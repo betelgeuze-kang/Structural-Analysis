@@ -82,12 +82,12 @@
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
   "extract_path_count": 0,
-  "generated_at": "2026-07-02T02:58:07.716186+00:00",
+  "generated_at": "2026-07-02T03:05:17.619801+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:56eee33ad18d1566d238a3a8d2af4e729d59b04e958a0cb562515f19472152b8",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:826c36a8adcd4325d2d4389800e65dddf2739a13c4273d69cf50233869f4e7aa",
-    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:629ba56d93bdf887f818a5f7137fdeedae44405b2786f25c626c688ece27ade2",
+    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:bbbef204ef8bf3eaffa8e57c34587b54a25c1808d93949fdd2b3323517078f85",
     "scripts/build_structural_scope_owner_review_packet.py": "sha256:4e87ae50c4850edd04dd7be8c2740eff518a81c7630db18ee35e15094e7bc497"
   },
   "next_actions": [
@@ -3330,10 +3330,36 @@
   "release_surface_cleanup_paths": [],
   "release_surface_cleanup_required_count": 0,
   "release_surface_excluded_path_count": 86,
+  "release_surface_first_batch_application_blockers": [
+    "pending_release_surface_owner_decision_count=3",
+    "release_surface_cleanup_decision_count_below_expected=0/3"
+  ],
+  "release_surface_first_batch_application_ready": false,
   "release_surface_first_batch_blockers": [
     "pending_release_surface_owner_decision_count=3",
     "release_surface_cleanup_decision_count_below_expected=0/3"
   ],
+  "release_surface_first_batch_cleanup_application_preflight": {
+    "blockers": [],
+    "claim_boundary": "This preflight is non-mutating. It only checks owner-approved cleanup rows before a human manually applies git rm or external extract-then-remove actions.",
+    "cleanup_path_count": 0,
+    "delete_path_count": 0,
+    "destructive_commands_enabled": false,
+    "extract_path_count": 0,
+    "git_rm_command_preview_only": true,
+    "manual_application_required": false,
+    "path_safety_rows": [],
+    "ready": false,
+    "release_surface_policy_violation_count": 0,
+    "release_surface_policy_violation_rows": [],
+    "requires_human_confirmation": false,
+    "retain_exception_cleanup_row_count": 0,
+    "safe_to_auto_apply": false,
+    "schema_version": "structural-scope-cleanup-application-preflight.v1",
+    "status": "no_cleanup_required",
+    "unsafe_cleanup_path_count": 0,
+    "unsafe_cleanup_path_rows": []
+  },
   "release_surface_first_batch_decision_intake": {
     "batch_id": "release_surface_first",
     "blockers": [
@@ -3592,7 +3618,7 @@
   "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "0b65811847b12e677bbfa98ba5013a4a04f71112",
+  "source_commit_sha": "bdfb99244fc827444b9819527b9d95e60c9f8990",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",

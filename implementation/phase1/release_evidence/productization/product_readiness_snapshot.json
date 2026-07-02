@@ -2645,10 +2645,36 @@
       "post_decision_cleanup_pending_count": 0,
       "ready": false,
       "release_surface_cleanup_required_count": 0,
+      "release_surface_first_batch_application_blockers": [
+        "pending_release_surface_owner_decision_count=3",
+        "release_surface_cleanup_decision_count_below_expected=0/3"
+      ],
+      "release_surface_first_batch_application_ready": false,
       "release_surface_first_batch_blockers": [
         "pending_release_surface_owner_decision_count=3",
         "release_surface_cleanup_decision_count_below_expected=0/3"
       ],
+      "release_surface_first_batch_cleanup_application_preflight": {
+        "blockers": [],
+        "claim_boundary": "This preflight is non-mutating. It only checks owner-approved cleanup rows before a human manually applies git rm or external extract-then-remove actions.",
+        "cleanup_path_count": 0,
+        "delete_path_count": 0,
+        "destructive_commands_enabled": false,
+        "extract_path_count": 0,
+        "git_rm_command_preview_only": true,
+        "manual_application_required": false,
+        "path_safety_rows": [],
+        "ready": false,
+        "release_surface_policy_violation_count": 0,
+        "release_surface_policy_violation_rows": [],
+        "requires_human_confirmation": false,
+        "retain_exception_cleanup_row_count": 0,
+        "safe_to_auto_apply": false,
+        "schema_version": "structural-scope-cleanup-application-preflight.v1",
+        "status": "no_cleanup_required",
+        "unsafe_cleanup_path_count": 0,
+        "unsafe_cleanup_path_rows": []
+      },
       "release_surface_first_batch_completion_ratio": 0.0,
       "release_surface_first_batch_decision_intake": {
         "batch_id": "release_surface_first",
@@ -2850,7 +2876,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T02:58:07.973344+00:00",
+  "generated_at": "2026-07-02T03:05:17.882015+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2875,16 +2901,16 @@
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:ab24d234600f80df38b7f96516966150aa4cb3bc72f988be6af5944c5b325ef2",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:4075fd832ffad15c808534a1b89ac3a3abfdd5780d3976b23a4dfd3eceb56dc8",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:c16529ac189cc6b140adfd3cab8f2c8eedd98e39c8ddd1e7a362568a858dec4c",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:e6c403d6a511fbdae5968a2c588e6d57f7494659dccd9476304ac3983ce82e63",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:fa608819eb98c23b74afc23a85c5070cb6a803f3107f3ad418efa7b842b993fa",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:56eee33ad18d1566d238a3a8d2af4e729d59b04e958a0cb562515f19472152b8",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:c88019b1b8e680aad97de373b7d2019ec2ab3d7ef2c906be18ba3aeb69336ac1",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:96ac2495e5462c05f5dccabb6919fc42478612ca19cb9f140bc1c842ff644887",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:29900ab476c4c7e5c015151b12e60c44e9de016e7025b756a452a8ec6d283876",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:a5a281886dedefa02c2237e3ad37e8aca2158ba5449b7f2ea475651dabe60ff0",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:76f44d8618dfba4d62dc00e039cf6e290d5f6cdb2cb91296d9ec3021c0cea509",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:1e14dfca123e7f72932af68008d243781c33fe0dbfc3542cd74c49493b8e2863",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
-    "scripts/build_product_readiness_snapshot.py": "sha256:b9274184c2baca81f825a252e522ea57250608e9427b3afb0ccc29d414fb9099"
+    "scripts/build_product_readiness_snapshot.py": "sha256:5b16f5bd5ae896624c60c991c270249d6729042de0418616b14b696f4888e6fd"
   },
   "limited_commercial_ready": false,
   "paid_pilot_ready": false,
@@ -3180,7 +3206,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "0b65811847b12e677bbfa98ba5013a4a04f71112",
+  "source_commit_sha": "bdfb99244fc827444b9819527b9d95e60c9f8990",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3270,8 +3296,10 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py"
         ],
@@ -4330,37 +4358,42 @@
       },
       {
         "artifact": "structural_scope_contamination_audit",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
+        ],
         "generated_at": "2026-07-02T02:57:49.421566+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "0b65811847b12e677bbfa98ba5013a4a04f71112",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-02T02:58:07.663224+00:00",
+        "generated_at": "2026-07-02T03:05:17.565830+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "0b65811847b12e677bbfa98ba5013a4a04f71112",
+        "source_commit_sha": "bdfb99244fc827444b9819527b9d95e60c9f8990",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "structural_scope_owner_decision_application_plan",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-02T02:58:07.716186+00:00",
+        "generated_at": "2026-07-02T03:05:17.619801+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "0b65811847b12e677bbfa98ba5013a4a04f71112",
+        "source_commit_sha": "bdfb99244fc827444b9819527b9d95e60c9f8990",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -4413,11 +4446,9 @@
         "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
         "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json"
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -4445,11 +4476,9 @@
         " M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
         " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
         " M implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
         " M implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json"
+        " M implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json"
       ]
     }
   },
