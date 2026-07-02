@@ -82,12 +82,12 @@
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
   "extract_path_count": 0,
-  "generated_at": "2026-07-02T02:41:16.084512+00:00",
+  "generated_at": "2026-07-02T02:46:01.626239+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:c3f5677cf0ed1ab0f1b7770f74f1d4200d90689da72594fc6d74271d8bf546db",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:80edad0f3f3c4f87f64c95e388bdbcfe945c7ac8fa77b3f001833b4eeb2e4e11",
-    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:a7dfc017a7a8125e545d86f0bbee9d3cadb1e639361a4b982f1a853483d85b35",
+    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:629ba56d93bdf887f818a5f7137fdeedae44405b2786f25c626c688ece27ade2",
     "scripts/build_structural_scope_owner_review_packet.py": "sha256:48477af9dacab22b53171ab6ce7bc7242bbae480dce326c3a9a5d503047f23e1"
   },
   "next_actions": [
@@ -3592,7 +3592,7 @@
   "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "b383f1e8f730ef2cce435f6f405ba38a62a9048e",
+  "source_commit_sha": "af22709ba9c97a9e114a3f54468ddc072de2d89c",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",

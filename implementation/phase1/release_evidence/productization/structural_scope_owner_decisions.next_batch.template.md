@@ -4,7 +4,6 @@
 - `path_area`: `release_surface`
 - `decision_pending_count`: `3`
 - `external_archive_reference`: required when `owner_decision` is `extract_to_molecular_or_science_repository`
-- `signed_owner_exception_reference`: required when `owner_decision` is `retain_quarantined_with_signed_owner_exception`
 
 ## Path-Specific Restrictions
 
