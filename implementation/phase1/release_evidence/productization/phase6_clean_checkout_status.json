@@ -55,7 +55,7 @@
   "contract_pass": true,
   "developer_preview_release_candidate_claim": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T23:20:42.289260+00:00",
+  "generated_at": "2026-07-02T23:24:31.556936+00:00",
   "git_clean_clone_gate": {
     "blocker_count": 0,
     "blocker_counts": {},
@@ -72,7 +72,7 @@
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:fd123502c0ba1dbe040509aed3e042a11fe7bf91bac52c52152e8fa18801db28",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
-    "scripts/build_phase6_clean_checkout_status.py": "sha256:45d563b95da9d5cd006abcc190203e3568187c8b50f7f2b11963c8ee44867c95"
+    "scripts/build_phase6_clean_checkout_status.py": "sha256:bf22c2d863c6f0b9ffe3d35d6cdf1b79dd0ae08441add7ef33e9982a9e03ff15"
   },
   "local_clean_checkout_gate": {
     "blockers": [],
@@ -110,7 +110,7 @@
   "reuse_policy": "phase6_clean_checkout_status_aggregates_phase3_replay_and_release_control_cleanup_receipts",
   "reused_evidence": true,
   "schema_version": "phase6-clean-checkout-status.v1",
-  "source_commit_sha": "15bb455f43b0a0b15ced20980df5239897575832",
+  "source_commit_sha": "d80ab2d64e421adece7823a0dfd8e8fa5dffeb69",
   "status": "ready",
   "summary_line": "Phase 6 clean checkout: READY | local=True | git_clone=True | cleanup_pending=0"
 }

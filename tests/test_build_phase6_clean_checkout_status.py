@@ -63,6 +63,28 @@ def test_phase6_clean_checkout_status_check_detects_missing_output(tmp_path: Pat
     assert message.startswith("phase6_clean_checkout_status_missing:")
 
 
+def test_phase6_clean_checkout_status_check_ignores_volatile_source_commit(
+    tmp_path: Path,
+) -> None:
+    out = tmp_path / "clean.json"
+    module.write_phase6_clean_checkout_status(repo_root=REPO_ROOT, out_path=out)
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    payload["generated_at"] = "2000-01-01T00:00:00+00:00"
+    payload["source_commit_sha"] = "different-source-commit"
+    out.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    ok, message = module.check_phase6_clean_checkout_status(
+        repo_root=REPO_ROOT,
+        out_path=out,
+    )
+
+    assert ok is True
+    assert message == "phase6_clean_checkout_status_consistent"
+
+
 def test_phase6_clean_checkout_status_check_detects_drift(tmp_path: Path) -> None:
     out = tmp_path / "clean.json"
     module.write_phase6_clean_checkout_status(repo_root=REPO_ROOT, out_path=out)
