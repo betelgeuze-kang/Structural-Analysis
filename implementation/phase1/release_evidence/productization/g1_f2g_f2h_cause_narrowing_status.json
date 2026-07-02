@@ -213,7 +213,7 @@
     "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing",
     "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing"
   ],
-  "generated_at": "2026-07-02T18:16:08.956299+00:00",
+  "generated_at": "2026-07-02T18:25:13.674571+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -295,7 +295,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json": "sha256:51fcb241f9223f1055fb222f08cedf7e004abb7b3227116defd73232505d3089",
     "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:e18438d69a6f45a18cc8cd0afd15c2b30dd81228ec70b58b8e38204a942a62df",
-    "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:93f6a28aece7b2fcd25e0b27387fe14064c56b60f305ac54749b8802e390cbd3",
+    "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:2efc4e10b27a897504b74e38d6d426b1e085fe58dfe3a1bd0275916d6437a85b",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:11389f3ef0058f6a862e08b5b6277e46c12d5831c8e1e84ce6c6620d5720720d",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:0c518c7e3678c0a5526bb67dbc1ae348c402cfeb0160a063453cb336b7375d14",
     "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:ca58151d432993bb1851ff196a45a55c3dd80b6fe38b306b863cdf9a2fbdc7c2",
@@ -476,7 +476,7 @@
     "solver_hip_strict_probe_pass": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "source_commit_sha": "c40a00bf5a170324b455b4f85902d21011bd98b1",
+  "source_commit_sha": "089d775d5dacf4f6d8cad4dcf4d2785c13d0d632",
   "status": "ready",
   "summary": {
     "dominant_near_null_rows": 64,
