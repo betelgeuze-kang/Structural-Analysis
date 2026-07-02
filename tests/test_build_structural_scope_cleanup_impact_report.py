@@ -262,6 +262,62 @@ def test_cleanup_impact_report_treats_pm_scope_tracking_as_release_governance(
     )
 
 
+def test_cleanup_impact_report_treats_owner_decision_fill_tools_as_scope_governance(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    owner_review = (
+        tmp_path
+        / "implementation/phase1/release_evidence/productization/"
+        "structural_scope_owner_review_packet.json"
+    )
+    origin = (
+        tmp_path
+        / "implementation/phase1/release_evidence/productization/"
+        "structural_scope_origin_report.json"
+    )
+    _write_json(owner_review, _owner_review_packet())
+    _write_json(origin, _origin_report())
+    _write_text(
+        tmp_path / "implementation/phase1/md3bead_soa.py",
+        "self reference should be ignored\n",
+    )
+    release_surface_path = (
+        "implementation/phase1/release_evidence/surface/"
+        "gpcr_hard_decoy_evidence_surface.json"
+    )
+    for path in [
+        "scripts/fill_structural_scope_owner_decisions_from_template.py",
+        "scripts/fill_structural_scope_release_surface_owner_decisions.py",
+        "scripts/merge_structural_scope_owner_decision_batch.py",
+        "tests/test_fill_structural_scope_owner_decisions_from_template.py",
+        "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
+        "tests/test_merge_structural_scope_owner_decision_batch.py",
+    ]:
+        _write_text(tmp_path / path, f"{release_surface_path}\n")
+    _git_add(tmp_path)
+
+    payload = impact_report.build_cleanup_impact_report(
+        repo_root=tmp_path,
+        owner_review_packet_path=owner_review,
+        origin_report_path=origin,
+    )
+
+    rows = {row["path"]: row for row in payload["reference_rows"]}
+    for path in [
+        "scripts/fill_structural_scope_owner_decisions_from_template.py",
+        "scripts/fill_structural_scope_release_surface_owner_decisions.py",
+        "scripts/merge_structural_scope_owner_decision_batch.py",
+        "tests/test_fill_structural_scope_owner_decisions_from_template.py",
+        "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
+        "tests/test_merge_structural_scope_owner_decision_batch.py",
+    ]:
+        assert rows[path]["reference_role"] == "scope_governance_reference"
+        assert rows[path]["blocking_cleanup_reference"] is False
+    assert payload["blocking_cleanup_reference_path_count"] == 0
+    assert payload["release_surface_cleanup_blocked_path_count"] == 0
+
+
 def test_cleanup_impact_report_flags_release_freshness_source_boundary_refs(
     tmp_path: Path,
 ) -> None:

@@ -57,11 +57,16 @@ SCOPE_GOVERNANCE_FILES = {
     "scripts/build_structural_scope_owner_decision_application_plan.py",
     "scripts/build_structural_scope_owner_review_packet.py",
     "scripts/check_structural_scope_contamination.py",
+    "scripts/fill_structural_scope_owner_decisions_from_template.py",
+    "scripts/fill_structural_scope_release_surface_owner_decisions.py",
+    "scripts/merge_structural_scope_owner_decision_batch.py",
     "tests/test_build_structural_scope_cleanup_impact_report.py",
     "tests/test_build_structural_scope_origin_report.py",
     "tests/test_build_structural_scope_owner_decision_application_plan.py",
     "tests/test_build_structural_scope_owner_review_packet.py",
     "tests/test_check_structural_scope_contamination.py",
+    "tests/test_fill_structural_scope_owner_decisions_from_template.py",
+    "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
     "tests/test_merge_structural_scope_owner_decision_batch.py",
 }
 RELEASE_GOVERNANCE_FILES = {

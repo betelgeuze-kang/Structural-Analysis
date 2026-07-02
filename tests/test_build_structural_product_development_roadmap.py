@@ -157,6 +157,9 @@ def _write_minimal_inputs(repo_root: Path) -> None:
                 "batch_id": "release_surface_first",
                 "path_area": "release_surface",
                 "path_count": 1,
+                "paths": [
+                    "implementation/phase1/release_evidence/surface/non_structural_scope_surface.json"
+                ],
             },
         },
     )
@@ -357,6 +360,15 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
     assert stages["structural_scope_cleanup"]["summary"][
         "unquarantined_non_structural_path_count"
     ] == 0
+    assert stages["structural_scope_cleanup"]["summary"][
+        "next_owner_review_batch"
+    ] == {
+        "batch_id": "release_surface_first",
+        "path_area": "release_surface",
+        "path_count": 1,
+        "priority": 0,
+        "review_goal": "",
+    }
     assert stages["pm_release_gate"]["blockers"] == ["ux::human_observation_missing"]
     assert stages["g1_solver_closure"]["blockers"] == [
         "full_load_hip_newton_not_closed"

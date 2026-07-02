@@ -243,6 +243,19 @@ def _stage_row(
     }
 
 
+def _owner_review_batch_summary(batch: dict[str, Any]) -> dict[str, Any]:
+    """Keep roadmap scope references at the governance level."""
+    if not batch:
+        return {}
+    return {
+        "batch_id": str(batch.get("batch_id") or ""),
+        "path_area": str(batch.get("path_area") or ""),
+        "path_count": _as_int(batch.get("path_count")),
+        "priority": _as_int(batch.get("priority")),
+        "review_goal": str(batch.get("review_goal") or ""),
+    }
+
+
 def build_structural_product_development_roadmap(
     *,
     repo_root: Path = ROOT,
@@ -261,6 +274,9 @@ def build_structural_product_development_roadmap(
     structural_scope = _load_json(repo_root, STRUCTURAL_SCOPE_AUDIT)
     structural_owner_review = _load_json(repo_root, STRUCTURAL_SCOPE_OWNER_REVIEW)
     structural_cleanup_plan = _load_json(repo_root, STRUCTURAL_SCOPE_OWNER_DECISION_PLAN)
+    structural_next_owner_review_batch = _owner_review_batch_summary(
+        _as_dict(structural_cleanup_plan.get("next_owner_review_batch"))
+    )
     customer_shadow = _load_json(repo_root, CUSTOMER_SHADOW)
     external_submission = _load_json(repo_root, EXTERNAL_BENCHMARK_SUBMISSION)
 
@@ -493,7 +509,7 @@ def build_structural_product_development_roadmap(
                 "release_surface_owner_decision_required_count": structural_release_expected,
                 "release_surface_pending_decision_count": structural_release_pending,
                 "next_owner_review_batch": _as_dict(
-                    structural_cleanup_plan.get("next_owner_review_batch")
+                    structural_next_owner_review_batch
                 ),
                 "release_surface_first_template_paths": _as_dict(
                     structural_cleanup_plan.get("release_surface_first_batch_template_paths")
@@ -774,7 +790,7 @@ def build_structural_product_development_roadmap(
                 ),
             },
             "exit_conditions": [
-                "release-surface GPCR/H-bond/PocketMD paths have owner delete/extract decisions",
+                "release-surface non-structural paths have owner delete/extract decisions",
                 "all 86 quarantined non-structural paths have owner decisions",
                 "owner-approved delete/extract cleanup is manually applied",
                 "structural scope audit and product snapshot pass after cleanup",
