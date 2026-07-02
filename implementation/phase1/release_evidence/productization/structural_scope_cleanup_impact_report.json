@@ -1276,11 +1276,11 @@
   "cleanup_impact_clear": false,
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T23:09:18.649030+00:00",
-  "governance_reference_path_count": 63,
+  "generated_at": "2026-07-02T23:15:11.762554+00:00",
+  "governance_reference_path_count": 67,
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json": "sha256:beea4a8604da8c2dba697f3eff88c163e0f43cd67ee910142911ba6caf659f5b",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:bd71f1cf47437357308ef8615c5591c1f6a8488d224f3538dde1e4e014eaa681",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:be89d76f6221d2a0496761c306f9f19af841af942465e16898eca31a3d37b361",
     "scripts/build_structural_scope_cleanup_impact_report.py": "sha256:8cce2e3b4ea3a058627a85629d6d3107f6480fa9d58bc7dd5206b80c6fef45c4"
   },
   "next_actions": [
@@ -1341,12 +1341,12 @@
   "owner_decision_pending_count": 86,
   "owner_review_packet": "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
   "quarantined_path_count": 86,
-  "reference_path_count": 97,
+  "reference_path_count": 101,
   "reference_role_counts": {
     "documentation_reference": 1,
     "implementation_runtime_or_manifest_reference": 28,
     "release_governance_reference": 19,
-    "scope_governance_reference": 32,
+    "scope_governance_reference": 36,
     "script_reference": 7,
     "test_reference": 10
   },
@@ -2990,6 +2990,72 @@
         "pocketmd_lite_science_product_surface.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
+      "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.overrides.template.csv",
+      "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
+      "reference_role": "scope_governance_reference",
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
+    },
+    {
+      "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
+      "matched_quarantined_path_count": 3,
+      "matched_quarantined_paths": [
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+      ],
+      "matched_scope_tokens": [
+        "gpcr",
+        "h_bond",
+        "pocketmd"
+      ],
+      "matched_term_count": 9,
+      "matched_terms": [
+        "gpcr_hard_decoy_evidence_surface",
+        "gpcr_hard_decoy_evidence_surface.json",
+        "h_bond_backmap_evidence_surface",
+        "h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+        "pocketmd_lite_science_product_surface",
+        "pocketmd_lite_science_product_surface.json"
+      ],
+      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
+      "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.overrides.template.md",
+      "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
+      "reference_role": "scope_governance_reference",
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
+    },
+    {
+      "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
+      "matched_quarantined_path_count": 3,
+      "matched_quarantined_paths": [
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+      ],
+      "matched_scope_tokens": [
+        "gpcr",
+        "h_bond",
+        "pocketmd"
+      ],
+      "matched_term_count": 9,
+      "matched_terms": [
+        "gpcr_hard_decoy_evidence_surface",
+        "gpcr_hard_decoy_evidence_surface.json",
+        "h_bond_backmap_evidence_surface",
+        "h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+        "pocketmd_lite_science_product_surface",
+        "pocketmd_lite_science_product_surface.json"
+      ],
+      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
@@ -3057,6 +3123,72 @@
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.md",
+      "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
+      "reference_role": "scope_governance_reference",
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
+    },
+    {
+      "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
+      "matched_quarantined_path_count": 3,
+      "matched_quarantined_paths": [
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+      ],
+      "matched_scope_tokens": [
+        "gpcr",
+        "h_bond",
+        "pocketmd"
+      ],
+      "matched_term_count": 9,
+      "matched_terms": [
+        "gpcr_hard_decoy_evidence_surface",
+        "gpcr_hard_decoy_evidence_surface.json",
+        "h_bond_backmap_evidence_surface",
+        "h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+        "pocketmd_lite_science_product_surface",
+        "pocketmd_lite_science_product_surface.json"
+      ],
+      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
+      "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.csv",
+      "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
+      "reference_role": "scope_governance_reference",
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
+    },
+    {
+      "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
+      "matched_quarantined_path_count": 3,
+      "matched_quarantined_paths": [
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+      ],
+      "matched_scope_tokens": [
+        "gpcr",
+        "h_bond",
+        "pocketmd"
+      ],
+      "matched_term_count": 9,
+      "matched_terms": [
+        "gpcr_hard_decoy_evidence_surface",
+        "gpcr_hard_decoy_evidence_surface.json",
+        "h_bond_backmap_evidence_surface",
+        "h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+        "pocketmd_lite_science_product_surface",
+        "pocketmd_lite_science_product_surface.json"
+      ],
+      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
+      "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
       "reference_role_priority": 99,
@@ -5531,6 +5663,74 @@
       "blocking_reference_paths": [],
       "blocking_reference_role_counts": {},
       "cleanup_ready_after_owner_decision": true,
+      "governance_reference_path_count": 42,
+      "governance_reference_paths": [
+        "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
+        "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
+        "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.md",
+        "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_origin_report.md",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.overrides.template.csv",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.overrides.template.md",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.md",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.csv",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.md",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.csv",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.md",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.md",
+        "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json",
+        "tests/test_build_pm_release_blocker_action_register.py",
+        "tests/test_build_structural_scope_cleanup_impact_report.py",
+        "tests/test_build_structural_scope_origin_report.py",
+        "tests/test_build_structural_scope_owner_decision_application_plan.py",
+        "tests/test_check_structural_scope_contamination.py",
+        "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
+        "tests/test_merge_structural_scope_owner_decision_batch.py",
+        "tests/test_report_pm_release_gate.py"
+      ],
+      "owner_decision_dependency_counts": {
+        "owner_delete_extract_decision_then_reference_cleanup": 42
+      },
+      "owner_decision_required": true,
+      "path": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+      "post_cleanup_verification": [
+        "python3 scripts/build_structural_scope_cleanup_impact_report.py --fail-blocked",
+        "python3 scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked",
+        "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
+        "python3 scripts/build_product_readiness_snapshot.py --check"
+      ],
+      "reference_path_count": 42
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository"
+      ],
+      "blocking_cleanup_action_counts": {},
+      "blocking_cleanup_reference_path_count": 0,
+      "blocking_reference_paths": [],
+      "blocking_reference_role_counts": {},
+      "cleanup_ready_after_owner_decision": true,
       "governance_reference_path_count": 38,
       "governance_reference_paths": [
         "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
@@ -5551,9 +5751,13 @@
         "implementation/phase1/release_evidence/productization/structural_scope_origin_report.md",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.overrides.template.csv",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.overrides.template.md",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.json",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.md",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.csv",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.md",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md",
@@ -5564,19 +5768,15 @@
         "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.md",
         "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json",
         "tests/test_build_pm_release_blocker_action_register.py",
-        "tests/test_build_structural_scope_cleanup_impact_report.py",
-        "tests/test_build_structural_scope_origin_report.py",
         "tests/test_build_structural_scope_owner_decision_application_plan.py",
-        "tests/test_check_structural_scope_contamination.py",
         "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
-        "tests/test_merge_structural_scope_owner_decision_batch.py",
-        "tests/test_report_pm_release_gate.py"
+        "tests/test_merge_structural_scope_owner_decision_batch.py"
       ],
       "owner_decision_dependency_counts": {
         "owner_delete_extract_decision_then_reference_cleanup": 38
       },
       "owner_decision_required": true,
-      "path": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+      "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
       "post_cleanup_verification": [
         "python3 scripts/build_structural_scope_cleanup_impact_report.py --fail-blocked",
         "python3 scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked",
@@ -5595,7 +5795,7 @@
       "blocking_reference_paths": [],
       "blocking_reference_role_counts": {},
       "cleanup_ready_after_owner_decision": true,
-      "governance_reference_path_count": 34,
+      "governance_reference_path_count": 43,
       "governance_reference_paths": [
         "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
         "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md",
@@ -5615,69 +5815,13 @@
         "implementation/phase1/release_evidence/productization/structural_scope_origin_report.md",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.overrides.template.csv",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.overrides.template.md",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.json",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.md",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.csv",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.md",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.md",
-        "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json",
-        "tests/test_build_pm_release_blocker_action_register.py",
-        "tests/test_build_structural_scope_owner_decision_application_plan.py",
-        "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
-        "tests/test_merge_structural_scope_owner_decision_batch.py"
-      ],
-      "owner_decision_dependency_counts": {
-        "owner_delete_extract_decision_then_reference_cleanup": 34
-      },
-      "owner_decision_required": true,
-      "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
-      "post_cleanup_verification": [
-        "python3 scripts/build_structural_scope_cleanup_impact_report.py --fail-blocked",
-        "python3 scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked",
-        "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
-        "python3 scripts/build_product_readiness_snapshot.py --check"
-      ],
-      "reference_path_count": 34
-    },
-    {
-      "allowed_owner_decisions": [
-        "delete_from_structural_repository",
-        "extract_to_molecular_or_science_repository"
-      ],
-      "blocking_cleanup_action_counts": {},
-      "blocking_cleanup_reference_path_count": 0,
-      "blocking_reference_paths": [],
-      "blocking_reference_role_counts": {},
-      "cleanup_ready_after_owner_decision": true,
-      "governance_reference_path_count": 39,
-      "governance_reference_paths": [
-        "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
-        "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
-        "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.md",
-        "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_origin_report.md",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.md",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.csv",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.md",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md",
@@ -5698,7 +5842,7 @@
         "tests/test_report_release_evidence_freshness.py"
       ],
       "owner_decision_dependency_counts": {
-        "owner_delete_extract_decision_then_reference_cleanup": 39
+        "owner_delete_extract_decision_then_reference_cleanup": 43
       },
       "owner_decision_required": true,
       "path": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
@@ -5708,7 +5852,7 @@
         "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
         "python3 scripts/build_product_readiness_snapshot.py --check"
       ],
-      "reference_path_count": 39
+      "reference_path_count": 43
     }
   ],
   "release_surface_path_count": 3,
@@ -5717,7 +5861,7 @@
     "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
   ],
-  "release_surface_reference_path_count": 42,
+  "release_surface_reference_path_count": 46,
   "release_surface_reference_rows": [
     {
       "blocking_cleanup_reference": false,
@@ -6833,6 +6977,72 @@
         "pocketmd_lite_science_product_surface.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
+      "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.overrides.template.csv",
+      "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
+      "reference_role": "scope_governance_reference",
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
+    },
+    {
+      "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
+      "matched_quarantined_path_count": 3,
+      "matched_quarantined_paths": [
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+      ],
+      "matched_scope_tokens": [
+        "gpcr",
+        "h_bond",
+        "pocketmd"
+      ],
+      "matched_term_count": 9,
+      "matched_terms": [
+        "gpcr_hard_decoy_evidence_surface",
+        "gpcr_hard_decoy_evidence_surface.json",
+        "h_bond_backmap_evidence_surface",
+        "h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+        "pocketmd_lite_science_product_surface",
+        "pocketmd_lite_science_product_surface.json"
+      ],
+      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
+      "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.overrides.template.md",
+      "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
+      "reference_role": "scope_governance_reference",
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
+    },
+    {
+      "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
+      "matched_quarantined_path_count": 3,
+      "matched_quarantined_paths": [
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+      ],
+      "matched_scope_tokens": [
+        "gpcr",
+        "h_bond",
+        "pocketmd"
+      ],
+      "matched_term_count": 9,
+      "matched_terms": [
+        "gpcr_hard_decoy_evidence_surface",
+        "gpcr_hard_decoy_evidence_surface.json",
+        "h_bond_backmap_evidence_surface",
+        "h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+        "pocketmd_lite_science_product_surface",
+        "pocketmd_lite_science_product_surface.json"
+      ],
+      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
@@ -6900,6 +7110,72 @@
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.md",
+      "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
+      "reference_role": "scope_governance_reference",
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
+    },
+    {
+      "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
+      "matched_quarantined_path_count": 3,
+      "matched_quarantined_paths": [
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+      ],
+      "matched_scope_tokens": [
+        "gpcr",
+        "h_bond",
+        "pocketmd"
+      ],
+      "matched_term_count": 9,
+      "matched_terms": [
+        "gpcr_hard_decoy_evidence_surface",
+        "gpcr_hard_decoy_evidence_surface.json",
+        "h_bond_backmap_evidence_surface",
+        "h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+        "pocketmd_lite_science_product_surface",
+        "pocketmd_lite_science_product_surface.json"
+      ],
+      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
+      "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.csv",
+      "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
+      "reference_role": "scope_governance_reference",
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
+    },
+    {
+      "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
+      "matched_quarantined_path_count": 3,
+      "matched_quarantined_paths": [
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+      ],
+      "matched_scope_tokens": [
+        "gpcr",
+        "h_bond",
+        "pocketmd"
+      ],
+      "matched_term_count": 9,
+      "matched_terms": [
+        "gpcr_hard_decoy_evidence_surface",
+        "gpcr_hard_decoy_evidence_surface.json",
+        "h_bond_backmap_evidence_surface",
+        "h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+        "pocketmd_lite_science_product_surface",
+        "pocketmd_lite_science_product_surface.json"
+      ],
+      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
+      "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
       "reference_role_priority": 99,
@@ -8226,7 +8502,7 @@
   "reuse_policy": "structural_scope_cleanup_impact_report_from_owner_review_and_tracked_references",
   "reused_evidence": false,
   "schema_version": "structural-scope-cleanup-impact-report.v1",
-  "source_commit_sha": "7dd6bc6cf09267eb2dc88b545620d72b58d222e2",
+  "source_commit_sha": "6473ba872b75ea0b39d238092dc0d82f91601a3f",
   "status": "blocked_cleanup_impact",
-  "summary_line": "Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=97 | blocking=34 | owner_pending=86"
+  "summary_line": "Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=101 | blocking=34 | owner_pending=86"
 }
