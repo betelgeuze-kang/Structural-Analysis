@@ -5,6 +5,8 @@
 - `phase2_ready`: `False`
 - `actual_closure_ready`: `False`
 - `blocker_count`: `5`
+- `official_source_receipt_plan_status`: `operator_receipts_required`
+- `official_source_receipt_role_count`: `4`
 - `phase2_row_audit`: `implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json`
 - `phase2_row_audit_status`: `operator_evidence_required`
 - `phase2_row_audit_missing_row_inputs`: `subset_rows, pose_rows, enrichment_rows, vina_gnina_rows`
@@ -15,6 +17,15 @@
 | `pose_rows` | `CASF/PDBBind` | `operator_acquisition_required` | `casf_pdbbind_pose_success_harness`, `symmetry_aware_ligand_rmsd`, `posebusters_style_pose_validity` |
 | `enrichment_rows` | `DUD-E/LIT-PCBA` | `operator_acquisition_required` | `dud_e_or_lit_pcba_enrichment` |
 | `vina_gnina_rows` | `CASF/PDBBind + Vina/GNINA` | `operator_acquisition_required` | `vina_gnina_comparison_adapter` |
+
+## Source Receipt Roles
+
+| Row Input | Receipt Role | Required Receipt Fields |
+|---|---|---|
+| `subset_rows` | `casf_pdbbind_subset_source_receipt` | `source_license_or_accession`, `source_checksum`, `provenance_ref` |
+| `pose_rows` | `casf_pdbbind_pose_coordinate_receipt` | `source_license_or_accession`, `source_checksum`, `provenance_ref`, `pose_preparation_provenance_ref` |
+| `enrichment_rows` | `dud_e_or_lit_pcba_enrichment_receipt` | `source_license_or_accession`, `source_checksum`, `provenance_ref` |
+| `vina_gnina_rows` | `vina_gnina_engine_comparison_receipt` | `source_license_or_accession`, `source_checksum`, `provenance_ref`, `predicted_ligand_checksum`, `engine_config_checksum`, `engine_run_provenance_ref` |
 
 ## Commands
 

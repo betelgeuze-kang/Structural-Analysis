@@ -18,10 +18,10 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T16:54:56.371181+00:00",
+  "generated_at": "2026-07-03T17:42:09.121580+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:120e7d3920f6873bf10706f26f843e6566f43bd496ea29d4e6f435add656626a",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:6ffaa18d0620b99e4520b6dc2fcf3300bb9327d7751ef15669ea15cec3f762f4",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:f315c44b306d29474605f5523a1e0ea9a0f2e001abf8e479adb41480efcd2af3",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
@@ -34,7 +34,198 @@
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:1741e0d4261554b76e9eb649028430ce0d3e96626358a6bc2bc31db6c16d650d",
     "scripts/validate_public_benchmark_external_receipts.py": "sha256:efe47b90b4d467b89ea13797c2681851e7cffc4f8ab8ba15f9d11bb0a765a8e0"
   },
+  "official_source_receipt_plan": {
+    "claim_boundary": "Receipt rows identify the authoritative source and operator-produced evidence needed for Phase 2. They are not source payloads, licenses, benchmark redistribution, or benchmark results.",
+    "operator_review_order": [
+      "casf_pdbbind_subset_source_receipt",
+      "casf_pdbbind_pose_coordinate_receipt",
+      "dud_e_or_lit_pcba_enrichment_receipt",
+      "vina_gnina_engine_comparison_receipt"
+    ],
+    "plan_id": "public_benchmark_phase2_official_source_receipt_plan",
+    "receipt_promotion_policy": {
+      "external_source_receipts_required": true,
+      "license_or_accession_reference_required": true,
+      "operator_attached_rows_required": true,
+      "per_source_bundle_checksum_required": true,
+      "redistribution_of_restricted_benchmark_payloads": false,
+      "summary_only_metrics_promote_to_phase2": false,
+      "synthetic_fixture_rows_promote_to_phase2": false
+    },
+    "receipt_role_count": 4,
+    "required_engine_receipt_fields": [
+      "engine_version",
+      "engine_config_checksum",
+      "engine_run_provenance_ref",
+      "predicted_ligand_checksum"
+    ],
+    "required_receipt_fields": [
+      "source_license_or_accession",
+      "source_checksum",
+      "provenance_ref"
+    ],
+    "row_input_count": 4,
+    "row_input_receipt_roles": [
+      {
+        "accepted_source_identities": [
+          "CASF/PDBBind subset membership",
+          "CASF/PDBBind protein structure files",
+          "CASF/PDBBind co-crystal/reference ligand coordinate files"
+        ],
+        "minimum_rows_required": 12,
+        "operator_must_attach": [
+          "source access/license or accession reference",
+          "source bundle checksum",
+          "per-case local source file checksums",
+          "subset preparation provenance reference"
+        ],
+        "receipt_role_id": "casf_pdbbind_subset_source_receipt",
+        "required_local_checksum_fields": [
+          "protein_structure_path",
+          "reference_ligand_path",
+          "predicted_ligand_path_or_docking_run_id"
+        ],
+        "required_receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "required_source_material": [
+          "selected complex identifiers from a supported CASF/PDBBind split",
+          "local protein structure path for every selected case",
+          "local reference ligand path for every selected case",
+          "local predicted pose path or docking run id for every selected case",
+          "ligand atom-order contract for every selected case",
+          "symmetry permutation contract for every selected case"
+        ],
+        "row_input_id": "subset_rows",
+        "source_family": "CASF/PDBBind",
+        "status": "operator_receipt_required",
+        "unblocks_components": [
+          "casf_pdbbind_pose_success_harness"
+        ]
+      },
+      {
+        "accepted_source_identities": [
+          "CASF/PDBBind reference ligand coordinates",
+          "operator-produced predicted ligand coordinates",
+          "operator-produced receptor/binding-site preparation context"
+        ],
+        "minimum_rows_required": 12,
+        "operator_must_attach": [
+          "coordinate extraction or conversion receipt",
+          "pose preparation provenance reference",
+          "row checksum for reference and predicted coordinate payloads",
+          "symmetry contract source or derivation note"
+        ],
+        "receipt_role_id": "casf_pdbbind_pose_coordinate_receipt",
+        "required_receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref",
+          "pose_preparation_provenance_ref"
+        ],
+        "required_source_material": [
+          "reference ligand atoms in the declared atom order",
+          "predicted ligand atoms in the same declared atom order",
+          "protein structure path matching the subset manifest case",
+          "receptor context for pose sanity checks",
+          "symmetry permutation contract used by RMSD scoring",
+          "pose preparation provenance for every predicted pose"
+        ],
+        "row_input_id": "pose_rows",
+        "source_family": "CASF/PDBBind",
+        "status": "operator_receipt_required",
+        "unblocks_components": [
+          "casf_pdbbind_pose_success_harness",
+          "symmetry_aware_ligand_rmsd",
+          "posebusters_style_pose_validity"
+        ]
+      },
+      {
+        "accepted_source_identities": [
+          "DUD-E target active/decoy benchmark rows",
+          "LIT-PCBA target active/decoy benchmark rows",
+          "operator-produced score rows over one supported family"
+        ],
+        "minimum_target_count_required": 1,
+        "operator_must_attach": [
+          "active/decoy source receipt",
+          "scoring run provenance reference",
+          "scored rows checksum",
+          "family coverage declaration"
+        ],
+        "receipt_role_id": "dud_e_or_lit_pcba_enrichment_receipt",
+        "required_receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "required_source_material": [
+          "benchmark family label for every target",
+          "target identifier",
+          "scored molecule identifier",
+          "active/decoy label",
+          "score and score direction",
+          "source receipt for active/decoy set and scoring run"
+        ],
+        "row_input_id": "enrichment_rows",
+        "source_family": "DUD-E/LIT-PCBA",
+        "status": "operator_receipt_required",
+        "supported_families": [
+          "DUD-E",
+          "LIT-PCBA"
+        ],
+        "unblocks_components": [
+          "dud_e_or_lit_pcba_enrichment"
+        ]
+      },
+      {
+        "accepted_source_identities": [
+          "CASF/PDBBind case identifiers already present in subset rows",
+          "AutoDock Vina engine run rows",
+          "GNINA engine run rows"
+        ],
+        "minimum_comparison_case_count_required": 1,
+        "operator_must_attach": [
+          "Vina run receipt",
+          "GNINA run receipt",
+          "engine version and configuration checksums",
+          "per-engine predicted ligand checksums"
+        ],
+        "receipt_role_id": "vina_gnina_engine_comparison_receipt",
+        "required_engines": [
+          "vina",
+          "gnina"
+        ],
+        "required_receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref",
+          "predicted_ligand_checksum",
+          "engine_config_checksum",
+          "engine_run_provenance_ref"
+        ],
+        "required_source_material": [
+          "case identifiers matching subset and pose rows",
+          "one Vina engine run per comparison case",
+          "one GNINA engine run per comparison case",
+          "predicted ligand checksum for each engine run",
+          "engine version and engine config checksum",
+          "symmetry-aware RMSD and pose-success fields per engine run"
+        ],
+        "row_input_id": "vina_gnina_rows",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
+        "status": "operator_receipt_required",
+        "unblocks_components": [
+          "vina_gnina_comparison_adapter"
+        ]
+      }
+    ],
+    "status": "operator_receipts_required"
+  },
   "operator_acquisition_checklist": [
+    "review_official_source_receipt_plan",
     "attach_casf_pdbbind_subset_rows_with_local_file_checksums",
     "attach_pose_coordinate_rows_with_symmetry_contracts",
     "attach_dud_e_or_lit_pcba_scored_molecule_rows",
@@ -80,6 +271,15 @@
     "phase2_ready": false,
     "phase2_row_closure_matrix_count": 4,
     "status": "operator_evidence_required"
+  },
+  "receipt_promotion_policy": {
+    "external_source_receipts_required": true,
+    "license_or_accession_reference_required": true,
+    "operator_attached_rows_required": true,
+    "per_source_bundle_checksum_required": true,
+    "redistribution_of_restricted_benchmark_payloads": false,
+    "summary_only_metrics_promote_to_phase2": false,
+    "synthetic_fixture_rows_promote_to_phase2": false
   },
   "required_component_count": 5,
   "required_components": [
@@ -180,6 +380,12 @@
           "symmetry_aware_ligand_rmsd_angstrom"
         ]
       },
+      "receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "pose_preparation_provenance_ref"
+      ],
       "required_fields": [
         "case_id",
         "pose_success_metric",
@@ -192,6 +398,10 @@
         "receptor_context"
       ],
       "row_input_id": "pose_rows",
+      "source_checksum_policy": {
+        "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+        "required_receipt_field": "source_checksum"
+      },
       "source_family": "CASF/PDBBind",
       "status": "operator_acquisition_required",
       "symmetry_rmsd_contract": {
@@ -412,7 +622,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "f7a21686f4abc42bd8143b142dd7ed3dfab7edd3",
+  "source_commit_sha": "c2016e19b72b5e5817f06960af7bcd6f83deeb72",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
@@ -420,6 +630,8 @@
     "minimum_enrichment_target_count": 1,
     "minimum_subset_case_count": 12,
     "minimum_vina_gnina_comparison_case_count": 1,
+    "official_source_receipt_plan_status": "operator_receipts_required",
+    "official_source_receipt_role_count": 4,
     "phase2_ready": false,
     "phase2_row_audit_blocker_count": 6,
     "phase2_row_audit_failed_criteria": [

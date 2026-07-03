@@ -254,6 +254,16 @@ def _source_acquisition_plan_summary(
     blockers = source_acquisition_plan.get("blockers")
     if not isinstance(blockers, list):
         blockers = []
+    official_source_receipt_plan = _as_dict(
+        source_acquisition_plan.get("official_source_receipt_plan")
+    )
+    row_input_receipt_roles = [
+        row
+        for row in _as_list(
+            official_source_receipt_plan.get("row_input_receipt_roles")
+        )
+        if isinstance(row, dict)
+    ]
     return {
         "artifact": str(DEFAULT_SOURCE_ACQUISITION_PLAN),
         "markdown_artifact": str(DEFAULT_SOURCE_ACQUISITION_PLAN_MD),
@@ -289,6 +299,26 @@ def _source_acquisition_plan_summary(
         "phase2_row_audit": _as_dict(
             source_acquisition_plan.get("phase2_row_audit")
         ),
+        "official_source_receipt_plan": {
+            "plan_id": str(official_source_receipt_plan.get("plan_id") or ""),
+            "status": str(official_source_receipt_plan.get("status") or ""),
+            "receipt_role_count": int(
+                official_source_receipt_plan.get("receipt_role_count") or 0
+            ),
+            "row_input_count": int(
+                official_source_receipt_plan.get("row_input_count") or 0
+            ),
+            "operator_review_order": [
+                str(row)
+                for row in _as_list(
+                    official_source_receipt_plan.get("operator_review_order")
+                )
+            ],
+            "row_input_receipt_roles": row_input_receipt_roles,
+            "receipt_promotion_policy": _as_dict(
+                official_source_receipt_plan.get("receipt_promotion_policy")
+            ),
+        },
         "blocker_count": int(source_acquisition_plan.get("blocker_count") or 0),
         "blockers": [str(row) for row in blockers],
         "command": _source_acquisition_plan_command(),

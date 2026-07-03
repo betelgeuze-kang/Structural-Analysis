@@ -67,6 +67,15 @@ SOURCE_CHECKSUM_POLICY = {
     "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
     "required_receipt_field": "source_checksum",
 }
+RECEIPT_PROMOTION_POLICY = {
+    "operator_attached_rows_required": True,
+    "external_source_receipts_required": True,
+    "per_source_bundle_checksum_required": True,
+    "license_or_accession_reference_required": True,
+    "synthetic_fixture_rows_promote_to_phase2": False,
+    "summary_only_metrics_promote_to_phase2": False,
+    "redistribution_of_restricted_benchmark_payloads": False,
+}
 REQUIRED_ROW_INPUTS = [
     "subset_rows",
     "pose_rows",
@@ -212,6 +221,13 @@ def _row_input_contracts() -> list[dict[str, Any]]:
             "accepted_formats": list(SUPPORTED_ROW_FORMATS),
             "depends_on_row_inputs": ["subset_rows"],
             "required_fields": list(REQUIRED_POSE_FIELDS),
+            "receipt_fields": [
+                "source_license_or_accession",
+                "source_checksum",
+                "provenance_ref",
+                "pose_preparation_provenance_ref",
+            ],
+            "source_checksum_policy": dict(SOURCE_CHECKSUM_POLICY),
             "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
             "posebusters_style_check_contract": {
                 "packet_schema_version": POSEBUSTERS_PACKET_SCHEMA_VERSION,
@@ -301,11 +317,208 @@ def _row_input_contracts() -> list[dict[str, Any]]:
     ]
 
 
+def _official_source_receipt_rows(
+    row_input_contracts: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    contracts = {
+        str(row.get("row_input_id")): row
+        for row in row_input_contracts
+        if isinstance(row, dict)
+    }
+    common_receipt_fields = [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+    ]
+    return [
+        {
+            "row_input_id": "subset_rows",
+            "receipt_role_id": "casf_pdbbind_subset_source_receipt",
+            "status": "operator_receipt_required",
+            "source_family": "CASF/PDBBind",
+            "accepted_source_identities": [
+                "CASF/PDBBind subset membership",
+                "CASF/PDBBind protein structure files",
+                "CASF/PDBBind co-crystal/reference ligand coordinate files",
+            ],
+            "required_source_material": [
+                "selected complex identifiers from a supported CASF/PDBBind split",
+                "local protein structure path for every selected case",
+                "local reference ligand path for every selected case",
+                "local predicted pose path or docking run id for every selected case",
+                "ligand atom-order contract for every selected case",
+                "symmetry permutation contract for every selected case",
+            ],
+            "required_receipt_fields": common_receipt_fields,
+            "required_local_checksum_fields": [str(row) for row in LOCAL_SOURCE_FILE_FIELDS],
+            "minimum_rows_required": contracts["subset_rows"][
+                "minimum_rows_required"
+            ],
+            "unblocks_components": contracts["subset_rows"][
+                "unblocks_components"
+            ],
+            "operator_must_attach": [
+                "source access/license or accession reference",
+                "source bundle checksum",
+                "per-case local source file checksums",
+                "subset preparation provenance reference",
+            ],
+        },
+        {
+            "row_input_id": "pose_rows",
+            "receipt_role_id": "casf_pdbbind_pose_coordinate_receipt",
+            "status": "operator_receipt_required",
+            "source_family": "CASF/PDBBind",
+            "accepted_source_identities": [
+                "CASF/PDBBind reference ligand coordinates",
+                "operator-produced predicted ligand coordinates",
+                "operator-produced receptor/binding-site preparation context",
+            ],
+            "required_source_material": [
+                "reference ligand atoms in the declared atom order",
+                "predicted ligand atoms in the same declared atom order",
+                "protein structure path matching the subset manifest case",
+                "receptor context for pose sanity checks",
+                "symmetry permutation contract used by RMSD scoring",
+                "pose preparation provenance for every predicted pose",
+            ],
+            "required_receipt_fields": [
+                *common_receipt_fields,
+                "pose_preparation_provenance_ref",
+            ],
+            "minimum_rows_required": contracts["pose_rows"]["minimum_rows_required"],
+            "unblocks_components": contracts["pose_rows"][
+                "unblocks_components"
+            ],
+            "operator_must_attach": [
+                "coordinate extraction or conversion receipt",
+                "pose preparation provenance reference",
+                "row checksum for reference and predicted coordinate payloads",
+                "symmetry contract source or derivation note",
+            ],
+        },
+        {
+            "row_input_id": "enrichment_rows",
+            "receipt_role_id": "dud_e_or_lit_pcba_enrichment_receipt",
+            "status": "operator_receipt_required",
+            "source_family": "DUD-E/LIT-PCBA",
+            "accepted_source_identities": [
+                "DUD-E target active/decoy benchmark rows",
+                "LIT-PCBA target active/decoy benchmark rows",
+                "operator-produced score rows over one supported family",
+            ],
+            "required_source_material": [
+                "benchmark family label for every target",
+                "target identifier",
+                "scored molecule identifier",
+                "active/decoy label",
+                "score and score direction",
+                "source receipt for active/decoy set and scoring run",
+            ],
+            "required_receipt_fields": common_receipt_fields,
+            "minimum_target_count_required": contracts["enrichment_rows"][
+                "minimum_target_count_required"
+            ],
+            "supported_families": contracts["enrichment_rows"][
+                "supported_families"
+            ],
+            "unblocks_components": contracts["enrichment_rows"][
+                "unblocks_components"
+            ],
+            "operator_must_attach": [
+                "active/decoy source receipt",
+                "scoring run provenance reference",
+                "scored rows checksum",
+                "family coverage declaration",
+            ],
+        },
+        {
+            "row_input_id": "vina_gnina_rows",
+            "receipt_role_id": "vina_gnina_engine_comparison_receipt",
+            "status": "operator_receipt_required",
+            "source_family": "CASF/PDBBind + Vina/GNINA",
+            "accepted_source_identities": [
+                "CASF/PDBBind case identifiers already present in subset rows",
+                "AutoDock Vina engine run rows",
+                "GNINA engine run rows",
+            ],
+            "required_source_material": [
+                "case identifiers matching subset and pose rows",
+                "one Vina engine run per comparison case",
+                "one GNINA engine run per comparison case",
+                "predicted ligand checksum for each engine run",
+                "engine version and engine config checksum",
+                "symmetry-aware RMSD and pose-success fields per engine run",
+            ],
+            "required_receipt_fields": [
+                *common_receipt_fields,
+                "predicted_ligand_checksum",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+            ],
+            "minimum_comparison_case_count_required": contracts[
+                "vina_gnina_rows"
+            ]["minimum_comparison_case_count_required"],
+            "required_engines": contracts["vina_gnina_rows"][
+                "required_engines"
+            ],
+            "unblocks_components": contracts["vina_gnina_rows"][
+                "unblocks_components"
+            ],
+            "operator_must_attach": [
+                "Vina run receipt",
+                "GNINA run receipt",
+                "engine version and configuration checksums",
+                "per-engine predicted ligand checksums",
+            ],
+        },
+    ]
+
+
+def _official_source_receipt_plan(
+    row_input_contracts: list[dict[str, Any]],
+) -> dict[str, Any]:
+    receipt_rows = _official_source_receipt_rows(row_input_contracts)
+    return {
+        "plan_id": "public_benchmark_phase2_official_source_receipt_plan",
+        "status": "operator_receipts_required",
+        "receipt_role_count": len(receipt_rows),
+        "row_input_count": len(REQUIRED_ROW_INPUTS),
+        "row_input_receipt_roles": receipt_rows,
+        "receipt_promotion_policy": dict(RECEIPT_PROMOTION_POLICY),
+        "required_receipt_fields": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref",
+        ],
+        "required_engine_receipt_fields": [
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "predicted_ligand_checksum",
+        ],
+        "operator_review_order": [
+            "casf_pdbbind_subset_source_receipt",
+            "casf_pdbbind_pose_coordinate_receipt",
+            "dud_e_or_lit_pcba_enrichment_receipt",
+            "vina_gnina_engine_comparison_receipt",
+        ],
+        "claim_boundary": (
+            "Receipt rows identify the authoritative source and operator-produced "
+            "evidence needed for Phase 2. They are not source payloads, licenses, "
+            "benchmark redistribution, or benchmark results."
+        ),
+    }
+
+
 def build_public_benchmark_phase2_source_acquisition_plan(
     *,
     repo_root: Path = ROOT,
 ) -> dict[str, Any]:
     row_input_contracts = _row_input_contracts()
+    official_source_receipt_plan = _official_source_receipt_plan(
+        row_input_contracts
+    )
     phase2_row_audit = _load_json(repo_root, DEFAULT_PHASE2_ROW_AUDIT)
     phase2_row_audit_summary = _phase2_row_audit_summary(phase2_row_audit)
     blockers = [
@@ -346,8 +559,11 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         "required_row_input_count": len(REQUIRED_ROW_INPUTS),
         "required_row_inputs": list(REQUIRED_ROW_INPUTS),
         "row_input_contracts": row_input_contracts,
+        "official_source_receipt_plan": official_source_receipt_plan,
+        "receipt_promotion_policy": dict(RECEIPT_PROMOTION_POLICY),
         "phase2_row_audit": phase2_row_audit_summary,
         "operator_acquisition_checklist": [
+            "review_official_source_receipt_plan",
             "attach_casf_pdbbind_subset_rows_with_local_file_checksums",
             "attach_pose_coordinate_rows_with_symmetry_contracts",
             "attach_dud_e_or_lit_pcba_scored_molecule_rows",
@@ -393,6 +609,12 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
             "minimum_enrichment_target_count": 1,
             "minimum_vina_gnina_comparison_case_count": 1,
+            "official_source_receipt_plan_status": official_source_receipt_plan[
+                "status"
+            ],
+            "official_source_receipt_role_count": official_source_receipt_plan[
+                "receipt_role_count"
+            ],
             "phase2_row_audit_status": phase2_row_audit_summary["status"],
             "phase2_row_audit_blocker_count": phase2_row_audit_summary[
                 "blocker_count"
@@ -431,6 +653,8 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `phase2_ready`: `{payload['phase2_ready']}`",
         f"- `actual_closure_ready`: `{payload['actual_closure_ready']}`",
         f"- `blocker_count`: `{payload['blocker_count']}`",
+        f"- `official_source_receipt_plan_status`: `{payload['official_source_receipt_plan']['status']}`",
+        f"- `official_source_receipt_role_count`: `{payload['official_source_receipt_plan']['receipt_role_count']}`",
         f"- `phase2_row_audit`: `{payload['phase2_row_audit']['artifact']}`",
         f"- `phase2_row_audit_status`: `{payload['phase2_row_audit']['status']}`",
         f"- `phase2_row_audit_missing_row_inputs`: `{', '.join(payload['phase2_row_audit']['missing_row_inputs'])}`",
@@ -445,6 +669,18 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         lines.append(
             f"| `{row['row_input_id']}` | `{row['source_family']}` | "
             f"`{row['status']}` | {unblocks} |"
+        )
+    lines.extend(["", "## Source Receipt Roles", ""])
+    lines.extend(["| Row Input | Receipt Role | Required Receipt Fields |", "|---|---|---|"])
+    for row in payload["official_source_receipt_plan"][
+        "row_input_receipt_roles"
+    ]:
+        receipt_fields = ", ".join(
+            f"`{field}`" for field in row["required_receipt_fields"]
+        )
+        lines.append(
+            f"| `{row['row_input_id']}` | `{row['receipt_role_id']}` | "
+            f"{receipt_fields} |"
         )
     lines.extend(["", "## Commands", ""])
     for key, command in payload["commands"].items():

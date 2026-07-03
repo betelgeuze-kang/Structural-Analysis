@@ -31,6 +31,10 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         repo_root=REPO_ROOT,
     )
     row_contracts = {row["row_input_id"]: row for row in payload["row_input_contracts"]}
+    receipt_plan = payload["official_source_receipt_plan"]
+    receipt_roles = {
+        row["row_input_id"]: row for row in receipt_plan["row_input_receipt_roles"]
+    }
 
     assert payload["schema_version"] == (
         "public-benchmark-phase2-source-acquisition-plan.v1"
@@ -53,6 +57,56 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "vina_gnina_rows",
     ]
     assert set(row_contracts) == set(payload["required_row_inputs"])
+    assert payload["receipt_promotion_policy"] == {
+        "external_source_receipts_required": True,
+        "license_or_accession_reference_required": True,
+        "operator_attached_rows_required": True,
+        "per_source_bundle_checksum_required": True,
+        "redistribution_of_restricted_benchmark_payloads": False,
+        "summary_only_metrics_promote_to_phase2": False,
+        "synthetic_fixture_rows_promote_to_phase2": False,
+    }
+    assert receipt_plan["plan_id"] == (
+        "public_benchmark_phase2_official_source_receipt_plan"
+    )
+    assert receipt_plan["status"] == "operator_receipts_required"
+    assert receipt_plan["receipt_role_count"] == 4
+    assert receipt_plan["row_input_count"] == 4
+    assert receipt_plan["operator_review_order"] == [
+        "casf_pdbbind_subset_source_receipt",
+        "casf_pdbbind_pose_coordinate_receipt",
+        "dud_e_or_lit_pcba_enrichment_receipt",
+        "vina_gnina_engine_comparison_receipt",
+    ]
+    assert set(receipt_roles) == set(payload["required_row_inputs"])
+    assert receipt_roles["subset_rows"]["receipt_role_id"] == (
+        "casf_pdbbind_subset_source_receipt"
+    )
+    assert receipt_roles["subset_rows"]["required_local_checksum_fields"] == [
+        "protein_structure_path",
+        "reference_ligand_path",
+        "predicted_ligand_path_or_docking_run_id",
+    ]
+    assert "source bundle checksum" in receipt_roles["subset_rows"][
+        "operator_must_attach"
+    ]
+    assert receipt_roles["pose_rows"]["receipt_role_id"] == (
+        "casf_pdbbind_pose_coordinate_receipt"
+    )
+    assert "pose_preparation_provenance_ref" in receipt_roles["pose_rows"][
+        "required_receipt_fields"
+    ]
+    assert receipt_roles["enrichment_rows"]["supported_families"] == [
+        "DUD-E",
+        "LIT-PCBA",
+    ]
+    assert receipt_roles["vina_gnina_rows"]["required_engines"] == [
+        "vina",
+        "gnina",
+    ]
+    assert "engine_config_checksum" in receipt_roles["vina_gnina_rows"][
+        "required_receipt_fields"
+    ]
     assert payload["phase2_row_audit"]["artifact"] == (
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_phase2_row_audit.json"
@@ -94,6 +148,12 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     pose = row_contracts["pose_rows"]
     assert pose["minimum_rows_required"] == 12
     assert pose["depends_on_row_inputs"] == ["subset_rows"]
+    assert pose["receipt_fields"] == [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "pose_preparation_provenance_ref",
+    ]
     assert pose["pose_success_metric"] == "symmetry_aware_ligand_rmsd_angstrom"
     assert pose["posebusters_style_check_contract"]["required_check_ids"] == [
         "coordinate_finiteness",
@@ -137,6 +197,8 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "minimum_enrichment_target_count": 1,
         "minimum_subset_case_count": 12,
         "minimum_vina_gnina_comparison_case_count": 1,
+        "official_source_receipt_plan_status": "operator_receipts_required",
+        "official_source_receipt_role_count": 4,
         "phase2_row_audit_blocker_count": 6,
         "phase2_row_audit_failed_criteria": [
             "casf_pdbbind_pose_success_harness_ready",
@@ -179,8 +241,12 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert payload["contract_pass"] is True
     assert payload["actual_closure_ready"] is False
     assert payload["required_row_input_count"] == 4
+    assert payload["official_source_receipt_plan"]["receipt_role_count"] == 4
     assert "# Public Benchmark Phase 2 Source Acquisition Plan" in markdown
     assert "public_benchmark_phase2_row_audit.json" in markdown
     assert "`subset_rows` | `CASF/PDBBind`" in markdown
     assert "`vina_gnina_rows` | `CASF/PDBBind + Vina/GNINA`" in markdown
+    assert "## Source Receipt Roles" in markdown
+    assert "casf_pdbbind_subset_source_receipt" in markdown
+    assert "vina_gnina_engine_comparison_receipt" in markdown
     assert "materialize_public_benchmark_operator_bundle_from_rows.py" in markdown

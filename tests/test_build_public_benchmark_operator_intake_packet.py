@@ -91,6 +91,39 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "enrichment_rows",
         "vina_gnina_rows",
     ]
+    receipt_plan = packet["source_acquisition_plan"][
+        "official_source_receipt_plan"
+    ]
+    receipt_roles = {
+        row["row_input_id"]: row for row in receipt_plan["row_input_receipt_roles"]
+    }
+    assert receipt_plan["plan_id"] == (
+        "public_benchmark_phase2_official_source_receipt_plan"
+    )
+    assert receipt_plan["status"] == "operator_receipts_required"
+    assert receipt_plan["receipt_role_count"] == 4
+    assert receipt_plan["row_input_count"] == 4
+    assert receipt_plan["operator_review_order"] == [
+        "casf_pdbbind_subset_source_receipt",
+        "casf_pdbbind_pose_coordinate_receipt",
+        "dud_e_or_lit_pcba_enrichment_receipt",
+        "vina_gnina_engine_comparison_receipt",
+    ]
+    assert receipt_plan["receipt_promotion_policy"][
+        "synthetic_fixture_rows_promote_to_phase2"
+    ] is False
+    assert receipt_roles["subset_rows"]["receipt_role_id"] == (
+        "casf_pdbbind_subset_source_receipt"
+    )
+    assert receipt_roles["pose_rows"]["receipt_role_id"] == (
+        "casf_pdbbind_pose_coordinate_receipt"
+    )
+    assert receipt_roles["enrichment_rows"]["receipt_role_id"] == (
+        "dud_e_or_lit_pcba_enrichment_receipt"
+    )
+    assert receipt_roles["vina_gnina_rows"]["receipt_role_id"] == (
+        "vina_gnina_engine_comparison_receipt"
+    )
     assert packet["source_of_truth_blockers"] == [
         "casf_pdbbind_source_material_not_attached",
         "casf_pdbbind_case_checksums_missing",
