@@ -64,6 +64,20 @@
 | `pocketmd_lite_case_003_rank_01` | `pocketmd_lite_case_003` | `1` | `missing` | `attach_pocketmd_topk_row_for_pocketmd_lite_case_003_rank_01` |
 | `pocketmd_lite_case_003_rank_02` | `pocketmd_lite_case_003` | `2` | `missing` | `attach_pocketmd_topk_row_for_pocketmd_lite_case_003_rank_02` |
 
+## Provided Closure Evidence
+
+### GPCR Phase 3 Gate
+
+- `status`: `ready`
+- `actual_closure_ready`: `True`
+- `target_pass_count`: `3/3`
+
+| Target | PR-AUC CI Low | Top20 Hit Rate | Decoys Above Positive | Out-Anchored | Status |
+| --- | --- | --- | --- | --- | --- |
+| `DRD2` | `1.0` | `0.6` | `0` | `False` | `pass` |
+| `HTR2A` | `1.0` | `0.6` | `0` | `False` | `pass` |
+| `OPRM1` | `1.0` | `0.6` | `0` | `False` | `pass` |
+
 ## Upstream Source Blockers
 
 - `public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_rows_not_acquired`

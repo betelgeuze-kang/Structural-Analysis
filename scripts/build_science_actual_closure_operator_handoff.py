@@ -27,6 +27,7 @@ DEFAULT_POCKETMD_REFINEMENT_PLAN = (
 DEFAULT_VINA_GNINA_RUNTIME_READINESS = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_runtime_readiness.json"
 )
+DEFAULT_GPCR_SUITE_REPORT = PRODUCTIZATION / "gpcr_hard_decoy_suite_report.json"
 SCHEMA_VERSION = "science-actual-closure-operator-handoff.v1"
 EXPECTED_ROW_INPUTS = (
     "subset_rows",
@@ -328,6 +329,100 @@ def _vina_gnina_engine_run_slot_detail(
     }
 
 
+def _compact_gpcr_target_row(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "target_id": str(row.get("target_id") or ""),
+        "status": str(row.get("status") or ""),
+        "contract_pass": bool(row.get("contract_pass")),
+        "ranking_pr_auc_ci_low": row.get("ranking_pr_auc_ci_low"),
+        "top20_hit_rate": row.get("top20_hit_rate"),
+        "decoys_above_positive_count": row.get("decoys_above_positive_count"),
+        "positive_out_anchored_by_top_decoys": bool(
+            row.get("positive_out_anchored_by_top_decoys")
+        ),
+        "criteria": _as_dict(row.get("criteria")),
+        "blockers": [str(item) for item in _as_list(row.get("blockers"))],
+    }
+
+
+def _compact_gpcr_phase3_criterion(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "criterion_id": str(row.get("criterion_id") or ""),
+        "required": row.get("required"),
+        "pass": bool(row.get("pass")),
+        "current_by_target": _as_dict(row.get("current_by_target")),
+        "failed_targets": [
+            str(item) for item in _as_list(row.get("failed_targets"))
+        ],
+        "blockers": [str(item) for item in _as_list(row.get("blockers"))],
+    }
+
+
+def _gpcr_phase3_slot_detail(
+    suite_report: dict[str, Any],
+    *,
+    artifact: Path,
+) -> dict[str, Any]:
+    if not suite_report:
+        return {}
+    summary = _as_dict(suite_report.get("summary"))
+    phase3_exit_gate = _as_dict(suite_report.get("phase3_exit_gate"))
+    target_rows = [
+        _compact_gpcr_target_row(row)
+        for row in _as_list(suite_report.get("target_rows"))
+        if isinstance(row, dict)
+    ]
+    criteria = [
+        _compact_gpcr_phase3_criterion(row)
+        for row in _as_list(phase3_exit_gate.get("criteria"))
+        if isinstance(row, dict)
+    ]
+    return {
+        "artifact": str(artifact),
+        "status": str(suite_report.get("status") or ""),
+        "contract_pass": bool(suite_report.get("contract_pass")),
+        "actual_closure_ready": bool(summary.get("actual_closure_ready")),
+        "phase3_exit_gate_status": str(
+            summary.get("phase3_exit_gate_status")
+            or phase3_exit_gate.get("status")
+            or ""
+        ),
+        "phase3_failed_criteria": [
+            str(item)
+            for item in _as_list(
+                summary.get("phase3_failed_criteria")
+                or phase3_exit_gate.get("failed_criteria")
+            )
+        ],
+        "target_count": _as_int(
+            summary.get("target_count") or phase3_exit_gate.get("target_count")
+        ),
+        "target_pass_count": _as_int(
+            summary.get("target_pass_count")
+            or phase3_exit_gate.get("target_pass_count")
+        ),
+        "exit_criteria": _as_dict(suite_report.get("exit_criteria")),
+        "criteria_pass": _as_dict(summary.get("criteria_pass")),
+        "observed_threshold_metrics": {
+            "ranking_pr_auc_ci_low_min_observed": summary.get(
+                "ranking_pr_auc_ci_low_min_observed"
+            ),
+            "top20_hit_rate_min_observed": summary.get(
+                "top20_hit_rate_min_observed"
+            ),
+            "decoys_above_positive_count_max_observed": summary.get(
+                "decoys_above_positive_count_max_observed"
+            ),
+            "positive_out_anchored_target_count": summary.get(
+                "positive_out_anchored_target_count"
+            ),
+        },
+        "phase3_exit_gate_criteria": criteria,
+        "target_rows": target_rows,
+        "claim_boundary": str(suite_report.get("claim_boundary") or ""),
+    }
+
+
 def _slot(
     row: dict[str, Any],
     contract: dict[str, Any],
@@ -596,7 +691,12 @@ def build_science_actual_closure_operator_handoff(
         repo_root,
         DEFAULT_VINA_GNINA_RUNTIME_READINESS,
     )
+    gpcr_suite_report = _load_json(repo_root, DEFAULT_GPCR_SUITE_REPORT)
     row_input_slot_details = {
+        "gpcr_rows": _gpcr_phase3_slot_detail(
+            gpcr_suite_report,
+            artifact=DEFAULT_GPCR_SUITE_REPORT,
+        ),
         "pocketmd_rows": _pocketmd_top_k_slot_detail(
             pocketmd_refinement_plan,
             artifact=DEFAULT_POCKETMD_REFINEMENT_PLAN,
@@ -660,6 +760,7 @@ def build_science_actual_closure_operator_handoff(
                 audit_path,
                 DEFAULT_POCKETMD_REFINEMENT_PLAN,
                 DEFAULT_VINA_GNINA_RUNTIME_READINESS,
+                DEFAULT_GPCR_SUITE_REPORT,
             ],
             reused_evidence=True,
             reuse_policy=(
@@ -844,10 +945,46 @@ def _markdown(payload: dict[str, Any]) -> str:
                         f"`{engine_slot.get('engine_id')}` | "
                         f"`{engine_slot.get('status')}` | "
                         f"`{actions}` |"
-                    )
+        )
     upstream_source_blockers = [
         str(item) for item in _as_list(payload.get("upstream_source_blockers"))
     ]
+    gpcr_slots = [
+        slot
+        for slot in _as_list(payload.get("row_slot_handoffs"))
+        if isinstance(slot, dict) and slot.get("row_input_id") == "gpcr_rows"
+    ]
+    gpcr_detail = (
+        _as_dict(gpcr_slots[0].get("row_input_slot_detail"))
+        if gpcr_slots
+        else {}
+    )
+    if gpcr_detail:
+        lines.extend(["", "## Provided Closure Evidence", ""])
+        lines.extend(
+            [
+                "### GPCR Phase 3 Gate",
+                "",
+                f"- `status`: `{gpcr_detail.get('phase3_exit_gate_status')}`",
+                f"- `actual_closure_ready`: `{gpcr_detail.get('actual_closure_ready')}`",
+                f"- `target_pass_count`: `{gpcr_detail.get('target_pass_count')}/{gpcr_detail.get('target_count')}`",
+                "",
+                "| Target | PR-AUC CI Low | Top20 Hit Rate | Decoys Above Positive | Out-Anchored | Status |",
+                "| --- | --- | --- | --- | --- | --- |",
+            ]
+        )
+        for target in _as_list(gpcr_detail.get("target_rows")):
+            if not isinstance(target, dict):
+                continue
+            lines.append(
+                "| "
+                f"`{target.get('target_id')}` | "
+                f"`{target.get('ranking_pr_auc_ci_low')}` | "
+                f"`{target.get('top20_hit_rate')}` | "
+                f"`{target.get('decoys_above_positive_count')}` | "
+                f"`{target.get('positive_out_anchored_by_top_decoys')}` | "
+                f"`{target.get('status')}` |"
+            )
     if upstream_source_blockers:
         lines.extend(["", "## Upstream Source Blockers", ""])
         for blocker in upstream_source_blockers:

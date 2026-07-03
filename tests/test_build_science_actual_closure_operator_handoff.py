@@ -249,6 +249,42 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "source_license",
         "source_artifact_sha256",
     ]
+    gpcr_detail = gpcr["row_input_slot_detail"]
+    assert gpcr_detail["artifact"].endswith("gpcr_hard_decoy_suite_report.json")
+    assert gpcr_detail["status"] == "ready"
+    assert gpcr_detail["actual_closure_ready"] is True
+    assert gpcr_detail["phase3_exit_gate_status"] == "ready"
+    assert gpcr_detail["phase3_failed_criteria"] == []
+    assert gpcr_detail["target_count"] == 3
+    assert gpcr_detail["target_pass_count"] == 3
+    assert gpcr_detail["exit_criteria"] == {
+        "decoys_above_positive_count_max": 0,
+        "positive_out_anchored_by_top_decoys_allowed": False,
+        "ranking_pr_auc_ci_low_min": 0.45,
+        "top20_hit_rate_min": 0.2,
+    }
+    assert gpcr_detail["observed_threshold_metrics"] == {
+        "decoys_above_positive_count_max_observed": 0,
+        "positive_out_anchored_target_count": 0,
+        "ranking_pr_auc_ci_low_min_observed": 1,
+        "top20_hit_rate_min_observed": 0.6,
+    }
+    assert gpcr_detail["target_rows"][0] == {
+        "blockers": [],
+        "contract_pass": True,
+        "criteria": {
+            "decoys_above_positive_count_max": 0,
+            "positive_out_anchored_by_top_decoys_allowed": False,
+            "ranking_pr_auc_ci_low_min": 0.45,
+            "top20_hit_rate_min": 0.2,
+        },
+        "decoys_above_positive_count": 0,
+        "positive_out_anchored_by_top_decoys": False,
+        "ranking_pr_auc_ci_low": 1,
+        "status": "pass",
+        "target_id": "DRD2",
+        "top20_hit_rate": 0.6,
+    }
 
     pocketmd = slots["pocketmd_rows"]
     assert pocketmd["actual_closure_component_id"] == (
@@ -366,6 +402,10 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_runtime_readiness.json"
     ].startswith("sha256:")
+    assert payload["input_checksums"][
+        "implementation/phase1/release_evidence/productization/"
+        "gpcr_hard_decoy_suite_report.json"
+    ].startswith("sha256:")
     assert "| `subset_rows` | `provided` |" in markdown
     assert "| `vina_gnina_rows` | `operator_input_required` |" in markdown
     assert "| `pocketmd_rows` | `operator_input_required` |" in markdown
@@ -382,6 +422,9 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "### Vina/GNINA Engine Run Slots" in markdown
     assert "casf2016_4llx_vina_casf2016_4llx_vina_run" in markdown
     assert "configure_vina_runtime" in markdown
+    assert "## Provided Closure Evidence" in markdown
+    assert "### GPCR Phase 3 Gate" in markdown
+    assert "| `DRD2` | `1.0` | `0.6` | `0` | `False` | `pass` |" in markdown
     assert "pocketmd_lite_topk_rows_not_acquired" in markdown
     assert "### PocketMD Top-k Candidate Slots" in markdown
     assert "pocketmd_lite_case_001_rank_01" in markdown

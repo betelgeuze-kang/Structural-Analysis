@@ -13,9 +13,9 @@
   "first_blocked_target": "",
   "first_blocker": "",
   "first_operator_evidence_gap": {},
-  "generated_at": "2026-07-03T22:06:33.455809+00:00",
+  "generated_at": "2026-07-03T22:57:26.867133+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:bbcad33f8f2ee24f4b358d270fcb4e6fea084f030e7ccd1e5ca0b62c1b8fb4f0",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:23cbe02174d9dcfa60f674bb612ba215b83a8f0169fc3c3b6a687a86aaeebf43",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:e9a2b010be4254d67a3574ab917821583a6de5e5803ab1cbd6a92ca8d15eea30"
   },
   "operator_evidence_gap_count": 0,
@@ -162,7 +162,7 @@
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "gpcr-hard-decoy-suite-report.v1",
-  "source_commit_sha": "09165e21a218f40a8be2951d512a86386b662700",
+  "source_commit_sha": "9d5007ab2ffc200853a80f4665a7092b1c851e82",
   "status": "ready",
   "summary": {
     "actual_closure_ready": true,

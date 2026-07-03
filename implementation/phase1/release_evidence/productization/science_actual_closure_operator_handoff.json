@@ -1395,12 +1395,13 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-03T22:51:01.683902+00:00",
+  "generated_at": "2026-07-03T22:57:36.962103+00:00",
   "input_checksums": {
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:9dd7c97c8a2b978436c07f11bfb088a2cef94f1fd1f33bc651ba8a4c09440b2b",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:02c03205636f5be5803c850e97f7ded298b089378106ea2ec81d92b7da2b36d3",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:bfa0c55dd4819586351de88656c572b4f13baef4393565cf3f27a7b45f4f3d26",
     "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:04a3ab789f279a906c5afdef1a618ad672f7959b58c50a5519961bdc78c402dd",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:51a5ac90c651e0ccce4fc85af0effc2e5ea460eb74c1e0dd7e05aa9553d864a5"
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:277aa94b18ab02f09d8be9be340f158fc282a97327f560367e11aac8b6402ce9"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -6709,7 +6710,148 @@
       "resolved_path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
       "row_contract_ref": "row_intake_contracts.gpcr_rows",
       "row_input_id": "gpcr_rows",
-      "row_input_slot_detail": {},
+      "row_input_slot_detail": {
+        "actual_closure_ready": true,
+        "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
+        "claim_boundary": "This report evaluates operator-attached DRD2/HTR2A/OPRM1 hard-decoy metrics against the Phase 3 exit criteria. It does not infer target activity, generate docking results, or unlock broad GPCR claims without all required numeric receipts.",
+        "contract_pass": true,
+        "criteria_pass": {
+          "decoys_above_positive_count_max": true,
+          "no_positive_out_anchored_by_top_decoys": true,
+          "ranking_pr_auc_ci_low_min": true,
+          "raw_hard_decoy_rows_actual_closure": true,
+          "top20_hit_rate_min": true
+        },
+        "exit_criteria": {
+          "decoys_above_positive_count_max": 0,
+          "positive_out_anchored_by_top_decoys_allowed": false,
+          "ranking_pr_auc_ci_low_min": 0.45,
+          "top20_hit_rate_min": 0.2
+        },
+        "observed_threshold_metrics": {
+          "decoys_above_positive_count_max_observed": 0,
+          "positive_out_anchored_target_count": 0,
+          "ranking_pr_auc_ci_low_min_observed": 1.0,
+          "top20_hit_rate_min_observed": 0.6
+        },
+        "phase3_exit_gate_criteria": [
+          {
+            "blockers": [],
+            "criterion_id": "ranking_pr_auc_ci_low_min",
+            "current_by_target": {
+              "DRD2": 1.0,
+              "HTR2A": 1.0,
+              "OPRM1": 1.0
+            },
+            "failed_targets": [],
+            "pass": true,
+            "required": ">=0.45"
+          },
+          {
+            "blockers": [],
+            "criterion_id": "top20_hit_rate_min",
+            "current_by_target": {
+              "DRD2": 0.6,
+              "HTR2A": 0.6,
+              "OPRM1": 0.6
+            },
+            "failed_targets": [],
+            "pass": true,
+            "required": ">=0.2"
+          },
+          {
+            "blockers": [],
+            "criterion_id": "decoys_above_positive_count_max",
+            "current_by_target": {
+              "DRD2": 0,
+              "HTR2A": 0,
+              "OPRM1": 0
+            },
+            "failed_targets": [],
+            "pass": true,
+            "required": "<=0"
+          },
+          {
+            "blockers": [],
+            "criterion_id": "no_positive_out_anchored_by_top_decoys",
+            "current_by_target": {
+              "DRD2": false,
+              "HTR2A": false,
+              "OPRM1": false
+            },
+            "failed_targets": [],
+            "pass": true,
+            "required": false
+          },
+          {
+            "blockers": [],
+            "criterion_id": "raw_hard_decoy_rows_actual_closure",
+            "current_by_target": {
+              "DRD2": "computed",
+              "HTR2A": "computed",
+              "OPRM1": "computed"
+            },
+            "failed_targets": [],
+            "pass": true,
+            "required": "computed_from_raw_hard_decoy_rows_with_quality_minimums"
+          }
+        ],
+        "phase3_exit_gate_status": "ready",
+        "phase3_failed_criteria": [],
+        "status": "ready",
+        "target_count": 3,
+        "target_pass_count": 3,
+        "target_rows": [
+          {
+            "blockers": [],
+            "contract_pass": true,
+            "criteria": {
+              "decoys_above_positive_count_max": 0,
+              "positive_out_anchored_by_top_decoys_allowed": false,
+              "ranking_pr_auc_ci_low_min": 0.45,
+              "top20_hit_rate_min": 0.2
+            },
+            "decoys_above_positive_count": 0,
+            "positive_out_anchored_by_top_decoys": false,
+            "ranking_pr_auc_ci_low": 1.0,
+            "status": "pass",
+            "target_id": "DRD2",
+            "top20_hit_rate": 0.6
+          },
+          {
+            "blockers": [],
+            "contract_pass": true,
+            "criteria": {
+              "decoys_above_positive_count_max": 0,
+              "positive_out_anchored_by_top_decoys_allowed": false,
+              "ranking_pr_auc_ci_low_min": 0.45,
+              "top20_hit_rate_min": 0.2
+            },
+            "decoys_above_positive_count": 0,
+            "positive_out_anchored_by_top_decoys": false,
+            "ranking_pr_auc_ci_low": 1.0,
+            "status": "pass",
+            "target_id": "HTR2A",
+            "top20_hit_rate": 0.6
+          },
+          {
+            "blockers": [],
+            "contract_pass": true,
+            "criteria": {
+              "decoys_above_positive_count_max": 0,
+              "positive_out_anchored_by_top_decoys_allowed": false,
+              "ranking_pr_auc_ci_low_min": 0.45,
+              "top20_hit_rate_min": 0.2
+            },
+            "decoys_above_positive_count": 0,
+            "positive_out_anchored_by_top_decoys": false,
+            "ranking_pr_auc_ci_low": 1.0,
+            "status": "pass",
+            "target_id": "OPRM1",
+            "top20_hit_rate": 0.6
+          }
+        ]
+      },
       "row_template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv",
       "row_template_present": true,
       "source_acquisition_operator_action": "",
@@ -7200,7 +7342,7 @@
   "schema_version": "science-actual-closure-operator-handoff.v1",
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "de9306cf2e4a34608e346f2f113f4a0493d95dbf",
+  "source_commit_sha": "9d5007ab2ffc200853a80f4665a7092b1c851e82",
   "status": "operator_rows_required",
   "summary": {
     "blocked_component_operator_action_count": 2,

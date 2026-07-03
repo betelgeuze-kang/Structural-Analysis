@@ -50,14 +50,14 @@
     "promote_broad_gpcr_claim",
     "infer_missing_target_values"
   ],
-  "generated_at": "2026-07-03T22:03:59.014759+00:00",
+  "generated_at": "2026-07-03T22:57:32.138572+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json": "sha256:6ec740aa2bd6c18684d2ea1eec0d9bc678786aa0fe114b1e632192c1bf4c4b29",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:455e6f4e0c4889169f6f4bfb16518a8ba64cea45a6560ea26026d9773b5d691a",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:bb3f54afc9414f81b3a37a2e3d1658370149ccbec78bd7b58f3d2506f70a3679",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:88d0379e5ae32d92abbe3d8839ce11382b5da2b234cadd9e27454f3be2e8e84e",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:a3161e9a00cebc00998ca57b1d2187774add4a553a1997c92b69ef1355e81eb4",
-    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:7218cde0ca24e19b02caac7990b1e590e0abae06b76f7e809a86604cf2bb263e",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:23cbe02174d9dcfa60f674bb612ba215b83a8f0169fc3c3b6a687a86aaeebf43",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:9dd7c97c8a2b978436c07f11bfb088a2cef94f1fd1f33bc651ba8a4c09440b2b",
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:9f269f9b855a3453cf171cd6d17dd8be8da436d189d96ac27e2cc0c024b3344b",
     "scripts/build_gpcr_hard_decoy_product_report.py": "sha256:a064497f981c4974b0d901713e5282c56300a6f0b5f9f784ce20b3f172e1d4fd",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:e9a2b010be4254d67a3574ab917821583a6de5e5803ab1cbd6a92ca8d15eea30"
   },
@@ -652,7 +652,7 @@
   "schema_version": "gpcr-hard-decoy-product-report.v1",
   "science_blockers": [],
   "science_claim_status": "ready",
-  "source_commit_sha": "09165e21a218f40a8be2951d512a86386b662700",
+  "source_commit_sha": "9d5007ab2ffc200853a80f4665a7092b1c851e82",
   "status": "ready",
   "summary": {
     "actual_closure_ready": true,
