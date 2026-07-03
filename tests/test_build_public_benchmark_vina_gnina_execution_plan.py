@@ -23,7 +23,7 @@ sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
 
-def _write_rows(root: Path) -> tuple[Path, Path]:
+def _write_rows(root: Path, *, materialize_inputs: bool = True) -> tuple[Path, Path]:
     subset_rows = root / "subset_rows.json"
     pose_rows = root / "pose_rows.json"
     subset_rows.write_text(
@@ -63,6 +63,15 @@ def _write_rows(root: Path) -> tuple[Path, Path]:
         ),
         encoding="utf-8",
     )
+    if materialize_inputs:
+        case_dir = root / "CASF-2016" / "coreset" / "1abc"
+        case_dir.mkdir(parents=True)
+        (case_dir / "1abc_protein.pdb").write_text("ATOM\n", encoding="utf-8")
+        (case_dir / "1abc_ligand.sdf").write_text("ligand\n", encoding="utf-8")
+        prepared_dir = root / "prepared"
+        prepared_dir.mkdir()
+        (prepared_dir / "1abc_receptor").write_text("receptor\n", encoding="utf-8")
+        (prepared_dir / "1abc_ligand").write_text("ligand\n", encoding="utf-8")
     return subset_rows, pose_rows
 
 
@@ -159,9 +168,13 @@ def test_vina_gnina_execution_plan_builds_case_run_specs(
     assert payload["case_count"] == 1
     assert payload["required_engine_run_count"] == 2
     assert payload["missing_engine_ids"] == []
+    assert payload["local_source_ready_case_count"] == 1
+    assert payload["prepared_input_ready_case_count"] == 1
     case_plan = payload["case_execution_plans"][0]
     assert case_plan["case_id"] == "casf2016_1abc"
     assert case_plan["reference_pose_id"] == "casf2016_1abc_reference"
+    assert case_plan["source_file_status"]["status"] == "ready"
+    assert case_plan["prepared_input_status"]["status"] == "ready"
     assert case_plan["docking_box"]["status"] == "ready"
     assert case_plan["docking_box"]["center"] == {"x": 1.0, "y": 0.5, "z": 0.25}
     assert case_plan["docking_box"]["size"] == {"x": 18.0, "y": 17.0, "z": 16.5}
@@ -170,6 +183,53 @@ def test_vina_gnina_execution_plan_builds_case_run_specs(
         module.REQUIRED_ENGINE_RUN_FIELDS
     )
     assert "does not run Vina or GNINA" in payload["claim_boundary"]
+
+
+def test_vina_gnina_execution_plan_blocks_missing_local_inputs(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    subset_rows, pose_rows = _write_rows(tmp_path, materialize_inputs=False)
+
+    monkeypatch.setattr(
+        module,
+        "_engine_binary_status",
+        lambda engine_id: {
+            "engine_id": engine_id,
+            "available": True,
+            "executable": f"/usr/bin/{engine_id}",
+            "version": f"{engine_id} test",
+            "blocker": "",
+        },
+    )
+
+    payload = module.build_vina_gnina_execution_plan(
+        repo_root=tmp_path,
+        subset_rows_path=subset_rows,
+        pose_rows_path=pose_rows,
+    )
+
+    assert payload["status"] == "engine_input_blocked"
+    assert payload["execution_plan_ready"] is False
+    assert payload["operator_execution_ready"] is False
+    assert payload["missing_engine_ids"] == []
+    assert payload["local_source_ready_case_count"] == 0
+    assert payload["prepared_input_ready_case_count"] == 0
+    assert payload["blockers"] == [
+        "casf2016_1abc::protein_structure_path_missing",
+        "casf2016_1abc::reference_ligand_path_missing",
+        "casf2016_1abc::prepared_receptor_path_missing",
+        "casf2016_1abc::prepared_ligand_path_missing",
+    ]
+    case_plan = payload["case_execution_plans"][0]
+    assert case_plan["source_file_status"]["blockers"] == [
+        "protein_structure_path_missing",
+        "reference_ligand_path_missing",
+    ]
+    assert case_plan["prepared_input_status"]["blockers"] == [
+        "prepared_receptor_path_missing",
+        "prepared_ligand_path_missing",
+    ]
 
 
 def test_vina_gnina_execution_plan_records_missing_engine_blockers(

@@ -339,6 +339,13 @@ def _engine_run_slots(
         engine_runs = case_plan.get("engine_runs")
         if not isinstance(engine_runs, list):
             continue
+        raw_case_blockers = case_plan.get("blockers", [])
+        case_blockers = (
+            [str(row) for row in raw_case_blockers if str(row)]
+            if isinstance(raw_case_blockers, list)
+            else []
+        )
+        case_inputs_ready = not case_blockers
         for run in engine_runs:
             if not isinstance(run, dict):
                 continue
@@ -353,6 +360,8 @@ def _engine_run_slots(
             slot_blockers: list[str] = []
             if not docking_box_ready:
                 slot_blockers.append("docking_box_not_ready")
+            if not case_inputs_ready:
+                slot_blockers.extend(case_blockers)
             if not engine_available:
                 slot_blockers.append(
                     str(engine_status.get("blocker") or f"{engine_id}_runtime_missing")
@@ -375,6 +384,8 @@ def _engine_run_slots(
                     "engine_container_image": str(
                         engine_status.get("container_image") or ""
                     ),
+                    "case_inputs_ready": case_inputs_ready,
+                    "case_blockers": case_blockers,
                     "command_template": str(run.get("command_template") or ""),
                     "expected_predicted_ligand_path_or_pose_ref": str(
                         run.get("expected_predicted_ligand_path_or_pose_ref") or ""
@@ -391,7 +402,7 @@ def _engine_run_slots(
                     ),
                     "status": (
                         "ready_for_engine_execution"
-                        if docking_box_ready and engine_available
+                        if docking_box_ready and case_inputs_ready and engine_available
                         else "blocked"
                     ),
                     "blockers": slot_blockers,
@@ -469,11 +480,27 @@ def build_vina_gnina_runtime_readiness(
         blockers.append("public_benchmark_vina_gnina_rows_not_detected")
     blockers.extend(slot_blockers)
     blockers = list(dict.fromkeys(blockers))
-    runtime_ready = execution_plan_ready and all_engines_available
+    ready_engine_run_slot_count = sum(
+        1 for row in engine_run_slots if row["status"] == "ready_for_engine_execution"
+    )
+    required_engine_run_count = int(
+        execution_plan.get("required_engine_run_count") or len(engine_run_slots)
+    )
+    all_engine_run_slots_ready = (
+        required_engine_run_count > 0
+        and ready_engine_run_slot_count == required_engine_run_count
+    )
+    runtime_ready = (
+        execution_plan_ready
+        and all_engines_available
+        and all_engine_run_slots_ready
+    )
     if not execution_plan_ready:
         status = "execution_plan_blocked"
     elif not all_engines_available:
         status = "engine_runtime_blocked"
+    elif not all_engine_run_slots_ready:
+        status = "engine_input_blocked"
     elif not row_artifacts_ready:
         status = "ready_for_engine_execution"
     else:
@@ -510,12 +537,8 @@ def build_vina_gnina_runtime_readiness(
         ],
         "row_candidate_status": row_status,
         "engine_run_slots": engine_run_slots,
-        "required_engine_run_count": int(
-            execution_plan.get("required_engine_run_count") or len(engine_run_slots)
-        ),
-        "ready_engine_run_slot_count": sum(
-            1 for row in engine_run_slots if row["status"] == "ready_for_engine_execution"
-        ),
+        "required_engine_run_count": required_engine_run_count,
+        "ready_engine_run_slot_count": ready_engine_run_slot_count,
         "operator_commands": {
             "build_execution_plan": (
                 "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
@@ -562,11 +585,7 @@ def build_vina_gnina_runtime_readiness(
                 execution_plan.get("required_engine_run_count")
                 or len(engine_run_slots)
             ),
-            "ready_engine_run_slot_count": sum(
-                1
-                for row in engine_run_slots
-                if row["status"] == "ready_for_engine_execution"
-            ),
+            "ready_engine_run_slot_count": ready_engine_run_slot_count,
             "available_engine_count": sum(
                 1 for row in current_engine_execution_statuses if row.get("available")
             ),

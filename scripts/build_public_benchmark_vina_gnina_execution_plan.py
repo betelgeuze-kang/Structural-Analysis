@@ -34,6 +34,7 @@ SCHEMA_VERSION = "public-benchmark-vina-gnina-execution-plan.v1"
 DEFAULT_BOX_MARGIN_ANGSTROM = 8.0
 DEFAULT_MIN_BOX_SIZE_ANGSTROM = 15.0
 DOCKER_BIN_ENV = "PUBLIC_BENCHMARK_DOCKER_BIN"
+LOCAL_SOURCE_FILE_FIELDS = ("protein_structure_path", "reference_ligand_path")
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -113,6 +114,83 @@ def _docking_box(
         "margin_angstrom": margin_angstrom,
         "minimum_size_angstrom": minimum_size_angstrom,
         "basis": "axis-aligned box around materialized reference ligand atoms",
+    }
+
+
+def _file_status(repo_root: Path, path_value: Any, *, blocker_prefix: str) -> dict[str, Any]:
+    path_text = str(path_value or "").strip()
+    if not path_text:
+        return {
+            "path": "",
+            "exists": False,
+            "is_file": False,
+            "status": "blocked",
+            "blocker": f"{blocker_prefix}_missing",
+        }
+    path = Path(path_text)
+    resolved = path if path.is_absolute() else repo_root / path
+    exists = resolved.exists()
+    is_file = resolved.is_file()
+    blocker = ""
+    if not exists:
+        blocker = f"{blocker_prefix}_missing"
+    elif not is_file:
+        blocker = f"{blocker_prefix}_not_file"
+    return {
+        "path": path_text,
+        "exists": exists,
+        "is_file": is_file,
+        "status": "ready" if is_file else "blocked",
+        "blocker": blocker,
+    }
+
+
+def _source_file_status(repo_root: Path, subset_row: dict[str, Any]) -> dict[str, Any]:
+    fields = {
+        field: _file_status(
+            repo_root,
+            subset_row.get(field),
+            blocker_prefix=field,
+        )
+        for field in LOCAL_SOURCE_FILE_FIELDS
+    }
+    blockers = [
+        str(row["blocker"])
+        for row in fields.values()
+        if str(row.get("blocker") or "")
+    ]
+    return {
+        "status": "ready" if not blockers else "blocked",
+        "required_fields": list(LOCAL_SOURCE_FILE_FIELDS),
+        "files": fields,
+        "blockers": blockers,
+    }
+
+
+def _prepared_input_status(repo_root: Path, complex_id: str) -> dict[str, Any]:
+    expected_paths = {
+        "receptor": f"prepared/{complex_id}_receptor",
+        "ligand": f"prepared/{complex_id}_ligand",
+    }
+    files = {
+        role: _file_status(
+            repo_root,
+            path,
+            blocker_prefix=f"prepared_{role}_path",
+        )
+        for role, path in expected_paths.items()
+    }
+    blockers = [
+        str(row["blocker"])
+        for row in files.values()
+        if str(row.get("blocker") or "")
+    ]
+    return {
+        "status": "ready" if not blockers else "blocked",
+        "preparation_required": bool(blockers),
+        "expected_paths": expected_paths,
+        "files": files,
+        "blockers": blockers,
     }
 
 
@@ -375,6 +453,7 @@ def _run_spec(
 
 def _case_plan(
     *,
+    repo_root: Path,
     subset_row: dict[str, Any],
     pose_row: dict[str, Any] | None,
 ) -> dict[str, Any]:
@@ -385,6 +464,10 @@ def _case_plan(
         blockers.append("pose_row_missing_for_case")
     docking_box = _docking_box((pose_row or {}).get("reference_atoms"))
     blockers.extend(str(row) for row in docking_box.get("blockers", []) if str(row))
+    source_file_status = _source_file_status(repo_root, subset_row)
+    prepared_input_status = _prepared_input_status(repo_root, complex_id)
+    blockers.extend(str(row) for row in source_file_status["blockers"])
+    blockers.extend(str(row) for row in prepared_input_status["blockers"])
     engine_runs = [
         _run_spec(
             case_id=case_id,
@@ -402,6 +485,8 @@ def _case_plan(
         "reference_pose_id": f"{case_id}_reference",
         "protein_structure_path": str(subset_row.get("protein_structure_path") or ""),
         "reference_ligand_path": str(subset_row.get("reference_ligand_path") or ""),
+        "source_file_status": source_file_status,
+        "prepared_input_status": prepared_input_status,
         "subset_source_checksum": str(subset_row.get("source_checksum") or ""),
         "source_license_or_accession": str(
             subset_row.get("source_license_or_accession") or ""
@@ -464,7 +549,11 @@ def build_vina_gnina_execution_plan(
         )
     )
     case_plans = [
-        _case_plan(subset_row=row, pose_row=pose_by_id.get(str(row.get("case_id") or "")))
+        _case_plan(
+            repo_root=repo_root,
+            subset_row=row,
+            pose_row=pose_by_id.get(str(row.get("case_id") or "")),
+        )
         for row in subset_rows
     ]
     case_blockers = [
@@ -481,6 +570,22 @@ def build_vina_gnina_execution_plan(
     blockers.extend(engine_blockers)
     execution_plan_ready = bool(case_plans and not case_blockers)
     operator_execution_ready = execution_plan_ready and not engine_blockers
+    if operator_execution_ready:
+        status = "ready_for_engine_execution"
+    elif not execution_plan_ready:
+        status = "engine_input_blocked"
+    else:
+        status = "engine_execution_required"
+    local_source_ready_case_count = sum(
+        1
+        for row in case_plans
+        if row.get("source_file_status", {}).get("status") == "ready"
+    )
+    prepared_input_ready_case_count = sum(
+        1
+        for row in case_plans
+        if row.get("prepared_input_status", {}).get("status") == "ready"
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -493,11 +598,7 @@ def build_vina_gnina_execution_plan(
             reuse_policy="public_benchmark_vina_gnina_execution_plan_from_materialized_rows",
             repo_root=repo_root,
         ),
-        "status": (
-            "ready_for_engine_execution"
-            if operator_execution_ready
-            else "engine_execution_required"
-        ),
+        "status": status,
         "contract_pass": True,
         "execution_plan_ready": execution_plan_ready,
         "operator_execution_ready": operator_execution_ready,
@@ -514,6 +615,8 @@ def build_vina_gnina_execution_plan(
             for row in engine_execution_statuses
             if not row["available"]
         ],
+        "local_source_ready_case_count": local_source_ready_case_count,
+        "prepared_input_ready_case_count": prepared_input_ready_case_count,
         "case_execution_plans": case_plans,
         "expected_vina_gnina_rows_artifact": str(vina_gnina_rows_out),
         "adapter_materialization_command": (
@@ -546,15 +649,18 @@ def build_vina_gnina_execution_plan(
                 1 for row in engine_execution_statuses if not row["available"]
             ),
             "case_blocker_count": len(case_blockers),
+            "local_source_ready_case_count": local_source_ready_case_count,
+            "prepared_input_ready_case_count": prepared_input_ready_case_count,
             "execution_plan_ready": execution_plan_ready,
             "operator_execution_ready": operator_execution_ready,
             "adapter_rows_ready": False,
         },
         "claim_boundary": (
             "This artifact is an execution plan derived from materialized CASF/PDBBind "
-            "subset and pose rows. It does not run Vina or GNINA, does not create "
-            "engine comparison rows, and does not close Public Benchmark Phase 2 until "
-            "real engine outputs and receipts pass the comparison adapter."
+            "subset and pose rows plus local source/prepared input file checks. It "
+            "does not run Vina or GNINA, does not create engine comparison rows, and "
+            "does not close Public Benchmark Phase 2 until real engine outputs and "
+            "receipts pass the comparison adapter."
         ),
     }
 

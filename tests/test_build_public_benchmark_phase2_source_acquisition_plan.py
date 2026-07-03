@@ -161,10 +161,10 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "public_benchmark_vina_gnina_execution_plan.json"
     )
     assert payload["vina_gnina_execution_plan"]["status"] == (
-        "ready_for_engine_execution"
+        "engine_input_blocked"
     )
-    assert payload["vina_gnina_execution_plan"]["execution_plan_ready"] is True
-    assert payload["vina_gnina_execution_plan"]["operator_execution_ready"] is True
+    assert payload["vina_gnina_execution_plan"]["execution_plan_ready"] is False
+    assert payload["vina_gnina_execution_plan"]["operator_execution_ready"] is False
     assert payload["vina_gnina_execution_plan"]["adapter_rows_ready"] is False
     assert payload["vina_gnina_execution_plan"]["case_count"] == 12
     assert payload["vina_gnina_execution_plan"]["required_engine_run_count"] == 24
@@ -174,14 +174,14 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "public_benchmark_vina_gnina_runtime_readiness.json"
     )
     assert payload["vina_gnina_runtime_readiness"]["status"] == (
-        "ready_for_engine_execution"
+        "execution_plan_blocked"
     )
     assert payload["vina_gnina_runtime_readiness"][
         "runtime_ready_for_engine_execution"
-    ] is True
+    ] is False
     assert payload["vina_gnina_runtime_readiness"][
         "ready_engine_run_slot_count"
-    ] == 24
+    ] == 0
     assert payload["vina_gnina_runtime_readiness"]["available_engine_count"] == 2
     assert payload["vina_gnina_runtime_readiness"]["missing_engine_count"] == 0
     assert payload["vina_gnina_runtime_readiness"][
@@ -273,7 +273,7 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
 
     assert payload["summary"] == {
         "actual_closure_ready": False,
-        "blocker_count": 2,
+        "blocker_count": 3,
         "minimum_enrichment_target_count": 1,
         "minimum_subset_case_count": 12,
         "minimum_vina_gnina_comparison_case_count": 1,
@@ -289,13 +289,13 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
             "vina_gnina_rows",
         ],
         "phase2_row_audit_status": "operator_evidence_required",
-        "vina_gnina_execution_plan_status": "ready_for_engine_execution",
-        "vina_gnina_execution_plan_ready": True,
+        "vina_gnina_execution_plan_status": "engine_input_blocked",
+        "vina_gnina_execution_plan_ready": False,
         "vina_gnina_required_engine_run_count": 24,
         "vina_gnina_missing_engine_count": 0,
-        "vina_gnina_runtime_readiness_status": "ready_for_engine_execution",
-        "vina_gnina_runtime_ready_for_engine_execution": True,
-        "vina_gnina_runtime_ready_engine_run_slot_count": 24,
+        "vina_gnina_runtime_readiness_status": "execution_plan_blocked",
+        "vina_gnina_runtime_ready_for_engine_execution": False,
+        "vina_gnina_runtime_ready_engine_run_slot_count": 0,
         "vina_gnina_runtime_detected_row_artifact_count": 0,
         "vina_gnina_runtime_missing_engine_ids": [],
         "vina_gnina_runtime_container_daemon_available": True,
@@ -305,6 +305,7 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     }
     assert payload["blockers"] == [
         "public_benchmark_vina_gnina_rows_not_acquired",
+        "public_benchmark_vina_gnina_engine_inputs_not_ready",
         "public_benchmark_external_receipts_not_attached",
     ]
 
@@ -326,13 +327,14 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert payload["official_source_receipt_plan"]["source_catalog_count"] == 6
     assert payload["vina_gnina_execution_plan"]["required_engine_run_count"] == 24
     assert payload["vina_gnina_runtime_readiness"]["status"] == (
-        "ready_for_engine_execution"
+        "execution_plan_blocked"
     )
     assert "# Public Benchmark Phase 2 Source Acquisition Plan" in markdown
     assert "public_benchmark_phase2_row_audit.json" in markdown
     assert "public_benchmark_vina_gnina_execution_plan.json" in markdown
     assert "public_benchmark_vina_gnina_runtime_readiness.json" in markdown
     assert "`vina_gnina_required_engine_run_count`: `24`" in markdown
+    assert "`vina_gnina_runtime_ready_engine_run_slot_count`: `0`" in markdown
     assert "## Vina/GNINA Runtime" in markdown
     assert "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE" in markdown
     assert "container_image_not_configured" in markdown

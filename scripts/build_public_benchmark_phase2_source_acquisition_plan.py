@@ -234,14 +234,29 @@ def _source_acquisition_blockers(
         for row_input in REQUIRED_ROW_INPUTS
         if row_input in missing_row_inputs
     ]
+    required_engine_run_count = int(
+        vina_gnina_runtime_readiness_summary.get("required_engine_run_count") or 0
+    )
+    ready_engine_run_slot_count = int(
+        vina_gnina_runtime_readiness_summary.get("ready_engine_run_slot_count") or 0
+    )
+    missing_engine_count = int(
+        vina_gnina_runtime_readiness_summary.get("missing_engine_count") or 0
+    )
     if (
         "vina_gnina_rows" in missing_row_inputs
         and not vina_gnina_runtime_readiness_summary.get(
             "runtime_ready_for_engine_execution"
         )
     ):
-        blockers.append("public_benchmark_vina_gnina_engine_runtime_not_ready")
-    if int(vina_gnina_runtime_readiness_summary.get("missing_engine_count") or 0) > 0:
+        if (
+            missing_engine_count == 0
+            and ready_engine_run_slot_count < required_engine_run_count
+        ):
+            blockers.append("public_benchmark_vina_gnina_engine_inputs_not_ready")
+        else:
+            blockers.append("public_benchmark_vina_gnina_engine_runtime_not_ready")
+    if missing_engine_count > 0:
         blockers.append(
             "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing"
         )

@@ -391,6 +391,55 @@ def test_runtime_readiness_detects_ready_engine_slots_and_rows(
     assert payload["blockers"] == []
 
 
+def test_runtime_readiness_blocks_case_input_blockers_with_available_engines(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    execution_plan = tmp_path / "execution_plan.json"
+    rows = tmp_path / "public_benchmark_vina_gnina_rows.json"
+    _execution_plan(execution_plan)
+    plan_payload = json.loads(execution_plan.read_text(encoding="utf-8"))
+    plan_payload["execution_plan_ready"] = False
+    plan_payload["case_execution_plans"][0]["blockers"] = [
+        "prepared_receptor_path_missing",
+        "prepared_ligand_path_missing",
+    ]
+    execution_plan.write_text(json.dumps(plan_payload), encoding="utf-8")
+
+    monkeypatch.setattr(
+        module,
+        "_engine_binary_status",
+        lambda engine_id: {
+            "engine_id": engine_id,
+            "available": True,
+            "executable": f"/usr/bin/{engine_id}",
+            "version": f"{engine_id} test",
+            "blocker": "",
+        },
+    )
+
+    payload = module.build_vina_gnina_runtime_readiness(
+        repo_root=tmp_path,
+        execution_plan_path=execution_plan,
+        vina_gnina_rows_path=rows,
+    )
+
+    assert payload["status"] == "execution_plan_blocked"
+    assert payload["runtime_ready_for_engine_execution"] is False
+    assert payload["ready_engine_run_slot_count"] == 0
+    assert payload["missing_engine_ids"] == []
+    assert payload["blockers"] == [
+        "vina_gnina_execution_plan_not_ready",
+        "public_benchmark_vina_gnina_rows_not_detected",
+        "casf2016_1abc::vina::prepared_receptor_path_missing",
+        "casf2016_1abc::vina::prepared_ligand_path_missing",
+        "casf2016_1abc::gnina::prepared_receptor_path_missing",
+        "casf2016_1abc::gnina::prepared_ligand_path_missing",
+    ]
+    assert payload["engine_run_slots"][0]["case_inputs_ready"] is False
+    assert payload["engine_run_slots"][0]["status"] == "blocked"
+
+
 def test_runtime_readiness_cli_writes_artifact(tmp_path: Path, monkeypatch) -> None:
     execution_plan = tmp_path / "execution_plan.json"
     rows = tmp_path / "public_benchmark_vina_gnina_rows.json"
