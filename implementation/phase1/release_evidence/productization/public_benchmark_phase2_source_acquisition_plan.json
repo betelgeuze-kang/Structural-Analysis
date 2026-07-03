@@ -20,14 +20,14 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T21:20:20.098657+00:00",
+  "generated_at": "2026-07-03T21:49:21.791866+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:a291c52463416359a533597ae3c21e539e112976deb621f3e26c7e8a923640b5",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:6a8e79892739d3f6c9c1b73e83f953c6d09ffc3bb7a3cd7d5084f83d8a18aaa6",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:e3e1d187a143cc4207fd986b98d97e20080132785b1fb0211fc47b4c8328978e",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:18872cd8ce759eefd0b34ae98244ff16b6f028a47dd15db728e599ec3cba0c7d",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:23c5d64fbbcf32a5e6a5021ffbd7c98865b86f836533a5d95b0237859c233460",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:926eb41ad14ba1404c1014a80ea0878446532d3f29f08c8d847d6bf82aff608a",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:b908da8547dd6438956919715c40fe9daffc3d174bd976cc5230fc5153bb2691",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4c7e76f6944271f99f96f3170ebdd7be9dd9280b3bddd39e328c2f43372c8261",
-    "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:017066949dcc9044edee289094c11caf8ecddf51c8d6f6877260ffeedf9fd1ae",
+    "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:86934e1e55189fc07b85130b81f236191549e998c991a69d75a0fa81169a3b02",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
@@ -768,7 +768,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "255d70a43a9ca5335dbb157bd94cd5f119d0a616",
+  "source_commit_sha": "dced728b9257557f1c038ad10a181e47ca08e7c0",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
@@ -798,6 +798,8 @@
     "vina_gnina_input_manifest_status": "not_detected",
     "vina_gnina_missing_engine_count": 2,
     "vina_gnina_required_engine_run_count": 24,
+    "vina_gnina_runtime_adapter_case_count": 0,
+    "vina_gnina_runtime_adapter_row_preflight_status": "row_artifact_missing",
     "vina_gnina_runtime_container_daemon_available": true,
     "vina_gnina_runtime_detected_row_artifact_count": 0,
     "vina_gnina_runtime_missing_engine_ids": [
@@ -847,6 +849,9 @@
     "status": "engine_input_blocked"
   },
   "vina_gnina_runtime_readiness": {
+    "adapter_case_count": 0,
+    "adapter_row_preflight_blocker": "public_benchmark_vina_gnina_rows_not_detected",
+    "adapter_row_preflight_status": "row_artifact_missing",
     "adapter_rows_ready": false,
     "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
     "available_engine_count": 0,
@@ -1023,6 +1028,7 @@
     "ready_engine_run_slot_count": 0,
     "required_engine_run_count": 24,
     "runtime_ready_for_engine_execution": false,
+    "selected_row_count": 0,
     "status": "execution_plan_blocked"
   }
 }

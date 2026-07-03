@@ -1440,12 +1440,12 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T21:43:28.180088+00:00",
+  "generated_at": "2026-07-03T21:49:30.041677+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json": "sha256:98255bfca71cb82c3146a11e74e90cc338836518d93672950cbec5defd7d7147",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:ad466981c1e07332efc3e657a50e810ae2250aa957e132da60f069fd06e2337a",
     "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:1243985688e35dd66119ceffac377c4115139631144cb3d7d7a6dba4464d80b4",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:723301ca01763d8be39d7c68e6490233cbad1e86c992bafbf6065d649e56adc5",
     "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
     "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261",
@@ -2869,7 +2869,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "1e3a90d8b8c38e145282be73699ced202dbbf342",
+  "source_commit_sha": "dced728b9257557f1c038ad10a181e47ca08e7c0",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,
@@ -2973,6 +2973,8 @@
         "vina_gnina_input_manifest_status": "not_detected",
         "vina_gnina_missing_engine_count": 2,
         "vina_gnina_required_engine_run_count": 24,
+        "vina_gnina_runtime_adapter_case_count": 0,
+        "vina_gnina_runtime_adapter_row_preflight_status": "row_artifact_missing",
         "vina_gnina_runtime_container_daemon_available": true,
         "vina_gnina_runtime_detected_row_artifact_count": 0,
         "vina_gnina_runtime_missing_engine_ids": [

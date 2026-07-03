@@ -337,6 +337,8 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "vina_gnina_runtime_ready_for_engine_execution": False,
         "vina_gnina_runtime_ready_engine_run_slot_count": 0,
         "vina_gnina_runtime_detected_row_artifact_count": 0,
+        "vina_gnina_runtime_adapter_case_count": 0,
+        "vina_gnina_runtime_adapter_row_preflight_status": "row_artifact_missing",
         "vina_gnina_runtime_missing_engine_ids": ["vina", "gnina"],
         "vina_gnina_runtime_container_daemon_available": True,
         "phase2_ready": False,

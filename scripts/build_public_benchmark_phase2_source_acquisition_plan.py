@@ -430,6 +430,9 @@ def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, 
     blockers = payload.get("blockers")
     if not isinstance(blockers, list):
         blockers = []
+    row_candidate_status = payload.get("row_candidate_status")
+    if not isinstance(row_candidate_status, dict):
+        row_candidate_status = {}
     container_runtime_status = payload.get("container_runtime_status")
     if not isinstance(container_runtime_status, dict):
         container_runtime_status = {}
@@ -457,6 +460,16 @@ def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, 
         "missing_engine_count": int(summary.get("missing_engine_count") or 0),
         "detected_row_artifact_count": int(
             summary.get("detected_row_artifact_count") or 0
+        ),
+        "selected_row_count": int(summary.get("selected_row_count") or 0),
+        "adapter_case_count": int(summary.get("adapter_case_count") or 0),
+        "adapter_row_preflight_status": str(
+            summary.get("adapter_row_preflight_status")
+            or row_candidate_status.get("status")
+            or ""
+        ),
+        "adapter_row_preflight_blocker": str(
+            row_candidate_status.get("blocker") or ""
         ),
         "missing_engine_ids": [
             str(row) for row in payload.get("missing_engine_ids", []) if str(row)
@@ -1030,6 +1043,14 @@ def build_public_benchmark_phase2_source_acquisition_plan(
                     "detected_row_artifact_count"
                 ]
             ),
+            "vina_gnina_runtime_adapter_case_count": (
+                vina_gnina_runtime_readiness_summary["adapter_case_count"]
+            ),
+            "vina_gnina_runtime_adapter_row_preflight_status": (
+                vina_gnina_runtime_readiness_summary[
+                    "adapter_row_preflight_status"
+                ]
+            ),
             "vina_gnina_runtime_missing_engine_ids": (
                 vina_gnina_runtime_readiness_summary["missing_engine_ids"]
             ),
@@ -1078,6 +1099,7 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `vina_gnina_runtime_readiness`: `{payload['vina_gnina_runtime_readiness']['artifact']}`",
         f"- `vina_gnina_runtime_readiness_status`: `{payload['vina_gnina_runtime_readiness']['status']}`",
         f"- `vina_gnina_runtime_ready_engine_run_slot_count`: `{payload['vina_gnina_runtime_readiness']['ready_engine_run_slot_count']}`",
+        f"- `vina_gnina_adapter_row_preflight_status`: `{payload['vina_gnina_runtime_readiness']['adapter_row_preflight_status']}`",
         f"- `vina_gnina_runtime_missing_engine_ids`: `{', '.join(payload['vina_gnina_runtime_readiness']['missing_engine_ids'])}`",
         "",
         "| Row Input | Source Family | Status | Unblocks |",

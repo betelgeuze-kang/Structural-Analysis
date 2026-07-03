@@ -19,6 +19,7 @@
 - `vina_gnina_runtime_readiness`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json`
 - `vina_gnina_runtime_readiness_status`: `execution_plan_blocked`
 - `vina_gnina_runtime_ready_engine_run_slot_count`: `0`
+- `vina_gnina_adapter_row_preflight_status`: `row_artifact_missing`
 - `vina_gnina_runtime_missing_engine_ids`: `vina, gnina`
 
 | Row Input | Source Family | Status | Unblocks |

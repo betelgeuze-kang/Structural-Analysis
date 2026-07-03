@@ -21,6 +21,11 @@ from materialize_public_benchmark_vina_gnina_comparison_adapter import (  # noqa
     REQUIRED_CASE_FIELDS,
     REQUIRED_ENGINE_RUN_FIELDS,
     SUPPORTED_ENGINES,
+    materialize_vina_gnina_comparison_adapter,
+)
+from materialize_public_benchmark_operator_bundle_from_rows import (  # noqa: E402
+    _build_vina_gnina_cases,
+    _load_rows,
 )
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 
@@ -299,6 +304,14 @@ def _engine_execution_status(
     }
 
 
+def _load_vina_gnina_candidate_rows(path: Path) -> list[dict[str, Any]]:
+    if path.suffix.lower() == ".json":
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(payload, dict) and isinstance(payload.get("cases"), list):
+            return [row for row in payload["cases"] if isinstance(row, dict)]
+    return _load_rows(path)
+
+
 def _row_candidate_status(repo_root: Path, rows_path: Path) -> dict[str, Any]:
     candidates = [
         PRODUCTIZATION / f"public_benchmark_vina_gnina_rows.{suffix}"
@@ -307,8 +320,13 @@ def _row_candidate_status(repo_root: Path, rows_path: Path) -> dict[str, Any]:
     if rows_path not in candidates:
         candidates.insert(0, rows_path)
     rows = []
+    selected_path = ""
+    selected_resolved_path: Path | None = None
     for path in candidates:
         resolved = path if path.is_absolute() else repo_root / path
+        if resolved.is_file() and selected_resolved_path is None:
+            selected_path = str(path)
+            selected_resolved_path = resolved
         rows.append(
             {
                 "path": str(path),
@@ -316,10 +334,81 @@ def _row_candidate_status(repo_root: Path, rows_path: Path) -> dict[str, Any]:
                 "is_file": resolved.is_file(),
             }
         )
+    detected_row_artifact_count = sum(1 for row in rows if row["is_file"])
+    selected_row_count = 0
+    adapter_case_count = 0
+    adapter_ready = False
+    adapter_preflight: dict[str, Any] = {
+        "status": "missing",
+        "contract_pass": False,
+        "case_count": 0,
+        "ready_case_count": 0,
+        "blocker_count": 0,
+        "first_blocked_target": "",
+        "engine_summaries": [],
+        "blockers": [],
+    }
+    load_error = ""
+    blocker = "public_benchmark_vina_gnina_rows_not_detected"
+    status = "row_artifact_missing"
+    if selected_resolved_path is not None:
+        try:
+            raw_rows = _load_vina_gnina_candidate_rows(selected_resolved_path)
+            selected_row_count = len(raw_rows)
+            cases = _build_vina_gnina_cases(raw_rows)
+            adapter_case_count = len(cases)
+            adapter = materialize_vina_gnina_comparison_adapter(
+                {"cases": cases},
+                repo_root=repo_root,
+                intake_path=Path(selected_path),
+            )
+            adapter_ready = bool(adapter.get("public_benchmark_engine_comparison_ready"))
+            adapter_summary = adapter.get("summary")
+            if not isinstance(adapter_summary, dict):
+                adapter_summary = {}
+            adapter_preflight = {
+                "status": str(adapter.get("status") or ""),
+                "contract_pass": bool(adapter.get("contract_pass")),
+                "case_count": int(adapter_summary.get("case_count") or 0),
+                "ready_case_count": int(adapter_summary.get("ready_case_count") or 0),
+                "blocker_count": len(adapter.get("blockers", []))
+                if isinstance(adapter.get("blockers"), list)
+                else 0,
+                "first_blocked_target": str(adapter.get("first_blocked_target") or ""),
+                "engine_summaries": adapter.get("engine_summaries")
+                if isinstance(adapter.get("engine_summaries"), list)
+                else [],
+                "blockers": [
+                    str(row) for row in adapter.get("blockers", []) if str(row)
+                ][:20]
+                if isinstance(adapter.get("blockers"), list)
+                else [],
+            }
+            if adapter_ready:
+                status = "row_artifact_detected_validated"
+                blocker = ""
+            elif adapter_case_count == 0:
+                status = "row_artifact_detected_empty"
+                blocker = "public_benchmark_vina_gnina_rows_empty"
+            else:
+                status = "row_artifact_detected_adapter_blocked"
+                blocker = "public_benchmark_vina_gnina_rows_not_adapter_ready"
+        except Exception as exc:
+            status = "row_artifact_detected_invalid"
+            blocker = "public_benchmark_vina_gnina_rows_invalid"
+            load_error = str(exc)
     return {
+        "status": status,
         "default_rows_path": str(rows_path),
         "candidate_paths": rows,
-        "detected_row_artifact_count": sum(1 for row in rows if row["is_file"]),
+        "detected_row_artifact_count": detected_row_artifact_count,
+        "selected_path": selected_path,
+        "selected_row_count": selected_row_count,
+        "adapter_case_count": adapter_case_count,
+        "adapter_rows_ready": adapter_ready,
+        "adapter_preflight": adapter_preflight,
+        "load_error": load_error,
+        "blocker": blocker,
     }
 
 
@@ -450,7 +539,7 @@ def build_vina_gnina_runtime_readiness(
     all_engines_available = all(
         bool(row.get("available")) for row in current_engine_execution_statuses
     )
-    row_artifacts_ready = row_status["detected_row_artifact_count"] > 0
+    adapter_rows_ready = bool(row_status.get("adapter_rows_ready"))
     slot_blockers = [
         f"{row['case_id']}::{row['engine_id']}::{blocker}"
         for row in engine_run_slots
@@ -476,8 +565,9 @@ def build_vina_gnina_runtime_readiness(
             "available"
         )
     )
-    if not row_artifacts_ready:
-        blockers.append("public_benchmark_vina_gnina_rows_not_detected")
+    row_blocker = str(row_status.get("blocker") or "")
+    if row_blocker:
+        blockers.append(row_blocker)
     blockers.extend(slot_blockers)
     blockers = list(dict.fromkeys(blockers))
     ready_engine_run_slot_count = sum(
@@ -501,7 +591,7 @@ def build_vina_gnina_runtime_readiness(
         status = "engine_runtime_blocked"
     elif not all_engine_run_slots_ready:
         status = "engine_input_blocked"
-    elif not row_artifacts_ready:
+    elif not adapter_rows_ready:
         status = "ready_for_engine_execution"
     else:
         status = "adapter_materialization_ready"
@@ -521,8 +611,8 @@ def build_vina_gnina_runtime_readiness(
         "contract_pass": True,
         "execution_plan_ready": execution_plan_ready,
         "runtime_ready_for_engine_execution": runtime_ready,
-        "operator_execution_ready": runtime_ready and row_artifacts_ready,
-        "adapter_rows_ready": row_artifacts_ready,
+        "operator_execution_ready": runtime_ready and adapter_rows_ready,
+        "adapter_rows_ready": adapter_rows_ready,
         "phase2_closure_ready": False,
         "supported_engines": list(SUPPORTED_ENGINES),
         "runtime_setup_requirements": _runtime_setup_requirements(),
@@ -578,8 +668,8 @@ def build_vina_gnina_runtime_readiness(
         "summary": {
             "execution_plan_ready": execution_plan_ready,
             "runtime_ready_for_engine_execution": runtime_ready,
-            "operator_execution_ready": runtime_ready and row_artifacts_ready,
-            "adapter_rows_ready": row_artifacts_ready,
+            "operator_execution_ready": runtime_ready and adapter_rows_ready,
+            "adapter_rows_ready": adapter_rows_ready,
             "case_count": int(execution_plan.get("case_count") or 0),
             "required_engine_run_count": int(
                 execution_plan.get("required_engine_run_count")
@@ -597,6 +687,9 @@ def build_vina_gnina_runtime_readiness(
             "detected_row_artifact_count": row_status[
                 "detected_row_artifact_count"
             ],
+            "selected_row_count": int(row_status.get("selected_row_count") or 0),
+            "adapter_case_count": int(row_status.get("adapter_case_count") or 0),
+            "adapter_row_preflight_status": str(row_status.get("status") or ""),
             "blocker_count": len(blockers),
         },
         "claim_boundary": (

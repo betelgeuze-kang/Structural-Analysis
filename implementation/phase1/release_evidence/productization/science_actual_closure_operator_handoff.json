@@ -287,6 +287,8 @@
         "vina_gnina_input_manifest_status": "not_detected",
         "vina_gnina_missing_engine_count": 2,
         "vina_gnina_required_engine_run_count": 24,
+        "vina_gnina_runtime_adapter_case_count": 0,
+        "vina_gnina_runtime_adapter_row_preflight_status": "row_artifact_missing",
         "vina_gnina_runtime_container_daemon_available": true,
         "vina_gnina_runtime_detected_row_artifact_count": 0,
         "vina_gnina_runtime_missing_engine_ids": [
@@ -307,9 +309,9 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-03T21:43:33.512164+00:00",
+  "generated_at": "2026-07-03T21:49:35.048164+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:465e54724f487ce5ac271c47511e0dc72f7850736c8a0e0c8961cb6c1f3f4286",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:d7a72e746aa61f9e60b88e0c35c46ff73a75b696cfc066ca39b0e7cca9d49a6d",
     "scripts/build_science_actual_closure_operator_handoff.py": "sha256:f46dc67ec10ecf1bbfd51f2378326c288a5015a261b02d564179214f7c2f7ffb"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
@@ -513,6 +515,8 @@
           "vina_gnina_input_manifest_status": "not_detected",
           "vina_gnina_missing_engine_count": 2,
           "vina_gnina_required_engine_run_count": 24,
+          "vina_gnina_runtime_adapter_case_count": 0,
+          "vina_gnina_runtime_adapter_row_preflight_status": "row_artifact_missing",
           "vina_gnina_runtime_container_daemon_available": true,
           "vina_gnina_runtime_detected_row_artifact_count": 0,
           "vina_gnina_runtime_missing_engine_ids": [
@@ -691,6 +695,8 @@
           "vina_gnina_input_manifest_status": "not_detected",
           "vina_gnina_missing_engine_count": 2,
           "vina_gnina_required_engine_run_count": 24,
+          "vina_gnina_runtime_adapter_case_count": 0,
+          "vina_gnina_runtime_adapter_row_preflight_status": "row_artifact_missing",
           "vina_gnina_runtime_container_daemon_available": true,
           "vina_gnina_runtime_detected_row_artifact_count": 0,
           "vina_gnina_runtime_missing_engine_ids": [
@@ -921,6 +927,8 @@
           "vina_gnina_input_manifest_status": "not_detected",
           "vina_gnina_missing_engine_count": 2,
           "vina_gnina_required_engine_run_count": 24,
+          "vina_gnina_runtime_adapter_case_count": 0,
+          "vina_gnina_runtime_adapter_row_preflight_status": "row_artifact_missing",
           "vina_gnina_runtime_container_daemon_available": true,
           "vina_gnina_runtime_detected_row_artifact_count": 0,
           "vina_gnina_runtime_missing_engine_ids": [
@@ -1164,6 +1172,8 @@
           "vina_gnina_input_manifest_status": "not_detected",
           "vina_gnina_missing_engine_count": 2,
           "vina_gnina_required_engine_run_count": 24,
+          "vina_gnina_runtime_adapter_case_count": 0,
+          "vina_gnina_runtime_adapter_row_preflight_status": "row_artifact_missing",
           "vina_gnina_runtime_container_daemon_available": true,
           "vina_gnina_runtime_detected_row_artifact_count": 0,
           "vina_gnina_runtime_missing_engine_ids": [
@@ -1533,7 +1543,7 @@
   "schema_version": "science-actual-closure-operator-handoff.v1",
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "1e3a90d8b8c38e145282be73699ced202dbbf342",
+  "source_commit_sha": "dced728b9257557f1c038ad10a181e47ca08e7c0",
   "status": "operator_rows_required",
   "summary": {
     "closes_actual_closure_criteria_count": 19,
@@ -1622,6 +1632,8 @@
         "vina_gnina_input_manifest_status": "not_detected",
         "vina_gnina_missing_engine_count": 2,
         "vina_gnina_required_engine_run_count": 24,
+        "vina_gnina_runtime_adapter_case_count": 0,
+        "vina_gnina_runtime_adapter_row_preflight_status": "row_artifact_missing",
         "vina_gnina_runtime_container_daemon_available": true,
         "vina_gnina_runtime_detected_row_artifact_count": 0,
         "vina_gnina_runtime_missing_engine_ids": [

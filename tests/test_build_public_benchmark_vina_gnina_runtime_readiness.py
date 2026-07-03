@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -24,6 +25,59 @@ module = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
+
+
+def _checksum(text: str) -> str:
+    return "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _engine_run(engine_id: str, *, rmsd: float, pose_success: bool) -> dict[str, object]:
+    return {
+        "engine_id": engine_id,
+        "docking_run_id": f"casf2016_1abc_{engine_id}_run",
+        "predicted_ligand_path_or_pose_ref": (
+            f"https://pdbbind.example.org/casf2016/1abc/{engine_id}_pose.sdf"
+        ),
+        "predicted_ligand_checksum": _checksum(f"1abc:{engine_id}:pose"),
+        "engine_version": f"{engine_id} test 1.0",
+        "engine_config_checksum": _checksum(f"1abc:{engine_id}:config"),
+        "engine_run_provenance_ref": (
+            f"https://pdbbind.example.org/casf2016/1abc/{engine_id}_run.json"
+        ),
+        "symmetry_aware_rmsd_angstrom": rmsd,
+        "pose_success": pose_success,
+        "score": -7.5,
+        "score_direction": "lower_is_better",
+    }
+
+
+def _valid_rows(path: Path) -> None:
+    path.write_text(
+        json.dumps(
+            {
+                "cases": [
+                    {
+                        "case_id": "casf2016_1abc",
+                        "source_family": "CASF/PDBBind + Vina/GNINA",
+                        "benchmark_split": "CASF-core",
+                        "complex_id": "1abc",
+                        "reference_pose_id": "casf2016_1abc_reference",
+                        "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+                        "source_checksum": _checksum("1abc:source"),
+                        "provenance_ref": (
+                            "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz"
+                        ),
+                        "engine_runs": [
+                            _engine_run("vina", rmsd=1.4, pose_success=True),
+                            _engine_run("gnina", rmsd=1.6, pose_success=True),
+                        ],
+                    }
+                ]
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
 
 
 def _execution_plan(path: Path) -> None:
@@ -265,6 +319,8 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
     ]
     assert payload["summary"] == {
         "adapter_rows_ready": False,
+        "adapter_case_count": 0,
+        "adapter_row_preflight_status": "row_artifact_missing",
         "available_engine_count": 0,
         "blocker_count": 5,
         "case_count": 1,
@@ -275,6 +331,7 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "ready_engine_run_slot_count": 0,
         "required_engine_run_count": 2,
         "runtime_ready_for_engine_execution": False,
+        "selected_row_count": 0,
     }
     assert payload["engine_run_slots"][0]["status"] == "blocked"
     assert payload["engine_run_slots"][0]["engine_execution_source"] == ""
@@ -362,7 +419,7 @@ def test_runtime_readiness_detects_ready_engine_slots_and_rows(
     execution_plan = tmp_path / "execution_plan.json"
     rows = tmp_path / "public_benchmark_vina_gnina_rows.json"
     _execution_plan(execution_plan)
-    rows.write_text('{"cases":[]}', encoding="utf-8")
+    _valid_rows(rows)
 
     monkeypatch.setattr(
         module,
@@ -388,7 +445,53 @@ def test_runtime_readiness_detects_ready_engine_slots_and_rows(
     assert payload["adapter_rows_ready"] is True
     assert payload["ready_engine_run_slot_count"] == 2
     assert payload["summary"]["detected_row_artifact_count"] == 1
+    assert payload["summary"]["adapter_case_count"] == 1
+    assert payload["summary"]["selected_row_count"] == 1
+    assert payload["summary"]["adapter_row_preflight_status"] == (
+        "row_artifact_detected_validated"
+    )
+    assert payload["row_candidate_status"]["adapter_preflight"]["contract_pass"] is True
     assert payload["blockers"] == []
+
+
+def test_runtime_readiness_blocks_empty_row_artifact(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    execution_plan = tmp_path / "execution_plan.json"
+    rows = tmp_path / "public_benchmark_vina_gnina_rows.json"
+    _execution_plan(execution_plan)
+    rows.write_text('{"cases":[]}', encoding="utf-8")
+
+    monkeypatch.setattr(
+        module,
+        "_engine_binary_status",
+        lambda engine_id: {
+            "engine_id": engine_id,
+            "available": True,
+            "executable": f"/usr/bin/{engine_id}",
+            "version": f"{engine_id} test",
+            "blocker": "",
+        },
+    )
+
+    payload = module.build_vina_gnina_runtime_readiness(
+        repo_root=tmp_path,
+        execution_plan_path=execution_plan,
+        vina_gnina_rows_path=rows,
+    )
+
+    assert payload["status"] == "ready_for_engine_execution"
+    assert payload["runtime_ready_for_engine_execution"] is True
+    assert payload["operator_execution_ready"] is False
+    assert payload["adapter_rows_ready"] is False
+    assert payload["blockers"] == ["public_benchmark_vina_gnina_rows_empty"]
+    assert payload["row_candidate_status"]["status"] == "row_artifact_detected_empty"
+    assert payload["row_candidate_status"]["adapter_preflight"]["blockers"] == [
+        "vina_gnina_comparison_cases_missing",
+        "vina_gnina_engine_runs_missing",
+        "vina_gnina_external_receipts_missing",
+    ]
 
 
 def test_runtime_readiness_blocks_case_input_blockers_with_available_engines(
