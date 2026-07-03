@@ -1,7 +1,7 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-07-02T22:01:35.305004+00:00",
-  "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
+  "generated_at": "2026-07-03T00:56:28.467413+00:00",
+  "source_commit_sha": "d7d66e517a575c978aa366d2feda441afdfb40a6",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "input_checksums": {
     "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b8f1b140751f430e4c7dc594f3440320433be9b3e3f055f3e7fad62a2999b8af",
@@ -332,6 +332,7 @@
           "full_load_hip_newton_lane_blockers": [
             "checkpoint_load_scale_below_required_full_load",
             "checkpoint_resolution_no_full_load_candidate",
+            "hip_consistency_proof_source_commit_sha_mismatch",
             "hip_consistency_proof_production_hip_path_not_proven",
             "hip_consistency_proof_gate_not_passed",
             "hip_consistency_proof_residual_jvp_worker_path_not_ready",
