@@ -37,6 +37,39 @@ def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+def _engine_binary_env_var(engine_id: str) -> str:
+    return f"PUBLIC_BENCHMARK_{engine_id.upper()}_BIN"
+
+
+def _engine_container_image_env_var(engine_id: str) -> str:
+    return f"PUBLIC_BENCHMARK_{engine_id.upper()}_CONTAINER_IMAGE"
+
+
+def _runtime_setup_requirements() -> dict[str, Any]:
+    return {
+        "accepted_runtime_sources": [
+            "engine binary discovered on PATH",
+            "engine binary path supplied by environment variable",
+            "local Docker image supplied by environment variable",
+        ],
+        "binary_env_vars": {
+            engine_id: _engine_binary_env_var(engine_id)
+            for engine_id in SUPPORTED_ENGINES
+        },
+        "container_image_env_vars": {
+            engine_id: _engine_container_image_env_var(engine_id)
+            for engine_id in SUPPORTED_ENGINES
+        },
+        "docker_bin_env_var": DOCKER_BIN_ENV,
+        "container_image_policy": (
+            "Container fallback requires a local Docker image reference in the "
+            "engine image env var; this readiness check inspects local images and "
+            "does not pull images."
+        ),
+        "rows_artifact_required_after_engine_execution": str(DEFAULT_VINA_GNINA_ROWS),
+    }
+
+
 def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
     resolved = path if path.is_absolute() else repo_root / path
     if not resolved.exists():
@@ -49,7 +82,7 @@ def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
 
 
 def _engine_binary_status(engine_id: str) -> dict[str, Any]:
-    env_var = f"PUBLIC_BENCHMARK_{engine_id.upper()}_BIN"
+    env_var = _engine_binary_env_var(engine_id)
     env_executable = os.environ.get(env_var, "").strip()
     executable = env_executable or shutil.which(engine_id)
     if not executable:
@@ -171,7 +204,7 @@ def _engine_container_status(
     *,
     docker_cli_status: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    image_env_var = f"PUBLIC_BENCHMARK_{engine_id.upper()}_CONTAINER_IMAGE"
+    image_env_var = _engine_container_image_env_var(engine_id)
     image = os.environ.get(image_env_var, "").strip()
     docker_status = docker_cli_status or _docker_cli_status()
     docker_daemon_available = False
@@ -465,6 +498,7 @@ def build_vina_gnina_runtime_readiness(
         "adapter_rows_ready": row_artifacts_ready,
         "phase2_closure_ready": False,
         "supported_engines": list(SUPPORTED_ENGINES),
+        "runtime_setup_requirements": _runtime_setup_requirements(),
         "container_runtime_status": docker_cli_status,
         "current_engine_binary_statuses": current_engine_statuses,
         "current_engine_container_statuses": current_engine_container_statuses,
@@ -486,6 +520,22 @@ def build_vina_gnina_runtime_readiness(
             "build_execution_plan": (
                 "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
                 f"--out {DEFAULT_EXECUTION_PLAN}"
+            ),
+            "set_binary_overrides": (
+                "export PUBLIC_BENCHMARK_VINA_BIN=<path-to-vina> "
+                "PUBLIC_BENCHMARK_GNINA_BIN=<path-to-gnina>"
+            ),
+            "set_container_image_overrides": (
+                "export PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE=<local-vina-image> "
+                "PUBLIC_BENCHMARK_GNINA_CONTAINER_IMAGE=<local-gnina-image>"
+            ),
+            "inspect_container_images": (
+                "docker image inspect \"$PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE\" "
+                "\"$PUBLIC_BENCHMARK_GNINA_CONTAINER_IMAGE\""
+            ),
+            "rerun_runtime_readiness": (
+                "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py "
+                f"--out {DEFAULT_OUT}"
             ),
             "materialize_adapter_from_rows": (
                 "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py "

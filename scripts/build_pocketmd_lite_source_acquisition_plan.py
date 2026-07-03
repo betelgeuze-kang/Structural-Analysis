@@ -32,6 +32,7 @@ PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "pocketmd_lite_source_acquisition_plan.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_ROWS_OUT = PRODUCTIZATION / "pocketmd_lite_topk_rows.json"
+DEFAULT_ROWS_TEMPLATE = PRODUCTIZATION / "pocketmd_lite_topk_rows_template.csv"
 DEFAULT_OPERATOR_INTAKE = PRODUCTIZATION / "pocketmd_lite_operator_intake.json"
 DEFAULT_OPERATOR_TEMPLATE = PRODUCTIZATION / "pocketmd_lite_operator_template.json"
 DEFAULT_REFINEMENT_EXECUTION_PLAN = (
@@ -371,6 +372,7 @@ def build_pocketmd_lite_source_acquisition_plan(
                 Path("scripts/build_pocketmd_lite_refinement_execution_plan.py"),
                 Path("scripts/materialize_pocketmd_lite_operator_intake_from_rows.py"),
                 Path("scripts/materialize_pocketmd_lite_topk_survival_report.py"),
+                DEFAULT_ROWS_TEMPLATE,
             ],
             reused_evidence=False,
             reuse_policy="pocketmd_lite_source_acquisition_plan",
@@ -396,6 +398,13 @@ def build_pocketmd_lite_source_acquisition_plan(
         ),
         "row_artifact_contract": {
             "default_output": str(rows_out),
+            "template_artifact": str(DEFAULT_ROWS_TEMPLATE),
+            "template_usage_policy": (
+                "The template enumerates required columns and minimum case/rank "
+                "slots only. Operators must replace placeholder blanks with real "
+                "top-k refinement rows and receipts before writing rows to the "
+                "default output."
+            ),
             "operator_intake_output": str(DEFAULT_OPERATOR_INTAKE),
             "required_case_count": min_cases,
             "required_total_candidate_rows": min_total,
@@ -460,6 +469,7 @@ def build_pocketmd_lite_source_acquisition_plan(
             "write_plan": (
                 "python3 scripts/build_pocketmd_lite_source_acquisition_plan.py"
             ),
+            "review_row_template": f"sed -n '1,20p' {DEFAULT_ROWS_TEMPLATE}",
             "build_refinement_execution_plan": _refinement_execution_plan_command(),
             "import_rows": (
                 "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
@@ -536,6 +546,7 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `refinement_execution_plan`: `{payload['refinement_execution_plan']['artifact']}`",
         f"- `refinement_execution_plan_status`: `{payload['refinement_execution_plan']['status']}`",
         f"- `required_candidate_slot_count`: `{payload['refinement_execution_plan']['required_candidate_slot_count']}`",
+        f"- `row_template_artifact`: `{payload['row_artifact_contract']['template_artifact']}`",
         "",
         "| Case | Minimum Rows | Required Rank Prefix | Scope |",
         "|---|---:|---|---|",

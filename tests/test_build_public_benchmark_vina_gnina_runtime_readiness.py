@@ -218,6 +218,44 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
     assert payload["adapter_rows_ready"] is False
     assert payload["phase2_closure_ready"] is False
     assert payload["missing_engine_ids"] == ["vina", "gnina"]
+    assert payload["runtime_setup_requirements"] == {
+        "accepted_runtime_sources": [
+            "engine binary discovered on PATH",
+            "engine binary path supplied by environment variable",
+            "local Docker image supplied by environment variable",
+        ],
+        "binary_env_vars": {
+            "vina": "PUBLIC_BENCHMARK_VINA_BIN",
+            "gnina": "PUBLIC_BENCHMARK_GNINA_BIN",
+        },
+        "container_image_env_vars": {
+            "vina": "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE",
+            "gnina": "PUBLIC_BENCHMARK_GNINA_CONTAINER_IMAGE",
+        },
+        "docker_bin_env_var": "PUBLIC_BENCHMARK_DOCKER_BIN",
+        "container_image_policy": (
+            "Container fallback requires a local Docker image reference in the "
+            "engine image env var; this readiness check inspects local images and "
+            "does not pull images."
+        ),
+        "rows_artifact_required_after_engine_execution": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_vina_gnina_rows.json"
+        ),
+    }
+    assert payload["operator_commands"]["set_binary_overrides"] == (
+        "export PUBLIC_BENCHMARK_VINA_BIN=<path-to-vina> "
+        "PUBLIC_BENCHMARK_GNINA_BIN=<path-to-gnina>"
+    )
+    assert payload["operator_commands"]["set_container_image_overrides"] == (
+        "export PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE=<local-vina-image> "
+        "PUBLIC_BENCHMARK_GNINA_CONTAINER_IMAGE=<local-gnina-image>"
+    )
+    assert payload["operator_commands"]["rerun_runtime_readiness"] == (
+        "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py "
+        "--out implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_runtime_readiness.json"
+    )
     assert payload["blockers"] == [
         "vina_binary_missing",
         "gnina_binary_missing",

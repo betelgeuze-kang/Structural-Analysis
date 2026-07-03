@@ -11,15 +11,17 @@
     "build_refinement_execution_plan": "python3 scripts/build_pocketmd_lite_refinement_execution_plan.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json",
     "import_rows": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
     "materialize_survival": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+    "review_row_template": "sed -n '1,20p' implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
     "science_actual_closure": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
     "write_plan": "python3 scripts/build_pocketmd_lite_source_acquisition_plan.py"
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T19:47:14.036744+00:00",
+  "generated_at": "2026-07-03T20:15:58.423968+00:00",
   "input_checksums": {
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv": "sha256:c152f0461e0f62970673d0763713fb487e93dd7bd5849b6c66a0cd555c67484e",
     "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:63575ffc589461c9b6114e0a603b3783bf5b13c164d1fb10259118ad1c53f84b",
-    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:fec3df2575bc3451834172ca615cb7fa7197c932e5127fb534f5f7707444968c",
+    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:c10ed60df7b096510507d65ee6fe385ae8d555f4750cba415c424b37e6618ade",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:985edb154d586829d3ec221ee54d820e8b45b880bcfd99a348f1c7037958d6e0",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:161673d8ff036a7a31d657fb972764eeb4b62f6d55cc0840e26f398565707c6f"
   },
@@ -493,10 +495,12 @@
         "source_artifact_sha256"
       ],
       "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached top-k row artifact"
-    }
+    },
+    "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+    "template_usage_policy": "The template enumerates required columns and minimum case/rank slots only. Operators must replace placeholder blanks with real top-k refinement rows and receipts before writing rows to the default output."
   },
   "schema_version": "pocketmd-lite-source-acquisition-plan.v1",
-  "source_commit_sha": "9bf476d4e4cefaca446b81ee52bc49c3dc481a87",
+  "source_commit_sha": "4acc1ac79cb232e8b63eefaaa15f1a82a1c112c1",
   "source_scope": "bounded_top_k_lite_refinement_rows",
   "status": "operator_acquisition_required",
   "summary": {

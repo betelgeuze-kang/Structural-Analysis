@@ -140,6 +140,15 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "implementation/phase1/release_evidence/productization/"
         "pocketmd_lite_topk_rows.json"
     )
+    assert row_contract["template_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows_template.csv"
+    )
+    assert row_contract["template_usage_policy"] == (
+        "The template enumerates required columns and minimum case/rank slots only. "
+        "Operators must replace placeholder blanks with real top-k refinement rows "
+        "and receipts before writing rows to the default output."
+    )
     assert row_contract["operator_intake_output"] == (
         "implementation/phase1/release_evidence/productization/"
         "pocketmd_lite_operator_intake.json"
@@ -241,6 +250,11 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     assert payload["commands"]["build_refinement_execution_plan"].startswith(
         "python3 scripts/build_pocketmd_lite_refinement_execution_plan.py"
     )
+    assert payload["commands"]["review_row_template"] == (
+        "sed -n '1,20p' "
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows_template.csv"
+    )
 
 
 def test_pocketmd_lite_source_acquisition_plan_detects_dropzone_rows(
@@ -288,6 +302,7 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert payload["refinement_execution_plan"]["execution_plan_ready"] is True
     assert "# PocketMD Lite Source Acquisition Plan" in markdown
     assert "pocketmd_lite_refinement_execution_plan.json" in markdown
+    assert "pocketmd_lite_topk_rows_template.csv" in markdown
     assert "`pocketmd_lite_case_001` | 2 | `1,2`" in markdown
     assert "## Phase 4 Receipt Roles" in markdown
     assert "upstream_top_k_candidate_scope_receipt" in markdown
