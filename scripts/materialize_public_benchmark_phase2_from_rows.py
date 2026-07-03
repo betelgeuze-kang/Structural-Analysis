@@ -427,6 +427,103 @@ def _missing_components(row_inputs: dict[str, Path | None]) -> list[dict[str, An
     return components
 
 
+def _replace_component(
+    components: list[dict[str, Any]],
+    replacement: dict[str, Any],
+) -> list[dict[str, Any]]:
+    component_id = str(replacement.get("component_id") or "")
+    return [
+        replacement if str(component.get("component_id") or "") == component_id else component
+        for component in components
+    ]
+
+
+def _partial_enrichment_component(
+    *,
+    repo_root: Path,
+    enrichment_rows_path: Path,
+    out_dir: Path,
+) -> tuple[dict[str, Any], dict[str, str]]:
+    enrichment_rows = row_bundle._load_rows(enrichment_rows_path)
+    enrichment_targets = row_bundle._build_enrichment_targets(enrichment_rows)
+    scorecard = enrichment_scorecard.materialize_enrichment_scorecard(
+        {"targets": enrichment_targets},
+        repo_root=repo_root,
+        intake_path=enrichment_rows_path,
+    )
+    artifact_path = (
+        _resolved_out_dir(repo_root, out_dir)
+        / harness_bundle.ARTIFACT_FILENAMES["enrichment_scorecard"]
+    )
+    _write_json(repo_root, artifact_path, scorecard)
+
+    required = next(
+        row
+        for row in harness_bundle.PHASE2_REQUIRED_COMPONENTS
+        if row["component_id"] == "dud_e_or_lit_pcba_enrichment"
+    )
+    current_count = int(scorecard.get("real_enrichment_target_count") or 0)
+    required_minimum_count = int(required["required_minimum_count"])
+    blockers = [str(blocker) for blocker in scorecard.get("blockers", []) if str(blocker)]
+    if current_count < required_minimum_count:
+        blockers.append(
+            "real_enrichment_target_count_below_minimum:"
+            f"{current_count}<{required_minimum_count}"
+        )
+    blockers = list(dict.fromkeys(blockers))
+    ready = bool(
+        scorecard.get("public_benchmark_enrichment_ready")
+        and scorecard.get("contract_pass")
+        and current_count >= required_minimum_count
+        and not blockers
+    )
+    component = {
+        "component_id": "dud_e_or_lit_pcba_enrichment",
+        "status": "ready" if ready else "operator_evidence_required",
+        "contract_pass": ready,
+        "source_artifact_contract_pass": bool(scorecard.get("contract_pass"))
+        and not blockers,
+        "ready": ready,
+        "materialized": True,
+        "artifact_role": "enrichment_scorecard",
+        "artifact": artifact_path.as_posix(),
+        "count_field": "real_enrichment_target_count",
+        "current_count": current_count,
+        "required_minimum_count": required_minimum_count,
+        "required_row_inputs": list(
+            COMPONENT_ROW_INPUTS["dud_e_or_lit_pcba_enrichment"]
+        ),
+        "missing_row_inputs": [],
+        "expected_rows_mode": "operator_attached_public_benchmark_rows",
+        "operator_evidence_required": not ready,
+        "blockers": blockers,
+        "outputs": {
+            "enrichment_scorecard": artifact_path.as_posix(),
+        },
+    }
+    return component, {"enrichment_scorecard": artifact_path.as_posix()}
+
+
+def _components_from_partial_rows(
+    *,
+    row_inputs: dict[str, Path | None],
+    repo_root: Path,
+    out_dir: Path,
+) -> tuple[list[dict[str, Any]], dict[str, str]]:
+    components = _missing_components(row_inputs)
+    outputs: dict[str, str] = {}
+    enrichment_rows_path = row_inputs.get("enrichment_rows")
+    if enrichment_rows_path is not None:
+        enrichment_component, enrichment_outputs = _partial_enrichment_component(
+            repo_root=repo_root,
+            enrichment_rows_path=enrichment_rows_path,
+            out_dir=out_dir,
+        )
+        components = _replace_component(components, enrichment_component)
+        outputs.update(enrichment_outputs)
+    return components, outputs
+
+
 def _component_error(exc: Exception) -> dict[str, Any]:
     return {
         "component_id": "public_benchmark_phase2_row_materialization",
@@ -845,7 +942,11 @@ def build_public_benchmark_phase2_row_audit(
         input_id for input_id, path in row_inputs.items() if path is None
     ]
     if missing_input_ids:
-        components = _missing_components(row_inputs)
+        components, partial_outputs = _components_from_partial_rows(
+            row_inputs=row_inputs,
+            repo_root=repo_root,
+            out_dir=out_dir,
+        )
         phase2_requirements = harness_bundle.build_phase2_requirement_rows(
             components
         )
@@ -893,7 +994,9 @@ def build_public_benchmark_phase2_row_audit(
             "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
             "blockers": blockers,
             "component_count": len(components),
-            "component_ready_count": 0,
+            "component_ready_count": sum(
+                1 for component in components if component.get("ready")
+            ),
             "component_requirement_summaries": [
                 component["requirement_summary"] for component in components
             ],
@@ -901,7 +1004,7 @@ def build_public_benchmark_phase2_row_audit(
             "phase2_exit_gate": phase2_exit_gate,
             "phase2_requirements": phase2_requirements,
             "phase2_requirement_summary": phase2_requirement_summary,
-            "outputs": {},
+            "outputs": partial_outputs,
             "required_phase2_components": [
                 dict(row) for row in harness_bundle.PHASE2_REQUIRED_COMPONENTS
             ],

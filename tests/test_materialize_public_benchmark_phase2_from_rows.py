@@ -665,6 +665,85 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
     assert not (tmp_path / "artifact_bundle.json").exists()
 
 
+def test_public_benchmark_phase2_row_audit_materializes_partial_enrichment_rows(
+    tmp_path: Path,
+) -> None:
+    enrichment_rows = tmp_path / "enrichment_rows.json"
+    _write_json(
+        enrichment_rows,
+        {
+            "targets": [
+                {
+                    "benchmark_family": "DUD-E",
+                    "target_id": "AA2AR",
+                    "score_direction": "higher_is_better",
+                    "source_license_or_accession": (
+                        "DUD-E:AA2AR:actives_final+decoys_final"
+                    ),
+                    "source_checksum": _checksum("DUD-E:AA2AR:official-files"),
+                    "provenance_ref": (
+                        "https://dude.docking.org/targets/aa2ar/"
+                        "actives_final.ism"
+                    ),
+                    "scored_molecules": [
+                        {"molecule_id": "active_1", "is_active": True, "score": 0.9},
+                        {"molecule_id": "decoy_1", "is_active": False, "score": 0.1},
+                    ],
+                }
+            ]
+        },
+    )
+
+    audit = module.build_public_benchmark_phase2_row_audit(
+        repo_root=tmp_path,
+        enrichment_rows_path=enrichment_rows,
+        operator_bundle_out=tmp_path / "operator_bundle.json",
+        out_dir=tmp_path / "out",
+        harness_report_out=tmp_path / "harness_report.json",
+        artifact_bundle_out=tmp_path / "artifact_bundle.json",
+    )
+
+    scorecard_path = (
+        tmp_path
+        / "out"
+        / module.harness_bundle.ARTIFACT_FILENAMES["enrichment_scorecard"]
+    )
+    components = {row["component_id"]: row for row in audit["components"]}
+
+    assert audit["status"] == "operator_evidence_required"
+    assert audit["contract_pass"] is False
+    assert audit["phase2_ready"] is False
+    assert audit["component_ready_count"] == 1
+    assert audit["missing_row_inputs"] == [
+        "subset_rows",
+        "pose_rows",
+        "vina_gnina_rows",
+    ]
+    assert scorecard_path.exists()
+    assert audit["outputs"] == {"enrichment_scorecard": scorecard_path.as_posix()}
+    assert components["dud_e_or_lit_pcba_enrichment"]["ready"] is True
+    assert components["dud_e_or_lit_pcba_enrichment"]["materialized"] is True
+    assert components["dud_e_or_lit_pcba_enrichment"]["current_count"] == 1
+    assert components["dud_e_or_lit_pcba_enrichment"]["blockers"] == []
+    assert audit["phase2_requirement_summary"]["ready_component_count"] == 1
+    assert (
+        audit["phase2_requirement_summary"]["materialized_component_count"] == 1
+    )
+    assert (
+        "dud_e_or_lit_pcba_enrichment_ready"
+        not in audit["phase2_exit_gate"]["failed_criteria"]
+    )
+    assert (
+        "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
+        not in audit["blockers"]
+    )
+    assert set(audit["phase2_requirement_summary"]["missing_row_inputs"]) == {
+        "pose_rows",
+        "subset_rows",
+        "vina_gnina_rows",
+    }
+
+
 def test_public_benchmark_phase2_row_audit_cli_writes_markdown(
     tmp_path: Path,
 ) -> None:
