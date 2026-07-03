@@ -1,0 +1,79 @@
+{
+  "blockers": [],
+  "claim_boundary": "This check only verifies that the release-surface-first owner-review handoff is internally consistent across templates, PM handoff, and roadmap surfaces. It is not an owner decision, does not delete or extract files, and does not close structural scope cleanup.",
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "expected_release_surface_path_count": 3,
+  "expected_release_surface_paths": [
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+    "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+    "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+  ],
+  "generated_at": "2026-07-03T02:45:52.839483+00:00",
+  "handoff_check_pass": true,
+  "handoff_surfaces": {
+    "application_plan_action_packet_ready": true,
+    "application_plan_action_packet_status": "ready_for_owner_decision_request",
+    "overrides_template_csv_row_count": 3,
+    "pm_handoff_ready": true,
+    "roadmap_slice_present": true,
+    "template_csv_row_count": 3,
+    "template_json_row_count": 3
+  },
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:5558e5f0d82be0cbcb22c4431c0247939a1a9f780938f6d40bcf8484561b0eed",
+    "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json": "sha256:9ebf4c1ae203e6ec0cc64529fe85ac8c68f91015223ec8030c9aeffd70ac57c5",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:368ebac497b947f8fad30109d93b7bc77ac864f288d6ccbd06b4ce600392f035",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.csv": "sha256:7e8d084885bd6f98fd62af4cd83d812dd4426c83e35d67152f39129cf7d106ba",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv": "sha256:7f99c21fcf9f754da96ae9a9c7534f6ac9e56ebfdb72161adf8195679b1e09d9",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json": "sha256:07d58eb10d7a68995f758decfa4141c1919d757c4357696612ca7e6bea983261",
+    "scripts/check_structural_scope_release_surface_owner_handoff.py": "sha256:40dfd80b47995e96585b06a48c70a09b5b63cd42c7cdfe3c61ae816a35ffaced"
+  },
+  "next_owner_input": {
+    "allowed_owner_decisions": [
+      "delete_from_structural_repository",
+      "extract_to_molecular_or_science_repository"
+    ],
+    "conditional_required_fields": [
+      "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository"
+    ],
+    "disallowed_owner_decisions": [
+      "retain_quarantined_with_signed_owner_exception"
+    ],
+    "fill_command": "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --decision-overrides <release-surface-decision-overrides.csv> --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <fallback-external-archive-reference-for-extract-decisions> --fail-blocked",
+    "merge_command": "python3 scripts/merge_structural_scope_owner_decision_batch.py --batch-owner-decisions <filled-release-surface-first-owner-decisions.csv> --out <candidate-owner-decisions.json> --out-md <candidate-owner-decisions.md> --fail-release-surface-first-blocked",
+    "post_decision_verification": [
+      "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
+      "python3 scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked",
+      "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
+      "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
+      "python3 scripts/build_product_readiness_snapshot.py --check"
+    ],
+    "required_owner_fields": [
+      "owner_decision",
+      "owner_identity",
+      "owner_role",
+      "decision_timestamp_utc",
+      "evidence_reference"
+    ]
+  },
+  "owner_decision_state": {
+    "owner_decision_pending_count": 86,
+    "owner_decision_recorded_count": 0,
+    "release_surface_first_batch_application_ready": false,
+    "release_surface_first_batch_ready": false,
+    "release_surface_owner_decision_required_count": 3,
+    "retain_quarantined_exception_count": 0
+  },
+  "reuse_policy": "non_mutating_release_surface_first_owner_handoff_consistency_check",
+  "reused_evidence": true,
+  "schema_version": "structural-scope-release-surface-owner-handoff-check.v1",
+  "source_commit_sha": "ec5364acf6892b34eaebeb11bf1f215cc75c0a00",
+  "status": "ready_for_owner_review",
+  "template_paths": {
+    "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",
+    "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
+    "overrides_csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.csv"
+  },
+  "warnings": []
+}

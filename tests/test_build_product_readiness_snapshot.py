@@ -179,6 +179,9 @@ def _paths(tmp_path: Path) -> SnapshotInputPaths:
         structural_scope_owner_decision_application_plan=Path(
             "structural_scope_owner_decision_application_plan.json"
         ),
+        structural_scope_release_surface_owner_handoff=Path(
+            "structural_scope_release_surface_owner_handoff_check.json"
+        ),
         developer_preview_final_gate_owner_packet=Path(
             "developer_preview_final_gate_owner_packet.json"
         ),
@@ -424,6 +427,41 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "application_blockers": [],
         "plan_blockers": [],
         "blockers": [],
+    })
+    _write_json(tmp_path / "structural_scope_release_surface_owner_handoff_check.json", {
+        "schema_version": "structural-scope-release-surface-owner-handoff-check.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "engine_version": "structural-analysis-workbench@test",
+        "input_checksums": {
+            "scripts/check_structural_scope_release_surface_owner_handoff.py": (
+                "sha256:abc123"
+            ),
+            "structural_scope_owner_decision_application_plan.json": (
+                "sha256:def456"
+            ),
+        },
+        "reused_evidence": True,
+        "reuse_policy": (
+            "non_mutating_release_surface_first_owner_handoff_consistency_check"
+        ),
+        "status": "ready_for_owner_review",
+        "contract_pass": True,
+        "handoff_check_pass": True,
+        "expected_release_surface_path_count": 0,
+        "expected_release_surface_paths": [],
+        "owner_decision_state": {
+            "owner_decision_pending_count": 0,
+            "owner_decision_recorded_count": 0,
+            "release_surface_owner_decision_required_count": 0,
+            "release_surface_first_batch_application_ready": False,
+            "release_surface_first_batch_ready": False,
+            "retain_quarantined_exception_count": 0,
+        },
+        "blockers": [],
+        "claim_boundary": (
+            "Fixture handoff check does not record owner decisions or apply cleanup."
+        ),
     })
     _write_json(tmp_path / "developer_preview_final_gate_owner_packet.json", {
         "schema_version": "developer-preview-final-gate-owner-packet.v1",

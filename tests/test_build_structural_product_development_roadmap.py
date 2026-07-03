@@ -164,6 +164,28 @@ def _write_minimal_inputs(repo_root: Path) -> None:
         },
     )
     _write_json(
+        productization / "structural_scope_release_surface_owner_handoff_check.json",
+        {
+            "schema_version": "structural-scope-release-surface-owner-handoff-check.v1",
+            "status": "ready_for_owner_review",
+            "contract_pass": True,
+            "handoff_check_pass": True,
+            "expected_release_surface_path_count": 1,
+            "expected_release_surface_paths": [
+                "implementation/phase1/release_evidence/surface/non_structural_scope_surface.json"
+            ],
+            "owner_decision_state": {
+                "owner_decision_pending_count": 3,
+                "owner_decision_recorded_count": 0,
+                "release_surface_owner_decision_required_count": 1,
+            },
+            "blockers": [],
+            "claim_boundary": (
+                "Fixture verifies owner handoff consistency only."
+            ),
+        },
+    )
+    _write_json(
         productization / "release_evidence_freshness_report.json",
         {
             "contract_pass": True,
@@ -315,6 +337,9 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
     assert details[
         "close_structural_scope_owner_review_and_release_surface_cleanup"
     ]["current_position"]["next_owner_review_batch"] == "release_surface_first"
+    assert details[
+        "close_structural_scope_owner_review_and_release_surface_cleanup"
+    ]["current_position"]["release_surface_owner_handoff_check_pass"] is True
     assert details["land_ci_license_ux_release_area_evidence"]["current_position"][
         "pm_release_areas"
     ] == "1/2"
@@ -369,6 +394,9 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
         "priority": 0,
         "review_goal": "",
     }
+    assert stages["structural_scope_cleanup"]["summary"][
+        "release_surface_owner_handoff_check_pass"
+    ] is True
     assert stages["pm_release_gate"]["blockers"] == ["ux::human_observation_missing"]
     assert stages["g1_solver_closure"]["blockers"] == [
         "full_load_hip_newton_not_closed"

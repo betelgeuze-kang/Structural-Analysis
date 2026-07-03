@@ -108,6 +108,9 @@ class SnapshotInputPaths:
     structural_scope_owner_decision_application_plan: Path = (
         PRODUCTIZATION / "structural_scope_owner_decision_application_plan.json"
     )
+    structural_scope_release_surface_owner_handoff: Path = (
+        PRODUCTIZATION / "structural_scope_release_surface_owner_handoff_check.json"
+    )
     developer_preview_final_gate_owner_packet: Path = (
         PRODUCTIZATION / "developer_preview_final_gate_owner_packet.json"
     )
@@ -321,6 +324,7 @@ def _receipt_commit_allowed_paths(
         "structural_scope_contamination",
         "structural_scope_owner_review",
         "structural_scope_owner_decision_application_plan",
+        "structural_scope_release_surface_owner_handoff",
         "developer_preview_final_gate_owner_packet",
         "phase3_release_control_cleanup_plan",
         "self_hosted_runner_status",
@@ -587,6 +591,9 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
             "scripts/build_structural_scope_owner_decision_application_plan.py",
             "scripts/fill_structural_scope_owner_decisions_from_template.py",
             "scripts/fill_structural_scope_release_surface_owner_decisions.py",
+        },
+        "structural_scope_release_surface_owner_handoff_check": {
+            "scripts/check_structural_scope_release_surface_owner_handoff.py",
         },
         "pm_release_gate_report": {
             "scripts/check_github_development_sync_preflight.py",
@@ -1847,6 +1854,11 @@ def build_snapshot(
         paths.structural_scope_owner_decision_application_plan,
         blockers,
     )
+    structural_scope_release_surface_owner_handoff = _load_json(
+        repo_root,
+        paths.structural_scope_release_surface_owner_handoff,
+        blockers,
+    )
     developer_preview_final_gate_owner_packet = _load_json(
         repo_root,
         paths.developer_preview_final_gate_owner_packet,
@@ -1942,6 +1954,9 @@ def build_snapshot(
         "structural_scope_owner_review_packet": structural_scope_owner_review,
         "structural_scope_owner_decision_application_plan": (
             structural_scope_cleanup_plan
+        ),
+        "structural_scope_release_surface_owner_handoff_check": (
+            structural_scope_release_surface_owner_handoff
         ),
         "developer_preview_final_gate_owner_packet": (
             developer_preview_final_gate_owner_packet
@@ -3235,6 +3250,56 @@ def build_snapshot(
                 "ready": structural_scope_cleanup_ready,
                 "claim_boundary": str(
                     structural_scope_cleanup_plan.get("claim_boundary", "")
+                ),
+            },
+            "structural_scope_release_surface_owner_handoff": {
+                "contract_pass": bool(
+                    structural_scope_release_surface_owner_handoff.get("contract_pass")
+                ),
+                "handoff_check_pass": bool(
+                    structural_scope_release_surface_owner_handoff.get(
+                        "handoff_check_pass"
+                    )
+                ),
+                "status": str(
+                    structural_scope_release_surface_owner_handoff.get(
+                        "status", ""
+                    )
+                ),
+                "expected_release_surface_path_count": _as_int(
+                    structural_scope_release_surface_owner_handoff.get(
+                        "expected_release_surface_path_count"
+                    ),
+                    0,
+                ),
+                "expected_release_surface_paths": [
+                    str(item)
+                    for item in _as_list(
+                        structural_scope_release_surface_owner_handoff.get(
+                            "expected_release_surface_paths"
+                        )
+                    )
+                ],
+                "owner_decision_state": _as_dict(
+                    structural_scope_release_surface_owner_handoff.get(
+                        "owner_decision_state"
+                    )
+                ),
+                "blockers": _as_list(
+                    structural_scope_release_surface_owner_handoff.get("blockers")
+                ),
+                "ready": bool(
+                    structural_scope_release_surface_owner_handoff.get(
+                        "contract_pass"
+                    )
+                    and not _as_list(
+                        structural_scope_release_surface_owner_handoff.get("blockers")
+                    )
+                ),
+                "claim_boundary": str(
+                    structural_scope_release_surface_owner_handoff.get(
+                        "claim_boundary", ""
+                    )
                 ),
             },
             "g1": {

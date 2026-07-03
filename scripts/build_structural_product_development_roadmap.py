@@ -41,6 +41,9 @@ STRUCTURAL_SCOPE_OWNER_REVIEW = PRODUCTIZATION / "structural_scope_owner_review_
 STRUCTURAL_SCOPE_OWNER_DECISION_PLAN = (
     PRODUCTIZATION / "structural_scope_owner_decision_application_plan.json"
 )
+STRUCTURAL_SCOPE_RELEASE_SURFACE_OWNER_HANDOFF = (
+    PRODUCTIZATION / "structural_scope_release_surface_owner_handoff_check.json"
+)
 CUSTOMER_SHADOW = Path("implementation/phase1/customer_shadow_evidence_status.json")
 EXTERNAL_BENCHMARK_SUBMISSION = Path(
     "implementation/phase1/release/external_benchmark_submission_readiness.json"
@@ -301,6 +304,10 @@ def build_structural_product_development_roadmap(
     structural_scope = _load_json(repo_root, STRUCTURAL_SCOPE_AUDIT)
     structural_owner_review = _load_json(repo_root, STRUCTURAL_SCOPE_OWNER_REVIEW)
     structural_cleanup_plan = _load_json(repo_root, STRUCTURAL_SCOPE_OWNER_DECISION_PLAN)
+    structural_release_surface_owner_handoff = _load_json(
+        repo_root,
+        STRUCTURAL_SCOPE_RELEASE_SURFACE_OWNER_HANDOFF,
+    )
     structural_next_owner_review_batch = _owner_review_batch_summary(
         _as_dict(structural_cleanup_plan.get("next_owner_review_batch"))
     )
@@ -374,10 +381,16 @@ def build_structural_product_development_roadmap(
     structural_release_pending = _as_int(
         structural_release_intake.get("pending_decision_count")
     )
+    structural_release_surface_handoff_ready = bool(
+        structural_release_surface_owner_handoff.get("contract_pass") is True
+        and structural_release_surface_owner_handoff.get("handoff_check_pass") is True
+        and not _as_list(structural_release_surface_owner_handoff.get("blockers"))
+    )
     structural_cleanup_closed = structural_cleanup_plan.get("evidence_closure_pass") is True
     structural_scope_checks = [
         structural_scope_quarantined,
         structural_release_surface_clean,
+        structural_release_surface_handoff_ready,
         structural_owner_total > 0 and structural_owner_pending == 0,
         structural_cleanup_closed,
     ]
@@ -397,6 +410,10 @@ def build_structural_product_development_roadmap(
     if structural_release_surface_leak_count > 0:
         structural_scope_stage_blockers.append(
             f"release_surface_text_leak_path_count={structural_release_surface_leak_count}"
+        )
+    if not structural_release_surface_handoff_ready:
+        structural_scope_stage_blockers.append(
+            "release_surface_owner_handoff_check_not_ready"
         )
     if not structural_cleanup_closed:
         structural_scope_stage_blockers.append(
@@ -516,6 +533,7 @@ def build_structural_product_development_roadmap(
                 STRUCTURAL_SCOPE_AUDIT,
                 STRUCTURAL_SCOPE_OWNER_REVIEW,
                 STRUCTURAL_SCOPE_OWNER_DECISION_PLAN,
+                STRUCTURAL_SCOPE_RELEASE_SURFACE_OWNER_HANDOFF,
             ],
             claim_boundary=(
                 "Quarantine removes non-structural paths from the structural release "
@@ -535,6 +553,12 @@ def build_structural_product_development_roadmap(
                 ),
                 "release_surface_owner_decision_required_count": structural_release_expected,
                 "release_surface_pending_decision_count": structural_release_pending,
+                "release_surface_owner_handoff_check_pass": (
+                    structural_release_surface_handoff_ready
+                ),
+                "release_surface_owner_handoff_status": str(
+                    structural_release_surface_owner_handoff.get("status") or ""
+                ),
                 "next_owner_review_batch": _as_dict(
                     structural_next_owner_review_batch
                 ),
@@ -809,6 +833,9 @@ def build_structural_product_development_roadmap(
                     f"{structural_release_valid_cleanup}/{structural_release_expected}"
                 ),
                 "release_surface_pending_decision_count": structural_release_pending,
+                "release_surface_owner_handoff_check_pass": (
+                    structural_release_surface_handoff_ready
+                ),
                 "next_owner_review_batch": str(
                     _as_dict(structural_cleanup_plan.get("next_owner_review_batch")).get(
                         "batch_id"
@@ -995,6 +1022,9 @@ def build_structural_product_development_roadmap(
             ),
             "structural_scope_release_surface_cleanup_decisions": (
                 f"{structural_release_valid_cleanup}/{structural_release_expected}"
+            ),
+            "structural_scope_release_surface_owner_handoff_check": (
+                "pass" if structural_release_surface_handoff_ready else "blocked"
             ),
             "g1_direct_residual_terminal_gate_ready": g1_direct_ready,
             "g1_full_load_hip_newton_lane_ready": g1_full_ready,
