@@ -454,7 +454,7 @@
     "product_goal_completion_audit",
     "goal_operator_action_board"
   ],
-  "generated_at": "2026-07-03T22:46:59.520933+00:00",
+  "generated_at": "2026-07-03T23:35:33.796725+00:00",
   "input_checksums": {
     "docs/source-of-truth-gap-classification.md": "sha256:296dd19b9dc9c36e8d2229db29f880f4097c0fada23eaf4ef970dd3f6e9d11fe",
     "implementation/phase1/real_accuracy_validation_report.json": "sha256:ca845f2afd861499dc1aa2457dd43546130272cbb595007548684a1b691780dd",
@@ -691,7 +691,7 @@
     }
   ],
   "schema_version": "source-of-truth-gap-classification.v1",
-  "source_commit_sha": "e96b532c6400c0c53f390ec1ef619426ff99a133",
+  "source_commit_sha": "9bea59e248800829a4a7135bb060e7be09bf841e",
   "status": "ready",
   "summary": {
     "accuracy_parity_scorecard_science_contract_pass": true,
