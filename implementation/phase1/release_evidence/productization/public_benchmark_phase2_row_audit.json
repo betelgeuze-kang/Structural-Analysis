@@ -1,30 +1,21 @@
 {
   "blockers": [
-    "casf_pdbbind_pose_success_harness::subset_rows_not_provided",
-    "casf_pdbbind_pose_success_harness::pose_rows_not_provided",
-    "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
-    "posebusters_style_pose_validity::pose_rows_not_provided",
     "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
   ],
   "claim_boundary": "This runner only materializes operator-attached public benchmark row files through the existing Public Benchmark harness materializers. It does not download CASF/PDBBind, DUD-E, or LIT-PCBA data, approve licenses, run docking engines, infer chemistry, or treat fixture/proxy rows as actual Phase 2 evidence.",
   "component_count": 5,
-  "component_ready_count": 1,
+  "component_ready_count": 4,
   "component_requirement_summaries": [
     {
-      "blocked_requirement_count": 1,
-      "blocker_count": 2,
+      "blocked_requirement_count": 0,
+      "blocker_count": 0,
       "component_id": "casf_pdbbind_pose_success_harness",
-      "failed_criteria": [
-        "casf_pdbbind_pose_success_harness_ready"
-      ],
-      "failed_criterion_count": 1,
-      "missing_row_input_count": 2,
-      "missing_row_inputs": [
-        "subset_rows",
-        "pose_rows"
-      ],
-      "phase2_component_ready": false,
-      "ready_requirement_count": 0,
+      "failed_criteria": [],
+      "failed_criterion_count": 0,
+      "missing_row_input_count": 0,
+      "missing_row_inputs": [],
+      "phase2_component_ready": true,
+      "ready_requirement_count": 1,
       "required_row_inputs": [
         "subset_rows",
         "pose_rows"
@@ -32,38 +23,30 @@
       "requirement_count": 1
     },
     {
-      "blocked_requirement_count": 1,
-      "blocker_count": 1,
+      "blocked_requirement_count": 0,
+      "blocker_count": 0,
       "component_id": "symmetry_aware_ligand_rmsd",
-      "failed_criteria": [
-        "symmetry_aware_ligand_rmsd_ready"
-      ],
-      "failed_criterion_count": 1,
-      "missing_row_input_count": 1,
-      "missing_row_inputs": [
-        "pose_rows"
-      ],
-      "phase2_component_ready": false,
-      "ready_requirement_count": 0,
+      "failed_criteria": [],
+      "failed_criterion_count": 0,
+      "missing_row_input_count": 0,
+      "missing_row_inputs": [],
+      "phase2_component_ready": true,
+      "ready_requirement_count": 1,
       "required_row_inputs": [
         "pose_rows"
       ],
       "requirement_count": 1
     },
     {
-      "blocked_requirement_count": 1,
-      "blocker_count": 1,
+      "blocked_requirement_count": 0,
+      "blocker_count": 0,
       "component_id": "posebusters_style_pose_validity",
-      "failed_criteria": [
-        "posebusters_style_pose_validity_ready"
-      ],
-      "failed_criterion_count": 1,
-      "missing_row_input_count": 1,
-      "missing_row_inputs": [
-        "pose_rows"
-      ],
-      "phase2_component_ready": false,
-      "ready_requirement_count": 0,
+      "failed_criteria": [],
+      "failed_criterion_count": 0,
+      "missing_row_input_count": 0,
+      "missing_row_inputs": [],
+      "phase2_component_ready": true,
+      "ready_requirement_count": 1,
       "required_row_inputs": [
         "pose_rows"
       ],
@@ -106,132 +89,126 @@
   ],
   "components": [
     {
-      "blockers": [
-        "subset_rows_not_provided",
-        "pose_rows_not_provided"
-      ],
+      "artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
+      "artifact_role": "pose_success_harness",
+      "blockers": [],
       "component_id": "casf_pdbbind_pose_success_harness",
-      "contract_pass": false,
+      "contract_pass": true,
+      "count_field": "real_benchmark_case_count",
+      "current_count": 12,
       "expected_rows_mode": "operator_attached_public_benchmark_rows",
-      "failed_criteria": [
-        "casf_pdbbind_pose_success_harness_ready"
-      ],
-      "materialized": false,
-      "missing_row_inputs": [
-        "subset_rows",
-        "pose_rows"
-      ],
-      "outputs": {},
-      "phase2_component_ready": false,
-      "ready": false,
+      "failed_criteria": [],
+      "materialized": true,
+      "missing_row_inputs": [],
+      "operator_evidence_required": false,
+      "outputs": {
+        "pose_success_harness": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json"
+      },
+      "phase2_component_ready": true,
+      "ready": true,
+      "required_minimum_count": 12,
       "required_row_inputs": [
         "subset_rows",
         "pose_rows"
       ],
       "requirement_summary": {
-        "blocked_requirement_count": 1,
-        "blocker_count": 2,
+        "blocked_requirement_count": 0,
+        "blocker_count": 0,
         "component_id": "casf_pdbbind_pose_success_harness",
-        "failed_criteria": [
-          "casf_pdbbind_pose_success_harness_ready"
-        ],
-        "failed_criterion_count": 1,
-        "missing_row_input_count": 2,
-        "missing_row_inputs": [
-          "subset_rows",
-          "pose_rows"
-        ],
-        "phase2_component_ready": false,
-        "ready_requirement_count": 0,
+        "failed_criteria": [],
+        "failed_criterion_count": 0,
+        "missing_row_input_count": 0,
+        "missing_row_inputs": [],
+        "phase2_component_ready": true,
+        "ready_requirement_count": 1,
         "required_row_inputs": [
           "subset_rows",
           "pose_rows"
         ],
         "requirement_count": 1
       },
-      "status": "operator_evidence_required"
+      "source_artifact_contract_pass": true,
+      "status": "ready"
     },
     {
-      "blockers": [
-        "pose_rows_not_provided"
-      ],
+      "artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
+      "artifact_role": "rmsd_scorecard",
+      "blockers": [],
       "component_id": "symmetry_aware_ligand_rmsd",
-      "contract_pass": false,
+      "contract_pass": true,
+      "count_field": "real_benchmark_case_count",
+      "current_count": 12,
       "expected_rows_mode": "operator_attached_public_benchmark_rows",
-      "failed_criteria": [
-        "symmetry_aware_ligand_rmsd_ready"
-      ],
-      "materialized": false,
-      "missing_row_inputs": [
-        "pose_rows"
-      ],
-      "outputs": {},
-      "phase2_component_ready": false,
-      "ready": false,
+      "failed_criteria": [],
+      "materialized": true,
+      "missing_row_inputs": [],
+      "operator_evidence_required": false,
+      "outputs": {
+        "rmsd_scorecard": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json"
+      },
+      "phase2_component_ready": true,
+      "ready": true,
+      "required_minimum_count": 12,
       "required_row_inputs": [
         "pose_rows"
       ],
       "requirement_summary": {
-        "blocked_requirement_count": 1,
-        "blocker_count": 1,
+        "blocked_requirement_count": 0,
+        "blocker_count": 0,
         "component_id": "symmetry_aware_ligand_rmsd",
-        "failed_criteria": [
-          "symmetry_aware_ligand_rmsd_ready"
-        ],
-        "failed_criterion_count": 1,
-        "missing_row_input_count": 1,
-        "missing_row_inputs": [
-          "pose_rows"
-        ],
-        "phase2_component_ready": false,
-        "ready_requirement_count": 0,
+        "failed_criteria": [],
+        "failed_criterion_count": 0,
+        "missing_row_input_count": 0,
+        "missing_row_inputs": [],
+        "phase2_component_ready": true,
+        "ready_requirement_count": 1,
         "required_row_inputs": [
           "pose_rows"
         ],
         "requirement_count": 1
       },
-      "status": "operator_evidence_required"
+      "source_artifact_contract_pass": true,
+      "status": "ready"
     },
     {
-      "blockers": [
-        "pose_rows_not_provided"
-      ],
+      "artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
+      "artifact_role": "pose_validity_packet",
+      "blockers": [],
       "component_id": "posebusters_style_pose_validity",
-      "contract_pass": false,
+      "contract_pass": true,
+      "count_field": "real_benchmark_case_count",
+      "current_count": 12,
       "expected_rows_mode": "operator_attached_public_benchmark_rows",
-      "failed_criteria": [
-        "posebusters_style_pose_validity_ready"
-      ],
-      "materialized": false,
-      "missing_row_inputs": [
-        "pose_rows"
-      ],
-      "outputs": {},
-      "phase2_component_ready": false,
-      "ready": false,
+      "failed_criteria": [],
+      "materialized": true,
+      "missing_row_inputs": [],
+      "operator_evidence_required": false,
+      "outputs": {
+        "pose_validity_packet": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json"
+      },
+      "phase2_component_ready": true,
+      "ready": true,
+      "required_minimum_count": 12,
       "required_row_inputs": [
         "pose_rows"
       ],
       "requirement_summary": {
-        "blocked_requirement_count": 1,
-        "blocker_count": 1,
+        "blocked_requirement_count": 0,
+        "blocker_count": 0,
         "component_id": "posebusters_style_pose_validity",
-        "failed_criteria": [
-          "posebusters_style_pose_validity_ready"
-        ],
-        "failed_criterion_count": 1,
-        "missing_row_input_count": 1,
-        "missing_row_inputs": [
-          "pose_rows"
-        ],
-        "phase2_component_ready": false,
-        "ready_requirement_count": 0,
+        "failed_criteria": [],
+        "failed_criterion_count": 0,
+        "missing_row_input_count": 0,
+        "missing_row_inputs": [],
+        "phase2_component_ready": true,
+        "ready_requirement_count": 1,
         "required_row_inputs": [
           "pose_rows"
         ],
         "requirement_count": 1
       },
-      "status": "operator_evidence_required"
+      "source_artifact_contract_pass": true,
+      "status": "ready"
     },
     {
       "blockers": [
@@ -317,20 +294,25 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T18:05:42.512344+00:00",
+  "generated_at": "2026-07-03T18:33:05.344468+00:00",
   "input_checksums": {
     "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
+    "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
+    "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
-    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:d47f7e7439be66ddd781edfbbb562662e04f74700a70e3c40f33b6dc3c44eff1"
+    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:7331a0e9e78f88e6767ae4892448c8b8f7b3ba96c21c8df178e2a620c9c4e714"
   },
   "missing_row_inputs": [
-    "subset_rows",
-    "pose_rows",
     "vina_gnina_rows"
   ],
   "outputs": {
-    "enrichment_scorecard": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json"
+    "enrichment_scorecard": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
+    "pose_success_harness": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
+    "pose_validity_input": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json",
+    "pose_validity_packet": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
+    "rmsd_scorecard": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
+    "subset_manifest": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
   },
   "phase2_exit_gate": {
     "claim": "public_benchmark_harness_phase2_exit_gate",
@@ -338,18 +320,15 @@
     "criteria": [
       {
         "artifact_role": "pose_success_harness",
-        "blockers": [
-          "subset_rows_not_provided",
-          "pose_rows_not_provided"
-        ],
+        "blockers": [],
         "component_id": "casf_pdbbind_pose_success_harness",
         "criterion_id": "casf_pdbbind_pose_success_harness_ready",
         "current": {
-          "contract_pass": false,
-          "ready": false,
-          "real_benchmark_case_count": 0
+          "contract_pass": true,
+          "ready": true,
+          "real_benchmark_case_count": 12
         },
-        "pass": false,
+        "pass": true,
         "required": {
           "contract_pass": true,
           "ready": true,
@@ -358,17 +337,15 @@
       },
       {
         "artifact_role": "rmsd_scorecard",
-        "blockers": [
-          "pose_rows_not_provided"
-        ],
+        "blockers": [],
         "component_id": "symmetry_aware_ligand_rmsd",
         "criterion_id": "symmetry_aware_ligand_rmsd_ready",
         "current": {
-          "contract_pass": false,
-          "ready": false,
-          "real_benchmark_case_count": 0
+          "contract_pass": true,
+          "ready": true,
+          "real_benchmark_case_count": 12
         },
-        "pass": false,
+        "pass": true,
         "required": {
           "contract_pass": true,
           "ready": true,
@@ -377,17 +354,15 @@
       },
       {
         "artifact_role": "pose_validity_packet",
-        "blockers": [
-          "pose_rows_not_provided"
-        ],
+        "blockers": [],
         "component_id": "posebusters_style_pose_validity",
         "criterion_id": "posebusters_style_pose_validity_ready",
         "current": {
-          "contract_pass": false,
-          "ready": false,
-          "real_benchmark_case_count": 0
+          "contract_pass": true,
+          "ready": true,
+          "real_benchmark_case_count": 12
         },
-        "pass": false,
+        "pass": true,
         "required": {
           "contract_pass": true,
           "ready": true,
@@ -432,59 +407,44 @@
       }
     ],
     "failed_criteria": [
-      "casf_pdbbind_pose_success_harness_ready",
-      "symmetry_aware_ligand_rmsd_ready",
-      "posebusters_style_pose_validity_ready",
       "vina_gnina_comparison_ready"
     ],
-    "failed_criterion_count": 4,
-    "ready_component_count": 1,
+    "failed_criterion_count": 1,
+    "ready_component_count": 4,
     "required_component_count": 5,
     "status": "blocked"
   },
   "phase2_ready": false,
   "phase2_requirement_summary": {
-    "blocked_component_count": 4,
+    "blocked_component_count": 1,
     "blocked_component_ids": [
-      "casf_pdbbind_pose_success_harness",
-      "symmetry_aware_ligand_rmsd",
-      "posebusters_style_pose_validity",
       "vina_gnina_comparison_adapter"
     ],
-    "materialized_component_count": 1,
-    "missing_row_input_count": 3,
+    "materialized_component_count": 4,
+    "missing_row_input_count": 1,
     "missing_row_inputs": [
-      "pose_rows",
-      "subset_rows",
       "vina_gnina_rows"
     ],
-    "operator_evidence_required_count": 4,
+    "operator_evidence_required_count": 1,
     "phase2_ready": false,
-    "ready_component_count": 1,
+    "ready_component_count": 4,
     "required_component_count": 5
   },
   "phase2_requirements": [
     {
-      "artifact": "",
+      "artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
       "artifact_role": "pose_success_harness",
-      "blocker_count": 2,
-      "blockers": [
-        "subset_rows_not_provided",
-        "pose_rows_not_provided"
-      ],
+      "blocker_count": 0,
+      "blockers": [],
       "component_id": "casf_pdbbind_pose_success_harness",
-      "contract_pass": false,
+      "contract_pass": true,
       "count_field": "real_benchmark_case_count",
       "criterion_id": "casf_pdbbind_pose_success_harness_ready",
-      "current_count": 0,
+      "current_count": 12,
       "expected_rows_mode": "operator_attached_public_benchmark_rows",
-      "materialized": false,
-      "missing_row_inputs": [
-        "subset_rows",
-        "pose_rows"
-      ],
-      "operator_evidence_required": true,
-      "ready": false,
+      "materialized": true,
+      "operator_evidence_required": false,
+      "ready": true,
       "ready_field": "pose_success_harness_ready",
       "required_minimum_count": 12,
       "required_row_inputs": [
@@ -492,64 +452,54 @@
         "pose_rows"
       ],
       "requirement": "CASF/PDBBind pose-success harness",
-      "source_artifact_contract_pass": false,
-      "status": "operator_evidence_required"
+      "source_artifact_contract_pass": true,
+      "status": "ready"
     },
     {
-      "artifact": "",
+      "artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
       "artifact_role": "rmsd_scorecard",
-      "blocker_count": 1,
-      "blockers": [
-        "pose_rows_not_provided"
-      ],
+      "blocker_count": 0,
+      "blockers": [],
       "component_id": "symmetry_aware_ligand_rmsd",
-      "contract_pass": false,
+      "contract_pass": true,
       "count_field": "real_benchmark_case_count",
       "criterion_id": "symmetry_aware_ligand_rmsd_ready",
-      "current_count": 0,
+      "current_count": 12,
       "expected_rows_mode": "operator_attached_public_benchmark_rows",
-      "materialized": false,
-      "missing_row_inputs": [
-        "pose_rows"
-      ],
-      "operator_evidence_required": true,
-      "ready": false,
+      "materialized": true,
+      "operator_evidence_required": false,
+      "ready": true,
       "ready_field": "scorecard_ready",
       "required_minimum_count": 12,
       "required_row_inputs": [
         "pose_rows"
       ],
       "requirement": "Symmetry-aware ligand RMSD scorecard",
-      "source_artifact_contract_pass": false,
-      "status": "operator_evidence_required"
+      "source_artifact_contract_pass": true,
+      "status": "ready"
     },
     {
-      "artifact": "",
+      "artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
       "artifact_role": "pose_validity_packet",
-      "blocker_count": 1,
-      "blockers": [
-        "pose_rows_not_provided"
-      ],
+      "blocker_count": 0,
+      "blockers": [],
       "component_id": "posebusters_style_pose_validity",
-      "contract_pass": false,
+      "contract_pass": true,
       "count_field": "real_benchmark_case_count",
       "criterion_id": "posebusters_style_pose_validity_ready",
-      "current_count": 0,
+      "current_count": 12,
       "expected_rows_mode": "operator_attached_public_benchmark_rows",
-      "materialized": false,
-      "missing_row_inputs": [
-        "pose_rows"
-      ],
-      "operator_evidence_required": true,
-      "ready": false,
+      "materialized": true,
+      "operator_evidence_required": false,
+      "ready": true,
       "ready_field": "posebusters_validity_ready",
       "required_minimum_count": 12,
       "required_row_inputs": [
         "pose_rows"
       ],
       "requirement": "PoseBusters-style pose validity packet",
-      "source_artifact_contract_pass": false,
-      "status": "operator_evidence_required"
+      "source_artifact_contract_pass": true,
+      "status": "ready"
     },
     {
       "artifact": "",
@@ -611,7 +561,7 @@
         "ndjson",
         "csv"
       ],
-      "auto_detected": false,
+      "auto_detected": true,
       "claim_boundary": "This row documents which Phase 2 readiness criteria a real operator-attached row file can unblock; it is not evidence by itself.",
       "closes_phase2_criteria": [
         "casf_pdbbind_pose_success_harness_ready"
@@ -632,11 +582,11 @@
         "materialize_public_benchmark_pose_validity_input",
         "materialize_public_benchmark_pose_success_harness"
       ],
-      "missing": true,
+      "missing": false,
       "operator_blockers_if_missing": [
         "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
       ],
-      "provided_path": "",
+      "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
       "required_by_components": [
         {
           "artifact_role": "pose_success_harness",
@@ -647,10 +597,10 @@
           "required_minimum_count": 12
         }
       ],
-      "resolved_path": "",
+      "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
       "row_contract_ref": "row_intake_contracts.subset_rows",
       "row_input_id": "subset_rows",
-      "status": "missing"
+      "status": "provided"
     },
     {
       "accepted_formats": [
@@ -659,7 +609,7 @@
         "ndjson",
         "csv"
       ],
-      "auto_detected": false,
+      "auto_detected": true,
       "claim_boundary": "This row documents which Phase 2 readiness criteria a real operator-attached row file can unblock; it is not evidence by itself.",
       "closes_phase2_criteria": [
         "casf_pdbbind_pose_success_harness_ready",
@@ -685,13 +635,13 @@
         "materialize_public_benchmark_rmsd_scorecard",
         "materialize_public_benchmark_pose_success_harness"
       ],
-      "missing": true,
+      "missing": false,
       "operator_blockers_if_missing": [
         "casf_pdbbind_pose_success_harness::pose_rows_not_provided",
         "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
         "posebusters_style_pose_validity::pose_rows_not_provided"
       ],
-      "provided_path": "",
+      "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
       "required_by_components": [
         {
           "artifact_role": "pose_success_harness",
@@ -718,10 +668,10 @@
           "required_minimum_count": 12
         }
       ],
-      "resolved_path": "",
+      "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
       "row_contract_ref": "row_intake_contracts.pose_rows",
       "row_input_id": "pose_rows",
-      "status": "missing"
+      "status": "provided"
     },
     {
       "accepted_formats": [
@@ -885,7 +835,7 @@
       "row_input_id": "enrichment_rows"
     },
     "pose_rows": {
-      "auto_detected": false,
+      "auto_detected": true,
       "candidate_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
         "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.jsonl",
@@ -893,12 +843,12 @@
         "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.csv"
       ],
       "explicit_path": "",
-      "missing": true,
-      "resolved_path": "",
+      "missing": false,
+      "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
       "row_input_id": "pose_rows"
     },
     "subset_rows": {
-      "auto_detected": false,
+      "auto_detected": true,
       "candidate_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
         "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.jsonl",
@@ -906,8 +856,8 @@
         "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.csv"
       ],
       "explicit_path": "",
-      "missing": true,
-      "resolved_path": "",
+      "missing": false,
+      "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
       "row_input_id": "subset_rows"
     },
     "vina_gnina_rows": {
@@ -1640,36 +1590,28 @@
     }
   },
   "schema_version": "public-benchmark-phase2-row-audit.v1",
-  "source_commit_sha": "4b8b6202704653d3cde5e710db0625eeb64e5a82",
+  "source_commit_sha": "4fe43d3cb7bab09fbe23a9c8901a4c8ddced4d66",
   "status": "operator_evidence_required",
   "summary": {
     "blocked_component_ids": [
-      "casf_pdbbind_pose_success_harness",
-      "symmetry_aware_ligand_rmsd",
-      "posebusters_style_pose_validity",
       "vina_gnina_comparison_adapter"
     ],
-    "blocked_requirement_count": 4,
-    "blocker_count": 5,
-    "component_blocked_count": 4,
+    "blocked_requirement_count": 1,
+    "blocker_count": 1,
+    "component_blocked_count": 1,
     "component_count": 5,
-    "component_ready_count": 1,
-    "missing_row_input_count": 3,
+    "component_ready_count": 4,
+    "missing_row_input_count": 1,
     "missing_row_inputs": [
-      "subset_rows",
-      "pose_rows",
       "vina_gnina_rows"
     ],
     "phase2_exit_gate_status": "blocked",
     "phase2_failed_criteria": [
-      "casf_pdbbind_pose_success_harness_ready",
-      "symmetry_aware_ligand_rmsd_ready",
-      "posebusters_style_pose_validity_ready",
       "vina_gnina_comparison_ready"
     ],
-    "phase2_failed_criterion_count": 4,
+    "phase2_failed_criterion_count": 1,
     "phase2_ready": false,
-    "ready_requirement_count": 1,
+    "ready_requirement_count": 4,
     "requirement_count": 5
   }
 }

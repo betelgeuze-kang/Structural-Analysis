@@ -744,6 +744,67 @@ def test_public_benchmark_phase2_row_audit_materializes_partial_enrichment_rows(
     }
 
 
+def test_public_benchmark_phase2_row_audit_materializes_pose_rows_without_vina_gnina(
+    tmp_path: Path,
+) -> None:
+    rows = _write_phase2_rows(tmp_path)
+
+    audit = module.build_public_benchmark_phase2_row_audit(
+        repo_root=tmp_path,
+        subset_rows_path=rows["subset"],
+        pose_rows_path=rows["pose"],
+        enrichment_rows_path=rows["enrichment"],
+        target_subset_case_count=module.harness_bundle.TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+        operator_bundle_out=tmp_path / "operator_bundle.json",
+        out_dir=tmp_path / "out",
+        harness_report_out=tmp_path / "harness_report.json",
+        artifact_bundle_out=tmp_path / "artifact_bundle.json",
+    )
+
+    components = {row["component_id"]: row for row in audit["components"]}
+    closure_matrix = {
+        row["row_input_id"]: row for row in audit["phase2_row_closure_matrix"]
+    }
+
+    assert audit["status"] == "operator_evidence_required"
+    assert audit["contract_pass"] is False
+    assert audit["phase2_ready"] is False
+    assert audit["component_ready_count"] == 4
+    assert audit["missing_row_inputs"] == ["vina_gnina_rows"]
+    assert audit["blockers"] == [
+        "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
+    ]
+    assert audit["summary"]["phase2_failed_criteria"] == [
+        "vina_gnina_comparison_ready"
+    ]
+    assert audit["phase2_requirement_summary"] == {
+        "required_component_count": 5,
+        "ready_component_count": 4,
+        "blocked_component_count": 1,
+        "materialized_component_count": 4,
+        "operator_evidence_required_count": 1,
+        "missing_row_input_count": 1,
+        "missing_row_inputs": ["vina_gnina_rows"],
+        "phase2_ready": False,
+        "blocked_component_ids": ["vina_gnina_comparison_adapter"],
+    }
+    assert closure_matrix["subset_rows"]["status"] == "provided"
+    assert closure_matrix["pose_rows"]["status"] == "provided"
+    assert closure_matrix["enrichment_rows"]["status"] == "provided"
+    assert closure_matrix["vina_gnina_rows"]["status"] == "missing"
+    assert components["casf_pdbbind_pose_success_harness"]["ready"] is True
+    assert components["symmetry_aware_ligand_rmsd"]["ready"] is True
+    assert components["posebusters_style_pose_validity"]["ready"] is True
+    assert components["dud_e_or_lit_pcba_enrichment"]["ready"] is True
+    assert components["vina_gnina_comparison_adapter"]["ready"] is False
+    assert audit["outputs"]["subset_manifest"].endswith(
+        "public_benchmark_subset_manifest.json"
+    )
+    assert audit["outputs"]["pose_validity_input"].endswith(
+        "public_benchmark_pose_validity_input.json"
+    )
+
+
 def test_public_benchmark_phase2_row_audit_cli_writes_markdown(
     tmp_path: Path,
 ) -> None:

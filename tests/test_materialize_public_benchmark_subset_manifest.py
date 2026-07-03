@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -32,6 +33,10 @@ def _write_case_files(root: Path, case_id: str) -> dict[str, str]:
     for path in files.values():
         path.write_text(f"{case_id}:{path.name}\n", encoding="utf-8")
     return {key: path.relative_to(root).as_posix() for key, path in files.items()}
+
+
+def _checksum(seed: str) -> str:
+    return f"sha256:{hashlib.sha256(seed.encode('utf-8')).hexdigest()}"
 
 
 def _case_descriptor(root: Path, case_id: str) -> dict[str, object]:
@@ -88,6 +93,45 @@ def test_materializer_builds_ready_subset_manifest_from_local_intake(tmp_path: P
     assert report["symmetry_permutation_contract_case_count"] == 1
     assert report["source_material_coverage"] == coverage
     assert report["materialization_blocker_count"] == 0
+
+
+def test_materializer_accepts_declared_archive_member_checksums_without_local_files(
+    tmp_path: Path,
+) -> None:
+    case = _case_descriptor(tmp_path, "case_a")
+    case.update(
+        {
+            "protein_structure_path": "CASF-2016/coreset/1abc/1abc_protein.pdb",
+            "reference_ligand_path": "CASF-2016/coreset/1abc/1abc_ligand.sdf",
+            "predicted_ligand_path_or_docking_run_id": (
+                "CASF-2016/decoys_docking/1abc_decoys.mol2#mol2_index=2"
+            ),
+            "source_checksum": _checksum("casf2016:1abc"),
+        }
+    )
+    case["source_file_checksums"] = {
+        str(case["protein_structure_path"]): _checksum("protein"),
+        str(case["reference_ligand_path"]): _checksum("ligand"),
+        str(case["predicted_ligand_path_or_docking_run_id"]): _checksum("pose"),
+    }
+
+    manifest = module.materialize_subset_manifest(
+        {
+            "target_subset_case_count": 1,
+            "cases": [case],
+        },
+        repo_root=tmp_path,
+    )
+
+    assert manifest["status"] == "ready"
+    assert manifest["public_benchmark_ready"] is True
+    assert manifest["blockers"] == []
+    row = manifest["case_rows"][0]
+    assert row["source_file_checksums"] == case["source_file_checksums"]
+    assert row["materialization_blockers"] == []
+    assert manifest["materialization_report"]["source_file_missing_count"] == 0
+    assert manifest["materialization_report"]["source_file_checksum_count"] == 3
+    assert manifest["source_material_coverage"]["source_file_checksum_case_count"] == 1
 
 
 def test_materializer_blocks_missing_local_pose_prediction(tmp_path: Path) -> None:

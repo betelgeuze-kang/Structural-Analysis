@@ -3,21 +3,21 @@
 - `status`: `operator_evidence_required`
 - `contract_pass`: `False`
 - `phase2_ready`: `False`
-- `component_ready_count`: `1/5`
-- `missing_row_inputs`: `subset_rows, pose_rows, vina_gnina_rows`
+- `component_ready_count`: `4/5`
+- `missing_row_inputs`: `vina_gnina_rows`
 
 | Row Input | Status | Feeds Components | Closes Criteria | Default Path |
 |---|---|---|---|---|
-| `subset_rows` | `missing` | `casf_pdbbind_pose_success_harness` | `casf_pdbbind_pose_success_harness_ready` | `implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json` |
-| `pose_rows` | `missing` | `symmetry_aware_ligand_rmsd, posebusters_style_pose_validity, casf_pdbbind_pose_success_harness` | `casf_pdbbind_pose_success_harness_ready, symmetry_aware_ligand_rmsd_ready, posebusters_style_pose_validity_ready` | `implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json` |
+| `subset_rows` | `provided` | `casf_pdbbind_pose_success_harness` | `casf_pdbbind_pose_success_harness_ready` | `implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json` |
+| `pose_rows` | `provided` | `symmetry_aware_ligand_rmsd, posebusters_style_pose_validity, casf_pdbbind_pose_success_harness` | `casf_pdbbind_pose_success_harness_ready, symmetry_aware_ligand_rmsd_ready, posebusters_style_pose_validity_ready` | `implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json` |
 | `enrichment_rows` | `provided` | `dud_e_or_lit_pcba_enrichment` | `dud_e_or_lit_pcba_enrichment_ready` | `implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json` |
 | `vina_gnina_rows` | `missing` | `vina_gnina_comparison_adapter` | `vina_gnina_comparison_ready` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` |
 
 | Component | Status | Failed Criteria | Blocker Count |
 |---|---|---|---|
-| `casf_pdbbind_pose_success_harness` | `operator_evidence_required` | `casf_pdbbind_pose_success_harness_ready` | `2` |
-| `symmetry_aware_ligand_rmsd` | `operator_evidence_required` | `symmetry_aware_ligand_rmsd_ready` | `1` |
-| `posebusters_style_pose_validity` | `operator_evidence_required` | `posebusters_style_pose_validity_ready` | `1` |
+| `casf_pdbbind_pose_success_harness` | `ready` | `none` | `0` |
+| `symmetry_aware_ligand_rmsd` | `ready` | `none` | `0` |
+| `posebusters_style_pose_validity` | `ready` | `none` | `0` |
 | `vina_gnina_comparison_adapter` | `operator_evidence_required` | `vina_gnina_comparison_ready` | `1` |
 | `dud_e_or_lit_pcba_enrichment` | `ready` | `none` | `0` |
 

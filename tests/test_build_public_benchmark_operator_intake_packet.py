@@ -86,8 +86,6 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert packet["source_acquisition_plan"]["phase2_row_audit"][
         "missing_row_inputs"
     ] == [
-        "subset_rows",
-        "pose_rows",
         "vina_gnina_rows",
     ]
     receipt_plan = packet["source_acquisition_plan"][
@@ -396,7 +394,7 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     )
     assert packet["first_execution_preflight_blocker"]["operator_slot_id"] == ""
     assert packet["first_execution_preflight_blocker"]["first_blocker"] == (
-        "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
+        "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
     )
     execution = {
         row["step_id"]: row for row in packet["execution_preflight_checklist"]
@@ -405,16 +403,16 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "current_artifact"
     ]["ready_values"] == {
         "phase2_ready": False,
-        "component_ready_count": 1,
+        "component_ready_count": 4,
         "component_count": 5,
     }
-    assert execution["materialize_subset_manifest"]["current_ready"] is False
+    assert execution["materialize_subset_manifest"]["current_ready"] is True
     assert execution["materialize_subset_manifest"]["dependency_ready"] is True
     assert execution["materialize_subset_manifest"]["current_artifact"][
         "ready_values"
     ] == {
-        "public_benchmark_ready": False,
-        "materialized_case_count": 0,
+        "public_benchmark_ready": True,
+        "materialized_case_count": 12,
         "target_subset_case_count": 12,
     }
     assert execution["materialize_pose_validity_input"]["dependency_states"] == [
@@ -423,12 +421,17 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
                 "implementation/phase1/release_evidence/productization/"
                 "public_benchmark_subset_manifest.json"
             ),
-            "ready": False,
+            "ready": True,
         }
     ]
+    assert execution["materialize_pose_validity_input"]["current_ready"] is True
     assert execution["materialize_pose_validity_input"]["current_artifact"][
-        "artifact_exists"
-    ] is False
+        "ready_values"
+    ] == {
+        "pose_validity_ready": True,
+        "real_benchmark_case_count": 12,
+        "real_pose_case_count": 12,
+    }
     assert execution["validate_external_receipts"]["first_blocker"] == (
         "public_benchmark_external_receipts_missing"
     )
@@ -447,12 +450,12 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "materialize_public_benchmark_phase2_row_audit"
     )
     assert packet["summary"]["first_execution_preflight_blocker"] == (
-        "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
+        "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
     )
     assert packet["summary"]["phase2_row_audit_status"] == (
         "operator_evidence_required"
     )
-    assert packet["summary"]["phase2_row_audit_missing_row_input_count"] == 3
+    assert packet["summary"]["phase2_row_audit_missing_row_input_count"] == 1
     gate_plan = {row["slot_id"]: row for row in packet["gate_unblock_plan"]}
     assert gate_plan["casf_pdbbind_subset_intake"]["unblocks_tier_beta_criteria"] == [
         "casf_pdbbind_subset_materialized",

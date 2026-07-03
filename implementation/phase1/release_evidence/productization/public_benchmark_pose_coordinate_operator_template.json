@@ -6,9 +6,9 @@
     "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T18:11:51.513880+00:00",
+  "generated_at": "2026-07-03T18:33:15.447351+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:a93502ef227e700cee7d0905385b518bcead08561acce0485930bee3f94d8985",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:9a920ac246d72dea6fdb7cd95241663741f3980042677d9db1bf60b5ced30e58",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:a02e0f8d2ec8ff40b696fac003e92b82ef7a7296fb3517bf1f869e97f57c640f",
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:a2f8dde118e607325074a1ca5aea075228426295eedc9cdb10553184a324f2b2",
     "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:b07d6de8afc6b8f42cdc6aea3d2a3eebe2d9c5cca8eba066aa4b0d259200f748",
@@ -19,7 +19,7 @@
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:f3f8ee12c7b15238da7a940bab4c4bfa2ba17cf270ea3522d000430dc20cd4a8",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:373b1e217aaa6bce582e83a3c9d84e8b7e25664362dc91a9ba009ee54a01cf56",
     "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:988022141137fa8dd3f56ff4feaebad1bdc218c838ed4cc9028f85bcc510d6e7",
-    "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:58d09754c886a093ceccc0305fcad5099a9160de2890f3795fe00d0c8e53f606",
+    "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:0919b1f1aca8be36939fedb6e55fb93ca52cb0a4a18366c2daaebb5958acbd31",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:1741e0d4261554b76e9eb649028430ce0d3e96626358a6bc2bc31db6c16d650d",
     "scripts/validate_public_benchmark_external_receipts.py": "sha256:efe47b90b4d467b89ea13797c2681851e7cffc4f8ab8ba15f9d11bb0a765a8e0",
     "scripts/validate_public_benchmark_pose_validity.py": "sha256:781e1a90205d6e04929d2bd29f7519427db86eefb708320e12a0ebc5559fea9d",
@@ -156,7 +156,7 @@
   },
   "schema_version": "public-benchmark-operator-template.v1",
   "slot_id": "pose_coordinate_intake",
-  "source_commit_sha": "4b8b6202704653d3cde5e710db0625eeb64e5a82",
+  "source_commit_sha": "4fe43d3cb7bab09fbe23a9c8901a4c8ddced4d66",
   "status": "operator_template_seed",
   "template": {
     "cases": [

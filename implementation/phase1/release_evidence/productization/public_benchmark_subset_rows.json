@@ -1,54 +1,5 @@
 {
-  "blockers": [],
-  "case_row_schema": {
-    "required_fields": [
-      "case_id",
-      "source_family",
-      "benchmark_split",
-      "complex_id",
-      "protein_structure_path",
-      "reference_ligand_path",
-      "predicted_ligand_path_or_docking_run_id",
-      "ligand_atom_order_contract",
-      "symmetry_permutation_contract",
-      "source_license_or_accession",
-      "source_checksum",
-      "provenance_ref",
-      "pose_success_metric",
-      "rmsd_threshold_angstrom"
-    ],
-    "supported_benchmark_splits": [
-      "CASF-core",
-      "PDBBind-core",
-      "PDBBind-refined",
-      "PDBBind-general"
-    ],
-    "template": {
-      "benchmark_split": "CASF-core",
-      "case_id": "casf_pdbbind_subset_001",
-      "complex_id": "",
-      "ligand_atom_order_contract": {
-        "atom_count": 0,
-        "atom_id_basis": "reference_ligand_atom_order",
-        "atom_ids": []
-      },
-      "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
-      "predicted_ligand_path_or_docking_run_id": "",
-      "protein_structure_path": "",
-      "provenance_ref": "",
-      "reference_ligand_path": "",
-      "rmsd_threshold_angstrom": 2.0,
-      "source_checksum": "",
-      "source_family": "CASF/PDBBind",
-      "source_license_or_accession": "",
-      "symmetry_permutation_contract": {
-        "permutation_basis": "zero_based_indices_into_ligand_atom_order_contract.atom_ids",
-        "permutations": []
-      }
-    },
-    "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest <materialized-subset-manifest.json> --fail-blocked"
-  },
-  "case_rows": [
+  "rows": [
     {
       "benchmark_split": "CASF-core",
       "case_id": "casf2016_4llx",
@@ -77,7 +28,6 @@
           "H18"
         ]
       },
-      "materialization_blockers": [],
       "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
       "predicted_ligand_path_or_docking_run_id": "CASF-2016/decoys_docking/4llx_decoys.mol2#mol2_index=9",
       "protein_structure_path": "CASF-2016/coreset/4llx/4llx_protein.pdb",
@@ -150,7 +100,6 @@
           "H22"
         ]
       },
-      "materialization_blockers": [],
       "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
       "predicted_ligand_path_or_docking_run_id": "CASF-2016/decoys_docking/5c28_decoys.mol2#mol2_index=44",
       "protein_structure_path": "CASF-2016/coreset/5c28/5c28_protein.pdb",
@@ -250,7 +199,6 @@
           "H45"
         ]
       },
-      "materialization_blockers": [],
       "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
       "predicted_ligand_path_or_docking_run_id": "CASF-2016/decoys_docking/3uuo_decoys.mol2#mol2_index=79",
       "protein_structure_path": "CASF-2016/coreset/3uuo/3uuo_protein.pdb",
@@ -375,7 +323,6 @@
           "H47"
         ]
       },
-      "materialization_blockers": [],
       "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
       "predicted_ligand_path_or_docking_run_id": "CASF-2016/decoys_docking/3ui7_decoys.mol2#mol2_index=11",
       "protein_structure_path": "CASF-2016/coreset/3ui7/3ui7_protein.pdb",
@@ -510,7 +457,6 @@
           "H55"
         ]
       },
-      "materialization_blockers": [],
       "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
       "predicted_ligand_path_or_docking_run_id": "CASF-2016/decoys_docking/5c2h_decoys.mol2#mol2_index=4",
       "protein_structure_path": "CASF-2016/coreset/5c2h/5c2h_protein.pdb",
@@ -627,7 +573,6 @@
           "H29"
         ]
       },
-      "materialization_blockers": [],
       "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
       "predicted_ligand_path_or_docking_run_id": "CASF-2016/decoys_docking/2v00_decoys.mol2#mol2_index=50",
       "protein_structure_path": "CASF-2016/coreset/2v00/2v00_protein.pdb",
@@ -747,7 +692,6 @@
           "H58"
         ]
       },
-      "materialization_blockers": [],
       "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
       "predicted_ligand_path_or_docking_run_id": "CASF-2016/decoys_docking/3wz8_decoys.mol2#mol2_index=15",
       "protein_structure_path": "CASF-2016/coreset/3wz8/3wz8_protein.pdb",
@@ -938,7 +882,6 @@
           "H100"
         ]
       },
-      "materialization_blockers": [],
       "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
       "predicted_ligand_path_or_docking_run_id": "CASF-2016/decoys_docking/3pww_decoys.mol2#mol2_index=14",
       "protein_structure_path": "CASF-2016/coreset/3pww/3pww_protein.pdb",
@@ -1169,7 +1112,6 @@
           "H98"
         ]
       },
-      "materialization_blockers": [],
       "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
       "predicted_ligand_path_or_docking_run_id": "CASF-2016/decoys_docking/3prs_decoys.mol2#mol2_index=77",
       "protein_structure_path": "CASF-2016/coreset/3prs/3prs_protein.pdb",
@@ -1430,7 +1372,6 @@
           "H130"
         ]
       },
-      "materialization_blockers": [],
       "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
       "predicted_ligand_path_or_docking_run_id": "CASF-2016/decoys_docking/3uri_decoys.mol2#mol2_index=3",
       "protein_structure_path": "CASF-2016/coreset/3uri/3uri_protein.pdb",
@@ -1632,7 +1573,6 @@
           "H39"
         ]
       },
-      "materialization_blockers": [],
       "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
       "predicted_ligand_path_or_docking_run_id": "CASF-2016/decoys_docking/4m0z_decoys.mol2#mol2_index=21",
       "protein_structure_path": "CASF-2016/coreset/4m0z/4m0z_protein.pdb",
@@ -1739,7 +1679,6 @@
           "H35"
         ]
       },
-      "materialization_blockers": [],
       "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
       "predicted_ligand_path_or_docking_run_id": "CASF-2016/decoys_docking/4m0y_decoys.mol2#mol2_index=72",
       "protein_structure_path": "CASF-2016/coreset/4m0y/4m0y_protein.pdb",
@@ -1797,132 +1736,5 @@
         ]
       }
     }
-  ],
-  "claim_boundary": "This manifest is materialized only from local operator-attached CASF/PDBBind case descriptors and files. The materializer computes checksums and validates the subset contract, but it does not download benchmark data, approve licenses, redistribute source files, or claim benchmark performance.",
-  "contract_pass": true,
-  "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T18:33:05.306317+00:00",
-  "input_checksums": {
-    "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
-    "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:0919b1f1aca8be36939fedb6e55fb93ca52cb0a4a18366c2daaebb5958acbd31",
-    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:1750e9440703be1f4e85fbc950adc15b197466af19cd3c8c21df9f46bae5dcf5"
-  },
-  "materialization_report": {
-    "benchmark_split_counts": {
-      "CASF-core": 12
-    },
-    "intake_case_count": 12,
-    "ligand_atom_order_contract_case_count": 12,
-    "materialization_blocker_count": 0,
-    "materialized_case_count": 12,
-    "public_benchmark_ready": true,
-    "receipt_complete_case_count": 12,
-    "schema_version": "public-benchmark-subset-materialization.v1",
-    "source_file_checksum_case_count": 12,
-    "source_file_checksum_count": 36,
-    "source_file_checksums": {
-      "CASF-2016/coreset/2v00/2v00_ligand.sdf": "sha256:cc87334e0ed4d4d66929e57998fae43785bbe399772967f8a660dfbc106c9b16",
-      "CASF-2016/coreset/2v00/2v00_protein.pdb": "sha256:ce00145b46da36a51792628b6322437c7acb30cbc6c165c47443a1ed3d2256fa",
-      "CASF-2016/coreset/3prs/3prs_ligand.sdf": "sha256:4625a72478cc0940022b39b2059e0d7115a20eaf6b845ecde8b17a195fba0911",
-      "CASF-2016/coreset/3prs/3prs_protein.pdb": "sha256:6a294ddeb8eaaf9a876ac9ad7a3e2715da586fdb7877d4cac306d4348932e34b",
-      "CASF-2016/coreset/3pww/3pww_ligand.sdf": "sha256:e4cc5a4f6f900a00cd2ce5976a3603d38204f0c288774f5650e35ab7e6324d0b",
-      "CASF-2016/coreset/3pww/3pww_protein.pdb": "sha256:351db504aee7d52f588e720c0f9d88ceb65fa738aa9a3d393ec5cbed4af96efb",
-      "CASF-2016/coreset/3ui7/3ui7_ligand.sdf": "sha256:bc6913724d6339af7844e5dedb93010e6e7e706c8da629d1e54a73c2fd2eafa2",
-      "CASF-2016/coreset/3ui7/3ui7_protein.pdb": "sha256:62a51c4d5a96b8b2b0388e1e9f9dc55763d39996935f1ed30c1bdfd2ef282e0e",
-      "CASF-2016/coreset/3uri/3uri_ligand.sdf": "sha256:9091e3949535eeae0afa1e80484ece0e71e6809c44d81072130b54f81f440a85",
-      "CASF-2016/coreset/3uri/3uri_protein.pdb": "sha256:03b1b8c59bd72520faca258f2a1c4a5677e161bf3ace4a9df3ae7003d585f8b1",
-      "CASF-2016/coreset/3uuo/3uuo_ligand.sdf": "sha256:7eedba7f908c0ba267dbe8af02294fcd148064d25cde772d62dded9737258ce5",
-      "CASF-2016/coreset/3uuo/3uuo_protein.pdb": "sha256:80b28a058a5a2da46bc2e3e91e26c1e14c4f2fd7514c051559b017ab0e93dcf9",
-      "CASF-2016/coreset/3wz8/3wz8_ligand.sdf": "sha256:33a3b8306ae40623d38a5af2a883037a17472f18ba58141456f7bdf8abedb03a",
-      "CASF-2016/coreset/3wz8/3wz8_protein.pdb": "sha256:9de2f60abeea752abc06f866597255ca08fe75bf09cc749f76951adc30b0b45f",
-      "CASF-2016/coreset/4llx/4llx_ligand.sdf": "sha256:a6298d4cdddb5d1926ca09bcb5e1412ecd2699476f3ae1fa086d3d335efaa6f1",
-      "CASF-2016/coreset/4llx/4llx_protein.pdb": "sha256:ee6be565638c58d9b608a5cb79a98dae39566a60b4ae019ea6a23a45c2b7a834",
-      "CASF-2016/coreset/4m0y/4m0y_ligand.sdf": "sha256:65f2c98b8958e739f98b243924513e3ff3068d536665a7b0e27fefa81a0e0dfc",
-      "CASF-2016/coreset/4m0y/4m0y_protein.pdb": "sha256:f2b1040546ed7c6d01e4ef39996afcc283be189a42df7bde3773db0d2ecbe7bc",
-      "CASF-2016/coreset/4m0z/4m0z_ligand.sdf": "sha256:533af481c8fe734256312a30791bfbb12eb5796e26409942c66581fb8ef60f07",
-      "CASF-2016/coreset/4m0z/4m0z_protein.pdb": "sha256:8eb56910faa3eb78ca1b8c244b01bf6094f2838a4db08a0b5198b68e6a96242d",
-      "CASF-2016/coreset/5c28/5c28_ligand.sdf": "sha256:7df337dcb033a69f6db8d229749489e45ba9695a4a2e9bdf5593a51ae66eaf87",
-      "CASF-2016/coreset/5c28/5c28_protein.pdb": "sha256:ac3677c62abb2e549c4e3f4a6185663da16028e7e1b1e6ef875da956e77639b0",
-      "CASF-2016/coreset/5c2h/5c2h_ligand.sdf": "sha256:7c512908ac4e7157027219b8f09bcede70f8d0621606303a5ff2eceb89033420",
-      "CASF-2016/coreset/5c2h/5c2h_protein.pdb": "sha256:59718184b6c4de964136707cca00f1eb1361fff3d24020e28878dbec60e67917",
-      "CASF-2016/decoys_docking/2v00_decoys.mol2#mol2_index=50": "sha256:e7ab6daa7dec0a0e0ea19818fca9d12a5b753fe8ec4dcac787c58a0b108b1c85",
-      "CASF-2016/decoys_docking/3prs_decoys.mol2#mol2_index=77": "sha256:c4a84cbaed3901cafcc4d50338b6f36463acddd45b34510c47b3f4e5f47f5f16",
-      "CASF-2016/decoys_docking/3pww_decoys.mol2#mol2_index=14": "sha256:80bc624b020d08fa25a6a162ff2fcd0492bd5309b87b67456c07cdd1bb8f3d48",
-      "CASF-2016/decoys_docking/3ui7_decoys.mol2#mol2_index=11": "sha256:821bf1b3b931b668546db911b0caf5f4d80092e4a55e05442e87aafa9428789e",
-      "CASF-2016/decoys_docking/3uri_decoys.mol2#mol2_index=3": "sha256:18968929bbbf37ee1df1d7fed7ad6979ca5083e3e15f1dabd88edecd037533d8",
-      "CASF-2016/decoys_docking/3uuo_decoys.mol2#mol2_index=79": "sha256:d87864f91a95443fc2cb9e8df744497e9080bb80983a93d6b6ecd735e491b75c",
-      "CASF-2016/decoys_docking/3wz8_decoys.mol2#mol2_index=15": "sha256:fa223642d9dd06a15db7a7f7680b7cdb31d23997785a731a8668a8710f8ad1fe",
-      "CASF-2016/decoys_docking/4llx_decoys.mol2#mol2_index=9": "sha256:97c56eccdca60d2a0a33c1110ef385097ae3c0d8cf4b81007aa45b6bee3cd10d",
-      "CASF-2016/decoys_docking/4m0y_decoys.mol2#mol2_index=72": "sha256:ccbdbf939ee1c398b01bee17cc78f75c4eb508519b9bcbefe0cf1a2f8a91bff8",
-      "CASF-2016/decoys_docking/4m0z_decoys.mol2#mol2_index=21": "sha256:1bd1f6aec33bcf6f5a6f1281015b89c3af8c644fd1cb301fd0bfc56fc1f95ab0",
-      "CASF-2016/decoys_docking/5c28_decoys.mol2#mol2_index=44": "sha256:a7212531736310d07052cb9c5956aaa40d2614b1cf32e110fdb4e71120498922",
-      "CASF-2016/decoys_docking/5c2h_decoys.mol2#mol2_index=4": "sha256:32bedd150f9ecd7809556153673f9d73adb5cd91fc7858e100b417ad2ba416b5"
-    },
-    "source_file_missing_count": 0,
-    "source_material_coverage": {
-      "benchmark_split_counts": {
-        "CASF-core": 12
-      },
-      "claim_boundary": "Coverage counts summarize local operator-attached CASF/PDBBind case rows. They prove manifest completeness only for declared rows and do not fetch, license, redistribute, or benchmark external source material.",
-      "expected_source_file_checksum_count": 36,
-      "ligand_atom_order_contract_case_count": 12,
-      "materialized_case_count": 12,
-      "missing_case_count": 0,
-      "receipt_complete_case_count": 12,
-      "required_local_source_file_field_count": 3,
-      "required_local_source_file_fields": [
-        "protein_structure_path",
-        "reference_ligand_path",
-        "predicted_ligand_path_or_docking_run_id"
-      ],
-      "source_file_checksum_case_count": 12,
-      "source_file_checksum_entry_count": 36,
-      "symmetry_permutation_contract_case_count": 12,
-      "target_subset_case_count": 12,
-      "valid_source_file_checksum_entry_count": 36
-    },
-    "symmetry_permutation_contract_case_count": 12,
-    "validation_blocker_count": 0
-  },
-  "materialized_case_count": 12,
-  "public_benchmark_ready": true,
-  "reuse_policy": "public_benchmark_subset_manifest_materialized_from_operator_intake",
-  "reused_evidence": false,
-  "row_integrity_policy": {
-    "purpose": "Duplicate CASF/PDBBind subset case rows cannot be used to inflate Public Benchmark source-material coverage or Phase 2 case counts.",
-    "required_unique_row_keys": {
-      "case_rows": [
-        "case_id"
-      ]
-    }
-  },
-  "schema_version": "public-benchmark-subset-manifest.v1",
-  "source_commit_sha": "4fe43d3cb7bab09fbe23a9c8901a4c8ddced4d66",
-  "source_families": [
-    "CASF/PDBBind"
-  ],
-  "source_material_coverage": {
-    "benchmark_split_counts": {
-      "CASF-core": 12
-    },
-    "claim_boundary": "Coverage counts summarize local operator-attached CASF/PDBBind case rows. They prove manifest completeness only for declared rows and do not fetch, license, redistribute, or benchmark external source material.",
-    "expected_source_file_checksum_count": 36,
-    "ligand_atom_order_contract_case_count": 12,
-    "materialized_case_count": 12,
-    "missing_case_count": 0,
-    "receipt_complete_case_count": 12,
-    "required_local_source_file_field_count": 3,
-    "required_local_source_file_fields": [
-      "protein_structure_path",
-      "reference_ligand_path",
-      "predicted_ligand_path_or_docking_run_id"
-    ],
-    "source_file_checksum_case_count": 12,
-    "source_file_checksum_entry_count": 36,
-    "symmetry_permutation_contract_case_count": 12,
-    "target_subset_case_count": 12,
-    "valid_source_file_checksum_entry_count": 36
-  },
-  "status": "ready",
-  "target_subset_case_count": 12
+  ]
 }

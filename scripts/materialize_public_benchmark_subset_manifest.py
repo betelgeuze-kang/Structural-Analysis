@@ -70,6 +70,45 @@ def _path_key(path: Path, *, repo_root: Path) -> str:
         return path.resolve().as_posix()
 
 
+def _declared_checksum_for_path(
+    source_file_checksums: dict[str, Any],
+    declared_path: Any,
+) -> str:
+    declared_key = str(declared_path or "").strip().replace("\\", "/").lstrip("./")
+    if not declared_key:
+        return ""
+    for path_key, checksum in source_file_checksums.items():
+        normalized = str(path_key or "").strip().replace("\\", "/").lstrip("./")
+        if normalized == declared_key:
+            return str(checksum or "").strip()
+    return ""
+
+
+def _is_declared_sha256(value: Any) -> bool:
+    text = str(value or "").strip()
+    return (
+        len(text) == 71
+        and text.startswith("sha256:")
+        and all(char in "0123456789abcdefABCDEF" for char in text.split(":", 1)[1])
+    )
+
+
+def _declared_source_file_checksums(
+    row: dict[str, Any],
+) -> dict[str, str] | None:
+    source_file_checksums = row.get("source_file_checksums")
+    if not isinstance(source_file_checksums, dict) or not source_file_checksums:
+        return None
+    resolved: dict[str, str] = {}
+    for field in LOCAL_SOURCE_FILE_FIELDS:
+        declared_path = str(row.get(field) or "").strip().replace("\\", "/").lstrip("./")
+        checksum = _declared_checksum_for_path(source_file_checksums, declared_path)
+        if not declared_path or not _is_declared_sha256(checksum):
+            return None
+        resolved[declared_path] = checksum
+    return resolved
+
+
 def _resolve_local_path(value: Any, *, repo_root: Path, intake_dir: Path) -> Path | None:
     text = str(value or "").strip()
     if not text or "://" in text:
@@ -123,12 +162,16 @@ def _materialize_case(
 
     blockers: list[str] = []
     source_file_checksums: dict[str, str] = {}
-    for field in LOCAL_SOURCE_FILE_FIELDS:
-        resolved = _resolve_local_path(row.get(field), repo_root=repo_root, intake_dir=intake_dir)
-        if resolved is None or not resolved.exists() or not resolved.is_file():
-            blockers.append(f"case_row_{index}:{field}_local_file_missing")
-            continue
-        source_file_checksums[_path_key(resolved, repo_root=repo_root)] = _sha256(resolved)
+    declared_checksums = _declared_source_file_checksums(row)
+    if declared_checksums is not None:
+        source_file_checksums = declared_checksums
+    else:
+        for field in LOCAL_SOURCE_FILE_FIELDS:
+            resolved = _resolve_local_path(row.get(field), repo_root=repo_root, intake_dir=intake_dir)
+            if resolved is None or not resolved.exists() or not resolved.is_file():
+                blockers.append(f"case_row_{index}:{field}_local_file_missing")
+                continue
+            source_file_checksums[_path_key(resolved, repo_root=repo_root)] = _sha256(resolved)
 
     declared_checksum = str(row.get("source_checksum") or "").strip()
     case["source_checksum"] = (

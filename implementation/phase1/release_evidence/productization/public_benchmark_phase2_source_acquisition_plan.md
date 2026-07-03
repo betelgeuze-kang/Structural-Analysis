@@ -4,13 +4,13 @@
 - `contract_pass`: `True`
 - `phase2_ready`: `False`
 - `actual_closure_ready`: `False`
-- `blocker_count`: `4`
+- `blocker_count`: `2`
 - `official_source_receipt_plan_status`: `operator_receipts_required`
 - `official_source_receipt_role_count`: `4`
 - `official_source_catalog_count`: `6`
 - `phase2_row_audit`: `implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json`
 - `phase2_row_audit_status`: `operator_evidence_required`
-- `phase2_row_audit_missing_row_inputs`: `subset_rows, pose_rows, vina_gnina_rows`
+- `phase2_row_audit_missing_row_inputs`: `vina_gnina_rows`
 
 | Row Input | Source Family | Status | Unblocks |
 |---|---|---|---|

@@ -504,14 +504,174 @@ def _partial_enrichment_component(
     return component, {"enrichment_scorecard": artifact_path.as_posix()}
 
 
+def _component_from_artifact(
+    *,
+    component_id: str,
+    payload: dict[str, Any],
+    artifact_path: Path,
+) -> dict[str, Any]:
+    required = next(
+        row
+        for row in harness_bundle.PHASE2_REQUIRED_COMPONENTS
+        if row["component_id"] == component_id
+    )
+    ready_field = str(required["ready_field"])
+    count_field = str(required["count_field"])
+    current_count = int(payload.get(count_field) or 0)
+    required_minimum_count = int(required["required_minimum_count"])
+    blockers = [str(blocker) for blocker in payload.get("blockers", []) if str(blocker)]
+    if current_count < required_minimum_count:
+        blockers.append(
+            f"{count_field}_below_minimum:{current_count}<"
+            f"{required_minimum_count}"
+        )
+    blockers = list(dict.fromkeys(blockers))
+    ready = bool(
+        payload.get(ready_field)
+        and payload.get("contract_pass")
+        and current_count >= required_minimum_count
+        and not blockers
+    )
+    return {
+        "component_id": component_id,
+        "status": "ready" if ready else "operator_evidence_required",
+        "contract_pass": ready,
+        "source_artifact_contract_pass": bool(payload.get("contract_pass"))
+        and not blockers,
+        "ready": ready,
+        "materialized": True,
+        "artifact_role": str(required["artifact_role"]),
+        "artifact": artifact_path.as_posix(),
+        "count_field": count_field,
+        "current_count": current_count,
+        "required_minimum_count": required_minimum_count,
+        "required_row_inputs": list(COMPONENT_ROW_INPUTS[component_id]),
+        "missing_row_inputs": [],
+        "expected_rows_mode": "operator_attached_public_benchmark_rows",
+        "operator_evidence_required": not ready,
+        "blockers": blockers,
+        "outputs": {
+            str(required["artifact_role"]): artifact_path.as_posix(),
+        },
+    }
+
+
+def _partial_pose_components(
+    *,
+    repo_root: Path,
+    subset_rows_path: Path,
+    pose_rows_path: Path,
+    out_dir: Path,
+    target_subset_case_count: int | None,
+) -> tuple[list[dict[str, Any]], dict[str, str]]:
+    subset_rows = row_bundle._load_rows(subset_rows_path)
+    pose_rows = row_bundle._load_rows(pose_rows_path)
+    target_count = int(
+        target_subset_case_count
+        or subset_manifest.DEFAULT_TARGET_SUBSET_CASE_COUNT
+    )
+    subset_payload = subset_manifest.materialize_subset_manifest(
+        {
+            "target_subset_case_count": target_count,
+            "cases": subset_rows,
+        },
+        repo_root=repo_root,
+        intake_path=subset_rows_path,
+        target_subset_case_count=target_count,
+    )
+    out_root = _resolved_out_dir(repo_root, out_dir)
+    subset_path = out_root / harness_bundle.ARTIFACT_FILENAMES["subset_manifest"]
+    _write_json(repo_root, subset_path, subset_payload)
+
+    pose_input_payload = pose_validity_input.materialize_pose_validity_input(
+        subset_payload,
+        {"cases": pose_rows},
+        repo_root=repo_root,
+        subset_manifest_path=subset_path,
+        pose_intake_path=pose_rows_path,
+    )
+    pose_input_path = out_root / harness_bundle.ARTIFACT_FILENAMES["pose_validity_input"]
+    _write_json(repo_root, pose_input_path, pose_input_payload)
+
+    pose_packet_payload = posebusters_packet.materialize_posebusters_validity_packet(
+        pose_input_payload,
+        repo_root=repo_root,
+        pose_validity_input_path=pose_input_path,
+    )
+    pose_packet_path = out_root / harness_bundle.ARTIFACT_FILENAMES[
+        "pose_validity_packet"
+    ]
+    _write_json(repo_root, pose_packet_path, pose_packet_payload)
+
+    rmsd_payload = harness_bundle.materialize_rmsd_scorecard(
+        pose_input_payload,
+        repo_root=repo_root,
+        pose_validity_input_path=pose_input_path,
+    )
+    rmsd_path = out_root / harness_bundle.ARTIFACT_FILENAMES["rmsd_scorecard"]
+    _write_json(repo_root, rmsd_path, rmsd_payload)
+
+    pose_success_payload = harness_bundle.materialize_pose_success_harness(
+        pose_packet_payload,
+        rmsd_payload,
+        repo_root=repo_root,
+        pose_validity_packet_path=pose_packet_path,
+        rmsd_scorecard_path=rmsd_path,
+    )
+    pose_success_path = out_root / harness_bundle.ARTIFACT_FILENAMES[
+        "pose_success_harness"
+    ]
+    _write_json(repo_root, pose_success_path, pose_success_payload)
+
+    components = [
+        _component_from_artifact(
+            component_id="casf_pdbbind_pose_success_harness",
+            payload=pose_success_payload,
+            artifact_path=pose_success_path,
+        ),
+        _component_from_artifact(
+            component_id="symmetry_aware_ligand_rmsd",
+            payload=rmsd_payload,
+            artifact_path=rmsd_path,
+        ),
+        _component_from_artifact(
+            component_id="posebusters_style_pose_validity",
+            payload=pose_packet_payload,
+            artifact_path=pose_packet_path,
+        ),
+    ]
+    outputs = {
+        "subset_manifest": subset_path.as_posix(),
+        "pose_validity_input": pose_input_path.as_posix(),
+        "pose_validity_packet": pose_packet_path.as_posix(),
+        "rmsd_scorecard": rmsd_path.as_posix(),
+        "pose_success_harness": pose_success_path.as_posix(),
+    }
+    return components, outputs
+
+
 def _components_from_partial_rows(
     *,
     row_inputs: dict[str, Path | None],
     repo_root: Path,
     out_dir: Path,
+    target_subset_case_count: int | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, str]]:
     components = _missing_components(row_inputs)
     outputs: dict[str, str] = {}
+    subset_rows_path = row_inputs.get("subset_rows")
+    pose_rows_path = row_inputs.get("pose_rows")
+    if subset_rows_path is not None and pose_rows_path is not None:
+        pose_components, pose_outputs = _partial_pose_components(
+            repo_root=repo_root,
+            subset_rows_path=subset_rows_path,
+            pose_rows_path=pose_rows_path,
+            out_dir=out_dir,
+            target_subset_case_count=target_subset_case_count,
+        )
+        for pose_component in pose_components:
+            components = _replace_component(components, pose_component)
+        outputs.update(pose_outputs)
     enrichment_rows_path = row_inputs.get("enrichment_rows")
     if enrichment_rows_path is not None:
         enrichment_component, enrichment_outputs = _partial_enrichment_component(
@@ -946,6 +1106,7 @@ def build_public_benchmark_phase2_row_audit(
             row_inputs=row_inputs,
             repo_root=repo_root,
             out_dir=out_dir,
+            target_subset_case_count=target_subset_case_count,
         )
         phase2_requirements = harness_bundle.build_phase2_requirement_rows(
             components
