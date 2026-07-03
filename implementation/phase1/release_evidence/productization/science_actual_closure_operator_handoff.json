@@ -200,12 +200,14 @@
     "resolved_path": "",
     "row_contract_ref": "row_intake_contracts.subset_rows",
     "row_input_id": "subset_rows",
+    "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows_template.csv",
+    "row_template_present": true,
     "status": "operator_input_required"
   },
-  "generated_at": "2026-07-01T13:35:42.016294+00:00",
+  "generated_at": "2026-07-03T15:38:21.302862+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:de6b2d3038e92933e8ba63ab5a77eb45eb53042dd4cf8b1ef7cfe7c3bc8ca048",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:6ceca1ef844a1e17b88972c169fcd1bd0c98b74668b2b17bec362bb16a859614"
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:e0d8467c488dc1a392fc90b50a042b3089103951695e1710d90976d36cb84f80"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -216,6 +218,7 @@
     "gpcr_rows",
     "pocketmd_rows"
   ],
+  "missing_row_template_artifacts": [],
   "operator_next_actions": [
     "attach_subset_rows",
     "attach_pose_rows",
@@ -366,6 +369,8 @@
       "resolved_path": "",
       "row_contract_ref": "row_intake_contracts.subset_rows",
       "row_input_id": "subset_rows",
+      "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows_template.csv",
+      "row_template_present": true,
       "status": "operator_input_required"
     },
     {
@@ -479,6 +484,8 @@
       "resolved_path": "",
       "row_contract_ref": "row_intake_contracts.pose_rows",
       "row_input_id": "pose_rows",
+      "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows_template.csv",
+      "row_template_present": true,
       "status": "operator_input_required"
     },
     {
@@ -644,6 +651,8 @@
       "resolved_path": "",
       "row_contract_ref": "row_intake_contracts.enrichment_rows",
       "row_input_id": "enrichment_rows",
+      "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows_template.csv",
+      "row_template_present": true,
       "status": "operator_input_required"
     },
     {
@@ -822,6 +831,8 @@
       "resolved_path": "",
       "row_contract_ref": "row_intake_contracts.vina_gnina_rows",
       "row_input_id": "vina_gnina_rows",
+      "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+      "row_template_present": true,
       "status": "operator_input_required"
     },
     {
@@ -943,6 +954,8 @@
       "resolved_path": "",
       "row_contract_ref": "row_intake_contracts.gpcr_rows",
       "row_input_id": "gpcr_rows",
+      "row_template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv",
+      "row_template_present": true,
       "status": "operator_input_required"
     },
     {
@@ -1100,20 +1113,32 @@
       "resolved_path": "",
       "row_contract_ref": "row_intake_contracts.pocketmd_rows",
       "row_input_id": "pocketmd_rows",
+      "row_template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+      "row_template_present": true,
       "status": "operator_input_required"
     }
   ],
+  "row_template_artifacts": {
+    "enrichment_rows": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows_template.csv",
+    "gpcr_rows": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv",
+    "pocketmd_rows": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+    "pose_rows": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows_template.csv",
+    "subset_rows": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows_template.csv",
+    "vina_gnina_rows": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv"
+  },
   "schema_version": "science-actual-closure-operator-handoff.v1",
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "5d59a79d85c91d5678007c75061efe8c1fbb3f31",
+  "source_commit_sha": "e65f7e1ad5b87c840b14fdbc7b695709d0dc22bc",
   "status": "operator_rows_required",
   "summary": {
     "closes_actual_closure_criteria_count": 19,
     "component_count": 3,
     "expected_slot_count": 6,
+    "missing_row_template_artifact_count": 0,
     "missing_slot_count": 6,
     "provided_slot_count": 0,
+    "row_template_artifact_count": 6,
     "science_actual_closure_blocker_count": 8,
     "slot_count": 6
   }

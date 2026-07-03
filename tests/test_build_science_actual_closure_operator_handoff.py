@@ -44,8 +44,10 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "closes_actual_closure_criteria_count": 19,
         "component_count": 3,
         "expected_slot_count": 6,
+        "missing_row_template_artifact_count": 0,
         "missing_slot_count": 6,
         "provided_slot_count": 0,
+        "row_template_artifact_count": 6,
         "science_actual_closure_blocker_count": 8,
         "slot_count": 6,
     }
@@ -58,10 +60,41 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "pocketmd_rows",
     ]
     assert payload["missing_row_inputs"] == list(slots)
+    assert payload["missing_row_template_artifacts"] == []
+    assert payload["row_template_artifacts"] == {
+        "enrichment_rows": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_enrichment_rows_template.csv"
+        ),
+        "gpcr_rows": (
+            "implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_rows_template.csv"
+        ),
+        "pocketmd_rows": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_topk_rows_template.csv"
+        ),
+        "pose_rows": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_pose_rows_template.csv"
+        ),
+        "subset_rows": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_subset_rows_template.csv"
+        ),
+        "vina_gnina_rows": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_vina_gnina_rows_template.csv"
+        ),
+    }
     assert payload["first_missing_slot"]["row_input_id"] == "subset_rows"
 
     subset = slots["subset_rows"]
     assert subset["status"] == "operator_input_required"
+    assert subset["row_template_present"] is True
+    assert subset["row_template_artifact"].endswith(
+        "public_benchmark_subset_rows_template.csv"
+    )
     assert subset["preferred_default_row_path"].endswith(
         "public_benchmark_subset_rows.json"
     )
@@ -86,6 +119,10 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
 
     gpcr = slots["gpcr_rows"]
     assert gpcr["actual_closure_component_id"] == "gpcr_hard_decoy_actual_closure"
+    assert gpcr["row_template_present"] is True
+    assert gpcr["row_template_artifact"].endswith(
+        "gpcr_hard_decoy_rows_template.csv"
+    )
     assert "raw_hard_decoy_rows_actual_closure" in gpcr[
         "closes_actual_closure_criteria"
     ]
@@ -102,6 +139,10 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     pocketmd = slots["pocketmd_rows"]
     assert pocketmd["actual_closure_component_id"] == (
         "pocketmd_lite_topk_actual_closure"
+    )
+    assert pocketmd["row_template_present"] is True
+    assert pocketmd["row_template_artifact"].endswith(
+        "pocketmd_lite_topk_rows_template.csv"
     )
     assert "top_k_refinement_rows_present" in pocketmd[
         "closes_actual_closure_criteria"
@@ -152,8 +193,13 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     markdown = out_md.read_text(encoding="utf-8")
     assert payload["contract_pass"] is True
     assert payload["row_slot_handoff_count"] == 6
+    assert payload["summary"]["row_template_artifact_count"] == 6
     assert payload["input_checksums"][
         "scripts/build_science_actual_closure_operator_handoff.py"
     ].startswith("sha256:")
     assert "| `subset_rows` | `operator_input_required` |" in markdown
+    assert "CSV Starter" in markdown
+    assert "public_benchmark_subset_rows_template.csv" in markdown
+    assert "gpcr_hard_decoy_rows_template.csv" in markdown
+    assert "pocketmd_lite_topk_rows_template.csv" in markdown
     assert "materialize_science_actual_closure_from_rows.py --fail-blocked" in markdown

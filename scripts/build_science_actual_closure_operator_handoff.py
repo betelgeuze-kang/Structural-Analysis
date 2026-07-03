@@ -30,6 +30,14 @@ EXPECTED_ROW_INPUTS = (
     "gpcr_rows",
     "pocketmd_rows",
 )
+DEFAULT_ROW_TEMPLATE_ARTIFACTS = {
+    "subset_rows": PRODUCTIZATION / "public_benchmark_subset_rows_template.csv",
+    "pose_rows": PRODUCTIZATION / "public_benchmark_pose_rows_template.csv",
+    "enrichment_rows": PRODUCTIZATION / "public_benchmark_enrichment_rows_template.csv",
+    "vina_gnina_rows": PRODUCTIZATION / "public_benchmark_vina_gnina_rows_template.csv",
+    "gpcr_rows": PRODUCTIZATION / "gpcr_hard_decoy_rows_template.csv",
+    "pocketmd_rows": PRODUCTIZATION / "pocketmd_lite_topk_rows_template.csv",
+}
 FIELD_GROUP_KEYS = (
     "required_case_fields",
     "required_context_fields",
@@ -103,9 +111,23 @@ def _operator_action(row: dict[str, Any]) -> str:
     return f"review_{row_input_id}_materialization"
 
 
-def _slot(row: dict[str, Any], contract: dict[str, Any]) -> dict[str, Any]:
+def _row_template_artifact(row_input_id: str) -> str:
+    raw_path = DEFAULT_ROW_TEMPLATE_ARTIFACTS.get(row_input_id)
+    return str(raw_path) if raw_path else ""
+
+
+def _slot(
+    row: dict[str, Any],
+    contract: dict[str, Any],
+    *,
+    repo_root: Path,
+) -> dict[str, Any]:
     row_input_id = str(row.get("row_input_id") or "")
     missing = bool(row.get("missing"))
+    row_template_artifact = _row_template_artifact(row_input_id)
+    row_template_path = (
+        repo_root / row_template_artifact if row_template_artifact else Path()
+    )
     materialization_chain = [
         str(item) for item in _as_list(row.get("materialization_chain"))
     ]
@@ -122,6 +144,10 @@ def _slot(row: dict[str, Any], contract: dict[str, Any]) -> dict[str, Any]:
         "status": "operator_input_required" if missing else "provided",
         "missing": missing,
         "operator_action": _operator_action(row),
+        "row_template_artifact": row_template_artifact,
+        "row_template_present": bool(
+            row_template_artifact and row_template_path.exists()
+        ),
         "preferred_default_row_path": _first_default_path(row),
         "default_row_path_candidates": [
             str(item) for item in _as_list(row.get("default_row_path_candidates"))
@@ -221,7 +247,11 @@ def build_science_actual_closure_operator_handoff(
     contracts = _as_dict(audit.get("row_intake_contracts"))
     slots = sorted(
         [
-            _slot(row, _as_dict(contracts.get(str(row.get("row_input_id") or ""))))
+            _slot(
+                row,
+                _as_dict(contracts.get(str(row.get("row_input_id") or ""))),
+                repo_root=repo_root,
+            )
             for row in row_matrix
         ],
         key=_slot_order,
@@ -244,6 +274,16 @@ def build_science_actual_closure_operator_handoff(
     handoff_contract_pass = bool(slots) and not set(EXPECTED_ROW_INPUTS).difference(
         str(slot.get("row_input_id") or "") for slot in slots
     )
+    row_template_artifacts = {
+        str(slot.get("row_input_id") or ""): str(slot.get("row_template_artifact") or "")
+        for slot in slots
+        if str(slot.get("row_template_artifact") or "")
+    }
+    missing_row_template_artifacts = [
+        str(slot.get("row_input_id") or "")
+        for slot in slots
+        if not bool(slot.get("row_template_present"))
+    ]
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -272,7 +312,13 @@ def build_science_actual_closure_operator_handoff(
             "science_actual_closure_blocker_count": len(
                 _as_list(audit.get("blockers"))
             ),
+            "row_template_artifact_count": len(row_template_artifacts),
+            "missing_row_template_artifact_count": len(
+                missing_row_template_artifacts
+            ),
         },
+        "row_template_artifacts": row_template_artifacts,
+        "missing_row_template_artifacts": missing_row_template_artifacts,
         "missing_row_inputs": [
             str(slot.get("row_input_id") or "") for slot in missing_slots
         ],
@@ -310,8 +356,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `missing_slot_count`: `{summary.get('missing_slot_count')}`",
         f"- `slot_count`: `{summary.get('slot_count')}`",
         "",
-        "| Row Input | Status | Preferred Path | Closes Criteria | Action |",
-        "| --- | --- | --- | --- | --- |",
+        "| Row Input | Status | Preferred Path | CSV Starter | Closes Criteria | Action |",
+        "| --- | --- | --- | --- | --- | --- |",
     ]
     for slot in _as_list(payload.get("row_slot_handoffs")):
         if not isinstance(slot, dict):
@@ -324,6 +370,7 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"`{slot.get('row_input_id')}` | "
             f"`{slot.get('status')}` | "
             f"`{slot.get('preferred_default_row_path')}` | "
+            f"`{slot.get('row_template_artifact')}` | "
             f"`{criteria}` | "
             f"`{slot.get('operator_action')}` |"
         )
