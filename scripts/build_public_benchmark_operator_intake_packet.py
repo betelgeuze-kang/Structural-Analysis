@@ -67,6 +67,12 @@ from materialize_public_benchmark_vina_gnina_comparison_adapter import (  # noqa
 from validate_public_benchmark_external_receipts import (  # noqa: E402
     SCHEMA_VERSION as EXTERNAL_RECEIPT_VALIDATION_SCHEMA_VERSION,
 )
+from build_public_benchmark_phase2_source_acquisition_plan import (  # noqa: E402
+    DEFAULT_OUT as SOURCE_ACQUISITION_PLAN_DEFAULT_OUT,
+    DEFAULT_OUT_MD as SOURCE_ACQUISITION_PLAN_DEFAULT_OUT_MD,
+    SCHEMA_VERSION as SOURCE_ACQUISITION_PLAN_SCHEMA_VERSION,
+    build_public_benchmark_phase2_source_acquisition_plan,
+)
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -96,6 +102,8 @@ DEFAULT_HARNESS_BUNDLE_REPORT = (
 DEFAULT_HARNESS_BUNDLE = PRODUCTIZATION / "public_benchmark_harness_bundle.json"
 DEFAULT_OUT = PRODUCTIZATION / "public_benchmark_operator_intake_packet.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+DEFAULT_SOURCE_ACQUISITION_PLAN = SOURCE_ACQUISITION_PLAN_DEFAULT_OUT
+DEFAULT_SOURCE_ACQUISITION_PLAN_MD = SOURCE_ACQUISITION_PLAN_DEFAULT_OUT_MD
 DEFAULT_OPERATOR_TEMPLATE_DIR = PRODUCTIZATION
 DEFAULT_CASF_PDBBIND_OPERATOR_TEMPLATE = (
     DEFAULT_OPERATOR_TEMPLATE_DIR / "public_benchmark_casf_pdbbind_operator_template.json"
@@ -227,9 +235,65 @@ def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
+def _source_acquisition_plan_command() -> str:
+    return (
+        "python3 scripts/build_public_benchmark_phase2_source_acquisition_plan.py "
+        f"--out {DEFAULT_SOURCE_ACQUISITION_PLAN} "
+        f"--out-md {DEFAULT_SOURCE_ACQUISITION_PLAN_MD}"
+    )
+
+
+def _source_acquisition_plan_summary(
+    source_acquisition_plan: dict[str, Any],
+) -> dict[str, Any]:
+    summary = source_acquisition_plan.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+    blockers = source_acquisition_plan.get("blockers")
+    if not isinstance(blockers, list):
+        blockers = []
+    return {
+        "artifact": str(DEFAULT_SOURCE_ACQUISITION_PLAN),
+        "markdown_artifact": str(DEFAULT_SOURCE_ACQUISITION_PLAN_MD),
+        "status": str(source_acquisition_plan.get("status") or ""),
+        "contract_pass": source_acquisition_plan.get("contract_pass"),
+        "phase2_ready": bool(source_acquisition_plan.get("phase2_ready")),
+        "actual_closure_ready": bool(
+            source_acquisition_plan.get("actual_closure_ready")
+        ),
+        "required_component_count": int(
+            source_acquisition_plan.get("required_component_count") or 0
+        ),
+        "required_components": [
+            str(row)
+            for row in _as_list(source_acquisition_plan.get("required_components"))
+        ],
+        "required_row_input_count": int(
+            source_acquisition_plan.get("required_row_input_count") or 0
+        ),
+        "required_row_inputs": [
+            str(row)
+            for row in _as_list(source_acquisition_plan.get("required_row_inputs"))
+        ],
+        "minimum_subset_case_count": int(
+            summary.get("minimum_subset_case_count") or 0
+        ),
+        "minimum_enrichment_target_count": int(
+            summary.get("minimum_enrichment_target_count") or 0
+        ),
+        "minimum_vina_gnina_comparison_case_count": int(
+            summary.get("minimum_vina_gnina_comparison_case_count") or 0
+        ),
+        "blocker_count": int(source_acquisition_plan.get("blocker_count") or 0),
+        "blockers": [str(row) for row in blockers],
+        "command": _source_acquisition_plan_command(),
+    }
+
+
 def _input_paths(source_of_truth_path: Path) -> list[Path]:
     return [
         Path("scripts/build_public_benchmark_operator_intake_packet.py"),
+        Path("scripts/build_public_benchmark_phase2_source_acquisition_plan.py"),
         Path("scripts/materialize_public_benchmark_operator_bundle_from_rows.py"),
         Path("scripts/materialize_public_benchmark_harness_bundle.py"),
         Path("scripts/materialize_public_benchmark_subset_manifest.py"),
@@ -964,6 +1028,12 @@ def build_public_benchmark_operator_intake_packet(
         for row in _as_list(source_of_truth.get("operator_blocker_detail_register"))
         if isinstance(row, dict)
     ]
+    source_acquisition_plan = build_public_benchmark_phase2_source_acquisition_plan(
+        repo_root=repo_root
+    )
+    source_acquisition_summary = _source_acquisition_plan_summary(
+        source_acquisition_plan
+    )
 
     subset_materialization = (
         "python3 scripts/materialize_public_benchmark_subset_manifest.py "
@@ -1318,6 +1388,12 @@ def build_public_benchmark_operator_intake_packet(
     }
     materialization_sequence = [
         {
+            "step_id": "build_public_benchmark_phase2_source_acquisition_plan",
+            "schema_version": SOURCE_ACQUISITION_PLAN_SCHEMA_VERSION,
+            "command": source_acquisition_summary["command"],
+            "produces": str(DEFAULT_SOURCE_ACQUISITION_PLAN),
+        },
+        {
             "step_id": "materialize_subset_manifest",
             "schema_version": SUBSET_MATERIALIZER_SCHEMA_VERSION,
             "command": subset_materialization,
@@ -1420,6 +1496,7 @@ def build_public_benchmark_operator_intake_packet(
         ),
         "source_of_truth_blocker_detail_register": source_blocker_detail_register,
         "source_of_truth_next_actions": source_next_actions,
+        "source_acquisition_plan": source_acquisition_summary,
         "input_slots": slots,
         "required_slot_count": len([slot for slot in slots if slot["required"]]),
         "manifest_contracts": manifest_contracts,
@@ -1452,6 +1529,7 @@ def build_public_benchmark_operator_intake_packet(
             ),
             "default_row_path_candidates": DEFAULT_PHASE2_ROW_INPUT_CANDIDATES,
             "row_template_artifacts": row_template_artifacts,
+            "source_acquisition_plan": source_acquisition_summary,
             "materialization_command": phase2_row_audit_command,
             "produces": str(
                 PRODUCTIZATION / "public_benchmark_phase2_row_audit.json"
@@ -1533,6 +1611,8 @@ def build_public_benchmark_operator_intake_packet(
         "supported_comparison_engines": list(VINA_GNINA_SUPPORTED_ENGINES),
         "required_engine_run_fields": list(VINA_GNINA_REQUIRED_ENGINE_RUN_FIELDS),
         "linked_artifacts": {
+            "source_acquisition_plan": str(DEFAULT_SOURCE_ACQUISITION_PLAN),
+            "source_acquisition_plan_markdown": str(DEFAULT_SOURCE_ACQUISITION_PLAN_MD),
             "source_of_truth": str(DEFAULT_SOURCE_OF_TRUTH),
             "subset_manifest": str(DEFAULT_SUBSET_MANIFEST),
             "pose_validity_input": str(DEFAULT_POSE_VALIDITY_INPUT),
@@ -1548,6 +1628,7 @@ def build_public_benchmark_operator_intake_packet(
             "row_templates": row_template_artifacts,
         },
         "next_actions": [
+            "complete_public_benchmark_phase2_source_acquisition_plan",
             "fill_public_benchmark_operator_intake_packet",
             "materialize_public_benchmark_operator_bundle_from_rows",
             "run_public_benchmark_harness_bundle_materializer",
@@ -1587,6 +1668,12 @@ def build_public_benchmark_operator_intake_packet(
             "source_of_truth_blocker_count": len(source_blockers),
             "source_of_truth_blocker_detail_count": len(source_blocker_detail_register),
             "source_of_truth_status": str(source_of_truth.get("status") or ""),
+            "source_acquisition_plan_status": str(
+                source_acquisition_summary.get("status") or ""
+            ),
+            "source_acquisition_plan_blocker_count": int(
+                source_acquisition_summary.get("blocker_count") or 0
+            ),
             "public_benchmark_ready": False,
         },
         "summary_line": (
@@ -1611,6 +1698,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `public_benchmark_ready`: `{payload['public_benchmark_ready']}`",
         f"- `source_of_truth_status`: `{payload['source_of_truth_status']}`",
         f"- `source_of_truth_blocker_count`: `{len(payload['source_of_truth_blockers'])}`",
+        f"- `source_acquisition_plan`: `{payload['source_acquisition_plan']['artifact']}`",
+        f"- `source_acquisition_plan_status`: `{payload['source_acquisition_plan']['status']}`",
         f"- `claim_boundary`: {payload['claim_boundary']}",
         "",
         "| Slot | Status | Intake Artifact | Validation Command |",
@@ -1677,6 +1766,12 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.append(f"- `{criterion}`")
     lines.append("")
     return "\n".join(lines)
+
+
+def render_public_benchmark_operator_intake_markdown(
+    payload: dict[str, Any],
+) -> str:
+    return _markdown(payload)
 
 
 def _operator_template_payload(
@@ -1808,7 +1903,10 @@ def write_public_benchmark_operator_intake_packet(
     resolved_out.write_text(_json_text(payload), encoding="utf-8")
     resolved_md = out_md if out_md.is_absolute() else repo_root / out_md
     resolved_md.parent.mkdir(parents=True, exist_ok=True)
-    resolved_md.write_text(_markdown(payload), encoding="utf-8")
+    resolved_md.write_text(
+        render_public_benchmark_operator_intake_markdown(payload),
+        encoding="utf-8",
+    )
     write_public_benchmark_operator_template_payloads(
         packet=payload,
         repo_root=repo_root,

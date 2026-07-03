@@ -5,6 +5,8 @@
 - `public_benchmark_ready`: `False`
 - `source_of_truth_status`: `seed_ready_materialization_blocked`
 - `source_of_truth_blocker_count`: `10`
+- `source_acquisition_plan`: `implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json`
+- `source_acquisition_plan_status`: `operator_acquisition_required`
 - `claim_boundary`: This packet is an owner-facing intake contract for public benchmark evidence. It does not attach CASF/PDBBind, DUD-E, or LIT-PCBA source files, does not redistribute benchmark data, does not infer ligand chemistry, and does not close Tier beta without materialized real benchmark rows.
 
 | Slot | Status | Intake Artifact | Validation Command |
@@ -36,6 +38,7 @@
 
 | Step | Ready | Dependency Ready | First Blocker |
 |---|---|---|---|
+| `build_public_benchmark_phase2_source_acquisition_plan` | `True` | `True` | `` |
 | `materialize_subset_manifest` | `False` | `True` | `casf_pdbbind_source_material_not_attached` |
 | `materialize_pose_validity_input` | `False` | `False` | `public_benchmark_real_pose_predictions_missing` |
 | `materialize_posebusters_validity_packet` | `False` | `False` | `public_benchmark_real_pose_predictions_missing` |
@@ -48,6 +51,7 @@
 
 ## Materialization Sequence
 
+- `build_public_benchmark_phase2_source_acquisition_plan`: `python3 scripts/build_public_benchmark_phase2_source_acquisition_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.md`
 - `materialize_subset_manifest`: `python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked`
 - `materialize_pose_validity_input`: `python3 scripts/materialize_public_benchmark_pose_validity_input.py --subset-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --pose-intake <operator-pose-coordinate-intake.json> --out-input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_materialization_report.json --fail-blocked`
 - `materialize_posebusters_validity_packet`: `python3 scripts/materialize_public_benchmark_posebusters_validity_packet.py --pose-validity-input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --out-packet implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_posebusters_validity_materialization_report.json --fail-blocked`

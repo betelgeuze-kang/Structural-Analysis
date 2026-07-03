@@ -69,12 +69,21 @@ from build_public_benchmark_operator_intake_packet import (  # noqa: E402
     DEFAULT_OPERATOR_TEMPLATE_DIR,
     DEFAULT_OUT as DEFAULT_OPERATOR_INTAKE_PACKET_OUT,
     build_public_benchmark_operator_intake_packet,
+    render_public_benchmark_operator_intake_markdown,
     write_public_benchmark_operator_template_payloads,
+)
+from build_public_benchmark_phase2_source_acquisition_plan import (  # noqa: E402
+    DEFAULT_OUT as SOURCE_ACQUISITION_PLAN_DEFAULT_OUT,
+    DEFAULT_OUT_MD as SOURCE_ACQUISITION_PLAN_DEFAULT_OUT_MD,
+    build_public_benchmark_phase2_source_acquisition_plan,
+    render_public_benchmark_phase2_source_acquisition_markdown,
 )
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_SOURCE_OF_TRUTH_OUT = PRODUCTIZATION / "public_benchmark_source_of_truth.json"
+DEFAULT_SOURCE_ACQUISITION_PLAN_OUT = SOURCE_ACQUISITION_PLAN_DEFAULT_OUT
+DEFAULT_SOURCE_ACQUISITION_PLAN_MD_OUT = SOURCE_ACQUISITION_PLAN_DEFAULT_OUT_MD
 DEFAULT_SUBSET_MANIFEST_OUT = PRODUCTIZATION / "public_benchmark_subset_manifest.json"
 DEFAULT_POSE_VALIDITY_PACKET_OUT = (
     PRODUCTIZATION / "public_benchmark_pose_validity_packet.json"
@@ -114,6 +123,7 @@ SOURCE_CHECKSUM_POLICY = {
 def _source_input_paths() -> list[Path]:
     return [
         Path("scripts/build_public_benchmark_source_of_truth.py"),
+        Path("scripts/build_public_benchmark_phase2_source_acquisition_plan.py"),
         Path("scripts/materialize_public_benchmark_operator_bundle_from_rows.py"),
         Path("scripts/materialize_public_benchmark_harness_bundle.py"),
         Path("scripts/materialize_public_benchmark_posebusters_validity_packet.py"),
@@ -1834,6 +1844,9 @@ def build_source_of_truth(
         if row.get("tier_beta_blocked")
     ]
     linked_operator_artifacts = dict(operator_intake_packet.get("linked_artifacts") or {})
+    source_acquisition_summary = dict(
+        operator_intake_packet.get("source_acquisition_plan") or {}
+    )
     operator_bundle_materialization = dict(
         operator_intake_packet.get("operator_bundle_materialization") or {}
     )
@@ -1928,6 +1941,7 @@ def build_source_of_truth(
         "phase2_requirements": phase2_requirements,
         "phase2_requirement_summary": phase2_requirement_summary,
         "operator_handoff_summary": operator_handoff_summary,
+        "source_acquisition_plan": source_acquisition_summary,
         "operator_handoff_queue_count": len(operator_handoff_queue),
         "first_operator_handoff": (
             operator_handoff_queue[0] if operator_handoff_queue else {}
@@ -1957,6 +1971,10 @@ def build_source_of_truth(
             ),
         },
         "linked_artifacts": {
+            "source_acquisition_plan": str(DEFAULT_SOURCE_ACQUISITION_PLAN_OUT),
+            "source_acquisition_plan_markdown": str(
+                DEFAULT_SOURCE_ACQUISITION_PLAN_MD_OUT
+            ),
             "harness_bundle": harness_bundle_artifact,
             "operator_intake_packet": str(DEFAULT_OPERATOR_INTAKE_PACKET_OUT),
             "operator_intake_packet_markdown": str(DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT),
@@ -2135,6 +2153,7 @@ def build_source_of_truth(
                 operator_intake_packet.get("operator_template_artifacts") or {}
             ),
             "linked_artifacts": linked_operator_artifacts,
+            "source_acquisition_plan": source_acquisition_summary,
             "operator_bundle_materialization": operator_bundle_materialization,
             "minimum_subset_case_count": operator_intake_packet[
                 "minimum_subset_case_count"
@@ -2305,6 +2324,7 @@ def build_source_of_truth(
         },
         "blockers": blockers,
         "next_actions": [
+            "complete_public_benchmark_phase2_source_acquisition_plan",
             "fill_public_benchmark_operator_intake_packet",
             "materialize_public_benchmark_operator_bundle_from_rows",
             "attach_checked_casf_pdbbind_subset_source_files",
@@ -2333,6 +2353,9 @@ def build_source_of_truth(
 def build_public_benchmark_artifacts(
     *, repo_root: Path = ROOT, operator_template_dir: Path = DEFAULT_OPERATOR_TEMPLATE_DIR
 ) -> dict[str, dict[str, Any]]:
+    source_acquisition_plan = build_public_benchmark_phase2_source_acquisition_plan(
+        repo_root=repo_root
+    )
     subset_manifest = build_subset_manifest(repo_root=repo_root)
     pose_validity_packet = build_pose_validity_packet(repo_root=repo_root)
     rmsd_scorecard = build_rmsd_scorecard(repo_root=repo_root)
@@ -2385,6 +2408,7 @@ def build_public_benchmark_artifacts(
         },
     }
     return {
+        "source_acquisition_plan": source_acquisition_plan,
         "source_of_truth": source_of_truth,
         "subset_manifest": subset_manifest,
         "pose_validity_packet": pose_validity_packet,
@@ -2400,6 +2424,8 @@ def build_public_benchmark_artifacts(
 def write_public_benchmark_artifacts(
     *,
     repo_root: Path = ROOT,
+    source_acquisition_plan_out: Path = DEFAULT_SOURCE_ACQUISITION_PLAN_OUT,
+    source_acquisition_plan_md_out: Path = DEFAULT_SOURCE_ACQUISITION_PLAN_MD_OUT,
     source_of_truth_out: Path = DEFAULT_SOURCE_OF_TRUTH_OUT,
     subset_manifest_out: Path = DEFAULT_SUBSET_MANIFEST_OUT,
     pose_validity_packet_out: Path = DEFAULT_POSE_VALIDITY_PACKET_OUT,
@@ -2417,6 +2443,7 @@ def write_public_benchmark_artifacts(
         operator_template_dir=operator_template_dir,
     )
     outputs = {
+        "source_acquisition_plan": source_acquisition_plan_out,
         "source_of_truth": source_of_truth_out,
         "subset_manifest": subset_manifest_out,
         "pose_validity_packet": pose_validity_packet_out,
@@ -2431,29 +2458,30 @@ def write_public_benchmark_artifacts(
         resolved = out_path if out_path.is_absolute() else repo_root / out_path
         resolved.parent.mkdir(parents=True, exist_ok=True)
         resolved.write_text(_json_text(artifacts[key]), encoding="utf-8")
+    resolved_source_plan_md = (
+        source_acquisition_plan_md_out
+        if source_acquisition_plan_md_out.is_absolute()
+        else repo_root / source_acquisition_plan_md_out
+    )
+    resolved_source_plan_md.parent.mkdir(parents=True, exist_ok=True)
+    resolved_source_plan_md.write_text(
+        render_public_benchmark_phase2_source_acquisition_markdown(
+            artifacts["source_acquisition_plan"]
+        ),
+        encoding="utf-8",
+    )
     resolved_md = (
         operator_intake_packet_md_out
         if operator_intake_packet_md_out.is_absolute()
         else repo_root / operator_intake_packet_md_out
     )
     resolved_md.parent.mkdir(parents=True, exist_ok=True)
-    lines = [
-        "# Public Benchmark Operator Intake Packet",
-        "",
-        f"- `contract_pass`: `{artifacts['operator_intake_packet']['contract_pass']}`",
-        f"- `status`: `{artifacts['operator_intake_packet']['status']}`",
-        f"- `public_benchmark_ready`: `{artifacts['operator_intake_packet']['public_benchmark_ready']}`",
-        f"- `claim_boundary`: {artifacts['operator_intake_packet']['claim_boundary']}",
-        "",
-        "| Slot | Status | Intake Artifact |",
-        "|---|---|---|",
-    ]
-    for slot in artifacts["operator_intake_packet"]["input_slots"]:
-        lines.append(
-            f"| `{slot['slot_id']}` | `{slot['status']}` | `{slot['intake_artifact']}` |"
-        )
-    lines.append("")
-    resolved_md.write_text("\n".join(lines), encoding="utf-8")
+    resolved_md.write_text(
+        render_public_benchmark_operator_intake_markdown(
+            artifacts["operator_intake_packet"]
+        ),
+        encoding="utf-8",
+    )
     write_public_benchmark_operator_template_payloads(
         packet=artifacts["operator_intake_packet"],
         repo_root=repo_root,
@@ -2463,6 +2491,16 @@ def write_public_benchmark_artifacts(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--source-acquisition-plan-out",
+        type=Path,
+        default=DEFAULT_SOURCE_ACQUISITION_PLAN_OUT,
+    )
+    parser.add_argument(
+        "--source-acquisition-plan-md-out",
+        type=Path,
+        default=DEFAULT_SOURCE_ACQUISITION_PLAN_MD_OUT,
+    )
     parser.add_argument(
         "--source-of-truth-out", type=Path, default=DEFAULT_SOURCE_OF_TRUTH_OUT
     )
@@ -2514,6 +2552,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     artifacts = write_public_benchmark_artifacts(
+        source_acquisition_plan_out=args.source_acquisition_plan_out,
+        source_acquisition_plan_md_out=args.source_acquisition_plan_md_out,
         source_of_truth_out=args.source_of_truth_out,
         subset_manifest_out=args.subset_manifest_out,
         pose_validity_packet_out=args.pose_validity_packet_out,

@@ -827,7 +827,25 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert source["operator_intake_packet"]["acceptance_criteria"][-1] == (
         "public_benchmark_source_of_truth.public_benchmark_ready == true"
     )
+    assert source["source_acquisition_plan"]["artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_phase2_source_acquisition_plan.json"
+    )
+    assert source["source_acquisition_plan"]["status"] == (
+        "operator_acquisition_required"
+    )
+    assert source["source_acquisition_plan"]["required_row_inputs"] == [
+        "subset_rows",
+        "pose_rows",
+        "enrichment_rows",
+        "vina_gnina_rows",
+    ]
+    assert source["linked_artifacts"]["source_acquisition_plan"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_phase2_source_acquisition_plan.json"
+    )
     assert source["next_actions"] == [
+        "complete_public_benchmark_phase2_source_acquisition_plan",
         "fill_public_benchmark_operator_intake_packet",
         "materialize_public_benchmark_operator_bundle_from_rows",
         "attach_checked_casf_pdbbind_subset_source_files",
@@ -1203,6 +1221,12 @@ def test_public_benchmark_source_of_truth_ready_is_derived_from_gate() -> None:
 
 
 def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
+    source_acquisition_plan_out = (
+        tmp_path / "public_benchmark_phase2_source_acquisition_plan.json"
+    )
+    source_acquisition_plan_md_out = (
+        tmp_path / "public_benchmark_phase2_source_acquisition_plan.md"
+    )
     source_out = tmp_path / "public_benchmark_source_of_truth.json"
     subset_out = tmp_path / "public_benchmark_subset_manifest.json"
     pose_out = tmp_path / "public_benchmark_pose_validity_packet.json"
@@ -1216,6 +1240,8 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
 
     artifacts = module.write_public_benchmark_artifacts(
         repo_root=REPO_ROOT,
+        source_acquisition_plan_out=source_acquisition_plan_out,
+        source_acquisition_plan_md_out=source_acquisition_plan_md_out,
         source_of_truth_out=source_out,
         subset_manifest_out=subset_out,
         pose_validity_packet_out=pose_out,
@@ -1228,6 +1254,8 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
         operator_template_dir=operator_template_dir,
     )
 
+    assert source_acquisition_plan_out.exists()
+    assert source_acquisition_plan_md_out.exists()
     assert source_out.exists()
     assert subset_out.exists()
     assert pose_out.exists()
@@ -1238,6 +1266,14 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
     assert operator_out.exists()
     assert operator_md_out.exists()
     assert (operator_template_dir / "public_benchmark_casf_pdbbind_operator_template.json").exists()
+    assert (
+        json.loads(source_acquisition_plan_out.read_text(encoding="utf-8"))
+        == artifacts["source_acquisition_plan"]
+    )
+    assert (
+        "# Public Benchmark Phase 2 Source Acquisition Plan"
+        in source_acquisition_plan_md_out.read_text(encoding="utf-8")
+    )
     assert (
         json.loads(source_out.read_text(encoding="utf-8"))
         == artifacts["source_of_truth"]

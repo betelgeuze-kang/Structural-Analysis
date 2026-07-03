@@ -64,6 +64,22 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "casf_pdbbind_subset_intake"
     )
     assert packet["source_of_truth_status"] == "seed_ready_materialization_blocked"
+    assert packet["source_acquisition_plan"]["artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_phase2_source_acquisition_plan.json"
+    )
+    assert packet["source_acquisition_plan"]["status"] == (
+        "operator_acquisition_required"
+    )
+    assert packet["source_acquisition_plan"]["phase2_ready"] is False
+    assert packet["source_acquisition_plan"]["actual_closure_ready"] is False
+    assert packet["source_acquisition_plan"]["required_component_count"] == 5
+    assert packet["source_acquisition_plan"]["required_row_inputs"] == [
+        "subset_rows",
+        "pose_rows",
+        "enrichment_rows",
+        "vina_gnina_rows",
+    ]
     assert packet["source_of_truth_blockers"] == [
         "casf_pdbbind_source_material_not_attached",
         "casf_pdbbind_case_checksums_missing",
@@ -490,6 +506,7 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
     steps = packet["materialization_sequence"]
 
     assert [step["step_id"] for step in steps] == [
+        "build_public_benchmark_phase2_source_acquisition_plan",
         "materialize_subset_manifest",
         "materialize_pose_validity_input",
         "materialize_posebusters_validity_packet",
@@ -524,7 +541,15 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_pose_success_harness.json"
     )
-    assert packet["next_actions"][0] == "fill_public_benchmark_operator_intake_packet"
+    assert packet["linked_artifacts"]["source_acquisition_plan"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_phase2_source_acquisition_plan.json"
+    )
+    assert packet["next_actions"][:3] == [
+        "complete_public_benchmark_phase2_source_acquisition_plan",
+        "fill_public_benchmark_operator_intake_packet",
+        "materialize_public_benchmark_operator_bundle_from_rows",
+    ]
     assert packet["next_actions"][-1] == "regenerate_goal_bottleneck_roadmap_surface"
     assert packet["linked_artifacts"]["source_of_truth"] == (
         "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json"
@@ -592,6 +617,7 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
             "implementation/phase1/release_evidence/productization/"
             "public_benchmark_phase2_row_audit.json"
         ),
+        "source_acquisition_plan": packet["source_acquisition_plan"],
         "row_template_artifacts": {
             "enrichment_rows": (
                 "implementation/phase1/release_evidence/productization/"
@@ -632,10 +658,10 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
     assert "public_benchmark_harness_bundle.json" in packet[
         "operator_bundle_materialization"
     ]["artifact_index_command"]
-    assert packet["next_actions"][1] == (
+    assert packet["next_actions"][2] == (
         "materialize_public_benchmark_operator_bundle_from_rows"
     )
-    assert packet["next_actions"][2] == (
+    assert packet["next_actions"][3] == (
         "run_public_benchmark_harness_bundle_materializer"
     )
     assert packet["operator_template_schema_version"] == (
