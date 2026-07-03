@@ -38,6 +38,12 @@
 
 ## Vina/GNINA Runtime
 
+- `operator_unblock_status`: `engine_inputs_required`
+- `input_manifest_template_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv`
+- `blocked_case_input_slot_count`: `12`
+- `blocked_engine_run_slot_count`: `24`
+- `adapter_row_preflight_status`: `row_artifact_missing`
+
 | Engine | Container Status | Docker Daemon | Image Env Var | Image Present |
 |---|---|---|---|---|
 | `vina` | `container_image_not_configured` | `True` | `PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE` | `False` |

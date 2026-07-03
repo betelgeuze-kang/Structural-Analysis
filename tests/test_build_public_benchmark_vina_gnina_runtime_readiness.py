@@ -348,6 +348,29 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "score",
         "score_direction",
     ]
+    unblock = payload["operator_unblock_packet"]
+    assert unblock["status"] == "engine_runtime_required"
+    assert unblock["input_manifest_template_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_input_manifest_template.csv"
+    )
+    assert unblock["case_input_slot_count"] == 1
+    assert unblock["blocked_case_input_slot_count"] == 0
+    assert unblock["required_engine_run_count"] == 2
+    assert unblock["ready_engine_run_slot_count"] == 0
+    assert unblock["blocked_engine_run_slot_count"] == 2
+    assert unblock["missing_engine_ids"] == ["vina", "gnina"]
+    assert unblock["first_blocked_engine_run_slot"]["engine_id"] == "vina"
+    assert unblock["engine_runtime_actions"][0] == {
+        "binary_env_var": "PUBLIC_BENCHMARK_VINA_BIN",
+        "container_image_env_var": "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE",
+        "engine_id": "vina",
+        "operator_action": "configure_vina_runtime",
+    }
+    assert unblock["operator_sequence"][:2] == [
+        "fill_public_benchmark_vina_gnina_input_manifest_from_template",
+        "rerun_public_benchmark_vina_gnina_execution_plan",
+    ]
     assert "does not run docking engines" in payload["claim_boundary"]
 
 
@@ -541,6 +564,26 @@ def test_runtime_readiness_blocks_case_input_blockers_with_available_engines(
     ]
     assert payload["engine_run_slots"][0]["case_inputs_ready"] is False
     assert payload["engine_run_slots"][0]["status"] == "blocked"
+    unblock = payload["operator_unblock_packet"]
+    assert unblock["status"] == "engine_inputs_required"
+    assert unblock["blocked_case_input_slot_count"] == 1
+    assert unblock["first_blocked_case_input_slot"] == {
+        "blockers": [
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+        ],
+        "case_id": "casf2016_1abc",
+        "case_inputs_ready": False,
+        "complex_id": "1abc",
+        "input_manifest_template_artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_vina_gnina_input_manifest_template.csv"
+        ),
+        "operator_action": (
+            "fill_vina_gnina_input_manifest_row_for_casf2016_1abc"
+        ),
+        "status": "blocked",
+    }
 
 
 def test_runtime_readiness_cli_writes_artifact(tmp_path: Path, monkeypatch) -> None:

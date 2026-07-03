@@ -218,6 +218,17 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "vina",
         "gnina",
     ]
+    runtime_unblock = payload["vina_gnina_runtime_readiness"][
+        "operator_unblock_packet"
+    ]
+    assert runtime_unblock["status"] == "engine_inputs_required"
+    assert runtime_unblock["input_manifest_template_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_input_manifest_template.csv"
+    )
+    assert runtime_unblock["blocked_case_input_slot_count"] == 12
+    assert runtime_unblock["blocked_engine_run_slot_count"] == 24
+    assert runtime_unblock["adapter_row_preflight_status"] == "row_artifact_missing"
     assert payload["vina_gnina_runtime_readiness"]["container_runtime_status"][
         "available"
     ] is True
@@ -399,6 +410,9 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "`vina_gnina_required_engine_run_count`: `24`" in markdown
     assert "`vina_gnina_input_manifest_status`: `not_detected`" in markdown
     assert "`vina_gnina_runtime_ready_engine_run_slot_count`: `0`" in markdown
+    assert "`operator_unblock_status`: `engine_inputs_required`" in markdown
+    assert "`blocked_case_input_slot_count`: `12`" in markdown
+    assert "`blocked_engine_run_slot_count`: `24`" in markdown
     assert "## Missing Row Input Actions" in markdown
     assert "attach_vina_gnina_rows_then_run_phase2_row_audit" in markdown
     assert "## Vina/GNINA Runtime" in markdown

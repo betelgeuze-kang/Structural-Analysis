@@ -33,6 +33,7 @@ PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_SOURCE_ACQUISITION_PLAN = PRODUCTIZATION / "pocketmd_lite_source_acquisition_plan.json"
 DEFAULT_SURVIVAL_REPORT = PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json"
 DEFAULT_ROWS_OUT = PRODUCTIZATION / "pocketmd_lite_topk_rows.json"
+DEFAULT_ROWS_TEMPLATE = PRODUCTIZATION / "pocketmd_lite_topk_rows_template.csv"
 DEFAULT_OPERATOR_INTAKE = PRODUCTIZATION / "pocketmd_lite_operator_intake.json"
 DEFAULT_OUT = PRODUCTIZATION / "pocketmd_lite_refinement_execution_plan.json"
 SCHEMA_VERSION = "pocketmd-lite-refinement-execution-plan.v1"
@@ -229,6 +230,51 @@ def _top_k_slot_status_summary(
     }
 
 
+def _operator_unblock_packet(
+    *,
+    top_k_slot_status_summary: dict[str, Any],
+    rows_out: Path,
+    operator_intake_out: Path,
+    operator_commands: dict[str, str],
+) -> dict[str, Any]:
+    missing_candidate_slot_count = int(
+        top_k_slot_status_summary.get("missing_candidate_slot_count") or 0
+    )
+    return {
+        "status": (
+            "operator_refinement_rows_required"
+            if missing_candidate_slot_count
+            else "operator_refinement_rows_ready"
+        ),
+        "row_template_artifact": str(DEFAULT_ROWS_TEMPLATE),
+        "expected_rows_artifact": str(rows_out),
+        "expected_operator_intake_artifact": str(operator_intake_out),
+        "required_candidate_slot_count": int(
+            top_k_slot_status_summary.get("required_candidate_slot_count") or 0
+        ),
+        "provided_candidate_slot_count": int(
+            top_k_slot_status_summary.get("provided_candidate_slot_count") or 0
+        ),
+        "missing_candidate_slot_count": missing_candidate_slot_count,
+        "first_missing_candidate_slot": dict(
+            top_k_slot_status_summary.get("first_missing_candidate_slot") or {}
+        ),
+        "operator_sequence": [
+            "fill_pocketmd_lite_topk_rows_from_template",
+            "materialize_pocketmd_lite_operator_intake_from_rows",
+            "materialize_pocketmd_lite_topk_survival_report",
+            "refresh_pocketmd_lite_refinement_execution_plan",
+            "rerun_science_actual_closure_row_audit",
+        ],
+        "commands": dict(operator_commands),
+        "claim_boundary": (
+            "This packet lists the bounded top-k refinement rows required by "
+            "PocketMD Lite. It does not run refinement or synthesize local-min, "
+            "contact, H-bond, clash, or uncertainty metrics."
+        ),
+    }
+
+
 def build_pocketmd_lite_refinement_execution_plan(
     *,
     repo_root: Path = ROOT,
@@ -267,6 +313,28 @@ def build_pocketmd_lite_refinement_execution_plan(
         blockers.append(row_blocker)
     blockers.extend(survival_blockers)
     blockers = list(dict.fromkeys(blockers))
+    operator_commands = {
+        "import_rows": (
+            "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
+            f"--rows {rows_out} --out {operator_intake_out} "
+            "--source-id <source-id> --source-url <source-url> "
+            "--source-license <license>"
+        ),
+        "materialize_survival_report": (
+            "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py "
+            f"--intake {operator_intake_out} "
+            f"--contract {PRODUCTIZATION / 'pocketmd_lite_contract.json'} "
+            f"--out-report {DEFAULT_SURVIVAL_REPORT} "
+            "--out-surface implementation/phase1/release_evidence/surface/"
+            "pocketmd_lite_science_product_surface.json --fail-blocked"
+        ),
+    }
+    operator_unblock_packet = _operator_unblock_packet(
+        top_k_slot_status_summary=top_k_slot_status_summary,
+        rows_out=rows_out,
+        operator_intake_out=operator_intake_out,
+        operator_commands=operator_commands,
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -293,27 +361,13 @@ def build_pocketmd_lite_refinement_execution_plan(
         "raw_row_candidate_status": raw_row_status,
         "expected_rows_artifact": str(rows_out),
         "expected_operator_intake_artifact": str(operator_intake_out),
+        "operator_unblock_packet": operator_unblock_packet,
         "supported_row_formats": list(SUPPORTED_ROW_FORMATS),
         "required_case_fields": list(REQUIRED_CASE_FIELDS),
         "required_flat_row_fields": _required_flat_row_fields(),
         "row_value_contract": row_value_contract(max_top_k=20),
         "source_receipt_requirements": dict(SOURCE_RECEIPT_REQUIREMENTS),
-        "operator_commands": {
-            "import_rows": (
-                "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
-                f"--rows {rows_out} --out {operator_intake_out} "
-                "--source-id <source-id> --source-url <source-url> "
-                "--source-license <license>"
-            ),
-            "materialize_survival_report": (
-                "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py "
-                f"--intake {operator_intake_out} "
-                f"--contract {PRODUCTIZATION / 'pocketmd_lite_contract.json'} "
-                f"--out-report {DEFAULT_SURVIVAL_REPORT} "
-                "--out-surface implementation/phase1/release_evidence/surface/"
-                "pocketmd_lite_science_product_surface.json --fail-blocked"
-            ),
-        },
+        "operator_commands": operator_commands,
         "blockers": blockers,
         "summary": {
             "required_case_count": len(minimum_rows),

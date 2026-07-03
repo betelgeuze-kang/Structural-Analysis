@@ -439,6 +439,9 @@ def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, 
     engine_container_statuses = payload.get("current_engine_container_statuses")
     if not isinstance(engine_container_statuses, list):
         engine_container_statuses = []
+    operator_unblock_packet = payload.get("operator_unblock_packet")
+    if not isinstance(operator_unblock_packet, dict):
+        operator_unblock_packet = {}
     return {
         "artifact": str(DEFAULT_VINA_GNINA_RUNTIME_READINESS),
         "status": str(payload.get("status") or "missing"),
@@ -498,6 +501,7 @@ def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, 
             for row in engine_container_statuses
             if isinstance(row, dict)
         ],
+        "operator_unblock_packet": operator_unblock_packet,
         "blocker_count": len(blockers),
         "blockers": [str(row) for row in blockers],
         "command": (
@@ -1212,6 +1216,20 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                 f"`{row.get('materialization_command', '')}` |"
             )
     lines.extend(["", "## Vina/GNINA Runtime", ""])
+    runtime_unblock = payload["vina_gnina_runtime_readiness"].get(
+        "operator_unblock_packet"
+    )
+    if isinstance(runtime_unblock, dict) and runtime_unblock:
+        lines.extend(
+            [
+                f"- `operator_unblock_status`: `{runtime_unblock.get('status')}`",
+                f"- `input_manifest_template_artifact`: `{runtime_unblock.get('input_manifest_template_artifact')}`",
+                f"- `blocked_case_input_slot_count`: `{runtime_unblock.get('blocked_case_input_slot_count')}`",
+                f"- `blocked_engine_run_slot_count`: `{runtime_unblock.get('blocked_engine_run_slot_count')}`",
+                f"- `adapter_row_preflight_status`: `{runtime_unblock.get('adapter_row_preflight_status')}`",
+                "",
+            ]
+        )
     lines.extend(
         [
             "| Engine | Container Status | Docker Daemon | Image Env Var | Image Present |",

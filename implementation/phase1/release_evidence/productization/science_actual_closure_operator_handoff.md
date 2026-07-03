@@ -24,6 +24,8 @@
 ### Vina/GNINA Engine Run Slots
 
 - `blocked_engine_run_slot_count`: `24`
+- `operator_unblock_status`: `engine_inputs_required`
+- `input_manifest_template_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv`
 
 | Slot | Case | Engine | Status | Actions |
 | --- | --- | --- | --- | --- |
@@ -55,6 +57,8 @@
 
 ### PocketMD Top-k Candidate Slots
 
+- `operator_unblock_status`: `operator_refinement_rows_required`
+- `row_template_artifact`: `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv`
 | Slot | Case | Rank | Status | Action |
 | --- | --- | --- | --- | --- |
 | `pocketmd_lite_case_001_rank_01` | `pocketmd_lite_case_001` | `1` | `missing` | `attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01` |

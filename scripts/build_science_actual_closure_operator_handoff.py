@@ -223,6 +223,9 @@ def _pocketmd_top_k_slot_detail(
         ),
         "top_k_slot_status_summary": summary,
         "candidate_slot_statuses": candidate_slot_statuses,
+        "operator_unblock_packet": _as_dict(
+            refinement_plan.get("operator_unblock_packet")
+        ),
         "first_missing_candidate_slot": _as_dict(
             summary.get("first_missing_candidate_slot")
         ),
@@ -316,6 +319,9 @@ def _vina_gnina_engine_run_slot_detail(
         ],
         "row_candidate_status": _as_dict(
             runtime_readiness.get("row_candidate_status")
+        ),
+        "operator_unblock_packet": _as_dict(
+            runtime_readiness.get("operator_unblock_packet")
         ),
         "engine_run_status_summary": {
             "required_engine_run_count": len(engine_run_slots),
@@ -894,7 +900,17 @@ def _markdown(payload: dict[str, Any]) -> str:
                 if isinstance(item, dict)
             ]
             if missing_candidate_slots:
+                operator_unblock = _as_dict(
+                    row_input_detail.get("operator_unblock_packet")
+                )
                 lines.extend(["", "### PocketMD Top-k Candidate Slots", ""])
+                if operator_unblock:
+                    lines.extend(
+                        [
+                            f"- `operator_unblock_status`: `{operator_unblock.get('status')}`",
+                            f"- `row_template_artifact`: `{operator_unblock.get('row_template_artifact')}`",
+                        ]
+                    )
                 lines.extend(
                     [
                         "| Slot | Case | Rank | Status | Action |",
@@ -921,11 +937,21 @@ def _markdown(payload: dict[str, Any]) -> str:
                 and str(item.get("status") or "") != "ready_for_engine_execution"
             ]
             if blocked_engine_run_slots:
+                operator_unblock = _as_dict(
+                    engine_run_detail.get("operator_unblock_packet")
+                )
                 lines.extend(["", "### Vina/GNINA Engine Run Slots", ""])
                 lines.append(
                     f"- `blocked_engine_run_slot_count`: "
                     f"`{engine_run_summary.get('blocked_engine_run_slot_count')}`"
                 )
+                if operator_unblock:
+                    lines.extend(
+                        [
+                            f"- `operator_unblock_status`: `{operator_unblock.get('status')}`",
+                            f"- `input_manifest_template_artifact`: `{operator_unblock.get('input_manifest_template_artifact')}`",
+                        ]
+                    )
                 lines.extend(
                     [
                         "",

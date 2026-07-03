@@ -33,6 +33,9 @@ from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_EXECUTION_PLAN = PRODUCTIZATION / "public_benchmark_vina_gnina_execution_plan.json"
 DEFAULT_VINA_GNINA_ROWS = PRODUCTIZATION / "public_benchmark_vina_gnina_rows.json"
+DEFAULT_INPUT_MANIFEST_TEMPLATE = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest_template.csv"
+)
 DEFAULT_OUT = PRODUCTIZATION / "public_benchmark_vina_gnina_runtime_readiness.json"
 SCHEMA_VERSION = "public-benchmark-vina-gnina-runtime-readiness.v1"
 DOCKER_BIN_ENV = "PUBLIC_BENCHMARK_DOCKER_BIN"
@@ -500,6 +503,134 @@ def _engine_run_slots(
     return slots
 
 
+def _case_input_unblock_slots(
+    engine_run_slots: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    slots_by_case: dict[str, dict[str, Any]] = {}
+    for slot in engine_run_slots:
+        case_id = str(slot.get("case_id") or "")
+        if not case_id or case_id in slots_by_case:
+            continue
+        case_blockers = (
+            [str(row) for row in slot.get("case_blockers", []) if str(row)]
+            if isinstance(slot.get("case_blockers"), list)
+            else []
+        )
+        case_inputs_ready = bool(slot.get("case_inputs_ready"))
+        slots_by_case[case_id] = {
+            "case_id": case_id,
+            "complex_id": str(slot.get("complex_id") or ""),
+            "status": "ready" if case_inputs_ready else "blocked",
+            "case_inputs_ready": case_inputs_ready,
+            "blockers": case_blockers,
+            "input_manifest_template_artifact": str(DEFAULT_INPUT_MANIFEST_TEMPLATE),
+            "operator_action": (
+                f"review_vina_gnina_case_inputs_for_{case_id}"
+                if case_inputs_ready
+                else f"fill_vina_gnina_input_manifest_row_for_{case_id}"
+            ),
+        }
+    return list(slots_by_case.values())
+
+
+def _operator_unblock_packet(
+    *,
+    engine_run_slots: list[dict[str, Any]],
+    current_engine_execution_statuses: list[dict[str, Any]],
+    row_status: dict[str, Any],
+    ready_engine_run_slot_count: int,
+    required_engine_run_count: int,
+    runtime_ready: bool,
+    adapter_rows_ready: bool,
+) -> dict[str, Any]:
+    blocked_engine_run_slots = [
+        row
+        for row in engine_run_slots
+        if str(row.get("status") or "") != "ready_for_engine_execution"
+    ]
+    case_input_slots = _case_input_unblock_slots(engine_run_slots)
+    blocked_case_input_slots = [
+        row for row in case_input_slots if str(row.get("status") or "") != "ready"
+    ]
+    missing_engine_ids = [
+        str(row.get("engine_id") or "")
+        for row in current_engine_execution_statuses
+        if not bool(row.get("available")) and str(row.get("engine_id") or "")
+    ]
+    if blocked_case_input_slots:
+        status = "engine_inputs_required"
+    elif missing_engine_ids:
+        status = "engine_runtime_required"
+    elif not runtime_ready:
+        status = "engine_run_slots_blocked"
+    elif not adapter_rows_ready:
+        status = "engine_run_rows_required"
+    else:
+        status = "adapter_materialization_ready"
+    return {
+        "status": status,
+        "input_manifest_template_artifact": str(DEFAULT_INPUT_MANIFEST_TEMPLATE),
+        "expected_rows_artifact": str(DEFAULT_VINA_GNINA_ROWS),
+        "case_input_slot_count": len(case_input_slots),
+        "blocked_case_input_slot_count": len(blocked_case_input_slots),
+        "first_blocked_case_input_slot": (
+            blocked_case_input_slots[0] if blocked_case_input_slots else {}
+        ),
+        "required_engine_run_count": required_engine_run_count,
+        "ready_engine_run_slot_count": ready_engine_run_slot_count,
+        "blocked_engine_run_slot_count": len(blocked_engine_run_slots),
+        "first_blocked_engine_run_slot": (
+            blocked_engine_run_slots[0] if blocked_engine_run_slots else {}
+        ),
+        "missing_engine_ids": missing_engine_ids,
+        "engine_runtime_actions": [
+            {
+                "engine_id": engine_id,
+                "binary_env_var": _engine_binary_env_var(engine_id),
+                "container_image_env_var": _engine_container_image_env_var(engine_id),
+                "operator_action": f"configure_{engine_id}_runtime",
+            }
+            for engine_id in SUPPORTED_ENGINES
+        ],
+        "adapter_row_preflight_status": str(row_status.get("status") or ""),
+        "detected_row_artifact_count": int(
+            row_status.get("detected_row_artifact_count") or 0
+        ),
+        "selected_row_path": str(row_status.get("selected_path") or ""),
+        "operator_sequence": [
+            "fill_public_benchmark_vina_gnina_input_manifest_from_template",
+            "rerun_public_benchmark_vina_gnina_execution_plan",
+            "configure_vina_gnina_binary_or_container_runtime",
+            "rerun_public_benchmark_vina_gnina_runtime_readiness",
+            "attach_public_benchmark_vina_gnina_rows",
+            "materialize_public_benchmark_vina_gnina_comparison_adapter",
+        ],
+        "commands": {
+            "rerun_execution_plan": (
+                "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
+                f"--out {DEFAULT_EXECUTION_PLAN}"
+            ),
+            "rerun_runtime_readiness": (
+                "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py "
+                f"--out {DEFAULT_OUT}"
+            ),
+            "materialize_adapter": (
+                "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py "
+                f"--intake {DEFAULT_VINA_GNINA_ROWS} --out-adapter "
+                f"{PRODUCTIZATION / 'public_benchmark_vina_gnina_comparison_adapter.json'} "
+                "--out-report "
+                f"{PRODUCTIZATION / 'public_benchmark_vina_gnina_materialization_report.json'} "
+                "--fail-blocked"
+            ),
+        },
+        "claim_boundary": (
+            "This packet only enumerates the operator steps needed to unblock "
+            "Vina/GNINA execution and adapter row materialization. It does not run "
+            "engines or synthesize comparison rows."
+        ),
+    }
+
+
 def build_vina_gnina_runtime_readiness(
     *,
     repo_root: Path = ROOT,
@@ -585,6 +716,15 @@ def build_vina_gnina_runtime_readiness(
         and all_engines_available
         and all_engine_run_slots_ready
     )
+    operator_unblock_packet = _operator_unblock_packet(
+        engine_run_slots=engine_run_slots,
+        current_engine_execution_statuses=current_engine_execution_statuses,
+        row_status=row_status,
+        ready_engine_run_slot_count=ready_engine_run_slot_count,
+        required_engine_run_count=required_engine_run_count,
+        runtime_ready=runtime_ready,
+        adapter_rows_ready=adapter_rows_ready,
+    )
     if not execution_plan_ready:
         status = "execution_plan_blocked"
     elif not all_engines_available:
@@ -627,6 +767,7 @@ def build_vina_gnina_runtime_readiness(
         ],
         "row_candidate_status": row_status,
         "engine_run_slots": engine_run_slots,
+        "operator_unblock_packet": operator_unblock_packet,
         "required_engine_run_count": required_engine_run_count,
         "ready_engine_run_slot_count": ready_engine_run_slot_count,
         "operator_commands": {

@@ -308,6 +308,22 @@ def test_refinement_execution_plan_enumerates_candidate_slots(
     }
     assert payload["expected_rows_artifact"] == str(rows_out)
     assert payload["expected_operator_intake_artifact"] == str(operator_intake)
+    unblock = payload["operator_unblock_packet"]
+    assert unblock["status"] == "operator_refinement_rows_required"
+    assert unblock["row_template_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows_template.csv"
+    )
+    assert unblock["expected_rows_artifact"] == str(rows_out)
+    assert unblock["expected_operator_intake_artifact"] == str(operator_intake)
+    assert unblock["required_candidate_slot_count"] == 6
+    assert unblock["provided_candidate_slot_count"] == 0
+    assert unblock["missing_candidate_slot_count"] == 6
+    assert unblock["first_missing_candidate_slot"]["slot_id"] == "case_a_rank_01"
+    assert unblock["operator_sequence"][:2] == [
+        "fill_pocketmd_lite_topk_rows_from_template",
+        "materialize_pocketmd_lite_operator_intake_from_rows",
+    ]
     assert "materialize_pocketmd_lite_operator_intake_from_rows.py" in payload[
         "operator_commands"
     ]["import_rows"]
@@ -356,6 +372,11 @@ def test_refinement_execution_plan_marks_valid_rows_ready(
     assert payload["top_k_slot_status_summary"]["missing_candidate_slot_count"] == 0
     assert payload["top_k_slot_status_summary"]["missing_candidate_slots"] == []
     assert payload["top_k_slot_status_summary"]["first_missing_candidate_slot"] == {}
+    assert payload["operator_unblock_packet"]["status"] == (
+        "operator_refinement_rows_ready"
+    )
+    assert payload["operator_unblock_packet"]["provided_candidate_slot_count"] == 6
+    assert payload["operator_unblock_packet"]["missing_candidate_slot_count"] == 0
     assert payload["blockers"] == [
         "pocketmd_lite_topk_candidate_rows_missing",
         "pocketmd_lite_local_min_survival_rows_missing",

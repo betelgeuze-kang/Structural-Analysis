@@ -215,6 +215,15 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "configure_vina_runtime",
         "attach_vina_gnina_adapter_row_for_casf2016_4llx_vina",
     ]
+    assert vina_detail["operator_unblock_packet"]["status"] == (
+        "engine_inputs_required"
+    )
+    assert vina_detail["operator_unblock_packet"][
+        "input_manifest_template_artifact"
+    ].endswith("public_benchmark_vina_gnina_input_manifest_template.csv")
+    assert vina_detail["operator_unblock_packet"][
+        "blocked_engine_run_slot_count"
+    ] == 24
     assert vina_detail["engine_run_slots"][0]["required_adapter_engine_run_fields"] == [
         "engine_id",
         "docking_run_id",
@@ -317,6 +326,12 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert pocketmd["row_input_slot_detail"]["top_k_slot_status_summary"][
         "missing_candidate_slot_count"
     ] == 6
+    assert pocketmd["row_input_slot_detail"]["operator_unblock_packet"]["status"] == (
+        "operator_refinement_rows_required"
+    )
+    assert pocketmd["row_input_slot_detail"]["operator_unblock_packet"][
+        "row_template_artifact"
+    ].endswith("pocketmd_lite_topk_rows_template.csv")
     assert pocketmd["row_input_slot_detail"]["candidate_slot_statuses"][0] == {
         "case_id": "pocketmd_lite_case_001",
         "expected_rows_artifact": (
@@ -420,6 +435,8 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     )
     assert "public_benchmark_vina_gnina_input_manifest_not_detected" in markdown
     assert "### Vina/GNINA Engine Run Slots" in markdown
+    assert "`operator_unblock_status`: `engine_inputs_required`" in markdown
+    assert "public_benchmark_vina_gnina_input_manifest_template.csv" in markdown
     assert "casf2016_4llx_vina_casf2016_4llx_vina_run" in markdown
     assert "configure_vina_runtime" in markdown
     assert "## Provided Closure Evidence" in markdown
@@ -427,6 +444,7 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "| `DRD2` | `1.0` | `0.6` | `0` | `False` | `pass` |" in markdown
     assert "pocketmd_lite_topk_rows_not_acquired" in markdown
     assert "### PocketMD Top-k Candidate Slots" in markdown
+    assert "`operator_unblock_status`: `operator_refinement_rows_required`" in markdown
     assert "pocketmd_lite_case_001_rank_01" in markdown
     assert "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01" in markdown
     assert "public_benchmark_subset_rows_template.csv" in markdown
