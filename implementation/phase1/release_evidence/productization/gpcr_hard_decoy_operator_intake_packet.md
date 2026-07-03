@@ -35,6 +35,7 @@
 - `raw_row_value_contract`: `{"boolean_label_policy": "is_positive and is_decoy must parse to booleans and be mutually exclusive.", "numeric_value_policy": {"score": "must parse to a finite float; NaN and Infinity are rejected"}, "row_integrity_policy": "molecule_id must be nonblank, non-placeholder, and unique within each target.", "score_direction_policy": "score_direction must be higher_is_better or lower_is_better, with exactly one direction per target.", "target_id_policy": "target_id must be one of DRD2, HTR2A, or OPRM1; out-of-scope target rows are rejected before suite materialization."}`
 - `source_receipt_requirements`: `{"mode": "raw_hard_decoy_rows", "placeholder_block_policy": {"text_markers": ["<operator", "fixture", "synthetic", "mock", "placeholder", "dummy", "example", "unit-test", "test-only"], "url_markers": ["://example.", ".example/", ".invalid", ".test/", "localhost", "127.0.0.1", "0.0.0.0"], "url_prefixes": ["operator://", "local-evidence://", "local://", "fixture://", "mock://", "synthetic://", "placeholder://", "test://", "unit-test://", "file://"]}, "required_fields": ["source_id", "source_url", "source_license", "source_artifact", "source_artifact_sha256"], "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached raw row artifact"}`
 - `source_acquisition_plan`: `implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.json`
+- `chembl_activity_rows`: `implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json`
 - `row_template_artifacts`: `{"gpcr_hard_decoy_rows": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv"}`
 
 ## Target Execution Preflight
@@ -48,6 +49,7 @@
 ## Materialization Sequence
 
 - `build_gpcr_hard_decoy_source_acquisition_plan`: `python3 scripts/build_gpcr_hard_decoy_source_acquisition_plan.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.json`
+- `build_gpcr_hard_decoy_chembl_activity_rows`: `python3 scripts/build_gpcr_hard_decoy_chembl_activity_rows.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json`
 - `materialize_gpcr_hard_decoy_operator_template_from_rows`: `python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py --rows <gpcr_hard_decoy_raw_rows.csv|json|tsv> --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json`
 - `materialize_gpcr_hard_decoy_suite_report`: `python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked`
 - `refresh_gpcr_hard_decoy_product_report`: `python3 scripts/build_gpcr_hard_decoy_product_report.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json`

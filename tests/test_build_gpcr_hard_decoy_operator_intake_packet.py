@@ -109,6 +109,19 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "HTR2A": 20,
         "OPRM1": 20,
     }
+    assert packet["raw_row_import"]["source_acquisition_plan"][
+        "chembl_activity_rows"
+    ]["raw_rows_ready"] is True
+    assert packet["raw_row_import"]["source_acquisition_plan"][
+        "chembl_activity_rows"
+    ]["row_count"] == 96
+    assert packet["raw_row_import"]["source_acquisition_plan"][
+        "chembl_activity_rows"
+    ]["target_counts"] == {
+        "DRD2": {"decoy_count": 20, "positive_count": 12, "total_count": 32},
+        "HTR2A": {"decoy_count": 20, "positive_count": 12, "total_count": 32},
+        "OPRM1": {"decoy_count": 20, "positive_count": 12, "total_count": 32},
+    }
     assert packet["target_execution_preflight_count"] == 3
     assert packet["first_target_execution_preflight_blocker"]["target_id"] == "DRD2"
     assert packet["first_target_execution_preflight_blocker"]["first_blocker"] == (
@@ -300,6 +313,7 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
 
     assert [step["step_id"] for step in packet["materialization_sequence"]] == [
         "build_gpcr_hard_decoy_source_acquisition_plan",
+        "build_gpcr_hard_decoy_chembl_activity_rows",
         "materialize_gpcr_hard_decoy_operator_template_from_rows",
         "materialize_gpcr_hard_decoy_suite_report",
         "refresh_gpcr_hard_decoy_product_report",
@@ -347,6 +361,12 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
         "raw_hard_decoy_rows"
     )
     assert packet["raw_row_import"]["source_acquisition_plan"]["blocker_count"] == 3
+    assert packet["raw_row_import"]["source_attached_row_artifacts"] == {
+        "chembl_activity_rows": (
+            "implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_chembl_activity_rows.json"
+        )
+    }
     assert packet["raw_row_import"]["row_template_artifacts"] == packet[
         "row_template_artifacts"
     ]
@@ -379,8 +399,9 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
     )
     assert packet["raw_row_dropzone"] == {
         "auto_detection_policy": (
-            "Place real GPCR hard-decoy row files at the default paths, then run "
-            "the raw-row importer followed by the suite materializer."
+            "Place accepted GPCR hard-decoy row files at the default paths, or "
+            "promote the reviewed ChEMBL activity row artifact, then run the "
+            "raw-row importer followed by the suite materializer."
         ),
         "default_row_path_candidates": [
             "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
@@ -402,6 +423,12 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
                 "gpcr_hard_decoy_rows_template.csv"
             )
         },
+        "source_attached_row_artifacts": {
+            "chembl_activity_rows": (
+                "implementation/phase1/release_evidence/productization/"
+                "gpcr_hard_decoy_chembl_activity_rows.json"
+            )
+        },
         "source_acquisition_plan": packet["raw_row_import"][
             "source_acquisition_plan"
         ],
@@ -416,10 +443,10 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
     ]
     assert packet["next_actions"][:5] == [
         "complete_gpcr_hard_decoy_source_acquisition_plan",
-        "build_gpcr_hard_decoy_decoy_source_snapshot",
-        "attach_gpcr_hard_decoy_raw_row_file",
+        "build_gpcr_hard_decoy_chembl_activity_rows",
+        "review_gpcr_chembl_activity_rows_for_hard_decoy_source_acceptance",
+        "promote_gpcr_chembl_activity_rows_to_default_dropzone",
         "materialize_gpcr_hard_decoy_operator_template_from_rows",
-        "fill_gpcr_hard_decoy_operator_intake_packet",
     ]
     assert packet["linked_artifacts"]["operator_template"] == (
         "implementation/phase1/release_evidence/productization/"
@@ -428,6 +455,10 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
     assert packet["linked_artifacts"]["source_acquisition_plan"] == (
         "implementation/phase1/release_evidence/productization/"
         "gpcr_hard_decoy_source_acquisition_plan.json"
+    )
+    assert packet["linked_artifacts"]["chembl_activity_rows"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "gpcr_hard_decoy_chembl_activity_rows.json"
     )
     assert packet["linked_artifacts"]["row_templates"] == packet[
         "row_template_artifacts"

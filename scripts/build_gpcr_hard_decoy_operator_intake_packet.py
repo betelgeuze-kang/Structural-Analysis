@@ -46,6 +46,9 @@ DEFAULT_GOAL_BOTTLENECK = PRODUCTIZATION / "goal_bottleneck_roadmap_surface.json
 DEFAULT_SOURCE_ACQUISITION_PLAN = (
     PRODUCTIZATION / "gpcr_hard_decoy_source_acquisition_plan.json"
 )
+DEFAULT_CHEMBL_ACTIVITY_ROWS = (
+    PRODUCTIZATION / "gpcr_hard_decoy_chembl_activity_rows.json"
+)
 DEFAULT_OUT = PRODUCTIZATION / "gpcr_hard_decoy_operator_intake_packet.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_ROW_TEMPLATE_DIR = PRODUCTIZATION
@@ -166,6 +169,7 @@ def _input_paths() -> list[Path]:
         DEFAULT_SUITE_REPORT,
         DEFAULT_EVIDENCE_SURFACE,
         DEFAULT_SOURCE_ACQUISITION_PLAN,
+        DEFAULT_CHEMBL_ACTIVITY_ROWS,
     ]
 
 
@@ -570,6 +574,9 @@ def build_gpcr_hard_decoy_operator_intake_packet(
     decoy_source_snapshot = _as_dict(
         source_acquisition_plan.get("decoy_source_snapshot")
     )
+    chembl_activity_rows = _as_dict(
+        source_acquisition_plan.get("chembl_activity_rows")
+    )
     source_acquisition_summary = {
         "artifact": str(DEFAULT_SOURCE_ACQUISITION_PLAN),
         "status": str(source_acquisition_plan.get("status") or ""),
@@ -585,6 +592,7 @@ def build_gpcr_hard_decoy_operator_intake_packet(
         ),
         "positive_source_snapshot": positive_source_snapshot,
         "decoy_source_snapshot": decoy_source_snapshot,
+        "chembl_activity_rows": chembl_activity_rows,
         "blocker_count": int(source_acquisition_plan.get("blocker_count") or 0),
         "blockers": [
             str(row) for row in _as_list(source_acquisition_plan.get("blockers"))
@@ -676,6 +684,9 @@ def build_gpcr_hard_decoy_operator_intake_packet(
             "row_source_receipt_requirements": dict(ROW_SOURCE_RECEIPT_REQUIREMENTS),
             "source_receipt_requirements": dict(SOURCE_RECEIPT_REQUIREMENTS),
             "source_acquisition_plan": source_acquisition_summary,
+            "source_attached_row_artifacts": {
+                "chembl_activity_rows": str(DEFAULT_CHEMBL_ACTIVITY_ROWS),
+            },
             "optional_row_fields": ["score_direction"],
             "required_targets": list(REQUIRED_TARGETS),
             "default_score_direction": "higher_is_better",
@@ -690,12 +701,16 @@ def build_gpcr_hard_decoy_operator_intake_packet(
         "raw_row_dropzone": {
             "status": "ready_for_operator_rows",
             "auto_detection_policy": (
-                "Place real GPCR hard-decoy row files at the default paths, then run "
-                "the raw-row importer followed by the suite materializer."
+                "Place accepted GPCR hard-decoy row files at the default paths, or "
+                "promote the reviewed ChEMBL activity row artifact, then run the "
+                "raw-row importer followed by the suite materializer."
             ),
             "default_row_path_candidates": DEFAULT_RAW_ROW_INPUT_CANDIDATES,
             "row_template_artifacts": row_template_artifacts,
             "source_acquisition_plan": source_acquisition_summary,
+            "source_attached_row_artifacts": {
+                "chembl_activity_rows": str(DEFAULT_CHEMBL_ACTIVITY_ROWS),
+            },
             "materialization_command": import_template_command,
             "required_row_inputs": ["gpcr_hard_decoy_rows"],
         },
@@ -715,6 +730,15 @@ def build_gpcr_hard_decoy_operator_intake_packet(
                 "schema_version": "gpcr-hard-decoy-source-acquisition-plan.v1",
                 "command": source_acquisition_command,
                 "produces": str(DEFAULT_SOURCE_ACQUISITION_PLAN),
+            },
+            {
+                "step_id": "build_gpcr_hard_decoy_chembl_activity_rows",
+                "schema_version": "gpcr-hard-decoy-chembl-activity-rows.v1",
+                "command": (
+                    "python3 scripts/build_gpcr_hard_decoy_chembl_activity_rows.py "
+                    f"--out {DEFAULT_CHEMBL_ACTIVITY_ROWS}"
+                ),
+                "produces": str(DEFAULT_CHEMBL_ACTIVITY_ROWS),
             },
             {
                 "step_id": "materialize_gpcr_hard_decoy_operator_template_from_rows",
@@ -765,12 +789,14 @@ def build_gpcr_hard_decoy_operator_intake_packet(
             "product_report": str(DEFAULT_PRODUCT_REPORT),
             "product_capabilities_surface": str(DEFAULT_PRODUCT_CAPABILITIES),
             "goal_bottleneck_roadmap_surface": str(DEFAULT_GOAL_BOTTLENECK),
+            "chembl_activity_rows": str(DEFAULT_CHEMBL_ACTIVITY_ROWS),
             "row_templates": row_template_artifacts,
         },
         "next_actions": [
             "complete_gpcr_hard_decoy_source_acquisition_plan",
-            "build_gpcr_hard_decoy_decoy_source_snapshot",
-            "attach_gpcr_hard_decoy_raw_row_file",
+            "build_gpcr_hard_decoy_chembl_activity_rows",
+            "review_gpcr_chembl_activity_rows_for_hard_decoy_source_acceptance",
+            "promote_gpcr_chembl_activity_rows_to_default_dropzone",
             "materialize_gpcr_hard_decoy_operator_template_from_rows",
             "fill_gpcr_hard_decoy_operator_intake_packet",
             "fill_drd2_htr2a_oprm1_operator_template_values",
@@ -803,6 +829,12 @@ def build_gpcr_hard_decoy_operator_intake_packet(
             ),
             "source_acquisition_plan_blocker_count": int(
                 source_acquisition_summary.get("blocker_count") or 0
+            ),
+            "chembl_activity_rows_ready": bool(
+                chembl_activity_rows.get("raw_rows_ready")
+            ),
+            "chembl_activity_row_count": int(
+                chembl_activity_rows.get("row_count") or 0
             ),
             "broad_gpcr_family_claim_safe": False,
         },
@@ -881,6 +913,8 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"{json.dumps(payload['raw_row_import']['source_receipt_requirements'], ensure_ascii=False, sort_keys=True)}`",
             f"- `source_acquisition_plan`: `"
             f"{payload['raw_row_import']['source_acquisition_plan']['artifact']}`",
+            f"- `chembl_activity_rows`: `"
+            f"{payload['linked_artifacts']['chembl_activity_rows']}`",
             f"- `row_template_artifacts`: `"
             f"{json.dumps(payload['raw_row_import']['row_template_artifacts'], ensure_ascii=False, sort_keys=True)}`",
         ]

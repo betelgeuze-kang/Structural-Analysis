@@ -58,6 +58,61 @@
       "role": "hard_decoy_candidates"
     },
     {
+      "candidate_snapshot": {
+        "actual_closure_ready": false,
+        "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json",
+        "blocker_count": 0,
+        "blockers": [],
+        "command": "python3 scripts/build_gpcr_hard_decoy_chembl_activity_rows.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json --out-md implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.md",
+        "contract_pass": true,
+        "markdown_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.md",
+        "materialization_commands": {
+          "copy_to_default_rows": "cp implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+          "import_operator_template": "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py --rows implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --source-id chembl_gpcr_activity_positive_low_affinity_rows --source-url https://www.ebi.ac.uk/chembl/api/data/activity --source-license 'ChEMBL public API activity rows; use subject to EBI and ChEMBL terms' --source-version live_chembl_api_snapshot",
+          "materialize_suite": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --fail-blocked"
+        },
+        "raw_rows_ready": true,
+        "row_count": 96,
+        "scoring_protocol": {
+          "claim_boundary": "This is an activity-derived ranking protocol over ChEMBL source rows. It is not a docking run and should be promoted only if the product accepts ChEMBL low-affinity rows as the hard-decoy source.",
+          "decoy_selection": "ChEMBL target-specific weak/low-affinity rows from decoy source snapshot",
+          "positive_selection": "ChEMBL strong activity rows from positive source snapshot",
+          "protocol_id": "pchembl_like_activity_score_from_standard_value_nm",
+          "score_direction": "higher_is_better",
+          "score_formula": "-log10(standard_value_nm * 1e-9)"
+        },
+        "status": "raw_activity_rows_ready",
+        "suggested_operator_input_source": {
+          "source_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+          "source_id": "chembl_gpcr_activity_positive_low_affinity_rows",
+          "source_license": "ChEMBL public API activity rows; use subject to EBI and ChEMBL terms",
+          "source_url": "https://www.ebi.ac.uk/chembl/api/data/activity",
+          "source_version": "live_chembl_api_snapshot"
+        },
+        "target_counts": {
+          "DRD2": {
+            "decoy_count": 20,
+            "positive_count": 12,
+            "total_count": 32
+          },
+          "HTR2A": {
+            "decoy_count": 20,
+            "positive_count": 12,
+            "total_count": 32
+          },
+          "OPRM1": {
+            "decoy_count": 20,
+            "positive_count": 12,
+            "total_count": 32
+          }
+        }
+      },
+      "candidate_source": "Source-attached ChEMBL activity rows with pChEMBL-like scores from positive and weak/low-affinity snapshots",
+      "closure_boundary": "These rows can feed the importer and suite materializer, but do not close Phase 3 until product owners accept the ChEMBL low-affinity rows as hard-decoy evidence and promote the rows into the default suite materialization path.",
+      "minimum_per_target": 24,
+      "role": "activity_ranked_raw_rows"
+    },
+    {
       "candidate_source": "One reproducible scoring protocol applied to positives and decoys for each required target",
       "closure_boundary": "Metrics are recomputed by the suite materializer from raw rows; summary-only metrics are preflight evidence only.",
       "minimum_per_target": 24,
@@ -67,12 +122,62 @@
   "actual_closure_ready": false,
   "blocker_count": 3,
   "blockers": [
-    "gpcr_hard_decoy_rows_not_acquired",
-    "target_specific_hard_decoy_source_not_attached",
-    "gpcr_scoring_protocol_receipts_not_attached"
+    "gpcr_activity_ranked_rows_require_operator_promotion_review",
+    "gpcr_activity_ranked_rows_not_imported_to_operator_template",
+    "gpcr_suite_not_rematerialized_from_raw_rows"
   ],
-  "claim_boundary": "This plan records verified public target identifiers and the row/source contract needed to acquire GPCR hard-decoy evidence. Candidate ChEMBL snapshots are source receipts only; they do not attach curated decoys, docking scores, or licenses, and they do not close Phase 3 until the raw rows pass the suite materializer.",
+  "chembl_activity_rows": {
+    "actual_closure_ready": false,
+    "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json",
+    "blocker_count": 0,
+    "blockers": [],
+    "command": "python3 scripts/build_gpcr_hard_decoy_chembl_activity_rows.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json --out-md implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.md",
+    "contract_pass": true,
+    "markdown_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.md",
+    "materialization_commands": {
+      "copy_to_default_rows": "cp implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+      "import_operator_template": "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py --rows implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --source-id chembl_gpcr_activity_positive_low_affinity_rows --source-url https://www.ebi.ac.uk/chembl/api/data/activity --source-license 'ChEMBL public API activity rows; use subject to EBI and ChEMBL terms' --source-version live_chembl_api_snapshot",
+      "materialize_suite": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --fail-blocked"
+    },
+    "raw_rows_ready": true,
+    "row_count": 96,
+    "scoring_protocol": {
+      "claim_boundary": "This is an activity-derived ranking protocol over ChEMBL source rows. It is not a docking run and should be promoted only if the product accepts ChEMBL low-affinity rows as the hard-decoy source.",
+      "decoy_selection": "ChEMBL target-specific weak/low-affinity rows from decoy source snapshot",
+      "positive_selection": "ChEMBL strong activity rows from positive source snapshot",
+      "protocol_id": "pchembl_like_activity_score_from_standard_value_nm",
+      "score_direction": "higher_is_better",
+      "score_formula": "-log10(standard_value_nm * 1e-9)"
+    },
+    "status": "raw_activity_rows_ready",
+    "suggested_operator_input_source": {
+      "source_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+      "source_id": "chembl_gpcr_activity_positive_low_affinity_rows",
+      "source_license": "ChEMBL public API activity rows; use subject to EBI and ChEMBL terms",
+      "source_url": "https://www.ebi.ac.uk/chembl/api/data/activity",
+      "source_version": "live_chembl_api_snapshot"
+    },
+    "target_counts": {
+      "DRD2": {
+        "decoy_count": 20,
+        "positive_count": 12,
+        "total_count": 32
+      },
+      "HTR2A": {
+        "decoy_count": 20,
+        "positive_count": 12,
+        "total_count": 32
+      },
+      "OPRM1": {
+        "decoy_count": 20,
+        "positive_count": 12,
+        "total_count": 32
+      }
+    }
+  },
+  "claim_boundary": "This plan records verified public target identifiers and the row/source contract needed to acquire GPCR hard-decoy evidence. Candidate ChEMBL snapshots and ChEMBL activity-ranked rows are source receipts and import candidates only; they do not promote a broad GPCR claim until the accepted raw rows pass the suite materializer in the default path.",
   "commands": {
+    "build_chembl_activity_rows": "python3 scripts/build_gpcr_hard_decoy_chembl_activity_rows.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json --out-md implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.md",
     "build_decoy_source_snapshot": "python3 scripts/build_gpcr_hard_decoy_decoy_source_snapshot.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json --out-md implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.md",
     "build_positive_source_snapshot": "python3 scripts/build_gpcr_hard_decoy_positive_source_snapshot.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json --out-md implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.md",
     "import_rows": "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py --rows implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --source-id <source-id> --source-url <source-url> --source-license <license>",
@@ -105,13 +210,15 @@
     "total_decoy_candidate_count": 60
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T16:31:54.700690+00:00",
+  "generated_at": "2026-07-03T17:06:35.164468+00:00",
   "input_checksums": {
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json": "sha256:6ec740aa2bd6c18684d2ea1eec0d9bc678786aa0fe114b1e632192c1bf4c4b29",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json": "sha256:66ed4370361fd02d9f820067a4ea02506c43834e681972fdb37ee05d6b37c18b",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json": "sha256:14fc63c1890aaaf1e9187a79b47fef21f3dc33511c2cf14e97356942568ae2c4",
+    "scripts/build_gpcr_hard_decoy_chembl_activity_rows.py": "sha256:2dafd153b15bf3287f500ebe07f4a47df2bc5973e37391e8ae520bec5f084543",
     "scripts/build_gpcr_hard_decoy_decoy_source_snapshot.py": "sha256:94862b9e94724e136d0bfcd966ad500d196245587f9dfb86bada83ea6c25e250",
     "scripts/build_gpcr_hard_decoy_positive_source_snapshot.py": "sha256:6e27e6448a6114b6defd76f52cf63ef2179ba57bd8895634ec8037f8c3378bc1",
-    "scripts/build_gpcr_hard_decoy_source_acquisition_plan.py": "sha256:be3c9b79880f43f88c5dfa7c52228e3ca939e11231c28b6192310aba751419c0",
+    "scripts/build_gpcr_hard_decoy_source_acquisition_plan.py": "sha256:d368be4fde41bca56308d8ba85f44618c8e218f18d36241763b49082ce5e1fab",
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:8824e14602faf05a39d841d8367d5773c76a23ffbf8f614ee99f926a8ff478a6"
   },
@@ -119,6 +226,8 @@
     "verify_human_target_mapping_against_chembl_target_endpoint",
     "build_gpcr_hard_decoy_positive_source_snapshot",
     "build_gpcr_hard_decoy_decoy_source_snapshot",
+    "build_gpcr_hard_decoy_chembl_activity_rows",
+    "review_chembl_activity_rows_for_hard_decoy_source_acceptance",
     "attach_positive_ligand_candidates_with_activity_receipts",
     "attach_target_specific_hard_decoy_candidates_with_license_receipts",
     "run_one_documented_scoring_protocol_for_all_rows_per_target",
@@ -215,14 +324,18 @@
       "provenance_ref"
     ],
     "row_source_receipt_policy": "Every molecule row must carry source_checksum and provenance_ref; the attached row file must also be passed to the importer with a source_id, source_url, source_license, and source_artifact_sha256.",
-    "score_direction_policy": "Use one score_direction per target and preserve the direction used by the scoring protocol."
+    "score_direction_policy": "Use one score_direction per target and preserve the direction used by the scoring protocol.",
+    "source_attached_candidate_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json"
   },
   "schema_version": "gpcr-hard-decoy-source-acquisition-plan.v1",
-  "source_commit_sha": "e0972d18d6823cded52107e0657bf94f99a1f267",
+  "source_commit_sha": "2a0302d4b2338b3b699cd167f39cf2666c1ccfaa",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
     "blocker_count": 3,
+    "chembl_activity_row_count": 96,
+    "chembl_activity_rows_ready": true,
+    "chembl_activity_rows_status": "raw_activity_rows_ready",
     "decoy_candidate_source_ready": true,
     "decoy_source_snapshot_status": "decoy_candidate_sources_ready",
     "minimum_decoy_rows_total": 60,

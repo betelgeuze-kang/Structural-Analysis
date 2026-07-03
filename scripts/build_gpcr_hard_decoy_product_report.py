@@ -24,6 +24,9 @@ DEFAULT_OPERATOR_TEMPLATE = PRODUCTIZATION / "gpcr_hard_decoy_operator_template.
 DEFAULT_OPERATOR_INTAKE_PACKET = PRODUCTIZATION / "gpcr_hard_decoy_operator_intake_packet.json"
 DEFAULT_OPERATOR_INTAKE_PACKET_MD = PRODUCTIZATION / "gpcr_hard_decoy_operator_intake_packet.md"
 DEFAULT_SUITE_REPORT = PRODUCTIZATION / "gpcr_hard_decoy_suite_report.json"
+DEFAULT_CHEMBL_ACTIVITY_ROWS = (
+    PRODUCTIZATION / "gpcr_hard_decoy_chembl_activity_rows.json"
+)
 DEFAULT_EVIDENCE_SURFACE = SURFACE_DIR / "gpcr_hard_decoy_evidence_surface.json"
 DEFAULT_OUT = PRODUCTIZATION / "gpcr_hard_decoy_product_report.json"
 
@@ -62,6 +65,7 @@ def _input_paths() -> list[Path]:
         DEFAULT_OPERATOR_TEMPLATE,
         DEFAULT_OPERATOR_INTAKE_PACKET,
         DEFAULT_OPERATOR_INTAKE_PACKET_MD,
+        DEFAULT_CHEMBL_ACTIVITY_ROWS,
         DEFAULT_SUITE_REPORT,
         DEFAULT_EVIDENCE_SURFACE,
     ]
@@ -97,6 +101,7 @@ def _required_fields_from_template(template: dict[str, Any]) -> list[str]:
 def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
     template = _load_json(repo_root, DEFAULT_OPERATOR_TEMPLATE)
     operator_intake = _load_json(repo_root, DEFAULT_OPERATOR_INTAKE_PACKET)
+    operator_intake_summary = _as_dict(operator_intake.get("summary"))
     suite = _load_json(repo_root, DEFAULT_SUITE_REPORT)
     surface = _load_json(repo_root, DEFAULT_EVIDENCE_SURFACE)
     broad_safe = bool(suite.get("broad_gpcr_family_claim_safe"))
@@ -224,6 +229,7 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
             "operator_template": str(DEFAULT_OPERATOR_TEMPLATE),
             "suite_report": str(DEFAULT_SUITE_REPORT),
             "evidence_surface": str(DEFAULT_EVIDENCE_SURFACE),
+            "chembl_activity_rows": str(DEFAULT_CHEMBL_ACTIVITY_ROWS),
         },
         "operator_intake_packet": {
             "schema_version": str(
@@ -248,6 +254,13 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
             "minimum_target_count": int(operator_intake.get("minimum_target_count") or 0),
             "minimum_metric_field_count_per_target": int(
                 operator_intake.get("minimum_metric_field_count_per_target") or 0
+            ),
+            "summary": operator_intake_summary,
+            "linked_artifacts": _as_dict(operator_intake.get("linked_artifacts")),
+            "source_attached_row_artifacts": _as_dict(
+                _as_dict(operator_intake.get("raw_row_import")).get(
+                    "source_attached_row_artifacts"
+                )
             ),
             "gate_unblock_plan": gate_unblock_plan,
         },
@@ -293,13 +306,24 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
         "next_actions": (
             ["review_gpcr_hard_decoy_suite_report"]
             if broad_safe
-            else [
-                "fill_gpcr_hard_decoy_operator_intake_packet",
-                "fill_drd2_htr2a_oprm1_operator_template_values",
-                "run_gpcr_hard_decoy_materializer",
-                "refresh_gpcr_hard_decoy_product_report",
-                "regenerate_product_capabilities_surface",
-            ]
+            else (
+                [
+                    "review_gpcr_chembl_activity_rows_for_hard_decoy_source_acceptance",
+                    "promote_gpcr_chembl_activity_rows_to_default_dropzone",
+                    "materialize_gpcr_hard_decoy_operator_template_from_rows",
+                    "run_gpcr_hard_decoy_materializer",
+                    "refresh_gpcr_hard_decoy_product_report",
+                    "regenerate_product_capabilities_surface",
+                ]
+                if bool(operator_intake_summary.get("chembl_activity_rows_ready"))
+                else [
+                    "fill_gpcr_hard_decoy_operator_intake_packet",
+                    "fill_drd2_htr2a_oprm1_operator_template_values",
+                    "run_gpcr_hard_decoy_materializer",
+                    "refresh_gpcr_hard_decoy_product_report",
+                    "regenerate_product_capabilities_surface",
+                ]
+            )
         ),
         "summary": {
             "read_model_ready": True,
@@ -310,6 +334,12 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
             "product_report_route": GPCR_PRODUCT_REPORT_ROUTE,
             "operator_intake_route": str(operator_intake.get("route") or GPCR_OPERATOR_INTAKE_ROUTE),
             "operator_intake_packet_status": str(operator_intake.get("status") or ""),
+            "chembl_activity_rows_ready": bool(
+                operator_intake_summary.get("chembl_activity_rows_ready")
+            ),
+            "chembl_activity_row_count": int(
+                operator_intake_summary.get("chembl_activity_row_count") or 0
+            ),
             "operator_intake_required_slot_count": int(
                 operator_intake.get("required_slot_count") or 0
             ),

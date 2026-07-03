@@ -113,6 +113,7 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> Non
         ),
         "operator_template": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
         "suite_report": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
+        "chembl_activity_rows": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json",
     }
     operator_packet = report["operator_intake_packet"]
     assert {
@@ -155,6 +156,18 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> Non
     assert operator_packet["gate_unblock_plan_count"] == 3
     assert operator_packet["minimum_target_count"] == 3
     assert operator_packet["minimum_metric_field_count_per_target"] == 4
+    assert operator_packet["summary"]["chembl_activity_rows_ready"] is True
+    assert operator_packet["summary"]["chembl_activity_row_count"] == 96
+    assert operator_packet["linked_artifacts"]["chembl_activity_rows"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "gpcr_hard_decoy_chembl_activity_rows.json"
+    )
+    assert operator_packet["source_attached_row_artifacts"] == {
+        "chembl_activity_rows": (
+            "implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_chembl_activity_rows.json"
+        )
+    }
     gate_plan = {row["target_id"]: row for row in operator_packet["gate_unblock_plan"]}
     assert gate_plan["DRD2"]["slot_id"] == "drd2_hard_decoy_metrics"
     assert gate_plan["DRD2"]["unblocks_phase3_criteria"] == [
@@ -185,11 +198,17 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> Non
         row["endpoint_id"] for row in report["endpoints"]
     } >= {"get_gpcr_hard_decoy_operator_intake_packet"}
     assert "promote_broad_gpcr_claim" in report["forbidden_operations"]
-    assert "fill_gpcr_hard_decoy_operator_intake_packet" in report["next_actions"]
-    assert "fill_drd2_htr2a_oprm1_operator_template_values" in report["next_actions"]
+    assert report["next_actions"][:4] == [
+        "review_gpcr_chembl_activity_rows_for_hard_decoy_source_acceptance",
+        "promote_gpcr_chembl_activity_rows_to_default_dropzone",
+        "materialize_gpcr_hard_decoy_operator_template_from_rows",
+        "run_gpcr_hard_decoy_materializer",
+    ]
     assert report["summary"]["operator_intake_packet_status"] == (
         "ready_for_operator_input"
     )
+    assert report["summary"]["chembl_activity_rows_ready"] is True
+    assert report["summary"]["chembl_activity_row_count"] == 96
     assert report["summary"]["product_report_route"] == (
         "/product/gpcr-hard-decoy-suite-report"
     )
