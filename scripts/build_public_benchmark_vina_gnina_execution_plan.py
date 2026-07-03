@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -115,14 +116,39 @@ def _docking_box(
 
 
 def _engine_binary_status(engine_id: str) -> dict[str, Any]:
-    executable = shutil.which(engine_id)
+    env_var = f"PUBLIC_BENCHMARK_{engine_id.upper()}_BIN"
+    env_executable = os.environ.get(env_var, "").strip()
+    executable = env_executable or shutil.which(engine_id)
     if not executable:
         return {
             "engine_id": engine_id,
             "available": False,
             "executable": "",
+            "binary_source": "",
+            "env_var": env_var,
             "version": "",
             "blocker": f"{engine_id}_binary_missing",
+        }
+    executable_path = Path(executable)
+    if env_executable and not executable_path.is_file():
+        return {
+            "engine_id": engine_id,
+            "available": False,
+            "executable": executable,
+            "binary_source": f"env:{env_var}",
+            "env_var": env_var,
+            "version": "",
+            "blocker": f"{engine_id}_binary_not_found",
+        }
+    if env_executable and not os.access(executable_path, os.X_OK):
+        return {
+            "engine_id": engine_id,
+            "available": False,
+            "executable": executable,
+            "binary_source": f"env:{env_var}",
+            "env_var": env_var,
+            "version": "",
+            "blocker": f"{engine_id}_binary_not_executable",
         }
     try:
         version_output = subprocess.check_output(
@@ -137,6 +163,8 @@ def _engine_binary_status(engine_id: str) -> dict[str, Any]:
         "engine_id": engine_id,
         "available": True,
         "executable": executable,
+        "binary_source": f"env:{env_var}" if env_executable else "PATH",
+        "env_var": env_var,
         "version": version_output.splitlines()[0] if version_output else "",
         "blocker": "",
     }

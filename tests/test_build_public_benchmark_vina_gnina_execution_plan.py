@@ -66,6 +66,38 @@ def _write_rows(root: Path) -> tuple[Path, Path]:
     return subset_rows, pose_rows
 
 
+def test_vina_gnina_execution_plan_engine_status_accepts_env_override(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    binary = tmp_path / "custom-vina"
+    binary.write_text("#!/bin/sh\necho 'vina custom 1.2.3'\n", encoding="utf-8")
+    binary.chmod(0o755)
+    monkeypatch.setenv("PUBLIC_BENCHMARK_VINA_BIN", str(binary))
+
+    status = module._engine_binary_status("vina")
+
+    assert status["available"] is True
+    assert status["executable"] == str(binary)
+    assert status["binary_source"] == "env:PUBLIC_BENCHMARK_VINA_BIN"
+    assert status["env_var"] == "PUBLIC_BENCHMARK_VINA_BIN"
+    assert status["version"] == "vina custom 1.2.3"
+    assert status["blocker"] == ""
+
+
+def test_vina_gnina_execution_plan_engine_status_blocks_bad_env_path(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("PUBLIC_BENCHMARK_GNINA_BIN", str(tmp_path / "missing-gnina"))
+
+    status = module._engine_binary_status("gnina")
+
+    assert status["available"] is False
+    assert status["binary_source"] == "env:PUBLIC_BENCHMARK_GNINA_BIN"
+    assert status["blocker"] == "gnina_binary_not_found"
+
+
 def test_vina_gnina_execution_plan_builds_case_run_specs(
     tmp_path: Path,
     monkeypatch,

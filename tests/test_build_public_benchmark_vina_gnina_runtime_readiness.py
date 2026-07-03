@@ -90,6 +90,40 @@ def _execution_plan(path: Path) -> None:
     )
 
 
+def test_runtime_readiness_engine_status_accepts_env_override(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    binary = tmp_path / "custom-gnina"
+    binary.write_text("#!/bin/sh\necho 'gnina custom 2.0'\n", encoding="utf-8")
+    binary.chmod(0o755)
+    monkeypatch.setenv("PUBLIC_BENCHMARK_GNINA_BIN", str(binary))
+
+    status = module._engine_binary_status("gnina")
+
+    assert status["available"] is True
+    assert status["executable"] == str(binary)
+    assert status["binary_source"] == "env:PUBLIC_BENCHMARK_GNINA_BIN"
+    assert status["env_var"] == "PUBLIC_BENCHMARK_GNINA_BIN"
+    assert status["version"] == "gnina custom 2.0"
+    assert status["blocker"] == ""
+
+
+def test_runtime_readiness_engine_status_blocks_non_executable_env_path(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    binary = tmp_path / "custom-vina"
+    binary.write_text("#!/bin/sh\necho 'vina custom'\n", encoding="utf-8")
+    monkeypatch.setenv("PUBLIC_BENCHMARK_VINA_BIN", str(binary))
+
+    status = module._engine_binary_status("vina")
+
+    assert status["available"] is False
+    assert status["binary_source"] == "env:PUBLIC_BENCHMARK_VINA_BIN"
+    assert status["blocker"] == "vina_binary_not_executable"
+
+
 def test_runtime_readiness_records_missing_binaries_and_rows(
     tmp_path: Path,
     monkeypatch,
