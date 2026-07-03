@@ -48,7 +48,7 @@
     "residual_formula": "F_internal_minus_F_external",
     "status": "pass"
   },
-  "generated_at": "2026-07-03T02:01:15.961447+00:00",
+  "generated_at": "2026-07-03T02:09:43.110820+00:00",
   "git_clean_clone_executed": false,
   "git_clean_clone_reproducibility_claim": "local_file_protocol_clone_when_preflight_passes",
   "git_clean_clone_reproduction_receipt_path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json",
@@ -79,7 +79,7 @@
     "scripts/phase3_benchmark_reproduction_contract.py": "sha256:8fc82a3e7b73bd3376d15aee5eb447f9b9d6edb4d0c28cd8850ee5bc82c314db",
     "scripts/release_evidence_metadata.py": "sha256:dcbc7e57cbd00dce4e4044d873af9d2c665def1e85b5140ac101055a04f2260c",
     "scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py": "sha256:12738f46eebbf5bc954ee7a5c1f25322e043bfabf1fc53b6d141293c4b06a542",
-    "scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py": "sha256:023aeabb0c2b5217f740d673a5cb0483caa299d1ba2f122411636300f77d8a5c",
+    "scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py": "sha256:11485583a3ffb27f7a9c6a6cd530e894d1075cda80a0090c194090ee24493b6b",
     "setup.cfg": "sha256:84309a0e08f03cb932f24eec12421725e2ca8bc6b035c32eaf16e0862c2f1f70",
     "src/structural_analysis": "dir-sha256:71dd2e211d4b0b4001c22907fdb0c8b90f51dea151331306d4b2bed1998de7ea",
     "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js": "sha256:8e7b8b9fffb9e99fd23c2bff58b8b31578c70d1a8b552d7b49ed90f6e25dd8d8",
@@ -96,7 +96,7 @@
     "tests/test_build_phase4_commercial_operator_reference_contract.py": "sha256:4dc75aa4140e2a5b0bf9a29bfefc64002c6e818e2ca096fc76c7e3d7e52528b4",
     "tests/test_build_phase4_commercial_operator_reference_ingest_validator.py": "sha256:038359450481ec84a1d714eb8b1546c21d0958b620c430bfc6299ab17dbc39fc",
     "tests/test_run_phase3_benchmark_factory_clean_checkout_reproduction.py": "sha256:877f87c1a757802c7928b4ee0fdff482e44bdbcd60504c0dfaf40880f9a1ce20",
-    "tests/test_run_phase3_benchmark_factory_git_clean_clone_reproduction.py": "sha256:db8da2d5e49d19824bffb9390fa48695b2d1b0a618c0663bd8495667e43b136b",
+    "tests/test_run_phase3_benchmark_factory_git_clean_clone_reproduction.py": "sha256:859f4e10125b753db044007f852110e7a22e1a8e2337da7141b0e1d92b6efe16",
     "tests/test_structural_analysis_benchmark_cli.py": "sha256:19fad9ae063c2f3074bdec43ecc4de17a69e533f769c1819955f1687375c3985",
     "tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py": "sha256:01baf1908f4460e1249574459aefb2014168b4aabd82abc1055963fc7cfea3d9",
     "tests/test_structure_viewer_explainability_report_contract.py": "sha256:8eb32cc892762d1962852f86aa6311ffd0136b298e6951c2375750971f6f6d3a"
@@ -235,7 +235,7 @@
     "tests/test_structure_viewer_explainability_report_contract.py"
   ],
   "schema_version": "phase3-benchmark-factory-seed-reproducibility-bundle.v1",
-  "source_commit_sha": "48f78b3c740cd85d3009c71043b40e922470eba4",
+  "source_commit_sha": "95d9c7e12eeb16efe4ceed434e9f58aeb63fcbe4",
   "stable_artifact_checksums": {
     "acquisition_plan": "sha256:bf007f37b48364f2d6cd3d92df0c8d142975d90c01db269613181350f787207b",
     "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:ad48bd01ec19d476563c7553c8157863bae5a067e9b5bc40db5607c251c789b6",
