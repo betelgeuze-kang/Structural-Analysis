@@ -902,6 +902,12 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
     assert vina_gnina_input_manifest[0]["protein_structure_path"] == (
         "CASF-2016/coreset/4llx/4llx_protein.pdb"
     )
+    assert vina_gnina_input_manifest[0]["protein_structure_checksum"].startswith(
+        "sha256:"
+    )
+    assert vina_gnina_input_manifest[0]["reference_ligand_checksum"].startswith(
+        "sha256:"
+    )
     assert vina_gnina_input_manifest[0]["prepared_receptor_path"] == (
         "prepared/4llx_receptor"
     )

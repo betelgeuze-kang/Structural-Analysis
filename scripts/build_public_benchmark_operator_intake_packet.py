@@ -661,6 +661,43 @@ def _vina_gnina_input_manifest_template_headers() -> list[str]:
     ]
 
 
+def _subset_source_file_checksums_by_case(repo_root: Path) -> dict[str, dict[str, str]]:
+    subset_rows_path = Path(DEFAULT_PHASE2_ROW_INPUT_CANDIDATES["subset_rows"][0])
+    payload = _load_json(repo_root, subset_rows_path)
+    rows = _as_list(payload.get("rows")) or _as_list(payload.get("cases"))
+    checksums_by_case: dict[str, dict[str, str]] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        case_id = str(row.get("case_id") or "")
+        source_file_checksums = row.get("source_file_checksums")
+        if not case_id or not isinstance(source_file_checksums, dict):
+            continue
+        checksums_by_case[case_id] = {
+            str(path): str(checksum)
+            for path, checksum in source_file_checksums.items()
+            if str(path) and str(checksum)
+        }
+    return checksums_by_case
+
+
+def _source_file_checksum(
+    case_plan: dict[str, Any],
+    checksums_by_case: dict[str, dict[str, str]],
+    *,
+    path_field: str,
+    checksum_field: str,
+) -> str:
+    explicit_checksum = str(case_plan.get(checksum_field) or "")
+    if explicit_checksum:
+        return explicit_checksum
+    case_id = str(case_plan.get("case_id") or "")
+    path_value = str(case_plan.get(path_field) or "")
+    if not case_id or not path_value:
+        return ""
+    return str(checksums_by_case.get(case_id, {}).get(path_value) or "")
+
+
 def _vina_gnina_input_manifest_rows_from_execution_plan(
     repo_root: Path,
 ) -> list[dict[str, Any]]:
@@ -670,6 +707,7 @@ def _vina_gnina_input_manifest_rows_from_execution_plan(
         for row in _as_list(execution_plan.get("case_execution_plans"))
         if isinstance(row, dict)
     ]
+    checksums_by_case = _subset_source_file_checksums_by_case(repo_root)
     rows: list[dict[str, Any]] = []
     for case_plan in case_plans:
         docking_box = _as_dict(case_plan.get("docking_box"))
@@ -696,11 +734,21 @@ def _vina_gnina_input_manifest_rows_from_execution_plan(
                 "protein_structure_path": str(
                     case_plan.get("protein_structure_path") or ""
                 ),
-                "protein_structure_checksum": "",
+                "protein_structure_checksum": _source_file_checksum(
+                    case_plan,
+                    checksums_by_case,
+                    path_field="protein_structure_path",
+                    checksum_field="protein_structure_checksum",
+                ),
                 "reference_ligand_path": str(
                     case_plan.get("reference_ligand_path") or ""
                 ),
-                "reference_ligand_checksum": "",
+                "reference_ligand_checksum": _source_file_checksum(
+                    case_plan,
+                    checksums_by_case,
+                    path_field="reference_ligand_path",
+                    checksum_field="reference_ligand_checksum",
+                ),
                 "prepared_receptor_path": str(prepared_paths.get("receptor") or ""),
                 "prepared_receptor_checksum": "",
                 "prepared_ligand_path": str(prepared_paths.get("ligand") or ""),

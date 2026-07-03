@@ -36,6 +36,14 @@ def _write_rows(root: Path, *, materialize_inputs: bool = True) -> tuple[Path, P
                         "benchmark_split": "CASF-core",
                         "protein_structure_path": "CASF-2016/coreset/1abc/1abc_protein.pdb",
                         "reference_ligand_path": "CASF-2016/coreset/1abc/1abc_ligand.sdf",
+                        "source_file_checksums": {
+                            "CASF-2016/coreset/1abc/1abc_protein.pdb": (
+                                "sha256:" + "a" * 64
+                            ),
+                            "CASF-2016/coreset/1abc/1abc_ligand.sdf": (
+                                "sha256:" + "b" * 64
+                            ),
+                        },
                         "source_checksum": "sha256:" + "1" * 64,
                         "source_license_or_accession": "PDBbind+ CASF-2016 official package",
                         "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
@@ -177,6 +185,8 @@ def test_vina_gnina_execution_plan_builds_case_run_specs(
     case_plan = payload["case_execution_plans"][0]
     assert case_plan["case_id"] == "casf2016_1abc"
     assert case_plan["reference_pose_id"] == "casf2016_1abc_reference"
+    assert case_plan["protein_structure_checksum"] == "sha256:" + "a" * 64
+    assert case_plan["reference_ligand_checksum"] == "sha256:" + "b" * 64
     assert case_plan["source_file_status"]["status"] == "ready"
     assert case_plan["prepared_input_status"]["status"] == "ready"
     assert case_plan["docking_box"]["status"] == "ready"

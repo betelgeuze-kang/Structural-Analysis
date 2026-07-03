@@ -262,6 +262,24 @@ def _merge_input_manifest_row(
     return merged
 
 
+def _source_file_checksum(
+    case_row: dict[str, Any],
+    *,
+    path_field: str,
+    checksum_field: str,
+) -> str:
+    explicit_checksum = str(case_row.get(checksum_field) or "").strip()
+    if explicit_checksum:
+        return explicit_checksum
+    source_file_checksums = case_row.get("source_file_checksums")
+    if not isinstance(source_file_checksums, dict):
+        return ""
+    path_value = str(case_row.get(path_field) or "").strip()
+    if not path_value:
+        return ""
+    return str(source_file_checksums.get(path_value) or "").strip()
+
+
 def _coordinates(atoms: Any) -> list[tuple[float, float, float]]:
     coords: list[tuple[float, float, float]] = []
     if not isinstance(atoms, list):
@@ -712,12 +730,16 @@ def _case_plan(
         ),
         "reference_pose_id": f"{case_id}_reference",
         "protein_structure_path": str(case_row.get("protein_structure_path") or ""),
-        "protein_structure_checksum": str(
-            case_row.get("protein_structure_checksum") or ""
+        "protein_structure_checksum": _source_file_checksum(
+            case_row,
+            path_field="protein_structure_path",
+            checksum_field="protein_structure_checksum",
         ),
         "reference_ligand_path": str(case_row.get("reference_ligand_path") or ""),
-        "reference_ligand_checksum": str(
-            case_row.get("reference_ligand_checksum") or ""
+        "reference_ligand_checksum": _source_file_checksum(
+            case_row,
+            path_field="reference_ligand_path",
+            checksum_field="reference_ligand_checksum",
         ),
         "prepared_receptor_path": str(case_row.get("prepared_receptor_path") or ""),
         "prepared_receptor_checksum": str(
