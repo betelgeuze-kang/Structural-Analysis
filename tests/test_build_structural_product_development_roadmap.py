@@ -510,3 +510,38 @@ def test_write_structural_product_development_roadmap_writes_json_and_markdown(
     assert "# Structural Product Development Roadmap" in out_md.read_text(
         encoding="utf-8"
     )
+
+
+def test_structural_product_development_roadmap_check_detects_stale_json(
+    tmp_path: Path,
+) -> None:
+    _write_minimal_inputs(tmp_path)
+    out_json = tmp_path / "roadmap.json"
+    out_md = tmp_path / "roadmap.md"
+
+    module.write_structural_product_development_roadmap(
+        repo_root=tmp_path,
+        out_json=out_json,
+        out_md=out_md,
+    )
+
+    ok, message, _generated = module.check_structural_product_development_roadmap(
+        repo_root=tmp_path,
+        out_json=out_json,
+        out_md=out_md,
+    )
+    assert ok is True
+    assert message == "structural_product_development_roadmap_consistent"
+
+    stale_payload = json.loads(out_json.read_text(encoding="utf-8"))
+    stale_payload["roadmap_stages"][0]["summary"]["snapshot_blocker_count"] = 999
+    _write_json(out_json, stale_payload)
+
+    ok, message, _generated = module.check_structural_product_development_roadmap(
+        repo_root=tmp_path,
+        out_json=out_json,
+        out_md=out_md,
+    )
+    assert ok is False
+    assert message.startswith("roadmap_semantic_mismatch:")
+    assert "roadmap_stages" in message

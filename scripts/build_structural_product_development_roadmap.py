@@ -54,6 +54,33 @@ def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+def _strip_volatile_for_compare(value: Any, path: tuple[str, ...] = ()) -> Any:
+    if isinstance(value, dict):
+        return {
+            str(key): _strip_volatile_for_compare(child, path + (str(key),))
+            for key, child in value.items()
+            if str(key) != "generated_at"
+            and not (path == () and str(key) == "source_commit_sha")
+        }
+    if isinstance(value, list):
+        return [_strip_volatile_for_compare(item, path) for item in value]
+    return value
+
+
+def _differing_paths(existing: Any, generated: Any, prefix: str = "") -> list[str]:
+    if existing == generated:
+        return []
+    if isinstance(existing, dict) and isinstance(generated, dict):
+        differences: list[str] = []
+        for key in sorted(set(existing) | set(generated)):
+            child_prefix = f"{prefix}.{key}" if prefix else str(key)
+            differences.extend(
+                _differing_paths(existing.get(key), generated.get(key), child_prefix)
+            )
+        return differences
+    return [prefix or "<root>"]
+
+
 def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
     resolved = path if path.is_absolute() else repo_root / path
     if not resolved.exists():
@@ -1057,17 +1084,80 @@ def write_structural_product_development_roadmap(
     return payload
 
 
+def check_structural_product_development_roadmap(
+    *,
+    repo_root: Path = ROOT,
+    out_json: Path = DEFAULT_OUT_JSON,
+    out_md: Path | None = DEFAULT_OUT_MD,
+) -> tuple[bool, str, dict[str, Any] | None]:
+    resolved_json = out_json if out_json.is_absolute() else repo_root / out_json
+    if not resolved_json.exists():
+        return False, f"roadmap_missing:{resolved_json.as_posix()}", None
+    try:
+        existing = json.loads(resolved_json.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return (
+            False,
+            f"roadmap_unreadable:{resolved_json.as_posix()}:{exc.__class__.__name__}",
+            None,
+        )
+    if not isinstance(existing, dict):
+        return False, f"roadmap_invalid_object:{resolved_json.as_posix()}", None
+
+    generated = build_structural_product_development_roadmap(repo_root=repo_root)
+    existing_normalized = _strip_volatile_for_compare(existing)
+    generated_normalized = _strip_volatile_for_compare(generated)
+    if existing_normalized != generated_normalized:
+        differences = _differing_paths(existing_normalized, generated_normalized)
+        return (
+            False,
+            "roadmap_semantic_mismatch:" + ",".join(differences[:20]),
+            generated,
+        )
+
+    if out_md is not None:
+        resolved_md = out_md if out_md.is_absolute() else repo_root / out_md
+        if not resolved_md.exists():
+            return False, f"roadmap_markdown_missing:{resolved_md.as_posix()}", generated
+        if resolved_md.read_text(encoding="utf-8") != _markdown(generated):
+            return False, f"roadmap_markdown_mismatch:{resolved_md.as_posix()}", generated
+
+    return True, "structural_product_development_roadmap_consistent", generated
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out-json", type=Path, default=DEFAULT_OUT_JSON)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
     parser.add_argument("--no-md", action="store_true")
     parser.add_argument("--json", action="store_true")
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help=(
+            "Non-mutating: compare the stored roadmap JSON/Markdown with a "
+            "freshly generated one, ignoring generated_at and the top-level "
+            "source_commit_sha wrapper."
+        ),
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.check:
+        ok, message, _generated = check_structural_product_development_roadmap(
+            out_json=args.out_json,
+            out_md=None if args.no_md else args.out_md,
+        )
+        if not ok:
+            print(
+                f"Structural product roadmap check FAILED: {message}",
+                file=sys.stderr,
+            )
+            return 2
+        print(f"Structural product roadmap check: {message}")
+        return 0
     payload = write_structural_product_development_roadmap(
         out_json=args.out_json,
         out_md=None if args.no_md else args.out_md,
