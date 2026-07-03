@@ -559,6 +559,62 @@ def _phase2_row_template_rows() -> dict[str, list[dict[str, Any]]]:
     }
 
 
+def _vina_gnina_rows_from_execution_plan(repo_root: Path) -> list[dict[str, Any]]:
+    execution_plan = _load_json(repo_root, DEFAULT_VINA_GNINA_EXECUTION_PLAN)
+    case_plans = [
+        row
+        for row in _as_list(execution_plan.get("case_execution_plans"))
+        if isinstance(row, dict)
+    ]
+    rows: list[dict[str, Any]] = []
+    for case_plan in case_plans:
+        case_seed = {
+            "case_id": str(case_plan.get("case_id") or ""),
+            "source_family": "CASF/PDBBind",
+            "benchmark_split": str(case_plan.get("benchmark_split") or ""),
+            "complex_id": str(case_plan.get("complex_id") or ""),
+            "reference_pose_id": str(case_plan.get("reference_pose_id") or ""),
+            "source_license_or_accession": str(
+                case_plan.get("source_license_or_accession") or ""
+            ),
+            "source_checksum": str(case_plan.get("subset_source_checksum") or ""),
+            "provenance_ref": str(case_plan.get("provenance_ref") or ""),
+        }
+        for engine_run in _as_list(case_plan.get("engine_runs")):
+            if not isinstance(engine_run, dict):
+                continue
+            rows.append(
+                {
+                    **case_seed,
+                    "engine_id": str(engine_run.get("engine_id") or ""),
+                    "docking_run_id": str(engine_run.get("docking_run_id") or ""),
+                    "predicted_ligand_path_or_pose_ref": str(
+                        engine_run.get("expected_predicted_ligand_path_or_pose_ref")
+                        or ""
+                    ),
+                    "predicted_ligand_checksum": "",
+                    "engine_version": "",
+                    "engine_config_checksum": "",
+                    "engine_run_provenance_ref": str(
+                        engine_run.get("expected_engine_run_provenance_ref") or ""
+                    ),
+                    "symmetry_aware_rmsd_angstrom": "",
+                    "pose_success": "",
+                    "score": "",
+                    "score_direction": "lower_is_better",
+                }
+            )
+    return rows
+
+
+def _phase2_row_template_rows_for_repo(repo_root: Path) -> dict[str, list[dict[str, Any]]]:
+    rows_by_input = _phase2_row_template_rows()
+    vina_gnina_rows = _vina_gnina_rows_from_execution_plan(repo_root)
+    if vina_gnina_rows:
+        rows_by_input["vina_gnina_rows"] = vina_gnina_rows
+    return rows_by_input
+
+
 def _phase2_row_template_headers() -> dict[str, list[str]]:
     return {
         "subset_rows": list(_subset_case_template().keys()),
@@ -1959,7 +2015,7 @@ def write_public_benchmark_row_template_csvs(
 ) -> dict[str, Path]:
     raw_paths = _as_dict(packet.get("row_template_artifacts"))
     headers_by_input = _phase2_row_template_headers()
-    rows_by_input = _phase2_row_template_rows()
+    rows_by_input = _phase2_row_template_rows_for_repo(repo_root)
     written: dict[str, Path] = {}
     for row_input_id, raw_path in raw_paths.items():
         path = Path(str(raw_path))
@@ -1969,7 +2025,7 @@ def write_public_benchmark_row_template_csvs(
         resolved.parent.mkdir(parents=True, exist_ok=True)
         headers = headers_by_input[str(row_input_id)]
         with resolved.open("w", encoding="utf-8", newline="") as handle:
-            writer = csv.DictWriter(handle, fieldnames=headers)
+            writer = csv.DictWriter(handle, fieldnames=headers, lineterminator="\n")
             writer.writeheader()
             for row in rows_by_input[str(row_input_id)]:
                 writer.writerow({header: row.get(header, "") for header in headers})

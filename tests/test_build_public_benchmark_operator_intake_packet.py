@@ -96,7 +96,10 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     )
     assert packet["source_acquisition_plan"]["vina_gnina_execution_plan"][
         "execution_plan_ready"
-    ] is True
+    ] is False
+    assert packet["source_acquisition_plan"]["vina_gnina_execution_plan"][
+        "status"
+    ] == "engine_input_blocked"
     assert packet["source_acquisition_plan"]["vina_gnina_execution_plan"][
         "required_engine_run_count"
     ] == 24
@@ -859,7 +862,20 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
     assert "symmetry_permutation_contract" in subset_rows[0]
     assert "reference_atoms" in pose_rows[0]
     assert [row["is_active"] for row in enrichment_rows] == ["True", "False"]
-    assert [row["engine_id"] for row in vina_gnina_rows] == ["vina", "gnina"]
+    assert len(vina_gnina_rows) == 24
+    assert vina_gnina_rows[0]["case_id"] == "casf2016_4llx"
+    assert vina_gnina_rows[0]["engine_id"] == "vina"
+    assert vina_gnina_rows[0]["docking_run_id"] == "casf2016_4llx_vina_run"
+    assert vina_gnina_rows[0]["predicted_ligand_path_or_pose_ref"] == (
+        "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf"
+    )
+    assert vina_gnina_rows[0]["engine_run_provenance_ref"] == (
+        "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json"
+    )
+    assert vina_gnina_rows[1]["case_id"] == "casf2016_4llx"
+    assert vina_gnina_rows[1]["engine_id"] == "gnina"
+    assert vina_gnina_rows[-1]["case_id"] == "casf2016_4m0y"
+    assert vina_gnina_rows[-1]["engine_id"] == "gnina"
     assert enrichment_template["row_validation_policies"][
         "score_direction_policy"
     ]["blank_values"] == "rejected; no implicit default is applied"
