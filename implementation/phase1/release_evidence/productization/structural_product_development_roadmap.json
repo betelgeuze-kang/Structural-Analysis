@@ -11,7 +11,7 @@
     "pm_milestones": "5/5",
     "pm_release_areas": "12/16",
     "release_ready": false,
-    "snapshot_blocker_count": 47,
+    "snapshot_blocker_count": 45,
     "snapshot_status": "stale_or_inconsistent",
     "structural_scope_owner_decisions": "0/86",
     "structural_scope_release_surface_cleanup_decisions": "0/3",
@@ -19,7 +19,7 @@
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_requirement_progress_percent": 59.6,
-  "generated_at": "2026-07-03T01:02:04.568982+00:00",
+  "generated_at": "2026-07-03T01:11:56.863104+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:633292697ba7ff31df9d94fdf661a8c93839447f2f154b077bb16c8fc3650efa",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:28aadab53b521b36a34c708810ffd81c7999271af8e993db9364205951b01072",
@@ -30,9 +30,9 @@
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:94a7e2a585815054c1c54ab7274b37564776d2ee336228eaf542a55df06e6fd1",
     "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:8f1082b8a1f3689a5fd9ea1840bf59641339e65e75b1c9b92bfc03d87d555a75",
     "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:cf68380c5dc48526a4f6ec541c2cd442957a6566c08e1620bde37b030307f7e1",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:9aae7eb159c72dcf6477f39d74fae2a707ef7117a839e8d045157300630b0697",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:d6d9ccb55c9c5f6665f8a5ef8b3560ca049fe6f9a4fb4271fc8d090a27eb331c",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:a1bd0694e9bce9d098bf50cb7871ce67102ca7ab1888791ae7f1eb47d83cf5ef",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:b2c201ee119bd64417c420c4ed516eb71ebd3d8c0635bd3e2dc363a155e71fea",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:6036ba28a06c3fb33c032af352fa2f4ccd1f9a275b49e9e8769137a119758d2e",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:8bb96070a59d0c92a8d1a71df602684470c96c242171955997926577f6110c49",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:4b850cd38991e0507cab5b9507cccb2bab9012f968e64eb2aa032f39119c31d8",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:d8d10b4a6570aab02a9e031488d7f11daed70d0e8b2f417cf63181829d82eb29",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:8136daf6d7687ad43d0911198046d7a96368866b95a6bd98627b1316b30014bc",
@@ -217,7 +217,7 @@
       "summary": {
         "fresh_artifact_count": 14,
         "fresh_artifact_pass_count": 14,
-        "snapshot_blocker_count": 47,
+        "snapshot_blocker_count": 45,
         "stale_or_inconsistent": true
       }
     },
@@ -278,7 +278,6 @@
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
-        "github_sync::github_sync_preflight::worktree_not_clean",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced"
@@ -514,7 +513,7 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "d7d66e517a575c978aa366d2feda441afdfb40a6",
+  "source_commit_sha": "2126538d6fa22122d68812d9fbb12bf8d5d185c7",
   "stage_average_progress_percent": 46.4,
   "stage_count": 8,
   "status": "blocked",
