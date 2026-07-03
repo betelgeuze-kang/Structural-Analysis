@@ -34,10 +34,16 @@ DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_ROWS_OUT = PRODUCTIZATION / "pocketmd_lite_topk_rows.json"
 DEFAULT_OPERATOR_INTAKE = PRODUCTIZATION / "pocketmd_lite_operator_intake.json"
 DEFAULT_OPERATOR_TEMPLATE = PRODUCTIZATION / "pocketmd_lite_operator_template.json"
+DEFAULT_REFINEMENT_EXECUTION_PLAN = (
+    PRODUCTIZATION / "pocketmd_lite_refinement_execution_plan.json"
+)
 DEFAULT_SURVIVAL_REPORT = PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json"
 DEFAULT_SURFACE = (
     Path("implementation/phase1/release_evidence/surface")
     / "pocketmd_lite_science_product_surface.json"
+)
+REFINEMENT_EXECUTION_PLAN_SCHEMA_VERSION = (
+    "pocketmd-lite-refinement-execution-plan.v1"
 )
 
 SCHEMA_VERSION = "pocketmd-lite-source-acquisition-plan.v1"
@@ -250,6 +256,39 @@ def _phase4_refinement_receipt_plan() -> dict[str, Any]:
     }
 
 
+def _refinement_execution_plan_command() -> str:
+    return (
+        "python3 scripts/build_pocketmd_lite_refinement_execution_plan.py "
+        f"--out {DEFAULT_REFINEMENT_EXECUTION_PLAN}"
+    )
+
+
+def _refinement_execution_plan_summary(
+    minimum_rows_by_case: list[dict[str, Any]],
+) -> dict[str, Any]:
+    required_candidate_slot_count = sum(
+        len(row.get("required_top_k_rank_prefix") or [])
+        for row in minimum_rows_by_case
+    )
+    return {
+        "artifact": str(DEFAULT_REFINEMENT_EXECUTION_PLAN),
+        "schema_version": REFINEMENT_EXECUTION_PLAN_SCHEMA_VERSION,
+        "status": "operator_refinement_rows_required",
+        "execution_plan_ready": True,
+        "operator_rows_ready": False,
+        "survival_report_ready": False,
+        "actual_closure_ready": False,
+        "required_case_count": len(minimum_rows_by_case),
+        "required_candidate_slot_count": required_candidate_slot_count,
+        "command": _refinement_execution_plan_command(),
+        "claim_boundary": (
+            "The execution plan enumerates the bounded top-k case/rank slots "
+            "operator rows must fill. It does not synthesize rows or promote "
+            "PocketMD Lite closure without the survival materializer."
+        ),
+    }
+
+
 def build_pocketmd_lite_source_acquisition_plan(
     *,
     repo_root: Path = ROOT,
@@ -264,11 +303,15 @@ def build_pocketmd_lite_source_acquisition_plan(
     min_total = int(TOPK_ROW_QUALITY_CRITERIA["min_total_top_k_candidate_count"])
     min_cases = int(TOPK_ROW_QUALITY_CRITERIA["min_real_refinement_case_count"])
     phase4_refinement_receipt_plan = _phase4_refinement_receipt_plan()
+    refinement_execution_plan = _refinement_execution_plan_summary(
+        minimum_rows_by_case
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
             input_paths=[
                 Path("scripts/build_pocketmd_lite_source_acquisition_plan.py"),
+                Path("scripts/build_pocketmd_lite_refinement_execution_plan.py"),
                 Path("scripts/materialize_pocketmd_lite_operator_intake_from_rows.py"),
                 Path("scripts/materialize_pocketmd_lite_topk_survival_report.py"),
             ],
@@ -289,6 +332,7 @@ def build_pocketmd_lite_source_acquisition_plan(
         "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
         "minimum_rows_by_case": minimum_rows_by_case,
         "phase4_refinement_receipt_plan": phase4_refinement_receipt_plan,
+        "refinement_execution_plan": refinement_execution_plan,
         "phase4_refinement_receipt_promotion_policy": dict(
             PHASE4_REFINEMENT_RECEIPT_PROMOTION_POLICY
         ),
@@ -343,6 +387,7 @@ def build_pocketmd_lite_source_acquisition_plan(
         ],
         "operator_acquisition_checklist": [
             "review_phase4_refinement_receipt_plan",
+            "build_pocketmd_lite_refinement_execution_plan",
             "select_upstream_ranked_top_k_candidate_sets",
             "attach_upstream_top_k_provenance_and_checksum_for_every_candidate",
             "run_bounded_lite_refinement_for_top_k_candidates_only",
@@ -356,6 +401,7 @@ def build_pocketmd_lite_source_acquisition_plan(
             "write_plan": (
                 "python3 scripts/build_pocketmd_lite_source_acquisition_plan.py"
             ),
+            "build_refinement_execution_plan": _refinement_execution_plan_command(),
             "import_rows": (
                 "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
                 f"--rows {DEFAULT_ROWS_OUT} --out {DEFAULT_OPERATOR_INTAKE} "
@@ -394,6 +440,14 @@ def build_pocketmd_lite_source_acquisition_plan(
                     "covered_phase4_criterion_count"
                 ]
             ),
+            "refinement_execution_plan_status": refinement_execution_plan["status"],
+            "refinement_execution_plan_ready": refinement_execution_plan[
+                "execution_plan_ready"
+            ],
+            "required_candidate_slot_count": refinement_execution_plan[
+                "required_candidate_slot_count"
+            ],
+            "operator_rows_ready": refinement_execution_plan["operator_rows_ready"],
             "actual_closure_ready": False,
             "blocker_count": len(blockers),
         },
@@ -416,6 +470,9 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `blocker_count`: `{payload['blocker_count']}`",
         f"- `phase4_refinement_receipt_plan_status`: `{payload['phase4_refinement_receipt_plan']['status']}`",
         f"- `phase4_refinement_receipt_role_count`: `{payload['phase4_refinement_receipt_plan']['receipt_role_count']}`",
+        f"- `refinement_execution_plan`: `{payload['refinement_execution_plan']['artifact']}`",
+        f"- `refinement_execution_plan_status`: `{payload['refinement_execution_plan']['status']}`",
+        f"- `required_candidate_slot_count`: `{payload['refinement_execution_plan']['required_candidate_slot_count']}`",
         "",
         "| Case | Minimum Rows | Required Rank Prefix | Scope |",
         "|---|---:|---|---|",

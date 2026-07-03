@@ -8,10 +8,11 @@
   "claim_boundary": "PocketMD Lite is a bounded top-k refinement surface. It reports local-min survival, contact persistence, H-bond persistence, clash relief, and uncertainty for already-ranked candidates only. It does not claim broad all-atom MD, FEP, long-timescale dynamics, or autonomous docking accuracy.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T17:48:20.191345+00:00",
+  "generated_at": "2026-07-03T19:14:05.416153+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:a93894c310e1cc8906fb68cd048eb3406b2b5d6f8b66ec47320f3c116fbe80d8",
-    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:9cbf576ad52048d3c9b77ec7c16ce4f24419462fd4ec9d9e5a095bce1d167036",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:8b07f986ff44eda42195d2bf90681c8a7afdadd656359222d16879fc9d5a380f",
+    "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:63575ffc589461c9b6114e0a603b3783bf5b13c164d1fb10259118ad1c53f84b",
+    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:f40353bc31525068bfea16e4c35e2f0abc604368247345b530153b2867f66884",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:985edb154d586829d3ec221ee54d820e8b45b880bcfd99a348f1c7037958d6e0",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:161673d8ff036a7a31d657fb972764eeb4b62f6d55cc0840e26f398565707c6f"
   },
@@ -478,7 +479,7 @@
   "reused_evidence": false,
   "schema_version": "pocketmd-lite-contract.v1",
   "scope": "top_k_lite_refinement_only",
-  "source_commit_sha": "7c4772c807ee84c159eff83e97863106e264794b",
+  "source_commit_sha": "47d00b9ee6e67abd386e046bb6ee9b637c3782db",
   "status": "contract_ready_operator_evidence_required",
   "top_k_policy": {
     "candidate_scope": "top_k_candidates_only",

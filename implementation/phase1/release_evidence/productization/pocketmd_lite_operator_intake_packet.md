@@ -6,6 +6,8 @@
 - `first_blocked_target`: `top_k_refinement_operator_intake`
 - `source_acquisition_plan`: `implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json`
 - `source_acquisition_plan_status`: `operator_acquisition_required`
+- `refinement_execution_plan`: `implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json`
+- `refinement_execution_plan_status`: `operator_refinement_rows_required`
 - `claim_boundary`: This packet is an owner-facing intake contract for bounded PocketMD Lite top-k refinement rows. It does not run MD, infer missing metrics, or unlock broad all-atom MD/FEP claims.
 
 | Slot | Status | Required Fields |
@@ -27,6 +29,7 @@
 ## Materialization Sequence
 
 - `build_pocketmd_lite_source_acquisition_plan`: `python3 scripts/build_pocketmd_lite_source_acquisition_plan.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.md`
+- `build_pocketmd_lite_refinement_execution_plan`: `python3 scripts/build_pocketmd_lite_refinement_execution_plan.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json`
 - `materialize_pocketmd_lite_operator_intake_from_rows`: `python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json|jsonl|ndjson> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-url <source-url> --source-license <license>`
 - `fill_pocketmd_lite_operator_intake_packet`: `create <operator-pocketmd-lite-intake.json> from implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json`
 - `materialize_pocketmd_lite_topk_survival_report`: `python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked`

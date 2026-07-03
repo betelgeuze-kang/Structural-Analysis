@@ -460,6 +460,9 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert "get_pocketmd_lite_source_acquisition_plan" in {
         row["endpoint_id"] for row in api["endpoints"]
     }
+    assert "get_pocketmd_lite_refinement_execution_plan" in {
+        row["endpoint_id"] for row in api["endpoints"]
+    }
 
     assert handoff["schema_version"] == "pocketmd-lite-delivery-handoff.v1"
     assert handoff["contract_pass"] is True
@@ -484,6 +487,9 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert handoff["evidence_artifacts"]["source_acquisition_plan"].endswith(
         "pocketmd_lite_source_acquisition_plan.json"
     )
+    assert handoff["evidence_artifacts"]["refinement_execution_plan"].endswith(
+        "pocketmd_lite_refinement_execution_plan.json"
+    )
     assert handoff["source_acquisition_plan"]["status"] == (
         "operator_acquisition_required"
     )
@@ -495,6 +501,12 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert handoff["source_acquisition_plan"]["phase4_refinement_receipt_plan"][
         "covered_phase4_criterion_count"
     ] == 8
+    assert handoff["source_acquisition_plan"]["refinement_execution_plan"][
+        "required_candidate_slot_count"
+    ] == 6
+    assert handoff["operator_intake_reference"]["refinement_execution_plan"][
+        "execution_plan_ready"
+    ] is True
     assert handoff["phase4_exit_gate_reference"] == {
         "source_artifact": (
             "implementation/phase1/release_evidence/productization/"
@@ -578,6 +590,22 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert operator["source_acquisition_plan"]["actual_closure_ready"] is False
     assert operator["source_acquisition_plan"]["required_case_count"] == 3
     assert operator["source_acquisition_plan"]["required_total_candidate_rows"] == 6
+    assert operator["source_acquisition_plan"]["refinement_execution_plan"][
+        "required_candidate_slot_count"
+    ] == 6
+    assert operator["refinement_execution_plan"]["artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_refinement_execution_plan.json"
+    )
+    assert operator["refinement_execution_plan"]["status"] == (
+        "operator_refinement_rows_required"
+    )
+    assert operator["refinement_execution_plan"]["execution_plan_ready"] is True
+    assert operator["refinement_execution_plan"]["operator_rows_ready"] is False
+    assert operator["refinement_execution_plan"]["required_case_count"] == 3
+    assert operator["refinement_execution_plan"][
+        "required_candidate_slot_count"
+    ] == 6
     receipt_plan = operator["source_acquisition_plan"][
         "phase4_refinement_receipt_plan"
     ]
@@ -633,6 +661,7 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
                 "pocketmd_lite_topk_rows_template.csv"
             )
         },
+        "refinement_execution_plan": operator["refinement_execution_plan"],
         "source_acquisition_plan": operator["source_acquisition_plan"],
         "status": "ready_for_operator_rows",
     }
@@ -643,6 +672,9 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert operator["phase4_topk_row_closure_matrix_count"] == 1
     assert operator["summary"]["phase4_topk_row_closure_matrix_count"] == 1
     assert operator["summary"]["row_template_artifact_count"] == 1
+    assert operator["summary"]["refinement_execution_plan_ready"] is True
+    assert operator["summary"]["operator_rows_ready"] is False
+    assert operator["summary"]["required_candidate_slot_count"] == 6
     assert operator["phase4_topk_row_closure_matrix"][0] == survival_closure
     assert operator["minimum_refinement_case_count"] == 3
     assert operator["minimum_top_k_candidate_count"] == 6
@@ -700,13 +732,17 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "build_pocketmd_lite_source_acquisition_plan"
     )
     assert operator["materialization_sequence"][1]["step_id"] == (
-        "materialize_pocketmd_lite_operator_intake_from_rows"
+        "build_pocketmd_lite_refinement_execution_plan"
     )
     assert operator["materialization_sequence"][2]["step_id"] == (
+        "materialize_pocketmd_lite_operator_intake_from_rows"
+    )
+    assert operator["materialization_sequence"][3]["step_id"] == (
         "fill_pocketmd_lite_operator_intake_packet"
     )
-    assert operator["next_actions"][:3] == [
+    assert operator["next_actions"][:4] == [
         "complete_pocketmd_lite_source_acquisition_plan",
+        "build_pocketmd_lite_refinement_execution_plan",
         "materialize_pocketmd_lite_operator_intake_from_rows",
         "fill_pocketmd_lite_operator_intake_packet",
     ]
@@ -742,6 +778,13 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert surface["operator_evidence_gap_count"] == 1
     assert surface["phase4_topk_row_closure_matrix_count"] == 1
     assert surface["phase4_topk_row_closure_matrix"][0] == survival_closure
+    assert surface["refinement_execution_plan"]["status"] == (
+        "operator_refinement_rows_required"
+    )
+    assert surface["refinement_execution_plan"]["required_candidate_slot_count"] == 6
+    assert surface["linked_artifacts"]["refinement_execution_plan"].endswith(
+        "pocketmd_lite_refinement_execution_plan.json"
+    )
     assert surface["first_operator_evidence_gap"]["slot_id"] == (
         "top_k_refinement_rows"
     )
@@ -927,6 +970,9 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
 def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
     source_plan_out = tmp_path / "pocketmd_lite_source_acquisition_plan.json"
     source_plan_md_out = tmp_path / "pocketmd_lite_source_acquisition_plan.md"
+    refinement_execution_plan_out = (
+        tmp_path / "pocketmd_lite_refinement_execution_plan.json"
+    )
     contract_out = tmp_path / "pocketmd_lite_contract.json"
     survival_out = tmp_path / "pocketmd_lite_topk_survival_report.json"
     survival_md_out = tmp_path / "pocketmd_lite_topk_survival_report.md"
@@ -948,6 +994,8 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
                 str(source_plan_out),
                 "--source-acquisition-plan-md-out",
                 str(source_plan_md_out),
+                "--refinement-execution-plan-out",
+                str(refinement_execution_plan_out),
                 "--contract-out",
                 str(contract_out),
                 "--survival-report-out",
@@ -976,6 +1024,7 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
     for path in (
         source_plan_out,
         source_plan_md_out,
+        refinement_execution_plan_out,
         contract_out,
         survival_out,
         api_out,
@@ -1004,6 +1053,9 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
             "scripts/build_pocketmd_lite_source_acquisition_plan.py"
         ].startswith("sha256:")
         assert payload["input_checksums"][
+            "scripts/build_pocketmd_lite_refinement_execution_plan.py"
+        ].startswith("sha256:")
+        assert payload["input_checksums"][
             "scripts/materialize_pocketmd_lite_topk_survival_report.py"
         ].startswith("sha256:")
         assert payload["input_checksums"][
@@ -1011,9 +1063,18 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
         ].startswith("sha256:")
     source_plan_payload = json.loads(source_plan_out.read_text(encoding="utf-8"))
     assert source_plan_payload["summary"]["required_total_candidate_rows"] == 6
+    assert source_plan_payload["summary"]["required_candidate_slot_count"] == 6
     assert source_plan_payload["input_checksums"][
         "scripts/build_pocketmd_lite_source_acquisition_plan.py"
     ].startswith("sha256:")
+    assert source_plan_payload["input_checksums"][
+        "scripts/build_pocketmd_lite_refinement_execution_plan.py"
+    ].startswith("sha256:")
+    refinement_execution_plan_payload = json.loads(
+        refinement_execution_plan_out.read_text(encoding="utf-8")
+    )
+    assert refinement_execution_plan_payload["required_candidate_slot_count"] == 6
+    assert refinement_execution_plan_payload["operator_rows_ready"] is False
     assert "# PocketMD Lite Source Acquisition Plan" in source_plan_md_out.read_text(
         encoding="utf-8"
     )

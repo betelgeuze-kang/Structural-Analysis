@@ -27,6 +27,7 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         repo_root=REPO_ROOT,
     )
     receipt_plan = payload["phase4_refinement_receipt_plan"]
+    execution_plan = payload["refinement_execution_plan"]
     receipt_roles = {
         row["receipt_role_id"]: row for row in receipt_plan["receipt_roles"]
     }
@@ -89,6 +90,30 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "uncertainty_unit_is_nonblank",
         "uncertainty_rows_share_the_bounded_top_k_candidate_scope",
     ]
+    assert execution_plan == {
+        "actual_closure_ready": False,
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_refinement_execution_plan.json"
+        ),
+        "claim_boundary": (
+            "The execution plan enumerates the bounded top-k case/rank slots "
+            "operator rows must fill. It does not synthesize rows or promote "
+            "PocketMD Lite closure without the survival materializer."
+        ),
+        "command": (
+            "python3 scripts/build_pocketmd_lite_refinement_execution_plan.py "
+            "--out implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_refinement_execution_plan.json"
+        ),
+        "execution_plan_ready": True,
+        "operator_rows_ready": False,
+        "required_candidate_slot_count": 6,
+        "required_case_count": 3,
+        "schema_version": "pocketmd-lite-refinement-execution-plan.v1",
+        "status": "operator_refinement_rows_required",
+        "survival_report_ready": False,
+    }
     assert payload["minimum_rows_by_case"] == [
         {
             "case_id": "pocketmd_lite_case_001",
@@ -187,9 +212,13 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "actual_closure_ready": False,
         "blocker_count": 3,
         "minimum_rows_by_case_count": 3,
+        "operator_rows_ready": False,
         "phase4_refinement_receipt_plan_status": "operator_receipts_required",
         "phase4_refinement_receipt_role_count": 4,
         "covered_phase4_criterion_count": 8,
+        "refinement_execution_plan_ready": True,
+        "refinement_execution_plan_status": "operator_refinement_rows_required",
+        "required_candidate_slot_count": 6,
         "required_candidate_rows_per_case": 2,
         "required_case_count": 3,
         "required_total_candidate_rows": 6,
@@ -201,6 +230,9 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     ]
     assert payload["commands"]["import_rows"].startswith(
         "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py"
+    )
+    assert payload["commands"]["build_refinement_execution_plan"].startswith(
+        "python3 scripts/build_pocketmd_lite_refinement_execution_plan.py"
     )
 
 
@@ -217,8 +249,11 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert payload["contract_pass"] is True
     assert payload["actual_closure_ready"] is False
     assert payload["summary"]["required_total_candidate_rows"] == 6
+    assert payload["summary"]["required_candidate_slot_count"] == 6
     assert payload["phase4_refinement_receipt_plan"]["receipt_role_count"] == 4
+    assert payload["refinement_execution_plan"]["execution_plan_ready"] is True
     assert "# PocketMD Lite Source Acquisition Plan" in markdown
+    assert "pocketmd_lite_refinement_execution_plan.json" in markdown
     assert "`pocketmd_lite_case_001` | 2 | `1,2`" in markdown
     assert "## Phase 4 Receipt Roles" in markdown
     assert "upstream_top_k_candidate_scope_receipt" in markdown
