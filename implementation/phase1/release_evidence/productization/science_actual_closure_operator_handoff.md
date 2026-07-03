@@ -69,6 +69,13 @@
 | `pocketmd_lite_case_003_rank_01` | `pocketmd_lite_case_003` | `1` | `missing` | `attach_pocketmd_topk_row_for_pocketmd_lite_case_003_rank_01` |
 | `pocketmd_lite_case_003_rank_02` | `pocketmd_lite_case_003` | `2` | `missing` | `attach_pocketmd_topk_row_for_pocketmd_lite_case_003_rank_02` |
 
+## Blocked Component Actions
+
+| Component | Row Input | Action | Default Artifact | Source Action |
+| --- | --- | --- | --- | --- |
+| `pocketmd_lite_topk_actual_closure` | `pocketmd_rows` | `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `resolve_pocketmd_lite_source_acquisition_blockers` |
+| `public_benchmark_phase2_actual_closure` | `vina_gnina_rows` | `attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `resolve_public_benchmark_phase2_source_acquisition_blockers` |
+
 ## Provided Closure Evidence
 
 ### GPCR Phase 3 Gate

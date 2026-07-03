@@ -136,9 +136,56 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert blocked_actions["public_benchmark_phase2_actual_closure"][
         "missing_row_input_ids"
     ] == ["vina_gnina_rows"]
+    public_action = blocked_actions["public_benchmark_phase2_actual_closure"][
+        "missing_row_input_actions"
+    ][0]
+    assert blocked_actions["public_benchmark_phase2_actual_closure"][
+        "missing_row_input_action_count"
+    ] == 1
+    assert public_action["row_input_id"] == "vina_gnina_rows"
+    assert public_action["operator_action"] == (
+        "attach_vina_gnina_rows_at_"
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_rows.json"
+    )
+    assert public_action["preferred_default_row_path"].endswith(
+        "public_benchmark_vina_gnina_rows.json"
+    )
+    assert public_action["row_template_artifact"].endswith(
+        "public_benchmark_vina_gnina_rows_template.csv"
+    )
+    assert public_action["source_acquisition_operator_action"] == (
+        "resolve_public_benchmark_phase2_source_acquisition_blockers"
+    )
+    assert "public_benchmark_vina_gnina_engine_runtime_not_ready" in public_action[
+        "upstream_source_blockers"
+    ]
     assert blocked_actions["pocketmd_lite_topk_actual_closure"][
         "missing_row_input_ids"
     ] == ["pocketmd_rows"]
+    pocketmd_action = blocked_actions["pocketmd_lite_topk_actual_closure"][
+        "missing_row_input_actions"
+    ][0]
+    assert blocked_actions["pocketmd_lite_topk_actual_closure"][
+        "missing_row_input_action_count"
+    ] == 1
+    assert pocketmd_action["row_input_id"] == "pocketmd_rows"
+    assert pocketmd_action["operator_action"] == (
+        "attach_pocketmd_rows_at_implementation/phase1/release_evidence/"
+        "productization/pocketmd_lite_topk_rows.json"
+    )
+    assert pocketmd_action["preferred_default_row_path"].endswith(
+        "pocketmd_lite_topk_rows.json"
+    )
+    assert pocketmd_action["row_template_artifact"].endswith(
+        "pocketmd_lite_topk_rows_template.csv"
+    )
+    assert pocketmd_action["source_acquisition_operator_action"] == (
+        "resolve_pocketmd_lite_source_acquisition_blockers"
+    )
+    assert "pocketmd_lite_topk_rows_not_acquired" in pocketmd_action[
+        "upstream_source_blockers"
+    ]
     assert len(payload["upstream_source_blockers"]) == 8
     assert payload["upstream_source_acquisition"]["public_benchmark_phase2"][
         "present"
@@ -446,6 +493,9 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "| `pocketmd_rows` | `operator_input_required` |" in markdown
     assert "- `blocker_count`: `10`" in markdown
     assert "## Missing Row Packet" in markdown
+    assert "## Blocked Component Actions" in markdown
+    assert "public_benchmark_phase2_actual_closure" in markdown
+    assert "pocketmd_lite_topk_actual_closure" in markdown
     assert "attach_pocketmd_rows_at_" in markdown
     assert "CSV Starter" in markdown
     assert "## Upstream Source Blockers" in markdown

@@ -647,6 +647,30 @@ def _blocked_component_operator_actions(
             == str(summary.get("component_id") or "")
             and bool(slot.get("missing"))
         ]
+        missing_row_input_actions = [
+            {
+                "row_input_id": str(slot.get("row_input_id") or ""),
+                "operator_action": str(slot.get("operator_action") or ""),
+                "preferred_default_row_path": str(
+                    slot.get("preferred_default_row_path") or ""
+                ),
+                "row_template_artifact": str(slot.get("row_template_artifact") or ""),
+                "materialization_command": str(
+                    slot.get("materialization_command") or ""
+                ),
+                "source_acquisition_operator_action": str(
+                    slot.get("source_acquisition_operator_action") or ""
+                ),
+                "upstream_source_blockers": [
+                    str(item) for item in _as_list(slot.get("upstream_source_blockers"))
+                ],
+                "operator_blockers_if_missing": [
+                    str(item)
+                    for item in _as_list(slot.get("operator_blockers_if_missing"))
+                ],
+            }
+            for slot in component_slots
+        ]
         rows.append(
             {
                 "component_id": str(summary.get("component_id") or ""),
@@ -654,6 +678,8 @@ def _blocked_component_operator_actions(
                 "operator_actions": [
                     str(slot.get("operator_action") or "") for slot in component_slots
                 ],
+                "missing_row_input_actions": missing_row_input_actions,
+                "missing_row_input_action_count": len(missing_row_input_actions),
                 "source_acquisition_operator_actions": sorted(
                     {
                         str(slot.get("source_acquisition_operator_action") or "")
@@ -987,7 +1013,32 @@ def _markdown(payload: dict[str, Any]) -> str:
                         f"`{engine_slot.get('engine_id')}` | "
                         f"`{engine_slot.get('status')}` | "
                         f"`{actions}` |"
+                    )
+    blocked_component_actions = [
+        row
+        for row in _as_list(payload.get("blocked_component_operator_actions"))
+        if isinstance(row, dict)
+    ]
+    if blocked_component_actions:
+        lines.extend(["", "## Blocked Component Actions", ""])
+        lines.extend(
+            [
+                "| Component | Row Input | Action | Default Artifact | Source Action |",
+                "| --- | --- | --- | --- | --- |",
+            ]
         )
+        for component in blocked_component_actions:
+            for action in _as_list(component.get("missing_row_input_actions")):
+                if not isinstance(action, dict):
+                    continue
+                lines.append(
+                    "| "
+                    f"`{component.get('component_id')}` | "
+                    f"`{action.get('row_input_id')}` | "
+                    f"`{action.get('operator_action')}` | "
+                    f"`{action.get('preferred_default_row_path')}` | "
+                    f"`{action.get('source_acquisition_operator_action')}` |"
+                )
     upstream_source_blockers = [
         str(item) for item in _as_list(payload.get("upstream_source_blockers"))
     ]
