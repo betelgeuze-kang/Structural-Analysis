@@ -154,6 +154,33 @@ def test_runtime_readiness_container_status_accepts_local_image(
     )
 
 
+def test_runtime_readiness_container_status_records_daemon_without_image(
+    monkeypatch,
+) -> None:
+    monkeypatch.delenv("PUBLIC_BENCHMARK_GNINA_CONTAINER_IMAGE", raising=False)
+    monkeypatch.setattr(
+        module,
+        "_docker_daemon_version",
+        lambda executable: (True, "29.1.3"),
+    )
+
+    status = module._engine_container_status(
+        "gnina",
+        docker_cli_status={
+            "available": True,
+            "executable": "/usr/bin/docker",
+            "blocker": "",
+        },
+    )
+
+    assert status["status"] == "container_image_not_configured"
+    assert status["available"] is False
+    assert status["docker_daemon_available"] is True
+    assert status["docker_server_version"] == "29.1.3"
+    assert status["image_present"] is False
+    assert status["blocker"] == ""
+
+
 def test_runtime_readiness_records_missing_binaries_and_rows(
     tmp_path: Path,
     monkeypatch,
@@ -279,6 +306,8 @@ def test_runtime_readiness_uses_container_execution_when_binaries_missing(
     assert payload["missing_engine_ids"] == []
     assert payload["blockers"] == ["public_benchmark_vina_gnina_rows_not_detected"]
     assert payload["ready_engine_run_slot_count"] == 2
+    assert payload["summary"]["available_engine_count"] == 2
+    assert payload["summary"]["missing_engine_count"] == 0
     assert payload["engine_run_slots"][0]["engine_execution_source"] == "container"
     assert payload["engine_run_slots"][0]["engine_container_image"] == (
         "ghcr.io/acme/vina:latest"

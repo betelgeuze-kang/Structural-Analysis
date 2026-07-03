@@ -98,6 +98,33 @@ def test_vina_gnina_execution_plan_engine_status_blocks_bad_env_path(
     assert status["blocker"] == "gnina_binary_not_found"
 
 
+def test_vina_gnina_execution_plan_container_status_records_daemon_without_image(
+    monkeypatch,
+) -> None:
+    monkeypatch.delenv("PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE", raising=False)
+    monkeypatch.setattr(
+        module,
+        "_docker_daemon_version",
+        lambda executable: (True, "29.1.3"),
+    )
+
+    status = module._engine_container_status(
+        "vina",
+        docker_cli_status={
+            "available": True,
+            "executable": "/usr/bin/docker",
+            "blocker": "",
+        },
+    )
+
+    assert status["status"] == "container_image_not_configured"
+    assert status["available"] is False
+    assert status["docker_daemon_available"] is True
+    assert status["docker_server_version"] == "29.1.3"
+    assert status["image_present"] is False
+    assert status["blocker"] == ""
+
+
 def test_vina_gnina_execution_plan_builds_case_run_specs(
     tmp_path: Path,
     monkeypatch,

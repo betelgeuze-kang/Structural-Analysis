@@ -174,6 +174,11 @@ def _engine_container_status(
     image_env_var = f"PUBLIC_BENCHMARK_{engine_id.upper()}_CONTAINER_IMAGE"
     image = os.environ.get(image_env_var, "").strip()
     docker_status = docker_cli_status or _docker_cli_status()
+    docker_daemon_available = False
+    docker_version = ""
+    if docker_status.get("available"):
+        executable = str(docker_status.get("executable") or "docker")
+        docker_daemon_available, docker_version = _docker_daemon_version(executable)
     base = {
         "engine_id": engine_id,
         "available": False,
@@ -181,8 +186,8 @@ def _engine_container_status(
         "image_env_var": image_env_var,
         "docker_executable": str(docker_status.get("executable") or ""),
         "docker_binary_available": bool(docker_status.get("available")),
-        "docker_daemon_available": False,
-        "docker_server_version": "",
+        "docker_daemon_available": docker_daemon_available,
+        "docker_server_version": docker_version,
         "image_present": False,
         "command_prefix": "",
         "blocker": "",
@@ -196,8 +201,7 @@ def _engine_container_status(
             "blocker": str(docker_status.get("blocker") or "docker_binary_missing"),
         }
     executable = str(docker_status.get("executable") or "docker")
-    daemon_available, docker_version = _docker_daemon_version(executable)
-    if not daemon_available:
+    if not docker_daemon_available:
         return {
             **base,
             "status": "blocked",
@@ -210,7 +214,6 @@ def _engine_container_status(
             **base,
             "status": "blocked",
             "docker_daemon_available": True,
-            "docker_server_version": docker_version,
             "blocker": f"{engine_id}_container_image_not_present",
         }
     command_prefix = f"{executable} run --rm -v $PWD:/work -w /work {image} {engine_id}"
@@ -515,10 +518,12 @@ def build_vina_gnina_runtime_readiness(
                 if row["status"] == "ready_for_engine_execution"
             ),
             "available_engine_count": sum(
-                1 for row in current_engine_statuses if row.get("available")
+                1 for row in current_engine_execution_statuses if row.get("available")
             ),
             "missing_engine_count": sum(
-                1 for row in current_engine_statuses if not row.get("available")
+                1
+                for row in current_engine_execution_statuses
+                if not row.get("available")
             ),
             "detected_row_artifact_count": row_status[
                 "detected_row_artifact_count"
