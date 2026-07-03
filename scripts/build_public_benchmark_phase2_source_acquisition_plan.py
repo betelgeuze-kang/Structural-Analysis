@@ -62,6 +62,9 @@ DEFAULT_HARNESS_BUNDLE = PRODUCTIZATION / "public_benchmark_harness_bundle.json"
 DEFAULT_VINA_GNINA_EXECUTION_PLAN = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_execution_plan.json"
 )
+DEFAULT_VINA_GNINA_RUNTIME_READINESS = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_runtime_readiness.json"
+)
 
 SCHEMA_VERSION = "public-benchmark-phase2-source-acquisition-plan.v1"
 TIER_BETA_MINIMUM_SUBSET_CASE_COUNT = 12
@@ -337,6 +340,44 @@ def _vina_gnina_execution_plan_summary(payload: dict[str, Any]) -> dict[str, Any
         "command": (
             "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
             f"--out {DEFAULT_VINA_GNINA_EXECUTION_PLAN}"
+        ),
+    }
+
+
+def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, Any]:
+    summary = payload.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+    blockers = payload.get("blockers")
+    if not isinstance(blockers, list):
+        blockers = []
+    return {
+        "artifact": str(DEFAULT_VINA_GNINA_RUNTIME_READINESS),
+        "status": str(payload.get("status") or "missing"),
+        "contract_pass": payload.get("contract_pass"),
+        "execution_plan_ready": bool(payload.get("execution_plan_ready")),
+        "runtime_ready_for_engine_execution": bool(
+            payload.get("runtime_ready_for_engine_execution")
+        ),
+        "operator_execution_ready": bool(payload.get("operator_execution_ready")),
+        "adapter_rows_ready": bool(payload.get("adapter_rows_ready")),
+        "case_count": int(summary.get("case_count") or 0),
+        "required_engine_run_count": int(
+            summary.get("required_engine_run_count") or 0
+        ),
+        "ready_engine_run_slot_count": int(
+            summary.get("ready_engine_run_slot_count") or 0
+        ),
+        "available_engine_count": int(summary.get("available_engine_count") or 0),
+        "missing_engine_count": int(summary.get("missing_engine_count") or 0),
+        "detected_row_artifact_count": int(
+            summary.get("detected_row_artifact_count") or 0
+        ),
+        "blocker_count": len(blockers),
+        "blockers": [str(row) for row in blockers],
+        "command": (
+            "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py "
+            f"--out {DEFAULT_VINA_GNINA_RUNTIME_READINESS}"
         ),
     }
 
@@ -693,6 +734,13 @@ def build_public_benchmark_phase2_source_acquisition_plan(
     vina_gnina_execution_plan_summary = _vina_gnina_execution_plan_summary(
         vina_gnina_execution_plan
     )
+    vina_gnina_runtime_readiness = _load_json(
+        repo_root,
+        DEFAULT_VINA_GNINA_RUNTIME_READINESS,
+    )
+    vina_gnina_runtime_readiness_summary = _vina_gnina_runtime_readiness_summary(
+        vina_gnina_runtime_readiness
+    )
     blockers = _source_acquisition_blockers(phase2_row_audit_summary)
     return {
         "schema_version": SCHEMA_VERSION,
@@ -711,7 +759,9 @@ def build_public_benchmark_phase2_source_acquisition_plan(
                 Path("scripts/materialize_public_benchmark_enrichment_scorecard.py"),
                 Path("scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"),
                 Path("scripts/build_public_benchmark_vina_gnina_execution_plan.py"),
+                Path("scripts/build_public_benchmark_vina_gnina_runtime_readiness.py"),
                 DEFAULT_VINA_GNINA_EXECUTION_PLAN,
+                DEFAULT_VINA_GNINA_RUNTIME_READINESS,
                 Path("scripts/validate_public_benchmark_external_receipts.py"),
             ],
             reused_evidence=False,
@@ -731,12 +781,14 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         "receipt_promotion_policy": dict(RECEIPT_PROMOTION_POLICY),
         "phase2_row_audit": phase2_row_audit_summary,
         "vina_gnina_execution_plan": vina_gnina_execution_plan_summary,
+        "vina_gnina_runtime_readiness": vina_gnina_runtime_readiness_summary,
         "operator_acquisition_checklist": [
             "review_official_source_receipt_plan",
             "attach_casf_pdbbind_subset_rows_with_local_file_checksums",
             "attach_pose_coordinate_rows_with_symmetry_contracts",
             "attach_dud_e_or_lit_pcba_scored_molecule_rows",
             "build_vina_gnina_execution_plan_from_materialized_cases",
+            "run_vina_gnina_runtime_readiness_check",
             "attach_vina_gnina_engine_run_rows",
             "attach_external_source_receipts_and_license_or_accession_refs",
             "run_public_benchmark_operator_bundle_from_rows",
@@ -764,6 +816,10 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "build_vina_gnina_execution_plan": (
                 "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
                 f"--out {DEFAULT_VINA_GNINA_EXECUTION_PLAN}"
+            ),
+            "check_vina_gnina_runtime_readiness": (
+                "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py "
+                f"--out {DEFAULT_VINA_GNINA_RUNTIME_READINESS}"
             ),
             "materialize_harness_bundle": (
                 "python3 scripts/materialize_public_benchmark_harness_bundle.py "
@@ -817,6 +873,22 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "vina_gnina_missing_engine_count": vina_gnina_execution_plan_summary[
                 "missing_engine_count"
             ],
+            "vina_gnina_runtime_readiness_status": (
+                vina_gnina_runtime_readiness_summary["status"]
+            ),
+            "vina_gnina_runtime_ready_for_engine_execution": (
+                vina_gnina_runtime_readiness_summary[
+                    "runtime_ready_for_engine_execution"
+                ]
+            ),
+            "vina_gnina_runtime_ready_engine_run_slot_count": (
+                vina_gnina_runtime_readiness_summary["ready_engine_run_slot_count"]
+            ),
+            "vina_gnina_runtime_detected_row_artifact_count": (
+                vina_gnina_runtime_readiness_summary[
+                    "detected_row_artifact_count"
+                ]
+            ),
             "phase2_ready": False,
             "actual_closure_ready": False,
             "blocker_count": len(blockers),
@@ -851,6 +923,9 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `vina_gnina_execution_plan`: `{payload['vina_gnina_execution_plan']['artifact']}`",
         f"- `vina_gnina_execution_plan_status`: `{payload['vina_gnina_execution_plan']['status']}`",
         f"- `vina_gnina_required_engine_run_count`: `{payload['vina_gnina_execution_plan']['required_engine_run_count']}`",
+        f"- `vina_gnina_runtime_readiness`: `{payload['vina_gnina_runtime_readiness']['artifact']}`",
+        f"- `vina_gnina_runtime_readiness_status`: `{payload['vina_gnina_runtime_readiness']['status']}`",
+        f"- `vina_gnina_runtime_ready_engine_run_slot_count`: `{payload['vina_gnina_runtime_readiness']['ready_engine_run_slot_count']}`",
         "",
         "| Row Input | Source Family | Status | Unblocks |",
         "|---|---|---|---|",

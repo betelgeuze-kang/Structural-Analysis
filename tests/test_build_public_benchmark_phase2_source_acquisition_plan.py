@@ -172,6 +172,22 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "vina",
         "gnina",
     ]
+    assert payload["vina_gnina_runtime_readiness"]["artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_runtime_readiness.json"
+    )
+    assert payload["vina_gnina_runtime_readiness"]["status"] == (
+        "engine_runtime_blocked"
+    )
+    assert payload["vina_gnina_runtime_readiness"][
+        "runtime_ready_for_engine_execution"
+    ] is False
+    assert payload["vina_gnina_runtime_readiness"][
+        "ready_engine_run_slot_count"
+    ] == 0
+    assert payload["vina_gnina_runtime_readiness"][
+        "detected_row_artifact_count"
+    ] == 0
 
     subset = row_contracts["subset_rows"]
     assert subset["source_family"] == "CASF/PDBBind"
@@ -258,6 +274,10 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "vina_gnina_execution_plan_ready": True,
         "vina_gnina_required_engine_run_count": 24,
         "vina_gnina_missing_engine_count": 2,
+        "vina_gnina_runtime_readiness_status": "engine_runtime_blocked",
+        "vina_gnina_runtime_ready_for_engine_execution": False,
+        "vina_gnina_runtime_ready_engine_run_slot_count": 0,
+        "vina_gnina_runtime_detected_row_artifact_count": 0,
         "phase2_ready": False,
         "required_component_count": 5,
         "required_row_input_count": 4,
@@ -284,9 +304,13 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert payload["official_source_receipt_plan"]["receipt_role_count"] == 4
     assert payload["official_source_receipt_plan"]["source_catalog_count"] == 6
     assert payload["vina_gnina_execution_plan"]["required_engine_run_count"] == 24
+    assert payload["vina_gnina_runtime_readiness"]["status"] == (
+        "engine_runtime_blocked"
+    )
     assert "# Public Benchmark Phase 2 Source Acquisition Plan" in markdown
     assert "public_benchmark_phase2_row_audit.json" in markdown
     assert "public_benchmark_vina_gnina_execution_plan.json" in markdown
+    assert "public_benchmark_vina_gnina_runtime_readiness.json" in markdown
     assert "`vina_gnina_required_engine_run_count`: `24`" in markdown
     assert "`subset_rows` | `CASF/PDBBind`" in markdown
     assert "`vina_gnina_rows` | `CASF/PDBBind + Vina/GNINA`" in markdown
