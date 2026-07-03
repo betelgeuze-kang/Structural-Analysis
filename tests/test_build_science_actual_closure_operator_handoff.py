@@ -83,6 +83,17 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_rows.json"
     )
+    vina_contract_detail = row_contracts["vina_gnina_rows"][
+        "row_input_slot_detail"
+    ]
+    assert vina_contract_detail["status"] == "execution_plan_blocked"
+    assert vina_contract_detail["required_engine_run_count"] == 24
+    assert vina_contract_detail["ready_engine_run_slot_count"] == 0
+    assert vina_contract_detail["blocked_engine_run_slot_count"] == 24
+    assert vina_contract_detail["missing_engine_ids"] == ["vina", "gnina"]
+    assert vina_contract_detail["engine_run_status_summary"][
+        "first_blocked_engine_run_slot"
+    ]["case_id"] == "casf2016_4llx"
     assert row_contracts["pocketmd_rows"]["row_template_artifact"].endswith(
         "pocketmd_lite_topk_rows_template.csv"
     )
@@ -187,6 +198,35 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     ]
     assert "public_benchmark_vina_gnina_input_manifest_not_detected" in vina_gnina[
         "upstream_source_blockers"
+    ]
+    vina_detail = vina_gnina["row_input_slot_detail"]
+    assert vina_detail["artifact"].endswith(
+        "public_benchmark_vina_gnina_runtime_readiness.json"
+    )
+    assert vina_detail["engine_run_status_summary"] == {
+        "blocked_engine_run_slot_count": 24,
+        "first_blocked_engine_run_slot": vina_detail["engine_run_slots"][0],
+        "first_ready_engine_run_slot": {},
+        "ready_engine_run_slot_count": 0,
+        "required_engine_run_count": 24,
+    }
+    assert vina_detail["engine_run_slots"][0]["operator_actions"] == [
+        "resolve_vina_gnina_case_inputs_for_casf2016_4llx",
+        "configure_vina_runtime",
+        "attach_vina_gnina_adapter_row_for_casf2016_4llx_vina",
+    ]
+    assert vina_detail["engine_run_slots"][0]["required_adapter_engine_run_fields"] == [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_version",
+        "engine_config_checksum",
+        "engine_run_provenance_ref",
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction",
     ]
 
     gpcr = slots["gpcr_rows"]
@@ -322,6 +362,10 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
         "implementation/phase1/release_evidence/productization/"
         "pocketmd_lite_refinement_execution_plan.json"
     ].startswith("sha256:")
+    assert payload["input_checksums"][
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_runtime_readiness.json"
+    ].startswith("sha256:")
     assert "| `subset_rows` | `provided` |" in markdown
     assert "| `vina_gnina_rows` | `operator_input_required` |" in markdown
     assert "| `pocketmd_rows` | `operator_input_required` |" in markdown
@@ -335,6 +379,9 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
         in markdown
     )
     assert "public_benchmark_vina_gnina_input_manifest_not_detected" in markdown
+    assert "### Vina/GNINA Engine Run Slots" in markdown
+    assert "casf2016_4llx_vina_casf2016_4llx_vina_run" in markdown
+    assert "configure_vina_runtime" in markdown
     assert "pocketmd_lite_topk_rows_not_acquired" in markdown
     assert "### PocketMD Top-k Candidate Slots" in markdown
     assert "pocketmd_lite_case_001_rank_01" in markdown

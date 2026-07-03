@@ -284,7 +284,1047 @@
     "resolved_path": "",
     "row_contract_ref": "row_intake_contracts.vina_gnina_rows",
     "row_input_id": "vina_gnina_rows",
-    "row_input_slot_detail": {},
+    "row_input_slot_detail": {
+      "adapter_rows_ready": false,
+      "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
+      "blocked_engine_run_slot_count": 24,
+      "claim_boundary": "This receipt reflects current runtime readiness for Vina/GNINA engine execution and adapter materialization. It does not run docking engines, create comparison rows, synthesize receipts, or close Public Benchmark Phase 2 without real engine outputs passing the comparison adapter.",
+      "engine_run_slots": [
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_id": "casf2016_4llx",
+          "case_inputs_ready": false,
+          "complex_id": "4llx",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_4llx_vina_run",
+          "engine_available": false,
+          "engine_id": "vina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_4llx",
+            "configure_vina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_4llx_vina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "gnina_binary_missing"
+          ],
+          "case_id": "casf2016_4llx",
+          "case_inputs_ready": false,
+          "complex_id": "4llx",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_4llx_gnina_run",
+          "engine_available": false,
+          "engine_id": "gnina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_4llx",
+            "configure_gnina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_4llx_gnina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_4llx_gnina_casf2016_4llx_gnina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_id": "casf2016_5c28",
+          "case_inputs_ready": false,
+          "complex_id": "5c28",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_5c28_vina_run",
+          "engine_available": false,
+          "engine_id": "vina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_5c28",
+            "configure_vina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_5c28_vina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_5c28_vina_casf2016_5c28_vina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "gnina_binary_missing"
+          ],
+          "case_id": "casf2016_5c28",
+          "case_inputs_ready": false,
+          "complex_id": "5c28",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_5c28_gnina_run",
+          "engine_available": false,
+          "engine_id": "gnina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_5c28",
+            "configure_gnina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_5c28_gnina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_5c28_gnina_casf2016_5c28_gnina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_id": "casf2016_3uuo",
+          "case_inputs_ready": false,
+          "complex_id": "3uuo",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_3uuo_vina_run",
+          "engine_available": false,
+          "engine_id": "vina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_3uuo",
+            "configure_vina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_3uuo_vina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_3uuo_vina_casf2016_3uuo_vina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "gnina_binary_missing"
+          ],
+          "case_id": "casf2016_3uuo",
+          "case_inputs_ready": false,
+          "complex_id": "3uuo",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_3uuo_gnina_run",
+          "engine_available": false,
+          "engine_id": "gnina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_3uuo",
+            "configure_gnina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_3uuo_gnina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_3uuo_gnina_casf2016_3uuo_gnina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_id": "casf2016_3ui7",
+          "case_inputs_ready": false,
+          "complex_id": "3ui7",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_3ui7_vina_run",
+          "engine_available": false,
+          "engine_id": "vina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_3ui7",
+            "configure_vina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_3ui7_vina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_3ui7_vina_casf2016_3ui7_vina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "gnina_binary_missing"
+          ],
+          "case_id": "casf2016_3ui7",
+          "case_inputs_ready": false,
+          "complex_id": "3ui7",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_3ui7_gnina_run",
+          "engine_available": false,
+          "engine_id": "gnina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_3ui7",
+            "configure_gnina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_3ui7_gnina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_3ui7_gnina_casf2016_3ui7_gnina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_id": "casf2016_5c2h",
+          "case_inputs_ready": false,
+          "complex_id": "5c2h",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_5c2h_vina_run",
+          "engine_available": false,
+          "engine_id": "vina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_5c2h",
+            "configure_vina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_5c2h_vina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_5c2h_vina_casf2016_5c2h_vina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "gnina_binary_missing"
+          ],
+          "case_id": "casf2016_5c2h",
+          "case_inputs_ready": false,
+          "complex_id": "5c2h",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_5c2h_gnina_run",
+          "engine_available": false,
+          "engine_id": "gnina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_5c2h",
+            "configure_gnina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_5c2h_gnina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_5c2h_gnina_casf2016_5c2h_gnina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_id": "casf2016_2v00",
+          "case_inputs_ready": false,
+          "complex_id": "2v00",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_2v00_vina_run",
+          "engine_available": false,
+          "engine_id": "vina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_2v00",
+            "configure_vina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_2v00_vina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_2v00_vina_casf2016_2v00_vina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "gnina_binary_missing"
+          ],
+          "case_id": "casf2016_2v00",
+          "case_inputs_ready": false,
+          "complex_id": "2v00",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_2v00_gnina_run",
+          "engine_available": false,
+          "engine_id": "gnina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_2v00",
+            "configure_gnina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_2v00_gnina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_2v00_gnina_casf2016_2v00_gnina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_id": "casf2016_3wz8",
+          "case_inputs_ready": false,
+          "complex_id": "3wz8",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_3wz8_vina_run",
+          "engine_available": false,
+          "engine_id": "vina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_3wz8",
+            "configure_vina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_3wz8_vina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_3wz8_vina_casf2016_3wz8_vina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "gnina_binary_missing"
+          ],
+          "case_id": "casf2016_3wz8",
+          "case_inputs_ready": false,
+          "complex_id": "3wz8",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_3wz8_gnina_run",
+          "engine_available": false,
+          "engine_id": "gnina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_3wz8",
+            "configure_gnina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_3wz8_gnina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_3wz8_gnina_casf2016_3wz8_gnina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_id": "casf2016_3pww",
+          "case_inputs_ready": false,
+          "complex_id": "3pww",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_3pww_vina_run",
+          "engine_available": false,
+          "engine_id": "vina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_3pww",
+            "configure_vina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_3pww_vina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_3pww_vina_casf2016_3pww_vina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "gnina_binary_missing"
+          ],
+          "case_id": "casf2016_3pww",
+          "case_inputs_ready": false,
+          "complex_id": "3pww",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_3pww_gnina_run",
+          "engine_available": false,
+          "engine_id": "gnina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_3pww",
+            "configure_gnina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_3pww_gnina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_3pww_gnina_casf2016_3pww_gnina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_id": "casf2016_3prs",
+          "case_inputs_ready": false,
+          "complex_id": "3prs",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_3prs_vina_run",
+          "engine_available": false,
+          "engine_id": "vina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_3prs",
+            "configure_vina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_3prs_vina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_3prs_vina_casf2016_3prs_vina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "gnina_binary_missing"
+          ],
+          "case_id": "casf2016_3prs",
+          "case_inputs_ready": false,
+          "complex_id": "3prs",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_3prs_gnina_run",
+          "engine_available": false,
+          "engine_id": "gnina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_3prs",
+            "configure_gnina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_3prs_gnina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_3prs_gnina_casf2016_3prs_gnina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_id": "casf2016_3uri",
+          "case_inputs_ready": false,
+          "complex_id": "3uri",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_3uri_vina_run",
+          "engine_available": false,
+          "engine_id": "vina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_3uri",
+            "configure_vina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_3uri_vina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_3uri_vina_casf2016_3uri_vina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "gnina_binary_missing"
+          ],
+          "case_id": "casf2016_3uri",
+          "case_inputs_ready": false,
+          "complex_id": "3uri",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_3uri_gnina_run",
+          "engine_available": false,
+          "engine_id": "gnina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_3uri",
+            "configure_gnina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_3uri_gnina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_3uri_gnina_casf2016_3uri_gnina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_id": "casf2016_4m0z",
+          "case_inputs_ready": false,
+          "complex_id": "4m0z",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_4m0z_vina_run",
+          "engine_available": false,
+          "engine_id": "vina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_4m0z",
+            "configure_vina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_4m0z_vina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_4m0z_vina_casf2016_4m0z_vina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "gnina_binary_missing"
+          ],
+          "case_id": "casf2016_4m0z",
+          "case_inputs_ready": false,
+          "complex_id": "4m0z",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_4m0z_gnina_run",
+          "engine_available": false,
+          "engine_id": "gnina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_4m0z",
+            "configure_gnina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_4m0z_gnina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_4m0z_gnina_casf2016_4m0z_gnina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_id": "casf2016_4m0y",
+          "case_inputs_ready": false,
+          "complex_id": "4m0y",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_4m0y_vina_run",
+          "engine_available": false,
+          "engine_id": "vina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_4m0y",
+            "configure_vina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_4m0y_vina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_4m0y_vina_casf2016_4m0y_vina_run",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "gnina_binary_missing"
+          ],
+          "case_id": "casf2016_4m0y",
+          "case_inputs_ready": false,
+          "complex_id": "4m0y",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_4m0y_gnina_run",
+          "engine_available": false,
+          "engine_id": "gnina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_4m0y",
+            "configure_gnina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_4m0y_gnina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_4m0y_gnina_casf2016_4m0y_gnina_run",
+          "status": "blocked"
+        }
+      ],
+      "engine_run_status_summary": {
+        "blocked_engine_run_slot_count": 24,
+        "first_blocked_engine_run_slot": {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_id": "casf2016_4llx",
+          "case_inputs_ready": false,
+          "complex_id": "4llx",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_4llx_vina_run",
+          "engine_available": false,
+          "engine_id": "vina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+          "operator_actions": [
+            "resolve_vina_gnina_case_inputs_for_casf2016_4llx",
+            "configure_vina_runtime",
+            "attach_vina_gnina_adapter_row_for_casf2016_4llx_vina"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+          "status": "blocked"
+        },
+        "first_ready_engine_run_slot": {},
+        "ready_engine_run_slot_count": 0,
+        "required_engine_run_count": 24
+      },
+      "missing_engine_ids": [
+        "vina",
+        "gnina"
+      ],
+      "operator_execution_ready": false,
+      "ready_engine_run_slot_count": 0,
+      "required_engine_run_count": 24,
+      "row_candidate_status": {
+        "adapter_case_count": 0,
+        "adapter_preflight": {
+          "blocker_count": 0,
+          "blockers": [],
+          "case_count": 0,
+          "contract_pass": false,
+          "engine_summaries": [],
+          "first_blocked_target": "",
+          "ready_case_count": 0,
+          "status": "missing"
+        },
+        "adapter_rows_ready": false,
+        "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+        "candidate_paths": [
+          {
+            "exists": false,
+            "is_file": false,
+            "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
+          },
+          {
+            "exists": false,
+            "is_file": false,
+            "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl"
+          },
+          {
+            "exists": false,
+            "is_file": false,
+            "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson"
+          },
+          {
+            "exists": false,
+            "is_file": false,
+            "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+          }
+        ],
+        "default_rows_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "detected_row_artifact_count": 0,
+        "load_error": "",
+        "selected_path": "",
+        "selected_row_count": 0,
+        "status": "row_artifact_missing"
+      },
+      "runtime_ready_for_engine_execution": false,
+      "status": "execution_plan_blocked"
+    },
     "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
     "row_template_present": true,
     "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
@@ -355,11 +1395,12 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-03T22:42:47.994338+00:00",
+  "generated_at": "2026-07-03T22:51:01.683902+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:02c03205636f5be5803c850e97f7ded298b089378106ea2ec81d92b7da2b36d3",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:bfa0c55dd4819586351de88656c572b4f13baef4393565cf3f27a7b45f4f3d26",
     "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:04a3ab789f279a906c5afdef1a618ad672f7959b58c50a5519961bdc78c402dd",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:1aabf29ecdf4c030087ab3e5c2e55e8256b32a4b60af830c780f6030900f99e8"
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:51a5ac90c651e0ccce4fc85af0effc2e5ea460eb74c1e0dd7e05aa9553d864a5"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -954,7 +1995,1047 @@
         ],
         "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
         "row_input_id": "vina_gnina_rows",
-        "row_input_slot_detail": {},
+        "row_input_slot_detail": {
+          "adapter_rows_ready": false,
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
+          "blocked_engine_run_slot_count": 24,
+          "claim_boundary": "This receipt reflects current runtime readiness for Vina/GNINA engine execution and adapter materialization. It does not run docking engines, create comparison rows, synthesize receipts, or close Public Benchmark Phase 2 without real engine outputs passing the comparison adapter.",
+          "engine_run_slots": [
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "vina_binary_missing"
+              ],
+              "case_id": "casf2016_4llx",
+              "case_inputs_ready": false,
+              "complex_id": "4llx",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_4llx_vina_run",
+              "engine_available": false,
+              "engine_id": "vina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_4llx",
+                "configure_vina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_4llx_vina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "gnina_binary_missing"
+              ],
+              "case_id": "casf2016_4llx",
+              "case_inputs_ready": false,
+              "complex_id": "4llx",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_4llx_gnina_run",
+              "engine_available": false,
+              "engine_id": "gnina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_4llx",
+                "configure_gnina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_4llx_gnina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_4llx_gnina_casf2016_4llx_gnina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "vina_binary_missing"
+              ],
+              "case_id": "casf2016_5c28",
+              "case_inputs_ready": false,
+              "complex_id": "5c28",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_5c28_vina_run",
+              "engine_available": false,
+              "engine_id": "vina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_5c28",
+                "configure_vina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_5c28_vina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_5c28_vina_casf2016_5c28_vina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "gnina_binary_missing"
+              ],
+              "case_id": "casf2016_5c28",
+              "case_inputs_ready": false,
+              "complex_id": "5c28",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_5c28_gnina_run",
+              "engine_available": false,
+              "engine_id": "gnina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_5c28",
+                "configure_gnina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_5c28_gnina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_5c28_gnina_casf2016_5c28_gnina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "vina_binary_missing"
+              ],
+              "case_id": "casf2016_3uuo",
+              "case_inputs_ready": false,
+              "complex_id": "3uuo",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_3uuo_vina_run",
+              "engine_available": false,
+              "engine_id": "vina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_3uuo",
+                "configure_vina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_3uuo_vina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_3uuo_vina_casf2016_3uuo_vina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "gnina_binary_missing"
+              ],
+              "case_id": "casf2016_3uuo",
+              "case_inputs_ready": false,
+              "complex_id": "3uuo",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_3uuo_gnina_run",
+              "engine_available": false,
+              "engine_id": "gnina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_3uuo",
+                "configure_gnina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_3uuo_gnina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_3uuo_gnina_casf2016_3uuo_gnina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "vina_binary_missing"
+              ],
+              "case_id": "casf2016_3ui7",
+              "case_inputs_ready": false,
+              "complex_id": "3ui7",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_3ui7_vina_run",
+              "engine_available": false,
+              "engine_id": "vina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_3ui7",
+                "configure_vina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_3ui7_vina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_3ui7_vina_casf2016_3ui7_vina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "gnina_binary_missing"
+              ],
+              "case_id": "casf2016_3ui7",
+              "case_inputs_ready": false,
+              "complex_id": "3ui7",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_3ui7_gnina_run",
+              "engine_available": false,
+              "engine_id": "gnina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_3ui7",
+                "configure_gnina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_3ui7_gnina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_3ui7_gnina_casf2016_3ui7_gnina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "vina_binary_missing"
+              ],
+              "case_id": "casf2016_5c2h",
+              "case_inputs_ready": false,
+              "complex_id": "5c2h",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_5c2h_vina_run",
+              "engine_available": false,
+              "engine_id": "vina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_5c2h",
+                "configure_vina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_5c2h_vina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_5c2h_vina_casf2016_5c2h_vina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "gnina_binary_missing"
+              ],
+              "case_id": "casf2016_5c2h",
+              "case_inputs_ready": false,
+              "complex_id": "5c2h",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_5c2h_gnina_run",
+              "engine_available": false,
+              "engine_id": "gnina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_5c2h",
+                "configure_gnina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_5c2h_gnina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_5c2h_gnina_casf2016_5c2h_gnina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "vina_binary_missing"
+              ],
+              "case_id": "casf2016_2v00",
+              "case_inputs_ready": false,
+              "complex_id": "2v00",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_2v00_vina_run",
+              "engine_available": false,
+              "engine_id": "vina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_2v00",
+                "configure_vina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_2v00_vina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_2v00_vina_casf2016_2v00_vina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "gnina_binary_missing"
+              ],
+              "case_id": "casf2016_2v00",
+              "case_inputs_ready": false,
+              "complex_id": "2v00",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_2v00_gnina_run",
+              "engine_available": false,
+              "engine_id": "gnina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_2v00",
+                "configure_gnina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_2v00_gnina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_2v00_gnina_casf2016_2v00_gnina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "vina_binary_missing"
+              ],
+              "case_id": "casf2016_3wz8",
+              "case_inputs_ready": false,
+              "complex_id": "3wz8",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_3wz8_vina_run",
+              "engine_available": false,
+              "engine_id": "vina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_3wz8",
+                "configure_vina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_3wz8_vina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_3wz8_vina_casf2016_3wz8_vina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "gnina_binary_missing"
+              ],
+              "case_id": "casf2016_3wz8",
+              "case_inputs_ready": false,
+              "complex_id": "3wz8",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_3wz8_gnina_run",
+              "engine_available": false,
+              "engine_id": "gnina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_3wz8",
+                "configure_gnina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_3wz8_gnina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_3wz8_gnina_casf2016_3wz8_gnina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "vina_binary_missing"
+              ],
+              "case_id": "casf2016_3pww",
+              "case_inputs_ready": false,
+              "complex_id": "3pww",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_3pww_vina_run",
+              "engine_available": false,
+              "engine_id": "vina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_3pww",
+                "configure_vina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_3pww_vina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_3pww_vina_casf2016_3pww_vina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "gnina_binary_missing"
+              ],
+              "case_id": "casf2016_3pww",
+              "case_inputs_ready": false,
+              "complex_id": "3pww",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_3pww_gnina_run",
+              "engine_available": false,
+              "engine_id": "gnina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_3pww",
+                "configure_gnina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_3pww_gnina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_3pww_gnina_casf2016_3pww_gnina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "vina_binary_missing"
+              ],
+              "case_id": "casf2016_3prs",
+              "case_inputs_ready": false,
+              "complex_id": "3prs",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_3prs_vina_run",
+              "engine_available": false,
+              "engine_id": "vina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_3prs",
+                "configure_vina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_3prs_vina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_3prs_vina_casf2016_3prs_vina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "gnina_binary_missing"
+              ],
+              "case_id": "casf2016_3prs",
+              "case_inputs_ready": false,
+              "complex_id": "3prs",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_3prs_gnina_run",
+              "engine_available": false,
+              "engine_id": "gnina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_3prs",
+                "configure_gnina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_3prs_gnina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_3prs_gnina_casf2016_3prs_gnina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "vina_binary_missing"
+              ],
+              "case_id": "casf2016_3uri",
+              "case_inputs_ready": false,
+              "complex_id": "3uri",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_3uri_vina_run",
+              "engine_available": false,
+              "engine_id": "vina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_3uri",
+                "configure_vina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_3uri_vina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_3uri_vina_casf2016_3uri_vina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "gnina_binary_missing"
+              ],
+              "case_id": "casf2016_3uri",
+              "case_inputs_ready": false,
+              "complex_id": "3uri",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_3uri_gnina_run",
+              "engine_available": false,
+              "engine_id": "gnina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_3uri",
+                "configure_gnina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_3uri_gnina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_3uri_gnina_casf2016_3uri_gnina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "vina_binary_missing"
+              ],
+              "case_id": "casf2016_4m0z",
+              "case_inputs_ready": false,
+              "complex_id": "4m0z",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_4m0z_vina_run",
+              "engine_available": false,
+              "engine_id": "vina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_4m0z",
+                "configure_vina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_4m0z_vina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_4m0z_vina_casf2016_4m0z_vina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "gnina_binary_missing"
+              ],
+              "case_id": "casf2016_4m0z",
+              "case_inputs_ready": false,
+              "complex_id": "4m0z",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_4m0z_gnina_run",
+              "engine_available": false,
+              "engine_id": "gnina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_4m0z",
+                "configure_gnina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_4m0z_gnina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_4m0z_gnina_casf2016_4m0z_gnina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "vina_binary_missing"
+              ],
+              "case_id": "casf2016_4m0y",
+              "case_inputs_ready": false,
+              "complex_id": "4m0y",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_4m0y_vina_run",
+              "engine_available": false,
+              "engine_id": "vina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_4m0y",
+                "configure_vina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_4m0y_vina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_4m0y_vina_casf2016_4m0y_vina_run",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "gnina_binary_missing"
+              ],
+              "case_id": "casf2016_4m0y",
+              "case_inputs_ready": false,
+              "complex_id": "4m0y",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_4m0y_gnina_run",
+              "engine_available": false,
+              "engine_id": "gnina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_4m0y",
+                "configure_gnina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_4m0y_gnina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_4m0y_gnina_casf2016_4m0y_gnina_run",
+              "status": "blocked"
+            }
+          ],
+          "engine_run_status_summary": {
+            "blocked_engine_run_slot_count": 24,
+            "first_blocked_engine_run_slot": {
+              "blockers": [
+                "protein_structure_path_missing",
+                "reference_ligand_path_missing",
+                "prepared_receptor_path_missing",
+                "prepared_ligand_path_missing",
+                "vina_binary_missing"
+              ],
+              "case_id": "casf2016_4llx",
+              "case_inputs_ready": false,
+              "complex_id": "4llx",
+              "docking_box_ready": true,
+              "docking_run_id": "casf2016_4llx_vina_run",
+              "engine_available": false,
+              "engine_id": "vina",
+              "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+              "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+              "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+              "operator_actions": [
+                "resolve_vina_gnina_case_inputs_for_casf2016_4llx",
+                "configure_vina_runtime",
+                "attach_vina_gnina_adapter_row_for_casf2016_4llx_vina"
+              ],
+              "required_adapter_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+              "status": "blocked"
+            },
+            "first_ready_engine_run_slot": {},
+            "ready_engine_run_slot_count": 0,
+            "required_engine_run_count": 24
+          },
+          "missing_engine_ids": [
+            "vina",
+            "gnina"
+          ],
+          "operator_execution_ready": false,
+          "ready_engine_run_slot_count": 0,
+          "required_engine_run_count": 24,
+          "row_candidate_status": {
+            "adapter_case_count": 0,
+            "adapter_preflight": {
+              "blocker_count": 0,
+              "blockers": [],
+              "case_count": 0,
+              "contract_pass": false,
+              "engine_summaries": [],
+              "first_blocked_target": "",
+              "ready_case_count": 0,
+              "status": "missing"
+            },
+            "adapter_rows_ready": false,
+            "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+            "candidate_paths": [
+              {
+                "exists": false,
+                "is_file": false,
+                "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
+              },
+              {
+                "exists": false,
+                "is_file": false,
+                "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl"
+              },
+              {
+                "exists": false,
+                "is_file": false,
+                "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson"
+              },
+              {
+                "exists": false,
+                "is_file": false,
+                "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+              }
+            ],
+            "default_rows_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+            "detected_row_artifact_count": 0,
+            "load_error": "",
+            "selected_path": "",
+            "selected_row_count": 0,
+            "status": "row_artifact_missing"
+          },
+          "runtime_ready_for_engine_execution": false,
+          "status": "execution_plan_blocked"
+        },
         "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
         "row_template_present": true,
         "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
@@ -1547,7 +3628,1047 @@
       ],
       "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
       "row_input_id": "vina_gnina_rows",
-      "row_input_slot_detail": {},
+      "row_input_slot_detail": {
+        "adapter_rows_ready": false,
+        "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
+        "blocked_engine_run_slot_count": 24,
+        "claim_boundary": "This receipt reflects current runtime readiness for Vina/GNINA engine execution and adapter materialization. It does not run docking engines, create comparison rows, synthesize receipts, or close Public Benchmark Phase 2 without real engine outputs passing the comparison adapter.",
+        "engine_run_slots": [
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_4llx",
+            "case_inputs_ready": false,
+            "complex_id": "4llx",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_4llx_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_4llx",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_4llx_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_4llx",
+            "case_inputs_ready": false,
+            "complex_id": "4llx",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_4llx_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_4llx",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_4llx_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_4llx_gnina_casf2016_4llx_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_5c28",
+            "case_inputs_ready": false,
+            "complex_id": "5c28",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_5c28_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_5c28",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_5c28_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_5c28_vina_casf2016_5c28_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_5c28",
+            "case_inputs_ready": false,
+            "complex_id": "5c28",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_5c28_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_5c28",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_5c28_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_5c28_gnina_casf2016_5c28_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_3uuo",
+            "case_inputs_ready": false,
+            "complex_id": "3uuo",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3uuo_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3uuo",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3uuo_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3uuo_vina_casf2016_3uuo_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_3uuo",
+            "case_inputs_ready": false,
+            "complex_id": "3uuo",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3uuo_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3uuo",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3uuo_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3uuo_gnina_casf2016_3uuo_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_3ui7",
+            "case_inputs_ready": false,
+            "complex_id": "3ui7",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3ui7_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3ui7",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3ui7_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3ui7_vina_casf2016_3ui7_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_3ui7",
+            "case_inputs_ready": false,
+            "complex_id": "3ui7",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3ui7_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3ui7",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3ui7_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3ui7_gnina_casf2016_3ui7_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_5c2h",
+            "case_inputs_ready": false,
+            "complex_id": "5c2h",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_5c2h_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_5c2h",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_5c2h_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_5c2h_vina_casf2016_5c2h_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_5c2h",
+            "case_inputs_ready": false,
+            "complex_id": "5c2h",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_5c2h_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_5c2h",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_5c2h_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_5c2h_gnina_casf2016_5c2h_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_2v00",
+            "case_inputs_ready": false,
+            "complex_id": "2v00",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_2v00_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_2v00",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_2v00_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_2v00_vina_casf2016_2v00_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_2v00",
+            "case_inputs_ready": false,
+            "complex_id": "2v00",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_2v00_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_2v00",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_2v00_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_2v00_gnina_casf2016_2v00_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_3wz8",
+            "case_inputs_ready": false,
+            "complex_id": "3wz8",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3wz8_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3wz8",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3wz8_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3wz8_vina_casf2016_3wz8_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_3wz8",
+            "case_inputs_ready": false,
+            "complex_id": "3wz8",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3wz8_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3wz8",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3wz8_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3wz8_gnina_casf2016_3wz8_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_3pww",
+            "case_inputs_ready": false,
+            "complex_id": "3pww",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3pww_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3pww",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3pww_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3pww_vina_casf2016_3pww_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_3pww",
+            "case_inputs_ready": false,
+            "complex_id": "3pww",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3pww_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3pww",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3pww_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3pww_gnina_casf2016_3pww_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_3prs",
+            "case_inputs_ready": false,
+            "complex_id": "3prs",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3prs_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3prs",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3prs_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3prs_vina_casf2016_3prs_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_3prs",
+            "case_inputs_ready": false,
+            "complex_id": "3prs",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3prs_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3prs",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3prs_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3prs_gnina_casf2016_3prs_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_3uri",
+            "case_inputs_ready": false,
+            "complex_id": "3uri",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3uri_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3uri",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3uri_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3uri_vina_casf2016_3uri_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_3uri",
+            "case_inputs_ready": false,
+            "complex_id": "3uri",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3uri_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3uri",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3uri_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3uri_gnina_casf2016_3uri_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_4m0z",
+            "case_inputs_ready": false,
+            "complex_id": "4m0z",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_4m0z_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_4m0z",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_4m0z_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_4m0z_vina_casf2016_4m0z_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_4m0z",
+            "case_inputs_ready": false,
+            "complex_id": "4m0z",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_4m0z_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_4m0z",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_4m0z_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_4m0z_gnina_casf2016_4m0z_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_4m0y",
+            "case_inputs_ready": false,
+            "complex_id": "4m0y",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_4m0y_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_4m0y",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_4m0y_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_4m0y_vina_casf2016_4m0y_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_4m0y",
+            "case_inputs_ready": false,
+            "complex_id": "4m0y",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_4m0y_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_4m0y",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_4m0y_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_4m0y_gnina_casf2016_4m0y_gnina_run",
+            "status": "blocked"
+          }
+        ],
+        "engine_run_status_summary": {
+          "blocked_engine_run_slot_count": 24,
+          "first_blocked_engine_run_slot": {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_4llx",
+            "case_inputs_ready": false,
+            "complex_id": "4llx",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_4llx_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_4llx",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_4llx_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+            "status": "blocked"
+          },
+          "first_ready_engine_run_slot": {},
+          "ready_engine_run_slot_count": 0,
+          "required_engine_run_count": 24
+        },
+        "missing_engine_ids": [
+          "vina",
+          "gnina"
+        ],
+        "operator_execution_ready": false,
+        "ready_engine_run_slot_count": 0,
+        "required_engine_run_count": 24,
+        "row_candidate_status": {
+          "adapter_case_count": 0,
+          "adapter_preflight": {
+            "blocker_count": 0,
+            "blockers": [],
+            "case_count": 0,
+            "contract_pass": false,
+            "engine_summaries": [],
+            "first_blocked_target": "",
+            "ready_case_count": 0,
+            "status": "missing"
+          },
+          "adapter_rows_ready": false,
+          "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+          "candidate_paths": [
+            {
+              "exists": false,
+              "is_file": false,
+              "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
+            },
+            {
+              "exists": false,
+              "is_file": false,
+              "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl"
+            },
+            {
+              "exists": false,
+              "is_file": false,
+              "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson"
+            },
+            {
+              "exists": false,
+              "is_file": false,
+              "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+            }
+          ],
+          "default_rows_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+          "detected_row_artifact_count": 0,
+          "load_error": "",
+          "selected_path": "",
+          "selected_row_count": 0,
+          "status": "row_artifact_missing"
+        },
+        "runtime_ready_for_engine_execution": false,
+        "status": "execution_plan_blocked"
+      },
       "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
       "row_template_present": true,
       "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
@@ -2358,7 +5479,1047 @@
       "resolved_path": "",
       "row_contract_ref": "row_intake_contracts.vina_gnina_rows",
       "row_input_id": "vina_gnina_rows",
-      "row_input_slot_detail": {},
+      "row_input_slot_detail": {
+        "adapter_rows_ready": false,
+        "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
+        "blocked_engine_run_slot_count": 24,
+        "claim_boundary": "This receipt reflects current runtime readiness for Vina/GNINA engine execution and adapter materialization. It does not run docking engines, create comparison rows, synthesize receipts, or close Public Benchmark Phase 2 without real engine outputs passing the comparison adapter.",
+        "engine_run_slots": [
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_4llx",
+            "case_inputs_ready": false,
+            "complex_id": "4llx",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_4llx_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_4llx",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_4llx_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_4llx",
+            "case_inputs_ready": false,
+            "complex_id": "4llx",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_4llx_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_4llx",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_4llx_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_4llx_gnina_casf2016_4llx_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_5c28",
+            "case_inputs_ready": false,
+            "complex_id": "5c28",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_5c28_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_5c28",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_5c28_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_5c28_vina_casf2016_5c28_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_5c28",
+            "case_inputs_ready": false,
+            "complex_id": "5c28",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_5c28_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_5c28",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_5c28_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_5c28_gnina_casf2016_5c28_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_3uuo",
+            "case_inputs_ready": false,
+            "complex_id": "3uuo",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3uuo_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3uuo",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3uuo_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3uuo_vina_casf2016_3uuo_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_3uuo",
+            "case_inputs_ready": false,
+            "complex_id": "3uuo",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3uuo_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3uuo",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3uuo_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3uuo_gnina_casf2016_3uuo_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_3ui7",
+            "case_inputs_ready": false,
+            "complex_id": "3ui7",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3ui7_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3ui7",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3ui7_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3ui7_vina_casf2016_3ui7_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_3ui7",
+            "case_inputs_ready": false,
+            "complex_id": "3ui7",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3ui7_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3ui7",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3ui7_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3ui7_gnina_casf2016_3ui7_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_5c2h",
+            "case_inputs_ready": false,
+            "complex_id": "5c2h",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_5c2h_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_5c2h",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_5c2h_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_5c2h_vina_casf2016_5c2h_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_5c2h",
+            "case_inputs_ready": false,
+            "complex_id": "5c2h",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_5c2h_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_5c2h",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_5c2h_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_5c2h_gnina_casf2016_5c2h_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_2v00",
+            "case_inputs_ready": false,
+            "complex_id": "2v00",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_2v00_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_2v00",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_2v00_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_2v00_vina_casf2016_2v00_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_2v00",
+            "case_inputs_ready": false,
+            "complex_id": "2v00",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_2v00_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_2v00",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_2v00_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_2v00_gnina_casf2016_2v00_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_3wz8",
+            "case_inputs_ready": false,
+            "complex_id": "3wz8",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3wz8_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3wz8",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3wz8_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3wz8_vina_casf2016_3wz8_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_3wz8",
+            "case_inputs_ready": false,
+            "complex_id": "3wz8",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3wz8_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3wz8",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3wz8_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3wz8_gnina_casf2016_3wz8_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_3pww",
+            "case_inputs_ready": false,
+            "complex_id": "3pww",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3pww_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3pww",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3pww_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3pww_vina_casf2016_3pww_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_3pww",
+            "case_inputs_ready": false,
+            "complex_id": "3pww",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3pww_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3pww",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3pww_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3pww_gnina_casf2016_3pww_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_3prs",
+            "case_inputs_ready": false,
+            "complex_id": "3prs",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3prs_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3prs",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3prs_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3prs_vina_casf2016_3prs_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_3prs",
+            "case_inputs_ready": false,
+            "complex_id": "3prs",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3prs_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3prs",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3prs_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3prs_gnina_casf2016_3prs_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_3uri",
+            "case_inputs_ready": false,
+            "complex_id": "3uri",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3uri_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3uri",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3uri_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3uri_vina_casf2016_3uri_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_3uri",
+            "case_inputs_ready": false,
+            "complex_id": "3uri",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_3uri_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_3uri",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_3uri_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_3uri_gnina_casf2016_3uri_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_4m0z",
+            "case_inputs_ready": false,
+            "complex_id": "4m0z",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_4m0z_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_4m0z",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_4m0z_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_4m0z_vina_casf2016_4m0z_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_4m0z",
+            "case_inputs_ready": false,
+            "complex_id": "4m0z",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_4m0z_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_4m0z",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_4m0z_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_4m0z_gnina_casf2016_4m0z_gnina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_4m0y",
+            "case_inputs_ready": false,
+            "complex_id": "4m0y",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_4m0y_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_4m0y",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_4m0y_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_4m0y_vina_casf2016_4m0y_vina_run",
+            "status": "blocked"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_4m0y",
+            "case_inputs_ready": false,
+            "complex_id": "4m0y",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_4m0y_gnina_run",
+            "engine_available": false,
+            "engine_id": "gnina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_4m0y",
+              "configure_gnina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_4m0y_gnina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_4m0y_gnina_casf2016_4m0y_gnina_run",
+            "status": "blocked"
+          }
+        ],
+        "engine_run_status_summary": {
+          "blocked_engine_run_slot_count": 24,
+          "first_blocked_engine_run_slot": {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_4llx",
+            "case_inputs_ready": false,
+            "complex_id": "4llx",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_4llx_vina_run",
+            "engine_available": false,
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+            "operator_actions": [
+              "resolve_vina_gnina_case_inputs_for_casf2016_4llx",
+              "configure_vina_runtime",
+              "attach_vina_gnina_adapter_row_for_casf2016_4llx_vina"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+            "status": "blocked"
+          },
+          "first_ready_engine_run_slot": {},
+          "ready_engine_run_slot_count": 0,
+          "required_engine_run_count": 24
+        },
+        "missing_engine_ids": [
+          "vina",
+          "gnina"
+        ],
+        "operator_execution_ready": false,
+        "ready_engine_run_slot_count": 0,
+        "required_engine_run_count": 24,
+        "row_candidate_status": {
+          "adapter_case_count": 0,
+          "adapter_preflight": {
+            "blocker_count": 0,
+            "blockers": [],
+            "case_count": 0,
+            "contract_pass": false,
+            "engine_summaries": [],
+            "first_blocked_target": "",
+            "ready_case_count": 0,
+            "status": "missing"
+          },
+          "adapter_rows_ready": false,
+          "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+          "candidate_paths": [
+            {
+              "exists": false,
+              "is_file": false,
+              "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
+            },
+            {
+              "exists": false,
+              "is_file": false,
+              "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl"
+            },
+            {
+              "exists": false,
+              "is_file": false,
+              "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson"
+            },
+            {
+              "exists": false,
+              "is_file": false,
+              "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+            }
+          ],
+          "default_rows_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+          "detected_row_artifact_count": 0,
+          "load_error": "",
+          "selected_path": "",
+          "selected_row_count": 0,
+          "status": "row_artifact_missing"
+        },
+        "runtime_ready_for_engine_execution": false,
+        "status": "execution_plan_blocked"
+      },
       "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
       "row_template_present": true,
       "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
@@ -3039,7 +7200,7 @@
   "schema_version": "science-actual-closure-operator-handoff.v1",
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "eb41c50f3af51a801870b06ecd115546e5f8608a",
+  "source_commit_sha": "de9306cf2e4a34608e346f2f113f4a0493d95dbf",
   "status": "operator_rows_required",
   "summary": {
     "blocked_component_operator_action_count": 2,

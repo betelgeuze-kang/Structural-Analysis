@@ -24,6 +24,9 @@ DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_POCKETMD_REFINEMENT_PLAN = (
     PRODUCTIZATION / "pocketmd_lite_refinement_execution_plan.json"
 )
+DEFAULT_VINA_GNINA_RUNTIME_READINESS = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_runtime_readiness.json"
+)
 SCHEMA_VERSION = "science-actual-closure-operator-handoff.v1"
 EXPECTED_ROW_INPUTS = (
     "subset_rows",
@@ -223,6 +226,105 @@ def _pocketmd_top_k_slot_detail(
             summary.get("first_missing_candidate_slot")
         ),
         "claim_boundary": str(refinement_plan.get("claim_boundary") or ""),
+    }
+
+
+def _compact_vina_gnina_engine_run_slot(row: dict[str, Any]) -> dict[str, Any]:
+    slot_id = (
+        f"{row.get('case_id')}_{row.get('engine_id')}_"
+        f"{row.get('docking_run_id')}"
+    )
+    return {
+        "slot_id": slot_id,
+        "case_id": str(row.get("case_id") or ""),
+        "complex_id": str(row.get("complex_id") or ""),
+        "engine_id": str(row.get("engine_id") or ""),
+        "docking_run_id": str(row.get("docking_run_id") or ""),
+        "status": str(row.get("status") or ""),
+        "engine_available": bool(row.get("engine_available")),
+        "case_inputs_ready": bool(row.get("case_inputs_ready")),
+        "docking_box_ready": bool(row.get("docking_box_ready")),
+        "blockers": [str(item) for item in _as_list(row.get("blockers"))],
+        "operator_actions": [
+            action
+            for action in (
+                f"resolve_vina_gnina_case_inputs_for_{row.get('case_id')}"
+                if not bool(row.get("case_inputs_ready"))
+                else "",
+                f"configure_{row.get('engine_id')}_runtime"
+                if not bool(row.get("engine_available"))
+                else "",
+                f"attach_vina_gnina_adapter_row_for_{row.get('case_id')}_{row.get('engine_id')}",
+            )
+            if action
+        ],
+        "expected_predicted_ligand_path_or_pose_ref": str(
+            row.get("expected_predicted_ligand_path_or_pose_ref") or ""
+        ),
+        "expected_engine_config_ref": str(
+            row.get("expected_engine_config_ref") or ""
+        ),
+        "expected_engine_run_provenance_ref": str(
+            row.get("expected_engine_run_provenance_ref") or ""
+        ),
+        "required_adapter_engine_run_fields": [
+            str(item)
+            for item in _as_list(row.get("required_adapter_engine_run_fields"))
+        ],
+    }
+
+
+def _vina_gnina_engine_run_slot_detail(
+    runtime_readiness: dict[str, Any],
+    *,
+    artifact: Path,
+) -> dict[str, Any]:
+    if not runtime_readiness:
+        return {}
+    engine_run_slots = [
+        _compact_vina_gnina_engine_run_slot(row)
+        for row in _as_list(runtime_readiness.get("engine_run_slots"))
+        if isinstance(row, dict)
+    ]
+    blocked_slots = [
+        row for row in engine_run_slots if str(row.get("status") or "") != "ready_for_engine_execution"
+    ]
+    ready_slots = [
+        row for row in engine_run_slots if str(row.get("status") or "") == "ready_for_engine_execution"
+    ]
+    summary = _as_dict(runtime_readiness.get("summary"))
+    return {
+        "artifact": str(artifact),
+        "status": str(runtime_readiness.get("status") or ""),
+        "runtime_ready_for_engine_execution": bool(
+            runtime_readiness.get("runtime_ready_for_engine_execution")
+        ),
+        "operator_execution_ready": bool(
+            runtime_readiness.get("operator_execution_ready")
+        ),
+        "adapter_rows_ready": bool(runtime_readiness.get("adapter_rows_ready")),
+        "required_engine_run_count": _as_int(
+            runtime_readiness.get("required_engine_run_count")
+            or summary.get("required_engine_run_count")
+        ),
+        "ready_engine_run_slot_count": len(ready_slots),
+        "blocked_engine_run_slot_count": len(blocked_slots),
+        "missing_engine_ids": [
+            str(item)
+            for item in _as_list(runtime_readiness.get("missing_engine_ids"))
+        ],
+        "row_candidate_status": _as_dict(
+            runtime_readiness.get("row_candidate_status")
+        ),
+        "engine_run_status_summary": {
+            "required_engine_run_count": len(engine_run_slots),
+            "ready_engine_run_slot_count": len(ready_slots),
+            "blocked_engine_run_slot_count": len(blocked_slots),
+            "first_blocked_engine_run_slot": blocked_slots[0] if blocked_slots else {},
+            "first_ready_engine_run_slot": ready_slots[0] if ready_slots else {},
+        },
+        "engine_run_slots": engine_run_slots,
+        "claim_boundary": str(runtime_readiness.get("claim_boundary") or ""),
     }
 
 
@@ -490,11 +592,19 @@ def build_science_actual_closure_operator_handoff(
         repo_root,
         DEFAULT_POCKETMD_REFINEMENT_PLAN,
     )
+    vina_gnina_runtime_readiness = _load_json(
+        repo_root,
+        DEFAULT_VINA_GNINA_RUNTIME_READINESS,
+    )
     row_input_slot_details = {
         "pocketmd_rows": _pocketmd_top_k_slot_detail(
             pocketmd_refinement_plan,
             artifact=DEFAULT_POCKETMD_REFINEMENT_PLAN,
-        )
+        ),
+        "vina_gnina_rows": _vina_gnina_engine_run_slot_detail(
+            vina_gnina_runtime_readiness,
+            artifact=DEFAULT_VINA_GNINA_RUNTIME_READINESS,
+        ),
     }
     slots = sorted(
         [
@@ -549,6 +659,7 @@ def build_science_actual_closure_operator_handoff(
                 Path("scripts/build_science_actual_closure_operator_handoff.py"),
                 audit_path,
                 DEFAULT_POCKETMD_REFINEMENT_PLAN,
+                DEFAULT_VINA_GNINA_RUNTIME_READINESS,
             ],
             reused_evidence=True,
             reuse_policy=(
@@ -697,6 +808,42 @@ def _markdown(payload: dict[str, Any]) -> str:
                         f"`{candidate_slot.get('top_k_rank')}` | "
                         "`missing` | "
                         f"`{candidate_slot.get('operator_action')}` |"
+                    )
+            engine_run_detail = _as_dict(contract.get("row_input_slot_detail"))
+            engine_run_summary = _as_dict(
+                engine_run_detail.get("engine_run_status_summary")
+            )
+            blocked_engine_run_slots = [
+                item
+                for item in _as_list(engine_run_detail.get("engine_run_slots"))
+                if isinstance(item, dict)
+                and str(item.get("status") or "") != "ready_for_engine_execution"
+            ]
+            if blocked_engine_run_slots:
+                lines.extend(["", "### Vina/GNINA Engine Run Slots", ""])
+                lines.append(
+                    f"- `blocked_engine_run_slot_count`: "
+                    f"`{engine_run_summary.get('blocked_engine_run_slot_count')}`"
+                )
+                lines.extend(
+                    [
+                        "",
+                        "| Slot | Case | Engine | Status | Actions |",
+                        "| --- | --- | --- | --- | --- |",
+                    ]
+                )
+                for engine_slot in blocked_engine_run_slots:
+                    actions = ", ".join(
+                        str(item)
+                        for item in _as_list(engine_slot.get("operator_actions"))
+                    )
+                    lines.append(
+                        "| "
+                        f"`{engine_slot.get('slot_id')}` | "
+                        f"`{engine_slot.get('case_id')}` | "
+                        f"`{engine_slot.get('engine_id')}` | "
+                        f"`{engine_slot.get('status')}` | "
+                        f"`{actions}` |"
                     )
     upstream_source_blockers = [
         str(item) for item in _as_list(payload.get("upstream_source_blockers"))
