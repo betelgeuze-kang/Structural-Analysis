@@ -10,7 +10,7 @@
   },
   "canonical_release_area_evidence": {
     "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
-    "release_area_blocker_count": 8,
+    "release_area_blocker_count": 9,
     "release_area_blocker_ids": [
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
@@ -18,6 +18,7 @@
       "ux::human_new_user_30min_sample_evidence_missing",
       "security::license_status_not_configured",
       "github_sync::github_sync_preflight::remote_mutation_approval_required",
+      "github_sync::github_sync_preflight::local_head_mismatch",
       "github_sync::github_sync_remote_sync_pending",
       "github_sync::github_sync_preflight_not_synced"
     ],
@@ -28,10 +29,10 @@
   "claim_boundary": "This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T02:05:13.523210+00:00",
+  "generated_at": "2026-07-03T02:23:41.257783+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:cc76b4513b90f4df238166fa5b976a99b0a409e8d5240b223a69ceabe1021048",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:b7708e327fc490b6b468b3c83d7582b40c56a5c6e6216e39d50ff7937ac83a85",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:98378c2a3c1fa84e1e0bc761bf13ae8b223771d0b6c8fd7a45545a4dc07a76eb",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:80203747950922052a7e8291d2f13eea5a339632d3a5bb9c64ac69c5bb185277",
     "scripts/build_pm_release_blocker_closure_board.py": "sha256:390c963b64828e63b71920b554bb49dfb6763c3051f78b8b8ec2e5db73ae5947"
   },
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -307,7 +308,41 @@
       "external_input_required": true,
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+      "next_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
+      "owner": "release_owner",
+      "owner_input_required": true,
+      "primary_evidence_artifacts": {
+        "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "reproduction_commands": [
+        "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "r4_remote_mutation_approval_required",
+      "scope": "release_area",
+      "verification_commands": [
+        "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
+        "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
+        "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
+        "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
+      ],
+      "blocker_id": "github_sync::github_sync_preflight::local_head_mismatch",
+      "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
+      "closure_state": "external_owner_input_ready",
+      "evidence_state": "approval_required",
+      "external_input_required": true,
+      "handoff_ready": true,
+      "handoff_state": "external_owner_input_ready",
+      "next_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
       "owner": "release_owner",
       "owner_input_required": true,
       "primary_evidence_artifacts": {
@@ -341,7 +376,7 @@
       "external_input_required": true,
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+      "next_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
       "owner": "release_owner",
       "owner_input_required": true,
       "primary_evidence_artifacts": {
@@ -375,7 +410,7 @@
       "external_input_required": true,
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+      "next_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
       "owner": "release_owner",
       "owner_input_required": true,
       "primary_evidence_artifacts": {
@@ -613,7 +648,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
-  "source_commit_sha": "79e1c1b98f9168d6fb8cd1b1120499e7e4503221",
+  "source_commit_sha": "c4fe128a1dae015b431d4de72c2afccfd0a6d43d",
   "summary": {
     "action_register_loaded": true,
     "action_register_matches_pm_report": true,
@@ -623,33 +658,33 @@
       "structural_scope_cleanup::owner_review_decisions_pending"
     ],
     "closure_state_counts": {
-      "external_owner_input_ready": 13,
+      "external_owner_input_ready": 14,
       "local_remediation_ready": 2
     },
-    "external_input_required_count": 13,
-    "external_owner_input_ready_count": 13,
+    "external_input_required_count": 14,
+    "external_owner_input_ready_count": 14,
     "full_release_gate_ready": false,
     "handoff_not_ready_count": 0,
-    "handoff_ready_count": 15,
+    "handoff_ready_count": 16,
     "limited_commercial_milestone_ready": true,
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
     "local_remediation_ready_count": 2,
     "missing_from_action_register": [],
     "missing_from_action_register_count": 0,
-    "open_blocker_count": 15,
-    "owner_input_required_count": 13,
+    "open_blocker_count": 16,
+    "owner_input_required_count": 14,
     "paid_pilot_candidate": true,
-    "pm_report_blocker_count": 14,
+    "pm_report_blocker_count": 15,
     "pm_report_loaded": true,
-    "register_blocker_count": 15,
-    "register_open_blocker_count": 15,
-    "release_area_blocker_count": 8,
+    "register_blocker_count": 16,
+    "register_open_blocker_count": 16,
+    "release_area_blocker_count": 9,
     "release_area_gate_ready": false,
     "release_area_green_count": 12,
     "release_area_total_count": 16,
     "stale_action_register_blocker_count": 0,
     "stale_action_register_blockers": []
   },
-  "summary_line": "PM release blocker closure board: BLOCKED | open=15 | external_owner_ready=13 | handoff_not_ready=0"
+  "summary_line": "PM release blocker closure board: BLOCKED | open=16 | external_owner_ready=14 | handoff_not_ready=0"
 }

@@ -96,7 +96,7 @@
     }
   ],
   "fresh_full_validation_ready": false,
-  "generated_at": "2026-07-03T01:27:15.647962+00:00",
+  "generated_at": "2026-07-03T02:14:44.726458+00:00",
   "input_checksums": {
     "/home/betelgeuze/건축구조분석/implementation/phase1/fresh_validation_receipt.schema.json": "sha256:9d90d216af33096c6a14aa8208482abf0ff5e03b17b2004f79086037d7aab047",
     "docs/commercialization-gap-current-state.md": "sha256:1f1e19f31d28a33b101a2244356b327d5033f32471ff2ca4520a1e71a3a89934",
@@ -646,7 +646,7 @@
     }
   ],
   "schema_version": "fresh-full-validation-lane-status.v1",
-  "source_commit_sha": "73db92d3f51fb2cf03e8324731c50693815d9749",
+  "source_commit_sha": "c4fe128a1dae015b431d4de72c2afccfd0a6d43d",
   "status": "blocked",
   "summary": {
     "blocker_count": 2,

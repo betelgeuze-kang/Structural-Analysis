@@ -120,14 +120,14 @@
     },
     "technical_silent_import_loss_zero": true
   },
-  "generated_at": "2026-07-03T02:05:12.867917+00:00",
+  "generated_at": "2026-07-03T02:12:32.682135+00:00",
   "import_health_contract_pass_count": 10,
   "import_health_execution_count": 10,
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:009a84e7756cd70bff5119bd4801deb2af6ed0aa819816ccdcecab1ee7ad06c8",
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:e2c15ca3c0be06ef9f7d8b3cc63b556bd9a5f6168885393f33732e399865923c",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:dc675f0963927ee84b1443e00f752ee8f86d6f229cf986ce98722b3ebd51da68",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:098f4022a0350257a34b78ed64ec3683b921be90dfcef71bef2d932ddb845336",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:460f3fa5ab532c8fc4d61a809c3918602171cee76b8d2e8fe462ce8dc7944815",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:b02e106f69d03bf7d4cb88ea2c48e2882f8ab0726ce1fb1bfe2ae62dfa5de167",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:fb3f211f5d85e0c2479f9e46e7349f9fc6483cbaea37fdd6facc1afbca8c6069",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:99295eade2415f1c299a9e16c4fa2bfc0bd9bfb870a14ce6510b2f223f199548",
     "scripts/build_phase6_silent_import_loss_status.py": "sha256:39e5274318dd2e9308a9f4edb1c74fd164a10fa9de38704bec3487a951c6535b"
   },
   "owner_action": "complete product/legal and per-file license review for quantity credit; close or explicitly defer the ifc-bench query/GUI spillover blockers; then refresh the RC final gate.",
@@ -155,7 +155,7 @@
   "silent_import_loss_gate_pass_count": 10,
   "silent_import_loss_zero": true,
   "source_checksum_attached_count": 10,
-  "source_commit_sha": "79e1c1b98f9168d6fb8cd1b1120499e7e4503221",
+  "source_commit_sha": "c4fe128a1dae015b431d4de72c2afccfd0a6d43d",
   "source_file_acquired_count": 10,
   "source_license_quantity_credit_ready_count": 0,
   "source_license_receipt_contract_pass": false,

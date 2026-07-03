@@ -2433,9 +2433,9 @@
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
-  "generated_at": "2026-07-03T00:56:32.753791+00:00",
+  "generated_at": "2026-07-03T02:15:07.261384+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:8136daf6d7687ad43d0911198046d7a96368866b95a6bd98627b1316b30014bc",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:f9535a3c546b2be7f32a80e9d48de5d0b4ac9a0aed1c652f048cc0dcf7220302",
     "scripts/build_structural_scope_owner_review_packet.py": "sha256:c2dda947a1316d70476468294332c3021fa1352ef14bdf698c8371d79c20e5ea"
   },
   "owner_decision_required_count": 86,
@@ -2472,6 +2472,6 @@
   "reuse_policy": "structural_scope_owner_decision_template_from_review_packet",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decisions.v1",
-  "source_commit_sha": "d7d66e517a575c978aa366d2feda441afdfb40a6",
+  "source_commit_sha": "c4fe128a1dae015b431d4de72c2afccfd0a6d43d",
   "status": "pending_owner_decisions"
 }
