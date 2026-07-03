@@ -1,20 +1,7 @@
 {
   "adapter_rows_ready": false,
   "blockers": [
-    "gnina_binary_missing",
-    "public_benchmark_vina_gnina_rows_not_detected",
-    "casf2016_4llx::gnina::gnina_binary_missing",
-    "casf2016_5c28::gnina::gnina_binary_missing",
-    "casf2016_3uuo::gnina::gnina_binary_missing",
-    "casf2016_3ui7::gnina::gnina_binary_missing",
-    "casf2016_5c2h::gnina::gnina_binary_missing",
-    "casf2016_2v00::gnina::gnina_binary_missing",
-    "casf2016_3wz8::gnina::gnina_binary_missing",
-    "casf2016_3pww::gnina::gnina_binary_missing",
-    "casf2016_3prs::gnina::gnina_binary_missing",
-    "casf2016_3uri::gnina::gnina_binary_missing",
-    "casf2016_4m0z::gnina::gnina_binary_missing",
-    "casf2016_4m0y::gnina::gnina_binary_missing"
+    "public_benchmark_vina_gnina_rows_not_detected"
   ],
   "claim_boundary": "This receipt reflects current runtime readiness for Vina/GNINA engine execution and adapter materialization. It does not run docking engines, create comparison rows, synthesize receipts, or close Public Benchmark Phase 2 without real engine outputs passing the comparison adapter.",
   "container_runtime_status": {
@@ -36,13 +23,13 @@
       "version": "AutoDock Vina v1.2.3"
     },
     {
-      "available": false,
-      "binary_source": "",
-      "blocker": "gnina_binary_missing",
+      "available": true,
+      "binary_source": "env:PUBLIC_BENCHMARK_GNINA_BIN",
+      "blocker": "",
       "engine_id": "gnina",
       "env_var": "PUBLIC_BENCHMARK_GNINA_BIN",
-      "executable": "",
-      "version": ""
+      "executable": "/home/betelgeuze/.local/bin/gnina",
+      "version": "gnina v1.3.3 master:6fe1ce2   Built Jun 30 2026."
     }
   ],
   "current_engine_container_statuses": [
@@ -86,14 +73,13 @@
       "version": "AutoDock Vina v1.2.3"
     },
     {
-      "available": false,
-      "blocker": "gnina_binary_missing",
-      "command_prefix": "",
-      "container_image": "",
+      "available": true,
+      "blocker": "",
+      "command_prefix": "/home/betelgeuze/.local/bin/gnina",
       "engine_id": "gnina",
-      "executable": "",
-      "execution_source": "",
-      "version": ""
+      "executable": "/home/betelgeuze/.local/bin/gnina",
+      "execution_source": "binary",
+      "version": "gnina v1.3.3 master:6fe1ce2   Built Jun 30 2026."
     }
   ],
   "engine_run_slots": [
@@ -140,19 +126,17 @@
       "status": "ready_for_engine_execution"
     },
     {
-      "blockers": [
-        "gnina_binary_missing"
-      ],
+      "blockers": [],
       "case_id": "casf2016_4llx",
       "command_template": "<gnina> --receptor <prepared/4llx_receptor> --ligand <prepared/4llx_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_4llx/gnina_pose.sdf",
       "complex_id": "4llx",
       "docking_box_ready": true,
       "docking_run_id": "casf2016_4llx_gnina_run",
-      "engine_available": false,
-      "engine_command_prefix": "",
+      "engine_available": true,
+      "engine_command_prefix": "/home/betelgeuze/.local/bin/gnina",
       "engine_container_image": "",
-      "engine_executable": "",
-      "engine_execution_source": "",
+      "engine_executable": "/home/betelgeuze/.local/bin/gnina",
+      "engine_execution_source": "binary",
       "engine_id": "gnina",
       "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_config.json",
       "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_run_receipt.json",
@@ -181,7 +165,7 @@
         "score",
         "score_direction"
       ],
-      "status": "blocked"
+      "status": "ready_for_engine_execution"
     },
     {
       "blockers": [],
@@ -226,19 +210,17 @@
       "status": "ready_for_engine_execution"
     },
     {
-      "blockers": [
-        "gnina_binary_missing"
-      ],
+      "blockers": [],
       "case_id": "casf2016_5c28",
       "command_template": "<gnina> --receptor <prepared/5c28_receptor> --ligand <prepared/5c28_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_5c28/gnina_pose.sdf",
       "complex_id": "5c28",
       "docking_box_ready": true,
       "docking_run_id": "casf2016_5c28_gnina_run",
-      "engine_available": false,
-      "engine_command_prefix": "",
+      "engine_available": true,
+      "engine_command_prefix": "/home/betelgeuze/.local/bin/gnina",
       "engine_container_image": "",
-      "engine_executable": "",
-      "engine_execution_source": "",
+      "engine_executable": "/home/betelgeuze/.local/bin/gnina",
+      "engine_execution_source": "binary",
       "engine_id": "gnina",
       "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_config.json",
       "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_run_receipt.json",
@@ -267,7 +249,7 @@
         "score",
         "score_direction"
       ],
-      "status": "blocked"
+      "status": "ready_for_engine_execution"
     },
     {
       "blockers": [],
@@ -312,19 +294,17 @@
       "status": "ready_for_engine_execution"
     },
     {
-      "blockers": [
-        "gnina_binary_missing"
-      ],
+      "blockers": [],
       "case_id": "casf2016_3uuo",
       "command_template": "<gnina> --receptor <prepared/3uuo_receptor> --ligand <prepared/3uuo_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_3uuo/gnina_pose.sdf",
       "complex_id": "3uuo",
       "docking_box_ready": true,
       "docking_run_id": "casf2016_3uuo_gnina_run",
-      "engine_available": false,
-      "engine_command_prefix": "",
+      "engine_available": true,
+      "engine_command_prefix": "/home/betelgeuze/.local/bin/gnina",
       "engine_container_image": "",
-      "engine_executable": "",
-      "engine_execution_source": "",
+      "engine_executable": "/home/betelgeuze/.local/bin/gnina",
+      "engine_execution_source": "binary",
       "engine_id": "gnina",
       "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_config.json",
       "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_run_receipt.json",
@@ -353,7 +333,7 @@
         "score",
         "score_direction"
       ],
-      "status": "blocked"
+      "status": "ready_for_engine_execution"
     },
     {
       "blockers": [],
@@ -398,19 +378,17 @@
       "status": "ready_for_engine_execution"
     },
     {
-      "blockers": [
-        "gnina_binary_missing"
-      ],
+      "blockers": [],
       "case_id": "casf2016_3ui7",
       "command_template": "<gnina> --receptor <prepared/3ui7_receptor> --ligand <prepared/3ui7_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_3ui7/gnina_pose.sdf",
       "complex_id": "3ui7",
       "docking_box_ready": true,
       "docking_run_id": "casf2016_3ui7_gnina_run",
-      "engine_available": false,
-      "engine_command_prefix": "",
+      "engine_available": true,
+      "engine_command_prefix": "/home/betelgeuze/.local/bin/gnina",
       "engine_container_image": "",
-      "engine_executable": "",
-      "engine_execution_source": "",
+      "engine_executable": "/home/betelgeuze/.local/bin/gnina",
+      "engine_execution_source": "binary",
       "engine_id": "gnina",
       "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_config.json",
       "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_run_receipt.json",
@@ -439,7 +417,7 @@
         "score",
         "score_direction"
       ],
-      "status": "blocked"
+      "status": "ready_for_engine_execution"
     },
     {
       "blockers": [],
@@ -484,19 +462,17 @@
       "status": "ready_for_engine_execution"
     },
     {
-      "blockers": [
-        "gnina_binary_missing"
-      ],
+      "blockers": [],
       "case_id": "casf2016_5c2h",
       "command_template": "<gnina> --receptor <prepared/5c2h_receptor> --ligand <prepared/5c2h_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_5c2h/gnina_pose.sdf",
       "complex_id": "5c2h",
       "docking_box_ready": true,
       "docking_run_id": "casf2016_5c2h_gnina_run",
-      "engine_available": false,
-      "engine_command_prefix": "",
+      "engine_available": true,
+      "engine_command_prefix": "/home/betelgeuze/.local/bin/gnina",
       "engine_container_image": "",
-      "engine_executable": "",
-      "engine_execution_source": "",
+      "engine_executable": "/home/betelgeuze/.local/bin/gnina",
+      "engine_execution_source": "binary",
       "engine_id": "gnina",
       "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_config.json",
       "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_run_receipt.json",
@@ -525,7 +501,7 @@
         "score",
         "score_direction"
       ],
-      "status": "blocked"
+      "status": "ready_for_engine_execution"
     },
     {
       "blockers": [],
@@ -570,19 +546,17 @@
       "status": "ready_for_engine_execution"
     },
     {
-      "blockers": [
-        "gnina_binary_missing"
-      ],
+      "blockers": [],
       "case_id": "casf2016_2v00",
       "command_template": "<gnina> --receptor <prepared/2v00_receptor> --ligand <prepared/2v00_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_2v00/gnina_pose.sdf",
       "complex_id": "2v00",
       "docking_box_ready": true,
       "docking_run_id": "casf2016_2v00_gnina_run",
-      "engine_available": false,
-      "engine_command_prefix": "",
+      "engine_available": true,
+      "engine_command_prefix": "/home/betelgeuze/.local/bin/gnina",
       "engine_container_image": "",
-      "engine_executable": "",
-      "engine_execution_source": "",
+      "engine_executable": "/home/betelgeuze/.local/bin/gnina",
+      "engine_execution_source": "binary",
       "engine_id": "gnina",
       "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_config.json",
       "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_run_receipt.json",
@@ -611,7 +585,7 @@
         "score",
         "score_direction"
       ],
-      "status": "blocked"
+      "status": "ready_for_engine_execution"
     },
     {
       "blockers": [],
@@ -656,19 +630,17 @@
       "status": "ready_for_engine_execution"
     },
     {
-      "blockers": [
-        "gnina_binary_missing"
-      ],
+      "blockers": [],
       "case_id": "casf2016_3wz8",
       "command_template": "<gnina> --receptor <prepared/3wz8_receptor> --ligand <prepared/3wz8_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_3wz8/gnina_pose.sdf",
       "complex_id": "3wz8",
       "docking_box_ready": true,
       "docking_run_id": "casf2016_3wz8_gnina_run",
-      "engine_available": false,
-      "engine_command_prefix": "",
+      "engine_available": true,
+      "engine_command_prefix": "/home/betelgeuze/.local/bin/gnina",
       "engine_container_image": "",
-      "engine_executable": "",
-      "engine_execution_source": "",
+      "engine_executable": "/home/betelgeuze/.local/bin/gnina",
+      "engine_execution_source": "binary",
       "engine_id": "gnina",
       "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_config.json",
       "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_run_receipt.json",
@@ -697,7 +669,7 @@
         "score",
         "score_direction"
       ],
-      "status": "blocked"
+      "status": "ready_for_engine_execution"
     },
     {
       "blockers": [],
@@ -742,19 +714,17 @@
       "status": "ready_for_engine_execution"
     },
     {
-      "blockers": [
-        "gnina_binary_missing"
-      ],
+      "blockers": [],
       "case_id": "casf2016_3pww",
       "command_template": "<gnina> --receptor <prepared/3pww_receptor> --ligand <prepared/3pww_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_3pww/gnina_pose.sdf",
       "complex_id": "3pww",
       "docking_box_ready": true,
       "docking_run_id": "casf2016_3pww_gnina_run",
-      "engine_available": false,
-      "engine_command_prefix": "",
+      "engine_available": true,
+      "engine_command_prefix": "/home/betelgeuze/.local/bin/gnina",
       "engine_container_image": "",
-      "engine_executable": "",
-      "engine_execution_source": "",
+      "engine_executable": "/home/betelgeuze/.local/bin/gnina",
+      "engine_execution_source": "binary",
       "engine_id": "gnina",
       "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_config.json",
       "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_run_receipt.json",
@@ -783,7 +753,7 @@
         "score",
         "score_direction"
       ],
-      "status": "blocked"
+      "status": "ready_for_engine_execution"
     },
     {
       "blockers": [],
@@ -828,19 +798,17 @@
       "status": "ready_for_engine_execution"
     },
     {
-      "blockers": [
-        "gnina_binary_missing"
-      ],
+      "blockers": [],
       "case_id": "casf2016_3prs",
       "command_template": "<gnina> --receptor <prepared/3prs_receptor> --ligand <prepared/3prs_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_3prs/gnina_pose.sdf",
       "complex_id": "3prs",
       "docking_box_ready": true,
       "docking_run_id": "casf2016_3prs_gnina_run",
-      "engine_available": false,
-      "engine_command_prefix": "",
+      "engine_available": true,
+      "engine_command_prefix": "/home/betelgeuze/.local/bin/gnina",
       "engine_container_image": "",
-      "engine_executable": "",
-      "engine_execution_source": "",
+      "engine_executable": "/home/betelgeuze/.local/bin/gnina",
+      "engine_execution_source": "binary",
       "engine_id": "gnina",
       "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_config.json",
       "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_run_receipt.json",
@@ -869,7 +837,7 @@
         "score",
         "score_direction"
       ],
-      "status": "blocked"
+      "status": "ready_for_engine_execution"
     },
     {
       "blockers": [],
@@ -914,19 +882,17 @@
       "status": "ready_for_engine_execution"
     },
     {
-      "blockers": [
-        "gnina_binary_missing"
-      ],
+      "blockers": [],
       "case_id": "casf2016_3uri",
       "command_template": "<gnina> --receptor <prepared/3uri_receptor> --ligand <prepared/3uri_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_3uri/gnina_pose.sdf",
       "complex_id": "3uri",
       "docking_box_ready": true,
       "docking_run_id": "casf2016_3uri_gnina_run",
-      "engine_available": false,
-      "engine_command_prefix": "",
+      "engine_available": true,
+      "engine_command_prefix": "/home/betelgeuze/.local/bin/gnina",
       "engine_container_image": "",
-      "engine_executable": "",
-      "engine_execution_source": "",
+      "engine_executable": "/home/betelgeuze/.local/bin/gnina",
+      "engine_execution_source": "binary",
       "engine_id": "gnina",
       "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_config.json",
       "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_run_receipt.json",
@@ -955,7 +921,7 @@
         "score",
         "score_direction"
       ],
-      "status": "blocked"
+      "status": "ready_for_engine_execution"
     },
     {
       "blockers": [],
@@ -1000,19 +966,17 @@
       "status": "ready_for_engine_execution"
     },
     {
-      "blockers": [
-        "gnina_binary_missing"
-      ],
+      "blockers": [],
       "case_id": "casf2016_4m0z",
       "command_template": "<gnina> --receptor <prepared/4m0z_receptor> --ligand <prepared/4m0z_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_4m0z/gnina_pose.sdf",
       "complex_id": "4m0z",
       "docking_box_ready": true,
       "docking_run_id": "casf2016_4m0z_gnina_run",
-      "engine_available": false,
-      "engine_command_prefix": "",
+      "engine_available": true,
+      "engine_command_prefix": "/home/betelgeuze/.local/bin/gnina",
       "engine_container_image": "",
-      "engine_executable": "",
-      "engine_execution_source": "",
+      "engine_executable": "/home/betelgeuze/.local/bin/gnina",
+      "engine_execution_source": "binary",
       "engine_id": "gnina",
       "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_config.json",
       "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_run_receipt.json",
@@ -1041,7 +1005,7 @@
         "score",
         "score_direction"
       ],
-      "status": "blocked"
+      "status": "ready_for_engine_execution"
     },
     {
       "blockers": [],
@@ -1086,19 +1050,17 @@
       "status": "ready_for_engine_execution"
     },
     {
-      "blockers": [
-        "gnina_binary_missing"
-      ],
+      "blockers": [],
       "case_id": "casf2016_4m0y",
       "command_template": "<gnina> --receptor <prepared/4m0y_receptor> --ligand <prepared/4m0y_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_4m0y/gnina_pose.sdf",
       "complex_id": "4m0y",
       "docking_box_ready": true,
       "docking_run_id": "casf2016_4m0y_gnina_run",
-      "engine_available": false,
-      "engine_command_prefix": "",
+      "engine_available": true,
+      "engine_command_prefix": "/home/betelgeuze/.local/bin/gnina",
       "engine_container_image": "",
-      "engine_executable": "",
-      "engine_execution_source": "",
+      "engine_executable": "/home/betelgeuze/.local/bin/gnina",
+      "engine_execution_source": "binary",
       "engine_id": "gnina",
       "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_config.json",
       "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_run_receipt.json",
@@ -1127,20 +1089,18 @@
         "score",
         "score_direction"
       ],
-      "status": "blocked"
+      "status": "ready_for_engine_execution"
     }
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
   "execution_plan_ready": true,
-  "generated_at": "2026-07-03T20:27:48.309559+00:00",
+  "generated_at": "2026-07-03T20:32:38.193432+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:ff0c5552350e08acfd40d6b91851ac80465303080cc318e07db4157760ea4e88",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:9ec76bc035ec145427707aa6061cf06e605aec0627936ad816715a0b0e5aaff7",
     "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:b0f8e0daff828d0bc991a41eeca280f08216456946b41915b49ce5cce2b2b288",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:1741e0d4261554b76e9eb649028430ce0d3e96626358a6bc2bc31db6c16d650d"
   },
-  "missing_engine_ids": [
-    "gnina"
-  ],
+  "missing_engine_ids": [],
   "operator_commands": {
     "build_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
     "inspect_container_images": "docker image inspect \"$PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE\" \"$PUBLIC_BENCHMARK_GNINA_CONTAINER_IMAGE\"",
@@ -1152,7 +1112,7 @@
   },
   "operator_execution_ready": false,
   "phase2_closure_ready": false,
-  "ready_engine_run_slot_count": 12,
+  "ready_engine_run_slot_count": 24,
   "required_engine_run_count": 24,
   "reuse_policy": "public_benchmark_vina_gnina_runtime_readiness_from_current_environment",
   "reused_evidence": false,
@@ -1182,7 +1142,7 @@
     "default_rows_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
     "detected_row_artifact_count": 0
   },
-  "runtime_ready_for_engine_execution": false,
+  "runtime_ready_for_engine_execution": true,
   "runtime_setup_requirements": {
     "accepted_runtime_sources": [
       "engine binary discovered on PATH",
@@ -1202,20 +1162,20 @@
     "rows_artifact_required_after_engine_execution": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
   },
   "schema_version": "public-benchmark-vina-gnina-runtime-readiness.v1",
-  "source_commit_sha": "922f2a19ec434f37a89cb043f01cb56404b65fd6",
-  "status": "engine_runtime_blocked",
+  "source_commit_sha": "5749bcc4dd70fd4b4ab0e7e35e4d75e8b9321f70",
+  "status": "ready_for_engine_execution",
   "summary": {
     "adapter_rows_ready": false,
-    "available_engine_count": 1,
-    "blocker_count": 14,
+    "available_engine_count": 2,
+    "blocker_count": 1,
     "case_count": 12,
     "detected_row_artifact_count": 0,
     "execution_plan_ready": true,
-    "missing_engine_count": 1,
+    "missing_engine_count": 0,
     "operator_execution_ready": false,
-    "ready_engine_run_slot_count": 12,
+    "ready_engine_run_slot_count": 24,
     "required_engine_run_count": 24,
-    "runtime_ready_for_engine_execution": false
+    "runtime_ready_for_engine_execution": true
   },
   "supported_engines": [
     "vina",

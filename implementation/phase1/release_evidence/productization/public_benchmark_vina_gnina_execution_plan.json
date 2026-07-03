@@ -1,9 +1,7 @@
 {
   "adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
   "adapter_rows_ready": false,
-  "blockers": [
-    "gnina_binary_missing"
-  ],
+  "blockers": [],
   "case_count": 12,
   "case_execution_plans": [
     {
@@ -1503,13 +1501,13 @@
       "version": "AutoDock Vina v1.2.3"
     },
     {
-      "available": false,
-      "binary_source": "",
-      "blocker": "gnina_binary_missing",
+      "available": true,
+      "binary_source": "env:PUBLIC_BENCHMARK_GNINA_BIN",
+      "blocker": "",
       "engine_id": "gnina",
       "env_var": "PUBLIC_BENCHMARK_GNINA_BIN",
-      "executable": "",
-      "version": ""
+      "executable": "/home/betelgeuze/.local/bin/gnina",
+      "version": "gnina v1.3.3 master:6fe1ce2   Built Jun 30 2026."
     }
   ],
   "engine_container_statuses": [
@@ -1553,14 +1551,13 @@
       "version": "AutoDock Vina v1.2.3"
     },
     {
-      "available": false,
-      "blocker": "gnina_binary_missing",
-      "command_prefix": "",
-      "container_image": "",
+      "available": true,
+      "blocker": "",
+      "command_prefix": "/home/betelgeuze/.local/bin/gnina",
       "engine_id": "gnina",
-      "executable": "",
-      "execution_source": "",
-      "version": ""
+      "executable": "/home/betelgeuze/.local/bin/gnina",
+      "execution_source": "binary",
+      "version": "gnina v1.3.3 master:6fe1ce2   Built Jun 30 2026."
     }
   ],
   "engine_receipts_required": [
@@ -1576,30 +1573,28 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "execution_plan_ready": true,
   "expected_vina_gnina_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
-  "generated_at": "2026-07-03T20:27:48.240146+00:00",
+  "generated_at": "2026-07-03T20:32:37.810394+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
     "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:7a9d6c0da850c12ab20c09a26ad4aac4ad17cbe2d77e7d35b417ed64f1f045fa"
   },
-  "missing_engine_ids": [
-    "gnina"
-  ],
-  "operator_execution_ready": false,
+  "missing_engine_ids": [],
+  "operator_execution_ready": true,
   "required_engine_run_count": 24,
   "reuse_policy": "public_benchmark_vina_gnina_execution_plan_from_materialized_rows",
   "reused_evidence": false,
   "schema_version": "public-benchmark-vina-gnina-execution-plan.v1",
-  "source_commit_sha": "922f2a19ec434f37a89cb043f01cb56404b65fd6",
-  "status": "engine_execution_required",
+  "source_commit_sha": "5749bcc4dd70fd4b4ab0e7e35e4d75e8b9321f70",
+  "status": "ready_for_engine_execution",
   "summary": {
     "adapter_rows_ready": false,
-    "available_engine_count": 1,
+    "available_engine_count": 2,
     "case_blocker_count": 0,
     "case_count": 12,
     "execution_plan_ready": true,
-    "missing_engine_count": 1,
-    "operator_execution_ready": false,
+    "missing_engine_count": 0,
+    "operator_execution_ready": true,
     "required_engine_run_count": 24
   },
   "supported_engines": [

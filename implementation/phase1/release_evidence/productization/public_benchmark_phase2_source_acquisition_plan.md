@@ -4,7 +4,7 @@
 - `contract_pass`: `True`
 - `phase2_ready`: `False`
 - `actual_closure_ready`: `False`
-- `blocker_count`: `4`
+- `blocker_count`: `2`
 - `official_source_receipt_plan_status`: `operator_receipts_required`
 - `official_source_receipt_role_count`: `4`
 - `official_source_catalog_count`: `6`
@@ -12,12 +12,12 @@
 - `phase2_row_audit_status`: `operator_evidence_required`
 - `phase2_row_audit_missing_row_inputs`: `vina_gnina_rows`
 - `vina_gnina_execution_plan`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json`
-- `vina_gnina_execution_plan_status`: `engine_execution_required`
+- `vina_gnina_execution_plan_status`: `ready_for_engine_execution`
 - `vina_gnina_required_engine_run_count`: `24`
 - `vina_gnina_runtime_readiness`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json`
-- `vina_gnina_runtime_readiness_status`: `engine_runtime_blocked`
-- `vina_gnina_runtime_ready_engine_run_slot_count`: `12`
-- `vina_gnina_runtime_missing_engine_ids`: `gnina`
+- `vina_gnina_runtime_readiness_status`: `ready_for_engine_execution`
+- `vina_gnina_runtime_ready_engine_run_slot_count`: `24`
+- `vina_gnina_runtime_missing_engine_ids`: ``
 
 | Row Input | Source Family | Status | Unblocks |
 |---|---|---|---|
