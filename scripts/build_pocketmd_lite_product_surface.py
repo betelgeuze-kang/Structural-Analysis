@@ -428,6 +428,11 @@ def _source_acquisition_plan_summary(
     )
     if not isinstance(refinement_execution_plan, dict):
         refinement_execution_plan = {}
+    raw_row_candidate_status = source_acquisition_plan.get(
+        "raw_row_candidate_status"
+    )
+    if not isinstance(raw_row_candidate_status, dict):
+        raw_row_candidate_status = {}
     return {
         "artifact": str(DEFAULT_SOURCE_ACQUISITION_PLAN_OUT),
         "markdown_artifact": str(DEFAULT_SOURCE_ACQUISITION_PLAN_MD_OUT),
@@ -505,6 +510,16 @@ def _source_acquisition_plan_summary(
                 or _refinement_execution_plan_command()
             ),
         },
+        "raw_row_candidate_status": raw_row_candidate_status,
+        "raw_row_artifact_detected": bool(
+            summary.get("raw_row_artifact_detected")
+            or raw_row_candidate_status.get("detected_row_artifact_count")
+        ),
+        "detected_row_artifact_count": int(
+            summary.get("detected_row_artifact_count")
+            or raw_row_candidate_status.get("detected_row_artifact_count")
+            or 0
+        ),
         "blocker_count": int(source_acquisition_plan.get("blocker_count") or 0),
         "blockers": [str(row) for row in blockers],
         "command": _source_acquisition_plan_command(),

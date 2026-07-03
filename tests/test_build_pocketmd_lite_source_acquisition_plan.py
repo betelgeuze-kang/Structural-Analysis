@@ -168,6 +168,11 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "provenance_ref",
         "source_checksum",
     ]
+    assert payload["raw_row_candidate_status"]["status"] == "row_artifact_missing"
+    assert payload["raw_row_candidate_status"]["detected_row_artifact_count"] == 0
+    assert row_contract["raw_row_candidate_status"] == payload[
+        "raw_row_candidate_status"
+    ]
     assert row_contract["source_receipt_requirements"]["mode"] == (
         "raw_top_k_refinement_rows"
     )
@@ -211,10 +216,12 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     assert payload["summary"] == {
         "actual_closure_ready": False,
         "blocker_count": 3,
+        "detected_row_artifact_count": 0,
         "minimum_rows_by_case_count": 3,
         "operator_rows_ready": False,
         "phase4_refinement_receipt_plan_status": "operator_receipts_required",
         "phase4_refinement_receipt_role_count": 4,
+        "raw_row_artifact_detected": False,
         "covered_phase4_criterion_count": 8,
         "refinement_execution_plan_ready": True,
         "refinement_execution_plan_status": "operator_refinement_rows_required",
@@ -234,6 +241,33 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     assert payload["commands"]["build_refinement_execution_plan"].startswith(
         "python3 scripts/build_pocketmd_lite_refinement_execution_plan.py"
     )
+
+
+def test_pocketmd_lite_source_acquisition_plan_detects_dropzone_rows(
+    tmp_path: Path,
+) -> None:
+    rows_out = tmp_path / "pocketmd_lite_topk_rows.json"
+    rows_out.write_text("[]\n", encoding="utf-8")
+
+    payload = module.build_pocketmd_lite_source_acquisition_plan(
+        repo_root=tmp_path,
+        rows_out=rows_out,
+    )
+
+    assert payload["raw_row_candidate_status"]["status"] == (
+        "row_artifact_detected_unvalidated"
+    )
+    assert payload["raw_row_candidate_status"]["detected_row_artifact_count"] == 1
+    assert payload["raw_row_candidate_status"]["first_detected_path"] == str(rows_out)
+    assert payload["summary"]["raw_row_artifact_detected"] is True
+    assert payload["summary"]["detected_row_artifact_count"] == 1
+    assert payload["summary"]["operator_rows_ready"] is True
+    assert payload["refinement_execution_plan"]["operator_rows_ready"] is True
+    assert payload["blockers"] == [
+        "pocketmd_lite_topk_rows_detected_but_not_materialized",
+        "upstream_top_k_candidate_receipts_not_attached",
+        "lite_refinement_metric_receipts_not_attached",
+    ]
 
 
 def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(

@@ -112,6 +112,48 @@ def _minimum_rows_by_case() -> list[dict[str, Any]]:
     ]
 
 
+def _raw_row_candidate_status(
+    repo_root: Path,
+    *,
+    rows_out: Path = DEFAULT_ROWS_OUT,
+) -> dict[str, Any]:
+    candidates = [
+        PRODUCTIZATION / f"pocketmd_lite_topk_rows.{suffix}"
+        for suffix in ("json", "jsonl", "ndjson", "csv", "tsv")
+    ]
+    if str(rows_out) not in {str(path) for path in candidates}:
+        candidates.insert(0, rows_out)
+
+    rows = []
+    seen_paths: set[str] = set()
+    for path in candidates:
+        path_key = str(path)
+        if path_key in seen_paths:
+            continue
+        seen_paths.add(path_key)
+        resolved = path if path.is_absolute() else repo_root / path
+        rows.append(
+            {
+                "path": str(path),
+                "exists": resolved.exists(),
+                "is_file": resolved.is_file(),
+            }
+        )
+
+    detected_paths = [str(row["path"]) for row in rows if row["is_file"]]
+    return {
+        "status": (
+            "row_artifact_detected_unvalidated"
+            if detected_paths
+            else "row_artifact_missing"
+        ),
+        "default_rows_out": str(rows_out),
+        "candidate_paths": rows,
+        "detected_row_artifact_count": len(detected_paths),
+        "first_detected_path": detected_paths[0] if detected_paths else "",
+    }
+
+
 def _phase4_refinement_receipt_roles() -> list[dict[str, Any]]:
     common_row_receipts = [
         "provenance_ref",
@@ -265,6 +307,8 @@ def _refinement_execution_plan_command() -> str:
 
 def _refinement_execution_plan_summary(
     minimum_rows_by_case: list[dict[str, Any]],
+    *,
+    operator_rows_ready: bool,
 ) -> dict[str, Any]:
     required_candidate_slot_count = sum(
         len(row.get("required_top_k_rank_prefix") or [])
@@ -275,7 +319,7 @@ def _refinement_execution_plan_summary(
         "schema_version": REFINEMENT_EXECUTION_PLAN_SCHEMA_VERSION,
         "status": "operator_refinement_rows_required",
         "execution_plan_ready": True,
-        "operator_rows_ready": False,
+        "operator_rows_ready": operator_rows_ready,
         "survival_report_ready": False,
         "actual_closure_ready": False,
         "required_case_count": len(minimum_rows_by_case),
@@ -292,19 +336,32 @@ def _refinement_execution_plan_summary(
 def build_pocketmd_lite_source_acquisition_plan(
     *,
     repo_root: Path = ROOT,
+    rows_out: Path = DEFAULT_ROWS_OUT,
 ) -> dict[str, Any]:
-    blockers = [
-        "pocketmd_lite_topk_rows_not_acquired",
-        "upstream_top_k_candidate_receipts_not_attached",
-        "lite_refinement_metric_receipts_not_attached",
-    ]
+    raw_row_candidate_status = _raw_row_candidate_status(
+        repo_root,
+        rows_out=rows_out,
+    )
+    row_artifact_detected = raw_row_candidate_status["detected_row_artifact_count"] > 0
+    blockers = []
+    if not row_artifact_detected:
+        blockers.append("pocketmd_lite_topk_rows_not_acquired")
+    else:
+        blockers.append("pocketmd_lite_topk_rows_detected_but_not_materialized")
+    blockers.extend(
+        [
+            "upstream_top_k_candidate_receipts_not_attached",
+            "lite_refinement_metric_receipts_not_attached",
+        ]
+    )
     required_flat_row_fields = _required_flat_row_fields()
     minimum_rows_by_case = _minimum_rows_by_case()
     min_total = int(TOPK_ROW_QUALITY_CRITERIA["min_total_top_k_candidate_count"])
     min_cases = int(TOPK_ROW_QUALITY_CRITERIA["min_real_refinement_case_count"])
     phase4_refinement_receipt_plan = _phase4_refinement_receipt_plan()
     refinement_execution_plan = _refinement_execution_plan_summary(
-        minimum_rows_by_case
+        minimum_rows_by_case,
+        operator_rows_ready=row_artifact_detected,
     )
     return {
         "schema_version": SCHEMA_VERSION,
@@ -331,13 +388,14 @@ def build_pocketmd_lite_source_acquisition_plan(
         "top_k_scope_policy": TOP_K_SCOPE_POLICY,
         "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
         "minimum_rows_by_case": minimum_rows_by_case,
+        "raw_row_candidate_status": raw_row_candidate_status,
         "phase4_refinement_receipt_plan": phase4_refinement_receipt_plan,
         "refinement_execution_plan": refinement_execution_plan,
         "phase4_refinement_receipt_promotion_policy": dict(
             PHASE4_REFINEMENT_RECEIPT_PROMOTION_POLICY
         ),
         "row_artifact_contract": {
-            "default_output": str(DEFAULT_ROWS_OUT),
+            "default_output": str(rows_out),
             "operator_intake_output": str(DEFAULT_OPERATOR_INTAKE),
             "required_case_count": min_cases,
             "required_total_candidate_rows": min_total,
@@ -349,6 +407,7 @@ def build_pocketmd_lite_source_acquisition_plan(
             ),
             "required_flat_row_fields": required_flat_row_fields,
             "accepted_formats": list(SUPPORTED_ROW_FORMATS),
+            "raw_row_candidate_status": raw_row_candidate_status,
             "row_value_contract": row_value_contract(max_top_k=20),
             "source_receipt_requirements": dict(SOURCE_RECEIPT_REQUIREMENTS),
         },
@@ -448,6 +507,10 @@ def build_pocketmd_lite_source_acquisition_plan(
                 "required_candidate_slot_count"
             ],
             "operator_rows_ready": refinement_execution_plan["operator_rows_ready"],
+            "raw_row_artifact_detected": row_artifact_detected,
+            "detected_row_artifact_count": raw_row_candidate_status[
+                "detected_row_artifact_count"
+            ],
             "actual_closure_ready": False,
             "blocker_count": len(blockers),
         },
@@ -508,8 +571,12 @@ def write_pocketmd_lite_source_acquisition_plan(
     repo_root: Path = ROOT,
     out: Path = DEFAULT_OUT,
     out_md: Path = DEFAULT_OUT_MD,
+    rows_out: Path = DEFAULT_ROWS_OUT,
 ) -> dict[str, Any]:
-    payload = build_pocketmd_lite_source_acquisition_plan(repo_root=repo_root)
+    payload = build_pocketmd_lite_source_acquisition_plan(
+        repo_root=repo_root,
+        rows_out=rows_out,
+    )
     resolved_out = out if out.is_absolute() else repo_root / out
     resolved_out.parent.mkdir(parents=True, exist_ok=True)
     resolved_out.write_text(_json_text(payload), encoding="utf-8")
@@ -525,6 +592,7 @@ def write_pocketmd_lite_source_acquisition_plan(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
+    parser.add_argument("--rows-out", type=Path, default=DEFAULT_ROWS_OUT)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
     parser.add_argument("--json", action="store_true")
@@ -537,6 +605,7 @@ def main(argv: list[str] | None = None) -> int:
         repo_root=args.repo_root,
         out=args.out,
         out_md=args.out_md,
+        rows_out=args.rows_out,
     )
     if args.json:
         print(_json_text(payload), end="")

@@ -16,10 +16,10 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T19:14:05.411521+00:00",
+  "generated_at": "2026-07-03T19:47:14.036744+00:00",
   "input_checksums": {
     "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:63575ffc589461c9b6114e0a603b3783bf5b13c164d1fb10259118ad1c53f84b",
-    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:f40353bc31525068bfea16e4c35e2f0abc604368247345b530153b2867f66884",
+    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:fec3df2575bc3451834172ca615cb7fa7197c932e5127fb534f5f7707444968c",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:985edb154d586829d3ec221ee54d820e8b45b880bcfd99a348f1c7037958d6e0",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:161673d8ff036a7a31d657fb972764eeb4b62f6d55cc0840e26f398565707c6f"
   },
@@ -272,6 +272,39 @@
     "synthetic_fixture_rows_promote_to_phase4": false,
     "upstream_top_k_scope_receipts_required": true
   },
+  "raw_row_candidate_status": {
+    "candidate_paths": [
+      {
+        "exists": false,
+        "is_file": false,
+        "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json"
+      },
+      {
+        "exists": false,
+        "is_file": false,
+        "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl"
+      },
+      {
+        "exists": false,
+        "is_file": false,
+        "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson"
+      },
+      {
+        "exists": false,
+        "is_file": false,
+        "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv"
+      },
+      {
+        "exists": false,
+        "is_file": false,
+        "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+      }
+    ],
+    "default_rows_out": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+    "detected_row_artifact_count": 0,
+    "first_detected_path": "",
+    "status": "row_artifact_missing"
+  },
   "refinement_execution_plan": {
     "actual_closure_ready": false,
     "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json",
@@ -335,6 +368,39 @@
     ],
     "default_output": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
     "operator_intake_output": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json",
+    "raw_row_candidate_status": {
+      "candidate_paths": [
+        {
+          "exists": false,
+          "is_file": false,
+          "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json"
+        },
+        {
+          "exists": false,
+          "is_file": false,
+          "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl"
+        },
+        {
+          "exists": false,
+          "is_file": false,
+          "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson"
+        },
+        {
+          "exists": false,
+          "is_file": false,
+          "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv"
+        },
+        {
+          "exists": false,
+          "is_file": false,
+          "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+        }
+      ],
+      "default_rows_out": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+      "detected_row_artifact_count": 0,
+      "first_detected_path": "",
+      "status": "row_artifact_missing"
+    },
     "required_candidate_rows_per_case": 2,
     "required_case_count": 3,
     "required_flat_row_fields": [
@@ -430,17 +496,19 @@
     }
   },
   "schema_version": "pocketmd-lite-source-acquisition-plan.v1",
-  "source_commit_sha": "47d00b9ee6e67abd386e046bb6ee9b637c3782db",
+  "source_commit_sha": "9bf476d4e4cefaca446b81ee52bc49c3dc481a87",
   "source_scope": "bounded_top_k_lite_refinement_rows",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
     "blocker_count": 3,
     "covered_phase4_criterion_count": 8,
+    "detected_row_artifact_count": 0,
     "minimum_rows_by_case_count": 3,
     "operator_rows_ready": false,
     "phase4_refinement_receipt_plan_status": "operator_receipts_required",
     "phase4_refinement_receipt_role_count": 4,
+    "raw_row_artifact_detected": false,
     "refinement_execution_plan_ready": true,
     "refinement_execution_plan_status": "operator_refinement_rows_required",
     "required_candidate_rows_per_case": 2,

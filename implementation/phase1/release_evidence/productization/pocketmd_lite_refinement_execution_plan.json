@@ -281,10 +281,10 @@
   "execution_plan_ready": true,
   "expected_operator_intake_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json",
   "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
-  "generated_at": "2026-07-03T19:14:05.414219+00:00",
+  "generated_at": "2026-07-03T19:47:14.039576+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:1657c61adaa827b53e4114b230ed453b0492b5bef9b03eb0b0dff48b7d8b626e",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:4424e27fdee1e218a74c26f064dc689fbba1c91b36376f0cd48df7b7ae74d823",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:eedaa616723bfebcb425011c48bc24db4b2c9318a71f638975f92fa1232b8b75",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:c9d5055df841c59672bb9358691bf0ff96e56a2de8d4e68db52f3492f82680ab",
     "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:63575ffc589461c9b6114e0a603b3783bf5b13c164d1fb10259118ad1c53f84b"
   },
   "operator_commands": {
@@ -351,7 +351,7 @@
     "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
   },
   "schema_version": "pocketmd-lite-refinement-execution-plan.v1",
-  "source_commit_sha": "47d00b9ee6e67abd386e046bb6ee9b637c3782db",
+  "source_commit_sha": "9bf476d4e4cefaca446b81ee52bc49c3dc481a87",
   "source_receipt_requirements": {
     "mode": "raw_top_k_refinement_rows",
     "placeholder_block_policy": {
