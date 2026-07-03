@@ -50,6 +50,8 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "row_template_artifact_count": 6,
         "science_actual_closure_blocker_count": 2,
         "slot_count": 6,
+        "upstream_source_blocker_count": 6,
+        "upstream_source_context_count": 2,
     }
     assert list(slots) == [
         "subset_rows",
@@ -63,6 +65,11 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "vina_gnina_rows",
         "pocketmd_rows",
     ]
+    assert len(payload["upstream_source_blockers"]) == 6
+    assert payload["upstream_source_acquisition"]["public_benchmark_phase2"][
+        "present"
+    ] is True
+    assert payload["upstream_source_acquisition"]["pocketmd_lite"]["present"] is True
     assert payload["missing_row_template_artifacts"] == []
     assert payload["row_template_artifacts"] == {
         "enrichment_rows": (
@@ -128,6 +135,13 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     vina_gnina = slots["vina_gnina_rows"]
     assert vina_gnina["status"] == "operator_input_required"
     assert vina_gnina["missing"] is True
+    assert vina_gnina["upstream_source_id"] == "public_benchmark_phase2"
+    assert vina_gnina["source_acquisition_operator_action"] == (
+        "resolve_public_benchmark_phase2_source_acquisition_blockers"
+    )
+    assert "public_benchmark_vina_gnina_engine_inputs_not_ready" in vina_gnina[
+        "upstream_source_blockers"
+    ]
 
     gpcr = slots["gpcr_rows"]
     assert gpcr["actual_closure_component_id"] == "gpcr_hard_decoy_actual_closure"
@@ -160,6 +174,13 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert pocketmd["row_template_artifact"].endswith(
         "pocketmd_lite_topk_rows_template.csv"
     )
+    assert pocketmd["upstream_source_id"] == "pocketmd_lite"
+    assert pocketmd["source_acquisition_operator_action"] == (
+        "resolve_pocketmd_lite_source_acquisition_blockers"
+    )
+    assert "pocketmd_lite_topk_rows_not_acquired" in pocketmd[
+        "upstream_source_blockers"
+    ]
     assert "top_k_refinement_rows_present" in pocketmd[
         "closes_actual_closure_criteria"
     ]
@@ -213,6 +234,9 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "| `vina_gnina_rows` | `operator_input_required` |" in markdown
     assert "| `pocketmd_rows` | `operator_input_required` |" in markdown
     assert "CSV Starter" in markdown
+    assert "## Upstream Source Blockers" in markdown
+    assert "public_benchmark_vina_gnina_engine_inputs_not_ready" in markdown
+    assert "pocketmd_lite_topk_rows_not_acquired" in markdown
     assert "public_benchmark_subset_rows_template.csv" in markdown
     assert "gpcr_hard_decoy_rows_template.csv" in markdown
     assert "pocketmd_lite_topk_rows_template.csv" in markdown

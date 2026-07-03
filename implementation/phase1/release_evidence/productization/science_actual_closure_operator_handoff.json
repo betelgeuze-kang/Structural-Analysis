@@ -242,12 +242,65 @@
     "row_input_id": "vina_gnina_rows",
     "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
     "row_template_present": true,
-    "status": "operator_input_required"
+    "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
+    "status": "operator_input_required",
+    "upstream_source_acquisition": {
+      "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
+      "blocker_count": 3,
+      "blockers": [
+        "public_benchmark_vina_gnina_rows_not_acquired",
+        "public_benchmark_vina_gnina_engine_inputs_not_ready",
+        "public_benchmark_external_receipts_not_attached"
+      ],
+      "contract_pass": true,
+      "operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
+      "present": true,
+      "source_id": "public_benchmark_phase2",
+      "status": "operator_acquisition_required",
+      "summary": {
+        "actual_closure_ready": false,
+        "blocker_count": 3,
+        "minimum_enrichment_target_count": 1,
+        "minimum_subset_case_count": 12,
+        "minimum_vina_gnina_comparison_case_count": 1,
+        "official_source_catalog_count": 6,
+        "official_source_receipt_plan_status": "operator_receipts_required",
+        "official_source_receipt_role_count": 4,
+        "phase2_ready": false,
+        "phase2_row_audit_blocker_count": 1,
+        "phase2_row_audit_failed_criteria": [
+          "vina_gnina_comparison_ready"
+        ],
+        "phase2_row_audit_missing_row_input_count": 1,
+        "phase2_row_audit_missing_row_inputs": [
+          "vina_gnina_rows"
+        ],
+        "phase2_row_audit_status": "operator_evidence_required",
+        "required_component_count": 5,
+        "required_row_input_count": 4,
+        "vina_gnina_execution_plan_ready": false,
+        "vina_gnina_execution_plan_status": "engine_input_blocked",
+        "vina_gnina_missing_engine_count": 0,
+        "vina_gnina_required_engine_run_count": 24,
+        "vina_gnina_runtime_container_daemon_available": true,
+        "vina_gnina_runtime_detected_row_artifact_count": 0,
+        "vina_gnina_runtime_missing_engine_ids": [],
+        "vina_gnina_runtime_readiness_status": "execution_plan_blocked",
+        "vina_gnina_runtime_ready_engine_run_slot_count": 0,
+        "vina_gnina_runtime_ready_for_engine_execution": false
+      }
+    },
+    "upstream_source_blockers": [
+      "public_benchmark_vina_gnina_rows_not_acquired",
+      "public_benchmark_vina_gnina_engine_inputs_not_ready",
+      "public_benchmark_external_receipts_not_attached"
+    ],
+    "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-03T19:59:45.620576+00:00",
+  "generated_at": "2026-07-03T21:03:48.876593+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:2766a8aa47fec7d364aeb1783fed5d40bedfa3ccf9559f566bbce48314f3d1ca",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:e0d8467c488dc1a392fc90b50a042b3089103951695e1710d90976d36cb84f80"
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:95d4c443360ab089f3a3922655252a64f375a52fd8583e7ffed29ec92a39df11",
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:f46dc67ec10ecf1bbfd51f2378326c288a5015a261b02d564179214f7c2f7ffb"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -258,6 +311,8 @@
   "operator_next_actions": [
     "attach_vina_gnina_rows",
     "attach_pocketmd_rows",
+    "resolve_public_benchmark_phase2_source_acquisition_blockers",
+    "resolve_pocketmd_lite_source_acquisition_blockers",
     "run_science_actual_closure_row_materializer",
     "review_science_actual_closure_row_audit"
   ],
@@ -403,7 +458,60 @@
       "row_input_id": "subset_rows",
       "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows_template.csv",
       "row_template_present": true,
-      "status": "provided"
+      "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
+      "status": "provided",
+      "upstream_source_acquisition": {
+        "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
+        "blocker_count": 3,
+        "blockers": [
+          "public_benchmark_vina_gnina_rows_not_acquired",
+          "public_benchmark_vina_gnina_engine_inputs_not_ready",
+          "public_benchmark_external_receipts_not_attached"
+        ],
+        "contract_pass": true,
+        "operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
+        "present": true,
+        "source_id": "public_benchmark_phase2",
+        "status": "operator_acquisition_required",
+        "summary": {
+          "actual_closure_ready": false,
+          "blocker_count": 3,
+          "minimum_enrichment_target_count": 1,
+          "minimum_subset_case_count": 12,
+          "minimum_vina_gnina_comparison_case_count": 1,
+          "official_source_catalog_count": 6,
+          "official_source_receipt_plan_status": "operator_receipts_required",
+          "official_source_receipt_role_count": 4,
+          "phase2_ready": false,
+          "phase2_row_audit_blocker_count": 1,
+          "phase2_row_audit_failed_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "phase2_row_audit_missing_row_input_count": 1,
+          "phase2_row_audit_missing_row_inputs": [
+            "vina_gnina_rows"
+          ],
+          "phase2_row_audit_status": "operator_evidence_required",
+          "required_component_count": 5,
+          "required_row_input_count": 4,
+          "vina_gnina_execution_plan_ready": false,
+          "vina_gnina_execution_plan_status": "engine_input_blocked",
+          "vina_gnina_missing_engine_count": 0,
+          "vina_gnina_required_engine_run_count": 24,
+          "vina_gnina_runtime_container_daemon_available": true,
+          "vina_gnina_runtime_detected_row_artifact_count": 0,
+          "vina_gnina_runtime_missing_engine_ids": [],
+          "vina_gnina_runtime_readiness_status": "execution_plan_blocked",
+          "vina_gnina_runtime_ready_engine_run_slot_count": 0,
+          "vina_gnina_runtime_ready_for_engine_execution": false
+        }
+      },
+      "upstream_source_blockers": [
+        "public_benchmark_vina_gnina_rows_not_acquired",
+        "public_benchmark_vina_gnina_engine_inputs_not_ready",
+        "public_benchmark_external_receipts_not_attached"
+      ],
+      "upstream_source_id": "public_benchmark_phase2"
     },
     {
       "accepted_formats": [
@@ -518,7 +626,60 @@
       "row_input_id": "pose_rows",
       "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows_template.csv",
       "row_template_present": true,
-      "status": "provided"
+      "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
+      "status": "provided",
+      "upstream_source_acquisition": {
+        "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
+        "blocker_count": 3,
+        "blockers": [
+          "public_benchmark_vina_gnina_rows_not_acquired",
+          "public_benchmark_vina_gnina_engine_inputs_not_ready",
+          "public_benchmark_external_receipts_not_attached"
+        ],
+        "contract_pass": true,
+        "operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
+        "present": true,
+        "source_id": "public_benchmark_phase2",
+        "status": "operator_acquisition_required",
+        "summary": {
+          "actual_closure_ready": false,
+          "blocker_count": 3,
+          "minimum_enrichment_target_count": 1,
+          "minimum_subset_case_count": 12,
+          "minimum_vina_gnina_comparison_case_count": 1,
+          "official_source_catalog_count": 6,
+          "official_source_receipt_plan_status": "operator_receipts_required",
+          "official_source_receipt_role_count": 4,
+          "phase2_ready": false,
+          "phase2_row_audit_blocker_count": 1,
+          "phase2_row_audit_failed_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "phase2_row_audit_missing_row_input_count": 1,
+          "phase2_row_audit_missing_row_inputs": [
+            "vina_gnina_rows"
+          ],
+          "phase2_row_audit_status": "operator_evidence_required",
+          "required_component_count": 5,
+          "required_row_input_count": 4,
+          "vina_gnina_execution_plan_ready": false,
+          "vina_gnina_execution_plan_status": "engine_input_blocked",
+          "vina_gnina_missing_engine_count": 0,
+          "vina_gnina_required_engine_run_count": 24,
+          "vina_gnina_runtime_container_daemon_available": true,
+          "vina_gnina_runtime_detected_row_artifact_count": 0,
+          "vina_gnina_runtime_missing_engine_ids": [],
+          "vina_gnina_runtime_readiness_status": "execution_plan_blocked",
+          "vina_gnina_runtime_ready_engine_run_slot_count": 0,
+          "vina_gnina_runtime_ready_for_engine_execution": false
+        }
+      },
+      "upstream_source_blockers": [
+        "public_benchmark_vina_gnina_rows_not_acquired",
+        "public_benchmark_vina_gnina_engine_inputs_not_ready",
+        "public_benchmark_external_receipts_not_attached"
+      ],
+      "upstream_source_id": "public_benchmark_phase2"
     },
     {
       "accepted_formats": [
@@ -685,7 +846,60 @@
       "row_input_id": "enrichment_rows",
       "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows_template.csv",
       "row_template_present": true,
-      "status": "provided"
+      "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
+      "status": "provided",
+      "upstream_source_acquisition": {
+        "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
+        "blocker_count": 3,
+        "blockers": [
+          "public_benchmark_vina_gnina_rows_not_acquired",
+          "public_benchmark_vina_gnina_engine_inputs_not_ready",
+          "public_benchmark_external_receipts_not_attached"
+        ],
+        "contract_pass": true,
+        "operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
+        "present": true,
+        "source_id": "public_benchmark_phase2",
+        "status": "operator_acquisition_required",
+        "summary": {
+          "actual_closure_ready": false,
+          "blocker_count": 3,
+          "minimum_enrichment_target_count": 1,
+          "minimum_subset_case_count": 12,
+          "minimum_vina_gnina_comparison_case_count": 1,
+          "official_source_catalog_count": 6,
+          "official_source_receipt_plan_status": "operator_receipts_required",
+          "official_source_receipt_role_count": 4,
+          "phase2_ready": false,
+          "phase2_row_audit_blocker_count": 1,
+          "phase2_row_audit_failed_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "phase2_row_audit_missing_row_input_count": 1,
+          "phase2_row_audit_missing_row_inputs": [
+            "vina_gnina_rows"
+          ],
+          "phase2_row_audit_status": "operator_evidence_required",
+          "required_component_count": 5,
+          "required_row_input_count": 4,
+          "vina_gnina_execution_plan_ready": false,
+          "vina_gnina_execution_plan_status": "engine_input_blocked",
+          "vina_gnina_missing_engine_count": 0,
+          "vina_gnina_required_engine_run_count": 24,
+          "vina_gnina_runtime_container_daemon_available": true,
+          "vina_gnina_runtime_detected_row_artifact_count": 0,
+          "vina_gnina_runtime_missing_engine_ids": [],
+          "vina_gnina_runtime_readiness_status": "execution_plan_blocked",
+          "vina_gnina_runtime_ready_engine_run_slot_count": 0,
+          "vina_gnina_runtime_ready_for_engine_execution": false
+        }
+      },
+      "upstream_source_blockers": [
+        "public_benchmark_vina_gnina_rows_not_acquired",
+        "public_benchmark_vina_gnina_engine_inputs_not_ready",
+        "public_benchmark_external_receipts_not_attached"
+      ],
+      "upstream_source_id": "public_benchmark_phase2"
     },
     {
       "accepted_formats": [
@@ -865,7 +1079,60 @@
       "row_input_id": "vina_gnina_rows",
       "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
       "row_template_present": true,
-      "status": "operator_input_required"
+      "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
+      "status": "operator_input_required",
+      "upstream_source_acquisition": {
+        "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
+        "blocker_count": 3,
+        "blockers": [
+          "public_benchmark_vina_gnina_rows_not_acquired",
+          "public_benchmark_vina_gnina_engine_inputs_not_ready",
+          "public_benchmark_external_receipts_not_attached"
+        ],
+        "contract_pass": true,
+        "operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
+        "present": true,
+        "source_id": "public_benchmark_phase2",
+        "status": "operator_acquisition_required",
+        "summary": {
+          "actual_closure_ready": false,
+          "blocker_count": 3,
+          "minimum_enrichment_target_count": 1,
+          "minimum_subset_case_count": 12,
+          "minimum_vina_gnina_comparison_case_count": 1,
+          "official_source_catalog_count": 6,
+          "official_source_receipt_plan_status": "operator_receipts_required",
+          "official_source_receipt_role_count": 4,
+          "phase2_ready": false,
+          "phase2_row_audit_blocker_count": 1,
+          "phase2_row_audit_failed_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "phase2_row_audit_missing_row_input_count": 1,
+          "phase2_row_audit_missing_row_inputs": [
+            "vina_gnina_rows"
+          ],
+          "phase2_row_audit_status": "operator_evidence_required",
+          "required_component_count": 5,
+          "required_row_input_count": 4,
+          "vina_gnina_execution_plan_ready": false,
+          "vina_gnina_execution_plan_status": "engine_input_blocked",
+          "vina_gnina_missing_engine_count": 0,
+          "vina_gnina_required_engine_run_count": 24,
+          "vina_gnina_runtime_container_daemon_available": true,
+          "vina_gnina_runtime_detected_row_artifact_count": 0,
+          "vina_gnina_runtime_missing_engine_ids": [],
+          "vina_gnina_runtime_readiness_status": "execution_plan_blocked",
+          "vina_gnina_runtime_ready_engine_run_slot_count": 0,
+          "vina_gnina_runtime_ready_for_engine_execution": false
+        }
+      },
+      "upstream_source_blockers": [
+        "public_benchmark_vina_gnina_rows_not_acquired",
+        "public_benchmark_vina_gnina_engine_inputs_not_ready",
+        "public_benchmark_external_receipts_not_attached"
+      ],
+      "upstream_source_id": "public_benchmark_phase2"
     },
     {
       "accepted_formats": [
@@ -988,7 +1255,21 @@
       "row_input_id": "gpcr_rows",
       "row_template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv",
       "row_template_present": true,
-      "status": "provided"
+      "source_acquisition_operator_action": "",
+      "status": "provided",
+      "upstream_source_acquisition": {
+        "artifact": "",
+        "blocker_count": 0,
+        "blockers": [],
+        "contract_pass": null,
+        "operator_action": "",
+        "present": false,
+        "source_id": "",
+        "status": "",
+        "summary": {}
+      },
+      "upstream_source_blockers": [],
+      "upstream_source_id": ""
     },
     {
       "accepted_formats": [
@@ -1147,7 +1428,45 @@
       "row_input_id": "pocketmd_rows",
       "row_template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
       "row_template_present": true,
-      "status": "operator_input_required"
+      "source_acquisition_operator_action": "resolve_pocketmd_lite_source_acquisition_blockers",
+      "status": "operator_input_required",
+      "upstream_source_acquisition": {
+        "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json",
+        "blocker_count": 3,
+        "blockers": [
+          "pocketmd_lite_topk_rows_not_acquired",
+          "upstream_top_k_candidate_receipts_not_attached",
+          "lite_refinement_metric_receipts_not_attached"
+        ],
+        "contract_pass": true,
+        "operator_action": "resolve_pocketmd_lite_source_acquisition_blockers",
+        "present": true,
+        "source_id": "pocketmd_lite",
+        "status": "operator_acquisition_required",
+        "summary": {
+          "actual_closure_ready": false,
+          "blocker_count": 3,
+          "covered_phase4_criterion_count": 8,
+          "detected_row_artifact_count": 0,
+          "minimum_rows_by_case_count": 3,
+          "operator_rows_ready": false,
+          "phase4_refinement_receipt_plan_status": "operator_receipts_required",
+          "phase4_refinement_receipt_role_count": 4,
+          "raw_row_artifact_detected": false,
+          "refinement_execution_plan_ready": true,
+          "refinement_execution_plan_status": "operator_refinement_rows_required",
+          "required_candidate_rows_per_case": 2,
+          "required_candidate_slot_count": 6,
+          "required_case_count": 3,
+          "required_total_candidate_rows": 6
+        }
+      },
+      "upstream_source_blockers": [
+        "pocketmd_lite_topk_rows_not_acquired",
+        "upstream_top_k_candidate_receipts_not_attached",
+        "lite_refinement_metric_receipts_not_attached"
+      ],
+      "upstream_source_id": "pocketmd_lite"
     }
   ],
   "row_template_artifacts": {
@@ -1161,7 +1480,7 @@
   "schema_version": "science-actual-closure-operator-handoff.v1",
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "89e5e3daaec280bf95597f397a38ca2d355242bc",
+  "source_commit_sha": "a4b2efb3f3268ba67c917aebf241cb47183656a9",
   "status": "operator_rows_required",
   "summary": {
     "closes_actual_closure_criteria_count": 19,
@@ -1172,6 +1491,91 @@
     "provided_slot_count": 4,
     "row_template_artifact_count": 6,
     "science_actual_closure_blocker_count": 2,
-    "slot_count": 6
-  }
+    "slot_count": 6,
+    "upstream_source_blocker_count": 6,
+    "upstream_source_context_count": 2
+  },
+  "upstream_source_acquisition": {
+    "pocketmd_lite": {
+      "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json",
+      "blocker_count": 3,
+      "blockers": [
+        "pocketmd_lite_topk_rows_not_acquired",
+        "upstream_top_k_candidate_receipts_not_attached",
+        "lite_refinement_metric_receipts_not_attached"
+      ],
+      "contract_pass": true,
+      "present": true,
+      "status": "operator_acquisition_required",
+      "summary": {
+        "actual_closure_ready": false,
+        "blocker_count": 3,
+        "covered_phase4_criterion_count": 8,
+        "detected_row_artifact_count": 0,
+        "minimum_rows_by_case_count": 3,
+        "operator_rows_ready": false,
+        "phase4_refinement_receipt_plan_status": "operator_receipts_required",
+        "phase4_refinement_receipt_role_count": 4,
+        "raw_row_artifact_detected": false,
+        "refinement_execution_plan_ready": true,
+        "refinement_execution_plan_status": "operator_refinement_rows_required",
+        "required_candidate_rows_per_case": 2,
+        "required_candidate_slot_count": 6,
+        "required_case_count": 3,
+        "required_total_candidate_rows": 6
+      }
+    },
+    "public_benchmark_phase2": {
+      "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
+      "blocker_count": 3,
+      "blockers": [
+        "public_benchmark_vina_gnina_rows_not_acquired",
+        "public_benchmark_vina_gnina_engine_inputs_not_ready",
+        "public_benchmark_external_receipts_not_attached"
+      ],
+      "contract_pass": true,
+      "present": true,
+      "status": "operator_acquisition_required",
+      "summary": {
+        "actual_closure_ready": false,
+        "blocker_count": 3,
+        "minimum_enrichment_target_count": 1,
+        "minimum_subset_case_count": 12,
+        "minimum_vina_gnina_comparison_case_count": 1,
+        "official_source_catalog_count": 6,
+        "official_source_receipt_plan_status": "operator_receipts_required",
+        "official_source_receipt_role_count": 4,
+        "phase2_ready": false,
+        "phase2_row_audit_blocker_count": 1,
+        "phase2_row_audit_failed_criteria": [
+          "vina_gnina_comparison_ready"
+        ],
+        "phase2_row_audit_missing_row_input_count": 1,
+        "phase2_row_audit_missing_row_inputs": [
+          "vina_gnina_rows"
+        ],
+        "phase2_row_audit_status": "operator_evidence_required",
+        "required_component_count": 5,
+        "required_row_input_count": 4,
+        "vina_gnina_execution_plan_ready": false,
+        "vina_gnina_execution_plan_status": "engine_input_blocked",
+        "vina_gnina_missing_engine_count": 0,
+        "vina_gnina_required_engine_run_count": 24,
+        "vina_gnina_runtime_container_daemon_available": true,
+        "vina_gnina_runtime_detected_row_artifact_count": 0,
+        "vina_gnina_runtime_missing_engine_ids": [],
+        "vina_gnina_runtime_readiness_status": "execution_plan_blocked",
+        "vina_gnina_runtime_ready_engine_run_slot_count": 0,
+        "vina_gnina_runtime_ready_for_engine_execution": false
+      }
+    }
+  },
+  "upstream_source_blockers": [
+    "public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_rows_not_acquired",
+    "public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_engine_inputs_not_ready",
+    "public_benchmark_phase2_source_acquisition::public_benchmark_external_receipts_not_attached",
+    "pocketmd_lite_source_acquisition::pocketmd_lite_topk_rows_not_acquired",
+    "pocketmd_lite_source_acquisition::upstream_top_k_candidate_receipts_not_attached",
+    "pocketmd_lite_source_acquisition::lite_refinement_metric_receipts_not_attached"
+  ]
 }

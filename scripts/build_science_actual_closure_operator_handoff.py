@@ -63,6 +63,13 @@ POLICY_KEYS = (
     "top_k_row_quality_minimums",
     "raw_row_quality_minimums",
 )
+ROW_INPUT_UPSTREAM_SOURCE_IDS = {
+    "subset_rows": "public_benchmark_phase2",
+    "pose_rows": "public_benchmark_phase2",
+    "enrichment_rows": "public_benchmark_phase2",
+    "vina_gnina_rows": "public_benchmark_phase2",
+    "pocketmd_rows": "pocketmd_lite",
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -116,14 +123,52 @@ def _row_template_artifact(row_input_id: str) -> str:
     return str(raw_path) if raw_path else ""
 
 
+def _slot_source_context(
+    row_input_id: str,
+    upstream_source_acquisition: dict[str, Any],
+) -> dict[str, Any]:
+    source_id = ROW_INPUT_UPSTREAM_SOURCE_IDS.get(row_input_id, "")
+    if not source_id:
+        return {
+            "source_id": "",
+            "present": False,
+            "status": "",
+            "artifact": "",
+            "contract_pass": None,
+            "blocker_count": 0,
+            "blockers": [],
+            "summary": {},
+            "operator_action": "",
+        }
+    source = _as_dict(upstream_source_acquisition.get(source_id))
+    blockers = [str(item) for item in _as_list(source.get("blockers"))]
+    return {
+        "source_id": source_id,
+        "present": bool(source.get("present")),
+        "status": str(source.get("status") or ""),
+        "artifact": str(source.get("artifact") or ""),
+        "contract_pass": source.get("contract_pass"),
+        "blocker_count": int(source.get("blocker_count") or len(blockers)),
+        "blockers": blockers,
+        "summary": _as_dict(source.get("summary")),
+        "operator_action": (
+            f"resolve_{source_id}_source_acquisition_blockers"
+            if blockers
+            else ""
+        ),
+    }
+
+
 def _slot(
     row: dict[str, Any],
     contract: dict[str, Any],
     *,
     repo_root: Path,
+    upstream_source_acquisition: dict[str, Any],
 ) -> dict[str, Any]:
     row_input_id = str(row.get("row_input_id") or "")
     missing = bool(row.get("missing"))
+    source_context = _slot_source_context(row_input_id, upstream_source_acquisition)
     row_template_artifact = _row_template_artifact(row_input_id)
     row_template_path = (
         repo_root / row_template_artifact if row_template_artifact else Path()
@@ -172,6 +217,10 @@ def _slot(
             str(item)
             for item in _as_list(row.get("phase2_operator_blockers_if_missing"))
         ],
+        "upstream_source_id": source_context["source_id"],
+        "upstream_source_acquisition": source_context,
+        "upstream_source_blockers": source_context["blockers"],
+        "source_acquisition_operator_action": source_context["operator_action"],
         "row_contract_ref": str(row.get("row_contract_ref") or ""),
         "contract_field_groups": _contract_field_groups(contract),
         "contract_policies": _contract_policies(contract),
@@ -245,12 +294,17 @@ def build_science_actual_closure_operator_handoff(
         if isinstance(row, dict)
     ]
     contracts = _as_dict(audit.get("row_intake_contracts"))
+    upstream_source_acquisition = _as_dict(audit.get("upstream_source_acquisition"))
+    upstream_source_blockers = [
+        str(item) for item in _as_list(audit.get("upstream_source_blockers"))
+    ]
     slots = sorted(
         [
             _slot(
                 row,
                 _as_dict(contracts.get(str(row.get("row_input_id") or ""))),
                 repo_root=repo_root,
+                upstream_source_acquisition=upstream_source_acquisition,
             )
             for row in row_matrix
         ],
@@ -316,7 +370,15 @@ def build_science_actual_closure_operator_handoff(
             "missing_row_template_artifact_count": len(
                 missing_row_template_artifacts
             ),
+            "upstream_source_context_count": sum(
+                1
+                for source in upstream_source_acquisition.values()
+                if _as_dict(source).get("present")
+            ),
+            "upstream_source_blocker_count": len(upstream_source_blockers),
         },
+        "upstream_source_acquisition": upstream_source_acquisition,
+        "upstream_source_blockers": upstream_source_blockers,
         "row_template_artifacts": row_template_artifacts,
         "missing_row_template_artifacts": missing_row_template_artifacts,
         "missing_row_inputs": [
@@ -374,6 +436,13 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"`{criteria}` | "
             f"`{slot.get('operator_action')}` |"
         )
+    upstream_source_blockers = [
+        str(item) for item in _as_list(payload.get("upstream_source_blockers"))
+    ]
+    if upstream_source_blockers:
+        lines.extend(["", "## Upstream Source Blockers", ""])
+        for blocker in upstream_source_blockers:
+            lines.append(f"- `{blocker}`")
     lines.extend(
         [
             "",
