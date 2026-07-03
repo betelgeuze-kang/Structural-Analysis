@@ -139,7 +139,7 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 14,
+      "blocker_count": 35,
       "blockers": [
         "ci_streak::nightly::github_actions_job_start_blocked",
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -148,10 +148,31 @@
         "human_ux::observation_file_missing",
         "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
-        "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
+        "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
+        "pm_release::github_sync::github_sync_preflight_not_synced",
+        "pm_release::github_sync::github_sync_remote_sync_pending",
         "self_hosted_runner::self_hosted_runner_matching_labels_not_online",
         "stale_or_inconsistent:open_blocker_count_conflict",
-        "stale_or_inconsistent:worktree_dirty",
+        "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
+        "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
+        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
+        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
+        "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
+        "stale_or_inconsistent:source_commit_mismatch:g1_f2g_f2h_cause_narrowing_status",
+        "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
+        "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
+        "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
+        "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
+        "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
+        "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
+        "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
+        "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
+        "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
+        "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
+        "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
+        "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
+        "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
+        "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness",
         "structural_scope::owner_decision_pending_count=86",
         "structural_scope::owner_decisions_missing",
         "structural_scope::release_surface_owner_decision_required_count=3"
@@ -165,7 +186,7 @@
       ]
     }
   },
-  "blocker_count": 44,
+  "blocker_count": 65,
   "blockers": [
     "ci_streak::nightly::github_actions_job_start_blocked",
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -203,11 +224,32 @@
     "license_server::operation_readiness_missing",
     "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
     "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
-    "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
+    "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
+    "pm_release::github_sync::github_sync_preflight_not_synced",
+    "pm_release::github_sync::github_sync_remote_sync_pending",
     "pm_release::security::license_status_not_configured",
     "self_hosted_runner::self_hosted_runner_matching_labels_not_online",
     "stale_or_inconsistent:open_blocker_count_conflict",
-    "stale_or_inconsistent:worktree_dirty",
+    "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
+    "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
+    "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
+    "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
+    "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
+    "stale_or_inconsistent:source_commit_mismatch:g1_f2g_f2h_cause_narrowing_status",
+    "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
+    "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
+    "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
+    "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
+    "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
+    "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
+    "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
+    "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
+    "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
+    "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
+    "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
+    "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
+    "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
+    "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness",
     "structural_scope::owner_decision_pending_count=86",
     "structural_scope::owner_decisions_missing",
     "structural_scope::release_surface_owner_decision_required_count=3"
@@ -471,12 +513,12 @@
       "status": "blocked"
     },
     "developer_preview_readiness": {
-      "blocker_count": 12,
+      "blocker_count": 31,
       "category_counts": {
         "benchmark": 2,
-        "future commercial": 32,
-        "numerical": 4,
-        "software product": 6
+        "future commercial": 34,
+        "numerical": 6,
+        "software product": 23
       },
       "claim_boundary": "Developer Preview is an open benchmark workstation preview, not a commercial structural solver beta. Customer shadow, commercial license/legal approval, license-server operation, commercial SLA, 30-run CI streak, and external approval receipts remain visible as future Commercial Release blockers. Remote GitHub sync/push approval is a release-publication handoff and does not block the local Developer Preview evidence bar. AI/GNN/surrogate truth claims stay frozen until the deterministic reference solver, residual/Jacobian/Newton closure, and benchmark truth are fixed.",
       "developer_preview_ready": false,
@@ -485,7 +527,7 @@
         "gpu_hip": "performance_track_after_cpu_reference_parity",
         "new_feature_development": "frozen_until_developer_preview_baseline_is_clean"
       },
-      "future_commercial_blocker_count": 32,
+      "future_commercial_blocker_count": 34,
       "gap_ledger_closure_requirement_visibility": {
         "ai_engine_guardrail_rows_ready": true,
         "autonomous_ai_engine_claim_blockers": [
@@ -2519,17 +2561,17 @@
         "pm_release::ux::human_new_user_30min_sample_evidence_missing": "human_ux::*",
         "pm_release::ux::human_new_user_observation_missing_or_failed": "human_ux::*"
       },
-      "full_release_blocker_count": 6,
+      "full_release_blocker_count": 8,
       "full_release_gate_ready": false,
       "limited_commercial_release_ready": false,
       "paid_pilot_candidate": true,
-      "release_area_blocker_count": 6,
+      "release_area_blocker_count": 8,
       "release_area_gate_ready": false,
       "release_area_green_count": 12,
       "release_area_total_count": 16,
       "release_decision": {
-        "approval_token_count": 5,
-        "blocked_release_count": 6,
+        "approval_token_count": 6,
+        "blocked_release_count": 8,
         "claim_boundary": "Evidence surface counts include only structural-analysis evidence surfaces. Non-structural product domains are outside this structural solver release gate and must not influence release readiness.",
         "evidence_surface_count": 8,
         "evidence_surface_dir": "implementation/phase1/release_evidence/surface",
@@ -2754,17 +2796,19 @@
       "cleanup_plan_status": "ready",
       "cleanup_plan_track_or_add_required_path_count": 0,
       "codex_commit_or_push_performed": false,
-      "dirty_path_count": 14,
+      "dirty_path_count": 0,
       "human_git_action_required": false,
       "human_handoff_next_action": "rerun_git_clean_clone_reproduction",
       "human_handoff_push_or_release_command_included": false,
       "human_handoff_status": "ready",
       "human_handoff_suggested_command_count": 3,
-      "local_worktree_dirty": true,
-      "non_receipt_dirty_path_count": 14,
-      "remote_github_sync_blocker_count": 1,
+      "local_worktree_dirty": false,
+      "non_receipt_dirty_path_count": 0,
+      "remote_github_sync_blocker_count": 3,
       "remote_github_sync_blockers": [
-        "pm_release::github_sync::github_sync_preflight::local_head_mismatch"
+        "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
+        "pm_release::github_sync::github_sync_preflight_not_synced",
+        "pm_release::github_sync::github_sync_remote_sync_pending"
       ],
       "remote_github_sync_clean": false
     },
@@ -3099,7 +3143,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-03T00:24:27.678603+00:00",
+  "generated_at": "2026-07-03T00:30:49.733217+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
@@ -3109,9 +3153,9 @@
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:9014e8908dfb6df4b52a6c042aa611fa066ed85f86e4c5c283b7fe17e738693d",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:b9eb89043bd3c76c88b3f06c9d5777f40d4713bcd08b8f2b9b1c9ae8f25e69ba",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:704f8462ca719ca0c1757d8a505d962ff9fb881ea8b77295aa8764b9be68addf",
-    "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:f0e0769b48eb16cdb9fa434d70352738dbb86c8ce775fb87ce21c171edd13510",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:4442fdfb357ec1089a4ab4f910ce2ec793ac9620a3f407a56c1222e90315a006",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:2d77f72cf774f40550e74e8cb97a069f2b2aa1236168ab55fb4753add6782faf",
+    "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:add36398ac87f6d889be19b55996fb7c27c2201e6291a1e11701457e0b3f6941",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:dbaf0d5fa9d935fc93c07be149329030380a1cd2d6c9aa5049248d080bd2c482",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:337fce3da1fbf0df378560f1ca16e7ae193a49fa74cac79d61666b23490cd177",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:e2cb4218163856b88483f65c7b62db0aeb664ac3845103f7ae6e184916177607",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:11d736909bd208fdfe058578b1b015278e533da3f57f516f4abb41dba72ad1fa",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:127faeca4e434f6e91f28eec84677ba759277ae162c592f3e9aa3714a64dd672",
@@ -3125,8 +3169,8 @@
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:1a551be747cf15670da8b71ea45117fd046fe7b2f611c3156bdb20b7bdea41b8",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:68e2db99e38eb1dbd70a9437134923c2c6d6537409a0957b1215ea3ec3b9ec4d",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d101c24c07b9f06e68129d61b4dd365bf125ea0219eb1d45523580e11e3e5c41",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:d7204c8094aa1e0c0727455f66302a250ec1ce83f4034328276dd9da1b4a503b",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:2039d6096b40643f4016fd718ee604da7ff72fbe4538bdf9c47b089dce77713b",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:1becffcac4f8bb01202d41136023b162b14bc19e0ad3d8d2f57bea72cf7ac9cb",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:ba5e483ea83608739b6a35f01b7d147be9b2a3789a12b42e980e817ba678199f",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:49daaee73431e8c0bb0eca2d1ebea12d4b7574a81ca2e3baaa642593562658e6",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:38937310ec59afa11687e8fe27d284ff4e7cbf58b7ce103caf28e4926f8aae05",
@@ -3140,8 +3184,8 @@
   "paid_pilot_ready": false,
   "reason_code": "STALE_OR_INCONSISTENT",
   "release_decision": {
-    "approval_token_count": 5,
-    "blocked_release_count": 6,
+    "approval_token_count": 6,
+    "blocked_release_count": 8,
     "claim_boundary": "Evidence surface counts include only structural-analysis evidence surfaces. Non-structural product domains are outside this structural solver release gate and must not influence release readiness.",
     "evidence_surface_count": 8,
     "evidence_surface_dir": "implementation/phase1/release_evidence/surface",
@@ -3419,11 +3463,32 @@
     },
     "release freshness/sync": {
       "blocked": true,
-      "blocker_count": 3,
+      "blocker_count": 24,
       "blockers": [
-        "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
+        "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
+        "pm_release::github_sync::github_sync_preflight_not_synced",
+        "pm_release::github_sync::github_sync_remote_sync_pending",
         "stale_or_inconsistent:open_blocker_count_conflict",
-        "stale_or_inconsistent:worktree_dirty"
+        "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
+        "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
+        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
+        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
+        "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
+        "stale_or_inconsistent:source_commit_mismatch:g1_f2g_f2h_cause_narrowing_status",
+        "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
+        "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
+        "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
+        "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
+        "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
+        "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
+        "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
+        "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
+        "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
+        "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
+        "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
+        "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
+        "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
+        "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
       ]
     },
     "structural scope": {
@@ -3440,7 +3505,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "93f68e1dfb6f58a0cd68fcbdada555a759e190b0",
+  "source_commit_sha": "889d498f62062c0465d69dd93265dd24cef16aa0",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3538,27 +3603,21 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-02T23:42:25.914673+00:00",
+        "generated_at": "2026-07-03T00:28:50.535443+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "93f68e1dfb6f58a0cd68fcbdada555a759e190b0",
+        "source_commit_sha": "889d498f62062c0465d69dd93265dd24cef16aa0",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "gap_closure_status",
         "changed_paths_since_source_commit": [
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/fill_structural_scope_owner_decisions_from_template.py",
-          "scripts/fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_fill_structural_scope_owner_decisions_from_template.py",
-          "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_merge_structural_scope_owner_decision_batch.py"
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
         ],
         "generated_at": "2026-07-02T22:01:55.026301+00:00",
         "input_checksum_present": true,
@@ -3566,21 +3625,15 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "commercial_gap_ledger_status",
         "changed_paths_since_source_commit": [
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/fill_structural_scope_owner_decisions_from_template.py",
-          "scripts/fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_fill_structural_scope_owner_decisions_from_template.py",
-          "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_merge_structural_scope_owner_decision_batch.py"
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
         ],
         "generated_at": "2026-07-02T22:01:35.305004+00:00",
         "input_checksum_present": true,
@@ -3588,21 +3641,15 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "gap_ledger_evidence_audit",
         "changed_paths_since_source_commit": [
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/fill_structural_scope_owner_decisions_from_template.py",
-          "scripts/fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_fill_structural_scope_owner_decisions_from_template.py",
-          "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_merge_structural_scope_owner_decision_batch.py"
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
         ],
         "generated_at": "2026-07-02T22:01:44.716855+00:00",
         "input_checksum_present": true,
@@ -3610,21 +3657,15 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "phase1_core_api_contract",
         "changed_paths_since_source_commit": [
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/fill_structural_scope_owner_decisions_from_template.py",
-          "scripts/fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_fill_structural_scope_owner_decisions_from_template.py",
-          "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_merge_structural_scope_owner_decision_batch.py"
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
         ],
         "generated_at": "2026-07-02T22:01:46.105319+00:00",
         "input_checksum_present": true,
@@ -3632,45 +3673,39 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-03T00:14:08.540076+00:00",
+        "generated_at": "2026-07-03T00:30:43.912361+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "93f68e1dfb6f58a0cd68fcbdada555a759e190b0",
+        "source_commit_sha": "889d498f62062c0465d69dd93265dd24cef16aa0",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-03T00:14:08.601525+00:00",
+        "generated_at": "2026-07-03T00:30:49.505322+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "93f68e1dfb6f58a0cd68fcbdada555a759e190b0",
+        "source_commit_sha": "889d498f62062c0465d69dd93265dd24cef16aa0",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/fill_structural_scope_owner_decisions_from_template.py",
-          "scripts/fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_fill_structural_scope_owner_decisions_from_template.py",
-          "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_merge_structural_scope_owner_decision_batch.py"
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
         ],
         "generated_at": "2026-07-02T22:01:45.691516+00:00",
         "input_checksum_present": true,
@@ -3678,21 +3713,15 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
         "changed_paths_since_source_commit": [
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/fill_structural_scope_owner_decisions_from_template.py",
-          "scripts/fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_fill_structural_scope_owner_decisions_from_template.py",
-          "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_merge_structural_scope_owner_decision_batch.py"
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
         ],
         "generated_at": "2026-07-02T22:06:57.597451+00:00",
         "input_checksum_present": true,
@@ -3700,21 +3729,15 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/fill_structural_scope_owner_decisions_from_template.py",
-          "scripts/fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_fill_structural_scope_owner_decisions_from_template.py",
-          "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_merge_structural_scope_owner_decision_batch.py"
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
         ],
         "generated_at": "2026-07-02T22:02:30.166358+00:00",
         "input_checksum_present": true,
@@ -3722,33 +3745,31 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "g1_f2g_f2h_cause_narrowing_status",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
+        ],
         "generated_at": "2026-07-02T23:44:26.065567+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "93f68e1dfb6f58a0cd68fcbdada555a759e190b0",
-        "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "customer_shadow_evidence_status",
         "changed_paths_since_source_commit": [
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/fill_structural_scope_owner_decisions_from_template.py",
-          "scripts/fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_fill_structural_scope_owner_decisions_from_template.py",
-          "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_merge_structural_scope_owner_decision_batch.py"
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
         ],
         "generated_at": "2026-07-02T22:01:35.132893+00:00",
         "input_checksum_present": true,
@@ -3756,21 +3777,15 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "workstation_delivery_readiness",
         "changed_paths_since_source_commit": [
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/fill_structural_scope_owner_decisions_from_template.py",
-          "scripts/fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_fill_structural_scope_owner_decisions_from_template.py",
-          "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_merge_structural_scope_owner_decision_batch.py"
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
         ],
         "generated_at": "2026-07-02T22:01:35.184840+00:00",
         "input_checksum_present": true,
@@ -3778,21 +3793,15 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "independent_product_readiness",
         "changed_paths_since_source_commit": [
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/fill_structural_scope_owner_decisions_from_template.py",
-          "scripts/fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_fill_structural_scope_owner_decisions_from_template.py",
-          "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_merge_structural_scope_owner_decision_batch.py"
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
         ],
         "generated_at": "2026-07-02T22:01:55.787377+00:00",
         "input_checksum_present": true,
@@ -3800,21 +3809,15 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/fill_structural_scope_owner_decisions_from_template.py",
-          "scripts/fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_fill_structural_scope_owner_decisions_from_template.py",
-          "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_merge_structural_scope_owner_decision_batch.py"
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
         ],
         "generated_at": "2026-07-01T10:19:19.231347+00:00",
         "input_checksum_present": true,
@@ -3822,21 +3825,15 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/fill_structural_scope_owner_decisions_from_template.py",
-          "scripts/fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_fill_structural_scope_owner_decisions_from_template.py",
-          "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_merge_structural_scope_owner_decision_batch.py"
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
         ],
         "generated_at": "2026-07-02T22:01:54.899421+00:00",
         "input_checksum_present": true,
@@ -3844,21 +3841,15 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "license_status_closure_report",
         "changed_paths_since_source_commit": [
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/fill_structural_scope_owner_decisions_from_template.py",
-          "scripts/fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_fill_structural_scope_owner_decisions_from_template.py",
-          "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_merge_structural_scope_owner_decision_batch.py"
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
         ],
         "generated_at": "2026-07-02T22:01:44.756993+00:00",
         "input_checksum_present": true,
@@ -3866,33 +3857,31 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "paid_pilot_scope_guard_report",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
+        ],
         "generated_at": "2026-07-02T23:40:58.798863+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "93f68e1dfb6f58a0cd68fcbdada555a759e190b0",
-        "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "external_benchmark_submission_readiness",
         "changed_paths_since_source_commit": [
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/fill_structural_scope_owner_decisions_from_template.py",
-          "scripts/fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_fill_structural_scope_owner_decisions_from_template.py",
-          "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_merge_structural_scope_owner_decision_batch.py"
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
         ],
         "generated_at": "2026-07-02T22:01:27.331856+00:00",
         "input_checksum_present": true,
@@ -3900,21 +3889,15 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "external_benchmark_submission_updates",
         "changed_paths_since_source_commit": [
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/fill_structural_scope_owner_decisions_from_template.py",
-          "scripts/fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_fill_structural_scope_owner_decisions_from_template.py",
-          "tests/test_fill_structural_scope_release_surface_owner_decisions.py",
-          "tests/test_merge_structural_scope_owner_decision_batch.py"
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
         ],
         "generated_at": "2026-07-02T22:01:23.163033+00:00",
         "input_checksum_present": true,
@@ -3922,54 +3905,66 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "structural_scope_contamination_audit",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
+        ],
         "generated_at": "2026-07-03T00:04:09.914989+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "93f68e1dfb6f58a0cd68fcbdada555a759e190b0",
-        "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "structural_scope_owner_review_packet",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
+        ],
         "generated_at": "2026-07-03T00:17:26.322424+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "93f68e1dfb6f58a0cd68fcbdada555a759e190b0",
-        "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "structural_scope_owner_decision_application_plan",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "docs/commercialization-improvement-priority-assessment.md",
+          "docs/github-documentation-status.md",
+          "scripts/build_pm_owner_evidence_request_packet.py"
+        ],
         "generated_at": "2026-07-03T00:24:04.778049+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "93f68e1dfb6f58a0cd68fcbdada555a759e190b0",
-        "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "developer_preview_final_gate_owner_packet",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-03T00:14:08.648445+00:00",
+        "generated_at": "2026-07-03T00:30:49.551081+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "93f68e1dfb6f58a0cd68fcbdada555a759e190b0",
+        "source_commit_sha": "889d498f62062c0465d69dd93265dd24cef16aa0",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       }
@@ -3977,7 +3972,7 @@
     "open_blocker_counts": {
       "README.md": 12,
       "docs/commercialization-gap-current-state.md": 13,
-      "pm_release_blocker_action_register": 13
+      "pm_release_blocker_action_register": 15
     },
     "release_area_counts": {
       "README.md": [
@@ -3994,28 +3989,13 @@
       ]
     },
     "worktree": {
-      "dirty": true,
+      "dirty": false,
       "dirty_paths": [
-        "README.md",
-        "docs/commercialization-gap-current-state.md",
-        "docs/commercialization-improvement-priority-assessment.md",
-        "docs/github-documentation-status.md",
-        "docs/pm-release-gate-milestones.md",
-        "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
-        "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.md",
         "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json",
         "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
         "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
         "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
-        "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
-        "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.md",
-        "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json",
-        "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json",
-        "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json",
-        "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
-        "implementation/phase1/release_evidence/productization/license_status_intake_packet.json",
-        "implementation/phase1/release_evidence/productization/non_expert_release_briefing_report.json",
-        "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
+        "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
         "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md",
         "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -4028,49 +4008,12 @@
         "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
         "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
-        "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.md",
         "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
         "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
-        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
-        "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
-        "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
-        "implementation/phase1/support_bundle_manifest.json",
-        "scripts/build_developer_preview_final_gate_owner_packet.py",
-        "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        "scripts/build_pm_owner_evidence_request_packet.py",
-        "scripts/build_structural_scope_owner_decision_application_plan.py",
-        "scripts/build_structural_scope_owner_review_packet.py",
-        "scripts/build_support_bundle.py",
-        "tests/test_build_developer_preview_final_gate_owner_packet.py",
-        "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        "tests/test_build_pm_owner_evidence_request_packet.py",
-        "tests/test_build_structural_scope_owner_decision_application_plan.py",
-        "tests/test_build_structural_scope_owner_review_packet.py",
-        "tests/test_build_support_bundle.py"
+        "implementation/phase1/support_bundle_manifest.json"
       ],
-      "non_receipt_dirty_paths": [
-        "docs/commercialization-improvement-priority-assessment.md",
-        "docs/github-documentation-status.md",
-        "scripts/build_developer_preview_final_gate_owner_packet.py",
-        "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        "scripts/build_pm_owner_evidence_request_packet.py",
-        "scripts/build_structural_scope_owner_decision_application_plan.py",
-        "scripts/build_structural_scope_owner_review_packet.py",
-        "scripts/build_support_bundle.py",
-        "tests/test_build_developer_preview_final_gate_owner_packet.py",
-        "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        "tests/test_build_pm_owner_evidence_request_packet.py",
-        "tests/test_build_structural_scope_owner_decision_application_plan.py",
-        "tests/test_build_structural_scope_owner_review_packet.py",
-        "tests/test_build_support_bundle.py"
-      ],
+      "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
         "candidate_release_control_commit_set_count": 0,
         "candidate_set_scope": "Phase 3 seed git-clean-clone reproduction required-input set only; it is not an exhaustive current-worktree dirty-path inventory.",
@@ -4093,26 +4036,11 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M README.md",
-        " M docs/commercialization-gap-current-state.md",
-        " M docs/commercialization-improvement-priority-assessment.md",
-        " M docs/github-documentation-status.md",
-        " M docs/pm-release-gate-milestones.md",
-        " M implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
-        " M implementation/phase1/release_evidence/productization/ci_streak_intake_packet.md",
         " M implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json",
         " M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
         " M implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
         " M implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
-        " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
-        " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.md",
-        " M implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json",
-        " M implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json",
-        " M implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json",
-        " M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
-        " M implementation/phase1/release_evidence/productization/license_status_intake_packet.json",
-        " M implementation/phase1/release_evidence/productization/non_expert_release_briefing_report.json",
-        " M implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
+        " M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         " M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
         " M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md",
         " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -4125,32 +4053,10 @@
         " M implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
-        " M implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.md",
         " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
         " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
-        " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
-        " M implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
-        " M implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
-        " M implementation/phase1/support_bundle_manifest.json",
-        " M scripts/build_developer_preview_final_gate_owner_packet.py",
-        " M scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        " M scripts/build_pm_owner_evidence_request_packet.py",
-        " M scripts/build_structural_scope_owner_decision_application_plan.py",
-        " M scripts/build_structural_scope_owner_review_packet.py",
-        " M scripts/build_support_bundle.py",
-        " M tests/test_build_developer_preview_final_gate_owner_packet.py",
-        " M tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        " M tests/test_build_pm_owner_evidence_request_packet.py",
-        " M tests/test_build_structural_scope_owner_decision_application_plan.py",
-        " M tests/test_build_structural_scope_owner_review_packet.py",
-        " M tests/test_build_support_bundle.py"
+        " M implementation/phase1/support_bundle_manifest.json"
       ]
     }
   },

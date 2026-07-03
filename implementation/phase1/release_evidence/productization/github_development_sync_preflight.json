@@ -1,15 +1,17 @@
 {
-  "blockers": [],
+  "blockers": [
+    "remote_mutation_approval_required"
+  ],
   "checks": {
     "explicit_remote_mutation_approval": false,
     "feature_fast_forward_possible": true,
     "feature_synced_to_head": true,
     "main_fast_forward_possible": true,
-    "main_synced_to_head": true,
+    "main_synced_to_head": false,
     "remote_fetch_ok": null,
     "remote_safety_ok": true,
     "worktree_clean": true,
-    "worktree_only_ignored_evidence_dirty": true
+    "worktree_only_ignored_evidence_dirty": false
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
@@ -17,43 +19,52 @@
     "main_fast_forward_push": "git push origin HEAD:main",
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
-  "contract_pass": true,
-  "generated_at": "2026-07-02T21:57:32.270302+00:00",
-  "pending_remote_updates": [],
+  "contract_pass": false,
+  "generated_at": "2026-07-03T00:28:45.153284+00:00",
+  "pending_remote_updates": [
+    {
+      "action": "fast-forward push current HEAD to main",
+      "command": "git push origin HEAD:main",
+      "rollback": "restore main to previous remote SHA 7dd6bc6cf09267eb2dc88b545620d72b58d222e2 with an approved revert/restore action",
+      "target": "origin/main"
+    }
+  ],
   "preflight_pass": true,
   "r4_disclosure": {
-    "action": "no remote mutation required",
-    "impact": "No GitHub ref update is needed; feature and main already match local HEAD.",
-    "risk": "No remote mutation remains.",
-    "rollback": "no rollback needed",
-    "target": [],
+    "action": "fast-forward push current HEAD to main",
+    "impact": "GitHub pending refs become externally visible at the local development state.",
+    "risk": "Main CI and external reviewers immediately see the current commits.",
+    "rollback": "restore main to previous remote SHA 7dd6bc6cf09267eb2dc88b545620d72b58d222e2 with an approved revert/restore action",
+    "target": [
+      "origin/main"
+    ],
     "verification": "fetch origin and compare remote feature/main refs with local HEAD after push"
   },
-  "reason_code": "PASS",
+  "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
   "receipt_commit_boundary": {
     "claim_boundary": "This receipt records GitHub sync state at source_commit_sha. A later commit that only refreshes productization/surface evidence can remain fresh in the PM gate as an evidence-only delta; any source-code or non-evidence delta must regenerate this preflight before claiming GitHub sync release credit.",
     "post_receipt_commit_delta_policy": "productization_or_surface_receipts_only",
-    "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9"
+    "source_commit_sha": "889d498f62062c0465d69dd93265dd24cef16aa0"
   },
   "remote_fetch_attempted": false,
   "remote_fetch_ok": null,
   "remote_mutation_approved": false,
-  "remote_sync_needed": false,
+  "remote_sync_needed": true,
   "schema_version": "github-development-sync-preflight.v1",
-  "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
+  "source_commit_sha": "889d498f62062c0465d69dd93265dd24cef16aa0",
   "state": {
     "branch": "codex/seed-pr-ci-source-evidence",
     "effective_worktree_status_short": "",
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
-    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json\n M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md\n M implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json\n M implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json\n M implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json\n M implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.json\n M implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.md\n M implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json\n M implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md",
-    "local_head_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
-    "main_ahead_count": 0,
+    "ignored_worktree_status_short": "",
+    "local_head_sha": "889d498f62062c0465d69dd93265dd24cef16aa0",
+    "main_ahead_count": 12,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
+    "remote_feature_sha": "889d498f62062c0465d69dd93265dd24cef16aa0",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
+    "remote_main_sha": "7dd6bc6cf09267eb2dc88b545620d72b58d222e2",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
@@ -67,7 +78,7 @@
         ]
       }
     },
-    "worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json\n M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md\n M implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json\n M implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json\n M implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json\n M implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.json\n M implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.md\n M implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json\n M implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md"
+    "worktree_status_short": ""
   },
-  "status": "synced"
+  "status": "approval_required"
 }
