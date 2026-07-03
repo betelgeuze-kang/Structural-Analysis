@@ -206,18 +206,18 @@
     "total_decoy_candidate_count": 60
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T17:14:34.810214+00:00",
+  "generated_at": "2026-07-03T22:02:53.440989+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json": "sha256:6ec740aa2bd6c18684d2ea1eec0d9bc678786aa0fe114b1e632192c1bf4c4b29",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json": "sha256:66ed4370361fd02d9f820067a4ea02506c43834e681972fdb37ee05d6b37c18b",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json": "sha256:14fc63c1890aaaf1e9187a79b47fef21f3dc33511c2cf14e97356942568ae2c4",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:5bb12770e94ce68a1482096dc886c7b4450d75e4b2679f5dcaa90071909c75b7",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:a3161e9a00cebc00998ca57b1d2187774add4a553a1997c92b69ef1355e81eb4",
     "scripts/build_gpcr_hard_decoy_chembl_activity_rows.py": "sha256:2dafd153b15bf3287f500ebe07f4a47df2bc5973e37391e8ae520bec5f084543",
     "scripts/build_gpcr_hard_decoy_decoy_source_snapshot.py": "sha256:94862b9e94724e136d0bfcd966ad500d196245587f9dfb86bada83ea6c25e250",
     "scripts/build_gpcr_hard_decoy_positive_source_snapshot.py": "sha256:6e27e6448a6114b6defd76f52cf63ef2179ba57bd8895634ec8037f8c3378bc1",
     "scripts/build_gpcr_hard_decoy_source_acquisition_plan.py": "sha256:4744de0029ab0431ce15b89b80ff364b0ee75bf0b4a7054249998b0388024d67",
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261",
-    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:8824e14602faf05a39d841d8367d5773c76a23ffbf8f614ee99f926a8ff478a6"
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:e9a2b010be4254d67a3574ab917821583a6de5e5803ab1cbd6a92ca8d15eea30"
   },
   "operator_acquisition_checklist": [
     "verify_human_target_mapping_against_chembl_target_endpoint",
@@ -325,7 +325,7 @@
     "source_attached_candidate_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json"
   },
   "schema_version": "gpcr-hard-decoy-source-acquisition-plan.v1",
-  "source_commit_sha": "919c7f9a482754407d7bea77439628701881dabf",
+  "source_commit_sha": "09165e21a218f40a8be2951d512a86386b662700",
   "status": "actual_closure_ready",
   "suite_report": {
     "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",

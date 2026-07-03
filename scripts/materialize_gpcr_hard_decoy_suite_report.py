@@ -1124,6 +1124,122 @@ def _phase3_exit_gate(
     }
 
 
+def _phase3_summary(
+    *,
+    target_rows: list[dict[str, Any]],
+    phase3_exit_gate: dict[str, Any],
+    target_pass_count: int,
+    blockers: list[str],
+    broad_safe: bool,
+) -> dict[str, Any]:
+    rankings = [
+        float(value)
+        for row in target_rows
+        if (value := _number(row.get("ranking_pr_auc_ci_low"))) is not None
+    ]
+    top20_rates = [
+        float(value)
+        for row in target_rows
+        if (value := _number(row.get("top20_hit_rate"))) is not None
+    ]
+    decoy_leakage = [
+        int(value)
+        for row in target_rows
+        if (value := _integer(row.get("decoys_above_positive_count"))) is not None
+    ]
+    out_anchored_target_count = sum(
+        1
+        for row in target_rows
+        if _boolean(row.get("positive_out_anchored_by_top_decoys")) is True
+    )
+    computed_target_count = sum(
+        1
+        for row in target_rows
+        if _as_dict(row.get("computed_hard_decoy_metrics")).get(
+            "calculation_status"
+        )
+        == "computed"
+    )
+    valid_row_counts = [
+        int(value)
+        for row in target_rows
+        if (
+            value := _integer(
+                _as_dict(row.get("computed_hard_decoy_metrics")).get(
+                    "valid_hard_decoy_row_count"
+                )
+            )
+        )
+        is not None
+    ]
+    positive_counts = [
+        int(value)
+        for row in target_rows
+        if (
+            value := _integer(
+                _as_dict(row.get("computed_hard_decoy_metrics")).get(
+                    "hard_decoy_positive_count"
+                )
+            )
+        )
+        is not None
+    ]
+    decoy_counts = [
+        int(value)
+        for row in target_rows
+        if (
+            value := _integer(
+                _as_dict(row.get("computed_hard_decoy_metrics")).get(
+                    "hard_decoy_decoy_count"
+                )
+            )
+        )
+        is not None
+    ]
+    criteria = [
+        row
+        for row in _as_list(phase3_exit_gate.get("criteria"))
+        if isinstance(row, dict)
+    ]
+    return {
+        "actual_closure_ready": broad_safe,
+        "phase3_exit_gate_status": str(phase3_exit_gate.get("status") or ""),
+        "phase3_failed_criteria": [
+            str(row) for row in _as_list(phase3_exit_gate.get("failed_criteria"))
+        ],
+        "phase3_failed_criterion_count": int(
+            phase3_exit_gate.get("failed_criterion_count") or 0
+        ),
+        "target_count": len(REQUIRED_TARGETS),
+        "target_pass_count": target_pass_count,
+        "computed_target_count": computed_target_count,
+        "ranking_pr_auc_ci_low_min_required": EXIT_CRITERIA[
+            "ranking_pr_auc_ci_low_min"
+        ],
+        "ranking_pr_auc_ci_low_min_observed": min(rankings) if rankings else None,
+        "top20_hit_rate_min_required": EXIT_CRITERIA["top20_hit_rate_min"],
+        "top20_hit_rate_min_observed": min(top20_rates) if top20_rates else None,
+        "decoys_above_positive_count_max_required": EXIT_CRITERIA[
+            "decoys_above_positive_count_max"
+        ],
+        "decoys_above_positive_count_max_observed": (
+            max(decoy_leakage) if decoy_leakage else None
+        ),
+        "positive_out_anchored_by_top_decoys_allowed": EXIT_CRITERIA[
+            "positive_out_anchored_by_top_decoys_allowed"
+        ],
+        "positive_out_anchored_target_count": out_anchored_target_count,
+        "raw_hard_decoy_row_count": sum(valid_row_counts),
+        "raw_hard_decoy_positive_count": sum(positive_counts),
+        "raw_hard_decoy_decoy_count": sum(decoy_counts),
+        "criteria_pass": {
+            str(row.get("criterion_id") or ""): bool(row.get("pass"))
+            for row in criteria
+        },
+        "blocker_count": len(blockers),
+    }
+
+
 def _markdown_value(value: Any) -> str:
     if value is None:
         return "missing"
@@ -1134,6 +1250,7 @@ def _markdown_value(value: Any) -> str:
 
 def _markdown(payload: dict[str, Any]) -> str:
     gate = _as_dict(payload.get("phase3_exit_gate"))
+    summary = _as_dict(payload.get("summary"))
     lines = [
         "# GPCR Hard-Decoy Suite Report",
         "",
@@ -1145,6 +1262,10 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `failed_criteria`: `{_comma_join(_as_list(gate.get('failed_criteria')))}`",
         f"- `first_blocked_target`: `{payload.get('first_blocked_target') or 'none'}`",
         f"- `first_blocker`: `{payload.get('first_blocker') or 'none'}`",
+        f"- `ranking_pr_auc_ci_low_min_observed`: `{_markdown_value(summary.get('ranking_pr_auc_ci_low_min_observed'))}`",
+        f"- `top20_hit_rate_min_observed`: `{_markdown_value(summary.get('top20_hit_rate_min_observed'))}`",
+        f"- `decoys_above_positive_count_max_observed`: `{_markdown_value(summary.get('decoys_above_positive_count_max_observed'))}`",
+        f"- `positive_out_anchored_target_count`: `{_markdown_value(summary.get('positive_out_anchored_target_count'))}`",
         "",
         "| Criterion | Pass | Required | Failed Targets | Blocker Count |",
         "|---|---|---|---|---|",
@@ -1266,6 +1387,13 @@ def materialize_gpcr_hard_decoy_suite_report(
     input_paths = [Path("scripts/materialize_gpcr_hard_decoy_suite_report.py")]
     if intake_path is not None:
         input_paths.append(intake_path)
+    summary = _phase3_summary(
+        target_rows=target_rows,
+        phase3_exit_gate=phase3_exit_gate,
+        target_pass_count=target_pass_count,
+        blockers=blockers,
+        broad_safe=broad_safe,
+    )
 
     payload = {
         "schema_version": SCHEMA_VERSION,
@@ -1287,6 +1415,7 @@ def materialize_gpcr_hard_decoy_suite_report(
         "operator_input_source_receipt": operator_input_source_receipt,
         "phase3_exit_gate": phase3_exit_gate,
         "target_rows": target_rows,
+        "summary": summary,
         "blockers": blockers,
         "operator_intake_route": GPCR_OPERATOR_INTAKE_ROUTE,
         "operator_intake_required_slot_count": len(REQUIRED_TARGETS),
@@ -1371,6 +1500,7 @@ def build_gpcr_evidence_surface(
         "target_families": list(REQUIRED_TARGETS),
         "exit_criteria": EXIT_CRITERIA,
         "phase3_exit_gate": _as_dict(report.get("phase3_exit_gate")),
+        "summary": _as_dict(report.get("summary")),
         "operator_input_source_receipt": _as_dict(
             report.get("operator_input_source_receipt")
         ),

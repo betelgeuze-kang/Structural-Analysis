@@ -8,6 +8,10 @@
 - `failed_criteria`: `none`
 - `first_blocked_target`: `none`
 - `first_blocker`: `none`
+- `ranking_pr_auc_ci_low_min_observed`: `1.0`
+- `top20_hit_rate_min_observed`: `0.6`
+- `decoys_above_positive_count_max_observed`: `0`
+- `positive_out_anchored_target_count`: `0`
 
 | Criterion | Pass | Required | Failed Targets | Blocker Count |
 |---|---|---|---|---|

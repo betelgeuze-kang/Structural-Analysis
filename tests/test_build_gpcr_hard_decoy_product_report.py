@@ -191,6 +191,13 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_ready() -> None:
     assert report["summary"]["phase3_exit_gate_status"] == "ready"
     assert report["summary"]["phase3_failed_criterion_count"] == 0
     assert report["summary"]["phase3_failed_criteria"] == []
+    assert report["summary"]["actual_closure_ready"] is True
+    assert report["summary"]["computed_target_count"] == 3
+    assert report["summary"]["ranking_pr_auc_ci_low_min_observed"] == 1
+    assert report["summary"]["top20_hit_rate_min_observed"] == 0.6
+    assert report["summary"]["decoys_above_positive_count_max_observed"] == 0
+    assert report["summary"]["positive_out_anchored_target_count"] == 0
+    assert report["summary"]["raw_hard_decoy_row_count"] == 96
 
 
 def test_gpcr_hard_decoy_product_report_cli_writes_contract(tmp_path: Path) -> None:

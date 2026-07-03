@@ -200,6 +200,34 @@ def test_gpcr_hard_decoy_suite_passes_required_targets(tmp_path: Path) -> None:
         "no_positive_out_anchored_by_top_decoys": True,
         "raw_hard_decoy_rows_actual_closure": True,
     }
+    assert report["summary"] == {
+        "actual_closure_ready": True,
+        "blocker_count": 0,
+        "computed_target_count": 3,
+        "criteria_pass": {
+            "decoys_above_positive_count_max": True,
+            "no_positive_out_anchored_by_top_decoys": True,
+            "ranking_pr_auc_ci_low_min": True,
+            "raw_hard_decoy_rows_actual_closure": True,
+            "top20_hit_rate_min": True,
+        },
+        "decoys_above_positive_count_max_observed": 0,
+        "decoys_above_positive_count_max_required": 0,
+        "phase3_exit_gate_status": "ready",
+        "phase3_failed_criteria": [],
+        "phase3_failed_criterion_count": 0,
+        "positive_out_anchored_by_top_decoys_allowed": False,
+        "positive_out_anchored_target_count": 0,
+        "ranking_pr_auc_ci_low_min_observed": 1.0,
+        "ranking_pr_auc_ci_low_min_required": 0.45,
+        "raw_hard_decoy_decoy_count": 60,
+        "raw_hard_decoy_positive_count": 12,
+        "raw_hard_decoy_row_count": 72,
+        "target_count": 3,
+        "target_pass_count": 3,
+        "top20_hit_rate_min_observed": 0.2,
+        "top20_hit_rate_min_required": 0.2,
+    }
 
 
 def test_gpcr_hard_decoy_suite_blocks_summary_metrics_without_raw_rows() -> None:
@@ -763,6 +791,8 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
     assert report["status"] == "locked"
     assert "# GPCR Hard-Decoy Suite Report" in markdown
     assert "`target_pass_count`: `0/3`" in markdown
+    assert "`ranking_pr_auc_ci_low_min_observed`: `missing`" in markdown
+    assert "`positive_out_anchored_target_count`: `0`" in markdown
     assert "`ranking_pr_auc_ci_low_min`" in markdown
     assert "`top20_hit_rate_min`" in markdown
     assert "`decoys_above_positive_count_max`" in markdown
@@ -779,6 +809,15 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
     assert surface["root_cause_tags"] == ["operator_values_required"]
     assert surface["phase3_exit_gate"]["status"] == "blocked"
     assert surface["phase3_exit_gate"]["failed_criterion_count"] == 5
+    assert surface["summary"]["actual_closure_ready"] is False
+    assert surface["summary"]["phase3_failed_criterion_count"] == 5
+    assert surface["summary"]["criteria_pass"] == {
+        "decoys_above_positive_count_max": False,
+        "no_positive_out_anchored_by_top_decoys": False,
+        "ranking_pr_auc_ci_low_min": False,
+        "raw_hard_decoy_rows_actual_closure": False,
+        "top20_hit_rate_min": False,
+    }
     assert surface["operator_intake_route"] == (
         "/product/gpcr-hard-decoy-suite-report/operator-intake"
     )

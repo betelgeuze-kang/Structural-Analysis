@@ -103,6 +103,7 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
     operator_intake = _load_json(repo_root, DEFAULT_OPERATOR_INTAKE_PACKET)
     operator_intake_summary = _as_dict(operator_intake.get("summary"))
     suite = _load_json(repo_root, DEFAULT_SUITE_REPORT)
+    suite_summary = _as_dict(suite.get("summary"))
     surface = _load_json(repo_root, DEFAULT_EVIDENCE_SURFACE)
     broad_safe = bool(suite.get("broad_gpcr_family_claim_safe"))
     target_rows = _as_list(suite.get("target_rows"))
@@ -362,6 +363,27 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
             "phase3_failed_criteria": [
                 str(row) for row in _as_list(phase3_exit_gate.get("failed_criteria"))
             ],
+            "actual_closure_ready": bool(
+                suite_summary.get("actual_closure_ready")
+            ),
+            "computed_target_count": int(
+                suite_summary.get("computed_target_count") or 0
+            ),
+            "ranking_pr_auc_ci_low_min_observed": suite_summary.get(
+                "ranking_pr_auc_ci_low_min_observed"
+            ),
+            "top20_hit_rate_min_observed": suite_summary.get(
+                "top20_hit_rate_min_observed"
+            ),
+            "decoys_above_positive_count_max_observed": suite_summary.get(
+                "decoys_above_positive_count_max_observed"
+            ),
+            "positive_out_anchored_target_count": int(
+                suite_summary.get("positive_out_anchored_target_count") or 0
+            ),
+            "raw_hard_decoy_row_count": int(
+                suite_summary.get("raw_hard_decoy_row_count") or 0
+            ),
         },
         "summary_line": (
             "GPCR hard-decoy product report: READY | science_claim=ready"

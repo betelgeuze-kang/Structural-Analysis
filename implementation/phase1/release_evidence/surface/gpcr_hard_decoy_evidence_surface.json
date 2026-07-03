@@ -14,10 +14,10 @@
   "first_blocked_target": "",
   "first_blocker": "",
   "first_operator_evidence_gap": {},
-  "generated_at": "2026-07-03T19:59:41.398487+00:00",
+  "generated_at": "2026-07-03T22:06:33.458487+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:b7fe3dc589acdd3f558ed1bd8031a72b7b62320e97968c061bf043352ab6943c",
-    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:8824e14602faf05a39d841d8367d5773c76a23ffbf8f614ee99f926a8ff478a6"
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:f479017d92efa81d7e2827306449cdee5412ea6403d064ed21512134efe71639",
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:e9a2b010be4254d67a3574ab917821583a6de5e5803ab1cbd6a92ca8d15eea30"
   },
   "locked": false,
   "next_actions": [
@@ -169,9 +169,37 @@
   "root_cause_tags": [],
   "schema_version": "gpcr-hard-decoy-evidence-surface.v1",
   "science_surface_family": "gpcr",
-  "source_commit_sha": "89e5e3daaec280bf95597f397a38ca2d355242bc",
+  "source_commit_sha": "09165e21a218f40a8be2951d512a86386b662700",
   "status": "ready",
   "suite_report": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
+  "summary": {
+    "actual_closure_ready": true,
+    "blocker_count": 0,
+    "computed_target_count": 3,
+    "criteria_pass": {
+      "decoys_above_positive_count_max": true,
+      "no_positive_out_anchored_by_top_decoys": true,
+      "ranking_pr_auc_ci_low_min": true,
+      "raw_hard_decoy_rows_actual_closure": true,
+      "top20_hit_rate_min": true
+    },
+    "decoys_above_positive_count_max_observed": 0,
+    "decoys_above_positive_count_max_required": 0,
+    "phase3_exit_gate_status": "ready",
+    "phase3_failed_criteria": [],
+    "phase3_failed_criterion_count": 0,
+    "positive_out_anchored_by_top_decoys_allowed": false,
+    "positive_out_anchored_target_count": 0,
+    "ranking_pr_auc_ci_low_min_observed": 1.0,
+    "ranking_pr_auc_ci_low_min_required": 0.45,
+    "raw_hard_decoy_decoy_count": 60,
+    "raw_hard_decoy_positive_count": 36,
+    "raw_hard_decoy_row_count": 96,
+    "target_count": 3,
+    "target_pass_count": 3,
+    "top20_hit_rate_min_observed": 0.6,
+    "top20_hit_rate_min_required": 0.2
+  },
   "summary_line": "GPCR hard-decoy suite: PASS",
   "surface_id": "gpcr_hard_decoy_evidence_surface",
   "surface_scope": "broad_gpcr_hard_decoy",
