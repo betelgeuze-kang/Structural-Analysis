@@ -353,6 +353,24 @@ def _source_acquisition_plan_summary(
     blockers = source_acquisition_plan.get("blockers")
     if not isinstance(blockers, list):
         blockers = []
+    phase4_refinement_receipt_plan = source_acquisition_plan.get(
+        "phase4_refinement_receipt_plan"
+    )
+    if not isinstance(phase4_refinement_receipt_plan, dict):
+        phase4_refinement_receipt_plan = {}
+    receipt_roles = phase4_refinement_receipt_plan.get("receipt_roles")
+    if not isinstance(receipt_roles, list):
+        receipt_roles = []
+    covered_phase4_criteria = phase4_refinement_receipt_plan.get(
+        "covered_phase4_criteria"
+    )
+    if not isinstance(covered_phase4_criteria, list):
+        covered_phase4_criteria = []
+    preserved_phase4_criteria = phase4_refinement_receipt_plan.get(
+        "preserved_phase4_criteria"
+    )
+    if not isinstance(preserved_phase4_criteria, list):
+        preserved_phase4_criteria = []
     return {
         "artifact": str(DEFAULT_SOURCE_ACQUISITION_PLAN_OUT),
         "markdown_artifact": str(DEFAULT_SOURCE_ACQUISITION_PLAN_MD_OUT),
@@ -372,6 +390,31 @@ def _source_acquisition_plan_summary(
         "minimum_rows_by_case_count": int(
             summary.get("minimum_rows_by_case_count") or 0
         ),
+        "phase4_refinement_receipt_plan": {
+            "plan_id": str(phase4_refinement_receipt_plan.get("plan_id") or ""),
+            "status": str(phase4_refinement_receipt_plan.get("status") or ""),
+            "receipt_role_count": int(
+                phase4_refinement_receipt_plan.get("receipt_role_count") or 0
+            ),
+            "covered_phase4_criterion_count": int(
+                phase4_refinement_receipt_plan.get(
+                    "covered_phase4_criterion_count"
+                )
+                or 0
+            ),
+            "covered_phase4_criteria": [
+                str(row) for row in covered_phase4_criteria
+            ],
+            "preserved_phase4_criteria": [
+                str(row) for row in preserved_phase4_criteria
+            ],
+            "receipt_roles": [
+                row for row in receipt_roles if isinstance(row, dict)
+            ],
+            "promotion_policy": dict(
+                phase4_refinement_receipt_plan.get("promotion_policy") or {}
+            ),
+        },
         "blocker_count": int(source_acquisition_plan.get("blocker_count") or 0),
         "blockers": [str(row) for row in blockers],
         "command": _source_acquisition_plan_command(),

@@ -4,12 +4,23 @@
 - `contract_pass`: `True`
 - `actual_closure_ready`: `False`
 - `blocker_count`: `3`
+- `phase4_refinement_receipt_plan_status`: `operator_receipts_required`
+- `phase4_refinement_receipt_role_count`: `4`
 
 | Case | Minimum Rows | Required Rank Prefix | Scope |
 |---|---:|---|---|
 | `pocketmd_lite_case_001` | 2 | `1,2` | `upstream_ranked_top_k_candidates_only` |
 | `pocketmd_lite_case_002` | 2 | `1,2` | `upstream_ranked_top_k_candidates_only` |
 | `pocketmd_lite_case_003` | 2 | `1,2` | `upstream_ranked_top_k_candidates_only` |
+
+## Phase 4 Receipt Roles
+
+| Receipt Role | Source Role | Closes Criteria |
+|---|---|---|
+| `upstream_top_k_candidate_scope_receipt` | `upstream_ranked_top_k_candidate_set` | `top_k_refinement_rows_present`, `top_k_refinement_case_coverage` |
+| `lite_refinement_run_receipt` | `bounded_lite_refinement_run` | `local_min_survival_materialized`, `report_blockers_resolved` |
+| `interaction_persistence_receipt` | `contact_hbond_clash_metric_rows` | `contact_persistence_materialized`, `h_bond_persistence_materialized`, `clash_relief_materialized`, `report_blockers_resolved` |
+| `uncertainty_interval_receipt` | `candidate_uncertainty_interval_rows` | `uncertainty_summary_materialized`, `report_blockers_resolved` |
 
 ## Commands
 

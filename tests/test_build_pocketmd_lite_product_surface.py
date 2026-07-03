@@ -489,6 +489,12 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     )
     assert handoff["source_acquisition_plan"]["actual_closure_ready"] is False
     assert handoff["source_acquisition_plan"]["required_total_candidate_rows"] == 6
+    assert handoff["source_acquisition_plan"]["phase4_refinement_receipt_plan"][
+        "receipt_role_count"
+    ] == 4
+    assert handoff["source_acquisition_plan"]["phase4_refinement_receipt_plan"][
+        "covered_phase4_criterion_count"
+    ] == 8
     assert handoff["phase4_exit_gate_reference"] == {
         "source_artifact": (
             "implementation/phase1/release_evidence/productization/"
@@ -572,6 +578,30 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert operator["source_acquisition_plan"]["actual_closure_ready"] is False
     assert operator["source_acquisition_plan"]["required_case_count"] == 3
     assert operator["source_acquisition_plan"]["required_total_candidate_rows"] == 6
+    receipt_plan = operator["source_acquisition_plan"][
+        "phase4_refinement_receipt_plan"
+    ]
+    receipt_roles = {
+        row["receipt_role_id"]: row for row in receipt_plan["receipt_roles"]
+    }
+    assert receipt_plan["plan_id"] == "pocketmd_lite_phase4_refinement_receipt_plan"
+    assert receipt_plan["status"] == "operator_receipts_required"
+    assert receipt_plan["receipt_role_count"] == 4
+    assert receipt_plan["covered_phase4_criterion_count"] == 8
+    assert receipt_plan["promotion_policy"][
+        "synthetic_fixture_rows_promote_to_phase4"
+    ] is False
+    assert receipt_roles["upstream_top_k_candidate_scope_receipt"][
+        "source_role"
+    ] == "upstream_ranked_top_k_candidate_set"
+    assert receipt_roles["interaction_persistence_receipt"][
+        "closes_phase4_criteria"
+    ] == [
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "report_blockers_resolved",
+    ]
     assert operator["source_acquisition_plan"]["blockers"] == [
         "pocketmd_lite_topk_rows_not_acquired",
         "upstream_top_k_candidate_receipts_not_attached",

@@ -26,6 +26,10 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     payload = module.build_pocketmd_lite_source_acquisition_plan(
         repo_root=REPO_ROOT,
     )
+    receipt_plan = payload["phase4_refinement_receipt_plan"]
+    receipt_roles = {
+        row["receipt_role_id"]: row for row in receipt_plan["receipt_roles"]
+    }
 
     assert payload["schema_version"] == "pocketmd-lite-source-acquisition-plan.v1"
     assert payload["status"] == "operator_acquisition_required"
@@ -39,6 +43,52 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "min_top_k_rank_coverage_per_case": 2,
         "min_total_top_k_candidate_count": 6,
     }
+    assert payload["phase4_refinement_receipt_promotion_policy"] == {
+        "broad_all_atom_or_fep_claims_unlocked": False,
+        "lite_refinement_metric_receipts_required": True,
+        "operator_attached_rows_required": True,
+        "operator_input_source_receipt_required": True,
+        "per_row_sha256_receipt_required": True,
+        "summary_only_metrics_promote_to_phase4": False,
+        "synthetic_fixture_rows_promote_to_phase4": False,
+        "upstream_top_k_scope_receipts_required": True,
+    }
+    assert receipt_plan["plan_id"] == "pocketmd_lite_phase4_refinement_receipt_plan"
+    assert receipt_plan["status"] == "operator_receipts_required"
+    assert receipt_plan["receipt_role_count"] == 4
+    assert receipt_plan["covered_phase4_criterion_count"] == 8
+    assert receipt_plan["preserved_phase4_criteria"] == [
+        "broad_all_atom_fep_claims_locked"
+    ]
+    assert set(receipt_roles) == {
+        "upstream_top_k_candidate_scope_receipt",
+        "lite_refinement_run_receipt",
+        "interaction_persistence_receipt",
+        "uncertainty_interval_receipt",
+    }
+    assert receipt_roles["upstream_top_k_candidate_scope_receipt"][
+        "closes_phase4_criteria"
+    ] == [
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+    ]
+    assert "upstream_top_k_source_checksum" in receipt_roles[
+        "upstream_top_k_candidate_scope_receipt"
+    ]["required_fields"]
+    assert receipt_roles["lite_refinement_run_receipt"][
+        "closes_phase4_criteria"
+    ] == ["local_min_survival_materialized", "report_blockers_resolved"]
+    assert "contact_persistence_materialized" in receipt_roles[
+        "interaction_persistence_receipt"
+    ]["closes_phase4_criteria"]
+    assert receipt_roles["uncertainty_interval_receipt"][
+        "required_quality_gates"
+    ] == [
+        "uncertainty_interval_has_finite_low_and_high",
+        "uncertainty_high_is_not_below_low",
+        "uncertainty_unit_is_nonblank",
+        "uncertainty_rows_share_the_bounded_top_k_candidate_scope",
+    ]
     assert payload["minimum_rows_by_case"] == [
         {
             "case_id": "pocketmd_lite_case_001",
@@ -137,6 +187,9 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "actual_closure_ready": False,
         "blocker_count": 3,
         "minimum_rows_by_case_count": 3,
+        "phase4_refinement_receipt_plan_status": "operator_receipts_required",
+        "phase4_refinement_receipt_role_count": 4,
+        "covered_phase4_criterion_count": 8,
         "required_candidate_rows_per_case": 2,
         "required_case_count": 3,
         "required_total_candidate_rows": 6,
@@ -164,6 +217,10 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert payload["contract_pass"] is True
     assert payload["actual_closure_ready"] is False
     assert payload["summary"]["required_total_candidate_rows"] == 6
+    assert payload["phase4_refinement_receipt_plan"]["receipt_role_count"] == 4
     assert "# PocketMD Lite Source Acquisition Plan" in markdown
     assert "`pocketmd_lite_case_001` | 2 | `1,2`" in markdown
+    assert "## Phase 4 Receipt Roles" in markdown
+    assert "upstream_top_k_candidate_scope_receipt" in markdown
+    assert "uncertainty_interval_receipt" in markdown
     assert "materialize_pocketmd_lite_operator_intake_from_rows.py" in markdown
