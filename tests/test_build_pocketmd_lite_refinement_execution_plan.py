@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import importlib.util
+import csv
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -20,6 +22,10 @@ module = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
+
+
+def _checksum(text: str) -> str:
+    return "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def _source_plan(path: Path) -> None:
@@ -66,6 +72,65 @@ def _survival_report(path: Path) -> None:
     )
 
 
+def _valid_rows(path: Path) -> None:
+    fieldnames = [
+        "case_id",
+        "source_family",
+        "top_k_rank",
+        "candidate_id",
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum",
+        "pre_refinement_energy_proxy",
+        "post_refinement_energy_proxy",
+        "local_min_survived",
+        "contact_persistence_rate",
+        "h_bond_persistence_rate",
+        "clash_count_before",
+        "clash_count_after",
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit",
+        "provenance_ref",
+        "source_checksum",
+    ]
+    rows = []
+    for case_id in ("case_a", "case_b", "case_c"):
+        for rank in (1, 2):
+            candidate_id = f"{case_id}_rank_{rank:02d}"
+            rows.append(
+                {
+                    "case_id": case_id,
+                    "source_family": "upstream_ranked_top_k_candidate_set",
+                    "top_k_rank": rank,
+                    "candidate_id": candidate_id,
+                    "upstream_top_k_provenance_ref": (
+                        f"https://pocketmd-data.org/topk/{case_id}/{candidate_id}.json#row"
+                    ),
+                    "upstream_top_k_source_checksum": _checksum(
+                        f"upstream:{case_id}:{candidate_id}"
+                    ),
+                    "pre_refinement_energy_proxy": -8.0 + rank,
+                    "post_refinement_energy_proxy": -8.5 + rank,
+                    "local_min_survived": "true",
+                    "contact_persistence_rate": 0.8,
+                    "h_bond_persistence_rate": 0.7,
+                    "clash_count_before": 3,
+                    "clash_count_after": 1,
+                    "uncertainty_low": 0.1,
+                    "uncertainty_high": 0.3,
+                    "uncertainty_unit": "energy_proxy_delta",
+                    "provenance_ref": (
+                        f"https://pocketmd-data.org/refinement/{case_id}/{candidate_id}.json#row"
+                    ),
+                    "source_checksum": _checksum(f"refinement:{case_id}:{candidate_id}"),
+                }
+            )
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
 def test_refinement_execution_plan_enumerates_candidate_slots(
     tmp_path: Path,
 ) -> None:
@@ -94,17 +159,20 @@ def test_refinement_execution_plan_enumerates_candidate_slots(
     assert payload["required_case_count"] == 3
     assert payload["required_candidate_slot_count"] == 6
     assert payload["blockers"] == [
-        "pocketmd_lite_topk_rows_not_detected",
+        "pocketmd_lite_topk_rows_not_acquired",
         "pocketmd_lite_topk_candidate_rows_missing",
         "pocketmd_lite_local_min_survival_rows_missing",
     ]
     assert payload["summary"] == {
         "blocker_count": 3,
+        "covered_required_slot_count": 0,
         "operator_rows_ready": False,
+        "raw_row_candidate_status": "row_artifact_missing",
         "required_candidate_slot_count": 6,
         "required_case_count": 3,
         "survival_report_blocker_count": 2,
         "survival_report_ready": False,
+        "validated_row_count": 0,
     }
     assert payload["candidate_slots"][0]["case_id"] == "case_a"
     assert payload["candidate_slots"][0]["top_k_rank"] == 1
@@ -120,6 +188,7 @@ def test_refinement_execution_plan_enumerates_candidate_slots(
         "required_metric_fields"
     ]
     assert payload["raw_row_candidate_status"]["detected_row_artifact_count"] == 0
+    assert payload["raw_row_candidate_status"]["status"] == "row_artifact_missing"
     assert payload["supported_row_formats"] == ["csv", "tsv", "json", "jsonl", "ndjson"]
     assert payload["expected_rows_artifact"] == str(rows_out)
     assert payload["expected_operator_intake_artifact"] == str(operator_intake)
@@ -127,6 +196,41 @@ def test_refinement_execution_plan_enumerates_candidate_slots(
         "operator_commands"
     ]["import_rows"]
     assert "does not run refinement" in payload["claim_boundary"]
+
+
+def test_refinement_execution_plan_marks_valid_rows_ready(
+    tmp_path: Path,
+) -> None:
+    source_plan = tmp_path / "source_plan.json"
+    survival_report = tmp_path / "survival_report.json"
+    rows_out = tmp_path / "pocketmd_lite_topk_rows.csv"
+    operator_intake = tmp_path / "pocketmd_lite_operator_intake.json"
+    _source_plan(source_plan)
+    _survival_report(survival_report)
+    _valid_rows(rows_out)
+
+    payload = module.build_pocketmd_lite_refinement_execution_plan(
+        repo_root=tmp_path,
+        source_acquisition_plan_path=source_plan,
+        survival_report_path=survival_report,
+        rows_out=rows_out,
+        operator_intake_out=operator_intake,
+    )
+
+    assert payload["operator_rows_ready"] is True
+    assert payload["raw_row_candidate_status"]["status"] == (
+        "row_artifact_detected_validated"
+    )
+    assert payload["raw_row_candidate_status"]["validated_row_count"] == 6
+    assert payload["raw_row_candidate_status"]["covered_required_slot_count"] == 6
+    assert payload["raw_row_candidate_status"]["missing_required_slots"] == []
+    assert payload["summary"]["operator_rows_ready"] is True
+    assert payload["summary"]["validated_row_count"] == 6
+    assert payload["summary"]["covered_required_slot_count"] == 6
+    assert payload["blockers"] == [
+        "pocketmd_lite_topk_candidate_rows_missing",
+        "pocketmd_lite_local_min_survival_rows_missing",
+    ]
 
 
 def test_refinement_execution_plan_cli_writes_artifact(tmp_path: Path) -> None:

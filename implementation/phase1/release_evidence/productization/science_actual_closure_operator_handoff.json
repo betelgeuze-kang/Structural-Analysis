@@ -307,9 +307,9 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-03T21:20:41.707411+00:00",
+  "generated_at": "2026-07-03T21:43:33.512164+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:3937cf324a0ed83d0d8c287d20a2116b8a8b38ddf2080ed4ec844dc9977aac6c",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:465e54724f487ce5ac271c47511e0dc72f7850736c8a0e0c8961cb6c1f3f4286",
     "scripts/build_science_actual_closure_operator_handoff.py": "sha256:f46dc67ec10ecf1bbfd51f2378326c288a5015a261b02d564179214f7c2f7ffb"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
@@ -1497,18 +1497,21 @@
           "actual_closure_ready": false,
           "blocker_count": 3,
           "covered_phase4_criterion_count": 8,
+          "covered_required_slot_count": 0,
           "detected_row_artifact_count": 0,
           "minimum_rows_by_case_count": 3,
           "operator_rows_ready": false,
           "phase4_refinement_receipt_plan_status": "operator_receipts_required",
           "phase4_refinement_receipt_role_count": 4,
           "raw_row_artifact_detected": false,
+          "raw_row_candidate_status": "row_artifact_missing",
           "refinement_execution_plan_ready": true,
           "refinement_execution_plan_status": "operator_refinement_rows_required",
           "required_candidate_rows_per_case": 2,
           "required_candidate_slot_count": 6,
           "required_case_count": 3,
-          "required_total_candidate_rows": 6
+          "required_total_candidate_rows": 6,
+          "validated_row_count": 0
         }
       },
       "upstream_source_blockers": [
@@ -1530,7 +1533,7 @@
   "schema_version": "science-actual-closure-operator-handoff.v1",
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "255d70a43a9ca5335dbb157bd94cd5f119d0a616",
+  "source_commit_sha": "1e3a90d8b8c38e145282be73699ced202dbbf342",
   "status": "operator_rows_required",
   "summary": {
     "closes_actual_closure_criteria_count": 19,
@@ -1561,18 +1564,21 @@
         "actual_closure_ready": false,
         "blocker_count": 3,
         "covered_phase4_criterion_count": 8,
+        "covered_required_slot_count": 0,
         "detected_row_artifact_count": 0,
         "minimum_rows_by_case_count": 3,
         "operator_rows_ready": false,
         "phase4_refinement_receipt_plan_status": "operator_receipts_required",
         "phase4_refinement_receipt_role_count": 4,
         "raw_row_artifact_detected": false,
+        "raw_row_candidate_status": "row_artifact_missing",
         "refinement_execution_plan_ready": true,
         "refinement_execution_plan_status": "operator_refinement_rows_required",
         "required_candidate_rows_per_case": 2,
         "required_candidate_slot_count": 6,
         "required_case_count": 3,
-        "required_total_candidate_rows": 6
+        "required_total_candidate_rows": 6,
+        "validated_row_count": 0
       }
     },
     "public_benchmark_phase2": {

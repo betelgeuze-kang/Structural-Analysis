@@ -15,7 +15,11 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from materialize_pocketmd_lite_operator_intake_from_rows import (  # noqa: E402
+    DEFAULT_MAX_TOP_K,
     SOURCE_RECEIPT_REQUIREMENTS,
+    _normalize_row,
+    _read_source_rows,
+    _validate_topk_integrity,
     row_value_contract,
 )
 from materialize_pocketmd_lite_topk_survival_report import (  # noqa: E402
@@ -113,10 +117,42 @@ def _minimum_rows_by_case() -> list[dict[str, Any]]:
     ]
 
 
+def _required_slot_keys(
+    minimum_rows_by_case: list[dict[str, Any]],
+) -> set[tuple[str, int]]:
+    slots: set[tuple[str, int]] = set()
+    for row in minimum_rows_by_case:
+        case_id = str(row.get("case_id") or "")
+        ranks = row.get("required_top_k_rank_prefix")
+        if not case_id or not isinstance(ranks, list):
+            continue
+        for rank in ranks:
+            try:
+                slots.add((case_id, int(rank)))
+            except (TypeError, ValueError):
+                continue
+    return slots
+
+
+def _rank_prefixes(rows: list[dict[str, Any]]) -> dict[str, list[int]]:
+    case_ids = sorted({str(row.get("case_id") or "") for row in rows if row.get("case_id")})
+    return {
+        case_id: sorted(
+            {
+                int(row["top_k_rank"])
+                for row in rows
+                if row.get("case_id") == case_id and row.get("top_k_rank") is not None
+            }
+        )
+        for case_id in case_ids
+    }
+
+
 def _raw_row_candidate_status(
     repo_root: Path,
     *,
     rows_out: Path = DEFAULT_ROWS_OUT,
+    minimum_rows_by_case: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     candidates = [
         PRODUCTIZATION / f"pocketmd_lite_topk_rows.{suffix}"
@@ -127,12 +163,17 @@ def _raw_row_candidate_status(
 
     rows = []
     seen_paths: set[str] = set()
+    selected_path = ""
+    selected_resolved_path: Path | None = None
     for path in candidates:
         path_key = str(path)
         if path_key in seen_paths:
             continue
         seen_paths.add(path_key)
         resolved = path if path.is_absolute() else repo_root / path
+        if resolved.is_file() and selected_resolved_path is None:
+            selected_path = str(path)
+            selected_resolved_path = resolved
         rows.append(
             {
                 "path": str(path),
@@ -142,16 +183,70 @@ def _raw_row_candidate_status(
         )
 
     detected_paths = [str(row["path"]) for row in rows if row["is_file"]]
+    required_slots = _required_slot_keys(minimum_rows_by_case or _minimum_rows_by_case())
+    selected_row_count = 0
+    normalized_rows: list[dict[str, Any]] = []
+    validation_error = ""
+    status = "row_artifact_missing"
+    blocker = "pocketmd_lite_topk_rows_not_acquired"
+    if selected_resolved_path is not None:
+        try:
+            raw_rows = _read_source_rows(selected_resolved_path)
+            selected_row_count = len(raw_rows)
+            if not raw_rows:
+                status = "row_artifact_detected_empty"
+                blocker = "pocketmd_lite_topk_rows_empty"
+            else:
+                normalized_rows = [
+                    _normalize_row(
+                        row,
+                        row_index=index,
+                        max_top_k=DEFAULT_MAX_TOP_K,
+                    )
+                    for index, row in enumerate(raw_rows, start=1)
+                ]
+                _validate_topk_integrity(normalized_rows)
+                observed_slots = {
+                    (str(row["case_id"]), int(row["top_k_rank"]))
+                    for row in normalized_rows
+                }
+                missing_slots = sorted(required_slots - observed_slots)
+                if missing_slots:
+                    status = "row_artifact_detected_incomplete_coverage"
+                    blocker = "pocketmd_lite_required_topk_slots_missing"
+                else:
+                    status = "row_artifact_detected_validated"
+                    blocker = ""
+        except Exception as exc:
+            status = "row_artifact_detected_invalid"
+            blocker = "pocketmd_lite_topk_rows_invalid"
+            validation_error = str(exc)
+
+    observed_slots = {
+        (str(row["case_id"]), int(row["top_k_rank"]))
+        for row in normalized_rows
+    }
+    missing_slots = sorted(required_slots - observed_slots)
     return {
-        "status": (
-            "row_artifact_detected_unvalidated"
-            if detected_paths
-            else "row_artifact_missing"
-        ),
+        "status": status,
         "default_rows_out": str(rows_out),
         "candidate_paths": rows,
         "detected_row_artifact_count": len(detected_paths),
         "first_detected_path": detected_paths[0] if detected_paths else "",
+        "selected_path": selected_path,
+        "selected_row_count": selected_row_count,
+        "validated_row_count": len(normalized_rows),
+        "validated_case_count": len({str(row["case_id"]) for row in normalized_rows}),
+        "covered_required_slot_count": len(required_slots - set(missing_slots)),
+        "required_candidate_slot_count": len(required_slots),
+        "missing_required_slots": [
+            {"case_id": case_id, "top_k_rank": rank}
+            for case_id, rank in missing_slots
+        ],
+        "case_top_k_rank_prefixes": _rank_prefixes(normalized_rows),
+        "coverage_ready": bool(required_slots) and not missing_slots and not blocker,
+        "validation_error": validation_error,
+        "blocker": blocker,
     }
 
 
@@ -339,30 +434,31 @@ def build_pocketmd_lite_source_acquisition_plan(
     repo_root: Path = ROOT,
     rows_out: Path = DEFAULT_ROWS_OUT,
 ) -> dict[str, Any]:
+    required_flat_row_fields = _required_flat_row_fields()
+    minimum_rows_by_case = _minimum_rows_by_case()
     raw_row_candidate_status = _raw_row_candidate_status(
         repo_root,
         rows_out=rows_out,
+        minimum_rows_by_case=minimum_rows_by_case,
     )
     row_artifact_detected = raw_row_candidate_status["detected_row_artifact_count"] > 0
+    operator_rows_ready = bool(raw_row_candidate_status["coverage_ready"])
     blockers = []
-    if not row_artifact_detected:
-        blockers.append("pocketmd_lite_topk_rows_not_acquired")
-    else:
-        blockers.append("pocketmd_lite_topk_rows_detected_but_not_materialized")
+    row_blocker = str(raw_row_candidate_status.get("blocker") or "")
+    if row_blocker:
+        blockers.append(row_blocker)
     blockers.extend(
         [
             "upstream_top_k_candidate_receipts_not_attached",
             "lite_refinement_metric_receipts_not_attached",
         ]
     )
-    required_flat_row_fields = _required_flat_row_fields()
-    minimum_rows_by_case = _minimum_rows_by_case()
     min_total = int(TOPK_ROW_QUALITY_CRITERIA["min_total_top_k_candidate_count"])
     min_cases = int(TOPK_ROW_QUALITY_CRITERIA["min_real_refinement_case_count"])
     phase4_refinement_receipt_plan = _phase4_refinement_receipt_plan()
     refinement_execution_plan = _refinement_execution_plan_summary(
         minimum_rows_by_case,
-        operator_rows_ready=row_artifact_detected,
+        operator_rows_ready=operator_rows_ready,
     )
     return {
         "schema_version": SCHEMA_VERSION,
@@ -518,6 +614,11 @@ def build_pocketmd_lite_source_acquisition_plan(
             ],
             "operator_rows_ready": refinement_execution_plan["operator_rows_ready"],
             "raw_row_artifact_detected": row_artifact_detected,
+            "raw_row_candidate_status": raw_row_candidate_status["status"],
+            "validated_row_count": raw_row_candidate_status["validated_row_count"],
+            "covered_required_slot_count": raw_row_candidate_status[
+                "covered_required_slot_count"
+            ],
             "detected_row_artifact_count": raw_row_candidate_status[
                 "detected_row_artifact_count"
             ],

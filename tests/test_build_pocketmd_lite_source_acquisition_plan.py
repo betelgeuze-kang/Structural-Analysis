@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import importlib.util
+import csv
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -20,6 +22,70 @@ module = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
+
+
+def _checksum(text: str) -> str:
+    return "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _write_valid_rows(path: Path) -> None:
+    fieldnames = [
+        "case_id",
+        "source_family",
+        "top_k_rank",
+        "candidate_id",
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum",
+        "pre_refinement_energy_proxy",
+        "post_refinement_energy_proxy",
+        "local_min_survived",
+        "contact_persistence_rate",
+        "h_bond_persistence_rate",
+        "clash_count_before",
+        "clash_count_after",
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit",
+        "provenance_ref",
+        "source_checksum",
+    ]
+    rows = []
+    for case_index in range(1, 4):
+        case_id = f"pocketmd_lite_case_{case_index:03d}"
+        for rank in (1, 2):
+            candidate_id = f"{case_id}_candidate_{rank:02d}"
+            rows.append(
+                {
+                    "case_id": case_id,
+                    "source_family": "upstream_ranked_top_k_candidate_set",
+                    "top_k_rank": rank,
+                    "candidate_id": candidate_id,
+                    "upstream_top_k_provenance_ref": (
+                        f"https://pocketmd-data.org/topk/{case_id}/{candidate_id}.json#row"
+                    ),
+                    "upstream_top_k_source_checksum": _checksum(
+                        f"upstream:{case_id}:{candidate_id}"
+                    ),
+                    "pre_refinement_energy_proxy": -8.0 + rank,
+                    "post_refinement_energy_proxy": -8.4 + rank,
+                    "local_min_survived": "true",
+                    "contact_persistence_rate": 0.8,
+                    "h_bond_persistence_rate": 0.7,
+                    "clash_count_before": 3,
+                    "clash_count_after": 1,
+                    "uncertainty_low": 0.1,
+                    "uncertainty_high": 0.3,
+                    "uncertainty_unit": "energy_proxy_delta",
+                    "provenance_ref": (
+                        f"https://pocketmd-data.org/refinement/{case_id}/{candidate_id}.json#row"
+                    ),
+                    "source_checksum": _checksum(f"refinement:{case_id}:{candidate_id}"),
+                }
+            )
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
 
 
 def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> None:
@@ -225,12 +291,15 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     assert payload["summary"] == {
         "actual_closure_ready": False,
         "blocker_count": 3,
+        "covered_required_slot_count": 0,
         "detected_row_artifact_count": 0,
         "minimum_rows_by_case_count": 3,
         "operator_rows_ready": False,
         "phase4_refinement_receipt_plan_status": "operator_receipts_required",
         "phase4_refinement_receipt_role_count": 4,
         "raw_row_artifact_detected": False,
+        "raw_row_candidate_status": "row_artifact_missing",
+        "validated_row_count": 0,
         "covered_phase4_criterion_count": 8,
         "refinement_execution_plan_ready": True,
         "refinement_execution_plan_status": "operator_refinement_rows_required",
@@ -269,16 +338,48 @@ def test_pocketmd_lite_source_acquisition_plan_detects_dropzone_rows(
     )
 
     assert payload["raw_row_candidate_status"]["status"] == (
-        "row_artifact_detected_unvalidated"
+        "row_artifact_detected_empty"
     )
     assert payload["raw_row_candidate_status"]["detected_row_artifact_count"] == 1
     assert payload["raw_row_candidate_status"]["first_detected_path"] == str(rows_out)
     assert payload["summary"]["raw_row_artifact_detected"] is True
     assert payload["summary"]["detected_row_artifact_count"] == 1
-    assert payload["summary"]["operator_rows_ready"] is True
-    assert payload["refinement_execution_plan"]["operator_rows_ready"] is True
+    assert payload["summary"]["operator_rows_ready"] is False
+    assert payload["refinement_execution_plan"]["operator_rows_ready"] is False
     assert payload["blockers"] == [
-        "pocketmd_lite_topk_rows_detected_but_not_materialized",
+        "pocketmd_lite_topk_rows_empty",
+        "upstream_top_k_candidate_receipts_not_attached",
+        "lite_refinement_metric_receipts_not_attached",
+    ]
+
+
+def test_pocketmd_lite_source_acquisition_plan_validates_slot_coverage(
+    tmp_path: Path,
+) -> None:
+    rows_out = tmp_path / "pocketmd_lite_topk_rows.csv"
+    _write_valid_rows(rows_out)
+
+    payload = module.build_pocketmd_lite_source_acquisition_plan(
+        repo_root=tmp_path,
+        rows_out=rows_out,
+    )
+
+    assert payload["raw_row_candidate_status"]["status"] == (
+        "row_artifact_detected_validated"
+    )
+    assert payload["raw_row_candidate_status"]["selected_row_count"] == 6
+    assert payload["raw_row_candidate_status"]["validated_row_count"] == 6
+    assert payload["raw_row_candidate_status"]["validated_case_count"] == 3
+    assert payload["raw_row_candidate_status"]["covered_required_slot_count"] == 6
+    assert payload["raw_row_candidate_status"]["missing_required_slots"] == []
+    assert payload["raw_row_candidate_status"]["coverage_ready"] is True
+    assert payload["summary"]["operator_rows_ready"] is True
+    assert payload["summary"]["raw_row_candidate_status"] == (
+        "row_artifact_detected_validated"
+    )
+    assert payload["summary"]["validated_row_count"] == 6
+    assert payload["summary"]["covered_required_slot_count"] == 6
+    assert payload["blockers"] == [
         "upstream_top_k_candidate_receipts_not_attached",
         "lite_refinement_metric_receipts_not_attached",
     ]

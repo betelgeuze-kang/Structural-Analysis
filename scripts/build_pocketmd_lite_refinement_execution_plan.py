@@ -23,6 +23,9 @@ from materialize_pocketmd_lite_topk_survival_report import (  # noqa: E402
     REQUIRED_CASE_FIELDS,
     TOPK_ROW_QUALITY_CRITERIA,
 )
+from build_pocketmd_lite_source_acquisition_plan import (  # noqa: E402
+    _raw_row_candidate_status,
+)
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 
 
@@ -112,30 +115,6 @@ def _candidate_slots(minimum_rows: list[dict[str, Any]]) -> list[dict[str, Any]]
     return slots
 
 
-def _raw_row_candidate_status(repo_root: Path, rows_out: Path) -> dict[str, Any]:
-    candidates = [
-        PRODUCTIZATION / f"pocketmd_lite_topk_rows.{suffix}"
-        for suffix in ("json", "jsonl", "ndjson", "csv", "tsv")
-    ]
-    if rows_out not in candidates:
-        candidates.insert(0, rows_out)
-    rows = []
-    for path in candidates:
-        resolved = path if path.is_absolute() else repo_root / path
-        rows.append(
-            {
-                "path": str(path),
-                "exists": resolved.exists(),
-                "is_file": resolved.is_file(),
-            }
-        )
-    return {
-        "default_rows_out": str(rows_out),
-        "candidate_paths": rows,
-        "detected_row_artifact_count": sum(1 for row in rows if row["is_file"]),
-    }
-
-
 def build_pocketmd_lite_refinement_execution_plan(
     *,
     repo_root: Path = ROOT,
@@ -148,16 +127,21 @@ def build_pocketmd_lite_refinement_execution_plan(
     survival_report = _load_json(repo_root, survival_report_path)
     minimum_rows = _minimum_rows_from_source_plan(source_plan)
     candidate_slots = _candidate_slots(minimum_rows)
-    raw_row_status = _raw_row_candidate_status(repo_root, rows_out)
+    raw_row_status = _raw_row_candidate_status(
+        repo_root,
+        rows_out=rows_out,
+        minimum_rows_by_case=minimum_rows,
+    )
     survival_blockers = [
         str(row)
         for row in survival_report.get("blockers", [])
         if str(row)
     ] if isinstance(survival_report.get("blockers"), list) else []
-    row_artifact_present = raw_row_status["detected_row_artifact_count"] > 0
+    operator_rows_ready = bool(raw_row_status["coverage_ready"])
     blockers = []
-    if not row_artifact_present:
-        blockers.append("pocketmd_lite_topk_rows_not_detected")
+    row_blocker = str(raw_row_status.get("blocker") or "")
+    if row_blocker:
+        blockers.append(row_blocker)
     blockers.extend(survival_blockers)
     blockers = list(dict.fromkeys(blockers))
     return {
@@ -175,7 +159,7 @@ def build_pocketmd_lite_refinement_execution_plan(
         "status": "operator_refinement_rows_required",
         "contract_pass": True,
         "execution_plan_ready": True,
-        "operator_rows_ready": row_artifact_present,
+        "operator_rows_ready": operator_rows_ready,
         "survival_report_ready": bool(survival_report.get("contract_pass")),
         "actual_closure_ready": False,
         "required_case_count": len(minimum_rows),
@@ -207,7 +191,12 @@ def build_pocketmd_lite_refinement_execution_plan(
         "summary": {
             "required_case_count": len(minimum_rows),
             "required_candidate_slot_count": len(candidate_slots),
-            "operator_rows_ready": row_artifact_present,
+            "operator_rows_ready": operator_rows_ready,
+            "raw_row_candidate_status": raw_row_status["status"],
+            "validated_row_count": raw_row_status["validated_row_count"],
+            "covered_required_slot_count": raw_row_status[
+                "covered_required_slot_count"
+            ],
             "survival_report_ready": bool(survival_report.get("contract_pass")),
             "survival_report_blocker_count": len(survival_blockers),
             "blocker_count": len(blockers),

@@ -1440,10 +1440,10 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T21:20:37.116075+00:00",
+  "generated_at": "2026-07-03T21:43:28.180088+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json": "sha256:98255bfca71cb82c3146a11e74e90cc338836518d93672950cbec5defd7d7147",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:6d7f704267384ddebc5ea238e9ef316281f890c812c146afb2878798657367ce",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:ad466981c1e07332efc3e657a50e810ae2250aa957e132da60f069fd06e2337a",
     "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:1243985688e35dd66119ceffac377c4115139631144cb3d7d7a6dba4464d80b4",
     "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
@@ -2869,7 +2869,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "255d70a43a9ca5335dbb157bd94cd5f119d0a616",
+  "source_commit_sha": "1e3a90d8b8c38e145282be73699ced202dbbf342",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,
@@ -2915,18 +2915,21 @@
         "actual_closure_ready": false,
         "blocker_count": 3,
         "covered_phase4_criterion_count": 8,
+        "covered_required_slot_count": 0,
         "detected_row_artifact_count": 0,
         "minimum_rows_by_case_count": 3,
         "operator_rows_ready": false,
         "phase4_refinement_receipt_plan_status": "operator_receipts_required",
         "phase4_refinement_receipt_role_count": 4,
         "raw_row_artifact_detected": false,
+        "raw_row_candidate_status": "row_artifact_missing",
         "refinement_execution_plan_ready": true,
         "refinement_execution_plan_status": "operator_refinement_rows_required",
         "required_candidate_rows_per_case": 2,
         "required_candidate_slot_count": 6,
         "required_case_count": 3,
-        "required_total_candidate_rows": 6
+        "required_total_candidate_rows": 6,
+        "validated_row_count": 0
       }
     },
     "public_benchmark_phase2": {
