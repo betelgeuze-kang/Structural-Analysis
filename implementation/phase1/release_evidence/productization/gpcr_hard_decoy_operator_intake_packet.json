@@ -596,14 +596,14 @@
     }
   ],
   "gate_unblock_plan_count": 3,
-  "generated_at": "2026-07-03T16:21:45.701657+00:00",
+  "generated_at": "2026-07-03T16:31:57.340372+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:9b88df9031923bd4d55d5a72f3b24a88427e1631a3d51570bebb1917f626e3b7",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.json": "sha256:0812fcd042da15b90fec5d1893257b2ae877f0c27bdef9984d9ef1a1d0742995",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.json": "sha256:1c37506efd27436047061c685e4d0a387bcc3e676e87ac6e629ad135a39e3d4e",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:352761100828448d288c3a6cce69151da70c5da55918c9e1022f978c8c11b06d",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:e987ceb5b02a847709d17886810257e923c2b27da2fd03a8264a935cd6aaa2e1",
-    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:4723323d6cd8071faa6f6fbff2f6444d878db3d72261d86023ed621a0c582559",
-    "scripts/build_gpcr_hard_decoy_source_acquisition_plan.py": "sha256:92ad1d38bb15d1c2ac2bac95a740d0c3f16d953c252bd05aacc06a4095bc8988",
+    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:815c781aa5313bb5d90b78683c87813ec0e9a37f5a0ec44799b6d04c488cc0ee",
+    "scripts/build_gpcr_hard_decoy_source_acquisition_plan.py": "sha256:be3c9b79880f43f88c5dfa7c52228e3ca939e11231c28b6192310aba751419c0",
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:8824e14602faf05a39d841d8367d5773c76a23ffbf8f614ee99f926a8ff478a6"
   },
@@ -673,6 +673,7 @@
   "minimum_target_count": 3,
   "next_actions": [
     "complete_gpcr_hard_decoy_source_acquisition_plan",
+    "build_gpcr_hard_decoy_decoy_source_snapshot",
     "attach_gpcr_hard_decoy_raw_row_file",
     "materialize_gpcr_hard_decoy_operator_template_from_rows",
     "fill_gpcr_hard_decoy_operator_intake_packet",
@@ -1132,6 +1133,29 @@
       ],
       "command": "python3 scripts/build_gpcr_hard_decoy_source_acquisition_plan.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.json",
       "contract_pass": true,
+      "decoy_source_snapshot": {
+        "actual_closure_ready": false,
+        "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json",
+        "blocker_count": 0,
+        "closure_blockers": [
+          "target_specific_hard_decoy_source_not_attached",
+          "gpcr_scoring_protocol_receipts_not_attached",
+          "gpcr_hard_decoy_rows_not_materialized"
+        ],
+        "command": "python3 scripts/build_gpcr_hard_decoy_decoy_source_snapshot.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json --out-md implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.md",
+        "contract_pass": true,
+        "decoy_candidate_source_ready": true,
+        "markdown_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.md",
+        "minimum_decoy_rows_per_target": 20,
+        "minimum_decoy_standard_value_nm": 10000.0,
+        "status": "decoy_candidate_sources_ready",
+        "target_candidate_counts": {
+          "DRD2": 20,
+          "HTR2A": 20,
+          "OPRM1": 20
+        },
+        "total_decoy_candidate_count": 60
+      },
       "positive_source_snapshot": {
         "actual_closure_ready": false,
         "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json",
@@ -1282,6 +1306,29 @@
       ],
       "command": "python3 scripts/build_gpcr_hard_decoy_source_acquisition_plan.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.json",
       "contract_pass": true,
+      "decoy_source_snapshot": {
+        "actual_closure_ready": false,
+        "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json",
+        "blocker_count": 0,
+        "closure_blockers": [
+          "target_specific_hard_decoy_source_not_attached",
+          "gpcr_scoring_protocol_receipts_not_attached",
+          "gpcr_hard_decoy_rows_not_materialized"
+        ],
+        "command": "python3 scripts/build_gpcr_hard_decoy_decoy_source_snapshot.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json --out-md implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.md",
+        "contract_pass": true,
+        "decoy_candidate_source_ready": true,
+        "markdown_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.md",
+        "minimum_decoy_rows_per_target": 20,
+        "minimum_decoy_standard_value_nm": 10000.0,
+        "status": "decoy_candidate_sources_ready",
+        "target_candidate_counts": {
+          "DRD2": 20,
+          "HTR2A": 20,
+          "OPRM1": 20
+        },
+        "total_decoy_candidate_count": 60
+      },
       "positive_source_snapshot": {
         "actual_closure_ready": false,
         "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json",
@@ -1402,7 +1449,7 @@
     "gpcr_hard_decoy_rows": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv"
   },
   "schema_version": "gpcr-hard-decoy-operator-intake-packet.v1",
-  "source_commit_sha": "ab5a547ffe624993935135002493a8d6a1c149ce",
+  "source_commit_sha": "e0972d18d6823cded52107e0657bf94f99a1f267",
   "status": "ready_for_operator_input",
   "summary": {
     "broad_gpcr_family_claim_safe": false,

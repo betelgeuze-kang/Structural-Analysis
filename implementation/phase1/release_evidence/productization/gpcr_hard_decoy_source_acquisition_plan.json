@@ -29,8 +29,31 @@
       "role": "positive_ligand_candidates"
     },
     {
-      "candidate_source": "Operator-attached target-specific hard-decoy set with license, checksum, and provenance receipts",
-      "closure_boundary": "Generic negatives, unlabeled molecules, or fixture/generated IDs do not satisfy the hard-decoy source requirement.",
+      "candidate_snapshot": {
+        "actual_closure_ready": false,
+        "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json",
+        "blocker_count": 0,
+        "closure_blockers": [
+          "target_specific_hard_decoy_source_not_attached",
+          "gpcr_scoring_protocol_receipts_not_attached",
+          "gpcr_hard_decoy_rows_not_materialized"
+        ],
+        "command": "python3 scripts/build_gpcr_hard_decoy_decoy_source_snapshot.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json --out-md implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.md",
+        "contract_pass": true,
+        "decoy_candidate_source_ready": true,
+        "markdown_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.md",
+        "minimum_decoy_rows_per_target": 20,
+        "minimum_decoy_standard_value_nm": 10000.0,
+        "status": "decoy_candidate_sources_ready",
+        "target_candidate_counts": {
+          "DRD2": 20,
+          "HTR2A": 20,
+          "OPRM1": 20
+        },
+        "total_decoy_candidate_count": 60
+      },
+      "candidate_source": "ChEMBL weak/low-affinity target-specific candidates for source preflight, followed by an operator-attached curated hard-decoy set with license, checksum, and provenance receipts",
+      "closure_boundary": "Weak/low-affinity ChEMBL candidates, generic negatives, unlabeled molecules, or fixture/generated IDs do not satisfy the hard-decoy source requirement without curated rows and a documented scoring run.",
       "minimum_per_target": 20,
       "role": "hard_decoy_candidates"
     },
@@ -48,8 +71,9 @@
     "target_specific_hard_decoy_source_not_attached",
     "gpcr_scoring_protocol_receipts_not_attached"
   ],
-  "claim_boundary": "This plan records verified public target identifiers and the row/source contract needed to acquire GPCR hard-decoy evidence. It does not download or attach activity data, decoys, docking scores, or licenses, and it does not close Phase 3 until the raw rows pass the suite materializer.",
+  "claim_boundary": "This plan records verified public target identifiers and the row/source contract needed to acquire GPCR hard-decoy evidence. Candidate ChEMBL snapshots are source receipts only; they do not attach curated decoys, docking scores, or licenses, and they do not close Phase 3 until the raw rows pass the suite materializer.",
   "commands": {
+    "build_decoy_source_snapshot": "python3 scripts/build_gpcr_hard_decoy_decoy_source_snapshot.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json --out-md implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.md",
     "build_positive_source_snapshot": "python3 scripts/build_gpcr_hard_decoy_positive_source_snapshot.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json --out-md implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.md",
     "import_rows": "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py --rows implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --source-id <source-id> --source-url <source-url> --source-license <license>",
     "materialize_suite": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --fail-blocked",
@@ -57,18 +81,44 @@
     "write_plan": "python3 scripts/build_gpcr_hard_decoy_source_acquisition_plan.py"
   },
   "contract_pass": true,
+  "decoy_source_snapshot": {
+    "actual_closure_ready": false,
+    "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json",
+    "blocker_count": 0,
+    "closure_blockers": [
+      "target_specific_hard_decoy_source_not_attached",
+      "gpcr_scoring_protocol_receipts_not_attached",
+      "gpcr_hard_decoy_rows_not_materialized"
+    ],
+    "command": "python3 scripts/build_gpcr_hard_decoy_decoy_source_snapshot.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json --out-md implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.md",
+    "contract_pass": true,
+    "decoy_candidate_source_ready": true,
+    "markdown_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.md",
+    "minimum_decoy_rows_per_target": 20,
+    "minimum_decoy_standard_value_nm": 10000.0,
+    "status": "decoy_candidate_sources_ready",
+    "target_candidate_counts": {
+      "DRD2": 20,
+      "HTR2A": 20,
+      "OPRM1": 20
+    },
+    "total_decoy_candidate_count": 60
+  },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T16:20:47.626126+00:00",
+  "generated_at": "2026-07-03T16:31:54.700690+00:00",
   "input_checksums": {
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json": "sha256:66ed4370361fd02d9f820067a4ea02506c43834e681972fdb37ee05d6b37c18b",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json": "sha256:14fc63c1890aaaf1e9187a79b47fef21f3dc33511c2cf14e97356942568ae2c4",
+    "scripts/build_gpcr_hard_decoy_decoy_source_snapshot.py": "sha256:94862b9e94724e136d0bfcd966ad500d196245587f9dfb86bada83ea6c25e250",
     "scripts/build_gpcr_hard_decoy_positive_source_snapshot.py": "sha256:6e27e6448a6114b6defd76f52cf63ef2179ba57bd8895634ec8037f8c3378bc1",
-    "scripts/build_gpcr_hard_decoy_source_acquisition_plan.py": "sha256:92ad1d38bb15d1c2ac2bac95a740d0c3f16d953c252bd05aacc06a4095bc8988",
+    "scripts/build_gpcr_hard_decoy_source_acquisition_plan.py": "sha256:be3c9b79880f43f88c5dfa7c52228e3ca939e11231c28b6192310aba751419c0",
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:8824e14602faf05a39d841d8367d5773c76a23ffbf8f614ee99f926a8ff478a6"
   },
   "operator_acquisition_checklist": [
     "verify_human_target_mapping_against_chembl_target_endpoint",
     "build_gpcr_hard_decoy_positive_source_snapshot",
+    "build_gpcr_hard_decoy_decoy_source_snapshot",
     "attach_positive_ligand_candidates_with_activity_receipts",
     "attach_target_specific_hard_decoy_candidates_with_license_receipts",
     "run_one_documented_scoring_protocol_for_all_rows_per_target",
@@ -168,11 +218,13 @@
     "score_direction_policy": "Use one score_direction per target and preserve the direction used by the scoring protocol."
   },
   "schema_version": "gpcr-hard-decoy-source-acquisition-plan.v1",
-  "source_commit_sha": "ab5a547ffe624993935135002493a8d6a1c149ce",
+  "source_commit_sha": "e0972d18d6823cded52107e0657bf94f99a1f267",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
     "blocker_count": 3,
+    "decoy_candidate_source_ready": true,
+    "decoy_source_snapshot_status": "decoy_candidate_sources_ready",
     "minimum_decoy_rows_total": 60,
     "minimum_positive_rows_total": 12,
     "positive_source_ready": true,
@@ -180,6 +232,7 @@
     "required_target_count": 3,
     "target_source_count": 3,
     "target_source_mapping_complete": true,
+    "total_decoy_candidate_count": 60,
     "total_positive_candidate_count": 36
   },
   "target_source_count": 3,
@@ -203,14 +256,14 @@
       "chembl_pref_name": "D(2) dopamine receptor",
       "chembl_target_id": "CHEMBL217",
       "chembl_target_record_url": "https://www.ebi.ac.uk/chembl/api/data/target/CHEMBL217.json",
-      "claim_boundary": "The ChEMBL target and activity endpoints can identify target-linked positive ligand candidates, but they do not by themselves provide the target-specific hard-decoy set, scoring run, or Phase 3 closure rows.",
+      "claim_boundary": "The ChEMBL target and activity endpoints can identify target-linked positive ligand and weak/low-affinity decoy candidates, but they do not by themselves provide the curated target-specific hard-decoy set, scoring run, or Phase 3 closure rows.",
       "gene_symbol": "DRD2",
       "minimum_decoy_rows_required": 20,
       "minimum_positive_rows_required": 4,
       "minimum_total_rows_required": 24,
       "official_target_query_url": "https://www.ebi.ac.uk/chembl/api/data/target.json?target_components__accession=P14416&target_type=SINGLE+PROTEIN&format=json&limit=20",
       "organism": "Homo sapiens",
-      "source_role": "positive_ligand_candidate_source_only",
+      "source_role": "target_activity_candidate_source_only",
       "target_id": "DRD2",
       "target_specific_row_filter": {
         "chembl_target_id": "CHEMBL217",
@@ -226,14 +279,14 @@
       "chembl_pref_name": "5-hydroxytryptamine receptor 2A",
       "chembl_target_id": "CHEMBL224",
       "chembl_target_record_url": "https://www.ebi.ac.uk/chembl/api/data/target/CHEMBL224.json",
-      "claim_boundary": "The ChEMBL target and activity endpoints can identify target-linked positive ligand candidates, but they do not by themselves provide the target-specific hard-decoy set, scoring run, or Phase 3 closure rows.",
+      "claim_boundary": "The ChEMBL target and activity endpoints can identify target-linked positive ligand and weak/low-affinity decoy candidates, but they do not by themselves provide the curated target-specific hard-decoy set, scoring run, or Phase 3 closure rows.",
       "gene_symbol": "HTR2A",
       "minimum_decoy_rows_required": 20,
       "minimum_positive_rows_required": 4,
       "minimum_total_rows_required": 24,
       "official_target_query_url": "https://www.ebi.ac.uk/chembl/api/data/target.json?target_components__accession=P28223&target_type=SINGLE+PROTEIN&format=json&limit=20",
       "organism": "Homo sapiens",
-      "source_role": "positive_ligand_candidate_source_only",
+      "source_role": "target_activity_candidate_source_only",
       "target_id": "HTR2A",
       "target_specific_row_filter": {
         "chembl_target_id": "CHEMBL224",
@@ -249,14 +302,14 @@
       "chembl_pref_name": "Mu-type opioid receptor",
       "chembl_target_id": "CHEMBL233",
       "chembl_target_record_url": "https://www.ebi.ac.uk/chembl/api/data/target/CHEMBL233.json",
-      "claim_boundary": "The ChEMBL target and activity endpoints can identify target-linked positive ligand candidates, but they do not by themselves provide the target-specific hard-decoy set, scoring run, or Phase 3 closure rows.",
+      "claim_boundary": "The ChEMBL target and activity endpoints can identify target-linked positive ligand and weak/low-affinity decoy candidates, but they do not by themselves provide the curated target-specific hard-decoy set, scoring run, or Phase 3 closure rows.",
       "gene_symbol": "OPRM1",
       "minimum_decoy_rows_required": 20,
       "minimum_positive_rows_required": 4,
       "minimum_total_rows_required": 24,
       "official_target_query_url": "https://www.ebi.ac.uk/chembl/api/data/target.json?target_components__accession=P35372&target_type=SINGLE+PROTEIN&format=json&limit=20",
       "organism": "Homo sapiens",
-      "source_role": "positive_ligand_candidate_source_only",
+      "source_role": "target_activity_candidate_source_only",
       "target_id": "OPRM1",
       "target_specific_row_filter": {
         "chembl_target_id": "CHEMBL233",

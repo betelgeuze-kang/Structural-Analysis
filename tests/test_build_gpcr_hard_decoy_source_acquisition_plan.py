@@ -58,7 +58,7 @@ def test_gpcr_hard_decoy_source_acquisition_plan_exposes_verified_targets() -> N
     for target_id, row in sources.items():
         assert row["organism"] == "Homo sapiens"
         assert row["target_type"] == "SINGLE PROTEIN"
-        assert row["source_role"] == "positive_ligand_candidate_source_only"
+        assert row["source_role"] == "target_activity_candidate_source_only"
         assert row["minimum_positive_rows_required"] == 4
         assert row["minimum_decoy_rows_required"] == 20
         assert row["minimum_total_rows_required"] == 24
@@ -92,13 +92,30 @@ def test_gpcr_hard_decoy_source_acquisition_plan_exposes_verified_targets() -> N
         "HTR2A": 12,
         "OPRM1": 12,
     }
+    assert payload["decoy_source_snapshot"]["artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "gpcr_hard_decoy_decoy_source_snapshot.json"
+    )
+    assert payload["decoy_source_snapshot"]["actual_closure_ready"] is False
+    assert payload["decoy_source_snapshot"]["decoy_candidate_source_ready"] is True
+    assert payload["decoy_source_snapshot"]["minimum_decoy_rows_per_target"] == 20
+    assert payload["decoy_source_snapshot"]["target_candidate_counts"] == {
+        "DRD2": 20,
+        "HTR2A": 20,
+        "OPRM1": 20,
+    }
     assert payload["acceptable_source_roles"][0]["candidate_snapshot"] == (
         payload["positive_source_snapshot"]
+    )
+    assert payload["acceptable_source_roles"][1]["candidate_snapshot"] == (
+        payload["decoy_source_snapshot"]
     )
     assert payload["summary"]["actual_closure_ready"] is False
     assert payload["summary"]["blocker_count"] == 3
     assert payload["summary"]["minimum_decoy_rows_total"] == 60
     assert payload["summary"]["minimum_positive_rows_total"] == 12
+    assert payload["summary"]["decoy_candidate_source_ready"] is True
+    assert payload["summary"]["total_decoy_candidate_count"] == 60
     assert payload["summary"]["positive_source_ready"] is True
     assert payload["summary"]["total_positive_candidate_count"] == 36
     assert payload["summary"]["required_target_count"] == 3
@@ -114,6 +131,9 @@ def test_gpcr_hard_decoy_source_acquisition_plan_exposes_verified_targets() -> N
     )
     assert payload["commands"]["build_positive_source_snapshot"].startswith(
         "python3 scripts/build_gpcr_hard_decoy_positive_source_snapshot.py"
+    )
+    assert payload["commands"]["build_decoy_source_snapshot"].startswith(
+        "python3 scripts/build_gpcr_hard_decoy_decoy_source_snapshot.py"
     )
 
 
@@ -134,4 +154,5 @@ def test_gpcr_hard_decoy_source_acquisition_plan_cli_writes_markdown(
     assert "`HTR2A` | `P28223` | `CHEMBL224`" in markdown
     assert "`OPRM1` | `P35372` | `CHEMBL233`" in markdown
     assert "gpcr_hard_decoy_positive_source_snapshot.json" in markdown
+    assert "gpcr_hard_decoy_decoy_source_snapshot.json" in markdown
     assert "materialize_gpcr_hard_decoy_operator_template_from_rows.py" in markdown

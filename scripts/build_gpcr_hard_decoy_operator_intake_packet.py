@@ -567,6 +567,9 @@ def build_gpcr_hard_decoy_operator_intake_packet(
     positive_source_snapshot = _as_dict(
         source_acquisition_plan.get("positive_source_snapshot")
     )
+    decoy_source_snapshot = _as_dict(
+        source_acquisition_plan.get("decoy_source_snapshot")
+    )
     source_acquisition_summary = {
         "artifact": str(DEFAULT_SOURCE_ACQUISITION_PLAN),
         "status": str(source_acquisition_plan.get("status") or ""),
@@ -581,6 +584,7 @@ def build_gpcr_hard_decoy_operator_intake_packet(
             source_acquisition_plan.get("target_source_ids")
         ),
         "positive_source_snapshot": positive_source_snapshot,
+        "decoy_source_snapshot": decoy_source_snapshot,
         "blocker_count": int(source_acquisition_plan.get("blocker_count") or 0),
         "blockers": [
             str(row) for row in _as_list(source_acquisition_plan.get("blockers"))
@@ -765,6 +769,7 @@ def build_gpcr_hard_decoy_operator_intake_packet(
         },
         "next_actions": [
             "complete_gpcr_hard_decoy_source_acquisition_plan",
+            "build_gpcr_hard_decoy_decoy_source_snapshot",
             "attach_gpcr_hard_decoy_raw_row_file",
             "materialize_gpcr_hard_decoy_operator_template_from_rows",
             "fill_gpcr_hard_decoy_operator_intake_packet",

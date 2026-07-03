@@ -33,6 +33,10 @@ DEFAULT_POSITIVE_SOURCE_SNAPSHOT = (
 DEFAULT_POSITIVE_SOURCE_SNAPSHOT_MD = DEFAULT_POSITIVE_SOURCE_SNAPSHOT.with_suffix(
     ".md"
 )
+DEFAULT_DECOY_SOURCE_SNAPSHOT = (
+    PRODUCTIZATION / "gpcr_hard_decoy_decoy_source_snapshot.json"
+)
+DEFAULT_DECOY_SOURCE_SNAPSHOT_MD = DEFAULT_DECOY_SOURCE_SNAPSHOT.with_suffix(".md")
 DEFAULT_OPERATOR_TEMPLATE = PRODUCTIZATION / "gpcr_hard_decoy_operator_template.json"
 DEFAULT_SUITE_REPORT = PRODUCTIZATION / "gpcr_hard_decoy_suite_report.json"
 
@@ -118,6 +122,45 @@ def _positive_source_snapshot_summary(
     }
 
 
+def _decoy_source_snapshot_summary(
+    snapshot: dict[str, Any],
+) -> dict[str, Any]:
+    summary = snapshot.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+    return {
+        "artifact": str(DEFAULT_DECOY_SOURCE_SNAPSHOT),
+        "markdown_artifact": str(DEFAULT_DECOY_SOURCE_SNAPSHOT_MD),
+        "status": str(snapshot.get("status") or "missing"),
+        "contract_pass": snapshot.get("contract_pass"),
+        "decoy_candidate_source_ready": bool(
+            snapshot.get("decoy_candidate_source_ready")
+        ),
+        "actual_closure_ready": bool(snapshot.get("actual_closure_ready")),
+        "target_candidate_counts": dict(snapshot.get("target_candidate_counts") or {}),
+        "total_decoy_candidate_count": int(
+            snapshot.get("total_decoy_candidate_count") or 0
+        ),
+        "minimum_decoy_rows_per_target": int(
+            snapshot.get("minimum_decoy_rows_per_target") or 0
+        ),
+        "minimum_decoy_standard_value_nm": float(
+            snapshot.get("minimum_decoy_standard_value_nm") or 0.0
+        ),
+        "closure_blockers": [
+            str(row) for row in snapshot.get("closure_blockers", [])
+        ]
+        if isinstance(snapshot.get("closure_blockers"), list)
+        else [],
+        "blocker_count": int(snapshot.get("blocker_count") or 0),
+        "command": (
+            "python3 scripts/build_gpcr_hard_decoy_decoy_source_snapshot.py "
+            f"--out {DEFAULT_DECOY_SOURCE_SNAPSHOT} "
+            f"--out-md {DEFAULT_DECOY_SOURCE_SNAPSHOT_MD}"
+        ),
+    }
+
+
 def _target_query_url(uniprot_accession: str) -> str:
     return (
         f"{CHEMBL_API_ROOT}/target.json?"
@@ -131,7 +174,7 @@ def _target_source(row: dict[str, str]) -> dict[str, Any]:
     target_id = row["target_id"]
     return {
         **row,
-        "source_role": "positive_ligand_candidate_source_only",
+        "source_role": "target_activity_candidate_source_only",
         "official_target_query_url": _target_query_url(row["uniprot_accession"]),
         "chembl_target_record_url": f"{CHEMBL_API_ROOT}/target/{chembl_target_id}.json",
         "chembl_activity_query_template": (
@@ -155,8 +198,9 @@ def _target_source(row: dict[str, str]) -> dict[str, Any]:
         },
         "claim_boundary": (
             "The ChEMBL target and activity endpoints can identify target-linked "
-            "positive ligand candidates, but they do not by themselves provide the "
-            "target-specific hard-decoy set, scoring run, or Phase 3 closure rows."
+            "positive ligand and weak/low-affinity decoy candidates, but they do "
+            "not by themselves provide the curated target-specific hard-decoy set, "
+            "scoring run, or Phase 3 closure rows."
         ),
     }
 
@@ -190,6 +234,8 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
     positive_source_summary = _positive_source_snapshot_summary(
         positive_source_snapshot
     )
+    decoy_source_snapshot = _load_json(repo_root, DEFAULT_DECOY_SOURCE_SNAPSHOT)
+    decoy_source_summary = _decoy_source_snapshot_summary(decoy_source_snapshot)
     required_targets = list(REQUIRED_TARGETS)
     target_ids = [str(row["target_id"]) for row in target_sources]
     blockers = [
@@ -203,7 +249,9 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
             input_paths=[
                 Path("scripts/build_gpcr_hard_decoy_source_acquisition_plan.py"),
                 Path("scripts/build_gpcr_hard_decoy_positive_source_snapshot.py"),
+                Path("scripts/build_gpcr_hard_decoy_decoy_source_snapshot.py"),
                 DEFAULT_POSITIVE_SOURCE_SNAPSHOT,
+                DEFAULT_DECOY_SOURCE_SNAPSHOT,
                 Path("scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py"),
                 Path("scripts/materialize_gpcr_hard_decoy_suite_report.py"),
             ],
@@ -225,6 +273,7 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
             for row in target_sources
         },
         "positive_source_snapshot": positive_source_summary,
+        "decoy_source_snapshot": decoy_source_summary,
         "per_target_exit_gates": [
             _per_target_exit_gate(target_id) for target_id in required_targets
         ],
@@ -269,12 +318,16 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
                     RAW_ROW_QUALITY_CRITERIA["min_decoy_count_per_target"]
                 ),
                 "candidate_source": (
-                    "Operator-attached target-specific hard-decoy set with license, "
-                    "checksum, and provenance receipts"
+                    "ChEMBL weak/low-affinity target-specific candidates for "
+                    "source preflight, followed by an operator-attached curated "
+                    "hard-decoy set with license, checksum, and provenance receipts"
                 ),
+                "candidate_snapshot": decoy_source_summary,
                 "closure_boundary": (
-                    "Generic negatives, unlabeled molecules, or fixture/generated IDs "
-                    "do not satisfy the hard-decoy source requirement."
+                    "Weak/low-affinity ChEMBL candidates, generic negatives, "
+                    "unlabeled molecules, or fixture/generated IDs do not satisfy "
+                    "the hard-decoy source requirement without curated rows and a "
+                    "documented scoring run."
                 ),
             },
             {
@@ -295,6 +348,7 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
         "operator_acquisition_checklist": [
             "verify_human_target_mapping_against_chembl_target_endpoint",
             "build_gpcr_hard_decoy_positive_source_snapshot",
+            "build_gpcr_hard_decoy_decoy_source_snapshot",
             "attach_positive_ligand_candidates_with_activity_receipts",
             "attach_target_specific_hard_decoy_candidates_with_license_receipts",
             "run_one_documented_scoring_protocol_for_all_rows_per_target",
@@ -310,6 +364,11 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
                 "python3 scripts/build_gpcr_hard_decoy_positive_source_snapshot.py "
                 f"--out {DEFAULT_POSITIVE_SOURCE_SNAPSHOT} "
                 f"--out-md {DEFAULT_POSITIVE_SOURCE_SNAPSHOT_MD}"
+            ),
+            "build_decoy_source_snapshot": (
+                "python3 scripts/build_gpcr_hard_decoy_decoy_source_snapshot.py "
+                f"--out {DEFAULT_DECOY_SOURCE_SNAPSHOT} "
+                f"--out-md {DEFAULT_DECOY_SOURCE_SNAPSHOT_MD}"
             ),
             "import_rows": (
                 "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py "
@@ -342,6 +401,15 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
             "total_positive_candidate_count": int(
                 positive_source_summary.get("total_positive_candidate_count") or 0
             ),
+            "decoy_candidate_source_ready": bool(
+                decoy_source_summary.get("decoy_candidate_source_ready")
+            ),
+            "decoy_source_snapshot_status": str(
+                decoy_source_summary.get("status") or ""
+            ),
+            "total_decoy_candidate_count": int(
+                decoy_source_summary.get("total_decoy_candidate_count") or 0
+            ),
             "minimum_positive_rows_total": int(
                 RAW_ROW_QUALITY_CRITERIA["min_positive_count_per_target"]
             )
@@ -355,9 +423,10 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
         },
         "claim_boundary": (
             "This plan records verified public target identifiers and the row/source "
-            "contract needed to acquire GPCR hard-decoy evidence. It does not download "
-            "or attach activity data, decoys, docking scores, or licenses, and it does "
-            "not close Phase 3 until the raw rows pass the suite materializer."
+            "contract needed to acquire GPCR hard-decoy evidence. Candidate ChEMBL "
+            "snapshots are source receipts only; they do not attach curated decoys, "
+            "docking scores, or licenses, and they do not close Phase 3 until the raw "
+            "rows pass the suite materializer."
         ),
     }
 
@@ -372,6 +441,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `blocker_count`: `{payload['blocker_count']}`",
         f"- `positive_source_snapshot`: `{payload['positive_source_snapshot']['artifact']}`",
         f"- `positive_source_ready`: `{payload['positive_source_snapshot']['positive_source_ready']}`",
+        f"- `decoy_source_snapshot`: `{payload['decoy_source_snapshot']['artifact']}`",
+        f"- `decoy_candidate_source_ready`: `{payload['decoy_source_snapshot']['decoy_candidate_source_ready']}`",
         "",
         "| Target | UniProt | ChEMBL | Role |",
         "|---|---|---|---|",
