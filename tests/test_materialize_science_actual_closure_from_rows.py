@@ -438,6 +438,13 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
     assert audit["summary"]["blocked_requirement_count"] == 18
     assert audit["summary"]["passing_requirement_count"] == 1
     assert audit["summary"]["actual_closure_ready"] is False
+    assert audit["summary"]["upstream_source_context_count"] == 0
+    assert audit["summary"]["upstream_source_blocker_count"] == 0
+    assert audit["upstream_source_blockers"] == []
+    assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
+        "present"
+    ] is False
+    assert audit["upstream_source_acquisition"]["pocketmd_lite"]["present"] is False
     assert audit["missing_row_inputs"] == [
         "subset_rows",
         "pose_rows",
@@ -813,6 +820,78 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
     assert "casf_pdbbind_pose_success_harness" in subset_contract["feeds_components"]
     assert not (tmp_path / "gpcr_report.json").exists()
     assert not (tmp_path / "pocketmd_report.json").exists()
+
+
+def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
+    tmp_path: Path,
+) -> None:
+    productization = (
+        tmp_path / "implementation" / "phase1" / "release_evidence" / "productization"
+    )
+    productization.mkdir(parents=True)
+    (productization / "public_benchmark_phase2_source_acquisition_plan.json").write_text(
+        json.dumps(
+            {
+                "status": "operator_acquisition_required",
+                "contract_pass": True,
+                "blocker_count": 2,
+                "blockers": [
+                    "public_benchmark_vina_gnina_rows_not_acquired",
+                    "public_benchmark_vina_gnina_engine_inputs_not_ready",
+                ],
+                "summary": {"vina_gnina_runtime_ready_engine_run_slot_count": 0},
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+    (productization / "pocketmd_lite_source_acquisition_plan.json").write_text(
+        json.dumps(
+            {
+                "status": "operator_acquisition_required",
+                "contract_pass": True,
+                "blocker_count": 1,
+                "blockers": ["pocketmd_lite_topk_rows_not_acquired"],
+                "summary": {"operator_rows_ready": False},
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+
+    audit = module.build_science_actual_closure_audit(
+        repo_root=tmp_path,
+        **_public_output_kwargs(tmp_path),
+        gpcr_template_out=tmp_path / "gpcr_template.json",
+        gpcr_report_out=tmp_path / "gpcr_report.json",
+        gpcr_surface_out=tmp_path / "gpcr_surface.json",
+        pocketmd_intake_out=tmp_path / "pocketmd_intake.json",
+        pocketmd_report_out=tmp_path / "pocketmd_report.json",
+        pocketmd_surface_out=tmp_path / "pocketmd_surface.json",
+    )
+
+    assert audit["summary"]["upstream_source_context_count"] == 2
+    assert audit["summary"]["upstream_source_blocker_count"] == 3
+    assert audit["upstream_source_blockers"] == [
+        "public_benchmark_phase2_source_acquisition::"
+        "public_benchmark_vina_gnina_rows_not_acquired",
+        "public_benchmark_phase2_source_acquisition::"
+        "public_benchmark_vina_gnina_engine_inputs_not_ready",
+        "pocketmd_lite_source_acquisition::"
+        "pocketmd_lite_topk_rows_not_acquired",
+    ]
+    assert audit["operator_next_actions"] == [
+        "attach_subset_rows",
+        "attach_pose_rows",
+        "attach_enrichment_rows",
+        "attach_vina_gnina_rows",
+        "attach_gpcr_rows",
+        "attach_pocketmd_rows",
+        "resolve_public_benchmark_phase2_source_acquisition_blockers",
+        "resolve_pocketmd_lite_source_acquisition_blockers",
+        "run_science_actual_closure_row_materializer",
+        "review_science_actual_closure_row_audit",
+    ]
 
 
 def test_science_actual_closure_audit_cli_writes_markdown(

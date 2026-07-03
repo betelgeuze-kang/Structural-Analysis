@@ -34,6 +34,12 @@ DEFAULT_POCKETMD_REPORT = PRODUCTIZATION / "pocketmd_lite_topk_survival_report.j
 DEFAULT_POCKETMD_SURFACE = SURFACE_DIR / "pocketmd_lite_science_product_surface.json"
 DEFAULT_POCKETMD_CONTRACT = PRODUCTIZATION / "pocketmd_lite_contract.json"
 DEFAULT_PUBLIC_PHASE2_AUDIT = PRODUCTIZATION / "public_benchmark_phase2_row_audit.json"
+DEFAULT_PUBLIC_SOURCE_ACQUISITION_PLAN = (
+    PRODUCTIZATION / "public_benchmark_phase2_source_acquisition_plan.json"
+)
+DEFAULT_POCKETMD_SOURCE_ACQUISITION_PLAN = (
+    PRODUCTIZATION / "pocketmd_lite_source_acquisition_plan.json"
+)
 
 SCHEMA_VERSION = "science-actual-closure-row-audit.v1"
 PUBLIC_BENCHMARK_COMPONENT_ID = "public_benchmark_phase2_actual_closure"
@@ -75,6 +81,74 @@ def _load_optional_json(repo_root: Path, path: Path) -> dict[str, Any]:
         return {}
     payload = json.loads(resolved.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else {}
+
+
+def _source_acquisition_summary(
+    payload: dict[str, Any],
+    *,
+    artifact: Path,
+) -> dict[str, Any]:
+    if not payload:
+        return {
+            "artifact": str(artifact),
+            "present": False,
+            "status": "missing",
+            "contract_pass": None,
+            "blocker_count": 0,
+            "blockers": [],
+            "summary": {},
+        }
+    raw_blockers = payload.get("blockers", [])
+    blockers = (
+        [str(row) for row in raw_blockers if str(row)]
+        if isinstance(raw_blockers, list)
+        else []
+    )
+    summary = payload.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+    return {
+        "artifact": str(artifact),
+        "present": True,
+        "status": str(payload.get("status") or ""),
+        "contract_pass": payload.get("contract_pass"),
+        "blocker_count": int(payload.get("blocker_count") or len(blockers)),
+        "blockers": blockers,
+        "summary": summary,
+    }
+
+
+def _upstream_source_acquisition_context(repo_root: Path) -> dict[str, Any]:
+    public_plan = _load_optional_json(repo_root, DEFAULT_PUBLIC_SOURCE_ACQUISITION_PLAN)
+    pocketmd_plan = _load_optional_json(
+        repo_root,
+        DEFAULT_POCKETMD_SOURCE_ACQUISITION_PLAN,
+    )
+    return {
+        "public_benchmark_phase2": _source_acquisition_summary(
+            public_plan,
+            artifact=DEFAULT_PUBLIC_SOURCE_ACQUISITION_PLAN,
+        ),
+        "pocketmd_lite": _source_acquisition_summary(
+            pocketmd_plan,
+            artifact=DEFAULT_POCKETMD_SOURCE_ACQUISITION_PLAN,
+        ),
+    }
+
+
+def _upstream_source_blockers(
+    upstream_source_acquisition: dict[str, dict[str, Any]],
+) -> list[str]:
+    blockers: list[str] = []
+    for source_id, source_summary in upstream_source_acquisition.items():
+        if not isinstance(source_summary, dict):
+            continue
+        blockers.extend(
+            f"{source_id}_source_acquisition::{blocker}"
+            for blocker in source_summary.get("blockers", [])
+            if str(blocker)
+        )
+    return blockers
 
 
 def _candidate_path_strings(row_input_id: str) -> list[str]:
@@ -792,6 +866,7 @@ def _operator_next_actions(
     missing_row_inputs: list[str],
     contract_pass: bool,
     blockers: list[str],
+    upstream_source_blockers: list[str],
 ) -> list[str]:
     if contract_pass:
         return [
@@ -799,13 +874,32 @@ def _operator_next_actions(
             "refresh_release_freshness_after_science_closure",
         ]
     attach_actions = [f"attach_{row_input_id}" for row_input_id in missing_row_inputs]
+    source_actions = []
+    if (
+        "vina_gnina_rows" in missing_row_inputs
+        and any(
+            blocker.startswith("public_benchmark_phase2_source_acquisition::")
+            for blocker in upstream_source_blockers
+        )
+    ):
+        source_actions.append(
+            "resolve_public_benchmark_phase2_source_acquisition_blockers"
+        )
+    if (
+        "pocketmd_rows" in missing_row_inputs
+        and any(
+            blocker.startswith("pocketmd_lite_source_acquisition::")
+            for blocker in upstream_source_blockers
+        )
+    ):
+        source_actions.append("resolve_pocketmd_lite_source_acquisition_blockers")
     follow_up_actions = [
         "run_science_actual_closure_row_materializer",
         "review_science_actual_closure_row_audit",
     ]
     if blockers and not missing_row_inputs:
         follow_up_actions.insert(0, "resolve_science_actual_closure_row_blockers")
-    return attach_actions + follow_up_actions
+    return attach_actions + source_actions + follow_up_actions
 
 
 def _comma_join(values: list[Any]) -> str:
@@ -820,6 +914,9 @@ def _markdown(payload: dict[str, Any]) -> str:
     missing_row_inputs = [
         str(item) for item in payload.get("missing_row_inputs", []) if str(item)
     ]
+    upstream_source_blockers = [
+        str(item) for item in payload.get("upstream_source_blockers", []) if str(item)
+    ]
     lines = [
         "# Science Actual Closure Row Audit",
         "",
@@ -828,6 +925,7 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `component_ready_count`: `{payload.get('component_ready_count', 0)}/{payload.get('component_count', 0)}`",
         f"- `requirement_pass_count`: `{summary.get('passing_requirement_count', 0)}/{summary.get('requirement_count', 0)}`",
         f"- `missing_row_inputs`: `{_comma_join(missing_row_inputs)}`",
+        f"- `upstream_source_blockers`: `{_comma_join(upstream_source_blockers)}`",
         "",
         "| Row Input | Status | Component | Closes Criteria | Default Path |",
         "|---|---|---|---|---|",
@@ -1236,6 +1334,8 @@ def build_science_actual_closure_audit(
         "gpcr_rows": gpcr_row_resolution,
         "pocketmd_rows": pocketmd_row_resolution,
     }
+    upstream_source_acquisition = _upstream_source_acquisition_context(repo_root)
+    upstream_source_blockers = _upstream_source_blockers(upstream_source_acquisition)
     public = _materialize_public_benchmark(
         subset_rows_path=None
         if subset_row_resolution.get("auto_detected")
@@ -1341,6 +1441,7 @@ def build_science_actual_closure_audit(
         missing_row_inputs=missing_row_inputs,
         contract_pass=contract_pass,
         blockers=blockers,
+        upstream_source_blockers=upstream_source_blockers,
     )
     input_paths = [
         Path("scripts/materialize_science_actual_closure_from_rows.py"),
@@ -1364,6 +1465,12 @@ def build_science_actual_closure_audit(
         input_paths.append(gpcr_rows_path)
     if pocketmd_rows_path is not None:
         input_paths.append(pocketmd_rows_path)
+    for path in (
+        DEFAULT_PUBLIC_SOURCE_ACQUISITION_PLAN,
+        DEFAULT_POCKETMD_SOURCE_ACQUISITION_PLAN,
+    ):
+        if _resolve(repo_root, path).exists():
+            input_paths.append(path)
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -1381,6 +1488,12 @@ def build_science_actual_closure_audit(
                 1 for component in components if component.get("contract_pass")
             ),
             "blocker_count": len(blockers),
+            "upstream_source_context_count": sum(
+                1
+                for row in upstream_source_acquisition.values()
+                if isinstance(row, dict) and row.get("present")
+            ),
+            "upstream_source_blocker_count": len(upstream_source_blockers),
             **requirement_summary,
         },
         "component_count": len(components),
@@ -1391,6 +1504,8 @@ def build_science_actual_closure_audit(
         "row_intake_contracts": row_intake_contracts,
         "row_closure_matrix": row_closure_matrix,
         "row_closure_matrix_count": len(row_closure_matrix),
+        "upstream_source_acquisition": upstream_source_acquisition,
+        "upstream_source_blockers": upstream_source_blockers,
         "operator_next_actions": operator_next_actions,
         "component_requirement_summaries": component_requirement_summaries,
         "actual_closure_requirements": actual_closure_requirements,

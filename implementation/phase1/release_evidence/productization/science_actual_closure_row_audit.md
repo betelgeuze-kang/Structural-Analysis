@@ -5,6 +5,7 @@
 - `component_ready_count`: `1/3`
 - `requirement_pass_count`: `10/19`
 - `missing_row_inputs`: `vina_gnina_rows, pocketmd_rows`
+- `upstream_source_blockers`: `public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_rows_not_acquired, public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_engine_inputs_not_ready, public_benchmark_phase2_source_acquisition::public_benchmark_external_receipts_not_attached, pocketmd_lite_source_acquisition::pocketmd_lite_topk_rows_not_acquired, pocketmd_lite_source_acquisition::upstream_top_k_candidate_receipts_not_attached, pocketmd_lite_source_acquisition::lite_refinement_metric_receipts_not_attached`
 
 | Row Input | Status | Component | Closes Criteria | Default Path |
 |---|---|---|---|---|
@@ -21,6 +22,6 @@
 | `gpcr_hard_decoy_actual_closure` | `ready` | `none` | `0` |
 | `pocketmd_lite_topk_actual_closure` | `operator_evidence_required` | `top_k_refinement_rows_present, top_k_refinement_case_coverage, local_min_survival_materialized, contact_persistence_materialized, h_bond_persistence_materialized, clash_relief_materialized, uncertainty_summary_materialized, report_blockers_resolved` | `13` |
 
-- `operator_next_actions`: `attach_vina_gnina_rows, attach_pocketmd_rows, run_science_actual_closure_row_materializer, review_science_actual_closure_row_audit`
+- `operator_next_actions`: `attach_vina_gnina_rows, attach_pocketmd_rows, resolve_public_benchmark_phase2_source_acquisition_blockers, resolve_pocketmd_lite_source_acquisition_blockers, run_science_actual_closure_row_materializer, review_science_actual_closure_row_audit`
 
 This runner only materializes operator-attached raw rows through the existing Public Benchmark, GPCR, and PocketMD Lite materializers. It does not download benchmark data, generate docking scores, run MD, infer missing metrics, or treat fixture/proxy rows as actual science closure evidence.
