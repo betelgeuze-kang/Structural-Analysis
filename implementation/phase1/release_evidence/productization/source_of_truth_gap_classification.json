@@ -3,17 +3,17 @@
   "claim_boundary": "This artifact classifies the five remaining source-of-truth gap candidates. It records freshness policy and live artifact checks, but does not promote aggregator rollups or replace the heavy validation receipts themselves.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T13:36:25.611880+00:00",
+  "generated_at": "2026-07-03T15:44:35.688873+00:00",
   "input_checksums": {
     "docs/source-of-truth-gap-classification.md": "sha256:d4cd1134e78f6acedaf39c09c5ff2fc0fcbf62451e60e6530686269b855a8c09",
-    "implementation/phase1/real_accuracy_validation_report.json": "sha256:1e63a32c3d0d95e3e34f58aea661e989646088d66cf086da7340bb8dfc8ab46c",
-    "implementation/phase1/release_evidence/productization/ai_engine_productization_contracts.json": "sha256:c02a64e4b97749c983082eb33a1c7842207f2c2da3c0d1c139008345dd83ca83",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:7e6821c62a9ee7520a8c3b154e0738778d1e2ec34f8560c9d7bc15cb6656c915",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:faf8c25ed3c6d5dad34e874a7f449271cc4a3b7622f0792b84977ae77e8e5f62",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json": "sha256:161b9e36a2bcb39dad03d93d6b4ecb29c6c549ea380380cf712febbe1ea27ae7",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:1e00ecf463db13175af04741ced747669d939681218722bb1d724ba98998c437",
+    "implementation/phase1/real_accuracy_validation_report.json": "sha256:ca845f2afd861499dc1aa2457dd43546130272cbb595007548684a1b691780dd",
+    "implementation/phase1/release_evidence/productization/ai_engine_productization_contracts.json": "sha256:208f7a05a7a53fa57d1dde4de4a5318c931afad067ca5e9680f87ade218a7806",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:5558e5f0d82be0cbcb22c4431c0247939a1a9f780938f6d40bcf8484561b0eed",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:189416fc44179d892e0fe0012a380fda9f1bbe1552256b53871db92a9a681360",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json": "sha256:ef2c7ea4bc559336fc47b42e185ce64ce167557a8697809a4a9a47dcf7e6ed27",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:c31a592285e990edbc4fa2a5c8db03f09ec9d65d0f01509f51f87436d63e134a",
     "scripts/build_source_of_truth_gap_classification.py": "sha256:8c5639933496df1a1951eb662c765d8c2bd3a9d327218bd86fddf97de1face23",
-    "scripts/report_release_evidence_freshness.py": "sha256:9615317879f49b73add1591d64a21d5d9ef56d8da82d6cae75c24da3847ddf38"
+    "scripts/report_release_evidence_freshness.py": "sha256:f351ba020542bb073efe698856bf518d93a1e1abdd11009c340c136bc78d3a02"
   },
   "reason_code": "PASS",
   "reuse_policy": "source_of_truth_gap_classification_materialized_from_freshness_policy",
@@ -175,7 +175,7 @@
     }
   ],
   "schema_version": "source-of-truth-gap-classification.v1",
-  "source_commit_sha": "5d59a79d85c91d5678007c75061efe8c1fbb3f31",
+  "source_commit_sha": "1eef4dd2490616540e45680ad783eb0b9b1d2473",
   "status": "ready",
   "summary": {
     "aggregator_review_count": 3,
