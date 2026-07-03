@@ -1440,7 +1440,7 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T19:56:05.395087+00:00",
+  "generated_at": "2026-07-03T19:59:41.400514+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json": "sha256:98255bfca71cb82c3146a11e74e90cc338836518d93672950cbec5defd7d7147",
     "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
@@ -1453,7 +1453,7 @@
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
     "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:b09772cfed185240c50637715362509946897e7dbf18428ccc1bfbf88527ce99",
-    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:5890692c1239d1a9d16c2e316c159aa3fae318f97b18ef6cf992bd553dd8c930"
+    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:e7ec371795c91dab11410c047235eac04dcf7190e65471dcdd5d818cc0b067a1"
   },
   "missing_row_inputs": [
     "vina_gnina_rows",
@@ -2865,7 +2865,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "0c62070c7d73dfed8ddcdb969834d371a17c0f18",
+  "source_commit_sha": "89e5e3daaec280bf95597f397a38ca2d355242bc",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,

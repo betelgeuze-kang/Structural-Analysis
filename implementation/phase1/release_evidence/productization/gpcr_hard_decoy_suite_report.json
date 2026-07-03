@@ -13,9 +13,9 @@
   "first_blocked_target": "",
   "first_blocker": "",
   "first_operator_evidence_gap": {},
-  "generated_at": "2026-07-03T19:56:05.390733+00:00",
+  "generated_at": "2026-07-03T19:59:41.396439+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:1a85ef2ff6450c0060c440d5bf9dd3ae86c4eb485fce78423b66630db4ab0e7a",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:3fb149745f292bd01861e94e38bb68f495771a36176192a89f03deacbba1ef73",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:8824e14602faf05a39d841d8367d5773c76a23ffbf8f614ee99f926a8ff478a6"
   },
   "operator_evidence_gap_count": 0,
@@ -162,7 +162,7 @@
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "gpcr-hard-decoy-suite-report.v1",
-  "source_commit_sha": "0c62070c7d73dfed8ddcdb969834d371a17c0f18",
+  "source_commit_sha": "89e5e3daaec280bf95597f397a38ca2d355242bc",
   "status": "ready",
   "summary_line": "GPCR hard-decoy suite: PASS",
   "target_count": 3,

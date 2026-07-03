@@ -1,7 +1,7 @@
 {
   "claim_boundary": "Operator intake template materialized from raw hard-decoy ranking rows. The GPCR suite materializer must still compute metrics and pass all Phase 3 exit criteria before broad GPCR claims are safe.",
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T19:56:05.365714+00:00",
+  "generated_at": "2026-07-03T19:59:41.371105+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json": "sha256:98255bfca71cb82c3146a11e74e90cc338836518d93672950cbec5defd7d7147",
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261"
@@ -79,7 +79,7 @@
   "reuse_policy": "gpcr_hard_decoy_operator_template_materialized_from_raw_ranking_rows",
   "reused_evidence": false,
   "schema_version": "gpcr-hard-decoy-operator-intake.v1",
-  "source_commit_sha": "0c62070c7d73dfed8ddcdb969834d371a17c0f18",
+  "source_commit_sha": "89e5e3daaec280bf95597f397a38ca2d355242bc",
   "targets": [
     {
       "decoys_above_positive_count": null,

@@ -978,6 +978,29 @@ def _component_error(component_id: str, exc: Exception, expected_mode: str) -> d
     }
 
 
+def _source_receipt_with_existing_defaults(
+    *,
+    repo_root: Path,
+    artifact_path: Path,
+    source_id: str,
+    source_url: str,
+    source_license: str,
+    source_version: str,
+) -> dict[str, str]:
+    existing = _load_optional_json(repo_root, artifact_path)
+    existing_source = existing.get("operator_input_source")
+    if not isinstance(existing_source, dict):
+        existing_source = {}
+    return {
+        "source_id": source_id or str(existing_source.get("source_id") or ""),
+        "source_url": source_url or str(existing_source.get("source_url") or ""),
+        "source_license": source_license
+        or str(existing_source.get("source_license") or ""),
+        "source_version": source_version
+        or str(existing_source.get("source_version") or ""),
+    }
+
+
 def _materialize_gpcr(
     *,
     rows_path: Path | None,
@@ -997,13 +1020,21 @@ def _materialize_gpcr(
             "raw_hard_decoy_rows",
         )
     try:
-        template = gpcr_rows.build_gpcr_hard_decoy_operator_template_from_rows(
-            rows_path=rows_path,
+        source_receipt = _source_receipt_with_existing_defaults(
             repo_root=repo_root,
+            artifact_path=template_out,
             source_id=source_id,
             source_url=source_url,
             source_license=source_license,
             source_version=source_version,
+        )
+        template = gpcr_rows.build_gpcr_hard_decoy_operator_template_from_rows(
+            rows_path=rows_path,
+            repo_root=repo_root,
+            source_id=source_receipt["source_id"],
+            source_url=source_receipt["source_url"],
+            source_license=source_receipt["source_license"],
+            source_version=source_receipt["source_version"],
         )
         _write_json(repo_root, template_out, template)
         report = gpcr_suite.materialize_gpcr_hard_decoy_suite_report(

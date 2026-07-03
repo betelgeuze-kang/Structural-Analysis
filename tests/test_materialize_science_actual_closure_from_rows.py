@@ -998,6 +998,52 @@ def test_science_actual_closure_audit_materializes_both_ready_surfaces(
     assert (tmp_path / "pocketmd_surface.json").exists()
 
 
+def test_science_actual_closure_preserves_existing_gpcr_source_receipt(
+    tmp_path: Path,
+) -> None:
+    gpcr_rows = tmp_path / "gpcr_rows.csv"
+    gpcr_template = tmp_path / "gpcr_template.json"
+    _write_gpcr_rows(gpcr_rows)
+    gpcr_template.write_text(
+        json.dumps(
+            {
+                "operator_input_source": {
+                    "source_id": "chembl_gpcr_activity_positive_low_affinity_rows",
+                    "source_url": "https://www.ebi.ac.uk/chembl/api/data/activity",
+                    "source_license": "ChEMBL public API activity rows",
+                    "source_version": "live_chembl_api_snapshot",
+                }
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+
+    audit = module.build_science_actual_closure_audit(
+        repo_root=tmp_path,
+        **_public_output_kwargs(tmp_path),
+        gpcr_rows_path=gpcr_rows,
+        gpcr_template_out=gpcr_template,
+        gpcr_report_out=tmp_path / "gpcr_report.json",
+        gpcr_surface_out=tmp_path / "gpcr_surface.json",
+        pocketmd_intake_out=tmp_path / "pocketmd_intake.json",
+        pocketmd_report_out=tmp_path / "pocketmd_report.json",
+        pocketmd_surface_out=tmp_path / "pocketmd_surface.json",
+    )
+
+    gpcr = audit["components"][1]
+    template_payload = json.loads(gpcr_template.read_text(encoding="utf-8"))
+    source = template_payload["operator_input_source"]
+    assert source["source_id"] == "chembl_gpcr_activity_positive_low_affinity_rows"
+    assert source["source_url"] == "https://www.ebi.ac.uk/chembl/api/data/activity"
+    assert source["source_license"] == "ChEMBL public API activity rows"
+    assert source["source_version"] == "live_chembl_api_snapshot"
+    assert gpcr["status"] == "ready"
+    assert gpcr["target_pass_count"] == 3
+    assert gpcr["phase3_exit_gate_status"] == "ready"
+    assert gpcr["actual_closure_ready"] is True
+
+
 def test_science_actual_closure_audit_blocks_placeholder_source_receipts(
     tmp_path: Path,
 ) -> None:
