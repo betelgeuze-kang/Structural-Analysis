@@ -45,10 +45,10 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "component_count": 3,
         "expected_slot_count": 6,
         "missing_row_template_artifact_count": 0,
-        "missing_slot_count": 6,
-        "provided_slot_count": 0,
+        "missing_slot_count": 2,
+        "provided_slot_count": 4,
         "row_template_artifact_count": 6,
-        "science_actual_closure_blocker_count": 8,
+        "science_actual_closure_blocker_count": 2,
         "slot_count": 6,
     }
     assert list(slots) == [
@@ -59,7 +59,10 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "gpcr_rows",
         "pocketmd_rows",
     ]
-    assert payload["missing_row_inputs"] == list(slots)
+    assert payload["missing_row_inputs"] == [
+        "vina_gnina_rows",
+        "pocketmd_rows",
+    ]
     assert payload["missing_row_template_artifacts"] == []
     assert payload["row_template_artifacts"] == {
         "enrichment_rows": (
@@ -87,10 +90,11 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
             "public_benchmark_vina_gnina_rows_template.csv"
         ),
     }
-    assert payload["first_missing_slot"]["row_input_id"] == "subset_rows"
+    assert payload["first_missing_slot"]["row_input_id"] == "vina_gnina_rows"
 
     subset = slots["subset_rows"]
-    assert subset["status"] == "operator_input_required"
+    assert subset["status"] == "provided"
+    assert subset["missing"] is False
     assert subset["row_template_present"] is True
     assert subset["row_template_artifact"].endswith(
         "public_benchmark_subset_rows_template.csv"
@@ -111,14 +115,24 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     )
 
     pose = slots["pose_rows"]
+    assert pose["status"] == "provided"
     assert {
         "symmetry_aware_ligand_rmsd_ready",
         "posebusters_style_pose_validity_ready",
     }.issubset(set(pose["closes_actual_closure_criteria"]))
     assert "required_pose_fields" in pose["contract_field_groups"]
 
+    enrichment = slots["enrichment_rows"]
+    assert enrichment["status"] == "provided"
+
+    vina_gnina = slots["vina_gnina_rows"]
+    assert vina_gnina["status"] == "operator_input_required"
+    assert vina_gnina["missing"] is True
+
     gpcr = slots["gpcr_rows"]
     assert gpcr["actual_closure_component_id"] == "gpcr_hard_decoy_actual_closure"
+    assert gpcr["status"] == "provided"
+    assert gpcr["missing"] is False
     assert gpcr["row_template_present"] is True
     assert gpcr["row_template_artifact"].endswith(
         "gpcr_hard_decoy_rows_template.csv"
@@ -140,6 +154,8 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert pocketmd["actual_closure_component_id"] == (
         "pocketmd_lite_topk_actual_closure"
     )
+    assert pocketmd["status"] == "operator_input_required"
+    assert pocketmd["missing"] is True
     assert pocketmd["row_template_present"] is True
     assert pocketmd["row_template_artifact"].endswith(
         "pocketmd_lite_topk_rows_template.csv"
@@ -158,15 +174,10 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     }
     assert component_summaries["public_benchmark_phase2_actual_closure"][
         "missing_row_input_ids"
-    ] == [
-        "subset_rows",
-        "pose_rows",
-        "enrichment_rows",
-        "vina_gnina_rows",
-    ]
+    ] == ["vina_gnina_rows"]
     assert component_summaries["gpcr_hard_decoy_actual_closure"][
         "missing_row_input_ids"
-    ] == ["gpcr_rows"]
+    ] == []
     assert component_summaries["pocketmd_lite_topk_actual_closure"][
         "missing_row_input_ids"
     ] == ["pocketmd_rows"]
@@ -194,10 +205,13 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert payload["contract_pass"] is True
     assert payload["row_slot_handoff_count"] == 6
     assert payload["summary"]["row_template_artifact_count"] == 6
+    assert payload["summary"]["missing_slot_count"] == 2
     assert payload["input_checksums"][
         "scripts/build_science_actual_closure_operator_handoff.py"
     ].startswith("sha256:")
-    assert "| `subset_rows` | `operator_input_required` |" in markdown
+    assert "| `subset_rows` | `provided` |" in markdown
+    assert "| `vina_gnina_rows` | `operator_input_required` |" in markdown
+    assert "| `pocketmd_rows` | `operator_input_required` |" in markdown
     assert "CSV Starter" in markdown
     assert "public_benchmark_subset_rows_template.csv" in markdown
     assert "gpcr_hard_decoy_rows_template.csv" in markdown

@@ -100,7 +100,7 @@ def _resolve_row_input(
     for candidate in candidates:
         resolved_candidate = _resolve(repo_root, candidate)
         if resolved_candidate.exists():
-            return resolved_candidate, {
+            return candidate, {
                 "row_input_id": row_input_id,
                 "explicit_path": "",
                 "resolved_path": str(candidate),
@@ -1206,10 +1206,16 @@ def build_science_actual_closure_audit(
         "pocketmd_rows": pocketmd_row_resolution,
     }
     public = _materialize_public_benchmark(
-        subset_rows_path=subset_rows_path,
-        pose_rows_path=pose_rows_path,
-        enrichment_rows_path=enrichment_rows_path,
-        vina_gnina_rows_path=vina_gnina_rows_path,
+        subset_rows_path=None
+        if subset_row_resolution.get("auto_detected")
+        else subset_rows_path,
+        pose_rows_path=None if pose_row_resolution.get("auto_detected") else pose_rows_path,
+        enrichment_rows_path=None
+        if enrichment_row_resolution.get("auto_detected")
+        else enrichment_rows_path,
+        vina_gnina_rows_path=None
+        if vina_gnina_row_resolution.get("auto_detected")
+        else vina_gnina_rows_path,
         repo_root=repo_root,
         audit_out=public_phase2_audit_out,
         operator_bundle_out=public_operator_bundle_out,

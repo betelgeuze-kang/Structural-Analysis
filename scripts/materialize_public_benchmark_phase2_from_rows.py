@@ -124,7 +124,8 @@ def _resolve_row_input(
 ) -> tuple[Path | None, dict[str, Any]]:
     candidates = DEFAULT_ROW_INPUT_CANDIDATES[row_input_id]
     if explicit_path is not None:
-        return explicit_path, {
+        resolved_explicit_path = _resolve(repo_root, explicit_path)
+        return resolved_explicit_path, {
             "row_input_id": row_input_id,
             "explicit_path": str(explicit_path),
             "resolved_path": str(explicit_path),
