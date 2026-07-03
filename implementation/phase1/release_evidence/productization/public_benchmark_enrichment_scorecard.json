@@ -13,7 +13,7 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_blocked_target": "",
-  "generated_at": "2026-07-03T22:06:33.422989+00:00",
+  "generated_at": "2026-07-03T23:31:05.500932+00:00",
   "input_checksums": {
     "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6"
@@ -83,7 +83,7 @@
     "blank_values": "rejected; no implicit default is applied",
     "required": true
   },
-  "source_commit_sha": "09165e21a218f40a8be2951d512a86386b662700",
+  "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
   "status": "ready",
   "summary": {
     "active_count": 25,

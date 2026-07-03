@@ -156,6 +156,20 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert payload["phase2_row_audit"]["phase2_failed_criteria"] == [
         "vina_gnina_comparison_ready",
     ]
+    assert payload["phase2_row_audit"]["source_actuality_scope"] == (
+        "provided_row_inputs_only"
+    )
+    assert payload["phase2_row_audit"]["source_actuality_contract_pass"] is True
+    assert payload["phase2_row_audit"]["source_actuality_scope_complete"] is False
+    assert payload["phase2_row_audit"]["source_actuality_blocker_count"] == 0
+    assert payload["phase2_row_audit"]["source_actuality_provided_row_inputs"] == [
+        "subset_rows",
+        "pose_rows",
+        "enrichment_rows",
+    ]
+    assert payload["phase2_row_audit"]["source_actuality_missing_row_inputs"] == [
+        "vina_gnina_rows",
+    ]
     assert payload["vina_gnina_execution_plan"]["artifact"] == (
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_execution_plan.json"
@@ -332,6 +346,10 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "phase2_row_audit_failed_criteria": [
             "vina_gnina_comparison_ready",
         ],
+        "phase2_row_audit_source_actuality_scope": "provided_row_inputs_only",
+        "phase2_row_audit_source_actuality_contract_pass": True,
+        "phase2_row_audit_source_actuality_scope_complete": False,
+        "phase2_row_audit_source_actuality_blocker_count": 0,
         "missing_row_input_action_count": 1,
         "phase2_row_audit_missing_row_input_count": 1,
         "phase2_row_audit_missing_row_inputs": [

@@ -11,6 +11,9 @@
 - `phase2_row_audit`: `implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json`
 - `phase2_row_audit_status`: `operator_evidence_required`
 - `phase2_row_audit_missing_row_inputs`: `vina_gnina_rows`
+- `phase2_row_audit_source_actuality_scope`: `provided_row_inputs_only`
+- `phase2_row_audit_source_actuality_contract_pass`: `True`
+- `phase2_row_audit_source_actuality_blocker_count`: `0`
 - `missing_row_input_action_count`: `1`
 - `vina_gnina_execution_plan`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json`
 - `vina_gnina_execution_plan_status`: `engine_input_blocked`

@@ -795,6 +795,24 @@ def test_public_benchmark_phase2_row_audit_materializes_pose_rows_without_vina_g
     assert audit["blockers"] == [
         "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
     ]
+    partial_source_check = audit["partial_operator_source_actuality_check"]
+    assert partial_source_check["scope"] == "provided_row_inputs_only"
+    assert partial_source_check["scope_complete"] is False
+    assert partial_source_check["contract_pass"] is True
+    assert partial_source_check["phase2_source_actuality_ready"] is False
+    assert partial_source_check["provided_row_inputs"] == [
+        "subset_rows",
+        "pose_rows",
+        "enrichment_rows",
+    ]
+    assert partial_source_check["missing_row_inputs"] == ["vina_gnina_rows"]
+    assert partial_source_check["blockers"] == []
+    assert set(partial_source_check["row_file_artifact_receipts"]) == {
+        "subset_rows",
+        "pose_rows",
+        "enrichment_rows",
+    }
+    assert audit["operator_bundle_source_actuality_check"] == partial_source_check
     assert audit["summary"]["phase2_failed_criteria"] == [
         "vina_gnina_comparison_ready"
     ]
@@ -841,6 +859,54 @@ def test_public_benchmark_phase2_row_audit_materializes_pose_rows_without_vina_g
     assert audit["outputs"]["pose_validity_input"].endswith(
         "public_benchmark_pose_validity_input.json"
     )
+
+
+def test_public_benchmark_phase2_row_audit_preflights_partial_source_receipts(
+    tmp_path: Path,
+) -> None:
+    rows = _write_phase2_rows(tmp_path)
+    subset_payload = json.loads(rows["subset"].read_text(encoding="utf-8"))
+    subset_payload["rows"][0]["source_license_or_accession"] = (
+        "CASF/PDBBind:test-accession"
+    )
+    subset_payload["rows"][0]["source_checksum"] = "sha256:" + "a" * 64
+    subset_payload["rows"][0]["provenance_ref"] = "operator://casf-pdbbind/case_01"
+    _write_json(rows["subset"], subset_payload)
+
+    audit = module.build_public_benchmark_phase2_row_audit(
+        repo_root=tmp_path,
+        subset_rows_path=rows["subset"],
+        pose_rows_path=rows["pose"],
+        enrichment_rows_path=rows["enrichment"],
+        target_subset_case_count=module.harness_bundle.TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+        operator_bundle_out=tmp_path / "operator_bundle.json",
+        out_dir=tmp_path / "out",
+        harness_report_out=tmp_path / "harness_report.json",
+        artifact_bundle_out=tmp_path / "artifact_bundle.json",
+    )
+
+    source_check = audit["partial_operator_source_actuality_check"]
+    assert audit["status"] == "operator_evidence_required"
+    assert audit["phase2_ready"] is False
+    assert audit["missing_row_inputs"] == ["vina_gnina_rows"]
+    assert source_check["contract_pass"] is False
+    assert source_check["blockers"] == [
+        "subset_rows:case_01:provenance_ref_placeholder",
+        "subset_rows:case_01:source_checksum_placeholder_digest",
+        "subset_rows:case_01:source_license_or_accession_placeholder",
+    ]
+    assert {
+        blocker
+        for blocker in audit["blockers"]
+        if blocker.startswith("partial_operator_source_actuality::")
+    } == {
+        "partial_operator_source_actuality::"
+        "subset_rows:case_01:provenance_ref_placeholder",
+        "partial_operator_source_actuality::"
+        "subset_rows:case_01:source_checksum_placeholder_digest",
+        "partial_operator_source_actuality::"
+        "subset_rows:case_01:source_license_or_accession_placeholder",
+    }
 
 
 def test_public_benchmark_phase2_row_audit_cli_writes_markdown(

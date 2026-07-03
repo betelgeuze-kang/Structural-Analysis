@@ -266,6 +266,8 @@ def _source_acquisition_blockers(
         blockers.append(
             "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing"
         )
+    if int(phase2_row_audit_summary.get("source_actuality_blocker_count") or 0) > 0:
+        blockers.append("public_benchmark_provided_row_source_receipts_not_actual")
     blockers.append("public_benchmark_external_receipts_not_attached")
     return blockers
 
@@ -304,6 +306,16 @@ def _phase2_row_audit_summary(audit: dict[str, Any]) -> dict[str, Any]:
         )
         if str(row)
     ]
+    source_actuality_check = audit.get("partial_operator_source_actuality_check")
+    if not isinstance(source_actuality_check, dict):
+        source_actuality_check = audit.get("operator_bundle_source_actuality_check")
+    if not isinstance(source_actuality_check, dict):
+        source_actuality_check = {}
+    source_actuality_blockers = [
+        str(row)
+        for row in source_actuality_check.get("blockers", [])
+        if str(row)
+    ] if isinstance(source_actuality_check.get("blockers"), list) else []
     return {
         "artifact": str(DEFAULT_PHASE2_ROW_AUDIT),
         "markdown_artifact": str(DEFAULT_PHASE2_ROW_AUDIT_MD),
@@ -333,6 +345,29 @@ def _phase2_row_audit_summary(audit: dict[str, Any]) -> dict[str, Any]:
         "phase2_row_closure_matrix_count": int(
             audit.get("phase2_row_closure_matrix_count") or 0
         ),
+        "source_actuality_scope": str(source_actuality_check.get("scope") or ""),
+        "source_actuality_contract_pass": source_actuality_check.get("contract_pass"),
+        "source_actuality_scope_complete": bool(
+            source_actuality_check.get("scope_complete")
+        ),
+        "source_actuality_phase2_ready": bool(
+            source_actuality_check.get("phase2_source_actuality_ready")
+        ),
+        "source_actuality_blocker_count": int(
+            source_actuality_check.get("blocker_count")
+            or len(source_actuality_blockers)
+        ),
+        "source_actuality_blockers": source_actuality_blockers,
+        "source_actuality_provided_row_inputs": [
+            str(row)
+            for row in source_actuality_check.get("provided_row_inputs", [])
+            if str(row)
+        ] if isinstance(source_actuality_check.get("provided_row_inputs"), list) else [],
+        "source_actuality_missing_row_inputs": [
+            str(row)
+            for row in source_actuality_check.get("missing_row_inputs", [])
+            if str(row)
+        ] if isinstance(source_actuality_check.get("missing_row_inputs"), list) else [],
         "blocker_count": int(summary.get("blocker_count") or len(audit.get("blockers", []))),
         "command": (
             "python3 scripts/materialize_public_benchmark_phase2_from_rows.py "
@@ -1084,6 +1119,18 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "phase2_row_audit_failed_criteria": phase2_row_audit_summary[
                 "phase2_failed_criteria"
             ],
+            "phase2_row_audit_source_actuality_scope": phase2_row_audit_summary[
+                "source_actuality_scope"
+            ],
+            "phase2_row_audit_source_actuality_contract_pass": (
+                phase2_row_audit_summary["source_actuality_contract_pass"]
+            ),
+            "phase2_row_audit_source_actuality_scope_complete": (
+                phase2_row_audit_summary["source_actuality_scope_complete"]
+            ),
+            "phase2_row_audit_source_actuality_blocker_count": (
+                phase2_row_audit_summary["source_actuality_blocker_count"]
+            ),
             "missing_row_input_action_count": len(missing_row_input_actions),
             "vina_gnina_execution_plan_status": vina_gnina_execution_plan_summary[
                 "status"
@@ -1170,6 +1217,9 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `phase2_row_audit`: `{payload['phase2_row_audit']['artifact']}`",
         f"- `phase2_row_audit_status`: `{payload['phase2_row_audit']['status']}`",
         f"- `phase2_row_audit_missing_row_inputs`: `{', '.join(payload['phase2_row_audit']['missing_row_inputs'])}`",
+        f"- `phase2_row_audit_source_actuality_scope`: `{payload['phase2_row_audit']['source_actuality_scope']}`",
+        f"- `phase2_row_audit_source_actuality_contract_pass`: `{payload['phase2_row_audit']['source_actuality_contract_pass']}`",
+        f"- `phase2_row_audit_source_actuality_blocker_count`: `{payload['phase2_row_audit']['source_actuality_blocker_count']}`",
         f"- `missing_row_input_action_count`: `{payload['missing_row_input_action_count']}`",
         f"- `vina_gnina_execution_plan`: `{payload['vina_gnina_execution_plan']['artifact']}`",
         f"- `vina_gnina_execution_plan_status`: `{payload['vina_gnina_execution_plan']['status']}`",

@@ -20,18 +20,18 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T23:14:08.507704+00:00",
+  "generated_at": "2026-07-03T23:31:05.423562+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:c25ba5ea401ba42eb25040cd23fb100aa19be66f3a4f695b362932e956d7044f",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:00d15d8668340de41ef36275a9b2f5601639e7197c0ce83a7aafda63cc0cb188",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:d91bbc8402c86796ce3d60d0a053610cceea2dcbbb0f5faf00adeaad7698bea4",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:6e75a02c6b13b518bf6087e44db30b84c243e4935d2b50611e2fd0411e476118",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:dcf5bdf831a01f412e7b969dd7c6b7eac57f59c28f6cf166a81b4fe0a4d5e36e",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:4acacfc65c70a8b52f02a183bc829ce139247e7a4eda72ad618c4dfbc0774fbb",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1",
     "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:895f52a4b9383625534767806ab373c4e33d70287a52ca65f9090b0d0e1e593a",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
-    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:8c22a94cdfecbc71b6a04aaea3040cad1ed053419474117fe1f22adf67301354",
+    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:cea647619944140048844f8c2efc475f47008bbd55333cd276673bb56f80d192",
     "scripts/materialize_public_benchmark_pose_success_harness.py": "sha256:8a8eccfa010924ca874984fecc8a484a158d974dd7888ba9bf42a01009366e61",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:f3f8ee12c7b15238da7a940bab4c4bfa2ba17cf270ea3522d000430dc20cd4a8",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:373b1e217aaa6bce582e83a3c9d84e8b7e25664362dc91a9ba009ee54a01cf56",
@@ -473,6 +473,20 @@
     "phase2_failed_criterion_count": 1,
     "phase2_ready": false,
     "phase2_row_closure_matrix_count": 4,
+    "source_actuality_blocker_count": 0,
+    "source_actuality_blockers": [],
+    "source_actuality_contract_pass": true,
+    "source_actuality_missing_row_inputs": [
+      "vina_gnina_rows"
+    ],
+    "source_actuality_phase2_ready": false,
+    "source_actuality_provided_row_inputs": [
+      "subset_rows",
+      "pose_rows",
+      "enrichment_rows"
+    ],
+    "source_actuality_scope": "provided_row_inputs_only",
+    "source_actuality_scope_complete": false,
     "status": "operator_evidence_required"
   },
   "receipt_promotion_policy": {
@@ -838,7 +852,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "2375d3dc0079cac8e278d152d3d7803eb017d0e6",
+  "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
@@ -859,6 +873,10 @@
     "phase2_row_audit_missing_row_inputs": [
       "vina_gnina_rows"
     ],
+    "phase2_row_audit_source_actuality_blocker_count": 0,
+    "phase2_row_audit_source_actuality_contract_pass": true,
+    "phase2_row_audit_source_actuality_scope": "provided_row_inputs_only",
+    "phase2_row_audit_source_actuality_scope_complete": false,
     "phase2_row_audit_status": "operator_evidence_required",
     "required_component_count": 5,
     "required_row_input_count": 4,

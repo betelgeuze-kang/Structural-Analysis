@@ -804,9 +804,9 @@
   "contract_pass": true,
   "dry_run_case_count": 0,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T22:06:33.409107+00:00",
+  "generated_at": "2026-07-03T23:31:05.486299+00:00",
   "input_checksums": {
-    "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json": "sha256:c3ad0d3fc58872f2e0826ea675f53cc94d1797f22149a85f6d21d1a1f1a1f115",
+    "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json": "sha256:63be53f8b95c83d84e4957b535b4463e0ed3dcb7bc30c726e57c3cec89170efb",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:373b1e217aaa6bce582e83a3c9d84e8b7e25664362dc91a9ba009ee54a01cf56",
     "scripts/validate_public_benchmark_pose_validity.py": "sha256:781e1a90205d6e04929d2bd29f7519427db86eefb708320e12a0ebc5559fea9d"
   },
@@ -838,7 +838,7 @@
     }
   },
   "schema_version": "public-benchmark-pose-validity-packet.v1",
-  "source_commit_sha": "09165e21a218f40a8be2951d512a86386b662700",
+  "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
   "status": "ready",
   "unique_real_benchmark_case_count": 12,
   "validation": {

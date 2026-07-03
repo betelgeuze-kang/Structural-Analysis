@@ -689,6 +689,71 @@ def _components_from_partial_rows(
     return components, outputs
 
 
+def _partial_operator_source_actuality_check(
+    row_inputs: dict[str, Path | None],
+    *,
+    missing_row_inputs: list[str],
+) -> dict[str, Any]:
+    provided_row_inputs = [
+        row_input_id
+        for row_input_id, path in row_inputs.items()
+        if path is not None
+    ]
+    subset_rows = (
+        row_bundle._load_rows(row_inputs["subset_rows"])
+        if row_inputs.get("subset_rows") is not None
+        else []
+    )
+    pose_rows = (
+        row_bundle._load_rows(row_inputs["pose_rows"])
+        if row_inputs.get("pose_rows") is not None
+        else []
+    )
+    enrichment_rows = (
+        row_bundle._load_rows(row_inputs["enrichment_rows"])
+        if row_inputs.get("enrichment_rows") is not None
+        else []
+    )
+    vina_gnina_rows = (
+        row_bundle._load_rows(row_inputs["vina_gnina_rows"])
+        if row_inputs.get("vina_gnina_rows") is not None
+        else []
+    )
+    source_actuality_check = row_bundle._source_actuality_check(
+        subset_rows=subset_rows,
+        pose_rows=pose_rows,
+        enrichment_targets=row_bundle._build_enrichment_targets(enrichment_rows),
+        vina_gnina_cases=row_bundle._build_vina_gnina_cases(vina_gnina_rows),
+    )
+    row_file_artifact_receipts = row_bundle._row_file_artifact_receipts(
+        {
+            row_input_id: path
+            for row_input_id, path in row_inputs.items()
+            if path is not None
+        }
+    )
+    return {
+        "schema_version": "public-benchmark-partial-source-actuality-check.v1",
+        **source_actuality_check,
+        "scope": "provided_row_inputs_only",
+        "scope_complete": not missing_row_inputs,
+        "phase2_source_actuality_ready": bool(
+            source_actuality_check["contract_pass"] and not missing_row_inputs
+        ),
+        "provided_row_inputs": provided_row_inputs,
+        "provided_row_input_count": len(provided_row_inputs),
+        "missing_row_inputs": list(missing_row_inputs),
+        "missing_row_input_count": len(missing_row_inputs),
+        "row_file_artifact_receipts": row_file_artifact_receipts,
+        "claim_boundary": (
+            "This partial preflight checks source actuality only for row inputs "
+            "that are already attached. Missing row inputs remain separately "
+            "blocked and must pass the full operator bundle source actuality "
+            "check before Public Benchmark Phase 2 can close."
+        ),
+    }
+
+
 def _component_error(exc: Exception) -> dict[str, Any]:
     return {
         "component_id": "public_benchmark_phase2_row_materialization",
@@ -1049,6 +1114,11 @@ def _markdown(payload: dict[str, Any]) -> str:
     summary = payload.get("summary")
     if not isinstance(summary, dict):
         summary = {}
+    source_actuality_check = payload.get("partial_operator_source_actuality_check")
+    if not isinstance(source_actuality_check, dict):
+        source_actuality_check = payload.get("operator_bundle_source_actuality_check")
+    if not isinstance(source_actuality_check, dict):
+        source_actuality_check = {}
     missing_row_inputs = [
         str(item) for item in payload.get("missing_row_inputs", []) if str(item)
     ]
@@ -1060,6 +1130,9 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `phase2_ready`: `{payload.get('phase2_ready', False)}`",
         f"- `component_ready_count`: `{payload.get('component_ready_count', 0)}/{payload.get('component_count', 0)}`",
         f"- `missing_row_inputs`: `{_comma_join(missing_row_inputs)}`",
+        f"- `source_actuality_scope`: `{source_actuality_check.get('scope', '')}`",
+        f"- `source_actuality_contract_pass`: `{source_actuality_check.get('contract_pass', '')}`",
+        f"- `source_actuality_blocker_count`: `{source_actuality_check.get('blocker_count', 0)}`",
         "",
         "| Row Input | Status | Feeds Components | Closes Criteria | Default Path |",
         "|---|---|---|---|---|",
@@ -1177,6 +1250,10 @@ def build_public_benchmark_phase2_row_audit(
         input_id for input_id, path in row_inputs.items() if path is None
     ]
     if missing_input_ids:
+        partial_source_actuality_check = _partial_operator_source_actuality_check(
+            row_inputs,
+            missing_row_inputs=missing_input_ids,
+        )
         components, partial_outputs = _components_from_partial_rows(
             row_inputs=row_inputs,
             repo_root=repo_root,
@@ -1201,6 +1278,11 @@ def build_public_benchmark_phase2_row_audit(
             for component in components
             for blocker in component["blockers"]
         ]
+        blockers.extend(
+            f"partial_operator_source_actuality::{blocker}"
+            for blocker in partial_source_actuality_check["blockers"]
+        )
+        blockers = list(dict.fromkeys(blockers))
         summary = _phase2_audit_summary(
             phase2_ready=False,
             missing_row_inputs=missing_input_ids,
@@ -1230,6 +1312,8 @@ def build_public_benchmark_phase2_row_audit(
             "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
             "row_input_statuses": row_input_statuses,
             "row_input_status_summary": row_input_status_summary,
+            "partial_operator_source_actuality_check": partial_source_actuality_check,
+            "operator_bundle_source_actuality_check": partial_source_actuality_check,
             "blockers": blockers,
             "component_count": len(components),
             "component_ready_count": sum(

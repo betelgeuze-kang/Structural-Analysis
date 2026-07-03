@@ -5,6 +5,9 @@
 - `phase2_ready`: `False`
 - `component_ready_count`: `4/5`
 - `missing_row_inputs`: `vina_gnina_rows`
+- `source_actuality_scope`: `provided_row_inputs_only`
+- `source_actuality_contract_pass`: `True`
+- `source_actuality_blocker_count`: `0`
 
 | Row Input | Status | Feeds Components | Closes Criteria | Default Path |
 |---|---|---|---|---|

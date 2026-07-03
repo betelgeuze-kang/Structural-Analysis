@@ -4,12 +4,12 @@
   "contract_pass": true,
   "depends_on": [],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T21:57:54.877411+00:00",
+  "generated_at": "2026-07-03T23:31:05.464705+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:0d83de9b431bcb01a5567a4794d506bb14f987868169b2bd5d830d13a01e7d10",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:47fffc2fe157845050743edc69a4d917bed4447cdd44f6d2b99a67d990189f3b",
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:ce68db3f97418cb0f8e5bfe0cd957228d793d87d3ce4ff772e0315d72de7d02c",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:b908da8547dd6438956919715c40fe9daffc3d174bd976cc5230fc5153bb2691",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:00d15d8668340de41ef36275a9b2f5601639e7197c0ce83a7aafda63cc0cb188",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:c3255363d4552621a396eb24ea451ab037a284205e26dc65f1a35f093c8aa48b",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:6b7d2c67ee7322b65e0c388bbac8737c7c8ce232fea99657ab263024c0a04203",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:4acacfc65c70a8b52f02a183bc829ce139247e7a4eda72ad618c4dfbc0774fbb",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
@@ -87,7 +87,7 @@
   "row_validation_policies": {},
   "schema_version": "public-benchmark-operator-template.v1",
   "slot_id": "casf_pdbbind_subset_intake",
-  "source_commit_sha": "e682930501bc0522594b9ce92ce934e7f9ab7dd8",
+  "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
   "status": "operator_template_seed",
   "template": {
     "cases": [

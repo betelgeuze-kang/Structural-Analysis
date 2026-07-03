@@ -44,10 +44,10 @@
           "public_benchmark_external_receipts_not_attached"
         ],
         "contract_pass": true,
-        "generated_at": "2026-07-03T22:16:10.266271+00:00",
+        "generated_at": "2026-07-03T23:31:00.889550+00:00",
         "ready_values": {},
         "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-        "source_commit_sha": "df149d71e2a2a7a1db92a41683e84ffb151e92ec",
+        "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
         "status": "operator_acquisition_required"
       },
       "current_ready": true,
@@ -76,14 +76,14 @@
           "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
         ],
         "contract_pass": false,
-        "generated_at": "2026-07-03T22:06:33.425309+00:00",
+        "generated_at": "2026-07-03T23:31:00.914983+00:00",
         "ready_values": {
           "component_count": 5,
           "component_ready_count": 4,
           "phase2_ready": false
         },
         "schema_version": "public-benchmark-phase2-row-audit.v1",
-        "source_commit_sha": "09165e21a218f40a8be2951d512a86386b662700",
+        "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
         "status": "operator_evidence_required"
       },
       "current_ready": false,
@@ -108,14 +108,14 @@
         "artifact_exists": true,
         "blockers": [],
         "contract_pass": true,
-        "generated_at": "2026-07-03T22:06:33.386742+00:00",
+        "generated_at": "2026-07-03T23:31:00.878019+00:00",
         "ready_values": {
           "materialized_case_count": 12,
           "public_benchmark_ready": true,
           "target_subset_case_count": 12
         },
         "schema_version": "public-benchmark-subset-manifest.v1",
-        "source_commit_sha": "09165e21a218f40a8be2951d512a86386b662700",
+        "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
         "status": "ready"
       },
       "current_ready": true,
@@ -145,14 +145,14 @@
         "artifact_exists": true,
         "blockers": [],
         "contract_pass": true,
-        "generated_at": "2026-07-03T22:06:33.394258+00:00",
+        "generated_at": "2026-07-03T23:31:00.885371+00:00",
         "ready_values": {
           "pose_validity_ready": true,
           "real_benchmark_case_count": 12,
           "real_pose_case_count": 12
         },
         "schema_version": "public-benchmark-pose-validity-input.v1",
-        "source_commit_sha": "09165e21a218f40a8be2951d512a86386b662700",
+        "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
         "status": "ready"
       },
       "current_ready": true,
@@ -189,13 +189,13 @@
         "artifact_exists": true,
         "blockers": [],
         "contract_pass": true,
-        "generated_at": "2026-07-03T22:06:33.409107+00:00",
+        "generated_at": "2026-07-03T23:31:00.899290+00:00",
         "ready_values": {
           "posebusters_validity_ready": true,
           "real_benchmark_case_count": 12
         },
         "schema_version": "public-benchmark-pose-validity-packet.v1",
-        "source_commit_sha": "09165e21a218f40a8be2951d512a86386b662700",
+        "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
         "status": "ready"
       },
       "current_ready": true,
@@ -232,14 +232,14 @@
         "artifact_exists": true,
         "blockers": [],
         "contract_pass": true,
-        "generated_at": "2026-07-03T22:06:33.414103+00:00",
+        "generated_at": "2026-07-03T23:31:00.904195+00:00",
         "ready_values": {
           "dry_run_case_count": 0,
           "real_benchmark_case_count": 12,
           "scorecard_ready": true
         },
         "schema_version": "public-benchmark-symmetry-rmsd-scorecard.v1",
-        "source_commit_sha": "09165e21a218f40a8be2951d512a86386b662700",
+        "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
         "status": "ready"
       },
       "current_ready": true,
@@ -276,14 +276,14 @@
         "artifact_exists": true,
         "blockers": [],
         "contract_pass": true,
-        "generated_at": "2026-07-03T22:06:33.417249+00:00",
+        "generated_at": "2026-07-03T23:31:00.906781+00:00",
         "ready_values": {
           "pose_success_count": 12,
           "pose_success_harness_ready": true,
           "real_benchmark_case_count": 12
         },
         "schema_version": "public-benchmark-pose-success-harness.v1",
-        "source_commit_sha": "09165e21a218f40a8be2951d512a86386b662700",
+        "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
         "status": "ready"
       },
       "current_ready": true,
@@ -325,13 +325,13 @@
         "artifact_exists": true,
         "blockers": [],
         "contract_pass": true,
-        "generated_at": "2026-07-03T22:06:33.422989+00:00",
+        "generated_at": "2026-07-03T23:31:00.912832+00:00",
         "ready_values": {
           "public_benchmark_enrichment_ready": true,
           "real_enrichment_target_count": 1
         },
         "schema_version": "public-benchmark-enrichment-scorecard.v1",
-        "source_commit_sha": "09165e21a218f40a8be2951d512a86386b662700",
+        "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
         "status": "ready"
       },
       "current_ready": true,
@@ -369,13 +369,13 @@
           "vina_gnina_external_receipts_missing"
         ],
         "contract_pass": false,
-        "generated_at": "2026-07-03T21:56:55.560204+00:00",
+        "generated_at": "2026-07-03T23:29:14.316796+00:00",
         "ready_values": {
           "public_benchmark_engine_comparison_ready": false,
           "real_comparison_case_count": 0
         },
         "schema_version": "public-benchmark-vina-gnina-comparison-adapter.v1",
-        "source_commit_sha": "e682930501bc0522594b9ce92ce934e7f9ab7dd8",
+        "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
         "status": "operator_evidence_required"
       },
       "current_ready": false,
@@ -492,14 +492,14 @@
           "public_benchmark_external_receipts_missing"
         ],
         "contract_pass": true,
-        "generated_at": "2026-07-03T21:56:55.574244+00:00",
+        "generated_at": "2026-07-03T23:29:14.330931+00:00",
         "ready_values": {
           "blocker_count": 10,
           "public_benchmark_ready": false,
           "tier_beta_ready": false
         },
         "schema_version": "public-benchmark-source-of-truth.v1",
-        "source_commit_sha": "e682930501bc0522594b9ce92ce934e7f9ab7dd8",
+        "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
         "status": "seed_ready_materialization_blocked"
       },
       "current_ready": false,
@@ -568,14 +568,14 @@
         "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
       ],
       "contract_pass": false,
-      "generated_at": "2026-07-03T22:06:33.425309+00:00",
+      "generated_at": "2026-07-03T23:31:00.914983+00:00",
       "ready_values": {
         "component_count": 5,
         "component_ready_count": 4,
         "phase2_ready": false
       },
       "schema_version": "public-benchmark-phase2-row-audit.v1",
-      "source_commit_sha": "09165e21a218f40a8be2951d512a86386b662700",
+      "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
       "status": "operator_evidence_required"
     },
     "current_ready": false,
@@ -1197,12 +1197,12 @@
     }
   ],
   "gate_unblock_plan_count": 4,
-  "generated_at": "2026-07-03T22:16:10.371574+00:00",
+  "generated_at": "2026-07-03T23:31:05.449678+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:25f7193af18951c81e61f790ae83cb3646d24e77b59700ec2bea191158ee1dff",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:47fffc2fe157845050743edc69a4d917bed4447cdd44f6d2b99a67d990189f3b",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:00d15d8668340de41ef36275a9b2f5601639e7197c0ce83a7aafda63cc0cb188",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:9b4062237557030891770bb198c87a400d64b6e41cc5c9f4a1350d7b0102ba9f",
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:6b7d2c67ee7322b65e0c388bbac8737c7c8ce232fea99657ab263024c0a04203",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:b908da8547dd6438956919715c40fe9daffc3d174bd976cc5230fc5153bb2691",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:4acacfc65c70a8b52f02a183bc829ce139247e7a4eda72ad618c4dfbc0774fbb",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
@@ -3127,6 +3127,20 @@
       "phase2_failed_criterion_count": 1,
       "phase2_ready": false,
       "phase2_row_closure_matrix_count": 4,
+      "source_actuality_blocker_count": 0,
+      "source_actuality_blockers": [],
+      "source_actuality_contract_pass": true,
+      "source_actuality_missing_row_inputs": [
+        "vina_gnina_rows"
+      ],
+      "source_actuality_phase2_ready": false,
+      "source_actuality_provided_row_inputs": [
+        "subset_rows",
+        "pose_rows",
+        "enrichment_rows"
+      ],
+      "source_actuality_scope": "provided_row_inputs_only",
+      "source_actuality_scope_complete": false,
       "status": "operator_evidence_required"
     },
     "produces": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
@@ -3495,6 +3509,20 @@
         "phase2_failed_criterion_count": 1,
         "phase2_ready": false,
         "phase2_row_closure_matrix_count": 4,
+        "source_actuality_blocker_count": 0,
+        "source_actuality_blockers": [],
+        "source_actuality_contract_pass": true,
+        "source_actuality_missing_row_inputs": [
+          "vina_gnina_rows"
+        ],
+        "source_actuality_phase2_ready": false,
+        "source_actuality_provided_row_inputs": [
+          "subset_rows",
+          "pose_rows",
+          "enrichment_rows"
+        ],
+        "source_actuality_scope": "provided_row_inputs_only",
+        "source_actuality_scope_complete": false,
         "status": "operator_evidence_required"
       },
       "required_component_count": 5,
@@ -3728,6 +3756,120 @@
           "gnina"
         ],
         "operator_execution_ready": false,
+        "operator_unblock_packet": {
+          "adapter_row_preflight_status": "row_artifact_missing",
+          "blocked_case_input_slot_count": 12,
+          "blocked_engine_run_slot_count": 24,
+          "case_input_slot_count": 12,
+          "claim_boundary": "This packet only enumerates the operator steps needed to unblock Vina/GNINA execution and adapter row materialization. It does not run engines or synthesize comparison rows.",
+          "commands": {
+            "materialize_adapter": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+            "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+            "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
+          },
+          "detected_row_artifact_count": 0,
+          "engine_runtime_actions": [
+            {
+              "binary_env_var": "PUBLIC_BENCHMARK_VINA_BIN",
+              "container_image_env_var": "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE",
+              "engine_id": "vina",
+              "operator_action": "configure_vina_runtime"
+            },
+            {
+              "binary_env_var": "PUBLIC_BENCHMARK_GNINA_BIN",
+              "container_image_env_var": "PUBLIC_BENCHMARK_GNINA_CONTAINER_IMAGE",
+              "engine_id": "gnina",
+              "operator_action": "configure_gnina_runtime"
+            }
+          ],
+          "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+          "first_blocked_case_input_slot": {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing"
+            ],
+            "case_id": "casf2016_4llx",
+            "case_inputs_ready": false,
+            "complex_id": "4llx",
+            "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+            "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_4llx",
+            "status": "blocked"
+          },
+          "first_blocked_engine_run_slot": {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing"
+            ],
+            "case_id": "casf2016_4llx",
+            "case_inputs_ready": false,
+            "command_template": "<vina> --receptor <prepared/4llx_receptor> --ligand <prepared/4llx_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+            "complex_id": "4llx",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_4llx_vina_run",
+            "engine_available": false,
+            "engine_command_prefix": "",
+            "engine_container_image": "",
+            "engine_executable": "",
+            "engine_execution_source": "",
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+            "required_adapter_case_fields": [
+              "case_id",
+              "source_family",
+              "benchmark_split",
+              "complex_id",
+              "reference_pose_id",
+              "engine_runs",
+              "source_license_or_accession",
+              "source_checksum",
+              "provenance_ref"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "status": "blocked"
+          },
+          "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+          "missing_engine_ids": [
+            "vina",
+            "gnina"
+          ],
+          "operator_sequence": [
+            "fill_public_benchmark_vina_gnina_input_manifest_from_template",
+            "rerun_public_benchmark_vina_gnina_execution_plan",
+            "configure_vina_gnina_binary_or_container_runtime",
+            "rerun_public_benchmark_vina_gnina_runtime_readiness",
+            "attach_public_benchmark_vina_gnina_rows",
+            "materialize_public_benchmark_vina_gnina_comparison_adapter"
+          ],
+          "ready_engine_run_slot_count": 0,
+          "required_engine_run_count": 24,
+          "selected_row_path": "",
+          "status": "engine_inputs_required"
+        },
         "ready_engine_run_slot_count": 0,
         "required_engine_run_count": 24,
         "runtime_ready_for_engine_execution": false,
@@ -4136,6 +4278,20 @@
       "phase2_failed_criterion_count": 1,
       "phase2_ready": false,
       "phase2_row_closure_matrix_count": 4,
+      "source_actuality_blocker_count": 0,
+      "source_actuality_blockers": [],
+      "source_actuality_contract_pass": true,
+      "source_actuality_missing_row_inputs": [
+        "vina_gnina_rows"
+      ],
+      "source_actuality_phase2_ready": false,
+      "source_actuality_provided_row_inputs": [
+        "subset_rows",
+        "pose_rows",
+        "enrichment_rows"
+      ],
+      "source_actuality_scope": "provided_row_inputs_only",
+      "source_actuality_scope_complete": false,
       "status": "operator_evidence_required"
     },
     "required_component_count": 5,
@@ -4369,6 +4525,120 @@
         "gnina"
       ],
       "operator_execution_ready": false,
+      "operator_unblock_packet": {
+        "adapter_row_preflight_status": "row_artifact_missing",
+        "blocked_case_input_slot_count": 12,
+        "blocked_engine_run_slot_count": 24,
+        "case_input_slot_count": 12,
+        "claim_boundary": "This packet only enumerates the operator steps needed to unblock Vina/GNINA execution and adapter row materialization. It does not run engines or synthesize comparison rows.",
+        "commands": {
+          "materialize_adapter": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+          "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+          "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
+        },
+        "detected_row_artifact_count": 0,
+        "engine_runtime_actions": [
+          {
+            "binary_env_var": "PUBLIC_BENCHMARK_VINA_BIN",
+            "container_image_env_var": "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE",
+            "engine_id": "vina",
+            "operator_action": "configure_vina_runtime"
+          },
+          {
+            "binary_env_var": "PUBLIC_BENCHMARK_GNINA_BIN",
+            "container_image_env_var": "PUBLIC_BENCHMARK_GNINA_CONTAINER_IMAGE",
+            "engine_id": "gnina",
+            "operator_action": "configure_gnina_runtime"
+          }
+        ],
+        "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "first_blocked_case_input_slot": {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing"
+          ],
+          "case_id": "casf2016_4llx",
+          "case_inputs_ready": false,
+          "complex_id": "4llx",
+          "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+          "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_4llx",
+          "status": "blocked"
+        },
+        "first_blocked_engine_run_slot": {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing"
+          ],
+          "case_id": "casf2016_4llx",
+          "case_inputs_ready": false,
+          "command_template": "<vina> --receptor <prepared/4llx_receptor> --ligand <prepared/4llx_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+          "complex_id": "4llx",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_4llx_vina_run",
+          "engine_available": false,
+          "engine_command_prefix": "",
+          "engine_container_image": "",
+          "engine_executable": "",
+          "engine_execution_source": "",
+          "engine_id": "vina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+          "required_adapter_case_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "engine_runs",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "status": "blocked"
+        },
+        "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "missing_engine_ids": [
+          "vina",
+          "gnina"
+        ],
+        "operator_sequence": [
+          "fill_public_benchmark_vina_gnina_input_manifest_from_template",
+          "rerun_public_benchmark_vina_gnina_execution_plan",
+          "configure_vina_gnina_binary_or_container_runtime",
+          "rerun_public_benchmark_vina_gnina_runtime_readiness",
+          "attach_public_benchmark_vina_gnina_rows",
+          "materialize_public_benchmark_vina_gnina_comparison_adapter"
+        ],
+        "ready_engine_run_slot_count": 0,
+        "required_engine_run_count": 24,
+        "selected_row_path": "",
+        "status": "engine_inputs_required"
+      },
       "ready_engine_run_slot_count": 0,
       "required_engine_run_count": 24,
       "runtime_ready_for_engine_execution": false,
@@ -4376,7 +4646,7 @@
       "status": "execution_plan_blocked"
     }
   },
-  "source_commit_sha": "df149d71e2a2a7a1db92a41683e84ffb151e92ec",
+  "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
   "source_of_truth_blocker_detail_count": 4,
   "source_of_truth_blocker_detail_register": [
     {

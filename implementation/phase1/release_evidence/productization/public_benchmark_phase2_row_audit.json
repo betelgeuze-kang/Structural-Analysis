@@ -294,18 +294,146 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T22:33:45.234418+00:00",
+  "generated_at": "2026-07-03T23:31:05.503120+00:00",
   "input_checksums": {
     "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
     "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
     "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
-    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:8c22a94cdfecbc71b6a04aaea3040cad1ed053419474117fe1f22adf67301354"
+    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:cea647619944140048844f8c2efc475f47008bbd55333cd276673bb56f80d192"
   },
   "missing_row_inputs": [
     "vina_gnina_rows"
   ],
+  "operator_bundle_source_actuality_check": {
+    "blocker_count": 0,
+    "blockers": [],
+    "checked_row_counts": {
+      "enrichment_targets": 1,
+      "pose_rows": 12,
+      "subset_rows": 12,
+      "vina_gnina_cases": 0
+    },
+    "claim_boundary": "This partial preflight checks source actuality only for row inputs that are already attached. Missing row inputs remain separately blocked and must pass the full operator bundle source actuality check before Public Benchmark Phase 2 can close.",
+    "contract_pass": true,
+    "missing_row_input_count": 1,
+    "missing_row_inputs": [
+      "vina_gnina_rows"
+    ],
+    "phase2_source_actuality_ready": false,
+    "policy": {
+      "placeholder_markers_rejected": [
+        "<operator",
+        "dry-run",
+        "dummy",
+        "example.invalid",
+        "example://",
+        "fake",
+        "fixture",
+        "mock",
+        "operator_supplied",
+        "placeholder",
+        "synthetic",
+        "test-accession",
+        "todo",
+        "unit-test"
+      ],
+      "placeholder_provenance_prefixes_rejected": [
+        "operator://",
+        "local-evidence://",
+        "local://",
+        "fixture://",
+        "mock://",
+        "synthetic://",
+        "placeholder://",
+        "test://",
+        "unit-test://",
+        "file://"
+      ],
+      "required_pose_source_receipt_fields": [
+        "receptor_context.provenance_ref"
+      ],
+      "required_source_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "required_vina_engine_run_pose_ref_fields": [
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "required_vina_engine_run_receipt_fields": [
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_version",
+        "engine_config_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
+      "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+      "vina_engine_run_checksum_fields": [
+        "predicted_ligand_checksum",
+        "engine_config_checksum"
+      ],
+      "vina_engine_run_provenance_fields": [
+        "predicted_ligand_path_or_pose_ref",
+        "engine_run_provenance_ref"
+      ]
+    },
+    "provided_row_input_count": 3,
+    "provided_row_inputs": [
+      "subset_rows",
+      "pose_rows",
+      "enrichment_rows"
+    ],
+    "row_file_artifact_receipts": {
+      "enrichment_rows": {
+        "format": "json",
+        "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+        "row_input_id": "enrichment_rows",
+        "source_artifact_sha256": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23"
+      },
+      "pose_rows": {
+        "format": "json",
+        "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+        "row_input_id": "pose_rows",
+        "source_artifact_sha256": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c"
+      },
+      "subset_rows": {
+        "format": "json",
+        "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+        "row_input_id": "subset_rows",
+        "source_artifact_sha256": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1"
+      }
+    },
+    "row_integrity_policy": {
+      "purpose": "Duplicate operator rows cannot be used to inflate Phase 2 Public Benchmark case, target, molecule, or engine-run counts.",
+      "required_unique_row_keys": {
+        "enrichment_target_molecules": [
+          "molecule_id"
+        ],
+        "enrichment_targets": [
+          "target_id"
+        ],
+        "pose_rows": [
+          "case_id"
+        ],
+        "subset_rows": [
+          "case_id"
+        ],
+        "vina_gnina_cases": [
+          "case_id"
+        ],
+        "vina_gnina_engine_runs": [
+          "engine_id",
+          "docking_run_id"
+        ]
+      }
+    },
+    "schema_version": "public-benchmark-partial-source-actuality-check.v1",
+    "scope": "provided_row_inputs_only",
+    "scope_complete": false
+  },
   "outputs": {
     "enrichment_scorecard": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
     "pose_success_harness": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
@@ -313,6 +441,134 @@
     "pose_validity_packet": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
     "rmsd_scorecard": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
     "subset_manifest": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
+  },
+  "partial_operator_source_actuality_check": {
+    "blocker_count": 0,
+    "blockers": [],
+    "checked_row_counts": {
+      "enrichment_targets": 1,
+      "pose_rows": 12,
+      "subset_rows": 12,
+      "vina_gnina_cases": 0
+    },
+    "claim_boundary": "This partial preflight checks source actuality only for row inputs that are already attached. Missing row inputs remain separately blocked and must pass the full operator bundle source actuality check before Public Benchmark Phase 2 can close.",
+    "contract_pass": true,
+    "missing_row_input_count": 1,
+    "missing_row_inputs": [
+      "vina_gnina_rows"
+    ],
+    "phase2_source_actuality_ready": false,
+    "policy": {
+      "placeholder_markers_rejected": [
+        "<operator",
+        "dry-run",
+        "dummy",
+        "example.invalid",
+        "example://",
+        "fake",
+        "fixture",
+        "mock",
+        "operator_supplied",
+        "placeholder",
+        "synthetic",
+        "test-accession",
+        "todo",
+        "unit-test"
+      ],
+      "placeholder_provenance_prefixes_rejected": [
+        "operator://",
+        "local-evidence://",
+        "local://",
+        "fixture://",
+        "mock://",
+        "synthetic://",
+        "placeholder://",
+        "test://",
+        "unit-test://",
+        "file://"
+      ],
+      "required_pose_source_receipt_fields": [
+        "receptor_context.provenance_ref"
+      ],
+      "required_source_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "required_vina_engine_run_pose_ref_fields": [
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "required_vina_engine_run_receipt_fields": [
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_version",
+        "engine_config_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
+      "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+      "vina_engine_run_checksum_fields": [
+        "predicted_ligand_checksum",
+        "engine_config_checksum"
+      ],
+      "vina_engine_run_provenance_fields": [
+        "predicted_ligand_path_or_pose_ref",
+        "engine_run_provenance_ref"
+      ]
+    },
+    "provided_row_input_count": 3,
+    "provided_row_inputs": [
+      "subset_rows",
+      "pose_rows",
+      "enrichment_rows"
+    ],
+    "row_file_artifact_receipts": {
+      "enrichment_rows": {
+        "format": "json",
+        "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+        "row_input_id": "enrichment_rows",
+        "source_artifact_sha256": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23"
+      },
+      "pose_rows": {
+        "format": "json",
+        "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+        "row_input_id": "pose_rows",
+        "source_artifact_sha256": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c"
+      },
+      "subset_rows": {
+        "format": "json",
+        "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+        "row_input_id": "subset_rows",
+        "source_artifact_sha256": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1"
+      }
+    },
+    "row_integrity_policy": {
+      "purpose": "Duplicate operator rows cannot be used to inflate Phase 2 Public Benchmark case, target, molecule, or engine-run counts.",
+      "required_unique_row_keys": {
+        "enrichment_target_molecules": [
+          "molecule_id"
+        ],
+        "enrichment_targets": [
+          "target_id"
+        ],
+        "pose_rows": [
+          "case_id"
+        ],
+        "subset_rows": [
+          "case_id"
+        ],
+        "vina_gnina_cases": [
+          "case_id"
+        ],
+        "vina_gnina_engine_runs": [
+          "engine_id",
+          "docking_run_id"
+        ]
+      }
+    },
+    "schema_version": "public-benchmark-partial-source-actuality-check.v1",
+    "scope": "provided_row_inputs_only",
+    "scope_complete": false
   },
   "phase2_exit_gate": {
     "claim": "public_benchmark_harness_phase2_exit_gate",
@@ -1720,7 +1976,7 @@
     }
   },
   "schema_version": "public-benchmark-phase2-row-audit.v1",
-  "source_commit_sha": "8aacd8f0ee17d7cbb486496cb778f2fa7e2676d3",
+  "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
   "status": "operator_evidence_required",
   "summary": {
     "blocked_component_ids": [
