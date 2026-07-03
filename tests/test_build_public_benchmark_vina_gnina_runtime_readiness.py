@@ -124,6 +124,36 @@ def test_runtime_readiness_engine_status_blocks_non_executable_env_path(
     assert status["blocker"] == "vina_binary_not_executable"
 
 
+def test_runtime_readiness_container_status_accepts_local_image(
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv(
+        "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE",
+        "ghcr.io/acme/public-benchmark-vina:latest",
+    )
+    monkeypatch.setattr(module, "_docker_daemon_version", lambda executable: (True, "27.0.0"))
+    monkeypatch.setattr(module, "_container_image_present", lambda executable, image: True)
+
+    status = module._engine_container_status(
+        "vina",
+        docker_cli_status={
+            "available": True,
+            "executable": "/usr/bin/docker",
+            "blocker": "",
+        },
+    )
+
+    assert status["status"] == "ready"
+    assert status["available"] is True
+    assert status["image_env_var"] == "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE"
+    assert status["docker_daemon_available"] is True
+    assert status["image_present"] is True
+    assert status["command_prefix"] == (
+        "/usr/bin/docker run --rm -v $PWD:/work -w /work "
+        "ghcr.io/acme/public-benchmark-vina:latest vina"
+    )
+
+
 def test_runtime_readiness_records_missing_binaries_and_rows(
     tmp_path: Path,
     monkeypatch,
@@ -182,6 +212,7 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "runtime_ready_for_engine_execution": False,
     }
     assert payload["engine_run_slots"][0]["status"] == "blocked"
+    assert payload["engine_run_slots"][0]["engine_execution_source"] == ""
     assert payload["engine_run_slots"][0]["required_adapter_engine_run_fields"] == [
         "engine_id",
         "docking_run_id",
@@ -196,6 +227,65 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "score_direction",
     ]
     assert "does not run docking engines" in payload["claim_boundary"]
+
+
+def test_runtime_readiness_uses_container_execution_when_binaries_missing(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    execution_plan = tmp_path / "execution_plan.json"
+    rows = tmp_path / "public_benchmark_vina_gnina_rows.json"
+    _execution_plan(execution_plan)
+
+    monkeypatch.setattr(
+        module,
+        "_engine_binary_status",
+        lambda engine_id: {
+            "engine_id": engine_id,
+            "available": False,
+            "executable": "",
+            "version": "",
+            "blocker": f"{engine_id}_binary_missing",
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "_engine_container_status",
+        lambda engine_id, docker_cli_status=None: {
+            "engine_id": engine_id,
+            "available": True,
+            "image": f"ghcr.io/acme/{engine_id}:latest",
+            "docker_executable": "/usr/bin/docker",
+            "docker_daemon_available": True,
+            "docker_server_version": "27.0.0",
+            "image_present": True,
+            "command_prefix": (
+                f"/usr/bin/docker run --rm -v $PWD:/work -w /work "
+                f"ghcr.io/acme/{engine_id}:latest {engine_id}"
+            ),
+            "blocker": "",
+        },
+    )
+
+    payload = module.build_vina_gnina_runtime_readiness(
+        repo_root=tmp_path,
+        execution_plan_path=execution_plan,
+        vina_gnina_rows_path=rows,
+    )
+
+    assert payload["status"] == "ready_for_engine_execution"
+    assert payload["runtime_ready_for_engine_execution"] is True
+    assert payload["operator_execution_ready"] is False
+    assert payload["missing_engine_ids"] == []
+    assert payload["blockers"] == ["public_benchmark_vina_gnina_rows_not_detected"]
+    assert payload["ready_engine_run_slot_count"] == 2
+    assert payload["engine_run_slots"][0]["engine_execution_source"] == "container"
+    assert payload["engine_run_slots"][0]["engine_container_image"] == (
+        "ghcr.io/acme/vina:latest"
+    )
+    assert payload["current_engine_execution_statuses"][0]["execution_source"] == (
+        "container"
+    )
 
 
 def test_runtime_readiness_detects_ready_engine_slots_and_rows(

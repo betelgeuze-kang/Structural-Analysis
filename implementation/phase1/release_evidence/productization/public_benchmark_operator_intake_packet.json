@@ -34,10 +34,10 @@
           "public_benchmark_external_receipts_not_attached"
         ],
         "contract_pass": true,
-        "generated_at": "2026-07-03T19:38:31.369266+00:00",
+        "generated_at": "2026-07-03T19:54:12.958101+00:00",
         "ready_values": {},
         "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-        "source_commit_sha": "f7f5290b7817b1c9516767e6c4d921e0f53a5c07",
+        "source_commit_sha": "0c62070c7d73dfed8ddcdb969834d371a17c0f18",
         "status": "operator_acquisition_required"
       },
       "current_ready": true,
@@ -1187,7 +1187,7 @@
     }
   ],
   "gate_unblock_plan_count": 4,
-  "generated_at": "2026-07-03T19:38:31.469895+00:00",
+  "generated_at": "2026-07-03T19:54:18.184182+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:ca7fd611755541fe59439ef83b429884f7bdc5863463adeb57167bb84db873ee",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:a02e0f8d2ec8ff40b696fac003e92b82ef7a7296fb3517bf1f869e97f57c640f",
@@ -3946,7 +3946,7 @@
       "status": "engine_execution_required"
     }
   },
-  "source_commit_sha": "f7f5290b7817b1c9516767e6c4d921e0f53a5c07",
+  "source_commit_sha": "0c62070c7d73dfed8ddcdb969834d371a17c0f18",
   "source_of_truth_blocker_detail_count": 4,
   "source_of_truth_blocker_detail_register": [
     {

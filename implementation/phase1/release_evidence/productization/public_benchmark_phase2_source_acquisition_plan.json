@@ -17,14 +17,14 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T19:38:31.369266+00:00",
+  "generated_at": "2026-07-03T19:54:12.958101+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:ca7fd611755541fe59439ef83b429884f7bdc5863463adeb57167bb84db873ee",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:3e82ddb34145dee270061fa05c007f2a8d93ce7a425b89143ac57268f331a4ea",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:79dfd8afd845e8ccd4818a794ff6816ae2f5ba7507b6159376d2ae8306037663",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:51451a44606dfebf6b6f8bf73a6be22bd95c639b6ebae1e244455ff6a45080fa",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:beb7073f0801caf22630dc2a8f467319a260dde684200646d9480445fecf0a48",
     "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:3508f0c51e8bf28ade5b95965f91a526efa007fcb0634e89238a4e3aa4a27b06",
-    "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:9522f7bdde5c941605b9df6ce33082e974fab4d50e8100ffbc5c894569514e87",
-    "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:33e88eb0185173be2d0c9d8810f3213703ab3d7288ece93aa7b94f57bc157f47",
+    "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:0db894a1f9e8cd86a476556a3d8224cf5ef93ebee5b12a6f88024cb5740baae2",
+    "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:4bc4691a10d331dd60509e54e013bc2040b365e5abf0dc818b9ac90f88374f84",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
@@ -751,7 +751,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "f7f5290b7817b1c9516767e6c4d921e0f53a5c07",
+  "source_commit_sha": "0c62070c7d73dfed8ddcdb969834d371a17c0f18",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,

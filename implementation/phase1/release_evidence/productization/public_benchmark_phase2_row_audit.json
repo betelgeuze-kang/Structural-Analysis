@@ -294,7 +294,7 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T19:32:12.529130+00:00",
+  "generated_at": "2026-07-03T19:56:05.361189+00:00",
   "input_checksums": {
     "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
     "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
@@ -1590,7 +1590,7 @@
     }
   },
   "schema_version": "public-benchmark-phase2-row-audit.v1",
-  "source_commit_sha": "985362d76a55a8def5adcf439d00e2212fe14023",
+  "source_commit_sha": "0c62070c7d73dfed8ddcdb969834d371a17c0f18",
   "status": "operator_evidence_required",
   "summary": {
     "blocked_component_ids": [

@@ -30,6 +30,7 @@ DEFAULT_EXECUTION_PLAN = PRODUCTIZATION / "public_benchmark_vina_gnina_execution
 DEFAULT_VINA_GNINA_ROWS = PRODUCTIZATION / "public_benchmark_vina_gnina_rows.json"
 DEFAULT_OUT = PRODUCTIZATION / "public_benchmark_vina_gnina_runtime_readiness.json"
 SCHEMA_VERSION = "public-benchmark-vina-gnina-runtime-readiness.v1"
+DOCKER_BIN_ENV = "PUBLIC_BENCHMARK_DOCKER_BIN"
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -102,6 +103,166 @@ def _engine_binary_status(engine_id: str) -> dict[str, Any]:
     }
 
 
+def _docker_cli_status() -> dict[str, Any]:
+    env_executable = os.environ.get(DOCKER_BIN_ENV, "").strip()
+    executable = env_executable or shutil.which("docker")
+    if not executable:
+        return {
+            "available": False,
+            "executable": "",
+            "binary_source": "",
+            "env_var": DOCKER_BIN_ENV,
+            "blocker": "docker_binary_missing",
+        }
+    executable_path = Path(executable)
+    if env_executable and not executable_path.is_file():
+        return {
+            "available": False,
+            "executable": executable,
+            "binary_source": f"env:{DOCKER_BIN_ENV}",
+            "env_var": DOCKER_BIN_ENV,
+            "blocker": "docker_binary_not_found",
+        }
+    if env_executable and not os.access(executable_path, os.X_OK):
+        return {
+            "available": False,
+            "executable": executable,
+            "binary_source": f"env:{DOCKER_BIN_ENV}",
+            "env_var": DOCKER_BIN_ENV,
+            "blocker": "docker_binary_not_executable",
+        }
+    return {
+        "available": True,
+        "executable": executable,
+        "binary_source": f"env:{DOCKER_BIN_ENV}" if env_executable else "PATH",
+        "env_var": DOCKER_BIN_ENV,
+        "blocker": "",
+    }
+
+
+def _docker_daemon_version(executable: str) -> tuple[bool, str]:
+    try:
+        output = subprocess.check_output(
+            [executable, "version", "--format", "{{.Server.Version}}"],
+            text=True,
+            stderr=subprocess.STDOUT,
+            timeout=10,
+        ).strip()
+    except Exception:
+        return False, ""
+    return bool(output), output.splitlines()[0] if output else ""
+
+
+def _container_image_present(executable: str, image: str) -> bool:
+    try:
+        subprocess.check_output(
+            [executable, "image", "inspect", image, "--format", "{{.Id}}"],
+            text=True,
+            stderr=subprocess.STDOUT,
+            timeout=10,
+        )
+    except Exception:
+        return False
+    return True
+
+
+def _engine_container_status(
+    engine_id: str,
+    *,
+    docker_cli_status: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    image_env_var = f"PUBLIC_BENCHMARK_{engine_id.upper()}_CONTAINER_IMAGE"
+    image = os.environ.get(image_env_var, "").strip()
+    docker_status = docker_cli_status or _docker_cli_status()
+    base = {
+        "engine_id": engine_id,
+        "available": False,
+        "image": image,
+        "image_env_var": image_env_var,
+        "docker_executable": str(docker_status.get("executable") or ""),
+        "docker_binary_available": bool(docker_status.get("available")),
+        "docker_daemon_available": False,
+        "docker_server_version": "",
+        "image_present": False,
+        "command_prefix": "",
+        "blocker": "",
+    }
+    if not image:
+        return {**base, "status": "container_image_not_configured"}
+    if not docker_status.get("available"):
+        return {
+            **base,
+            "status": "blocked",
+            "blocker": str(docker_status.get("blocker") or "docker_binary_missing"),
+        }
+    executable = str(docker_status.get("executable") or "docker")
+    daemon_available, docker_version = _docker_daemon_version(executable)
+    if not daemon_available:
+        return {
+            **base,
+            "status": "blocked",
+            "docker_daemon_available": False,
+            "blocker": "docker_daemon_unavailable",
+        }
+    image_present = _container_image_present(executable, image)
+    if not image_present:
+        return {
+            **base,
+            "status": "blocked",
+            "docker_daemon_available": True,
+            "docker_server_version": docker_version,
+            "blocker": f"{engine_id}_container_image_not_present",
+        }
+    command_prefix = f"{executable} run --rm -v $PWD:/work -w /work {image} {engine_id}"
+    return {
+        **base,
+        "status": "ready",
+        "available": True,
+        "docker_daemon_available": True,
+        "docker_server_version": docker_version,
+        "image_present": True,
+        "command_prefix": command_prefix,
+    }
+
+
+def _engine_execution_status(
+    engine_id: str,
+    binary_status: dict[str, Any],
+    container_status: dict[str, Any],
+) -> dict[str, Any]:
+    if binary_status.get("available"):
+        return {
+            "engine_id": engine_id,
+            "available": True,
+            "execution_source": "binary",
+            "executable": str(binary_status.get("executable") or ""),
+            "command_prefix": str(binary_status.get("executable") or engine_id),
+            "version": str(binary_status.get("version") or ""),
+            "blocker": "",
+        }
+    if container_status.get("available"):
+        return {
+            "engine_id": engine_id,
+            "available": True,
+            "execution_source": "container",
+            "executable": str(container_status.get("docker_executable") or ""),
+            "command_prefix": str(container_status.get("command_prefix") or ""),
+            "version": str(container_status.get("docker_server_version") or ""),
+            "container_image": str(container_status.get("image") or ""),
+            "blocker": "",
+        }
+    return {
+        "engine_id": engine_id,
+        "available": False,
+        "execution_source": "",
+        "executable": "",
+        "command_prefix": "",
+        "version": "",
+        "container_image": str(container_status.get("image") or ""),
+        "blocker": str(binary_status.get("blocker") or f"{engine_id}_runtime_missing"),
+    }
+
+
 def _row_candidate_status(repo_root: Path, rows_path: Path) -> dict[str, Any]:
     candidates = [
         PRODUCTIZATION / f"public_benchmark_vina_gnina_rows.{suffix}"
@@ -157,7 +318,9 @@ def _engine_run_slots(
             if not docking_box_ready:
                 slot_blockers.append("docking_box_not_ready")
             if not engine_available:
-                slot_blockers.append(f"{engine_id}_binary_missing")
+                slot_blockers.append(
+                    str(engine_status.get("blocker") or f"{engine_id}_runtime_missing")
+                )
             slots.append(
                 {
                     "case_id": case_id,
@@ -167,6 +330,15 @@ def _engine_run_slots(
                     "docking_box_ready": docking_box_ready,
                     "engine_available": engine_available,
                     "engine_executable": str(engine_status.get("executable") or ""),
+                    "engine_execution_source": str(
+                        engine_status.get("execution_source") or ""
+                    ),
+                    "engine_command_prefix": str(
+                        engine_status.get("command_prefix") or ""
+                    ),
+                    "engine_container_image": str(
+                        engine_status.get("container_image") or ""
+                    ),
                     "command_template": str(run.get("command_template") or ""),
                     "expected_predicted_ligand_path_or_pose_ref": str(
                         run.get("expected_predicted_ligand_path_or_pose_ref") or ""
@@ -199,17 +371,37 @@ def build_vina_gnina_runtime_readiness(
     vina_gnina_rows_path: Path = DEFAULT_VINA_GNINA_ROWS,
 ) -> dict[str, Any]:
     execution_plan = _load_json(repo_root, execution_plan_path)
+    docker_cli_status = _docker_cli_status()
     current_engine_statuses = [
         _engine_binary_status(engine_id) for engine_id in SUPPORTED_ENGINES
     ]
+    current_engine_container_statuses = [
+        _engine_container_status(engine_id, docker_cli_status=docker_cli_status)
+        for engine_id in SUPPORTED_ENGINES
+    ]
+    container_status_by_id = {
+        str(row.get("engine_id") or ""): row
+        for row in current_engine_container_statuses
+    }
+    current_engine_execution_statuses = [
+        _engine_execution_status(
+            engine_id,
+            binary_status,
+            container_status_by_id.get(engine_id, {}),
+        )
+        for engine_id, binary_status in (
+            (str(row.get("engine_id") or ""), row) for row in current_engine_statuses
+        )
+    ]
     engine_status_by_id = {
-        str(row.get("engine_id") or ""): row for row in current_engine_statuses
+        str(row.get("engine_id") or ""): row
+        for row in current_engine_execution_statuses
     }
     row_status = _row_candidate_status(repo_root, vina_gnina_rows_path)
     engine_run_slots = _engine_run_slots(execution_plan, engine_status_by_id)
     execution_plan_ready = bool(execution_plan.get("execution_plan_ready"))
     all_engines_available = all(
-        bool(row.get("available")) for row in current_engine_statuses
+        bool(row.get("available")) for row in current_engine_execution_statuses
     )
     row_artifacts_ready = row_status["detected_row_artifact_count"] > 0
     slot_blockers = [
@@ -224,6 +416,18 @@ def build_vina_gnina_runtime_readiness(
         str(row.get("blocker"))
         for row in current_engine_statuses
         if str(row.get("blocker") or "")
+        and not engine_status_by_id.get(str(row.get("engine_id") or ""), {}).get(
+            "available"
+        )
+    )
+    blockers.extend(
+        str(row.get("blocker"))
+        for row in current_engine_container_statuses
+        if str(row.get("blocker") or "")
+        and str(row.get("image") or "")
+        and not engine_status_by_id.get(str(row.get("engine_id") or ""), {}).get(
+            "available"
+        )
     )
     if not row_artifacts_ready:
         blockers.append("public_benchmark_vina_gnina_rows_not_detected")
@@ -258,10 +462,13 @@ def build_vina_gnina_runtime_readiness(
         "adapter_rows_ready": row_artifacts_ready,
         "phase2_closure_ready": False,
         "supported_engines": list(SUPPORTED_ENGINES),
+        "container_runtime_status": docker_cli_status,
         "current_engine_binary_statuses": current_engine_statuses,
+        "current_engine_container_statuses": current_engine_container_statuses,
+        "current_engine_execution_statuses": current_engine_execution_statuses,
         "missing_engine_ids": [
             str(row.get("engine_id") or "")
-            for row in current_engine_statuses
+            for row in current_engine_execution_statuses
             if not row.get("available")
         ],
         "row_candidate_status": row_status,
