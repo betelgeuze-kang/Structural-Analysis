@@ -10,7 +10,7 @@
     "no_geometric_softening_promotion_without_consistent_newton_gate"
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T18:42:33.693265+00:00",
+  "generated_at": "2026-07-02T23:44:26.027985+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:e18438d69a6f45a18cc8cd0afd15c2b30dd81228ec70b58b8e38204a942a62df",
     "implementation/phase1/release_evidence/productization/f2h_lightweight_pdelta_0p1_0p2_0p4.local.json": "sha256:8b9516fe2c04a8b3a9256007d65e360a514897a625d6b8ee4fa2cbea50977030",
@@ -200,7 +200,7 @@
     "weak_restraint_or_geometric_softening": "active_secondary"
   },
   "schema_version": "g1-load-dependent-near-null-geometric-stiffness-comparison.v1",
-  "source_commit_sha": "4ccb9ac800c4f5cc60cc46328ec9bf3c1bd8cc40",
+  "source_commit_sha": "93f68e1dfb6f58a0cd68fcbdada555a759e190b0",
   "status": "ready",
   "summary": {
     "blocker_count": 0,

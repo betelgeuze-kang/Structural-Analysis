@@ -1,21 +1,21 @@
 # Structural Scope Cleanup Impact Report
 
-- `summary_line`: `Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=101 | blocking=34 | owner_pending=86`
+- `summary_line`: `Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=102 | blocking=35 | owner_pending=86`
 - `contract_pass`: `False`
 - `cleanup_impact_clear`: `False`
 - `quarantined_path_count`: `86`
-- `reference_path_count`: `101`
-- `blocking_cleanup_reference_path_count`: `34`
+- `reference_path_count`: `102`
+- `blocking_cleanup_reference_path_count`: `35`
 - `owner_decision_pending_count`: `86`
-- `release_surface_cleanup_blocked_path_count`: `0`
+- `release_surface_cleanup_blocked_path_count`: `2`
 - `blocking_reference_cleanup_batch_count`: `3`
 - `release_freshness_source_boundary_reference_count`: `1`
 
 ## Reference Roles
 
-- `reference_role_counts`: `{'documentation_reference': 1, 'implementation_runtime_or_manifest_reference': 28, 'release_governance_reference': 19, 'scope_governance_reference': 36, 'script_reference': 7, 'test_reference': 10}`
-- `blocking_reference_role_counts`: `{'implementation_runtime_or_manifest_reference': 24, 'script_reference': 6, 'test_reference': 4}`
-- `blocking_reference_cleanup_action_counts`: `{'delete_or_extract_molecular_script_or_remove_quarantined_path_refs': 6, 'delete_or_extract_molecular_tests_or_update_scope_guard_tests': 4, 'remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts': 24}`
+- `reference_role_counts`: `{'documentation_reference': 1, 'implementation_runtime_or_manifest_reference': 28, 'release_governance_reference': 19, 'scope_governance_reference': 36, 'script_reference': 7, 'test_reference': 11}`
+- `blocking_reference_role_counts`: `{'implementation_runtime_or_manifest_reference': 24, 'script_reference': 6, 'test_reference': 5}`
+- `blocking_reference_cleanup_action_counts`: `{'delete_or_extract_molecular_script_or_remove_quarantined_path_refs': 6, 'delete_or_extract_molecular_tests_or_update_scope_guard_tests': 5, 'remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts': 24}`
 
 ## Cleanup Batches
 
@@ -23,15 +23,15 @@
 |---|---:|---|---:|---:|---|
 | `cleanup_refs_02_implementation_runtime_or_manifest_reference` | 2 | `implementation_runtime_or_manifest_reference` | 24 | 1 | `remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts` |
 | `cleanup_refs_03_script_reference` | 3 | `script_reference` | 6 | 0 | `delete_or_extract_molecular_script_or_remove_quarantined_path_refs` |
-| `cleanup_refs_04_test_reference` | 4 | `test_reference` | 4 | 0 | `delete_or_extract_molecular_tests_or_update_scope_guard_tests` |
+| `cleanup_refs_04_test_reference` | 4 | `test_reference` | 5 | 0 | `delete_or_extract_molecular_tests_or_update_scope_guard_tests` |
 
 ## Release Surface First Impact
 
 | Path | References | Blocking | Governance | Cleanup Ready After Owner Decision |
 |---|---:|---:|---:|---:|
-| `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json` | 42 | 0 | 42 | `True` |
+| `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json` | 43 | 1 | 42 | `False` |
 | `implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json` | 38 | 0 | 38 | `True` |
-| `implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json` | 43 | 0 | 43 | `True` |
+| `implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json` | 44 | 1 | 43 | `False` |
 
 ## Blocking References
 
@@ -69,13 +69,14 @@
 | `scripts/materialize_public_benchmark_rmsd_scorecard.py` | `script_reference` | `False` | 4 | `gnina, symmetry_aware_ligand` | 2 |
 | `tests/test_build_public_benchmark_operator_intake_packet.py` | `test_reference` | `False` | 35 | `casf_pdbbind, gnina, pdbbind, posebusters, symmetry_aware_ligand` | 18 |
 | `tests/test_build_public_benchmark_source_of_truth.py` | `test_reference` | `False` | 42 | `casf_pdbbind, gnina, pdbbind, posebusters, symmetry_aware_ligand` | 17 |
+| `tests/test_build_support_bundle.py` | `test_reference` | `False` | 6 | `gpcr, pocketmd` | 2 |
 | `tests/test_materialize_public_benchmark_harness_bundle.py` | `test_reference` | `False` | 12 | `casf_pdbbind, gnina, pdbbind, posebusters, symmetry_aware_ligand` | 6 |
 | `tests/test_materialize_public_benchmark_operator_bundle_from_rows.py` | `test_reference` | `False` | 2 | `casf_pdbbind, gnina, pdbbind, posebusters, symmetry_aware_ligand` | 2 |
 
 ## Blockers
 
 - `owner_decision_pending_count=86`
-- `blocking_cleanup_reference_path_count=34`
+- `blocking_cleanup_reference_path_count=35`
 
 ## Next Actions
 

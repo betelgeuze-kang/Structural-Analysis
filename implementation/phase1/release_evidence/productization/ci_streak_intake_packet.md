@@ -93,7 +93,7 @@
 | Check | Current | Required | Pass |
 |---|---|---|---:|
 | `source_manifest_threshold_consistency` | `source=30; required=30` | `source threshold equals release threshold` | `True` |
-| `source_evidence_freshness` | `age_hours=33.75` | `freshness_pass=true` | `True` |
+| `source_evidence_freshness` | `age_hours=37.385` | `freshness_pass=true` | `True` |
 | `pr_trigger_and_source` | `triggers=['pull_request', 'push', 'workflow_dispatch']; pull_request_source=True` | `pull_request trigger and pull_request source runs present` | `True` |
 | `nightly_trigger_source` | `triggers=['schedule', 'workflow_dispatch']` | `schedule or workflow_dispatch trigger present` | `True` |
 | `self_hosted_runner_precondition` | `evaluated=True; online=0; ready=0` | `at least one required self-hosted runner online when evaluated` | `False` |
@@ -124,4 +124,4 @@
 
 | Path | Schema | Fresh | Age Hours | Pass |
 |---|---|---:|---:|---:|
-| `implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json` | `github-actions-ci-streak-evidence.v1` | `True` | `33.75` | `False` |
+| `implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json` | `github-actions-ci-streak-evidence.v1` | `True` | `37.385` | `False` |

@@ -70,6 +70,19 @@ def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+def _semantic_normalize(value: Any, path: tuple[str, ...] = ()) -> Any:
+    if isinstance(value, dict):
+        return {
+            str(key): _semantic_normalize(child, path + (str(key),))
+            for key, child in value.items()
+            if str(key) != "generated_at"
+            and not (path == () and str(key) == "source_commit_sha")
+        }
+    if isinstance(value, list):
+        return [_semantic_normalize(item, path) for item in value]
+    return value
+
+
 def _resolve(repo_root: Path, path: Path) -> Path:
     return path if path.is_absolute() else repo_root / path
 
@@ -2823,6 +2836,185 @@ def write_application_plan(
     return payload
 
 
+def _check_json_file(path: Path, expected: dict[str, Any]) -> str:
+    if not path.exists():
+        return f"missing:{path.as_posix()}"
+    try:
+        actual = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return f"unreadable:{path.as_posix()}"
+    if not isinstance(actual, dict):
+        return f"not_object:{path.as_posix()}"
+    if _semantic_normalize(actual) != _semantic_normalize(expected):
+        return f"mismatch:{path.as_posix()}"
+    return ""
+
+
+def _check_text_file(path: Path, expected: str) -> str:
+    if not path.exists():
+        return f"missing:{path.as_posix()}"
+    if path.read_text(encoding="utf-8") != expected:
+        return f"mismatch:{path.as_posix()}"
+    return ""
+
+
+def check_application_plan(
+    *,
+    repo_root: Path = ROOT,
+    audit_path: Path = DEFAULT_AUDIT,
+    quarantine_manifest_path: Path = DEFAULT_QUARANTINE_MANIFEST,
+    owner_decisions_path: Path = DEFAULT_OWNER_DECISIONS,
+    origin_report_path: Path = DEFAULT_ORIGIN_REPORT,
+    out: Path = DEFAULT_OUT,
+    out_md: Path = DEFAULT_OUT_MD,
+    next_batch_template_out: Path = DEFAULT_NEXT_BATCH_TEMPLATE,
+    next_batch_template_out_md: Path = DEFAULT_NEXT_BATCH_TEMPLATE_MD,
+    next_batch_template_out_csv: Path = DEFAULT_NEXT_BATCH_TEMPLATE_CSV,
+    next_batch_decision_overrides_template_out_csv: Path = (
+        DEFAULT_NEXT_BATCH_DECISION_OVERRIDES_TEMPLATE_CSV
+    ),
+    next_batch_decision_overrides_template_out_md: Path = (
+        DEFAULT_NEXT_BATCH_DECISION_OVERRIDES_TEMPLATE_MD
+    ),
+    release_surface_first_batch_template_out: Path = (
+        DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE
+    ),
+    release_surface_first_batch_template_out_md: Path = (
+        DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_MD
+    ),
+    release_surface_first_batch_template_out_csv: Path = (
+        DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_CSV
+    ),
+    release_surface_first_decision_overrides_template_out_csv: Path = (
+        DEFAULT_RELEASE_SURFACE_FIRST_DECISION_OVERRIDES_TEMPLATE_CSV
+    ),
+    release_surface_first_decision_overrides_template_out_md: Path = (
+        DEFAULT_RELEASE_SURFACE_FIRST_DECISION_OVERRIDES_TEMPLATE_MD
+    ),
+) -> tuple[bool, str, dict[str, Any]]:
+    repo_root = repo_root.resolve()
+    expected = build_application_plan(
+        repo_root=repo_root,
+        audit_path=audit_path,
+        quarantine_manifest_path=quarantine_manifest_path,
+        owner_decisions_path=owner_decisions_path,
+        origin_report_path=origin_report_path,
+    )
+    mismatches = [
+        _check_json_file(_resolve(repo_root, out), expected),
+        _check_text_file(_resolve(repo_root, out_md), _markdown(expected)),
+    ]
+
+    next_batch_template = expected.get("next_owner_review_batch_decision_template")
+    next_batch_template = (
+        next_batch_template if isinstance(next_batch_template, dict) else {}
+    )
+    if next_batch_template:
+        next_override_rows = [
+            row
+            for row in _as_list(
+                next_batch_template.get("decision_overrides_template_rows")
+            )
+            if isinstance(row, dict)
+        ]
+        next_override_fields = [
+            str(item)
+            for item in _as_list(
+                next_batch_template.get("decision_overrides_template_columns")
+            )
+        ]
+        mismatches.extend(
+            [
+                _check_json_file(_resolve(repo_root, next_batch_template_out), next_batch_template),
+                _check_text_file(
+                    _resolve(repo_root, next_batch_template_out_md),
+                    _next_batch_template_markdown(next_batch_template),
+                ),
+                _check_text_file(
+                    _resolve(repo_root, next_batch_template_out_csv),
+                    _csv_text(next_batch_template["decision_rows"]),
+                ),
+                _check_text_file(
+                    _resolve(repo_root, next_batch_decision_overrides_template_out_csv),
+                    _custom_csv_text(next_override_rows, next_override_fields),
+                ),
+                _check_text_file(
+                    _resolve(repo_root, next_batch_decision_overrides_template_out_md),
+                    _next_batch_overrides_template_markdown(next_batch_template),
+                ),
+            ]
+        )
+
+    release_surface_template = expected.get(
+        "release_surface_first_batch_decision_template"
+    )
+    release_surface_template = (
+        release_surface_template if isinstance(release_surface_template, dict) else {}
+    )
+    if release_surface_template:
+        override_rows = [
+            row
+            for row in _as_list(
+                release_surface_template.get("mixed_decision_overrides_template_rows")
+            )
+            if isinstance(row, dict)
+        ]
+        override_fields = [
+            "path",
+            "owner_decision",
+            "external_archive_reference",
+            "evidence_reference",
+        ]
+        mismatches.extend(
+            [
+                _check_json_file(
+                    _resolve(repo_root, release_surface_first_batch_template_out),
+                    release_surface_template,
+                ),
+                _check_text_file(
+                    _resolve(repo_root, release_surface_first_batch_template_out_md),
+                    _release_surface_first_batch_template_markdown(
+                        release_surface_template
+                    ),
+                ),
+                _check_text_file(
+                    _resolve(repo_root, release_surface_first_batch_template_out_csv),
+                    _csv_text(release_surface_template["decision_rows"]),
+                ),
+                _check_text_file(
+                    _resolve(
+                        repo_root,
+                        release_surface_first_decision_overrides_template_out_csv,
+                    ),
+                    _custom_csv_text(override_rows, override_fields),
+                ),
+                _check_text_file(
+                    _resolve(
+                        repo_root,
+                        release_surface_first_decision_overrides_template_out_md,
+                    ),
+                    _release_surface_overrides_template_markdown(
+                        release_surface_template
+                    ),
+                ),
+            ]
+        )
+
+    mismatches = [item for item in mismatches if item]
+    if mismatches:
+        return (
+            False,
+            "structural_scope_owner_decision_application_plan_mismatch:"
+            + ",".join(mismatches),
+            expected,
+        )
+    return (
+        True,
+        "structural_scope_owner_decision_application_plan_consistent",
+        expected,
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
@@ -2883,6 +3075,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_RELEASE_SURFACE_FIRST_DECISION_OVERRIDES_TEMPLATE_MD,
     )
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--check", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     parser.add_argument(
         "--fail-invalid-owner-decisions",
@@ -2907,6 +3100,77 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.check:
+        ok, message, payload = check_application_plan(
+            repo_root=args.repo_root,
+            audit_path=args.audit,
+            quarantine_manifest_path=args.quarantine_manifest,
+            owner_decisions_path=args.owner_decisions,
+            origin_report_path=args.origin_report,
+            out=args.out,
+            out_md=args.out_md,
+            next_batch_template_out=args.next_batch_template_out,
+            next_batch_template_out_md=args.next_batch_template_out_md,
+            next_batch_template_out_csv=args.next_batch_template_out_csv,
+            next_batch_decision_overrides_template_out_csv=(
+                args.next_batch_decision_overrides_template_out_csv
+            ),
+            next_batch_decision_overrides_template_out_md=(
+                args.next_batch_decision_overrides_template_out_md
+            ),
+            release_surface_first_batch_template_out=(
+                args.release_surface_first_batch_template_out
+            ),
+            release_surface_first_batch_template_out_md=(
+                args.release_surface_first_batch_template_out_md
+            ),
+            release_surface_first_batch_template_out_csv=(
+                args.release_surface_first_batch_template_out_csv
+            ),
+            release_surface_first_decision_overrides_template_out_csv=(
+                args.release_surface_first_decision_overrides_template_out_csv
+            ),
+            release_surface_first_decision_overrides_template_out_md=(
+                args.release_surface_first_decision_overrides_template_out_md
+            ),
+        )
+        if args.json:
+            print(_json_text(payload), end="")
+        if not ok:
+            print(
+                "Structural scope owner decision application plan check FAILED: "
+                f"{message}",
+                file=sys.stderr,
+            )
+            return 1
+        if args.fail_invalid_owner_decisions and not payload[
+            "owner_decision_validation_pass"
+        ]:
+            print(
+                "Structural scope owner decision application plan check FAILED: "
+                "owner_decisions_invalid",
+                file=sys.stderr,
+            )
+            return 1
+        if args.fail_release_surface_first_blocked and not payload[
+            "release_surface_first_batch_application_ready"
+        ]:
+            print(
+                "Structural scope owner decision application plan check FAILED: "
+                "release_surface_first_blocked",
+                file=sys.stderr,
+            )
+            return 1
+        if args.fail_blocked and not payload["evidence_closure_pass"]:
+            print(
+                "Structural scope owner decision application plan check FAILED: "
+                "scope_cleanup_not_closed",
+                file=sys.stderr,
+            )
+            return 1
+        print(f"Structural scope owner decision application plan check: {message}")
+        return 0
+
     payload = write_application_plan(
         repo_root=args.repo_root,
         audit_path=args.audit,

@@ -401,3 +401,60 @@ def test_owner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
     assert "`nearest_abf_ready_count`: `2/3`" in markdown
     assert "## Gate Unblock Plan" in markdown
     assert "## Upstream Handoff Sources" in markdown
+
+
+def test_owner_packet_check_detects_stale_json(tmp_path: Path, capsys) -> None:
+    rc_status = tmp_path / "developer_preview_rc_status.json"
+    action_register = tmp_path / "docs/developer_preview_final_gate_action_register.md"
+    out = tmp_path / "packet.json"
+    out_md = tmp_path / "packet.md"
+    _write_json(rc_status, _rc_status_payload())
+    _write_text(action_register, "# Developer Preview Final Gate Action Register\n")
+    _write_json(tmp_path / owner_packet.DEFAULT_UX_OBSERVATION_INTAKE, _ux_intake_payload())
+    _write_upstream_handoff_artifacts(tmp_path)
+
+    owner_packet.write_owner_packet(
+        repo_root=tmp_path,
+        rc_status_path=rc_status,
+        action_register_path=action_register,
+        out=out,
+        out_md=out_md,
+    )
+
+    assert owner_packet.main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "--rc-status",
+            str(rc_status),
+            "--action-register",
+            str(action_register),
+            "--out",
+            str(out),
+            "--out-md",
+            str(out_md),
+            "--check",
+        ]
+    ) == 0
+    assert "developer_preview_final_gate_owner_packet_consistent" in capsys.readouterr().out
+
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    payload["blocked_final_gate_count"] = 99
+    out.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    assert owner_packet.main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "--rc-status",
+            str(rc_status),
+            "--action-register",
+            str(action_register),
+            "--out",
+            str(out),
+            "--out-md",
+            str(out_md),
+            "--check",
+        ]
+    ) == 1
+    assert "developer_preview_final_gate_owner_packet_mismatch" in capsys.readouterr().err

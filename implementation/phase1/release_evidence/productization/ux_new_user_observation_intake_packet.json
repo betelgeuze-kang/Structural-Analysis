@@ -465,7 +465,7 @@
     }
   ],
   "gate_unblock_plan_count": 5,
-  "generated_at": "2026-07-02T21:21:47.375183+00:00",
+  "generated_at": "2026-07-02T23:42:24.897846+00:00",
   "human_observation_evidence_policy": {
     "accepted_evidence": [
       "human-observed 30-minute new-user workflow record with anonymized participant_ref",

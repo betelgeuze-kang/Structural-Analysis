@@ -109,6 +109,19 @@ def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+def _semantic_normalize(value: Any, path: tuple[str, ...] = ()) -> Any:
+    if isinstance(value, dict):
+        return {
+            str(key): _semantic_normalize(child, path + (str(key),))
+            for key, child in value.items()
+            if str(key) != "generated_at"
+            and not (path == () and str(key) == "source_commit_sha")
+        }
+    if isinstance(value, list):
+        return [_semantic_normalize(item, path) for item in value]
+    return value
+
+
 def _resolve(repo_root: Path, path: Path) -> Path:
     return path if path.is_absolute() else repo_root / path
 
@@ -1200,6 +1213,41 @@ def write_owner_decision_template(
     return payload
 
 
+def check_owner_review_packet(
+    *,
+    repo_root: Path = ROOT,
+    audit_path: Path = DEFAULT_AUDIT,
+    quarantine_manifest_path: Path = DEFAULT_QUARANTINE_MANIFEST,
+    owner_decisions_path: Path = DEFAULT_OWNER_DECISIONS,
+    out: Path = DEFAULT_OUT,
+    out_md: Path = DEFAULT_OUT_MD,
+) -> tuple[bool, str, dict[str, Any]]:
+    expected = build_owner_review_packet(
+        repo_root=repo_root,
+        audit_path=audit_path,
+        quarantine_manifest_path=quarantine_manifest_path,
+        owner_decisions_path=owner_decisions_path,
+    )
+    resolved_out = _resolve(repo_root, out)
+    if not resolved_out.exists():
+        return False, "structural_scope_owner_review_packet_missing", expected
+    try:
+        actual = json.loads(resolved_out.read_text(encoding="utf-8"))
+    except Exception:
+        return False, "structural_scope_owner_review_packet_unreadable", expected
+    if not isinstance(actual, dict):
+        return False, "structural_scope_owner_review_packet_not_object", expected
+    if _semantic_normalize(actual) != _semantic_normalize(expected):
+        return False, "structural_scope_owner_review_packet_mismatch", expected
+
+    resolved_out_md = _resolve(repo_root, out_md)
+    if not resolved_out_md.exists():
+        return False, "structural_scope_owner_review_packet_markdown_missing", expected
+    if resolved_out_md.read_text(encoding="utf-8") != _markdown(expected):
+        return False, "structural_scope_owner_review_packet_markdown_mismatch", expected
+    return True, "structural_scope_owner_review_packet_consistent", expected
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
@@ -1228,6 +1276,7 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_OWNER_DECISION_TEMPLATE_CSV,
     )
+    parser.add_argument("--check", action="store_true")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     return parser
@@ -1235,6 +1284,29 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.check:
+        ok, message, payload = check_owner_review_packet(
+            repo_root=args.repo_root,
+            audit_path=args.audit,
+            quarantine_manifest_path=args.quarantine_manifest,
+            owner_decisions_path=args.owner_decisions,
+            out=args.out,
+            out_md=args.out_md,
+        )
+        if args.json:
+            print(_json_text(payload), end="")
+        if not ok:
+            print(f"Structural scope owner review packet check FAILED: {message}", file=sys.stderr)
+            return 1
+        if args.fail_blocked and not payload["evidence_closure_pass"]:
+            print(
+                "Structural scope owner review packet check FAILED: owner_review_not_closed",
+                file=sys.stderr,
+            )
+            return 1
+        print(f"Structural scope owner review packet check: {message}")
+        return 0
+
     payload = write_owner_review_packet(
         repo_root=args.repo_root,
         audit_path=args.audit,

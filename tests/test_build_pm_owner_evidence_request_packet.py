@@ -118,8 +118,11 @@ def test_build_packet_groups_ci_blockers_by_owner_and_dedupes_commands(tmp_path:
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
     ]
+    assert packet["owner_action"] == "Collect evidence."
+    assert packet["owner_actions"] == ["Collect evidence."]
     assert packet["reproduction_commands"] == ["python3 scripts/build_ci_streak_intake_packet.py"]
     assert packet["expected_intake_paths"] == [str(intake)]
+    assert packet["evidence_intake_artifacts"] == [str(intake)]
     assert packet["expected_intake_details"][0]["schema_version"] == "ci-streak-intake-packet.v1"
     assert packet["intake_current_blockers"] == ["pr:pr_ci_30_consecutive_pass_evidence_missing"]
     assert packet["intake_lane_request_rows"][0]["lane"] == "pr"
@@ -487,7 +490,10 @@ def test_build_packet_surfaces_blocked_release_tier_owner_requests(tmp_path: Pat
         "ga_release_owner",
     ]
     ga_packet = payload["release_tier_owner_packets"][1]
+    assert ga_packet["owner_action"] == "Attach independent V&V before GA/Enterprise release."
+    assert ga_packet["owner_actions"] == ["Attach independent V&V before GA/Enterprise release."]
     assert ga_packet["expected_intake_paths"] == [str(ga_intake)]
+    assert ga_packet["evidence_intake_artifacts"] == [str(ga_intake)]
     assert ga_packet["intake_current_blockers"] == ["independent_vv_missing"]
     assert ga_packet["intake_signoff_request_rows"][0]["signoff"] == "independent_vv_attestation"
     assert ga_packet["intake_signoff_request_rows"][0]["missing_fields"] == [

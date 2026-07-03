@@ -14,13 +14,14 @@
     "highest_observed_gap_to_required_load_scale": 0.344,
     "highest_observed_load_scale": 0.656,
     "required_load_scale": 1.0,
-    "workspace_candidate_count": 357,
-    "workspace_scan_root": "implementation/phase1/release_evidence/productization"
+    "workspace_candidate_count": 0,
+    "workspace_scan_root": ""
   },
   "claim_boundary": "This packet defines the next G1 runner contract for generating a consistent residual/Jacobian Newton full-load checkpoint candidate. It does not create the checkpoint, close the consistent Newton gate, prove full-load 1.0 equilibrium, promote G1 closure, or allow an exhausted row-only support/link retuning loop to count as progress.",
   "closure_blockers": [
     "checkpoint_load_scale_below_required_full_load",
     "checkpoint_resolution_no_full_load_candidate",
+    "hip_consistency_proof_source_commit_sha_mismatch",
     "hip_consistency_proof_production_hip_path_not_proven",
     "hip_consistency_proof_gate_not_passed",
     "hip_consistency_proof_residual_jvp_worker_path_not_ready",
@@ -50,7 +51,7 @@
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
-  "generated_at": "2026-07-02T18:24:53.704506+00:00",
+  "generated_at": "2026-07-02T23:58:22.497533+00:00",
   "hip_worker_contract": {
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -251,11 +252,11 @@
     }
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:40b0d61e7b864fbc900271f8bc1264897de2dc54b9bd191b56d4674575b82690",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:11389f3ef0058f6a862e08b5b6277e46c12d5831c8e1e84ce6c6620d5720720d",
-    "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:0c518c7e3678c0a5526bb67dbc1ae348c402cfeb0160a063453cb336b7375d14",
+    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:127faeca4e434f6e91f28eec84677ba759277ae162c592f3e9aa3714a64dd672",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:c1b31c863b692a6c70b5b4ae2c88a44b2feb6e135c551c60b272584fde2dbe64",
+    "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:94a7e2a585815054c1c54ab7274b37564776d2ee336228eaf542a55df06e6fd1",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:fff3f1e0393a6dde86c0ea737f7e51fc95fd41c82f8513656378323c964f3376",
-    "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:c59d7caa10d2c3e9a30a97d597222535d7fc9856a3a8e4a53b982b96c2b3579e"
+    "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:88b8b6bc8bf67fa0be0c54999d58ce8ab029ef769b1bfd550ae6ee9b7ebc48c4"
   },
   "next_actions": [
     {
@@ -354,10 +355,10 @@
     "runner_id": "build_consistent_newton_full_load_checkpoint_candidate_runner"
   },
   "schema_version": "g1-consistent-newton-full-load-checkpoint-candidate-runner.v1",
-  "source_commit_sha": "420a2a6c200f6defc6a642d56d34f6717008a8df",
+  "source_commit_sha": "93f68e1dfb6f58a0cd68fcbdada555a759e190b0",
   "status": "blocked_runner_contract",
   "summary": {
-    "closure_blocker_count": 27,
+    "closure_blocker_count": 28,
     "consistent_residual_jacobian_newton_gate_passed": false,
     "contract_blocker_count": 1,
     "contract_pass": false,
@@ -378,15 +379,88 @@
     "residual_jvp_worker_path_ready": false,
     "row_only_correction_loop_stopped": true,
     "support_or_link_row_gap_disfavored": true,
+    "worker_path_operator_sequence_count": 4,
     "worker_path_repair_blocker_count": 9,
     "worker_path_repair_category_count": 5,
     "worker_path_repair_next_action_id": "repair_production_rocm_hip_residual_jvp_worker_path"
   },
-  "summary_line": "G1 consistent Newton full-load runner contract: BLOCKED_RUNNER_CONTRACT | contract_pass=False | observed_load=0.656/1 | closure_blockers=27",
+  "summary_line": "G1 consistent Newton full-load runner contract: BLOCKED_RUNNER_CONTRACT | contract_pass=False | observed_load=0.656/1 | closure_blockers=28",
   "verification_commands": [
     "python3 scripts/run_g1_full_load_hip_newton_lane.py --checkpoint-npz <full-load-checkpoint.npz> --fail-blocked",
     "python3 scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py --fail-blocked",
     "python3 scripts/build_structural_product_development_roadmap.py"
+  ],
+  "worker_path_operator_sequence": [
+    {
+      "acceptance": [
+        "/dev/kfd and /dev/dri are available to the runner",
+        "ROCm/HIP runtime preflight reports hip_available == true",
+        "no CPU diagnostic assembler is used as a substitute"
+      ],
+      "clears_categories": [
+        "runtime_device_interface"
+      ],
+      "command": "python3 implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py --require-hip-residual-engine --hip-runtime-preflight-only --output-json implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+      "owner": "runtime_rocm_owner",
+      "required_receipts": [
+        "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+        "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json"
+      ],
+      "status": "required",
+      "step_id": "verify_rocm_runtime_device_interface"
+    },
+    {
+      "acceptance": [
+        "child HIP direct probe is executed, not preflight-only",
+        "production_hip_residual_jacobian_path == true",
+        "matrix-free global Krylov retains HIP JVP rows",
+        "current tangent residual-row correction uses HIP batch replay"
+      ],
+      "clears_categories": [
+        "hip_required_direct_probe",
+        "production_hip_residual_jacobian_path",
+        "matrix_free_global_krylov",
+        "current_tangent_residual_row_replay"
+      ],
+      "command": "python3 implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py --require-hip-residual-engine --output-json implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+      "owner": "runtime_rocm_owner",
+      "required_receipts": [
+        "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
+      ],
+      "status": "required",
+      "step_id": "run_hip_required_direct_probe"
+    },
+    {
+      "acceptance": [
+        "worker_path_repair_plan.blocker_count == 0",
+        "hip_worker_contract.residual_jvp_worker_path_ready == true"
+      ],
+      "clears_categories": [],
+      "command": "python3 scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py --fail-blocked",
+      "owner": "g1_solver_owner",
+      "required_receipts": [
+        "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+        "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
+      ],
+      "status": "required",
+      "step_id": "refresh_runner_contract_after_hip_probe"
+    },
+    {
+      "acceptance": [
+        "checkpoint load_scale >= 1.0",
+        "checkpoint schema is mgt-direct-residual-newton-state.v1",
+        "g1_full_load_hip_newton_lane_report contract passes"
+      ],
+      "clears_categories": [],
+      "command": "python3 scripts/run_g1_full_load_hip_newton_lane.py --checkpoint-npz <full-load-checkpoint.npz> --fail-blocked",
+      "owner": "g1_solver_owner",
+      "required_receipts": [
+        "<full-load-checkpoint.npz>",
+        "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json"
+      ],
+      "status": "required",
+      "step_id": "rerun_g1_full_load_lane_with_full_load_checkpoint"
+    }
   ],
   "worker_path_repair_plan": {
     "blocker_count": 9,

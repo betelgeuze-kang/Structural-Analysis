@@ -194,6 +194,26 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
                 "release_surface_excluded_path_count": 2,
             },
         ),
+        "structural_scope_quarantine_manifest": _write_json(
+            tmp_path / "structural-scope-quarantine-manifest.json",
+            {
+                "schema_version": "structural-scope-quarantine-manifest.v1",
+                "status": "active",
+                "path_count": 2,
+                "paths": [
+                    {
+                        "path": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+                        "families": ["molecular_docking"],
+                        "path_area": "release_surface",
+                    },
+                    {
+                        "path": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+                        "families": ["molecular_dynamics"],
+                        "path_area": "release_surface",
+                    },
+                ],
+            },
+        ),
         "developer_preview_final_gate_owner_packet": _write_json(
             tmp_path / "developer-preview-final-gate-owner-packet.json",
             {
@@ -487,6 +507,7 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
         assert "redacted/pm_release_gate_reviewer_handoff.json" in members
         assert "redacted/pm_owner_evidence_request_packet.json" in members
         assert "redacted/structural_scope_owner_review_packet.json" in members
+        assert "redacted/structural_scope_quarantine_manifest.json" in members
         assert "redacted/developer_preview_final_gate_owner_packet.json" in members
         assert "redacted/license_status_closure_report.json" in members
         assert "redacted/license_status_template.json" in members
@@ -518,6 +539,7 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert "pm_release_gate_reviewer_handoff" in payload["optional_sections"]
     assert "pm_owner_evidence_request_packet" in payload["optional_sections"]
     assert "structural_scope_owner_review_packet" in payload["optional_sections"]
+    assert "structural_scope_quarantine_manifest" in payload["optional_sections"]
     assert "developer_preview_final_gate_owner_packet" in payload["optional_sections"]
     assert "ci_streak_intake_packet" in payload["optional_sections"]
     assert "ci_streak_manifest" in payload["optional_sections"]
@@ -566,6 +588,12 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     )
     assert "pm-owner-evidence-request-packet.v1" in redacted_owner_packet
     assert "release_ci_owner" in redacted_owner_packet
+    redacted_quarantine_manifest = Path(
+        payload["optional_sections"]["structural_scope_quarantine_manifest"]
+    ).read_text(encoding="utf-8")
+    assert "structural-scope-quarantine-manifest.v1" in redacted_quarantine_manifest
+    assert "gpcr_hard_decoy_evidence_surface" in redacted_quarantine_manifest
+    assert "pocketmd_lite_science_product_surface" in redacted_quarantine_manifest
     redacted_ci_streak = Path(payload["optional_sections"]["ci_streak_intake_packet"]).read_text(
         encoding="utf-8"
     )

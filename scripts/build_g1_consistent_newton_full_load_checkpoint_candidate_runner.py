@@ -286,6 +286,109 @@ def _worker_path_repair_plan(
     }
 
 
+def _worker_path_operator_sequence(
+    *,
+    worker_path_repair_plan: dict[str, Any],
+    hip_probe_path: Path,
+    g1_lane_path: Path,
+) -> list[dict[str, Any]]:
+    category_order = [
+        str(item) for item in _as_list(worker_path_repair_plan.get("category_order"))
+    ]
+    blocked_categories = set(category_order)
+
+    def step_status(*categories: str) -> str:
+        return "required" if blocked_categories.intersection(categories) else "ready"
+
+    return [
+        {
+            "step_id": "verify_rocm_runtime_device_interface",
+            "owner": "runtime_rocm_owner",
+            "status": step_status("runtime_device_interface"),
+            "clears_categories": ["runtime_device_interface"],
+            "command": (
+                "python3 implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py "
+                "--require-hip-residual-engine --hip-runtime-preflight-only "
+                f"--output-json {hip_probe_path.as_posix()}"
+            ),
+            "required_receipts": [
+                hip_probe_path.as_posix(),
+                DEFAULT_SOLVER_HIP_E2E.as_posix(),
+            ],
+            "acceptance": [
+                "/dev/kfd and /dev/dri are available to the runner",
+                "ROCm/HIP runtime preflight reports hip_available == true",
+                "no CPU diagnostic assembler is used as a substitute",
+            ],
+        },
+        {
+            "step_id": "run_hip_required_direct_probe",
+            "owner": "runtime_rocm_owner",
+            "status": step_status(
+                "hip_required_direct_probe",
+                "production_hip_residual_jacobian_path",
+                "matrix_free_global_krylov",
+                "current_tangent_residual_row_replay",
+            ),
+            "clears_categories": [
+                "hip_required_direct_probe",
+                "production_hip_residual_jacobian_path",
+                "matrix_free_global_krylov",
+                "current_tangent_residual_row_replay",
+            ],
+            "command": (
+                "python3 implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py "
+                "--require-hip-residual-engine "
+                f"--output-json {hip_probe_path.as_posix()}"
+            ),
+            "required_receipts": [hip_probe_path.as_posix()],
+            "acceptance": [
+                "child HIP direct probe is executed, not preflight-only",
+                "production_hip_residual_jacobian_path == true",
+                "matrix-free global Krylov retains HIP JVP rows",
+                "current tangent residual-row correction uses HIP batch replay",
+            ],
+        },
+        {
+            "step_id": "refresh_runner_contract_after_hip_probe",
+            "owner": "g1_solver_owner",
+            "status": "required" if worker_path_repair_plan.get("blocker_count") else "ready",
+            "clears_categories": [],
+            "command": (
+                "python3 scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py "
+                "--fail-blocked"
+            ),
+            "required_receipts": [
+                hip_probe_path.as_posix(),
+                DEFAULT_OUT.as_posix(),
+            ],
+            "acceptance": [
+                "worker_path_repair_plan.blocker_count == 0",
+                "hip_worker_contract.residual_jvp_worker_path_ready == true",
+            ],
+        },
+        {
+            "step_id": "rerun_g1_full_load_lane_with_full_load_checkpoint",
+            "owner": "g1_solver_owner",
+            "status": "required",
+            "clears_categories": [],
+            "command": (
+                "python3 scripts/run_g1_full_load_hip_newton_lane.py "
+                "--checkpoint-npz <full-load-checkpoint.npz> --fail-blocked"
+            ),
+            "required_receipts": [
+                "<full-load-checkpoint.npz>",
+                g1_lane_path.as_posix(),
+            ],
+            "acceptance": [
+                "checkpoint load_scale >= 1.0",
+                "checkpoint schema is mgt-direct-residual-newton-state.v1",
+                "g1_full_load_hip_newton_lane_report contract passes",
+            ],
+        },
+    ]
+
+
 def _closure_blockers(
     *,
     g1_lane: dict[str, Any],
@@ -389,6 +492,11 @@ def build_runner_packet(
     worker_path_repair_plan = _worker_path_repair_plan(
         worker=worker,
         hip_probe_path=hip_probe_path,
+    )
+    worker_path_operator_sequence = _worker_path_operator_sequence(
+        worker_path_repair_plan=worker_path_repair_plan,
+        hip_probe_path=hip_probe_path,
+        g1_lane_path=g1_lane_path,
     )
     terminal_partition = _as_dict(worker.get("terminal_gate_partition"))
     routing_blockers = _routing_blockers(action=action, cause_narrowing=cause_narrowing)
@@ -495,6 +603,7 @@ def build_runner_packet(
             "worker_path_repair_next_action_id": worker_path_repair_plan[
                 "next_action_id"
             ],
+            "worker_path_operator_sequence_count": len(worker_path_operator_sequence),
             "g1_closure_gate_ready": worker.get("g1_closure_gate_ready") is True,
             "consistent_residual_jacobian_newton_gate_passed": hip_probe.get(
                 "consistent_residual_jacobian_newton_gate_passed"
@@ -612,6 +721,7 @@ def build_runner_packet(
             "worker_path_repair_plan": worker_path_repair_plan,
         },
         "worker_path_repair_plan": worker_path_repair_plan,
+        "worker_path_operator_sequence": worker_path_operator_sequence,
         "verification_commands": [
             (
                 "python3 scripts/run_g1_full_load_hip_newton_lane.py "
@@ -685,6 +795,16 @@ def _markdown(payload: dict[str, Any]) -> str:
             lines.append(
                 f"- `{category}`: "
                 f"`{_as_dict(repair_plan.get('category_counts')).get(category, 0)}`"
+            )
+    operator_sequence = _as_list(payload.get("worker_path_operator_sequence"))
+    if operator_sequence:
+        lines.extend(["", "## Worker Path Operator Sequence", ""])
+        for item in operator_sequence:
+            if not isinstance(item, dict):
+                continue
+            lines.append(
+                f"- `{item.get('step_id')}`: owner=`{item.get('owner')}`, "
+                f"status=`{item.get('status')}`"
             )
     if payload["closure_blockers"]:
         lines.extend(["", "## Closure Blockers", ""])

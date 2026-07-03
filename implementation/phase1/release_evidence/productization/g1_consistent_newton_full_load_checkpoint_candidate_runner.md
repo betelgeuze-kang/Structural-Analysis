@@ -1,6 +1,6 @@
 # G1 Consistent Newton Full-Load Runner Contract
 
-- `summary_line`: `G1 consistent Newton full-load runner contract: BLOCKED_RUNNER_CONTRACT | contract_pass=False | observed_load=0.656/1 | closure_blockers=27`
+- `summary_line`: `G1 consistent Newton full-load runner contract: BLOCKED_RUNNER_CONTRACT | contract_pass=False | observed_load=0.656/1 | closure_blockers=28`
 - `contract_pass`: `False`
 - `evidence_closure_pass`: `False`
 - `runner_id`: `build_consistent_newton_full_load_checkpoint_candidate_runner`
@@ -41,10 +41,18 @@
 - `matrix_free_global_krylov`: `3`
 - `current_tangent_residual_row_replay`: `1`
 
+## Worker Path Operator Sequence
+
+- `verify_rocm_runtime_device_interface`: owner=`runtime_rocm_owner`, status=`required`
+- `run_hip_required_direct_probe`: owner=`runtime_rocm_owner`, status=`required`
+- `refresh_runner_contract_after_hip_probe`: owner=`g1_solver_owner`, status=`required`
+- `rerun_g1_full_load_lane_with_full_load_checkpoint`: owner=`g1_solver_owner`, status=`required`
+
 ## Closure Blockers
 
 - `checkpoint_load_scale_below_required_full_load`
 - `checkpoint_resolution_no_full_load_candidate`
+- `hip_consistency_proof_source_commit_sha_mismatch`
 - `hip_consistency_proof_production_hip_path_not_proven`
 - `hip_consistency_proof_gate_not_passed`
 - `hip_consistency_proof_residual_jvp_worker_path_not_ready`

@@ -286,6 +286,8 @@ def _owner_packet(owner: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
         if _as_dict(row.get("expected_intake_detail")).get("path")
     ]
     deduped_intake_details = _dedupe_dicts(intake_details, key="path")
+    next_actions = _dedupe([row["next_action"] for row in rows])
+    expected_intake_paths = _dedupe([row["expected_intake_path"] for row in rows])
     return {
         "owner": owner,
         "request_state": "ready_for_owner_input" if not incomplete else "request_incomplete",
@@ -295,7 +297,9 @@ def _owner_packet(owner: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
             [tier for row in rows for tier in _as_list(row.get("blocked_release_tiers"))]
         ),
         "evidence_states": _dedupe([row["evidence_state"] for row in rows]),
-        "next_actions": _dedupe([row["next_action"] for row in rows]),
+        "owner_action": next_actions[0] if next_actions else "",
+        "owner_actions": next_actions,
+        "next_actions": next_actions,
         "acceptance_criteria": _dedupe(
             [item for row in rows for item in _as_list(row.get("acceptance_criteria"))]
         ),
@@ -306,7 +310,8 @@ def _owner_packet(owner: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
             [item for row in rows for item in _as_list(row.get("verification_commands"))]
         ),
         "expected_intake_artifacts": _dedupe([row["expected_intake_artifact"] for row in rows]),
-        "expected_intake_paths": _dedupe([row["expected_intake_path"] for row in rows]),
+        "expected_intake_paths": expected_intake_paths,
+        "evidence_intake_artifacts": expected_intake_paths,
         "expected_intake_details": deduped_intake_details,
         "intake_current_blockers": _dedupe(
             [
@@ -444,13 +449,17 @@ def _release_tier_owner_packet(owner: str, rows: list[dict[str, Any]]) -> dict[s
         if _as_dict(row.get("expected_intake_detail")).get("path")
     ]
     deduped_intake_details = _dedupe_dicts(intake_details, key="path")
+    next_actions = _dedupe([row["next_action"] for row in rows])
+    expected_intake_paths = _dedupe([row["expected_intake_path"] for row in rows])
     return {
         "owner": owner,
         "request_state": "ready_for_owner_input" if not incomplete else "request_incomplete",
         "release_tier_request_count": len(rows),
         "requirement_ids": [row["requirement_id"] for row in rows],
         "blockers": _dedupe([item for row in rows for item in _as_list(row.get("blockers"))]),
-        "next_actions": _dedupe([row["next_action"] for row in rows]),
+        "owner_action": next_actions[0] if next_actions else "",
+        "owner_actions": next_actions,
+        "next_actions": next_actions,
         "acceptance_criteria": _dedupe(
             [item for row in rows for item in _as_list(row.get("acceptance_criteria"))]
         ),
@@ -461,7 +470,8 @@ def _release_tier_owner_packet(owner: str, rows: list[dict[str, Any]]) -> dict[s
             [item for row in rows for item in _as_list(row.get("verification_commands"))]
         ),
         "expected_intake_artifacts": _dedupe([row["expected_intake_artifact"] for row in rows]),
-        "expected_intake_paths": _dedupe([row["expected_intake_path"] for row in rows]),
+        "expected_intake_paths": expected_intake_paths,
+        "evidence_intake_artifacts": expected_intake_paths,
         "expected_intake_details": deduped_intake_details,
         "intake_current_blockers": _dedupe(
             [

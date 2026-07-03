@@ -186,6 +186,7 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
         "close_consistent_residual_jacobian_newton_gate",
         "prove_production_rocm_hip_residual_jvp_worker",
     ]
+    assert payload["summary"]["worker_path_operator_sequence_count"] == 4
     assert payload["runner_contract"]["runner_id"] == runner.RUNNER_ID
     assert (
         payload["runner_contract"]["preferred_candidate_generator"]
@@ -229,6 +230,21 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     ]
     assert "consistent_residual_jacobian_newton_gate_not_passed" in payload[
         "closure_blockers"
+    ]
+    sequence = payload["worker_path_operator_sequence"]
+    assert [row["step_id"] for row in sequence] == [
+        "verify_rocm_runtime_device_interface",
+        "run_hip_required_direct_probe",
+        "refresh_runner_contract_after_hip_probe",
+        "rerun_g1_full_load_lane_with_full_load_checkpoint",
+    ]
+    assert sequence[0]["status"] == "ready"
+    assert sequence[1]["status"] == "ready"
+    assert "--require-hip-residual-engine" in sequence[1]["command"]
+    assert "--hip-runtime-preflight-only" not in sequence[1]["command"]
+    assert sequence[2]["required_receipts"] == [
+        paths["hip"].as_posix(),
+        runner.DEFAULT_OUT.as_posix(),
     ]
 
 
@@ -278,6 +294,12 @@ def test_runner_packet_classifies_blocked_worker_path_repair_plan(tmp_path: Path
         "matrix_free_global_krylov.proof.jvp_rows_retained == true",
         "accepted-state tangent refresh uses HIP, not CPU",
     ]
+    sequence = payload["worker_path_operator_sequence"]
+    assert sequence[0]["status"] == "required"
+    assert sequence[0]["clears_categories"] == ["runtime_device_interface"]
+    assert "--hip-runtime-preflight-only" in sequence[0]["command"]
+    assert sequence[1]["status"] == "required"
+    assert "matrix_free_global_krylov" in sequence[1]["clears_categories"]
     assert payload["summary"]["worker_path_repair_blocker_count"] == 6
     assert payload["summary"]["worker_path_repair_category_count"] == 5
     assert (
@@ -325,4 +347,6 @@ def test_runner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
     assert runner.RUNNER_ID in markdown
     assert "## Next Actions" in markdown
     assert "generate_full_load_1p0_checkpoint_candidate" in markdown
+    assert "## Worker Path Operator Sequence" in markdown
+    assert "run_hip_required_direct_probe" in markdown
     assert payload["status"] == "ready_for_runner_implementation"

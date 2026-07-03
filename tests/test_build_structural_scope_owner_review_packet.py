@@ -717,6 +717,60 @@ def test_owner_review_packet_writes_json_and_markdown(tmp_path: Path) -> None:
     assert "implementation/phase1/md3bead_soa.py" in markdown
 
 
+def test_owner_review_packet_check_detects_stale_json(tmp_path: Path, capsys) -> None:
+    audit = tmp_path / "audit.json"
+    manifest = tmp_path / "manifest.json"
+    out = tmp_path / "packet.json"
+    out_md = tmp_path / "packet.md"
+    _write_json(audit, _audit_payload())
+    _write_json(manifest, _manifest_payload())
+    owner_review.write_owner_review_packet(
+        repo_root=tmp_path,
+        audit_path=audit,
+        quarantine_manifest_path=manifest,
+        out=out,
+        out_md=out_md,
+    )
+
+    assert owner_review.main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "--audit",
+            str(audit),
+            "--quarantine-manifest",
+            str(manifest),
+            "--out",
+            str(out),
+            "--out-md",
+            str(out_md),
+            "--check",
+        ]
+    ) == 0
+    assert "structural_scope_owner_review_packet_consistent" in capsys.readouterr().out
+
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    payload["owner_decision_pending_count"] = 99
+    out.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    assert owner_review.main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "--audit",
+            str(audit),
+            "--quarantine-manifest",
+            str(manifest),
+            "--out",
+            str(out),
+            "--out-md",
+            str(out_md),
+            "--check",
+        ]
+    ) == 1
+    assert "structural_scope_owner_review_packet_mismatch" in capsys.readouterr().err
+
+
 def test_owner_decision_template_writes_fillable_rows(tmp_path: Path) -> None:
     audit = tmp_path / "audit.json"
     manifest = tmp_path / "manifest.json"

@@ -65,6 +65,9 @@ DEFAULT_PM_OWNER_EVIDENCE_REQUEST_PACKET = Path(
 DEFAULT_STRUCTURAL_SCOPE_OWNER_REVIEW_PACKET = Path(
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json"
 )
+DEFAULT_STRUCTURAL_SCOPE_QUARANTINE_MANIFEST = Path(
+    "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json"
+)
 DEFAULT_DEVELOPER_PREVIEW_FINAL_GATE_OWNER_PACKET = Path(
     "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json"
 )
@@ -151,6 +154,7 @@ PM_FAILURE_BUNDLE_REQUIRED_SECTION_LABELS = (
     "ga_enterprise_readiness_report",
     "ga_enterprise_signoff_intake_packet",
     "fresh_full_validation_lane_status",
+    "structural_scope_quarantine_manifest",
     "commercial_gap_ledger_status",
     "gap_closure_status",
     "independent_vv_attestation_template",
@@ -715,6 +719,7 @@ def build_support_bundle(
     pm_release_gate_reviewer_handoff: Path | None = DEFAULT_PM_RELEASE_GATE_REVIEWER_HANDOFF,
     pm_owner_evidence_request_packet: Path | None = DEFAULT_PM_OWNER_EVIDENCE_REQUEST_PACKET,
     structural_scope_owner_review_packet: Path | None = DEFAULT_STRUCTURAL_SCOPE_OWNER_REVIEW_PACKET,
+    structural_scope_quarantine_manifest: Path | None = DEFAULT_STRUCTURAL_SCOPE_QUARANTINE_MANIFEST,
     developer_preview_final_gate_owner_packet: Path | None = (
         DEFAULT_DEVELOPER_PREVIEW_FINAL_GATE_OWNER_PACKET
     ),
@@ -777,6 +782,7 @@ def build_support_bundle(
         ("pm_release_gate_reviewer_handoff", pm_release_gate_reviewer_handoff),
         ("pm_owner_evidence_request_packet", pm_owner_evidence_request_packet),
         ("structural_scope_owner_review_packet", structural_scope_owner_review_packet),
+        ("structural_scope_quarantine_manifest", structural_scope_quarantine_manifest),
         (
             "developer_preview_final_gate_owner_packet",
             developer_preview_final_gate_owner_packet,
@@ -993,6 +999,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_STRUCTURAL_SCOPE_OWNER_REVIEW_PACKET,
     )
     parser.add_argument(
+        "--structural-scope-quarantine-manifest",
+        type=Path,
+        default=DEFAULT_STRUCTURAL_SCOPE_QUARANTINE_MANIFEST,
+    )
+    parser.add_argument(
         "--developer-preview-final-gate-owner-packet",
         type=Path,
         default=DEFAULT_DEVELOPER_PREVIEW_FINAL_GATE_OWNER_PACKET,
@@ -1153,6 +1164,7 @@ def main(argv: list[str] | None = None) -> int:
         pm_release_gate_reviewer_handoff=args.pm_release_gate_reviewer_handoff,
         pm_owner_evidence_request_packet=args.pm_owner_evidence_request_packet,
         structural_scope_owner_review_packet=args.structural_scope_owner_review_packet,
+        structural_scope_quarantine_manifest=args.structural_scope_quarantine_manifest,
         developer_preview_final_gate_owner_packet=(
             args.developer_preview_final_gate_owner_packet
         ),

@@ -258,6 +258,19 @@ def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+def _semantic_normalize(value: Any, path: tuple[str, ...] = ()) -> Any:
+    if isinstance(value, dict):
+        return {
+            str(key): _semantic_normalize(child, path + (str(key),))
+            for key, child in value.items()
+            if str(key) != "generated_at"
+            and not (path == () and str(key) == "source_commit_sha")
+        }
+    if isinstance(value, list):
+        return [_semantic_normalize(item, path) for item in value]
+    return value
+
+
 def _resolve(repo_root: Path, path: Path) -> Path:
     return path if path.is_absolute() else repo_root / path
 
@@ -928,6 +941,39 @@ def write_owner_packet(
     return payload
 
 
+def check_owner_packet(
+    *,
+    repo_root: Path = ROOT,
+    rc_status_path: Path = DEFAULT_RC_STATUS,
+    action_register_path: Path = DEFAULT_ACTION_REGISTER,
+    out: Path = DEFAULT_OUT,
+    out_md: Path = DEFAULT_OUT_MD,
+) -> tuple[bool, str, dict[str, Any]]:
+    expected = build_owner_packet(
+        repo_root=repo_root,
+        rc_status_path=rc_status_path,
+        action_register_path=action_register_path,
+    )
+    resolved_out = _resolve(repo_root, out)
+    if not resolved_out.exists():
+        return False, "developer_preview_final_gate_owner_packet_missing", expected
+    try:
+        actual = json.loads(resolved_out.read_text(encoding="utf-8"))
+    except Exception:
+        return False, "developer_preview_final_gate_owner_packet_unreadable", expected
+    if not isinstance(actual, dict):
+        return False, "developer_preview_final_gate_owner_packet_not_object", expected
+    if _semantic_normalize(actual) != _semantic_normalize(expected):
+        return False, "developer_preview_final_gate_owner_packet_mismatch", expected
+
+    resolved_out_md = _resolve(repo_root, out_md)
+    if not resolved_out_md.exists():
+        return False, "developer_preview_final_gate_owner_packet_markdown_missing", expected
+    if resolved_out_md.read_text(encoding="utf-8") != _markdown(expected):
+        return False, "developer_preview_final_gate_owner_packet_markdown_mismatch", expected
+    return True, "developer_preview_final_gate_owner_packet_consistent", expected
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
@@ -935,6 +981,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--action-register", type=Path, default=DEFAULT_ACTION_REGISTER)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
+    parser.add_argument("--check", action="store_true")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     return parser
@@ -942,6 +989,25 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.check:
+        ok, message, payload = check_owner_packet(
+            repo_root=args.repo_root,
+            rc_status_path=args.rc_status,
+            action_register_path=args.action_register,
+            out=args.out,
+            out_md=args.out_md,
+        )
+        if args.json:
+            print(_json_text(payload), end="")
+        if not ok:
+            print(f"Developer Preview final gate owner packet check FAILED: {message}", file=sys.stderr)
+            return 1
+        if args.fail_blocked and not payload["contract_pass"]:
+            print("Developer Preview final gate owner packet check FAILED: blocked_handoff", file=sys.stderr)
+            return 1
+        print(f"Developer Preview final gate owner packet check: {message}")
+        return 0
+
     payload = write_owner_packet(
         repo_root=args.repo_root,
         rc_status_path=args.rc_status,

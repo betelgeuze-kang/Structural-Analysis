@@ -10,7 +10,7 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_operator_handoff": {},
-  "generated_at": "2026-07-02T04:53:24.679136+00:00",
+  "generated_at": "2026-07-02T23:40:58.743999+00:00",
   "human_ux_summary": {
     "evidence_artifacts": {
       "observation_report": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
@@ -39,10 +39,10 @@
     "workflow_step_pass_count": 0
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:a3a3da8bfda68f3bc8de800f15beaa887091db745ebc0db9729efc675b6c1c61",
+    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:845291407dc2610da53f247424595a05c782dc7f54f72d337a5ae4dde7be3626",
     "scripts/build_non_expert_release_briefing_report.py": "sha256:c8425a9b99789f4be43384a640a6386d8df9510916dba96075572ff99811eeb7"
   },
-  "next_owner_action_count": 5,
+  "next_owner_action_count": 6,
   "next_owner_actions": [
     {
       "blocker_id": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
@@ -78,6 +78,13 @@
       "owner": "product_legal_owner",
       "owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
       "source": "release_area"
+    },
+    {
+      "blocker_id": "github_sync::github_sync_preflight::local_head_mismatch",
+      "external_input_required": true,
+      "owner": "release_owner",
+      "owner_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
+      "source": "release_area"
     }
   ],
   "plain_status": "Release is blocked. The product can remain in restricted alpha/beta preparation, but it must not be presented as fully release-ready.",
@@ -97,8 +104,8 @@
   "read_model_ready": true,
   "reason_code": "PASS",
   "release_allowed": false,
-  "release_area_blocker_count": 5,
-  "release_area_owner_handoff_count": 5,
+  "release_area_blocker_count": 6,
+  "release_area_owner_handoff_count": 6,
   "reuse_policy": "non_expert_release_briefing_report_from_goal_bottleneck_surface",
   "reused_evidence": true,
   "route": "/goal/non-expert-release-briefing",
@@ -106,6 +113,6 @@
   "source_artifacts": {
     "goal_bottleneck_roadmap_surface": "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json"
   },
-  "source_commit_sha": "aa1425e2593886ae9e2f74b6fe3cf4b2e896fdd0",
+  "source_commit_sha": "93f68e1dfb6f58a0cd68fcbdada555a759e190b0",
   "status": "ready_release_blocked"
 }

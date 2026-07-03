@@ -128,6 +128,55 @@ def _write_inputs(tmp_path: Path) -> tuple[Path, Path]:
     return audit, manifest
 
 
+def _write_release_surface_inputs(tmp_path: Path) -> tuple[Path, Path, Path, str]:
+    audit = _audit_payload()
+    manifest = _manifest_payload()
+    release_surface_path = (
+        "implementation/phase1/release_evidence/surface/"
+        "pocketmd_lite_science_product_surface.json"
+    )
+    audit["quarantined_non_structural_rows"].append(
+        {
+            "path": release_surface_path,
+            "git_state": "tracked",
+            "path_area": "release_surface",
+            "families": ["molecular_dynamics"],
+            "matched_tokens": ["pocketmd"],
+            "quarantine_status": "quarantined",
+            "excluded_from_structural_release_surface": True,
+        }
+    )
+    manifest["paths"].append(
+        {
+            "path": release_surface_path,
+            "excluded_from_structural_release_surface": True,
+        }
+    )
+    audit_path = tmp_path / "audit.json"
+    manifest_path = tmp_path / "manifest.json"
+    origin_report_path = tmp_path / "origin_report.json"
+    _write_json(audit_path, audit)
+    _write_json(manifest_path, manifest)
+    _write_json(
+        origin_report_path,
+        {
+            "origin_rows": [
+                {
+                    "path": release_surface_path,
+                    "origin_wave": "pocketmd_productization_evidence_wave",
+                    "first_added_commit_sha": "01e6fe1b00000000000000000000000000000000",
+                    "first_added_commit_short_sha": "01e6fe1b",
+                    "first_added_commit_date": "2026-06-30",
+                    "first_added_commit_subject": (
+                        "Materialize PocketMD Lite product surface"
+                    ),
+                }
+            ]
+        },
+    )
+    return audit_path, manifest_path, origin_report_path, release_surface_path
+
+
 def test_application_plan_waits_for_owner_decisions(tmp_path: Path) -> None:
     audit, manifest = _write_inputs(tmp_path)
 
@@ -1608,6 +1657,165 @@ def test_application_plan_writes_json_and_markdown(tmp_path: Path) -> None:
     assert "Next Batch Decision Overrides Template" in next_overrides_markdown
     assert "Blank rows intentionally block validation" in next_overrides_markdown
     assert "retain_quarantined_with_signed_owner_exception" in next_overrides_markdown
+
+
+def test_application_plan_check_detects_stale_main_plan(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    audit, manifest = _write_inputs(tmp_path)
+    out = tmp_path / "plan.json"
+    out_md = tmp_path / "plan.md"
+    next_template = tmp_path / "next_batch.template.json"
+    next_template_md = tmp_path / "next_batch.template.md"
+    next_template_csv = tmp_path / "next_batch.template.csv"
+    next_overrides_template_csv = tmp_path / "next_batch.overrides.csv"
+    next_overrides_template_md = tmp_path / "next_batch.overrides.md"
+    check_args = [
+        "--repo-root",
+        str(tmp_path),
+        "--audit",
+        str(audit),
+        "--quarantine-manifest",
+        str(manifest),
+        "--owner-decisions",
+        str(tmp_path / "missing_decisions.json"),
+        "--out",
+        str(out),
+        "--out-md",
+        str(out_md),
+        "--next-batch-template-out",
+        str(next_template),
+        "--next-batch-template-out-md",
+        str(next_template_md),
+        "--next-batch-template-out-csv",
+        str(next_template_csv),
+        "--next-batch-decision-overrides-template-out-csv",
+        str(next_overrides_template_csv),
+        "--next-batch-decision-overrides-template-out-md",
+        str(next_overrides_template_md),
+        "--check",
+    ]
+    application_plan.write_application_plan(
+        repo_root=tmp_path,
+        audit_path=audit,
+        quarantine_manifest_path=manifest,
+        owner_decisions_path=tmp_path / "missing_decisions.json",
+        out=out,
+        out_md=out_md,
+        next_batch_template_out=next_template,
+        next_batch_template_out_md=next_template_md,
+        next_batch_template_out_csv=next_template_csv,
+        next_batch_decision_overrides_template_out_csv=next_overrides_template_csv,
+        next_batch_decision_overrides_template_out_md=next_overrides_template_md,
+    )
+
+    assert application_plan.main(check_args) == 0
+    output = capsys.readouterr()
+    assert "structural_scope_owner_decision_application_plan_consistent" in output.out
+
+    stale_payload = json.loads(out.read_text(encoding="utf-8"))
+    stale_payload["owner_decision_pending_count"] = 99
+    _write_json(out, stale_payload)
+
+    assert application_plan.main(check_args) == 1
+    output = capsys.readouterr()
+    assert "structural_scope_owner_decision_application_plan_mismatch" in output.err
+    assert "mismatch:" in output.err
+
+
+def test_application_plan_check_detects_stale_release_surface_template(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    audit, manifest, origin_report, _release_surface_path = (
+        _write_release_surface_inputs(tmp_path)
+    )
+    out = tmp_path / "plan.json"
+    out_md = tmp_path / "plan.md"
+    next_template = tmp_path / "next_batch.template.json"
+    next_template_md = tmp_path / "next_batch.template.md"
+    next_template_csv = tmp_path / "next_batch.template.csv"
+    next_overrides_template_csv = tmp_path / "next_batch.overrides.csv"
+    next_overrides_template_md = tmp_path / "next_batch.overrides.md"
+    release_template = tmp_path / "release_surface_first.template.json"
+    release_template_md = tmp_path / "release_surface_first.template.md"
+    release_template_csv = tmp_path / "release_surface_first.template.csv"
+    release_overrides_template_csv = tmp_path / "release_surface_first.overrides.csv"
+    release_overrides_template_md = tmp_path / "release_surface_first.overrides.md"
+    check_args = [
+        "--repo-root",
+        str(tmp_path),
+        "--audit",
+        str(audit),
+        "--quarantine-manifest",
+        str(manifest),
+        "--origin-report",
+        str(origin_report),
+        "--owner-decisions",
+        str(tmp_path / "missing_decisions.json"),
+        "--out",
+        str(out),
+        "--out-md",
+        str(out_md),
+        "--next-batch-template-out",
+        str(next_template),
+        "--next-batch-template-out-md",
+        str(next_template_md),
+        "--next-batch-template-out-csv",
+        str(next_template_csv),
+        "--next-batch-decision-overrides-template-out-csv",
+        str(next_overrides_template_csv),
+        "--next-batch-decision-overrides-template-out-md",
+        str(next_overrides_template_md),
+        "--release-surface-first-batch-template-out",
+        str(release_template),
+        "--release-surface-first-batch-template-out-md",
+        str(release_template_md),
+        "--release-surface-first-batch-template-out-csv",
+        str(release_template_csv),
+        "--release-surface-first-decision-overrides-template-out-csv",
+        str(release_overrides_template_csv),
+        "--release-surface-first-decision-overrides-template-out-md",
+        str(release_overrides_template_md),
+        "--check",
+    ]
+    application_plan.write_application_plan(
+        repo_root=tmp_path,
+        audit_path=audit,
+        quarantine_manifest_path=manifest,
+        owner_decisions_path=tmp_path / "missing_decisions.json",
+        origin_report_path=origin_report,
+        out=out,
+        out_md=out_md,
+        next_batch_template_out=next_template,
+        next_batch_template_out_md=next_template_md,
+        next_batch_template_out_csv=next_template_csv,
+        next_batch_decision_overrides_template_out_csv=next_overrides_template_csv,
+        next_batch_decision_overrides_template_out_md=next_overrides_template_md,
+        release_surface_first_batch_template_out=release_template,
+        release_surface_first_batch_template_out_md=release_template_md,
+        release_surface_first_batch_template_out_csv=release_template_csv,
+        release_surface_first_decision_overrides_template_out_csv=(
+            release_overrides_template_csv
+        ),
+        release_surface_first_decision_overrides_template_out_md=(
+            release_overrides_template_md
+        ),
+    )
+
+    assert application_plan.main(check_args) == 0
+    output = capsys.readouterr()
+    assert "structural_scope_owner_decision_application_plan_consistent" in output.out
+
+    stale_template = json.loads(release_template.read_text(encoding="utf-8"))
+    stale_template["decision_pending_count"] = 99
+    _write_json(release_template, stale_template)
+
+    assert application_plan.main(check_args) == 1
+    output = capsys.readouterr()
+    assert "structural_scope_owner_decision_application_plan_mismatch" in output.err
+    assert "release_surface_first.template.json" in output.err
 
 
 def test_application_plan_writes_release_surface_first_template(
