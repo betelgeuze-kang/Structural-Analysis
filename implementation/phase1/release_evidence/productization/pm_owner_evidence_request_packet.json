@@ -22,7 +22,7 @@
   "claim_boundary": "This packet groups open PM blocker and release-tier evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA approval, or any other external release evidence. When reviewer handoff evidence is supplied, each open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps the owner handoff blocked except for explicit non-tier structural scope cleanup adjunct handoffs. This packet does not convert missing evidence into a release pass.",
   "contract_pass": true,
   "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
-  "generated_at": "2026-07-03T00:29:55.730051+00:00",
+  "generated_at": "2026-07-03T00:37:52.444165+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tier_requirements": [],
   "missing_release_tier_impacts": [],
@@ -1955,12 +1955,12 @@
       "intake_lane_request_rows": [],
       "intake_signoff_request_rows": [],
       "next_actions": [
-        "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`."
+        "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`."
       ],
       "owner": "release_owner",
-      "owner_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+      "owner_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
       "owner_actions": [
-        "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`."
+        "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`."
       ],
       "owner_input_required": true,
       "reproduction_commands": [
@@ -1993,7 +1993,7 @@
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+          "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
@@ -2032,7 +2032,7 @@
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+          "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
@@ -2071,7 +2071,7 @@
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+          "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
