@@ -20,13 +20,13 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T23:07:30.111000+00:00",
+  "generated_at": "2026-07-03T23:14:08.507704+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:c25ba5ea401ba42eb25040cd23fb100aa19be66f3a4f695b362932e956d7044f",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:b4c48144c39ff6168b6b97a9e9fa328e7d643286fa8ba6ab10e80f2d91318b77",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:428d1ff1e69fa6d018b15c376e963e5e0a13e351ebeac259262daa2f26ef78e9",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:d91bbc8402c86796ce3d60d0a053610cceea2dcbbb0f5faf00adeaad7698bea4",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:6e75a02c6b13b518bf6087e44db30b84c243e4935d2b50611e2fd0411e476118",
     "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:dcf5bdf831a01f412e7b969dd7c6b7eac57f59c28f6cf166a81b4fe0a4d5e36e",
-    "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:1530941d975e86ff27b900bfb70b3691a286385afa1d0a083d24e2ae44ffc2a5",
+    "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1",
     "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:895f52a4b9383625534767806ab373c4e33d70287a52ca65f9090b0d0e1e593a",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
@@ -838,7 +838,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "13b5a540bb90459f5b9dcaedad06818415996dc4",
+  "source_commit_sha": "2375d3dc0079cac8e278d152d3d7803eb017d0e6",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,

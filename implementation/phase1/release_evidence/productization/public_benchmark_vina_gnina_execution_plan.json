@@ -185,15 +185,21 @@
         },
         "files": {
           "ligand": {
+            "actual_checksum": "",
             "blocker": "prepared_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/4llx_ligand",
             "status": "blocked"
           },
           "receptor": {
+            "actual_checksum": "",
             "blocker": "prepared_receptor_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/4llx_receptor",
             "status": "blocked"
@@ -231,15 +237,21 @@
         ],
         "files": {
           "protein_structure_path": {
+            "actual_checksum": "",
             "blocker": "protein_structure_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:ee6be565638c58d9b608a5cb79a98dae39566a60b4ae019ea6a23a45c2b7a834",
             "is_file": false,
             "path": "CASF-2016/coreset/4llx/4llx_protein.pdb",
             "status": "blocked"
           },
           "reference_ligand_path": {
+            "actual_checksum": "",
             "blocker": "reference_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:a6298d4cdddb5d1926ca09bcb5e1412ecd2699476f3ae1fa086d3d335efaa6f1",
             "is_file": false,
             "path": "CASF-2016/coreset/4llx/4llx_ligand.sdf",
             "status": "blocked"
@@ -385,15 +397,21 @@
         },
         "files": {
           "ligand": {
+            "actual_checksum": "",
             "blocker": "prepared_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/5c28_ligand",
             "status": "blocked"
           },
           "receptor": {
+            "actual_checksum": "",
             "blocker": "prepared_receptor_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/5c28_receptor",
             "status": "blocked"
@@ -431,15 +449,21 @@
         ],
         "files": {
           "protein_structure_path": {
+            "actual_checksum": "",
             "blocker": "protein_structure_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:ac3677c62abb2e549c4e3f4a6185663da16028e7e1b1e6ef875da956e77639b0",
             "is_file": false,
             "path": "CASF-2016/coreset/5c28/5c28_protein.pdb",
             "status": "blocked"
           },
           "reference_ligand_path": {
+            "actual_checksum": "",
             "blocker": "reference_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:7df337dcb033a69f6db8d229749489e45ba9695a4a2e9bdf5593a51ae66eaf87",
             "is_file": false,
             "path": "CASF-2016/coreset/5c28/5c28_ligand.sdf",
             "status": "blocked"
@@ -585,15 +609,21 @@
         },
         "files": {
           "ligand": {
+            "actual_checksum": "",
             "blocker": "prepared_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/3uuo_ligand",
             "status": "blocked"
           },
           "receptor": {
+            "actual_checksum": "",
             "blocker": "prepared_receptor_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/3uuo_receptor",
             "status": "blocked"
@@ -631,15 +661,21 @@
         ],
         "files": {
           "protein_structure_path": {
+            "actual_checksum": "",
             "blocker": "protein_structure_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:80b28a058a5a2da46bc2e3e91e26c1e14c4f2fd7514c051559b017ab0e93dcf9",
             "is_file": false,
             "path": "CASF-2016/coreset/3uuo/3uuo_protein.pdb",
             "status": "blocked"
           },
           "reference_ligand_path": {
+            "actual_checksum": "",
             "blocker": "reference_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:7eedba7f908c0ba267dbe8af02294fcd148064d25cde772d62dded9737258ce5",
             "is_file": false,
             "path": "CASF-2016/coreset/3uuo/3uuo_ligand.sdf",
             "status": "blocked"
@@ -785,15 +821,21 @@
         },
         "files": {
           "ligand": {
+            "actual_checksum": "",
             "blocker": "prepared_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/3ui7_ligand",
             "status": "blocked"
           },
           "receptor": {
+            "actual_checksum": "",
             "blocker": "prepared_receptor_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/3ui7_receptor",
             "status": "blocked"
@@ -831,15 +873,21 @@
         ],
         "files": {
           "protein_structure_path": {
+            "actual_checksum": "",
             "blocker": "protein_structure_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:62a51c4d5a96b8b2b0388e1e9f9dc55763d39996935f1ed30c1bdfd2ef282e0e",
             "is_file": false,
             "path": "CASF-2016/coreset/3ui7/3ui7_protein.pdb",
             "status": "blocked"
           },
           "reference_ligand_path": {
+            "actual_checksum": "",
             "blocker": "reference_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:bc6913724d6339af7844e5dedb93010e6e7e706c8da629d1e54a73c2fd2eafa2",
             "is_file": false,
             "path": "CASF-2016/coreset/3ui7/3ui7_ligand.sdf",
             "status": "blocked"
@@ -985,15 +1033,21 @@
         },
         "files": {
           "ligand": {
+            "actual_checksum": "",
             "blocker": "prepared_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/5c2h_ligand",
             "status": "blocked"
           },
           "receptor": {
+            "actual_checksum": "",
             "blocker": "prepared_receptor_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/5c2h_receptor",
             "status": "blocked"
@@ -1031,15 +1085,21 @@
         ],
         "files": {
           "protein_structure_path": {
+            "actual_checksum": "",
             "blocker": "protein_structure_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:59718184b6c4de964136707cca00f1eb1361fff3d24020e28878dbec60e67917",
             "is_file": false,
             "path": "CASF-2016/coreset/5c2h/5c2h_protein.pdb",
             "status": "blocked"
           },
           "reference_ligand_path": {
+            "actual_checksum": "",
             "blocker": "reference_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:7c512908ac4e7157027219b8f09bcede70f8d0621606303a5ff2eceb89033420",
             "is_file": false,
             "path": "CASF-2016/coreset/5c2h/5c2h_ligand.sdf",
             "status": "blocked"
@@ -1185,15 +1245,21 @@
         },
         "files": {
           "ligand": {
+            "actual_checksum": "",
             "blocker": "prepared_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/2v00_ligand",
             "status": "blocked"
           },
           "receptor": {
+            "actual_checksum": "",
             "blocker": "prepared_receptor_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/2v00_receptor",
             "status": "blocked"
@@ -1231,15 +1297,21 @@
         ],
         "files": {
           "protein_structure_path": {
+            "actual_checksum": "",
             "blocker": "protein_structure_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:ce00145b46da36a51792628b6322437c7acb30cbc6c165c47443a1ed3d2256fa",
             "is_file": false,
             "path": "CASF-2016/coreset/2v00/2v00_protein.pdb",
             "status": "blocked"
           },
           "reference_ligand_path": {
+            "actual_checksum": "",
             "blocker": "reference_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:cc87334e0ed4d4d66929e57998fae43785bbe399772967f8a660dfbc106c9b16",
             "is_file": false,
             "path": "CASF-2016/coreset/2v00/2v00_ligand.sdf",
             "status": "blocked"
@@ -1385,15 +1457,21 @@
         },
         "files": {
           "ligand": {
+            "actual_checksum": "",
             "blocker": "prepared_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/3wz8_ligand",
             "status": "blocked"
           },
           "receptor": {
+            "actual_checksum": "",
             "blocker": "prepared_receptor_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/3wz8_receptor",
             "status": "blocked"
@@ -1431,15 +1509,21 @@
         ],
         "files": {
           "protein_structure_path": {
+            "actual_checksum": "",
             "blocker": "protein_structure_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:9de2f60abeea752abc06f866597255ca08fe75bf09cc749f76951adc30b0b45f",
             "is_file": false,
             "path": "CASF-2016/coreset/3wz8/3wz8_protein.pdb",
             "status": "blocked"
           },
           "reference_ligand_path": {
+            "actual_checksum": "",
             "blocker": "reference_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:33a3b8306ae40623d38a5af2a883037a17472f18ba58141456f7bdf8abedb03a",
             "is_file": false,
             "path": "CASF-2016/coreset/3wz8/3wz8_ligand.sdf",
             "status": "blocked"
@@ -1585,15 +1669,21 @@
         },
         "files": {
           "ligand": {
+            "actual_checksum": "",
             "blocker": "prepared_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/3pww_ligand",
             "status": "blocked"
           },
           "receptor": {
+            "actual_checksum": "",
             "blocker": "prepared_receptor_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/3pww_receptor",
             "status": "blocked"
@@ -1631,15 +1721,21 @@
         ],
         "files": {
           "protein_structure_path": {
+            "actual_checksum": "",
             "blocker": "protein_structure_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:351db504aee7d52f588e720c0f9d88ceb65fa738aa9a3d393ec5cbed4af96efb",
             "is_file": false,
             "path": "CASF-2016/coreset/3pww/3pww_protein.pdb",
             "status": "blocked"
           },
           "reference_ligand_path": {
+            "actual_checksum": "",
             "blocker": "reference_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:e4cc5a4f6f900a00cd2ce5976a3603d38204f0c288774f5650e35ab7e6324d0b",
             "is_file": false,
             "path": "CASF-2016/coreset/3pww/3pww_ligand.sdf",
             "status": "blocked"
@@ -1785,15 +1881,21 @@
         },
         "files": {
           "ligand": {
+            "actual_checksum": "",
             "blocker": "prepared_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/3prs_ligand",
             "status": "blocked"
           },
           "receptor": {
+            "actual_checksum": "",
             "blocker": "prepared_receptor_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/3prs_receptor",
             "status": "blocked"
@@ -1831,15 +1933,21 @@
         ],
         "files": {
           "protein_structure_path": {
+            "actual_checksum": "",
             "blocker": "protein_structure_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:6a294ddeb8eaaf9a876ac9ad7a3e2715da586fdb7877d4cac306d4348932e34b",
             "is_file": false,
             "path": "CASF-2016/coreset/3prs/3prs_protein.pdb",
             "status": "blocked"
           },
           "reference_ligand_path": {
+            "actual_checksum": "",
             "blocker": "reference_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:4625a72478cc0940022b39b2059e0d7115a20eaf6b845ecde8b17a195fba0911",
             "is_file": false,
             "path": "CASF-2016/coreset/3prs/3prs_ligand.sdf",
             "status": "blocked"
@@ -1985,15 +2093,21 @@
         },
         "files": {
           "ligand": {
+            "actual_checksum": "",
             "blocker": "prepared_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/3uri_ligand",
             "status": "blocked"
           },
           "receptor": {
+            "actual_checksum": "",
             "blocker": "prepared_receptor_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/3uri_receptor",
             "status": "blocked"
@@ -2031,15 +2145,21 @@
         ],
         "files": {
           "protein_structure_path": {
+            "actual_checksum": "",
             "blocker": "protein_structure_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:03b1b8c59bd72520faca258f2a1c4a5677e161bf3ace4a9df3ae7003d585f8b1",
             "is_file": false,
             "path": "CASF-2016/coreset/3uri/3uri_protein.pdb",
             "status": "blocked"
           },
           "reference_ligand_path": {
+            "actual_checksum": "",
             "blocker": "reference_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:9091e3949535eeae0afa1e80484ece0e71e6809c44d81072130b54f81f440a85",
             "is_file": false,
             "path": "CASF-2016/coreset/3uri/3uri_ligand.sdf",
             "status": "blocked"
@@ -2185,15 +2305,21 @@
         },
         "files": {
           "ligand": {
+            "actual_checksum": "",
             "blocker": "prepared_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/4m0z_ligand",
             "status": "blocked"
           },
           "receptor": {
+            "actual_checksum": "",
             "blocker": "prepared_receptor_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/4m0z_receptor",
             "status": "blocked"
@@ -2231,15 +2357,21 @@
         ],
         "files": {
           "protein_structure_path": {
+            "actual_checksum": "",
             "blocker": "protein_structure_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:8eb56910faa3eb78ca1b8c244b01bf6094f2838a4db08a0b5198b68e6a96242d",
             "is_file": false,
             "path": "CASF-2016/coreset/4m0z/4m0z_protein.pdb",
             "status": "blocked"
           },
           "reference_ligand_path": {
+            "actual_checksum": "",
             "blocker": "reference_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:533af481c8fe734256312a30791bfbb12eb5796e26409942c66581fb8ef60f07",
             "is_file": false,
             "path": "CASF-2016/coreset/4m0z/4m0z_ligand.sdf",
             "status": "blocked"
@@ -2385,15 +2517,21 @@
         },
         "files": {
           "ligand": {
+            "actual_checksum": "",
             "blocker": "prepared_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/4m0y_ligand",
             "status": "blocked"
           },
           "receptor": {
+            "actual_checksum": "",
             "blocker": "prepared_receptor_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "",
             "is_file": false,
             "path": "prepared/4m0y_receptor",
             "status": "blocked"
@@ -2431,15 +2569,21 @@
         ],
         "files": {
           "protein_structure_path": {
+            "actual_checksum": "",
             "blocker": "protein_structure_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:f2b1040546ed7c6d01e4ef39996afcc283be189a42df7bde3773db0d2ecbe7bc",
             "is_file": false,
             "path": "CASF-2016/coreset/4m0y/4m0y_protein.pdb",
             "status": "blocked"
           },
           "reference_ligand_path": {
+            "actual_checksum": "",
             "blocker": "reference_ligand_path_missing",
+            "checksum_verified": false,
             "exists": false,
+            "expected_checksum": "sha256:65f2c98b8958e739f98b243924513e3ff3068d536665a7b0e27fefa81a0e0dfc",
             "is_file": false,
             "path": "CASF-2016/coreset/4m0y/4m0y_ligand.sdf",
             "status": "blocked"
@@ -2550,12 +2694,12 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "execution_plan_ready": false,
   "expected_vina_gnina_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
-  "generated_at": "2026-07-03T22:16:10.115960+00:00",
+  "generated_at": "2026-07-03T23:14:02.081855+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
     "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json": "missing",
-    "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:1530941d975e86ff27b900bfb70b3691a286385afa1d0a083d24e2ae44ffc2a5"
+    "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1"
   },
   "input_manifest_status": {
     "accepted_formats": [
@@ -2630,7 +2774,7 @@
   "reuse_policy": "public_benchmark_vina_gnina_execution_plan_from_materialized_rows",
   "reused_evidence": false,
   "schema_version": "public-benchmark-vina-gnina-execution-plan.v1",
-  "source_commit_sha": "df149d71e2a2a7a1db92a41683e84ffb151e92ec",
+  "source_commit_sha": "2375d3dc0079cac8e278d152d3d7803eb017d0e6",
   "status": "engine_input_blocked",
   "summary": {
     "adapter_rows_ready": false,

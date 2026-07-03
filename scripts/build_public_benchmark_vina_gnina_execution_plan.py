@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -332,13 +333,48 @@ def _docking_box(
     }
 
 
-def _file_status(repo_root: Path, path_value: Any, *, blocker_prefix: str) -> dict[str, Any]:
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _checksum_blocker(
+    expected_checksum: str,
+    actual_checksum: str,
+    *,
+    blocker_prefix: str,
+    require_checksum: bool,
+) -> str:
+    if not expected_checksum:
+        return f"{blocker_prefix}_checksum_missing" if require_checksum else ""
+    if not expected_checksum.lower().startswith("sha256:"):
+        return f"{blocker_prefix}_checksum_invalid"
+    if expected_checksum.lower() != actual_checksum.lower():
+        return f"{blocker_prefix}_checksum_mismatch"
+    return ""
+
+
+def _file_status(
+    repo_root: Path,
+    path_value: Any,
+    *,
+    blocker_prefix: str,
+    expected_checksum: Any = "",
+    require_checksum: bool = False,
+) -> dict[str, Any]:
     path_text = str(path_value or "").strip()
+    expected_checksum_text = str(expected_checksum or "").strip()
     if not path_text:
         return {
             "path": "",
             "exists": False,
             "is_file": False,
+            "expected_checksum": expected_checksum_text,
+            "actual_checksum": "",
+            "checksum_verified": False,
             "status": "blocked",
             "blocker": f"{blocker_prefix}_missing",
         }
@@ -351,24 +387,54 @@ def _file_status(repo_root: Path, path_value: Any, *, blocker_prefix: str) -> di
         blocker = f"{blocker_prefix}_missing"
     elif not is_file:
         blocker = f"{blocker_prefix}_not_file"
+    actual_checksum = ""
+    checksum_verified = False
+    if is_file:
+        try:
+            actual_checksum = _sha256_file(resolved)
+        except OSError:
+            blocker = f"{blocker_prefix}_checksum_read_error"
+        else:
+            checksum_blocker = _checksum_blocker(
+                expected_checksum_text,
+                actual_checksum,
+                blocker_prefix=blocker_prefix,
+                require_checksum=require_checksum,
+            )
+            if checksum_blocker:
+                blocker = checksum_blocker
+            checksum_verified = bool(expected_checksum_text) and not checksum_blocker
     return {
         "path": path_text,
         "exists": exists,
         "is_file": is_file,
-        "status": "ready" if is_file else "blocked",
+        "expected_checksum": expected_checksum_text,
+        "actual_checksum": actual_checksum,
+        "checksum_verified": checksum_verified,
+        "status": "ready" if is_file and not blocker else "blocked",
         "blocker": blocker,
     }
 
 
 def _source_file_status(repo_root: Path, subset_row: dict[str, Any]) -> dict[str, Any]:
-    fields = {
-        field: _file_status(
-            repo_root,
-            subset_row.get(field),
-            blocker_prefix=field,
-        )
-        for field in LOCAL_SOURCE_FILE_FIELDS
+    checksum_fields = {
+        "protein_structure_path": "protein_structure_checksum",
+        "reference_ligand_path": "reference_ligand_checksum",
     }
+    fields = {}
+    for field in LOCAL_SOURCE_FILE_FIELDS:
+        checksum_field = checksum_fields[field]
+        fields[field] = _file_status(
+            repo_root=repo_root,
+            path_value=subset_row.get(field),
+            blocker_prefix=field,
+            expected_checksum=_source_file_checksum(
+                subset_row,
+                path_field=field,
+                checksum_field=checksum_field,
+            ),
+            require_checksum=True,
+        )
     blockers = [
         str(row["blocker"])
         for row in fields.values()
@@ -400,6 +466,8 @@ def _prepared_input_status(
             repo_root,
             path,
             blocker_prefix=f"prepared_{role}_path",
+            expected_checksum=case_row.get(f"prepared_{role}_checksum"),
+            require_checksum=True,
         )
         for role, path in expected_paths.items()
     }
