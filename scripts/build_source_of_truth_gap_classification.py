@@ -25,13 +25,15 @@ PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "source_of_truth_gap_classification.json"
 DEFAULT_DOC = Path("docs/source-of-truth-gap-classification.md")
 SCHEMA_VERSION = "source-of-truth-gap-classification.v1"
-EXPECTED_CANDIDATES = {
+EXPECTED_CANDIDATE_ORDER = (
     "accuracy_parity_scorecard",
     "product_production_ai_checkpoint_readiness",
     "goal_readiness_rollup",
     "product_goal_completion_audit",
     "goal_operator_action_board",
-}
+)
+EXPECTED_CANDIDATES = set(EXPECTED_CANDIDATE_ORDER)
+CLASSIFICATION_BUCKETS = ("fix", "no-op", "aggregator-review")
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -159,6 +161,26 @@ def _row(
     }
 
 
+def _classification_by_candidate(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    return {str(row["candidate"]): row for row in rows}
+
+
+def _classification_by_bucket(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    bucket_rows: dict[str, list[dict[str, Any]]] = {
+        bucket: [] for bucket in CLASSIFICATION_BUCKETS
+    }
+    for row in rows:
+        bucket_rows.setdefault(str(row["classification"]), []).append(row)
+    return {
+        bucket: {
+            "count": len(items),
+            "contract_pass_count": sum(1 for item in items if item["contract_pass"]),
+            "candidate_ids": [str(item["candidate"]) for item in items],
+        }
+        for bucket, items in bucket_rows.items()
+    }
+
+
 def build_source_of_truth_gap_classification(
     *,
     repo_root: Path = ROOT,
@@ -175,6 +197,7 @@ def build_source_of_truth_gap_classification(
         if not row["contract_pass"]
     ]
     classifications = [str(row["classification"]) for row in rows]
+    classification_by_bucket = _classification_by_bucket(rows)
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -197,6 +220,10 @@ def build_source_of_truth_gap_classification(
         "status": "ready" if not blockers else "blocked",
         "contract_pass": not blockers,
         "reason_code": "PASS" if not blockers else "ERR_SOURCE_OF_TRUTH_GAP_CLASSIFICATION",
+        "expected_candidates": list(EXPECTED_CANDIDATE_ORDER),
+        "classification_rows": rows,
+        "classification_by_candidate": _classification_by_candidate(rows),
+        "classification_by_bucket": classification_by_bucket,
         "summary": {
             "candidate_count": len(rows),
             "expected_candidate_count": len(EXPECTED_CANDIDATES),
@@ -208,6 +235,7 @@ def build_source_of_truth_gap_classification(
             ),
             "no_op_count": classifications.count("no-op"),
             "aggregator_review_count": classifications.count("aggregator-review"),
+            "classification_bucket_count": len(classification_by_bucket),
             "aggregator_reviewed_count": sum(
                 1
                 for row in rows

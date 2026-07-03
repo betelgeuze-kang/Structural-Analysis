@@ -34,12 +34,40 @@ def test_source_of_truth_gap_classification_materializes_live_scan() -> None:
         "aggregator_reviewed_count": 3,
         "blocker_count": 0,
         "candidate_count": 5,
+        "classification_bucket_count": 3,
         "expected_candidate_count": 5,
         "fix_count": 2,
         "fixed_count": 2,
         "no_op_count": 0,
     }
+    assert payload["expected_candidates"] == list(module.EXPECTED_CANDIDATE_ORDER)
     assert set(rows) == module.EXPECTED_CANDIDATES
+    assert payload["classification_rows"] == payload["rows"]
+    assert set(payload["classification_by_candidate"]) == module.EXPECTED_CANDIDATES
+    assert payload["classification_by_bucket"] == {
+        "aggregator-review": {
+            "candidate_ids": [
+                "goal_readiness_rollup",
+                "product_goal_completion_audit",
+                "goal_operator_action_board",
+            ],
+            "contract_pass_count": 3,
+            "count": 3,
+        },
+        "fix": {
+            "candidate_ids": [
+                "accuracy_parity_scorecard",
+                "product_production_ai_checkpoint_readiness",
+            ],
+            "contract_pass_count": 2,
+            "count": 2,
+        },
+        "no-op": {
+            "candidate_ids": [],
+            "contract_pass_count": 0,
+            "count": 0,
+        },
+    }
 
     accuracy = rows["accuracy_parity_scorecard"]
     assert accuracy["classification"] == "fix"
@@ -74,6 +102,8 @@ def test_source_of_truth_gap_classification_cli_writes_artifact(tmp_path: Path) 
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["contract_pass"] is True
     assert payload["summary"]["candidate_count"] == 5
+    assert payload["classification_by_bucket"]["fix"]["count"] == 2
+    assert payload["classification_by_bucket"]["aggregator-review"]["count"] == 3
     assert payload["input_checksums"][
         "scripts/build_source_of_truth_gap_classification.py"
     ].startswith("sha256:")
