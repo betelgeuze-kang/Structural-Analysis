@@ -50,7 +50,7 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "row_template_artifact_count": 6,
         "science_actual_closure_blocker_count": 2,
         "slot_count": 6,
-        "upstream_source_blocker_count": 6,
+        "upstream_source_blocker_count": 8,
         "upstream_source_context_count": 2,
     }
     assert list(slots) == [
@@ -65,7 +65,7 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "vina_gnina_rows",
         "pocketmd_rows",
     ]
-    assert len(payload["upstream_source_blockers"]) == 6
+    assert len(payload["upstream_source_blockers"]) == 8
     assert payload["upstream_source_acquisition"]["public_benchmark_phase2"][
         "present"
     ] is True
@@ -139,7 +139,10 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert vina_gnina["source_acquisition_operator_action"] == (
         "resolve_public_benchmark_phase2_source_acquisition_blockers"
     )
-    assert "public_benchmark_vina_gnina_engine_inputs_not_ready" in vina_gnina[
+    assert "public_benchmark_vina_gnina_engine_runtime_not_ready" in vina_gnina[
+        "upstream_source_blockers"
+    ]
+    assert "public_benchmark_vina_gnina_input_manifest_not_detected" in vina_gnina[
         "upstream_source_blockers"
     ]
 
@@ -235,7 +238,12 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "| `pocketmd_rows` | `operator_input_required` |" in markdown
     assert "CSV Starter" in markdown
     assert "## Upstream Source Blockers" in markdown
-    assert "public_benchmark_vina_gnina_engine_inputs_not_ready" in markdown
+    assert "public_benchmark_vina_gnina_engine_runtime_not_ready" in markdown
+    assert (
+        "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing"
+        in markdown
+    )
+    assert "public_benchmark_vina_gnina_input_manifest_not_detected" in markdown
     assert "pocketmd_lite_topk_rows_not_acquired" in markdown
     assert "public_benchmark_subset_rows_template.csv" in markdown
     assert "gpcr_hard_decoy_rows_template.csv" in markdown

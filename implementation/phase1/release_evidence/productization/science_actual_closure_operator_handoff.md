@@ -18,7 +18,9 @@
 ## Upstream Source Blockers
 
 - `public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_rows_not_acquired`
-- `public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_engine_inputs_not_ready`
+- `public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_engine_runtime_not_ready`
+- `public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_input_manifest_not_detected`
+- `public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_engine_binaries_or_container_images_missing`
 - `public_benchmark_phase2_source_acquisition::public_benchmark_external_receipts_not_attached`
 - `pocketmd_lite_source_acquisition::pocketmd_lite_topk_rows_not_acquired`
 - `pocketmd_lite_source_acquisition::upstream_top_k_candidate_receipts_not_attached`

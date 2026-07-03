@@ -225,6 +225,7 @@ def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
 
 def _source_acquisition_blockers(
     phase2_row_audit_summary: dict[str, Any],
+    vina_gnina_execution_plan_summary: dict[str, Any],
     vina_gnina_runtime_readiness_summary: dict[str, Any],
 ) -> list[str]:
     missing_row_inputs = {
@@ -259,6 +260,8 @@ def _source_acquisition_blockers(
             blockers.append("public_benchmark_vina_gnina_engine_inputs_not_ready")
         else:
             blockers.append("public_benchmark_vina_gnina_engine_runtime_not_ready")
+    if not vina_gnina_execution_plan_summary.get("input_manifest_detected"):
+        blockers.append("public_benchmark_vina_gnina_input_manifest_not_detected")
     if missing_engine_count > 0:
         blockers.append(
             "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing"
@@ -342,6 +345,23 @@ def _vina_gnina_execution_plan_summary(payload: dict[str, Any]) -> dict[str, Any
     summary = payload.get("summary")
     if not isinstance(summary, dict):
         summary = {}
+    input_manifest_status = payload.get("input_manifest_status")
+    if not isinstance(input_manifest_status, dict):
+        input_manifest_status = {}
+    manifest_status = str(
+        summary.get("input_manifest_status")
+        or input_manifest_status.get("status")
+        or ("not_detected" if payload else "missing")
+    )
+    manifest_blockers = [
+        str(row)
+        for row in input_manifest_status.get("blockers", [])
+        if str(row)
+    ] if isinstance(input_manifest_status.get("blockers"), list) else []
+    if manifest_status == "not_detected" and not manifest_blockers:
+        manifest_blockers = [
+            "public_benchmark_vina_gnina_input_manifest_not_detected"
+        ]
     return {
         "artifact": str(DEFAULT_VINA_GNINA_EXECUTION_PLAN),
         "status": str(payload.get("status") or "missing"),
@@ -367,6 +387,20 @@ def _vina_gnina_execution_plan_summary(payload: dict[str, Any]) -> dict[str, Any
         "blocker_count": len(payload.get("blockers", []))
         if isinstance(payload.get("blockers"), list)
         else 0,
+        "input_manifest_status": manifest_status,
+        "input_manifest_detected": bool(
+            summary.get("input_manifest_detected")
+            or input_manifest_status.get("detected_manifest_artifact_count")
+        ),
+        "input_manifest_row_count": int(
+            summary.get("input_manifest_row_count")
+            or input_manifest_status.get("row_count")
+            or 0
+        ),
+        "input_manifest_selected_path": str(
+            input_manifest_status.get("selected_manifest_path") or ""
+        ),
+        "input_manifest_blockers": manifest_blockers,
         "engine_input_manifest_template": str(
             DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE
         ),
@@ -836,6 +870,7 @@ def build_public_benchmark_phase2_source_acquisition_plan(
     )
     blockers = _source_acquisition_blockers(
         phase2_row_audit_summary,
+        vina_gnina_execution_plan_summary,
         vina_gnina_runtime_readiness_summary,
     )
     return {
@@ -884,6 +919,7 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "attach_pose_coordinate_rows_with_symmetry_contracts",
             "attach_dud_e_or_lit_pcba_scored_molecule_rows",
             "build_vina_gnina_execution_plan_from_materialized_cases",
+            "fill_public_benchmark_vina_gnina_input_manifest",
             "run_vina_gnina_runtime_readiness_check",
             "attach_vina_gnina_engine_run_rows",
             "attach_external_source_receipts_and_license_or_accession_refs",
@@ -966,6 +1002,15 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "vina_gnina_required_engine_run_count": vina_gnina_execution_plan_summary[
                 "required_engine_run_count"
             ],
+            "vina_gnina_input_manifest_status": (
+                vina_gnina_execution_plan_summary["input_manifest_status"]
+            ),
+            "vina_gnina_input_manifest_detected": (
+                vina_gnina_execution_plan_summary["input_manifest_detected"]
+            ),
+            "vina_gnina_input_manifest_row_count": (
+                vina_gnina_execution_plan_summary["input_manifest_row_count"]
+            ),
             "vina_gnina_missing_engine_count": vina_gnina_execution_plan_summary[
                 "missing_engine_count"
             ],
@@ -1028,6 +1073,8 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `vina_gnina_execution_plan`: `{payload['vina_gnina_execution_plan']['artifact']}`",
         f"- `vina_gnina_execution_plan_status`: `{payload['vina_gnina_execution_plan']['status']}`",
         f"- `vina_gnina_required_engine_run_count`: `{payload['vina_gnina_execution_plan']['required_engine_run_count']}`",
+        f"- `vina_gnina_input_manifest_status`: `{payload['vina_gnina_execution_plan']['input_manifest_status']}`",
+        f"- `vina_gnina_input_manifest_row_count`: `{payload['vina_gnina_execution_plan']['input_manifest_row_count']}`",
         f"- `vina_gnina_runtime_readiness`: `{payload['vina_gnina_runtime_readiness']['artifact']}`",
         f"- `vina_gnina_runtime_readiness_status`: `{payload['vina_gnina_runtime_readiness']['status']}`",
         f"- `vina_gnina_runtime_ready_engine_run_slot_count`: `{payload['vina_gnina_runtime_readiness']['ready_engine_run_slot_count']}`",

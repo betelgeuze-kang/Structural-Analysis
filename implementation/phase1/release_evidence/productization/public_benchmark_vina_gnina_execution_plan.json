@@ -49,7 +49,9 @@
     "casf2016_4m0y::protein_structure_path_missing",
     "casf2016_4m0y::reference_ligand_path_missing",
     "casf2016_4m0y::prepared_receptor_path_missing",
-    "casf2016_4m0y::prepared_ligand_path_missing"
+    "casf2016_4m0y::prepared_ligand_path_missing",
+    "vina_binary_missing",
+    "gnina_binary_missing"
   ],
   "case_count": 12,
   "case_execution_plans": [
@@ -118,6 +120,8 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+          "prepared_ligand_path": "prepared/4llx_ligand",
+          "prepared_receptor_path": "prepared/4llx_receptor",
           "receipt_required": true
         },
         {
@@ -158,9 +162,18 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_pose.sdf",
+          "prepared_ligand_path": "prepared/4llx_ligand",
+          "prepared_receptor_path": "prepared/4llx_receptor",
           "receipt_required": true
         }
       ],
+      "input_manifest_case_status": {
+        "blocker": "",
+        "manifest_row_present": false,
+        "manifest_selected": false,
+        "provided_fields": []
+      },
+      "input_preparation_provenance_ref": "",
       "prepared_input_status": {
         "blockers": [
           "prepared_receptor_path_missing",
@@ -189,8 +202,14 @@
         "preparation_required": true,
         "status": "blocked"
       },
+      "prepared_ligand_checksum": "",
+      "prepared_ligand_path": "",
+      "prepared_receptor_checksum": "",
+      "prepared_receptor_path": "",
+      "protein_structure_checksum": "",
       "protein_structure_path": "CASF-2016/coreset/4llx/4llx_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_ligand_checksum": "",
       "reference_ligand_path": "CASF-2016/coreset/4llx/4llx_ligand.sdf",
       "reference_pose_id": "casf2016_4llx_reference",
       "required_adapter_case_fields": [
@@ -204,7 +223,7 @@
         "source_checksum",
         "provenance_ref"
       ],
-      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_family": "CASF/PDBBind",
       "source_file_status": {
         "blockers": [
           "protein_structure_path_missing",
@@ -301,6 +320,8 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_pose.sdf",
+          "prepared_ligand_path": "prepared/5c28_ligand",
+          "prepared_receptor_path": "prepared/5c28_receptor",
           "receipt_required": true
         },
         {
@@ -341,9 +362,18 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_pose.sdf",
+          "prepared_ligand_path": "prepared/5c28_ligand",
+          "prepared_receptor_path": "prepared/5c28_receptor",
           "receipt_required": true
         }
       ],
+      "input_manifest_case_status": {
+        "blocker": "",
+        "manifest_row_present": false,
+        "manifest_selected": false,
+        "provided_fields": []
+      },
+      "input_preparation_provenance_ref": "",
       "prepared_input_status": {
         "blockers": [
           "prepared_receptor_path_missing",
@@ -372,8 +402,14 @@
         "preparation_required": true,
         "status": "blocked"
       },
+      "prepared_ligand_checksum": "",
+      "prepared_ligand_path": "",
+      "prepared_receptor_checksum": "",
+      "prepared_receptor_path": "",
+      "protein_structure_checksum": "",
       "protein_structure_path": "CASF-2016/coreset/5c28/5c28_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_ligand_checksum": "",
       "reference_ligand_path": "CASF-2016/coreset/5c28/5c28_ligand.sdf",
       "reference_pose_id": "casf2016_5c28_reference",
       "required_adapter_case_fields": [
@@ -387,7 +423,7 @@
         "source_checksum",
         "provenance_ref"
       ],
-      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_family": "CASF/PDBBind",
       "source_file_status": {
         "blockers": [
           "protein_structure_path_missing",
@@ -484,6 +520,8 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_pose.sdf",
+          "prepared_ligand_path": "prepared/3uuo_ligand",
+          "prepared_receptor_path": "prepared/3uuo_receptor",
           "receipt_required": true
         },
         {
@@ -524,9 +562,18 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_pose.sdf",
+          "prepared_ligand_path": "prepared/3uuo_ligand",
+          "prepared_receptor_path": "prepared/3uuo_receptor",
           "receipt_required": true
         }
       ],
+      "input_manifest_case_status": {
+        "blocker": "",
+        "manifest_row_present": false,
+        "manifest_selected": false,
+        "provided_fields": []
+      },
+      "input_preparation_provenance_ref": "",
       "prepared_input_status": {
         "blockers": [
           "prepared_receptor_path_missing",
@@ -555,8 +602,14 @@
         "preparation_required": true,
         "status": "blocked"
       },
+      "prepared_ligand_checksum": "",
+      "prepared_ligand_path": "",
+      "prepared_receptor_checksum": "",
+      "prepared_receptor_path": "",
+      "protein_structure_checksum": "",
       "protein_structure_path": "CASF-2016/coreset/3uuo/3uuo_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_ligand_checksum": "",
       "reference_ligand_path": "CASF-2016/coreset/3uuo/3uuo_ligand.sdf",
       "reference_pose_id": "casf2016_3uuo_reference",
       "required_adapter_case_fields": [
@@ -570,7 +623,7 @@
         "source_checksum",
         "provenance_ref"
       ],
-      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_family": "CASF/PDBBind",
       "source_file_status": {
         "blockers": [
           "protein_structure_path_missing",
@@ -667,6 +720,8 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_pose.sdf",
+          "prepared_ligand_path": "prepared/3ui7_ligand",
+          "prepared_receptor_path": "prepared/3ui7_receptor",
           "receipt_required": true
         },
         {
@@ -707,9 +762,18 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_pose.sdf",
+          "prepared_ligand_path": "prepared/3ui7_ligand",
+          "prepared_receptor_path": "prepared/3ui7_receptor",
           "receipt_required": true
         }
       ],
+      "input_manifest_case_status": {
+        "blocker": "",
+        "manifest_row_present": false,
+        "manifest_selected": false,
+        "provided_fields": []
+      },
+      "input_preparation_provenance_ref": "",
       "prepared_input_status": {
         "blockers": [
           "prepared_receptor_path_missing",
@@ -738,8 +802,14 @@
         "preparation_required": true,
         "status": "blocked"
       },
+      "prepared_ligand_checksum": "",
+      "prepared_ligand_path": "",
+      "prepared_receptor_checksum": "",
+      "prepared_receptor_path": "",
+      "protein_structure_checksum": "",
       "protein_structure_path": "CASF-2016/coreset/3ui7/3ui7_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_ligand_checksum": "",
       "reference_ligand_path": "CASF-2016/coreset/3ui7/3ui7_ligand.sdf",
       "reference_pose_id": "casf2016_3ui7_reference",
       "required_adapter_case_fields": [
@@ -753,7 +823,7 @@
         "source_checksum",
         "provenance_ref"
       ],
-      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_family": "CASF/PDBBind",
       "source_file_status": {
         "blockers": [
           "protein_structure_path_missing",
@@ -850,6 +920,8 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_pose.sdf",
+          "prepared_ligand_path": "prepared/5c2h_ligand",
+          "prepared_receptor_path": "prepared/5c2h_receptor",
           "receipt_required": true
         },
         {
@@ -890,9 +962,18 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_pose.sdf",
+          "prepared_ligand_path": "prepared/5c2h_ligand",
+          "prepared_receptor_path": "prepared/5c2h_receptor",
           "receipt_required": true
         }
       ],
+      "input_manifest_case_status": {
+        "blocker": "",
+        "manifest_row_present": false,
+        "manifest_selected": false,
+        "provided_fields": []
+      },
+      "input_preparation_provenance_ref": "",
       "prepared_input_status": {
         "blockers": [
           "prepared_receptor_path_missing",
@@ -921,8 +1002,14 @@
         "preparation_required": true,
         "status": "blocked"
       },
+      "prepared_ligand_checksum": "",
+      "prepared_ligand_path": "",
+      "prepared_receptor_checksum": "",
+      "prepared_receptor_path": "",
+      "protein_structure_checksum": "",
       "protein_structure_path": "CASF-2016/coreset/5c2h/5c2h_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_ligand_checksum": "",
       "reference_ligand_path": "CASF-2016/coreset/5c2h/5c2h_ligand.sdf",
       "reference_pose_id": "casf2016_5c2h_reference",
       "required_adapter_case_fields": [
@@ -936,7 +1023,7 @@
         "source_checksum",
         "provenance_ref"
       ],
-      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_family": "CASF/PDBBind",
       "source_file_status": {
         "blockers": [
           "protein_structure_path_missing",
@@ -1033,6 +1120,8 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_pose.sdf",
+          "prepared_ligand_path": "prepared/2v00_ligand",
+          "prepared_receptor_path": "prepared/2v00_receptor",
           "receipt_required": true
         },
         {
@@ -1073,9 +1162,18 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_pose.sdf",
+          "prepared_ligand_path": "prepared/2v00_ligand",
+          "prepared_receptor_path": "prepared/2v00_receptor",
           "receipt_required": true
         }
       ],
+      "input_manifest_case_status": {
+        "blocker": "",
+        "manifest_row_present": false,
+        "manifest_selected": false,
+        "provided_fields": []
+      },
+      "input_preparation_provenance_ref": "",
       "prepared_input_status": {
         "blockers": [
           "prepared_receptor_path_missing",
@@ -1104,8 +1202,14 @@
         "preparation_required": true,
         "status": "blocked"
       },
+      "prepared_ligand_checksum": "",
+      "prepared_ligand_path": "",
+      "prepared_receptor_checksum": "",
+      "prepared_receptor_path": "",
+      "protein_structure_checksum": "",
       "protein_structure_path": "CASF-2016/coreset/2v00/2v00_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_ligand_checksum": "",
       "reference_ligand_path": "CASF-2016/coreset/2v00/2v00_ligand.sdf",
       "reference_pose_id": "casf2016_2v00_reference",
       "required_adapter_case_fields": [
@@ -1119,7 +1223,7 @@
         "source_checksum",
         "provenance_ref"
       ],
-      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_family": "CASF/PDBBind",
       "source_file_status": {
         "blockers": [
           "protein_structure_path_missing",
@@ -1216,6 +1320,8 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_pose.sdf",
+          "prepared_ligand_path": "prepared/3wz8_ligand",
+          "prepared_receptor_path": "prepared/3wz8_receptor",
           "receipt_required": true
         },
         {
@@ -1256,9 +1362,18 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_pose.sdf",
+          "prepared_ligand_path": "prepared/3wz8_ligand",
+          "prepared_receptor_path": "prepared/3wz8_receptor",
           "receipt_required": true
         }
       ],
+      "input_manifest_case_status": {
+        "blocker": "",
+        "manifest_row_present": false,
+        "manifest_selected": false,
+        "provided_fields": []
+      },
+      "input_preparation_provenance_ref": "",
       "prepared_input_status": {
         "blockers": [
           "prepared_receptor_path_missing",
@@ -1287,8 +1402,14 @@
         "preparation_required": true,
         "status": "blocked"
       },
+      "prepared_ligand_checksum": "",
+      "prepared_ligand_path": "",
+      "prepared_receptor_checksum": "",
+      "prepared_receptor_path": "",
+      "protein_structure_checksum": "",
       "protein_structure_path": "CASF-2016/coreset/3wz8/3wz8_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_ligand_checksum": "",
       "reference_ligand_path": "CASF-2016/coreset/3wz8/3wz8_ligand.sdf",
       "reference_pose_id": "casf2016_3wz8_reference",
       "required_adapter_case_fields": [
@@ -1302,7 +1423,7 @@
         "source_checksum",
         "provenance_ref"
       ],
-      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_family": "CASF/PDBBind",
       "source_file_status": {
         "blockers": [
           "protein_structure_path_missing",
@@ -1399,6 +1520,8 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_pose.sdf",
+          "prepared_ligand_path": "prepared/3pww_ligand",
+          "prepared_receptor_path": "prepared/3pww_receptor",
           "receipt_required": true
         },
         {
@@ -1439,9 +1562,18 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_pose.sdf",
+          "prepared_ligand_path": "prepared/3pww_ligand",
+          "prepared_receptor_path": "prepared/3pww_receptor",
           "receipt_required": true
         }
       ],
+      "input_manifest_case_status": {
+        "blocker": "",
+        "manifest_row_present": false,
+        "manifest_selected": false,
+        "provided_fields": []
+      },
+      "input_preparation_provenance_ref": "",
       "prepared_input_status": {
         "blockers": [
           "prepared_receptor_path_missing",
@@ -1470,8 +1602,14 @@
         "preparation_required": true,
         "status": "blocked"
       },
+      "prepared_ligand_checksum": "",
+      "prepared_ligand_path": "",
+      "prepared_receptor_checksum": "",
+      "prepared_receptor_path": "",
+      "protein_structure_checksum": "",
       "protein_structure_path": "CASF-2016/coreset/3pww/3pww_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_ligand_checksum": "",
       "reference_ligand_path": "CASF-2016/coreset/3pww/3pww_ligand.sdf",
       "reference_pose_id": "casf2016_3pww_reference",
       "required_adapter_case_fields": [
@@ -1485,7 +1623,7 @@
         "source_checksum",
         "provenance_ref"
       ],
-      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_family": "CASF/PDBBind",
       "source_file_status": {
         "blockers": [
           "protein_structure_path_missing",
@@ -1582,6 +1720,8 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_pose.sdf",
+          "prepared_ligand_path": "prepared/3prs_ligand",
+          "prepared_receptor_path": "prepared/3prs_receptor",
           "receipt_required": true
         },
         {
@@ -1622,9 +1762,18 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_pose.sdf",
+          "prepared_ligand_path": "prepared/3prs_ligand",
+          "prepared_receptor_path": "prepared/3prs_receptor",
           "receipt_required": true
         }
       ],
+      "input_manifest_case_status": {
+        "blocker": "",
+        "manifest_row_present": false,
+        "manifest_selected": false,
+        "provided_fields": []
+      },
+      "input_preparation_provenance_ref": "",
       "prepared_input_status": {
         "blockers": [
           "prepared_receptor_path_missing",
@@ -1653,8 +1802,14 @@
         "preparation_required": true,
         "status": "blocked"
       },
+      "prepared_ligand_checksum": "",
+      "prepared_ligand_path": "",
+      "prepared_receptor_checksum": "",
+      "prepared_receptor_path": "",
+      "protein_structure_checksum": "",
       "protein_structure_path": "CASF-2016/coreset/3prs/3prs_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_ligand_checksum": "",
       "reference_ligand_path": "CASF-2016/coreset/3prs/3prs_ligand.sdf",
       "reference_pose_id": "casf2016_3prs_reference",
       "required_adapter_case_fields": [
@@ -1668,7 +1823,7 @@
         "source_checksum",
         "provenance_ref"
       ],
-      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_family": "CASF/PDBBind",
       "source_file_status": {
         "blockers": [
           "protein_structure_path_missing",
@@ -1765,6 +1920,8 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_pose.sdf",
+          "prepared_ligand_path": "prepared/3uri_ligand",
+          "prepared_receptor_path": "prepared/3uri_receptor",
           "receipt_required": true
         },
         {
@@ -1805,9 +1962,18 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_pose.sdf",
+          "prepared_ligand_path": "prepared/3uri_ligand",
+          "prepared_receptor_path": "prepared/3uri_receptor",
           "receipt_required": true
         }
       ],
+      "input_manifest_case_status": {
+        "blocker": "",
+        "manifest_row_present": false,
+        "manifest_selected": false,
+        "provided_fields": []
+      },
+      "input_preparation_provenance_ref": "",
       "prepared_input_status": {
         "blockers": [
           "prepared_receptor_path_missing",
@@ -1836,8 +2002,14 @@
         "preparation_required": true,
         "status": "blocked"
       },
+      "prepared_ligand_checksum": "",
+      "prepared_ligand_path": "",
+      "prepared_receptor_checksum": "",
+      "prepared_receptor_path": "",
+      "protein_structure_checksum": "",
       "protein_structure_path": "CASF-2016/coreset/3uri/3uri_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_ligand_checksum": "",
       "reference_ligand_path": "CASF-2016/coreset/3uri/3uri_ligand.sdf",
       "reference_pose_id": "casf2016_3uri_reference",
       "required_adapter_case_fields": [
@@ -1851,7 +2023,7 @@
         "source_checksum",
         "provenance_ref"
       ],
-      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_family": "CASF/PDBBind",
       "source_file_status": {
         "blockers": [
           "protein_structure_path_missing",
@@ -1948,6 +2120,8 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_pose.sdf",
+          "prepared_ligand_path": "prepared/4m0z_ligand",
+          "prepared_receptor_path": "prepared/4m0z_receptor",
           "receipt_required": true
         },
         {
@@ -1988,9 +2162,18 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_pose.sdf",
+          "prepared_ligand_path": "prepared/4m0z_ligand",
+          "prepared_receptor_path": "prepared/4m0z_receptor",
           "receipt_required": true
         }
       ],
+      "input_manifest_case_status": {
+        "blocker": "",
+        "manifest_row_present": false,
+        "manifest_selected": false,
+        "provided_fields": []
+      },
+      "input_preparation_provenance_ref": "",
       "prepared_input_status": {
         "blockers": [
           "prepared_receptor_path_missing",
@@ -2019,8 +2202,14 @@
         "preparation_required": true,
         "status": "blocked"
       },
+      "prepared_ligand_checksum": "",
+      "prepared_ligand_path": "",
+      "prepared_receptor_checksum": "",
+      "prepared_receptor_path": "",
+      "protein_structure_checksum": "",
       "protein_structure_path": "CASF-2016/coreset/4m0z/4m0z_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_ligand_checksum": "",
       "reference_ligand_path": "CASF-2016/coreset/4m0z/4m0z_ligand.sdf",
       "reference_pose_id": "casf2016_4m0z_reference",
       "required_adapter_case_fields": [
@@ -2034,7 +2223,7 @@
         "source_checksum",
         "provenance_ref"
       ],
-      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_family": "CASF/PDBBind",
       "source_file_status": {
         "blockers": [
           "protein_structure_path_missing",
@@ -2131,6 +2320,8 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_pose.sdf",
+          "prepared_ligand_path": "prepared/4m0y_ligand",
+          "prepared_receptor_path": "prepared/4m0y_receptor",
           "receipt_required": true
         },
         {
@@ -2171,9 +2362,18 @@
           "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_config.json",
           "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_run_receipt.json",
           "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_pose.sdf",
+          "prepared_ligand_path": "prepared/4m0y_ligand",
+          "prepared_receptor_path": "prepared/4m0y_receptor",
           "receipt_required": true
         }
       ],
+      "input_manifest_case_status": {
+        "blocker": "",
+        "manifest_row_present": false,
+        "manifest_selected": false,
+        "provided_fields": []
+      },
+      "input_preparation_provenance_ref": "",
       "prepared_input_status": {
         "blockers": [
           "prepared_receptor_path_missing",
@@ -2202,8 +2402,14 @@
         "preparation_required": true,
         "status": "blocked"
       },
+      "prepared_ligand_checksum": "",
+      "prepared_ligand_path": "",
+      "prepared_receptor_checksum": "",
+      "prepared_receptor_path": "",
+      "protein_structure_checksum": "",
       "protein_structure_path": "CASF-2016/coreset/4m0y/4m0y_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_ligand_checksum": "",
       "reference_ligand_path": "CASF-2016/coreset/4m0y/4m0y_ligand.sdf",
       "reference_pose_id": "casf2016_4m0y_reference",
       "required_adapter_case_fields": [
@@ -2217,7 +2423,7 @@
         "source_checksum",
         "provenance_ref"
       ],
-      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_family": "CASF/PDBBind",
       "source_file_status": {
         "blockers": [
           "protein_structure_path_missing",
@@ -2261,22 +2467,22 @@
   "contract_pass": true,
   "engine_binary_statuses": [
     {
-      "available": true,
-      "binary_source": "env:PUBLIC_BENCHMARK_VINA_BIN",
-      "blocker": "",
+      "available": false,
+      "binary_source": "",
+      "blocker": "vina_binary_missing",
       "engine_id": "vina",
       "env_var": "PUBLIC_BENCHMARK_VINA_BIN",
-      "executable": "/home/betelgeuze/.local/bin/vina",
-      "version": "AutoDock Vina v1.2.3"
+      "executable": "",
+      "version": ""
     },
     {
-      "available": true,
-      "binary_source": "env:PUBLIC_BENCHMARK_GNINA_BIN",
-      "blocker": "",
+      "available": false,
+      "binary_source": "",
+      "blocker": "gnina_binary_missing",
       "engine_id": "gnina",
       "env_var": "PUBLIC_BENCHMARK_GNINA_BIN",
-      "executable": "/home/betelgeuze/.local/bin/gnina",
-      "version": "gnina v1.3.3 master:6fe1ce2   Built Jun 30 2026."
+      "executable": "",
+      "version": ""
     }
   ],
   "engine_container_statuses": [
@@ -2311,22 +2517,24 @@
   ],
   "engine_execution_statuses": [
     {
-      "available": true,
-      "blocker": "",
-      "command_prefix": "/home/betelgeuze/.local/bin/vina",
+      "available": false,
+      "blocker": "vina_binary_missing",
+      "command_prefix": "",
+      "container_image": "",
       "engine_id": "vina",
-      "executable": "/home/betelgeuze/.local/bin/vina",
-      "execution_source": "binary",
-      "version": "AutoDock Vina v1.2.3"
+      "executable": "",
+      "execution_source": "",
+      "version": ""
     },
     {
-      "available": true,
-      "blocker": "",
-      "command_prefix": "/home/betelgeuze/.local/bin/gnina",
+      "available": false,
+      "blocker": "gnina_binary_missing",
+      "command_prefix": "",
+      "container_image": "",
       "engine_id": "gnina",
-      "executable": "/home/betelgeuze/.local/bin/gnina",
-      "execution_source": "binary",
-      "version": "gnina v1.3.3 master:6fe1ce2   Built Jun 30 2026."
+      "executable": "",
+      "execution_source": "",
+      "version": ""
     }
   ],
   "engine_receipts_required": [
@@ -2342,30 +2550,99 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "execution_plan_ready": false,
   "expected_vina_gnina_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
-  "generated_at": "2026-07-03T20:40:24.312743+00:00",
+  "generated_at": "2026-07-03T21:19:53.258067+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
     "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
-    "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:ca8f09a0d98d8a0245f7e530194e8574db9043217a144adf9b26e231c18d630f"
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json": "missing",
+    "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4c7e76f6944271f99f96f3170ebdd7be9dd9280b3bddd39e328c2f43372c8261"
+  },
+  "input_manifest_status": {
+    "accepted_formats": [
+      "json",
+      "jsonl",
+      "ndjson",
+      "csv",
+      "tsv"
+    ],
+    "blockers": [
+      "public_benchmark_vina_gnina_input_manifest_not_detected"
+    ],
+    "candidate_paths": [
+      {
+        "exists": false,
+        "format": "json",
+        "is_file": false,
+        "load_error": "",
+        "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
+        "row_count": 0
+      },
+      {
+        "exists": false,
+        "format": "jsonl",
+        "is_file": false,
+        "load_error": "",
+        "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.jsonl",
+        "row_count": 0
+      },
+      {
+        "exists": false,
+        "format": "ndjson",
+        "is_file": false,
+        "load_error": "",
+        "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.ndjson",
+        "row_count": 0
+      },
+      {
+        "exists": false,
+        "format": "csv",
+        "is_file": false,
+        "load_error": "",
+        "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+        "row_count": 0
+      },
+      {
+        "exists": false,
+        "format": "tsv",
+        "is_file": false,
+        "load_error": "",
+        "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.tsv",
+        "row_count": 0
+      }
+    ],
+    "case_count": 0,
+    "default_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
+    "detected_manifest_artifact_count": 0,
+    "duplicate_case_ids": [],
+    "row_count": 0,
+    "selected_manifest_format": "",
+    "selected_manifest_path": "",
+    "status": "not_detected"
   },
   "local_source_ready_case_count": 0,
-  "missing_engine_ids": [],
+  "missing_engine_ids": [
+    "vina",
+    "gnina"
+  ],
   "operator_execution_ready": false,
   "prepared_input_ready_case_count": 0,
   "required_engine_run_count": 24,
   "reuse_policy": "public_benchmark_vina_gnina_execution_plan_from_materialized_rows",
   "reused_evidence": false,
   "schema_version": "public-benchmark-vina-gnina-execution-plan.v1",
-  "source_commit_sha": "4eca0a9ffa859f5f37c2d98f69a392cad0dfe2c6",
+  "source_commit_sha": "255d70a43a9ca5335dbb157bd94cd5f119d0a616",
   "status": "engine_input_blocked",
   "summary": {
     "adapter_rows_ready": false,
-    "available_engine_count": 2,
+    "available_engine_count": 0,
     "case_blocker_count": 48,
     "case_count": 12,
     "execution_plan_ready": false,
+    "input_manifest_detected": false,
+    "input_manifest_row_count": 0,
+    "input_manifest_status": "not_detected",
     "local_source_ready_case_count": 0,
-    "missing_engine_count": 0,
+    "missing_engine_count": 2,
     "operator_execution_ready": false,
     "prepared_input_ready_case_count": 0,
     "required_engine_run_count": 24

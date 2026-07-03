@@ -168,6 +168,10 @@ def test_vina_gnina_execution_plan_builds_case_run_specs(
     assert payload["case_count"] == 1
     assert payload["required_engine_run_count"] == 2
     assert payload["missing_engine_ids"] == []
+    assert payload["input_manifest_status"]["status"] == "not_detected"
+    assert payload["input_manifest_status"]["blockers"] == [
+        "public_benchmark_vina_gnina_input_manifest_not_detected"
+    ]
     assert payload["local_source_ready_case_count"] == 1
     assert payload["prepared_input_ready_case_count"] == 1
     case_plan = payload["case_execution_plans"][0]
@@ -183,6 +187,101 @@ def test_vina_gnina_execution_plan_builds_case_run_specs(
         module.REQUIRED_ENGINE_RUN_FIELDS
     )
     assert "does not run Vina or GNINA" in payload["claim_boundary"]
+
+
+def test_vina_gnina_execution_plan_uses_operator_input_manifest(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    subset_rows, pose_rows = _write_rows(tmp_path, materialize_inputs=False)
+    input_dir = tmp_path / "operator_inputs" / "1abc"
+    input_dir.mkdir(parents=True)
+    (input_dir / "protein.pdb").write_text("ATOM\n", encoding="utf-8")
+    (input_dir / "reference_ligand.sdf").write_text("ligand\n", encoding="utf-8")
+    (input_dir / "receptor.pdbqt").write_text("receptor\n", encoding="utf-8")
+    (input_dir / "ligand.pdbqt").write_text("ligand\n", encoding="utf-8")
+    manifest = tmp_path / "public_benchmark_vina_gnina_input_manifest.csv"
+    manifest.write_text(
+        "\n".join(
+            [
+                (
+                    "case_id,complex_id,benchmark_split,protein_structure_path,"
+                    "protein_structure_checksum,reference_ligand_path,"
+                    "reference_ligand_checksum,prepared_receptor_path,"
+                    "prepared_receptor_checksum,prepared_ligand_path,"
+                    "prepared_ligand_checksum,vina_config_ref,"
+                    "vina_run_receipt_ref,input_preparation_provenance_ref"
+                ),
+                (
+                    "casf2016_1abc,1abc,CASF-core,"
+                    "operator_inputs/1abc/protein.pdb,sha256:"
+                    + "a" * 64
+                    + ",operator_inputs/1abc/reference_ligand.sdf,sha256:"
+                    + "b" * 64
+                    + ",operator_inputs/1abc/receptor.pdbqt,sha256:"
+                    + "c" * 64
+                    + ",operator_inputs/1abc/ligand.pdbqt,sha256:"
+                    + "d" * 64
+                    + ",operator_attached/vina_gnina/casf2016_1abc/vina_config.json,"
+                    "operator_attached/vina_gnina/casf2016_1abc/vina_run_receipt.json,"
+                    "operator_attached/vina_gnina/casf2016_1abc/input_prep.json"
+                ),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(
+        module,
+        "_engine_binary_status",
+        lambda engine_id: {
+            "engine_id": engine_id,
+            "available": True,
+            "executable": f"/usr/bin/{engine_id}",
+            "version": f"{engine_id} test",
+            "blocker": "",
+        },
+    )
+
+    payload = module.build_vina_gnina_execution_plan(
+        repo_root=tmp_path,
+        subset_rows_path=subset_rows,
+        pose_rows_path=pose_rows,
+        input_manifest_path=manifest,
+    )
+
+    assert payload["status"] == "ready_for_engine_execution"
+    assert payload["input_manifest_status"]["status"] == "ready"
+    assert payload["input_manifest_status"]["selected_manifest_path"] == str(manifest)
+    assert payload["summary"]["input_manifest_detected"] is True
+    assert payload["summary"]["input_manifest_row_count"] == 1
+    case_plan = payload["case_execution_plans"][0]
+    assert case_plan["protein_structure_path"] == "operator_inputs/1abc/protein.pdb"
+    assert case_plan["protein_structure_checksum"] == "sha256:" + "a" * 64
+    assert case_plan["reference_ligand_path"] == (
+        "operator_inputs/1abc/reference_ligand.sdf"
+    )
+    assert case_plan["reference_ligand_checksum"] == "sha256:" + "b" * 64
+    assert case_plan["prepared_receptor_path"] == "operator_inputs/1abc/receptor.pdbqt"
+    assert case_plan["prepared_receptor_checksum"] == "sha256:" + "c" * 64
+    assert case_plan["prepared_ligand_path"] == "operator_inputs/1abc/ligand.pdbqt"
+    assert case_plan["prepared_ligand_checksum"] == "sha256:" + "d" * 64
+    assert case_plan["input_manifest_case_status"]["manifest_row_present"] is True
+    assert case_plan["source_file_status"]["status"] == "ready"
+    assert case_plan["prepared_input_status"]["status"] == "ready"
+    assert case_plan["engine_runs"][0]["prepared_receptor_path"] == (
+        "operator_inputs/1abc/receptor.pdbqt"
+    )
+    assert case_plan["engine_runs"][0]["expected_engine_config_ref"] == (
+        "operator_attached/vina_gnina/casf2016_1abc/vina_config.json"
+    )
+    assert case_plan["engine_runs"][0]["expected_engine_run_provenance_ref"] == (
+        "operator_attached/vina_gnina/casf2016_1abc/vina_run_receipt.json"
+    )
+    assert "<operator_inputs/1abc/receptor.pdbqt>" in case_plan["engine_runs"][0][
+        "command_template"
+    ]
 
 
 def test_vina_gnina_execution_plan_blocks_missing_local_inputs(
