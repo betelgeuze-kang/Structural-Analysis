@@ -11,8 +11,8 @@
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing",
       "security::license_status_not_configured",
+      "github_sync::github_sync_preflight::remote_fetch_failed",
       "github_sync::github_sync_preflight::remote_mutation_approval_required",
-      "github_sync::github_sync_preflight::local_head_mismatch",
       "github_sync::github_sync_remote_sync_pending",
       "github_sync::github_sync_preflight_not_synced"
     ],
@@ -23,7 +23,7 @@
   "claim_boundary": "This packet groups open PM blocker and release-tier evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA approval, or any other external release evidence. When reviewer handoff evidence is supplied, each open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps the owner handoff blocked except for explicit non-tier structural scope cleanup adjunct handoffs. This packet does not convert missing evidence into a release pass.",
   "contract_pass": true,
   "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
-  "generated_at": "2026-07-03T02:23:41.371190+00:00",
+  "generated_at": "2026-07-03T02:27:45.090292+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tier_requirements": [],
   "missing_release_tier_impacts": [],
@@ -1938,14 +1938,14 @@
       ],
       "blocker_count": 4,
       "blocker_ids": [
+        "github_sync::github_sync_preflight::remote_fetch_failed",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
-        "github_sync::github_sync_preflight::local_head_mismatch",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced"
       ],
       "evidence_intake_artifacts": [],
       "evidence_states": [
-        "approval_required"
+        "blocked"
       ],
       "expected_intake_artifacts": [],
       "expected_intake_details": [],
@@ -1957,12 +1957,12 @@
       "intake_lane_request_rows": [],
       "intake_signoff_request_rows": [],
       "next_actions": [
-        "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate."
+        "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`."
       ],
       "owner": "release_owner",
-      "owner_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
+      "owner_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
       "owner_actions": [
-        "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate."
+        "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`."
       ],
       "owner_input_required": true,
       "reproduction_commands": [
@@ -1982,20 +1982,20 @@
             "release_tier.limited_commercial_full_gate_ready",
             "release_tier.ga_enterprise_evidence_gate_pass"
           ],
-          "blocker_id": "github_sync::github_sync_preflight::remote_mutation_approval_required",
+          "blocker_id": "github_sync::github_sync_preflight::remote_fetch_failed",
           "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
           "evidence_artifacts": {
             "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
             "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
           },
-          "evidence_state": "approval_required",
+          "evidence_state": "blocked",
           "expected_intake_artifact": "",
           "expected_intake_detail": {},
           "expected_intake_path": "",
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
+          "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
@@ -2021,20 +2021,20 @@
             "release_tier.limited_commercial_full_gate_ready",
             "release_tier.ga_enterprise_evidence_gate_pass"
           ],
-          "blocker_id": "github_sync::github_sync_preflight::local_head_mismatch",
+          "blocker_id": "github_sync::github_sync_preflight::remote_mutation_approval_required",
           "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
           "evidence_artifacts": {
             "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
             "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
           },
-          "evidence_state": "approval_required",
+          "evidence_state": "blocked",
           "expected_intake_artifact": "",
           "expected_intake_detail": {},
           "expected_intake_path": "",
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
+          "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
@@ -2066,14 +2066,14 @@
             "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
             "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
           },
-          "evidence_state": "approval_required",
+          "evidence_state": "blocked",
           "expected_intake_artifact": "",
           "expected_intake_detail": {},
           "expected_intake_path": "",
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
+          "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
@@ -2105,14 +2105,14 @@
             "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
             "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
           },
-          "evidence_state": "approval_required",
+          "evidence_state": "blocked",
           "expected_intake_artifact": "",
           "expected_intake_detail": {},
           "expected_intake_path": "",
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
+          "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
@@ -2824,8 +2824,8 @@
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
+        "github_sync::github_sync_preflight::remote_fetch_failed",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
-        "github_sync::github_sync_preflight::local_head_mismatch",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced"
       ],
@@ -2863,8 +2863,8 @@
             "ux::human_new_user_observation_missing_or_failed",
             "ux::human_new_user_30min_sample_evidence_missing",
             "security::license_status_not_configured",
+            "github_sync::github_sync_preflight::remote_fetch_failed",
             "github_sync::github_sync_preflight::remote_mutation_approval_required",
-            "github_sync::github_sync_preflight::local_head_mismatch",
             "github_sync::github_sync_remote_sync_pending",
             "github_sync::github_sync_preflight_not_synced"
           ],
@@ -2913,8 +2913,8 @@
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
+        "github_sync::github_sync_preflight::remote_fetch_failed",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
-        "github_sync::github_sync_preflight::local_head_mismatch",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced"
       ],
@@ -3193,8 +3193,8 @@
             "ux::human_new_user_observation_missing_or_failed",
             "ux::human_new_user_30min_sample_evidence_missing",
             "security::license_status_not_configured",
+            "github_sync::github_sync_preflight::remote_fetch_failed",
             "github_sync::github_sync_preflight::remote_mutation_approval_required",
-            "github_sync::github_sync_preflight::local_head_mismatch",
             "github_sync::github_sync_remote_sync_pending",
             "github_sync::github_sync_preflight_not_synced"
           ],

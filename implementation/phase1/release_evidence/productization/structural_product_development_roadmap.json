@@ -19,7 +19,7 @@
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_requirement_progress_percent": 63.5,
-  "generated_at": "2026-07-03T02:23:41.539297+00:00",
+  "generated_at": "2026-07-03T02:27:45.329921+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:795b316226a787c9812c179fcd7754615cfdc2c26dd77c29a0453fca80579c3e",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:f1f232596281c4dbd5921776d4b4b6e67cefa25fd3ab0a3e59da4863d657da61",
@@ -30,8 +30,8 @@
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:461c82706d56e914cd27e1781e2bbfc9bbeb6b58e266952918766d2e00963858",
     "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:b39062c3bb3ad05d34a4fa67e2126f264d545dbe08ccbd1fe42f625f0bb6e13d",
     "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:219dda567b878e3f234c8df9601e8a2294b3240c81d19a4e72e20ef05b2ebd88",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:80203747950922052a7e8291d2f13eea5a339632d3a5bb9c64ac69c5bb185277",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:5ad647a03e329d80feca1b0aabf6034d42a708dbbcd3332f50716c45eb3acfee",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:fc87faa4fd9acfb4e87000f955f1086cc39a86f479b9325e30cb2864c9f19631",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:c31a592285e990edbc4fa2a5c8db03f09ec9d65d0f01509f51f87436d63e134a",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:69285c5dcf0a4bdc30c7a71d48b86dabde7af6e458925f250a4e3f9b9616e109",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:1ff6db3fdf34baa839e2dd8668c38cf0f7d3cb98d6f77b225737259e83d41d74",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:368ebac497b947f8fad30109d93b7bc77ac864f288d6ccbd06b4ce600392f035",
@@ -276,8 +276,8 @@
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
+        "github_sync::github_sync_preflight::remote_fetch_failed",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
-        "github_sync::github_sync_preflight::local_head_mismatch",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced"
       ],
@@ -510,7 +510,7 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "c4fe128a1dae015b431d4de72c2afccfd0a6d43d",
+  "source_commit_sha": "a99df0b74dd77b806f7e11fc34802155e8a68205",
   "stage_average_progress_percent": 54.7,
   "stage_count": 8,
   "status": "blocked",

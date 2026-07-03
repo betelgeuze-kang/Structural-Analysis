@@ -1,5 +1,6 @@
 {
   "blockers": [
+    "remote_fetch_failed",
     "remote_mutation_approval_required"
   ],
   "checks": {
@@ -8,7 +9,7 @@
     "feature_synced_to_head": true,
     "main_fast_forward_possible": true,
     "main_synced_to_head": false,
-    "remote_fetch_ok": null,
+    "remote_fetch_ok": false,
     "remote_safety_ok": true,
     "worktree_clean": true,
     "worktree_only_ignored_evidence_dirty": false
@@ -20,7 +21,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": false,
-  "generated_at": "2026-07-03T01:46:13.786148+00:00",
+  "generated_at": "2026-07-03T02:27:17.492501+00:00",
   "pending_remote_updates": [
     {
       "action": "fast-forward push current HEAD to main",
@@ -29,7 +30,7 @@
       "target": "origin/main"
     }
   ],
-  "preflight_pass": true,
+  "preflight_pass": false,
   "r4_disclosure": {
     "action": "fast-forward push current HEAD to main",
     "impact": "GitHub pending refs become externally visible at the local development state.",
@@ -44,25 +45,25 @@
   "receipt_commit_boundary": {
     "claim_boundary": "This receipt records GitHub sync state at source_commit_sha. A later commit that only refreshes productization/surface evidence can remain fresh in the PM gate as an evidence-only delta; any source-code or non-evidence delta must regenerate this preflight before claiming GitHub sync release credit.",
     "post_receipt_commit_delta_policy": "productization_or_surface_receipts_only",
-    "source_commit_sha": "05e0cadf15a7aee617dd6f850e2fa494da558b99"
+    "source_commit_sha": "a99df0b74dd77b806f7e11fc34802155e8a68205"
   },
-  "remote_fetch_attempted": false,
-  "remote_fetch_ok": null,
+  "remote_fetch_attempted": true,
+  "remote_fetch_ok": false,
   "remote_mutation_approved": false,
   "remote_sync_needed": true,
   "schema_version": "github-development-sync-preflight.v1",
-  "source_commit_sha": "05e0cadf15a7aee617dd6f850e2fa494da558b99",
+  "source_commit_sha": "a99df0b74dd77b806f7e11fc34802155e8a68205",
   "state": {
     "branch": "codex/seed-pr-ci-source-evidence",
     "effective_worktree_status_short": "",
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
     "ignored_worktree_status_short": "",
-    "local_head_sha": "05e0cadf15a7aee617dd6f850e2fa494da558b99",
-    "main_ahead_count": 27,
+    "local_head_sha": "a99df0b74dd77b806f7e11fc34802155e8a68205",
+    "main_ahead_count": 33,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "05e0cadf15a7aee617dd6f850e2fa494da558b99",
+    "remote_feature_sha": "a99df0b74dd77b806f7e11fc34802155e8a68205",
     "remote_main_ref": "origin/main",
     "remote_main_sha": "7dd6bc6cf09267eb2dc88b545620d72b58d222e2",
     "remote_safety": {
@@ -80,5 +81,5 @@
     },
     "worktree_status_short": ""
   },
-  "status": "approval_required"
+  "status": "blocked"
 }
