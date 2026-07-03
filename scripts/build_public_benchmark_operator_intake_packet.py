@@ -263,6 +263,9 @@ def _source_acquisition_plan_summary(
     official_source_receipt_plan = _as_dict(
         source_acquisition_plan.get("official_source_receipt_plan")
     )
+    vina_gnina_runtime_readiness = _as_dict(
+        source_acquisition_plan.get("vina_gnina_runtime_readiness")
+    )
     row_input_receipt_roles = [
         row
         for row in _as_list(
@@ -315,6 +318,7 @@ def _source_acquisition_plan_summary(
         "vina_gnina_execution_plan": _as_dict(
             source_acquisition_plan.get("vina_gnina_execution_plan")
         ),
+        "vina_gnina_runtime_readiness": vina_gnina_runtime_readiness,
         "official_source_receipt_plan": {
             "plan_id": str(official_source_receipt_plan.get("plan_id") or ""),
             "status": str(official_source_receipt_plan.get("status") or ""),
@@ -1959,6 +1963,18 @@ def build_public_benchmark_operator_intake_packet(
                 )
                 or 0
             ),
+            "vina_gnina_runtime_adapter_case_count": int(
+                _as_dict(
+                    source_acquisition_summary.get("vina_gnina_runtime_readiness")
+                ).get("adapter_case_count")
+                or 0
+            ),
+            "vina_gnina_runtime_adapter_row_preflight_status": str(
+                _as_dict(
+                    source_acquisition_summary.get("vina_gnina_runtime_readiness")
+                ).get("adapter_row_preflight_status")
+                or ""
+            ),
             "public_benchmark_ready": False,
         },
         "summary_line": (
@@ -1985,6 +2001,7 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `source_of_truth_blocker_count`: `{len(payload['source_of_truth_blockers'])}`",
         f"- `source_acquisition_plan`: `{payload['source_acquisition_plan']['artifact']}`",
         f"- `source_acquisition_plan_status`: `{payload['source_acquisition_plan']['status']}`",
+        f"- `vina_gnina_adapter_row_preflight_status`: `{payload['summary']['vina_gnina_runtime_adapter_row_preflight_status']}`",
         f"- `claim_boundary`: {payload['claim_boundary']}",
         "",
         "| Slot | Status | Intake Artifact | Validation Command |",

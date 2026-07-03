@@ -7,6 +7,7 @@
 - `source_of_truth_blocker_count`: `10`
 - `source_acquisition_plan`: `implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json`
 - `source_acquisition_plan_status`: `operator_acquisition_required`
+- `vina_gnina_adapter_row_preflight_status`: `row_artifact_missing`
 - `claim_boundary`: This packet is an owner-facing intake contract for public benchmark evidence. It does not attach CASF/PDBBind, DUD-E, or LIT-PCBA source files, does not redistribute benchmark data, does not infer ligand chemistry, and does not close Tier beta without materialized real benchmark rows.
 
 | Slot | Status | Intake Artifact | Validation Command |

@@ -103,6 +103,17 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert packet["source_acquisition_plan"]["vina_gnina_execution_plan"][
         "required_engine_run_count"
     ] == 24
+    runtime = packet["source_acquisition_plan"]["vina_gnina_runtime_readiness"]
+    assert runtime["status"] == "execution_plan_blocked"
+    assert runtime["adapter_row_preflight_status"] == "row_artifact_missing"
+    assert runtime["adapter_row_preflight_blocker"] == (
+        "public_benchmark_vina_gnina_rows_not_detected"
+    )
+    assert runtime["adapter_case_count"] == 0
+    assert packet["summary"]["vina_gnina_runtime_adapter_case_count"] == 0
+    assert packet["summary"][
+        "vina_gnina_runtime_adapter_row_preflight_status"
+    ] == "row_artifact_missing"
     receipt_plan = packet["source_acquisition_plan"][
         "official_source_receipt_plan"
     ]
@@ -918,6 +929,10 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
         "pose_success_policy"
     ]["consistency_rule"].startswith("pose_success must equal")
     assert "# Public Benchmark Operator Intake Packet" in markdown
+    assert (
+        "- `vina_gnina_adapter_row_preflight_status`: `row_artifact_missing`"
+        in markdown
+    )
     assert "## Phase 2 Row Closure Matrix" in markdown
     assert "## Engine Input Templates" in markdown
     assert "public_benchmark_vina_gnina_input_manifest_template.csv" in markdown

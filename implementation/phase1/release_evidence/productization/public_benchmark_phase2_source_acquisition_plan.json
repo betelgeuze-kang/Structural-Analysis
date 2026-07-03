@@ -20,11 +20,11 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T21:49:21.791866+00:00",
+  "generated_at": "2026-07-03T21:57:50.096129+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:6a8e79892739d3f6c9c1b73e83f953c6d09ffc3bb7a3cd7d5084f83d8a18aaa6",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:0d83de9b431bcb01a5567a4794d506bb14f987868169b2bd5d830d13a01e7d10",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:e3e1d187a143cc4207fd986b98d97e20080132785b1fb0211fc47b4c8328978e",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:926eb41ad14ba1404c1014a80ea0878446532d3f29f08c8d847d6bf82aff608a",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:5173d181a2786c55db9c1af07fa56674625738a514a8ba1439036024a3cceff4",
     "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:b908da8547dd6438956919715c40fe9daffc3d174bd976cc5230fc5153bb2691",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4c7e76f6944271f99f96f3170ebdd7be9dd9280b3bddd39e328c2f43372c8261",
     "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:86934e1e55189fc07b85130b81f236191549e998c991a69d75a0fa81169a3b02",
@@ -768,7 +768,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "dced728b9257557f1c038ad10a181e47ca08e7c0",
+  "source_commit_sha": "e682930501bc0522594b9ce92ce934e7f9ab7dd8",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,

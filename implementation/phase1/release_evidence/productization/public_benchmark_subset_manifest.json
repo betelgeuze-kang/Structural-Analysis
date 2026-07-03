@@ -1801,7 +1801,7 @@
   "claim_boundary": "This manifest is materialized only from local operator-attached CASF/PDBBind case descriptors and files. The materializer computes checksums and validates the subset contract, but it does not download benchmark data, approve licenses, redistribute source files, or claim benchmark performance.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T21:20:37.043418+00:00",
+  "generated_at": "2026-07-03T21:57:29.671576+00:00",
   "input_checksums": {
     "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
     "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:0919b1f1aca8be36939fedb6e55fb93ca52cb0a4a18366c2daaebb5958acbd31",
@@ -1897,7 +1897,7 @@
     }
   },
   "schema_version": "public-benchmark-subset-manifest.v1",
-  "source_commit_sha": "255d70a43a9ca5335dbb157bd94cd5f119d0a616",
+  "source_commit_sha": "e682930501bc0522594b9ce92ce934e7f9ab7dd8",
   "source_families": [
     "CASF/PDBBind"
   ],

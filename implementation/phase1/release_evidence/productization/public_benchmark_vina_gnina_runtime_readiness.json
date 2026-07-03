@@ -1531,7 +1531,7 @@
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
   "execution_plan_ready": false,
-  "generated_at": "2026-07-03T21:49:15.512995+00:00",
+  "generated_at": "2026-07-03T21:57:50.094419+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:e3e1d187a143cc4207fd986b98d97e20080132785b1fb0211fc47b4c8328978e",
     "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:86934e1e55189fc07b85130b81f236191549e998c991a69d75a0fa81169a3b02",
@@ -1619,7 +1619,7 @@
     "rows_artifact_required_after_engine_execution": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
   },
   "schema_version": "public-benchmark-vina-gnina-runtime-readiness.v1",
-  "source_commit_sha": "dced728b9257557f1c038ad10a181e47ca08e7c0",
+  "source_commit_sha": "e682930501bc0522594b9ce92ce934e7f9ab7dd8",
   "status": "execution_plan_blocked",
   "summary": {
     "adapter_case_count": 0,
