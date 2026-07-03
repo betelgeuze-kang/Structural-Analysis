@@ -129,6 +129,106 @@ def _candidate_slots(minimum_rows: list[dict[str, Any]]) -> list[dict[str, Any]]
     return slots
 
 
+def _missing_slot_keys(raw_row_status: dict[str, Any]) -> set[tuple[str, int]]:
+    missing_slots = raw_row_status.get("missing_required_slots")
+    if not isinstance(missing_slots, list):
+        return set()
+
+    keys: set[tuple[str, int]] = set()
+    for row in missing_slots:
+        if not isinstance(row, dict):
+            continue
+        try:
+            keys.add((str(row.get("case_id") or ""), int(row.get("top_k_rank"))))
+        except (TypeError, ValueError):
+            continue
+    return keys
+
+
+def _candidate_slot_statuses(
+    candidate_slots: list[dict[str, Any]],
+    raw_row_status: dict[str, Any],
+    *,
+    expected_rows_artifact: Path,
+) -> list[dict[str, Any]]:
+    missing_keys = _missing_slot_keys(raw_row_status)
+    statuses: list[dict[str, Any]] = []
+    for slot in candidate_slots:
+        case_id = str(slot.get("case_id") or "")
+        top_k_rank = int(slot.get("top_k_rank") or 0)
+        missing = (case_id, top_k_rank) in missing_keys
+        slot_id = f"{case_id}_rank_{top_k_rank:02d}"
+        statuses.append(
+            {
+                "slot_id": slot_id,
+                "case_id": case_id,
+                "top_k_rank": top_k_rank,
+                "candidate_id_placeholder": slot.get("candidate_id_placeholder"),
+                "source_family": slot.get("source_family"),
+                "status": "row_slot_missing" if missing else "row_slot_provided",
+                "missing": missing,
+                "provided": not missing,
+                "expected_rows_artifact": str(expected_rows_artifact),
+                "operator_action": (
+                    f"attach_pocketmd_topk_row_for_{slot_id}"
+                    if missing
+                    else f"review_validated_pocketmd_topk_row_for_{slot_id}"
+                ),
+                "required_row_fields": list(slot.get("required_row_fields") or []),
+                "required_metric_fields": list(
+                    slot.get("required_metric_fields") or []
+                ),
+                "required_receipt_fields": list(
+                    slot.get("required_receipt_fields") or []
+                ),
+            }
+        )
+    return statuses
+
+
+def _slot_ref(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "slot_id": str(row.get("slot_id") or ""),
+        "case_id": str(row.get("case_id") or ""),
+        "top_k_rank": int(row.get("top_k_rank") or 0),
+        "operator_action": str(row.get("operator_action") or ""),
+    }
+
+
+def _top_k_slot_status_summary(
+    candidate_slot_statuses: list[dict[str, Any]],
+    raw_row_status: dict[str, Any],
+) -> dict[str, Any]:
+    missing_slots = [
+        _slot_ref(row)
+        for row in candidate_slot_statuses
+        if bool(row.get("missing"))
+    ]
+    provided_slots = [
+        _slot_ref(row)
+        for row in candidate_slot_statuses
+        if bool(row.get("provided"))
+    ]
+    return {
+        "raw_row_candidate_status": str(raw_row_status.get("status") or ""),
+        "operator_rows_ready": bool(raw_row_status.get("coverage_ready")),
+        "required_candidate_slot_count": len(candidate_slot_statuses),
+        "provided_candidate_slot_count": len(provided_slots),
+        "missing_candidate_slot_count": len(missing_slots),
+        "covered_required_slot_count": int(
+            raw_row_status.get("covered_required_slot_count") or 0
+        ),
+        "validated_row_count": int(raw_row_status.get("validated_row_count") or 0),
+        "selected_path": str(raw_row_status.get("selected_path") or ""),
+        "case_top_k_rank_prefixes": dict(
+            raw_row_status.get("case_top_k_rank_prefixes") or {}
+        ),
+        "missing_candidate_slots": missing_slots,
+        "provided_candidate_slots": provided_slots,
+        "first_missing_candidate_slot": missing_slots[0] if missing_slots else {},
+    }
+
+
 def build_pocketmd_lite_refinement_execution_plan(
     *,
     repo_root: Path = ROOT,
@@ -145,6 +245,15 @@ def build_pocketmd_lite_refinement_execution_plan(
         repo_root,
         rows_out=rows_out,
         minimum_rows_by_case=minimum_rows,
+    )
+    candidate_slot_statuses = _candidate_slot_statuses(
+        candidate_slots,
+        raw_row_status,
+        expected_rows_artifact=rows_out,
+    )
+    top_k_slot_status_summary = _top_k_slot_status_summary(
+        candidate_slot_statuses,
+        raw_row_status,
     )
     survival_blockers = [
         str(row)
@@ -179,6 +288,8 @@ def build_pocketmd_lite_refinement_execution_plan(
         "required_case_count": len(minimum_rows),
         "required_candidate_slot_count": len(candidate_slots),
         "candidate_slots": candidate_slots,
+        "candidate_slot_statuses": candidate_slot_statuses,
+        "top_k_slot_status_summary": top_k_slot_status_summary,
         "raw_row_candidate_status": raw_row_status,
         "expected_rows_artifact": str(rows_out),
         "expected_operator_intake_artifact": str(operator_intake_out),
@@ -212,6 +323,12 @@ def build_pocketmd_lite_refinement_execution_plan(
             "validated_row_count": raw_row_status["validated_row_count"],
             "covered_required_slot_count": raw_row_status[
                 "covered_required_slot_count"
+            ],
+            "provided_candidate_slot_count": top_k_slot_status_summary[
+                "provided_candidate_slot_count"
+            ],
+            "missing_candidate_slot_count": top_k_slot_status_summary[
+                "missing_candidate_slot_count"
             ],
             "survival_report_ready": bool(survival_report.get("contract_pass")),
             "survival_report_blocker_count": len(survival_blockers),

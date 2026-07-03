@@ -166,7 +166,9 @@ def test_refinement_execution_plan_enumerates_candidate_slots(
     assert payload["summary"] == {
         "blocker_count": 3,
         "covered_required_slot_count": 0,
+        "missing_candidate_slot_count": 6,
         "operator_rows_ready": False,
+        "provided_candidate_slot_count": 0,
         "raw_row_candidate_status": "row_artifact_missing",
         "required_candidate_slot_count": 6,
         "required_case_count": 3,
@@ -236,6 +238,74 @@ def test_refinement_execution_plan_enumerates_candidate_slots(
         "uncertainty_high",
         "uncertainty_unit",
     ]
+    assert payload["candidate_slot_statuses"][0]["slot_id"] == "case_a_rank_01"
+    assert payload["candidate_slot_statuses"][0]["status"] == "row_slot_missing"
+    assert payload["candidate_slot_statuses"][0]["missing"] is True
+    assert payload["candidate_slot_statuses"][0]["provided"] is False
+    assert payload["candidate_slot_statuses"][0]["operator_action"] == (
+        "attach_pocketmd_topk_row_for_case_a_rank_01"
+    )
+    assert payload["candidate_slot_statuses"][0]["required_metric_fields"][-3:] == [
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit",
+    ]
+    assert payload["top_k_slot_status_summary"] == {
+        "case_top_k_rank_prefixes": {},
+        "covered_required_slot_count": 0,
+        "first_missing_candidate_slot": {
+            "case_id": "case_a",
+            "operator_action": "attach_pocketmd_topk_row_for_case_a_rank_01",
+            "slot_id": "case_a_rank_01",
+            "top_k_rank": 1,
+        },
+        "missing_candidate_slot_count": 6,
+        "missing_candidate_slots": [
+            {
+                "case_id": "case_a",
+                "operator_action": "attach_pocketmd_topk_row_for_case_a_rank_01",
+                "slot_id": "case_a_rank_01",
+                "top_k_rank": 1,
+            },
+            {
+                "case_id": "case_a",
+                "operator_action": "attach_pocketmd_topk_row_for_case_a_rank_02",
+                "slot_id": "case_a_rank_02",
+                "top_k_rank": 2,
+            },
+            {
+                "case_id": "case_b",
+                "operator_action": "attach_pocketmd_topk_row_for_case_b_rank_01",
+                "slot_id": "case_b_rank_01",
+                "top_k_rank": 1,
+            },
+            {
+                "case_id": "case_b",
+                "operator_action": "attach_pocketmd_topk_row_for_case_b_rank_02",
+                "slot_id": "case_b_rank_02",
+                "top_k_rank": 2,
+            },
+            {
+                "case_id": "case_c",
+                "operator_action": "attach_pocketmd_topk_row_for_case_c_rank_01",
+                "slot_id": "case_c_rank_01",
+                "top_k_rank": 1,
+            },
+            {
+                "case_id": "case_c",
+                "operator_action": "attach_pocketmd_topk_row_for_case_c_rank_02",
+                "slot_id": "case_c_rank_02",
+                "top_k_rank": 2,
+            },
+        ],
+        "operator_rows_ready": False,
+        "provided_candidate_slot_count": 0,
+        "provided_candidate_slots": [],
+        "raw_row_candidate_status": "row_artifact_missing",
+        "required_candidate_slot_count": 6,
+        "selected_path": "",
+        "validated_row_count": 0,
+    }
     assert payload["expected_rows_artifact"] == str(rows_out)
     assert payload["expected_operator_intake_artifact"] == str(operator_intake)
     assert "materialize_pocketmd_lite_operator_intake_from_rows.py" in payload[
@@ -273,6 +343,19 @@ def test_refinement_execution_plan_marks_valid_rows_ready(
     assert payload["summary"]["operator_rows_ready"] is True
     assert payload["summary"]["validated_row_count"] == 6
     assert payload["summary"]["covered_required_slot_count"] == 6
+    assert payload["summary"]["provided_candidate_slot_count"] == 6
+    assert payload["summary"]["missing_candidate_slot_count"] == 0
+    assert payload["candidate_slot_statuses"][0]["status"] == "row_slot_provided"
+    assert payload["candidate_slot_statuses"][0]["missing"] is False
+    assert payload["candidate_slot_statuses"][0]["provided"] is True
+    assert payload["candidate_slot_statuses"][0]["operator_action"] == (
+        "review_validated_pocketmd_topk_row_for_case_a_rank_01"
+    )
+    assert payload["top_k_slot_status_summary"]["operator_rows_ready"] is True
+    assert payload["top_k_slot_status_summary"]["provided_candidate_slot_count"] == 6
+    assert payload["top_k_slot_status_summary"]["missing_candidate_slot_count"] == 0
+    assert payload["top_k_slot_status_summary"]["missing_candidate_slots"] == []
+    assert payload["top_k_slot_status_summary"]["first_missing_candidate_slot"] == {}
     assert payload["blockers"] == [
         "pocketmd_lite_topk_candidate_rows_missing",
         "pocketmd_lite_local_min_survival_rows_missing",
@@ -308,3 +391,4 @@ def test_refinement_execution_plan_cli_writes_artifact(tmp_path: Path) -> None:
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["required_candidate_slot_count"] == 6
     assert payload["summary"]["blocker_count"] == 3
+    assert payload["top_k_slot_status_summary"]["missing_candidate_slot_count"] == 6
