@@ -2257,6 +2257,54 @@ def test_snapshot_accepts_receipt_only_commit_as_fresh(tmp_path: Path) -> None:
     ]
 
 
+def test_snapshot_accepts_p1_benchmark_breadth_status_as_receipt_boundary(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_json(tmp_path / "implementation/phase1/p1_benchmark_breadth_status.json", {
+        "schema_version": "p1-benchmark-breadth-status.v1",
+        "generated_at": "2026-06-21T00:00:01+00:00",
+        "source_commit_sha": source_commit,
+        "contract_pass": False,
+        "blockers": ["external_receipts_pending"],
+    })
+    _write_text(
+        tmp_path / "implementation/phase1/p1_benchmark_breadth_status.md",
+        "# P1 Benchmark Breadth Status\n\n- `contract_pass`: `False`\n",
+    )
+    receipt_commit = _commit_all(tmp_path, "p1 benchmark breadth status")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert payload["source_commit_sha"] == receipt_commit
+    assert payload["evidence_fresh"] is True
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_state_kind"]
+        == "receipt_only_commit"
+    )
+    assert (
+        "implementation/phase1/p1_benchmark_breadth_status.json"
+        in metadata_rows["pm_release_gate_report"]["changed_paths_since_source_commit"]
+    )
+    assert not [
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ]
+
+
 def test_snapshot_accepts_structural_scope_owner_decisions_csv_as_receipt_boundary(
     tmp_path: Path,
 ) -> None:

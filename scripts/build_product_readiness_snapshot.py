@@ -374,6 +374,8 @@ def _receipt_commit_allowed_path(path: str, allowed_paths: set[str]) -> bool:
         "implementation/phase1/customer_shadow_evidence_status.json",
         "implementation/phase1/native_runtime_artifact_manifest.json",
         "implementation/phase1/p0_engine_perf_report.json",
+        "implementation/phase1/p1_benchmark_breadth_status.json",
+        "implementation/phase1/p1_benchmark_breadth_status.md",
         "implementation/phase1/production_runtime_packaging_manifest.json",
         "implementation/phase1/runtime_sbom.json",
         "implementation/phase1/runtime_version_compatibility_matrix.json",
@@ -386,6 +388,8 @@ def _receipt_commit_allowed_path(path: str, allowed_paths: set[str]) -> bool:
         "implementation/phase1/zero_copy_real_probe_report_strict.json",
         "implementation/phase1/release/independent_product_readiness.json",
         "implementation/phase1/release/external_benchmark_submission_readiness.json",
+        "implementation/phase1/release/p1_benchmark_breadth_status.json",
+        "implementation/phase1/release/p1_benchmark_breadth_status.md",
     }:
         return True
     return False
