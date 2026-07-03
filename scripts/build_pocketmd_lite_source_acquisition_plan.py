@@ -429,6 +429,75 @@ def _refinement_execution_plan_summary(
     }
 
 
+def _pocketmd_rows_operator_action(
+    *,
+    raw_row_candidate_status: dict[str, Any],
+    minimum_rows_by_case: list[dict[str, Any]],
+    required_flat_row_fields: list[str],
+    commands: dict[str, str],
+) -> dict[str, Any]:
+    row_blocker = str(raw_row_candidate_status.get("blocker") or "")
+    required_candidate_slot_count = sum(
+        len(row.get("required_top_k_rank_prefix") or [])
+        for row in minimum_rows_by_case
+    )
+    operator_action = (
+        "review_validated_pocketmd_lite_rows_and_attach_receipts"
+        if raw_row_candidate_status.get("coverage_ready")
+        else f"attach_pocketmd_rows_at_{DEFAULT_ROWS_OUT}"
+    )
+    return {
+        "row_input_id": "pocketmd_rows",
+        "status": "provided" if raw_row_candidate_status.get("coverage_ready") else "missing",
+        "operator_action": operator_action,
+        "default_row_artifact": str(DEFAULT_ROWS_OUT),
+        "template_artifact": str(DEFAULT_ROWS_TEMPLATE),
+        "accepted_formats": list(SUPPORTED_ROW_FORMATS),
+        "required_case_count": len(minimum_rows_by_case),
+        "required_candidate_slot_count": required_candidate_slot_count,
+        "required_total_candidate_rows": int(
+            TOPK_ROW_QUALITY_CRITERIA["min_total_top_k_candidate_count"]
+        ),
+        "required_candidate_rows_per_case": int(
+            TOPK_ROW_QUALITY_CRITERIA["min_candidate_count_per_case"]
+        ),
+        "required_top_k_rank_coverage_per_case": int(
+            TOPK_ROW_QUALITY_CRITERIA["min_top_k_rank_coverage_per_case"]
+        ),
+        "required_flat_row_fields": list(required_flat_row_fields),
+        "required_minimum_rows_by_case": minimum_rows_by_case,
+        "raw_row_candidate_status": raw_row_candidate_status,
+        "closes_phase4_criteria": [
+            "top_k_refinement_rows_present",
+            "top_k_refinement_case_coverage",
+            "local_min_survival_materialized",
+            "contact_persistence_materialized",
+            "h_bond_persistence_materialized",
+            "clash_relief_materialized",
+            "uncertainty_summary_materialized",
+            "report_blockers_resolved",
+        ],
+        "required_receipt_roles": [
+            "upstream_top_k_candidate_scope_receipt",
+            "lite_refinement_run_receipt",
+            "interaction_persistence_receipt",
+            "uncertainty_interval_receipt",
+        ],
+        "operator_blockers_if_missing": [row_blocker] if row_blocker else [],
+        "commands": {
+            "review_row_template": commands["review_row_template"],
+            "import_rows": commands["import_rows"],
+            "materialize_survival": commands["materialize_survival"],
+            "science_actual_closure": commands["science_actual_closure"],
+        },
+        "claim_boundary": (
+            "This action identifies the PocketMD Lite top-k row input needed for "
+            "Phase 4 actual closure. It is not closure evidence until real rows "
+            "and source receipts pass the importer and survival materializer."
+        ),
+    }
+
+
 def build_pocketmd_lite_source_acquisition_plan(
     *,
     repo_root: Path = ROOT,
@@ -459,6 +528,41 @@ def build_pocketmd_lite_source_acquisition_plan(
     refinement_execution_plan = _refinement_execution_plan_summary(
         minimum_rows_by_case,
         operator_rows_ready=operator_rows_ready,
+    )
+    commands = {
+        "write_plan": (
+            "python3 scripts/build_pocketmd_lite_source_acquisition_plan.py"
+        ),
+        "review_row_template": f"sed -n '1,20p' {DEFAULT_ROWS_TEMPLATE}",
+        "build_refinement_execution_plan": _refinement_execution_plan_command(),
+        "import_rows": (
+            "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
+            f"--rows {DEFAULT_ROWS_OUT} --out {DEFAULT_OPERATOR_INTAKE} "
+            "--source-id <source-id> --source-url <source-url> "
+            "--source-license <license>"
+        ),
+        "materialize_survival": (
+            "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py "
+            f"--intake {DEFAULT_OPERATOR_INTAKE} "
+            f"--contract {PRODUCTIZATION / 'pocketmd_lite_contract.json'} "
+            f"--out-report {DEFAULT_SURVIVAL_REPORT} --out-surface {DEFAULT_SURFACE} "
+            "--fail-blocked"
+        ),
+        "science_actual_closure": (
+            "python3 scripts/materialize_science_actual_closure_from_rows.py "
+            "--fail-blocked"
+        ),
+    }
+    pocketmd_rows_operator_action = _pocketmd_rows_operator_action(
+        raw_row_candidate_status=raw_row_candidate_status,
+        minimum_rows_by_case=minimum_rows_by_case,
+        required_flat_row_fields=required_flat_row_fields,
+        commands=commands,
+    )
+    missing_row_input_actions = (
+        [pocketmd_rows_operator_action]
+        if not raw_row_candidate_status.get("coverage_ready")
+        else []
     )
     return {
         "schema_version": SCHEMA_VERSION,
@@ -561,30 +665,10 @@ def build_pocketmd_lite_source_acquisition_plan(
             "run_pocketmd_lite_raw_row_importer_and_survival_materializer",
             "refresh_science_actual_closure_from_rows",
         ],
-        "commands": {
-            "write_plan": (
-                "python3 scripts/build_pocketmd_lite_source_acquisition_plan.py"
-            ),
-            "review_row_template": f"sed -n '1,20p' {DEFAULT_ROWS_TEMPLATE}",
-            "build_refinement_execution_plan": _refinement_execution_plan_command(),
-            "import_rows": (
-                "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
-                f"--rows {DEFAULT_ROWS_OUT} --out {DEFAULT_OPERATOR_INTAKE} "
-                "--source-id <source-id> --source-url <source-url> "
-                "--source-license <license>"
-            ),
-            "materialize_survival": (
-                "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py "
-                f"--intake {DEFAULT_OPERATOR_INTAKE} "
-                f"--contract {PRODUCTIZATION / 'pocketmd_lite_contract.json'} "
-                f"--out-report {DEFAULT_SURVIVAL_REPORT} --out-surface {DEFAULT_SURFACE} "
-                "--fail-blocked"
-            ),
-            "science_actual_closure": (
-                "python3 scripts/materialize_science_actual_closure_from_rows.py "
-                "--fail-blocked"
-            ),
-        },
+        "commands": commands,
+        "pocketmd_rows_operator_action": pocketmd_rows_operator_action,
+        "missing_row_input_actions": missing_row_input_actions,
+        "missing_row_input_action_count": len(missing_row_input_actions),
         "blockers": blockers,
         "blocker_count": len(blockers),
         "summary": {
@@ -622,6 +706,7 @@ def build_pocketmd_lite_source_acquisition_plan(
             "detected_row_artifact_count": raw_row_candidate_status[
                 "detected_row_artifact_count"
             ],
+            "missing_row_input_action_count": len(missing_row_input_actions),
             "actual_closure_ready": False,
             "blocker_count": len(blockers),
         },
@@ -667,6 +752,26 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.append(
             f"| `{row['receipt_role_id']}` | `{row['source_role']}` | {closes} |"
         )
+    missing_actions = [
+        row
+        for row in payload.get("missing_row_input_actions", [])
+        if isinstance(row, dict)
+    ]
+    if missing_actions:
+        lines.extend(["", "## Missing Row Input Actions", ""])
+        lines.extend(
+            [
+                "| Row Input | Action | Default Artifact | Required Slots |",
+                "|---|---|---|---:|",
+            ]
+        )
+        for row in missing_actions:
+            lines.append(
+                f"| `{row.get('row_input_id', '')}` | "
+                f"`{row.get('operator_action', '')}` | "
+                f"`{row.get('default_row_artifact', '')}` | "
+                f"{row.get('required_candidate_slot_count', 0)} |"
+            )
     lines.extend(["", "## Commands", ""])
     for key, command in payload["commands"].items():
         lines.append(f"- `{key}`: `{command}`")

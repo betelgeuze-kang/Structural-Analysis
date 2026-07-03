@@ -254,6 +254,38 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     assert row_contract["row_value_contract"]["top_k_survival_scope_policy"].startswith(
         "PocketMD Lite refinement rows are bounded to upstream top-k candidates only"
     )
+    row_action = payload["pocketmd_rows_operator_action"]
+    assert row_action["row_input_id"] == "pocketmd_rows"
+    assert row_action["status"] == "missing"
+    assert row_action["operator_action"] == (
+        "attach_pocketmd_rows_at_implementation/phase1/release_evidence/"
+        "productization/pocketmd_lite_topk_rows.json"
+    )
+    assert row_action["default_row_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows.json"
+    )
+    assert row_action["template_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows_template.csv"
+    )
+    assert row_action["required_case_count"] == 3
+    assert row_action["required_candidate_slot_count"] == 6
+    assert row_action["required_total_candidate_rows"] == 6
+    assert row_action["operator_blockers_if_missing"] == [
+        "pocketmd_lite_topk_rows_not_acquired"
+    ]
+    assert row_action["required_receipt_roles"] == [
+        "upstream_top_k_candidate_scope_receipt",
+        "lite_refinement_run_receipt",
+        "interaction_persistence_receipt",
+        "uncertainty_interval_receipt",
+    ]
+    assert "uncertainty_summary_materialized" in row_action[
+        "closes_phase4_criteria"
+    ]
+    assert payload["missing_row_input_actions"] == [row_action]
+    assert payload["missing_row_input_action_count"] == 1
 
     assert payload["metric_receipt_contract"] == [
         {
@@ -293,6 +325,7 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "blocker_count": 3,
         "covered_required_slot_count": 0,
         "detected_row_artifact_count": 0,
+        "missing_row_input_action_count": 1,
         "minimum_rows_by_case_count": 3,
         "operator_rows_ready": False,
         "phase4_refinement_receipt_plan_status": "operator_receipts_required",
@@ -346,6 +379,10 @@ def test_pocketmd_lite_source_acquisition_plan_detects_dropzone_rows(
     assert payload["summary"]["detected_row_artifact_count"] == 1
     assert payload["summary"]["operator_rows_ready"] is False
     assert payload["refinement_execution_plan"]["operator_rows_ready"] is False
+    assert payload["missing_row_input_action_count"] == 1
+    assert payload["missing_row_input_actions"][0]["operator_blockers_if_missing"] == [
+        "pocketmd_lite_topk_rows_empty"
+    ]
     assert payload["blockers"] == [
         "pocketmd_lite_topk_rows_empty",
         "upstream_top_k_candidate_receipts_not_attached",
@@ -379,6 +416,9 @@ def test_pocketmd_lite_source_acquisition_plan_validates_slot_coverage(
     )
     assert payload["summary"]["validated_row_count"] == 6
     assert payload["summary"]["covered_required_slot_count"] == 6
+    assert payload["missing_row_input_actions"] == []
+    assert payload["missing_row_input_action_count"] == 0
+    assert payload["pocketmd_rows_operator_action"]["status"] == "provided"
     assert payload["blockers"] == [
         "upstream_top_k_candidate_receipts_not_attached",
         "lite_refinement_metric_receipts_not_attached",
@@ -404,6 +444,8 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert "# PocketMD Lite Source Acquisition Plan" in markdown
     assert "pocketmd_lite_refinement_execution_plan.json" in markdown
     assert "pocketmd_lite_topk_rows_template.csv" in markdown
+    assert "## Missing Row Input Actions" in markdown
+    assert "attach_pocketmd_rows_at_" in markdown
     assert "`pocketmd_lite_case_001` | 2 | `1,2`" in markdown
     assert "## Phase 4 Receipt Roles" in markdown
     assert "upstream_top_k_candidate_scope_receipt" in markdown

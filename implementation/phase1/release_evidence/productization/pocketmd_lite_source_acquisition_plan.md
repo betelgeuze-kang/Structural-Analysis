@@ -26,6 +26,12 @@
 | `interaction_persistence_receipt` | `contact_hbond_clash_metric_rows` | `contact_persistence_materialized`, `h_bond_persistence_materialized`, `clash_relief_materialized`, `report_blockers_resolved` |
 | `uncertainty_interval_receipt` | `candidate_uncertainty_interval_rows` | `uncertainty_summary_materialized`, `report_blockers_resolved` |
 
+## Missing Row Input Actions
+
+| Row Input | Action | Default Artifact | Required Slots |
+|---|---|---|---:|
+| `pocketmd_rows` | `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | 6 |
+
 ## Commands
 
 - `write_plan`: `python3 scripts/build_pocketmd_lite_source_acquisition_plan.py`
