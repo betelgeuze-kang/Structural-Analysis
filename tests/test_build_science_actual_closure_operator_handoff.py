@@ -86,6 +86,19 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert row_contracts["pocketmd_rows"]["row_template_artifact"].endswith(
         "pocketmd_lite_topk_rows_template.csv"
     )
+    pocketmd_contract_detail = row_contracts["pocketmd_rows"][
+        "row_input_slot_detail"
+    ]
+    assert pocketmd_contract_detail["missing_candidate_slot_count"] == 6
+    assert pocketmd_contract_detail["provided_candidate_slot_count"] == 0
+    assert pocketmd_contract_detail["first_missing_candidate_slot"] == {
+        "case_id": "pocketmd_lite_case_001",
+        "operator_action": (
+            "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01"
+        ),
+        "slot_id": "pocketmd_lite_case_001_rank_01",
+        "top_k_rank": 1,
+    }
     blocked_actions = {
         row["component_id"]: row for row in payload["blocked_component_operator_actions"]
     }
@@ -222,6 +235,48 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     ]
     assert "required_case_fields" in pocketmd["contract_field_groups"]
     assert "uncertainty_field_modes" in pocketmd["contract_field_groups"]
+    assert pocketmd["row_input_slot_detail"]["artifact"].endswith(
+        "pocketmd_lite_refinement_execution_plan.json"
+    )
+    assert pocketmd["row_input_slot_detail"]["top_k_slot_status_summary"][
+        "missing_candidate_slot_count"
+    ] == 6
+    assert pocketmd["row_input_slot_detail"]["candidate_slot_statuses"][0] == {
+        "case_id": "pocketmd_lite_case_001",
+        "expected_rows_artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_topk_rows.json"
+        ),
+        "missing": True,
+        "operator_action": (
+            "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01"
+        ),
+        "provided": False,
+        "required_metric_fields": [
+            "local_min_survived",
+            "contact_persistence_rate",
+            "h_bond_persistence_rate",
+            "clash_count_before",
+            "clash_count_after",
+            "uncertainty_low",
+            "uncertainty_high",
+            "uncertainty_unit",
+        ],
+        "required_receipt_fields": [
+            "upstream_top_k_provenance_ref",
+            "upstream_top_k_source_checksum",
+            "provenance_ref",
+            "source_checksum",
+            "operator_input_source.source_artifact",
+            "operator_input_source.source_artifact_sha256",
+            "operator_input_source.source_id",
+            "operator_input_source.source_url",
+            "operator_input_source.source_license",
+        ],
+        "slot_id": "pocketmd_lite_case_001_rank_01",
+        "status": "row_slot_missing",
+        "top_k_rank": 1,
+    }
 
     component_summaries = {
         row["component_id"]: row for row in payload["component_slot_summary"]
@@ -263,6 +318,10 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert payload["input_checksums"][
         "scripts/build_science_actual_closure_operator_handoff.py"
     ].startswith("sha256:")
+    assert payload["input_checksums"][
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_refinement_execution_plan.json"
+    ].startswith("sha256:")
     assert "| `subset_rows` | `provided` |" in markdown
     assert "| `vina_gnina_rows` | `operator_input_required` |" in markdown
     assert "| `pocketmd_rows` | `operator_input_required` |" in markdown
@@ -277,6 +336,9 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     )
     assert "public_benchmark_vina_gnina_input_manifest_not_detected" in markdown
     assert "pocketmd_lite_topk_rows_not_acquired" in markdown
+    assert "### PocketMD Top-k Candidate Slots" in markdown
+    assert "pocketmd_lite_case_001_rank_01" in markdown
+    assert "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01" in markdown
     assert "public_benchmark_subset_rows_template.csv" in markdown
     assert "gpcr_hard_decoy_rows_template.csv" in markdown
     assert "pocketmd_lite_topk_rows_template.csv" in markdown

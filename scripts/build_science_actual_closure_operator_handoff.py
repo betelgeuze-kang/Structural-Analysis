@@ -21,6 +21,9 @@ PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_AUDIT = PRODUCTIZATION / "science_actual_closure_row_audit.json"
 DEFAULT_OUT = PRODUCTIZATION / "science_actual_closure_operator_handoff.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+DEFAULT_POCKETMD_REFINEMENT_PLAN = (
+    PRODUCTIZATION / "pocketmd_lite_refinement_execution_plan.json"
+)
 SCHEMA_VERSION = "science-actual-closure-operator-handoff.v1"
 EXPECTED_ROW_INPUTS = (
     "subset_rows",
@@ -82,6 +85,13 @@ def _as_dict(value: Any) -> dict[str, Any]:
 
 def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
+
+
+def _as_int(value: Any) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
 
 
 def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
@@ -159,16 +169,75 @@ def _slot_source_context(
     }
 
 
+def _compact_candidate_slot_status(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "slot_id": str(row.get("slot_id") or ""),
+        "case_id": str(row.get("case_id") or ""),
+        "top_k_rank": _as_int(row.get("top_k_rank")),
+        "status": str(row.get("status") or ""),
+        "missing": bool(row.get("missing")),
+        "provided": bool(row.get("provided")),
+        "operator_action": str(row.get("operator_action") or ""),
+        "expected_rows_artifact": str(row.get("expected_rows_artifact") or ""),
+        "required_metric_fields": [
+            str(item) for item in _as_list(row.get("required_metric_fields"))
+        ],
+        "required_receipt_fields": [
+            str(item) for item in _as_list(row.get("required_receipt_fields"))
+        ],
+    }
+
+
+def _pocketmd_top_k_slot_detail(
+    refinement_plan: dict[str, Any],
+    *,
+    artifact: Path,
+) -> dict[str, Any]:
+    if not refinement_plan:
+        return {}
+    candidate_slot_statuses = [
+        _compact_candidate_slot_status(row)
+        for row in _as_list(refinement_plan.get("candidate_slot_statuses"))
+        if isinstance(row, dict)
+    ]
+    summary = _as_dict(refinement_plan.get("top_k_slot_status_summary"))
+    return {
+        "artifact": str(artifact),
+        "status": str(refinement_plan.get("status") or ""),
+        "operator_rows_ready": bool(refinement_plan.get("operator_rows_ready")),
+        "expected_rows_artifact": str(
+            refinement_plan.get("expected_rows_artifact") or ""
+        ),
+        "required_candidate_slot_count": _as_int(
+            refinement_plan.get("required_candidate_slot_count")
+        ),
+        "missing_candidate_slot_count": _as_int(
+            summary.get("missing_candidate_slot_count")
+        ),
+        "provided_candidate_slot_count": _as_int(
+            summary.get("provided_candidate_slot_count")
+        ),
+        "top_k_slot_status_summary": summary,
+        "candidate_slot_statuses": candidate_slot_statuses,
+        "first_missing_candidate_slot": _as_dict(
+            summary.get("first_missing_candidate_slot")
+        ),
+        "claim_boundary": str(refinement_plan.get("claim_boundary") or ""),
+    }
+
+
 def _slot(
     row: dict[str, Any],
     contract: dict[str, Any],
     *,
     repo_root: Path,
     upstream_source_acquisition: dict[str, Any],
+    row_input_slot_details: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
     row_input_id = str(row.get("row_input_id") or "")
     missing = bool(row.get("missing"))
     source_context = _slot_source_context(row_input_id, upstream_source_acquisition)
+    row_input_slot_detail = _as_dict(row_input_slot_details.get(row_input_id))
     row_template_artifact = _row_template_artifact(row_input_id)
     row_template_path = (
         repo_root / row_template_artifact if row_template_artifact else Path()
@@ -221,6 +290,7 @@ def _slot(
         "upstream_source_acquisition": source_context,
         "upstream_source_blockers": source_context["blockers"],
         "source_acquisition_operator_action": source_context["operator_action"],
+        "row_input_slot_detail": row_input_slot_detail,
         "row_contract_ref": str(row.get("row_contract_ref") or ""),
         "contract_field_groups": _contract_field_groups(contract),
         "contract_policies": _contract_policies(contract),
@@ -323,6 +393,9 @@ def _row_input_materialization_contracts(
             "source_acquisition_operator_action": str(
                 slot.get("source_acquisition_operator_action") or ""
             ),
+            "row_input_slot_detail": _as_dict(
+                slot.get("row_input_slot_detail")
+            ),
             "operator_blockers_if_missing": [
                 str(item)
                 for item in _as_list(slot.get("operator_blockers_if_missing"))
@@ -413,6 +486,16 @@ def build_science_actual_closure_operator_handoff(
     upstream_source_blockers = [
         str(item) for item in _as_list(audit.get("upstream_source_blockers"))
     ]
+    pocketmd_refinement_plan = _load_json(
+        repo_root,
+        DEFAULT_POCKETMD_REFINEMENT_PLAN,
+    )
+    row_input_slot_details = {
+        "pocketmd_rows": _pocketmd_top_k_slot_detail(
+            pocketmd_refinement_plan,
+            artifact=DEFAULT_POCKETMD_REFINEMENT_PLAN,
+        )
+    }
     slots = sorted(
         [
             _slot(
@@ -420,6 +503,7 @@ def build_science_actual_closure_operator_handoff(
                 _as_dict(contracts.get(str(row.get("row_input_id") or ""))),
                 repo_root=repo_root,
                 upstream_source_acquisition=upstream_source_acquisition,
+                row_input_slot_details=row_input_slot_details,
             )
             for row in row_matrix
         ],
@@ -464,6 +548,7 @@ def build_science_actual_closure_operator_handoff(
             input_paths=[
                 Path("scripts/build_science_actual_closure_operator_handoff.py"),
                 audit_path,
+                DEFAULT_POCKETMD_REFINEMENT_PLAN,
             ],
             reused_evidence=True,
             reuse_policy=(
@@ -587,6 +672,32 @@ def _markdown(payload: dict[str, Any]) -> str:
                 f"`{contract.get('row_template_artifact')}` | "
                 f"`{contract.get('materialization_command')}` |"
             )
+            row_input_detail = _as_dict(contract.get("row_input_slot_detail"))
+            top_k_summary = _as_dict(
+                row_input_detail.get("top_k_slot_status_summary")
+            )
+            missing_candidate_slots = [
+                item
+                for item in _as_list(top_k_summary.get("missing_candidate_slots"))
+                if isinstance(item, dict)
+            ]
+            if missing_candidate_slots:
+                lines.extend(["", "### PocketMD Top-k Candidate Slots", ""])
+                lines.extend(
+                    [
+                        "| Slot | Case | Rank | Status | Action |",
+                        "| --- | --- | --- | --- | --- |",
+                    ]
+                )
+                for candidate_slot in missing_candidate_slots:
+                    lines.append(
+                        "| "
+                        f"`{candidate_slot.get('slot_id')}` | "
+                        f"`{candidate_slot.get('case_id')}` | "
+                        f"`{candidate_slot.get('top_k_rank')}` | "
+                        "`missing` | "
+                        f"`{candidate_slot.get('operator_action')}` |"
+                    )
     upstream_source_blockers = [
         str(item) for item in _as_list(payload.get("upstream_source_blockers"))
     ]

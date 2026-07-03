@@ -22,6 +22,17 @@
 | `vina_gnina_rows` | `attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv` | `python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked` |
 | `pocketmd_rows` | `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv` | `python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked` |
 
+### PocketMD Top-k Candidate Slots
+
+| Slot | Case | Rank | Status | Action |
+| --- | --- | --- | --- | --- |
+| `pocketmd_lite_case_001_rank_01` | `pocketmd_lite_case_001` | `1` | `missing` | `attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01` |
+| `pocketmd_lite_case_001_rank_02` | `pocketmd_lite_case_001` | `2` | `missing` | `attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_02` |
+| `pocketmd_lite_case_002_rank_01` | `pocketmd_lite_case_002` | `1` | `missing` | `attach_pocketmd_topk_row_for_pocketmd_lite_case_002_rank_01` |
+| `pocketmd_lite_case_002_rank_02` | `pocketmd_lite_case_002` | `2` | `missing` | `attach_pocketmd_topk_row_for_pocketmd_lite_case_002_rank_02` |
+| `pocketmd_lite_case_003_rank_01` | `pocketmd_lite_case_003` | `1` | `missing` | `attach_pocketmd_topk_row_for_pocketmd_lite_case_003_rank_01` |
+| `pocketmd_lite_case_003_rank_02` | `pocketmd_lite_case_003` | `2` | `missing` | `attach_pocketmd_topk_row_for_pocketmd_lite_case_003_rank_02` |
+
 ## Upstream Source Blockers
 
 - `public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_rows_not_acquired`

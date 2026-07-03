@@ -284,6 +284,7 @@
     "resolved_path": "",
     "row_contract_ref": "row_intake_contracts.vina_gnina_rows",
     "row_input_id": "vina_gnina_rows",
+    "row_input_slot_detail": {},
     "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
     "row_template_present": true,
     "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
@@ -354,10 +355,11 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-03T22:38:12.076089+00:00",
+  "generated_at": "2026-07-03T22:42:47.994338+00:00",
   "input_checksums": {
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:02c03205636f5be5803c850e97f7ded298b089378106ea2ec81d92b7da2b36d3",
     "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:04a3ab789f279a906c5afdef1a618ad672f7959b58c50a5519961bdc78c402dd",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:dc4c940796ed7b0393b77a026736c12b7905a68a3d9f5a8e2d41b8520a6856b9"
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:1aabf29ecdf4c030087ab3e5c2e55e8256b32a4b60af830c780f6030900f99e8"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -520,6 +522,266 @@
         ],
         "preferred_default_row_path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
         "row_input_id": "pocketmd_rows",
+        "row_input_slot_detail": {
+          "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json",
+          "candidate_slot_statuses": [
+            {
+              "case_id": "pocketmd_lite_case_001",
+              "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "missing": true,
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01",
+              "provided": false,
+              "required_metric_fields": [
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_receipt_fields": [
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum",
+                "provenance_ref",
+                "source_checksum",
+                "operator_input_source.source_artifact",
+                "operator_input_source.source_artifact_sha256",
+                "operator_input_source.source_id",
+                "operator_input_source.source_url",
+                "operator_input_source.source_license"
+              ],
+              "slot_id": "pocketmd_lite_case_001_rank_01",
+              "status": "row_slot_missing",
+              "top_k_rank": 1
+            },
+            {
+              "case_id": "pocketmd_lite_case_001",
+              "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "missing": true,
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_02",
+              "provided": false,
+              "required_metric_fields": [
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_receipt_fields": [
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum",
+                "provenance_ref",
+                "source_checksum",
+                "operator_input_source.source_artifact",
+                "operator_input_source.source_artifact_sha256",
+                "operator_input_source.source_id",
+                "operator_input_source.source_url",
+                "operator_input_source.source_license"
+              ],
+              "slot_id": "pocketmd_lite_case_001_rank_02",
+              "status": "row_slot_missing",
+              "top_k_rank": 2
+            },
+            {
+              "case_id": "pocketmd_lite_case_002",
+              "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "missing": true,
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_002_rank_01",
+              "provided": false,
+              "required_metric_fields": [
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_receipt_fields": [
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum",
+                "provenance_ref",
+                "source_checksum",
+                "operator_input_source.source_artifact",
+                "operator_input_source.source_artifact_sha256",
+                "operator_input_source.source_id",
+                "operator_input_source.source_url",
+                "operator_input_source.source_license"
+              ],
+              "slot_id": "pocketmd_lite_case_002_rank_01",
+              "status": "row_slot_missing",
+              "top_k_rank": 1
+            },
+            {
+              "case_id": "pocketmd_lite_case_002",
+              "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "missing": true,
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_002_rank_02",
+              "provided": false,
+              "required_metric_fields": [
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_receipt_fields": [
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum",
+                "provenance_ref",
+                "source_checksum",
+                "operator_input_source.source_artifact",
+                "operator_input_source.source_artifact_sha256",
+                "operator_input_source.source_id",
+                "operator_input_source.source_url",
+                "operator_input_source.source_license"
+              ],
+              "slot_id": "pocketmd_lite_case_002_rank_02",
+              "status": "row_slot_missing",
+              "top_k_rank": 2
+            },
+            {
+              "case_id": "pocketmd_lite_case_003",
+              "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "missing": true,
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_003_rank_01",
+              "provided": false,
+              "required_metric_fields": [
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_receipt_fields": [
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum",
+                "provenance_ref",
+                "source_checksum",
+                "operator_input_source.source_artifact",
+                "operator_input_source.source_artifact_sha256",
+                "operator_input_source.source_id",
+                "operator_input_source.source_url",
+                "operator_input_source.source_license"
+              ],
+              "slot_id": "pocketmd_lite_case_003_rank_01",
+              "status": "row_slot_missing",
+              "top_k_rank": 1
+            },
+            {
+              "case_id": "pocketmd_lite_case_003",
+              "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "missing": true,
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_003_rank_02",
+              "provided": false,
+              "required_metric_fields": [
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_receipt_fields": [
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum",
+                "provenance_ref",
+                "source_checksum",
+                "operator_input_source.source_artifact",
+                "operator_input_source.source_artifact_sha256",
+                "operator_input_source.source_id",
+                "operator_input_source.source_url",
+                "operator_input_source.source_license"
+              ],
+              "slot_id": "pocketmd_lite_case_003_rank_02",
+              "status": "row_slot_missing",
+              "top_k_rank": 2
+            }
+          ],
+          "claim_boundary": "This execution plan enumerates the bounded PocketMD Lite top-k refinement row slots required by the current contract. It does not run refinement, does not synthesize metric rows, and does not unlock all-atom MD/FEP claims before real operator rows pass the survival materializer.",
+          "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+          "first_missing_candidate_slot": {
+            "case_id": "pocketmd_lite_case_001",
+            "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01",
+            "slot_id": "pocketmd_lite_case_001_rank_01",
+            "top_k_rank": 1
+          },
+          "missing_candidate_slot_count": 6,
+          "operator_rows_ready": false,
+          "provided_candidate_slot_count": 0,
+          "required_candidate_slot_count": 6,
+          "status": "operator_refinement_rows_required",
+          "top_k_slot_status_summary": {
+            "case_top_k_rank_prefixes": {},
+            "covered_required_slot_count": 0,
+            "first_missing_candidate_slot": {
+              "case_id": "pocketmd_lite_case_001",
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01",
+              "slot_id": "pocketmd_lite_case_001_rank_01",
+              "top_k_rank": 1
+            },
+            "missing_candidate_slot_count": 6,
+            "missing_candidate_slots": [
+              {
+                "case_id": "pocketmd_lite_case_001",
+                "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01",
+                "slot_id": "pocketmd_lite_case_001_rank_01",
+                "top_k_rank": 1
+              },
+              {
+                "case_id": "pocketmd_lite_case_001",
+                "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_02",
+                "slot_id": "pocketmd_lite_case_001_rank_02",
+                "top_k_rank": 2
+              },
+              {
+                "case_id": "pocketmd_lite_case_002",
+                "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_002_rank_01",
+                "slot_id": "pocketmd_lite_case_002_rank_01",
+                "top_k_rank": 1
+              },
+              {
+                "case_id": "pocketmd_lite_case_002",
+                "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_002_rank_02",
+                "slot_id": "pocketmd_lite_case_002_rank_02",
+                "top_k_rank": 2
+              },
+              {
+                "case_id": "pocketmd_lite_case_003",
+                "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_003_rank_01",
+                "slot_id": "pocketmd_lite_case_003_rank_01",
+                "top_k_rank": 1
+              },
+              {
+                "case_id": "pocketmd_lite_case_003",
+                "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_003_rank_02",
+                "slot_id": "pocketmd_lite_case_003_rank_02",
+                "top_k_rank": 2
+              }
+            ],
+            "operator_rows_ready": false,
+            "provided_candidate_slot_count": 0,
+            "provided_candidate_slots": [],
+            "raw_row_candidate_status": "row_artifact_missing",
+            "required_candidate_slot_count": 6,
+            "selected_path": "",
+            "validated_row_count": 0
+          }
+        },
         "row_template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
         "row_template_present": true,
         "source_acquisition_operator_action": "resolve_pocketmd_lite_source_acquisition_blockers",
@@ -692,6 +954,7 @@
         ],
         "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
         "row_input_id": "vina_gnina_rows",
+        "row_input_slot_detail": {},
         "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
         "row_template_present": true,
         "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
@@ -852,6 +1115,266 @@
       ],
       "preferred_default_row_path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
       "row_input_id": "pocketmd_rows",
+      "row_input_slot_detail": {
+        "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json",
+        "candidate_slot_statuses": [
+          {
+            "case_id": "pocketmd_lite_case_001",
+            "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "missing": true,
+            "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01",
+            "provided": false,
+            "required_metric_fields": [
+              "local_min_survived",
+              "contact_persistence_rate",
+              "h_bond_persistence_rate",
+              "clash_count_before",
+              "clash_count_after",
+              "uncertainty_low",
+              "uncertainty_high",
+              "uncertainty_unit"
+            ],
+            "required_receipt_fields": [
+              "upstream_top_k_provenance_ref",
+              "upstream_top_k_source_checksum",
+              "provenance_ref",
+              "source_checksum",
+              "operator_input_source.source_artifact",
+              "operator_input_source.source_artifact_sha256",
+              "operator_input_source.source_id",
+              "operator_input_source.source_url",
+              "operator_input_source.source_license"
+            ],
+            "slot_id": "pocketmd_lite_case_001_rank_01",
+            "status": "row_slot_missing",
+            "top_k_rank": 1
+          },
+          {
+            "case_id": "pocketmd_lite_case_001",
+            "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "missing": true,
+            "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_02",
+            "provided": false,
+            "required_metric_fields": [
+              "local_min_survived",
+              "contact_persistence_rate",
+              "h_bond_persistence_rate",
+              "clash_count_before",
+              "clash_count_after",
+              "uncertainty_low",
+              "uncertainty_high",
+              "uncertainty_unit"
+            ],
+            "required_receipt_fields": [
+              "upstream_top_k_provenance_ref",
+              "upstream_top_k_source_checksum",
+              "provenance_ref",
+              "source_checksum",
+              "operator_input_source.source_artifact",
+              "operator_input_source.source_artifact_sha256",
+              "operator_input_source.source_id",
+              "operator_input_source.source_url",
+              "operator_input_source.source_license"
+            ],
+            "slot_id": "pocketmd_lite_case_001_rank_02",
+            "status": "row_slot_missing",
+            "top_k_rank": 2
+          },
+          {
+            "case_id": "pocketmd_lite_case_002",
+            "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "missing": true,
+            "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_002_rank_01",
+            "provided": false,
+            "required_metric_fields": [
+              "local_min_survived",
+              "contact_persistence_rate",
+              "h_bond_persistence_rate",
+              "clash_count_before",
+              "clash_count_after",
+              "uncertainty_low",
+              "uncertainty_high",
+              "uncertainty_unit"
+            ],
+            "required_receipt_fields": [
+              "upstream_top_k_provenance_ref",
+              "upstream_top_k_source_checksum",
+              "provenance_ref",
+              "source_checksum",
+              "operator_input_source.source_artifact",
+              "operator_input_source.source_artifact_sha256",
+              "operator_input_source.source_id",
+              "operator_input_source.source_url",
+              "operator_input_source.source_license"
+            ],
+            "slot_id": "pocketmd_lite_case_002_rank_01",
+            "status": "row_slot_missing",
+            "top_k_rank": 1
+          },
+          {
+            "case_id": "pocketmd_lite_case_002",
+            "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "missing": true,
+            "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_002_rank_02",
+            "provided": false,
+            "required_metric_fields": [
+              "local_min_survived",
+              "contact_persistence_rate",
+              "h_bond_persistence_rate",
+              "clash_count_before",
+              "clash_count_after",
+              "uncertainty_low",
+              "uncertainty_high",
+              "uncertainty_unit"
+            ],
+            "required_receipt_fields": [
+              "upstream_top_k_provenance_ref",
+              "upstream_top_k_source_checksum",
+              "provenance_ref",
+              "source_checksum",
+              "operator_input_source.source_artifact",
+              "operator_input_source.source_artifact_sha256",
+              "operator_input_source.source_id",
+              "operator_input_source.source_url",
+              "operator_input_source.source_license"
+            ],
+            "slot_id": "pocketmd_lite_case_002_rank_02",
+            "status": "row_slot_missing",
+            "top_k_rank": 2
+          },
+          {
+            "case_id": "pocketmd_lite_case_003",
+            "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "missing": true,
+            "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_003_rank_01",
+            "provided": false,
+            "required_metric_fields": [
+              "local_min_survived",
+              "contact_persistence_rate",
+              "h_bond_persistence_rate",
+              "clash_count_before",
+              "clash_count_after",
+              "uncertainty_low",
+              "uncertainty_high",
+              "uncertainty_unit"
+            ],
+            "required_receipt_fields": [
+              "upstream_top_k_provenance_ref",
+              "upstream_top_k_source_checksum",
+              "provenance_ref",
+              "source_checksum",
+              "operator_input_source.source_artifact",
+              "operator_input_source.source_artifact_sha256",
+              "operator_input_source.source_id",
+              "operator_input_source.source_url",
+              "operator_input_source.source_license"
+            ],
+            "slot_id": "pocketmd_lite_case_003_rank_01",
+            "status": "row_slot_missing",
+            "top_k_rank": 1
+          },
+          {
+            "case_id": "pocketmd_lite_case_003",
+            "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "missing": true,
+            "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_003_rank_02",
+            "provided": false,
+            "required_metric_fields": [
+              "local_min_survived",
+              "contact_persistence_rate",
+              "h_bond_persistence_rate",
+              "clash_count_before",
+              "clash_count_after",
+              "uncertainty_low",
+              "uncertainty_high",
+              "uncertainty_unit"
+            ],
+            "required_receipt_fields": [
+              "upstream_top_k_provenance_ref",
+              "upstream_top_k_source_checksum",
+              "provenance_ref",
+              "source_checksum",
+              "operator_input_source.source_artifact",
+              "operator_input_source.source_artifact_sha256",
+              "operator_input_source.source_id",
+              "operator_input_source.source_url",
+              "operator_input_source.source_license"
+            ],
+            "slot_id": "pocketmd_lite_case_003_rank_02",
+            "status": "row_slot_missing",
+            "top_k_rank": 2
+          }
+        ],
+        "claim_boundary": "This execution plan enumerates the bounded PocketMD Lite top-k refinement row slots required by the current contract. It does not run refinement, does not synthesize metric rows, and does not unlock all-atom MD/FEP claims before real operator rows pass the survival materializer.",
+        "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+        "first_missing_candidate_slot": {
+          "case_id": "pocketmd_lite_case_001",
+          "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01",
+          "slot_id": "pocketmd_lite_case_001_rank_01",
+          "top_k_rank": 1
+        },
+        "missing_candidate_slot_count": 6,
+        "operator_rows_ready": false,
+        "provided_candidate_slot_count": 0,
+        "required_candidate_slot_count": 6,
+        "status": "operator_refinement_rows_required",
+        "top_k_slot_status_summary": {
+          "case_top_k_rank_prefixes": {},
+          "covered_required_slot_count": 0,
+          "first_missing_candidate_slot": {
+            "case_id": "pocketmd_lite_case_001",
+            "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01",
+            "slot_id": "pocketmd_lite_case_001_rank_01",
+            "top_k_rank": 1
+          },
+          "missing_candidate_slot_count": 6,
+          "missing_candidate_slots": [
+            {
+              "case_id": "pocketmd_lite_case_001",
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01",
+              "slot_id": "pocketmd_lite_case_001_rank_01",
+              "top_k_rank": 1
+            },
+            {
+              "case_id": "pocketmd_lite_case_001",
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_02",
+              "slot_id": "pocketmd_lite_case_001_rank_02",
+              "top_k_rank": 2
+            },
+            {
+              "case_id": "pocketmd_lite_case_002",
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_002_rank_01",
+              "slot_id": "pocketmd_lite_case_002_rank_01",
+              "top_k_rank": 1
+            },
+            {
+              "case_id": "pocketmd_lite_case_002",
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_002_rank_02",
+              "slot_id": "pocketmd_lite_case_002_rank_02",
+              "top_k_rank": 2
+            },
+            {
+              "case_id": "pocketmd_lite_case_003",
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_003_rank_01",
+              "slot_id": "pocketmd_lite_case_003_rank_01",
+              "top_k_rank": 1
+            },
+            {
+              "case_id": "pocketmd_lite_case_003",
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_003_rank_02",
+              "slot_id": "pocketmd_lite_case_003_rank_02",
+              "top_k_rank": 2
+            }
+          ],
+          "operator_rows_ready": false,
+          "provided_candidate_slot_count": 0,
+          "provided_candidate_slots": [],
+          "raw_row_candidate_status": "row_artifact_missing",
+          "required_candidate_slot_count": 6,
+          "selected_path": "",
+          "validated_row_count": 0
+        }
+      },
       "row_template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
       "row_template_present": true,
       "source_acquisition_operator_action": "resolve_pocketmd_lite_source_acquisition_blockers",
@@ -1024,6 +1547,7 @@
       ],
       "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
       "row_input_id": "vina_gnina_rows",
+      "row_input_slot_detail": {},
       "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
       "row_template_present": true,
       "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
@@ -1171,6 +1695,7 @@
       "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
       "row_contract_ref": "row_intake_contracts.subset_rows",
       "row_input_id": "subset_rows",
+      "row_input_slot_detail": {},
       "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows_template.csv",
       "row_template_present": true,
       "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
@@ -1352,6 +1877,7 @@
       "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
       "row_contract_ref": "row_intake_contracts.pose_rows",
       "row_input_id": "pose_rows",
+      "row_input_slot_detail": {},
       "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows_template.csv",
       "row_template_present": true,
       "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
@@ -1585,6 +2111,7 @@
       "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
       "row_contract_ref": "row_intake_contracts.enrichment_rows",
       "row_input_id": "enrichment_rows",
+      "row_input_slot_detail": {},
       "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows_template.csv",
       "row_template_present": true,
       "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
@@ -1831,6 +2358,7 @@
       "resolved_path": "",
       "row_contract_ref": "row_intake_contracts.vina_gnina_rows",
       "row_input_id": "vina_gnina_rows",
+      "row_input_slot_detail": {},
       "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
       "row_template_present": true,
       "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
@@ -2020,6 +2548,7 @@
       "resolved_path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
       "row_contract_ref": "row_intake_contracts.gpcr_rows",
       "row_input_id": "gpcr_rows",
+      "row_input_slot_detail": {},
       "row_template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv",
       "row_template_present": true,
       "source_acquisition_operator_action": "",
@@ -2193,6 +2722,266 @@
       "resolved_path": "",
       "row_contract_ref": "row_intake_contracts.pocketmd_rows",
       "row_input_id": "pocketmd_rows",
+      "row_input_slot_detail": {
+        "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json",
+        "candidate_slot_statuses": [
+          {
+            "case_id": "pocketmd_lite_case_001",
+            "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "missing": true,
+            "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01",
+            "provided": false,
+            "required_metric_fields": [
+              "local_min_survived",
+              "contact_persistence_rate",
+              "h_bond_persistence_rate",
+              "clash_count_before",
+              "clash_count_after",
+              "uncertainty_low",
+              "uncertainty_high",
+              "uncertainty_unit"
+            ],
+            "required_receipt_fields": [
+              "upstream_top_k_provenance_ref",
+              "upstream_top_k_source_checksum",
+              "provenance_ref",
+              "source_checksum",
+              "operator_input_source.source_artifact",
+              "operator_input_source.source_artifact_sha256",
+              "operator_input_source.source_id",
+              "operator_input_source.source_url",
+              "operator_input_source.source_license"
+            ],
+            "slot_id": "pocketmd_lite_case_001_rank_01",
+            "status": "row_slot_missing",
+            "top_k_rank": 1
+          },
+          {
+            "case_id": "pocketmd_lite_case_001",
+            "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "missing": true,
+            "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_02",
+            "provided": false,
+            "required_metric_fields": [
+              "local_min_survived",
+              "contact_persistence_rate",
+              "h_bond_persistence_rate",
+              "clash_count_before",
+              "clash_count_after",
+              "uncertainty_low",
+              "uncertainty_high",
+              "uncertainty_unit"
+            ],
+            "required_receipt_fields": [
+              "upstream_top_k_provenance_ref",
+              "upstream_top_k_source_checksum",
+              "provenance_ref",
+              "source_checksum",
+              "operator_input_source.source_artifact",
+              "operator_input_source.source_artifact_sha256",
+              "operator_input_source.source_id",
+              "operator_input_source.source_url",
+              "operator_input_source.source_license"
+            ],
+            "slot_id": "pocketmd_lite_case_001_rank_02",
+            "status": "row_slot_missing",
+            "top_k_rank": 2
+          },
+          {
+            "case_id": "pocketmd_lite_case_002",
+            "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "missing": true,
+            "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_002_rank_01",
+            "provided": false,
+            "required_metric_fields": [
+              "local_min_survived",
+              "contact_persistence_rate",
+              "h_bond_persistence_rate",
+              "clash_count_before",
+              "clash_count_after",
+              "uncertainty_low",
+              "uncertainty_high",
+              "uncertainty_unit"
+            ],
+            "required_receipt_fields": [
+              "upstream_top_k_provenance_ref",
+              "upstream_top_k_source_checksum",
+              "provenance_ref",
+              "source_checksum",
+              "operator_input_source.source_artifact",
+              "operator_input_source.source_artifact_sha256",
+              "operator_input_source.source_id",
+              "operator_input_source.source_url",
+              "operator_input_source.source_license"
+            ],
+            "slot_id": "pocketmd_lite_case_002_rank_01",
+            "status": "row_slot_missing",
+            "top_k_rank": 1
+          },
+          {
+            "case_id": "pocketmd_lite_case_002",
+            "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "missing": true,
+            "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_002_rank_02",
+            "provided": false,
+            "required_metric_fields": [
+              "local_min_survived",
+              "contact_persistence_rate",
+              "h_bond_persistence_rate",
+              "clash_count_before",
+              "clash_count_after",
+              "uncertainty_low",
+              "uncertainty_high",
+              "uncertainty_unit"
+            ],
+            "required_receipt_fields": [
+              "upstream_top_k_provenance_ref",
+              "upstream_top_k_source_checksum",
+              "provenance_ref",
+              "source_checksum",
+              "operator_input_source.source_artifact",
+              "operator_input_source.source_artifact_sha256",
+              "operator_input_source.source_id",
+              "operator_input_source.source_url",
+              "operator_input_source.source_license"
+            ],
+            "slot_id": "pocketmd_lite_case_002_rank_02",
+            "status": "row_slot_missing",
+            "top_k_rank": 2
+          },
+          {
+            "case_id": "pocketmd_lite_case_003",
+            "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "missing": true,
+            "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_003_rank_01",
+            "provided": false,
+            "required_metric_fields": [
+              "local_min_survived",
+              "contact_persistence_rate",
+              "h_bond_persistence_rate",
+              "clash_count_before",
+              "clash_count_after",
+              "uncertainty_low",
+              "uncertainty_high",
+              "uncertainty_unit"
+            ],
+            "required_receipt_fields": [
+              "upstream_top_k_provenance_ref",
+              "upstream_top_k_source_checksum",
+              "provenance_ref",
+              "source_checksum",
+              "operator_input_source.source_artifact",
+              "operator_input_source.source_artifact_sha256",
+              "operator_input_source.source_id",
+              "operator_input_source.source_url",
+              "operator_input_source.source_license"
+            ],
+            "slot_id": "pocketmd_lite_case_003_rank_01",
+            "status": "row_slot_missing",
+            "top_k_rank": 1
+          },
+          {
+            "case_id": "pocketmd_lite_case_003",
+            "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "missing": true,
+            "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_003_rank_02",
+            "provided": false,
+            "required_metric_fields": [
+              "local_min_survived",
+              "contact_persistence_rate",
+              "h_bond_persistence_rate",
+              "clash_count_before",
+              "clash_count_after",
+              "uncertainty_low",
+              "uncertainty_high",
+              "uncertainty_unit"
+            ],
+            "required_receipt_fields": [
+              "upstream_top_k_provenance_ref",
+              "upstream_top_k_source_checksum",
+              "provenance_ref",
+              "source_checksum",
+              "operator_input_source.source_artifact",
+              "operator_input_source.source_artifact_sha256",
+              "operator_input_source.source_id",
+              "operator_input_source.source_url",
+              "operator_input_source.source_license"
+            ],
+            "slot_id": "pocketmd_lite_case_003_rank_02",
+            "status": "row_slot_missing",
+            "top_k_rank": 2
+          }
+        ],
+        "claim_boundary": "This execution plan enumerates the bounded PocketMD Lite top-k refinement row slots required by the current contract. It does not run refinement, does not synthesize metric rows, and does not unlock all-atom MD/FEP claims before real operator rows pass the survival materializer.",
+        "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+        "first_missing_candidate_slot": {
+          "case_id": "pocketmd_lite_case_001",
+          "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01",
+          "slot_id": "pocketmd_lite_case_001_rank_01",
+          "top_k_rank": 1
+        },
+        "missing_candidate_slot_count": 6,
+        "operator_rows_ready": false,
+        "provided_candidate_slot_count": 0,
+        "required_candidate_slot_count": 6,
+        "status": "operator_refinement_rows_required",
+        "top_k_slot_status_summary": {
+          "case_top_k_rank_prefixes": {},
+          "covered_required_slot_count": 0,
+          "first_missing_candidate_slot": {
+            "case_id": "pocketmd_lite_case_001",
+            "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01",
+            "slot_id": "pocketmd_lite_case_001_rank_01",
+            "top_k_rank": 1
+          },
+          "missing_candidate_slot_count": 6,
+          "missing_candidate_slots": [
+            {
+              "case_id": "pocketmd_lite_case_001",
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01",
+              "slot_id": "pocketmd_lite_case_001_rank_01",
+              "top_k_rank": 1
+            },
+            {
+              "case_id": "pocketmd_lite_case_001",
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_02",
+              "slot_id": "pocketmd_lite_case_001_rank_02",
+              "top_k_rank": 2
+            },
+            {
+              "case_id": "pocketmd_lite_case_002",
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_002_rank_01",
+              "slot_id": "pocketmd_lite_case_002_rank_01",
+              "top_k_rank": 1
+            },
+            {
+              "case_id": "pocketmd_lite_case_002",
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_002_rank_02",
+              "slot_id": "pocketmd_lite_case_002_rank_02",
+              "top_k_rank": 2
+            },
+            {
+              "case_id": "pocketmd_lite_case_003",
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_003_rank_01",
+              "slot_id": "pocketmd_lite_case_003_rank_01",
+              "top_k_rank": 1
+            },
+            {
+              "case_id": "pocketmd_lite_case_003",
+              "operator_action": "attach_pocketmd_topk_row_for_pocketmd_lite_case_003_rank_02",
+              "slot_id": "pocketmd_lite_case_003_rank_02",
+              "top_k_rank": 2
+            }
+          ],
+          "operator_rows_ready": false,
+          "provided_candidate_slot_count": 0,
+          "provided_candidate_slots": [],
+          "raw_row_candidate_status": "row_artifact_missing",
+          "required_candidate_slot_count": 6,
+          "selected_path": "",
+          "validated_row_count": 0
+        }
+      },
       "row_template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
       "row_template_present": true,
       "source_acquisition_operator_action": "resolve_pocketmd_lite_source_acquisition_blockers",
@@ -2250,7 +3039,7 @@
   "schema_version": "science-actual-closure-operator-handoff.v1",
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "686d783c945765b4f951662f0571d2a9f386b0dd",
+  "source_commit_sha": "eb41c50f3af51a801870b06ecd115546e5f8608a",
   "status": "operator_rows_required",
   "summary": {
     "blocked_component_operator_action_count": 2,
