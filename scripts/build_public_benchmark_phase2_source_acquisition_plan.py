@@ -76,6 +76,108 @@ RECEIPT_PROMOTION_POLICY = {
     "summary_only_metrics_promote_to_phase2": False,
     "redistribution_of_restricted_benchmark_payloads": False,
 }
+OFFICIAL_SOURCE_CATALOG = [
+    {
+        "source_id": "pdbbind_plus_casf",
+        "source_family": "CASF/PDBBind",
+        "source_name": "PDBbind+ CASF data packages",
+        "primary_url": "https://www.pdbbind-plus.org.cn/casf",
+        "fallback_url": "https://www.pdbbind-plus.org.cn/",
+        "access_mode": "operator_download_and_license_or_accession_receipt_required",
+        "feeds_row_inputs": ["subset_rows", "pose_rows", "vina_gnina_rows"],
+        "feeds_components": [
+            "casf_pdbbind_pose_success_harness",
+            "symmetry_aware_ligand_rmsd",
+            "posebusters_style_pose_validity",
+            "vina_gnina_comparison_adapter",
+        ],
+        "required_operator_receipts": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref",
+            "per_case_local_file_checksums",
+        ],
+    },
+    {
+        "source_id": "dud_e",
+        "source_family": "DUD-E",
+        "source_name": "DUD-E targets and active/decoy sets",
+        "primary_url": "https://dude.docking.org/targets/",
+        "fallback_url": "https://dude.docking.org/",
+        "access_mode": "public_download_with_operator_checksum_receipt",
+        "feeds_row_inputs": ["enrichment_rows"],
+        "feeds_components": ["dud_e_or_lit_pcba_enrichment"],
+        "required_operator_receipts": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref",
+            "scoring_run_provenance_ref",
+        ],
+    },
+    {
+        "source_id": "lit_pcba",
+        "source_family": "LIT-PCBA",
+        "source_name": "LIT-PCBA virtual screening benchmark",
+        "primary_url": "https://drugdesign.unistra.fr/LIT-PCBA/",
+        "fallback_url": "https://drugdesign.unistra.fr/LIT-PCBA/index.htm",
+        "access_mode": "public_download_with_operator_checksum_receipt",
+        "feeds_row_inputs": ["enrichment_rows"],
+        "feeds_components": ["dud_e_or_lit_pcba_enrichment"],
+        "required_operator_receipts": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref",
+            "scoring_run_provenance_ref",
+        ],
+    },
+    {
+        "source_id": "autodock_vina",
+        "source_family": "Vina",
+        "source_name": "AutoDock Vina",
+        "primary_url": "https://vina.scripps.edu/",
+        "fallback_url": "https://github.com/ccsb-scripps/AutoDock-Vina",
+        "access_mode": "engine_install_and_run_receipt_required",
+        "feeds_row_inputs": ["vina_gnina_rows"],
+        "feeds_components": ["vina_gnina_comparison_adapter"],
+        "required_operator_receipts": [
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "predicted_ligand_checksum",
+        ],
+    },
+    {
+        "source_id": "gnina",
+        "source_family": "GNINA",
+        "source_name": "GNINA docking engine",
+        "primary_url": "https://github.com/gnina/gnina",
+        "fallback_url": "https://gnina.github.io/gnina/rsc_workshop2021/",
+        "access_mode": "engine_install_and_run_receipt_required",
+        "feeds_row_inputs": ["vina_gnina_rows"],
+        "feeds_components": ["vina_gnina_comparison_adapter"],
+        "required_operator_receipts": [
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "predicted_ligand_checksum",
+        ],
+    },
+    {
+        "source_id": "posebusters",
+        "source_family": "PoseBusters",
+        "source_name": "PoseBusters plausibility checks",
+        "primary_url": "https://github.com/maabuu/posebusters",
+        "fallback_url": "https://zenodo.org/records/8278563",
+        "access_mode": "reference_checklist_or_tool_run_receipt_required",
+        "feeds_row_inputs": ["pose_rows"],
+        "feeds_components": ["posebusters_style_pose_validity"],
+        "required_operator_receipts": [
+            "pose_preparation_provenance_ref",
+            "source_checksum",
+            "provenance_ref",
+        ],
+    },
+]
 REQUIRED_ROW_INPUTS = [
     "subset_rows",
     "pose_rows",
@@ -479,10 +581,13 @@ def _official_source_receipt_plan(
     row_input_contracts: list[dict[str, Any]],
 ) -> dict[str, Any]:
     receipt_rows = _official_source_receipt_rows(row_input_contracts)
+    source_catalog = [dict(row) for row in OFFICIAL_SOURCE_CATALOG]
     return {
         "plan_id": "public_benchmark_phase2_official_source_receipt_plan",
         "status": "operator_receipts_required",
         "receipt_role_count": len(receipt_rows),
+        "source_catalog_count": len(source_catalog),
+        "official_source_catalog": source_catalog,
         "row_input_count": len(REQUIRED_ROW_INPUTS),
         "row_input_receipt_roles": receipt_rows,
         "receipt_promotion_policy": dict(RECEIPT_PROMOTION_POLICY),
@@ -503,6 +608,7 @@ def _official_source_receipt_plan(
             "dud_e_or_lit_pcba_enrichment_receipt",
             "vina_gnina_engine_comparison_receipt",
         ],
+        "source_review_order": [row["source_id"] for row in source_catalog],
         "claim_boundary": (
             "Receipt rows identify the authoritative source and operator-produced "
             "evidence needed for Phase 2. They are not source payloads, licenses, "
@@ -615,6 +721,9 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "official_source_receipt_role_count": official_source_receipt_plan[
                 "receipt_role_count"
             ],
+            "official_source_catalog_count": official_source_receipt_plan[
+                "source_catalog_count"
+            ],
             "phase2_row_audit_status": phase2_row_audit_summary["status"],
             "phase2_row_audit_blocker_count": phase2_row_audit_summary[
                 "blocker_count"
@@ -655,6 +764,7 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `blocker_count`: `{payload['blocker_count']}`",
         f"- `official_source_receipt_plan_status`: `{payload['official_source_receipt_plan']['status']}`",
         f"- `official_source_receipt_role_count`: `{payload['official_source_receipt_plan']['receipt_role_count']}`",
+        f"- `official_source_catalog_count`: `{payload['official_source_receipt_plan']['source_catalog_count']}`",
         f"- `phase2_row_audit`: `{payload['phase2_row_audit']['artifact']}`",
         f"- `phase2_row_audit_status`: `{payload['phase2_row_audit']['status']}`",
         f"- `phase2_row_audit_missing_row_inputs`: `{', '.join(payload['phase2_row_audit']['missing_row_inputs'])}`",
@@ -681,6 +791,16 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         lines.append(
             f"| `{row['row_input_id']}` | `{row['receipt_role_id']}` | "
             f"{receipt_fields} |"
+        )
+    lines.extend(["", "## Official Source Catalog", ""])
+    lines.extend(["| Source | Family | Feeds Row Inputs | Primary URL |", "|---|---|---|---|"])
+    for row in payload["official_source_receipt_plan"][
+        "official_source_catalog"
+    ]:
+        feeds = ", ".join(f"`{row_input}`" for row_input in row["feeds_row_inputs"])
+        lines.append(
+            f"| `{row['source_id']}` | `{row['source_family']}` | "
+            f"{feeds} | {row['primary_url']} |"
         )
     lines.extend(["", "## Commands", ""])
     for key, command in payload["commands"].items():

@@ -97,17 +97,42 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     receipt_roles = {
         row["row_input_id"]: row for row in receipt_plan["row_input_receipt_roles"]
     }
+    source_catalog = {
+        row["source_id"]: row for row in receipt_plan["official_source_catalog"]
+    }
     assert receipt_plan["plan_id"] == (
         "public_benchmark_phase2_official_source_receipt_plan"
     )
     assert receipt_plan["status"] == "operator_receipts_required"
     assert receipt_plan["receipt_role_count"] == 4
+    assert receipt_plan["source_catalog_count"] == 6
     assert receipt_plan["row_input_count"] == 4
     assert receipt_plan["operator_review_order"] == [
         "casf_pdbbind_subset_source_receipt",
         "casf_pdbbind_pose_coordinate_receipt",
         "dud_e_or_lit_pcba_enrichment_receipt",
         "vina_gnina_engine_comparison_receipt",
+    ]
+    assert receipt_plan["source_review_order"] == [
+        "pdbbind_plus_casf",
+        "dud_e",
+        "lit_pcba",
+        "autodock_vina",
+        "gnina",
+        "posebusters",
+    ]
+    assert source_catalog["pdbbind_plus_casf"]["feeds_components"] == [
+        "casf_pdbbind_pose_success_harness",
+        "symmetry_aware_ligand_rmsd",
+        "posebusters_style_pose_validity",
+        "vina_gnina_comparison_adapter",
+    ]
+    assert source_catalog["lit_pcba"]["feeds_row_inputs"] == ["enrichment_rows"]
+    assert source_catalog["autodock_vina"]["required_operator_receipts"] == [
+        "engine_version",
+        "engine_config_checksum",
+        "engine_run_provenance_ref",
+        "predicted_ligand_checksum",
     ]
     assert receipt_plan["receipt_promotion_policy"][
         "synthetic_fixture_rows_promote_to_phase2"

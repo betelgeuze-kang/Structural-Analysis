@@ -264,6 +264,13 @@ def _source_acquisition_plan_summary(
         )
         if isinstance(row, dict)
     ]
+    official_source_catalog = [
+        row
+        for row in _as_list(
+            official_source_receipt_plan.get("official_source_catalog")
+        )
+        if isinstance(row, dict)
+    ]
     return {
         "artifact": str(DEFAULT_SOURCE_ACQUISITION_PLAN),
         "markdown_artifact": str(DEFAULT_SOURCE_ACQUISITION_PLAN_MD),
@@ -305,6 +312,9 @@ def _source_acquisition_plan_summary(
             "receipt_role_count": int(
                 official_source_receipt_plan.get("receipt_role_count") or 0
             ),
+            "source_catalog_count": int(
+                official_source_receipt_plan.get("source_catalog_count") or 0
+            ),
             "row_input_count": int(
                 official_source_receipt_plan.get("row_input_count") or 0
             ),
@@ -314,6 +324,13 @@ def _source_acquisition_plan_summary(
                     official_source_receipt_plan.get("operator_review_order")
                 )
             ],
+            "source_review_order": [
+                str(row)
+                for row in _as_list(
+                    official_source_receipt_plan.get("source_review_order")
+                )
+            ],
+            "official_source_catalog": official_source_catalog,
             "row_input_receipt_roles": row_input_receipt_roles,
             "receipt_promotion_policy": _as_dict(
                 official_source_receipt_plan.get("receipt_promotion_policy")

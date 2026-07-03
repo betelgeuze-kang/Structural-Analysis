@@ -1306,7 +1306,7 @@
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
   "first_required_operator_slot": "casf_pdbbind_subset_intake",
-  "generated_at": "2026-07-03T17:42:09.147366+00:00",
+  "generated_at": "2026-07-03T17:52:55.639236+00:00",
   "harness_bundle_index": {
     "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
     "artifact_index_command": "python3 scripts/materialize_public_benchmark_harness_bundle.py --out implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
@@ -1316,8 +1316,8 @@
     "status": "ready_for_local_artifact_index"
   },
   "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:6a69efaebc9106cbfeda737ff214a2b84fa106eca6e05254b773b917c5c817b3",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:f315c44b306d29474605f5523a1e0ea9a0f2e001abf8e479adb41480efcd2af3",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:a2f8dde118e607325074a1ca5aea075228426295eedc9cdb10553184a324f2b2",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:e6a480fa8d1aa1436a403fa27b9d5a034e98772c3419910f443c595282aa7e2d",
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:57e7df559ab42c7f3591f00a5ea6df353e0b81cfbbf12c1b5996df4932da536c",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
@@ -4160,6 +4160,132 @@
       "minimum_subset_case_count": 12,
       "minimum_vina_gnina_comparison_case_count": 1,
       "official_source_receipt_plan": {
+        "official_source_catalog": [
+          {
+            "access_mode": "operator_download_and_license_or_accession_receipt_required",
+            "fallback_url": "https://www.pdbbind-plus.org.cn/",
+            "feeds_components": [
+              "casf_pdbbind_pose_success_harness",
+              "symmetry_aware_ligand_rmsd",
+              "posebusters_style_pose_validity",
+              "vina_gnina_comparison_adapter"
+            ],
+            "feeds_row_inputs": [
+              "subset_rows",
+              "pose_rows",
+              "vina_gnina_rows"
+            ],
+            "primary_url": "https://www.pdbbind-plus.org.cn/casf",
+            "required_operator_receipts": [
+              "source_license_or_accession",
+              "source_checksum",
+              "provenance_ref",
+              "per_case_local_file_checksums"
+            ],
+            "source_family": "CASF/PDBBind",
+            "source_id": "pdbbind_plus_casf",
+            "source_name": "PDBbind+ CASF data packages"
+          },
+          {
+            "access_mode": "public_download_with_operator_checksum_receipt",
+            "fallback_url": "https://dude.docking.org/",
+            "feeds_components": [
+              "dud_e_or_lit_pcba_enrichment"
+            ],
+            "feeds_row_inputs": [
+              "enrichment_rows"
+            ],
+            "primary_url": "https://dude.docking.org/targets/",
+            "required_operator_receipts": [
+              "source_license_or_accession",
+              "source_checksum",
+              "provenance_ref",
+              "scoring_run_provenance_ref"
+            ],
+            "source_family": "DUD-E",
+            "source_id": "dud_e",
+            "source_name": "DUD-E targets and active/decoy sets"
+          },
+          {
+            "access_mode": "public_download_with_operator_checksum_receipt",
+            "fallback_url": "https://drugdesign.unistra.fr/LIT-PCBA/index.htm",
+            "feeds_components": [
+              "dud_e_or_lit_pcba_enrichment"
+            ],
+            "feeds_row_inputs": [
+              "enrichment_rows"
+            ],
+            "primary_url": "https://drugdesign.unistra.fr/LIT-PCBA/",
+            "required_operator_receipts": [
+              "source_license_or_accession",
+              "source_checksum",
+              "provenance_ref",
+              "scoring_run_provenance_ref"
+            ],
+            "source_family": "LIT-PCBA",
+            "source_id": "lit_pcba",
+            "source_name": "LIT-PCBA virtual screening benchmark"
+          },
+          {
+            "access_mode": "engine_install_and_run_receipt_required",
+            "fallback_url": "https://github.com/ccsb-scripps/AutoDock-Vina",
+            "feeds_components": [
+              "vina_gnina_comparison_adapter"
+            ],
+            "feeds_row_inputs": [
+              "vina_gnina_rows"
+            ],
+            "primary_url": "https://vina.scripps.edu/",
+            "required_operator_receipts": [
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "predicted_ligand_checksum"
+            ],
+            "source_family": "Vina",
+            "source_id": "autodock_vina",
+            "source_name": "AutoDock Vina"
+          },
+          {
+            "access_mode": "engine_install_and_run_receipt_required",
+            "fallback_url": "https://gnina.github.io/gnina/rsc_workshop2021/",
+            "feeds_components": [
+              "vina_gnina_comparison_adapter"
+            ],
+            "feeds_row_inputs": [
+              "vina_gnina_rows"
+            ],
+            "primary_url": "https://github.com/gnina/gnina",
+            "required_operator_receipts": [
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "predicted_ligand_checksum"
+            ],
+            "source_family": "GNINA",
+            "source_id": "gnina",
+            "source_name": "GNINA docking engine"
+          },
+          {
+            "access_mode": "reference_checklist_or_tool_run_receipt_required",
+            "fallback_url": "https://zenodo.org/records/8278563",
+            "feeds_components": [
+              "posebusters_style_pose_validity"
+            ],
+            "feeds_row_inputs": [
+              "pose_rows"
+            ],
+            "primary_url": "https://github.com/maabuu/posebusters",
+            "required_operator_receipts": [
+              "pose_preparation_provenance_ref",
+              "source_checksum",
+              "provenance_ref"
+            ],
+            "source_family": "PoseBusters",
+            "source_id": "posebusters",
+            "source_name": "PoseBusters plausibility checks"
+          }
+        ],
         "operator_review_order": [
           "casf_pdbbind_subset_source_receipt",
           "casf_pdbbind_pose_coordinate_receipt",
@@ -4334,6 +4460,15 @@
               "vina_gnina_comparison_adapter"
             ]
           }
+        ],
+        "source_catalog_count": 6,
+        "source_review_order": [
+          "pdbbind_plus_casf",
+          "dud_e",
+          "lit_pcba",
+          "autodock_vina",
+          "gnina",
+          "posebusters"
         ],
         "status": "operator_receipts_required"
       },
@@ -4762,6 +4897,132 @@
     "minimum_subset_case_count": 12,
     "minimum_vina_gnina_comparison_case_count": 1,
     "official_source_receipt_plan": {
+      "official_source_catalog": [
+        {
+          "access_mode": "operator_download_and_license_or_accession_receipt_required",
+          "fallback_url": "https://www.pdbbind-plus.org.cn/",
+          "feeds_components": [
+            "casf_pdbbind_pose_success_harness",
+            "symmetry_aware_ligand_rmsd",
+            "posebusters_style_pose_validity",
+            "vina_gnina_comparison_adapter"
+          ],
+          "feeds_row_inputs": [
+            "subset_rows",
+            "pose_rows",
+            "vina_gnina_rows"
+          ],
+          "primary_url": "https://www.pdbbind-plus.org.cn/casf",
+          "required_operator_receipts": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref",
+            "per_case_local_file_checksums"
+          ],
+          "source_family": "CASF/PDBBind",
+          "source_id": "pdbbind_plus_casf",
+          "source_name": "PDBbind+ CASF data packages"
+        },
+        {
+          "access_mode": "public_download_with_operator_checksum_receipt",
+          "fallback_url": "https://dude.docking.org/",
+          "feeds_components": [
+            "dud_e_or_lit_pcba_enrichment"
+          ],
+          "feeds_row_inputs": [
+            "enrichment_rows"
+          ],
+          "primary_url": "https://dude.docking.org/targets/",
+          "required_operator_receipts": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref",
+            "scoring_run_provenance_ref"
+          ],
+          "source_family": "DUD-E",
+          "source_id": "dud_e",
+          "source_name": "DUD-E targets and active/decoy sets"
+        },
+        {
+          "access_mode": "public_download_with_operator_checksum_receipt",
+          "fallback_url": "https://drugdesign.unistra.fr/LIT-PCBA/index.htm",
+          "feeds_components": [
+            "dud_e_or_lit_pcba_enrichment"
+          ],
+          "feeds_row_inputs": [
+            "enrichment_rows"
+          ],
+          "primary_url": "https://drugdesign.unistra.fr/LIT-PCBA/",
+          "required_operator_receipts": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref",
+            "scoring_run_provenance_ref"
+          ],
+          "source_family": "LIT-PCBA",
+          "source_id": "lit_pcba",
+          "source_name": "LIT-PCBA virtual screening benchmark"
+        },
+        {
+          "access_mode": "engine_install_and_run_receipt_required",
+          "fallback_url": "https://github.com/ccsb-scripps/AutoDock-Vina",
+          "feeds_components": [
+            "vina_gnina_comparison_adapter"
+          ],
+          "feeds_row_inputs": [
+            "vina_gnina_rows"
+          ],
+          "primary_url": "https://vina.scripps.edu/",
+          "required_operator_receipts": [
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "predicted_ligand_checksum"
+          ],
+          "source_family": "Vina",
+          "source_id": "autodock_vina",
+          "source_name": "AutoDock Vina"
+        },
+        {
+          "access_mode": "engine_install_and_run_receipt_required",
+          "fallback_url": "https://gnina.github.io/gnina/rsc_workshop2021/",
+          "feeds_components": [
+            "vina_gnina_comparison_adapter"
+          ],
+          "feeds_row_inputs": [
+            "vina_gnina_rows"
+          ],
+          "primary_url": "https://github.com/gnina/gnina",
+          "required_operator_receipts": [
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "predicted_ligand_checksum"
+          ],
+          "source_family": "GNINA",
+          "source_id": "gnina",
+          "source_name": "GNINA docking engine"
+        },
+        {
+          "access_mode": "reference_checklist_or_tool_run_receipt_required",
+          "fallback_url": "https://zenodo.org/records/8278563",
+          "feeds_components": [
+            "posebusters_style_pose_validity"
+          ],
+          "feeds_row_inputs": [
+            "pose_rows"
+          ],
+          "primary_url": "https://github.com/maabuu/posebusters",
+          "required_operator_receipts": [
+            "pose_preparation_provenance_ref",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "source_family": "PoseBusters",
+          "source_id": "posebusters",
+          "source_name": "PoseBusters plausibility checks"
+        }
+      ],
       "operator_review_order": [
         "casf_pdbbind_subset_source_receipt",
         "casf_pdbbind_pose_coordinate_receipt",
@@ -4937,6 +5198,15 @@
           ]
         }
       ],
+      "source_catalog_count": 6,
+      "source_review_order": [
+        "pdbbind_plus_casf",
+        "dud_e",
+        "lit_pcba",
+        "autodock_vina",
+        "gnina",
+        "posebusters"
+      ],
       "status": "operator_receipts_required"
     },
     "phase2_ready": false,
@@ -4992,7 +5262,7 @@
     ],
     "status": "operator_acquisition_required"
   },
-  "source_commit_sha": "c2016e19b72b5e5817f06960af7bcd6f83deeb72",
+  "source_commit_sha": "04efeaf94ba0e58d1cce8608bb3c5f37e6ace4db",
   "source_families": [
     {
       "family_id": "casf_pdbbind",

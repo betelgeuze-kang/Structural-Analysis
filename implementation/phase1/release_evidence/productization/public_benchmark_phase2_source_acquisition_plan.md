@@ -7,6 +7,7 @@
 - `blocker_count`: `5`
 - `official_source_receipt_plan_status`: `operator_receipts_required`
 - `official_source_receipt_role_count`: `4`
+- `official_source_catalog_count`: `6`
 - `phase2_row_audit`: `implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json`
 - `phase2_row_audit_status`: `operator_evidence_required`
 - `phase2_row_audit_missing_row_inputs`: `subset_rows, pose_rows, enrichment_rows, vina_gnina_rows`
@@ -26,6 +27,17 @@
 | `pose_rows` | `casf_pdbbind_pose_coordinate_receipt` | `source_license_or_accession`, `source_checksum`, `provenance_ref`, `pose_preparation_provenance_ref` |
 | `enrichment_rows` | `dud_e_or_lit_pcba_enrichment_receipt` | `source_license_or_accession`, `source_checksum`, `provenance_ref` |
 | `vina_gnina_rows` | `vina_gnina_engine_comparison_receipt` | `source_license_or_accession`, `source_checksum`, `provenance_ref`, `predicted_ligand_checksum`, `engine_config_checksum`, `engine_run_provenance_ref` |
+
+## Official Source Catalog
+
+| Source | Family | Feeds Row Inputs | Primary URL |
+|---|---|---|---|
+| `pdbbind_plus_casf` | `CASF/PDBBind` | `subset_rows`, `pose_rows`, `vina_gnina_rows` | https://www.pdbbind-plus.org.cn/casf |
+| `dud_e` | `DUD-E` | `enrichment_rows` | https://dude.docking.org/targets/ |
+| `lit_pcba` | `LIT-PCBA` | `enrichment_rows` | https://drugdesign.unistra.fr/LIT-PCBA/ |
+| `autodock_vina` | `Vina` | `vina_gnina_rows` | https://vina.scripps.edu/ |
+| `gnina` | `GNINA` | `vina_gnina_rows` | https://github.com/gnina/gnina |
+| `posebusters` | `PoseBusters` | `pose_rows` | https://github.com/maabuu/posebusters |
 
 ## Commands
 

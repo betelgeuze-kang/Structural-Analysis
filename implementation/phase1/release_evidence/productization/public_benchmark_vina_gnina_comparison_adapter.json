@@ -25,10 +25,10 @@
     }
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T17:42:09.137258+00:00",
+  "generated_at": "2026-07-03T17:52:55.629224+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:6a69efaebc9106cbfeda737ff214a2b84fa106eca6e05254b773b917c5c817b3",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:f315c44b306d29474605f5523a1e0ea9a0f2e001abf8e479adb41480efcd2af3",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:a2f8dde118e607325074a1ca5aea075228426295eedc9cdb10553184a324f2b2",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:e6a480fa8d1aa1436a403fa27b9d5a034e98772c3419910f443c595282aa7e2d",
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:57e7df559ab42c7f3591f00a5ea6df353e0b81cfbbf12c1b5996df4932da536c",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
@@ -136,7 +136,7 @@
   "reuse_policy": "public_benchmark_vina_gnina_comparison_adapter_seed_from_repo_contract",
   "reused_evidence": false,
   "schema_version": "public-benchmark-vina-gnina-comparison-adapter.v1",
-  "source_commit_sha": "c2016e19b72b5e5817f06960af7bcd6f83deeb72",
+  "source_commit_sha": "04efeaf94ba0e58d1cce8608bb3c5f37e6ace4db",
   "status": "operator_evidence_required",
   "summary": {
     "benchmark_split_counts": {},

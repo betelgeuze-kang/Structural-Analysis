@@ -35,6 +35,9 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     receipt_roles = {
         row["row_input_id"]: row for row in receipt_plan["row_input_receipt_roles"]
     }
+    source_catalog = {
+        row["source_id"]: row for row in receipt_plan["official_source_catalog"]
+    }
 
     assert payload["schema_version"] == (
         "public-benchmark-phase2-source-acquisition-plan.v1"
@@ -71,12 +74,44 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     )
     assert receipt_plan["status"] == "operator_receipts_required"
     assert receipt_plan["receipt_role_count"] == 4
+    assert receipt_plan["source_catalog_count"] == 6
     assert receipt_plan["row_input_count"] == 4
     assert receipt_plan["operator_review_order"] == [
         "casf_pdbbind_subset_source_receipt",
         "casf_pdbbind_pose_coordinate_receipt",
         "dud_e_or_lit_pcba_enrichment_receipt",
         "vina_gnina_engine_comparison_receipt",
+    ]
+    assert receipt_plan["source_review_order"] == [
+        "pdbbind_plus_casf",
+        "dud_e",
+        "lit_pcba",
+        "autodock_vina",
+        "gnina",
+        "posebusters",
+    ]
+    assert set(source_catalog) == set(receipt_plan["source_review_order"])
+    assert source_catalog["pdbbind_plus_casf"]["primary_url"] == (
+        "https://www.pdbbind-plus.org.cn/casf"
+    )
+    assert source_catalog["pdbbind_plus_casf"]["feeds_row_inputs"] == [
+        "subset_rows",
+        "pose_rows",
+        "vina_gnina_rows",
+    ]
+    assert source_catalog["dud_e"]["primary_url"] == (
+        "https://dude.docking.org/targets/"
+    )
+    assert source_catalog["dud_e"]["feeds_row_inputs"] == ["enrichment_rows"]
+    assert source_catalog["lit_pcba"]["primary_url"] == (
+        "https://drugdesign.unistra.fr/LIT-PCBA/"
+    )
+    assert source_catalog["autodock_vina"]["feeds_row_inputs"] == [
+        "vina_gnina_rows"
+    ]
+    assert source_catalog["gnina"]["primary_url"] == "https://github.com/gnina/gnina"
+    assert source_catalog["posebusters"]["feeds_components"] == [
+        "posebusters_style_pose_validity"
     ]
     assert set(receipt_roles) == set(payload["required_row_inputs"])
     assert receipt_roles["subset_rows"]["receipt_role_id"] == (
@@ -199,6 +234,7 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "minimum_vina_gnina_comparison_case_count": 1,
         "official_source_receipt_plan_status": "operator_receipts_required",
         "official_source_receipt_role_count": 4,
+        "official_source_catalog_count": 6,
         "phase2_row_audit_blocker_count": 6,
         "phase2_row_audit_failed_criteria": [
             "casf_pdbbind_pose_success_harness_ready",
@@ -242,6 +278,7 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert payload["actual_closure_ready"] is False
     assert payload["required_row_input_count"] == 4
     assert payload["official_source_receipt_plan"]["receipt_role_count"] == 4
+    assert payload["official_source_receipt_plan"]["source_catalog_count"] == 6
     assert "# Public Benchmark Phase 2 Source Acquisition Plan" in markdown
     assert "public_benchmark_phase2_row_audit.json" in markdown
     assert "`subset_rows` | `CASF/PDBBind`" in markdown
@@ -249,4 +286,7 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "## Source Receipt Roles" in markdown
     assert "casf_pdbbind_subset_source_receipt" in markdown
     assert "vina_gnina_engine_comparison_receipt" in markdown
+    assert "## Official Source Catalog" in markdown
+    assert "pdbbind_plus_casf" in markdown
+    assert "https://dude.docking.org/targets/" in markdown
     assert "materialize_public_benchmark_operator_bundle_from_rows.py" in markdown

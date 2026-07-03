@@ -844,8 +844,14 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "receipt_role_count"
     ] == 4
     assert source["source_acquisition_plan"]["official_source_receipt_plan"][
+        "source_catalog_count"
+    ] == 6
+    assert source["source_acquisition_plan"]["official_source_receipt_plan"][
         "operator_review_order"
     ][0] == "casf_pdbbind_subset_source_receipt"
+    assert source["source_acquisition_plan"]["official_source_receipt_plan"][
+        "source_review_order"
+    ][0] == "pdbbind_plus_casf"
     assert source["linked_artifacts"]["source_acquisition_plan"] == (
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_phase2_source_acquisition_plan.json"
