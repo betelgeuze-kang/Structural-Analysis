@@ -80,6 +80,17 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "enrichment_rows",
         "vina_gnina_rows",
     ]
+    assert packet["source_acquisition_plan"]["phase2_row_audit"][
+        "status"
+    ] == "operator_evidence_required"
+    assert packet["source_acquisition_plan"]["phase2_row_audit"][
+        "missing_row_inputs"
+    ] == [
+        "subset_rows",
+        "pose_rows",
+        "enrichment_rows",
+        "vina_gnina_rows",
+    ]
     assert packet["source_of_truth_blockers"] == [
         "casf_pdbbind_source_material_not_attached",
         "casf_pdbbind_case_checksums_missing",
@@ -324,16 +335,21 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         packet["materialization_sequence"]
     )
     assert packet["first_execution_preflight_blocker"]["step_id"] == (
-        "materialize_subset_manifest"
+        "materialize_public_benchmark_phase2_row_audit"
     )
-    assert packet["first_execution_preflight_blocker"]["operator_slot_id"] == (
-        "casf_pdbbind_subset_intake"
-    )
+    assert packet["first_execution_preflight_blocker"]["operator_slot_id"] == ""
     assert packet["first_execution_preflight_blocker"]["first_blocker"] == (
-        "casf_pdbbind_source_material_not_attached"
+        "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
     )
     execution = {
         row["step_id"]: row for row in packet["execution_preflight_checklist"]
+    }
+    assert execution["materialize_public_benchmark_phase2_row_audit"][
+        "current_artifact"
+    ]["ready_values"] == {
+        "phase2_ready": False,
+        "component_ready_count": 0,
+        "component_count": 5,
     }
     assert execution["materialize_subset_manifest"]["current_ready"] is False
     assert execution["materialize_subset_manifest"]["dependency_ready"] is True
@@ -371,11 +387,15 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         packet["materialization_sequence"]
     )
     assert packet["summary"]["first_execution_preflight_step_id"] == (
-        "materialize_subset_manifest"
+        "materialize_public_benchmark_phase2_row_audit"
     )
     assert packet["summary"]["first_execution_preflight_blocker"] == (
-        "casf_pdbbind_source_material_not_attached"
+        "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
     )
+    assert packet["summary"]["phase2_row_audit_status"] == (
+        "operator_evidence_required"
+    )
+    assert packet["summary"]["phase2_row_audit_missing_row_input_count"] == 4
     gate_plan = {row["slot_id"]: row for row in packet["gate_unblock_plan"]}
     assert gate_plan["casf_pdbbind_subset_intake"]["unblocks_tier_beta_criteria"] == [
         "casf_pdbbind_subset_materialized",
@@ -507,6 +527,7 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
 
     assert [step["step_id"] for step in steps] == [
         "build_public_benchmark_phase2_source_acquisition_plan",
+        "materialize_public_benchmark_phase2_row_audit",
         "materialize_subset_manifest",
         "materialize_pose_validity_input",
         "materialize_posebusters_validity_packet",
@@ -544,6 +565,10 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
     assert packet["linked_artifacts"]["source_acquisition_plan"] == (
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_phase2_source_acquisition_plan.json"
+    )
+    assert packet["linked_artifacts"]["phase2_row_audit"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_phase2_row_audit.json"
     )
     assert packet["next_actions"][:3] == [
         "complete_public_benchmark_phase2_source_acquisition_plan",
@@ -618,6 +643,9 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
             "public_benchmark_phase2_row_audit.json"
         ),
         "source_acquisition_plan": packet["source_acquisition_plan"],
+        "phase2_row_audit": packet["source_acquisition_plan"][
+            "phase2_row_audit"
+        ],
         "row_template_artifacts": {
             "enrichment_rows": (
                 "implementation/phase1/release_evidence/productization/"

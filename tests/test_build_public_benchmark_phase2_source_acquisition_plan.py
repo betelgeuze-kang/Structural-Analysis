@@ -53,6 +53,26 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "vina_gnina_rows",
     ]
     assert set(row_contracts) == set(payload["required_row_inputs"])
+    assert payload["phase2_row_audit"]["artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_phase2_row_audit.json"
+    )
+    assert payload["phase2_row_audit"]["status"] == "operator_evidence_required"
+    assert payload["phase2_row_audit"]["phase2_ready"] is False
+    assert payload["phase2_row_audit"]["missing_row_input_count"] == 4
+    assert payload["phase2_row_audit"]["missing_row_inputs"] == [
+        "subset_rows",
+        "pose_rows",
+        "enrichment_rows",
+        "vina_gnina_rows",
+    ]
+    assert payload["phase2_row_audit"]["phase2_failed_criteria"] == [
+        "casf_pdbbind_pose_success_harness_ready",
+        "symmetry_aware_ligand_rmsd_ready",
+        "posebusters_style_pose_validity_ready",
+        "vina_gnina_comparison_ready",
+        "dud_e_or_lit_pcba_enrichment_ready",
+    ]
 
     subset = row_contracts["subset_rows"]
     assert subset["source_family"] == "CASF/PDBBind"
@@ -117,6 +137,22 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "minimum_enrichment_target_count": 1,
         "minimum_subset_case_count": 12,
         "minimum_vina_gnina_comparison_case_count": 1,
+        "phase2_row_audit_blocker_count": 6,
+        "phase2_row_audit_failed_criteria": [
+            "casf_pdbbind_pose_success_harness_ready",
+            "symmetry_aware_ligand_rmsd_ready",
+            "posebusters_style_pose_validity_ready",
+            "vina_gnina_comparison_ready",
+            "dud_e_or_lit_pcba_enrichment_ready",
+        ],
+        "phase2_row_audit_missing_row_input_count": 4,
+        "phase2_row_audit_missing_row_inputs": [
+            "subset_rows",
+            "pose_rows",
+            "enrichment_rows",
+            "vina_gnina_rows",
+        ],
+        "phase2_row_audit_status": "operator_evidence_required",
         "phase2_ready": False,
         "required_component_count": 5,
         "required_row_input_count": 4,
@@ -144,6 +180,7 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert payload["actual_closure_ready"] is False
     assert payload["required_row_input_count"] == 4
     assert "# Public Benchmark Phase 2 Source Acquisition Plan" in markdown
+    assert "public_benchmark_phase2_row_audit.json" in markdown
     assert "`subset_rows` | `CASF/PDBBind`" in markdown
     assert "`vina_gnina_rows` | `CASF/PDBBind + Vina/GNINA`" in markdown
     assert "materialize_public_benchmark_operator_bundle_from_rows.py" in markdown

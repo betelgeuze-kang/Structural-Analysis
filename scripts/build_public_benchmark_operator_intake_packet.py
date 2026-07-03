@@ -100,6 +100,8 @@ DEFAULT_HARNESS_BUNDLE_REPORT = (
     PRODUCTIZATION / "public_benchmark_harness_bundle_materialization_report.json"
 )
 DEFAULT_HARNESS_BUNDLE = PRODUCTIZATION / "public_benchmark_harness_bundle.json"
+DEFAULT_PHASE2_ROW_AUDIT = PRODUCTIZATION / "public_benchmark_phase2_row_audit.json"
+DEFAULT_PHASE2_ROW_AUDIT_MD = DEFAULT_PHASE2_ROW_AUDIT.with_suffix(".md")
 DEFAULT_OUT = PRODUCTIZATION / "public_benchmark_operator_intake_packet.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_SOURCE_ACQUISITION_PLAN = SOURCE_ACQUISITION_PLAN_DEFAULT_OUT
@@ -284,6 +286,9 @@ def _source_acquisition_plan_summary(
         "minimum_vina_gnina_comparison_case_count": int(
             summary.get("minimum_vina_gnina_comparison_case_count") or 0
         ),
+        "phase2_row_audit": _as_dict(
+            source_acquisition_plan.get("phase2_row_audit")
+        ),
         "blocker_count": int(source_acquisition_plan.get("blocker_count") or 0),
         "blockers": [str(row) for row in blockers],
         "command": _source_acquisition_plan_command(),
@@ -296,6 +301,7 @@ def _input_paths(source_of_truth_path: Path) -> list[Path]:
         Path("scripts/build_public_benchmark_phase2_source_acquisition_plan.py"),
         Path("scripts/materialize_public_benchmark_operator_bundle_from_rows.py"),
         Path("scripts/materialize_public_benchmark_harness_bundle.py"),
+        DEFAULT_PHASE2_ROW_AUDIT,
         Path("scripts/materialize_public_benchmark_subset_manifest.py"),
         Path("scripts/materialize_public_benchmark_pose_validity_input.py"),
         Path("scripts/materialize_public_benchmark_posebusters_validity_packet.py"),
@@ -826,6 +832,7 @@ def _execution_preflight_checklist(
     source_blocker_detail_register: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     slot_by_step: dict[str, str] = {
+        "materialize_public_benchmark_phase2_row_audit": "",
         "materialize_subset_manifest": "casf_pdbbind_subset_intake",
         "materialize_pose_validity_input": "pose_coordinate_intake",
         "materialize_posebusters_validity_packet": "pose_coordinate_intake",
@@ -864,6 +871,15 @@ def _execution_preflight_checklist(
         ],
     }
     checks_by_step: dict[str, dict[str, Any]] = {
+        "materialize_public_benchmark_phase2_row_audit": {
+            "ready_checks": [
+                "phase2_ready",
+                "component_ready_count",
+                "component_count",
+            ],
+            "required_true_fields": ["phase2_ready"],
+            "minimum_counts": {"component_ready_count": 5},
+        },
         "materialize_subset_manifest": {
             "ready_checks": [
                 "public_benchmark_ready",
@@ -1394,6 +1410,12 @@ def build_public_benchmark_operator_intake_packet(
             "produces": str(DEFAULT_SOURCE_ACQUISITION_PLAN),
         },
         {
+            "step_id": "materialize_public_benchmark_phase2_row_audit",
+            "schema_version": "public-benchmark-phase2-row-audit.v1",
+            "command": phase2_row_audit_command,
+            "produces": str(DEFAULT_PHASE2_ROW_AUDIT),
+        },
+        {
             "step_id": "materialize_subset_manifest",
             "schema_version": SUBSET_MATERIALIZER_SCHEMA_VERSION,
             "command": subset_materialization,
@@ -1530,10 +1552,11 @@ def build_public_benchmark_operator_intake_packet(
             "default_row_path_candidates": DEFAULT_PHASE2_ROW_INPUT_CANDIDATES,
             "row_template_artifacts": row_template_artifacts,
             "source_acquisition_plan": source_acquisition_summary,
-            "materialization_command": phase2_row_audit_command,
-            "produces": str(
-                PRODUCTIZATION / "public_benchmark_phase2_row_audit.json"
+            "phase2_row_audit": source_acquisition_summary.get(
+                "phase2_row_audit", {}
             ),
+            "materialization_command": phase2_row_audit_command,
+            "produces": str(DEFAULT_PHASE2_ROW_AUDIT),
             "required_row_inputs": [
                 "subset_rows",
                 "pose_rows",
@@ -1613,6 +1636,8 @@ def build_public_benchmark_operator_intake_packet(
         "linked_artifacts": {
             "source_acquisition_plan": str(DEFAULT_SOURCE_ACQUISITION_PLAN),
             "source_acquisition_plan_markdown": str(DEFAULT_SOURCE_ACQUISITION_PLAN_MD),
+            "phase2_row_audit": str(DEFAULT_PHASE2_ROW_AUDIT),
+            "phase2_row_audit_markdown": str(DEFAULT_PHASE2_ROW_AUDIT_MD),
             "source_of_truth": str(DEFAULT_SOURCE_OF_TRUTH),
             "subset_manifest": str(DEFAULT_SUBSET_MANIFEST),
             "pose_validity_input": str(DEFAULT_POSE_VALIDITY_INPUT),
@@ -1673,6 +1698,18 @@ def build_public_benchmark_operator_intake_packet(
             ),
             "source_acquisition_plan_blocker_count": int(
                 source_acquisition_summary.get("blocker_count") or 0
+            ),
+            "phase2_row_audit_status": str(
+                _as_dict(source_acquisition_summary.get("phase2_row_audit")).get(
+                    "status"
+                )
+                or ""
+            ),
+            "phase2_row_audit_missing_row_input_count": int(
+                _as_dict(source_acquisition_summary.get("phase2_row_audit")).get(
+                    "missing_row_input_count"
+                )
+                or 0
             ),
             "public_benchmark_ready": False,
         },

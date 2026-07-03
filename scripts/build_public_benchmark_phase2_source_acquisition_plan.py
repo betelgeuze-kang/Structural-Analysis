@@ -57,6 +57,7 @@ DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_OPERATOR_BUNDLE = PRODUCTIZATION / "public_benchmark_operator_bundle.json"
 DEFAULT_SOURCE_OF_TRUTH = PRODUCTIZATION / "public_benchmark_source_of_truth.json"
 DEFAULT_PHASE2_ROW_AUDIT = PRODUCTIZATION / "public_benchmark_phase2_row_audit.json"
+DEFAULT_PHASE2_ROW_AUDIT_MD = DEFAULT_PHASE2_ROW_AUDIT.with_suffix(".md")
 DEFAULT_HARNESS_BUNDLE = PRODUCTIZATION / "public_benchmark_harness_bundle.json"
 
 SCHEMA_VERSION = "public-benchmark-phase2-source-acquisition-plan.v1"
@@ -83,6 +84,88 @@ PHASE2_COMPONENTS = [
 
 def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+
+
+def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
+    resolved = path if path.is_absolute() else repo_root / path
+    if not resolved.exists():
+        return {}
+    try:
+        payload = json.loads(resolved.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _phase2_row_audit_summary(audit: dict[str, Any]) -> dict[str, Any]:
+    summary = audit.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+    phase2_exit_gate = audit.get("phase2_exit_gate")
+    if not isinstance(phase2_exit_gate, dict):
+        phase2_exit_gate = {}
+    missing_row_inputs = [
+        str(row)
+        for row in (
+            summary.get("missing_row_inputs")
+            if isinstance(summary.get("missing_row_inputs"), list)
+            else audit.get("missing_row_inputs", [])
+        )
+        if str(row)
+    ]
+    blocked_component_ids = [
+        str(row)
+        for row in (
+            summary.get("blocked_component_ids")
+            if isinstance(summary.get("blocked_component_ids"), list)
+            else []
+        )
+        if str(row)
+    ]
+    failed_criteria = [
+        str(row)
+        for row in (
+            summary.get("phase2_failed_criteria")
+            if isinstance(summary.get("phase2_failed_criteria"), list)
+            else phase2_exit_gate.get("failed_criteria", [])
+        )
+        if str(row)
+    ]
+    return {
+        "artifact": str(DEFAULT_PHASE2_ROW_AUDIT),
+        "markdown_artifact": str(DEFAULT_PHASE2_ROW_AUDIT_MD),
+        "status": str(audit.get("status") or "missing"),
+        "contract_pass": audit.get("contract_pass"),
+        "phase2_ready": bool(audit.get("phase2_ready")),
+        "phase2_exit_gate_status": str(
+            summary.get("phase2_exit_gate_status")
+            or phase2_exit_gate.get("status")
+            or ""
+        ),
+        "component_count": int(summary.get("component_count") or audit.get("component_count") or 0),
+        "component_ready_count": int(
+            summary.get("component_ready_count")
+            or audit.get("component_ready_count")
+            or 0
+        ),
+        "missing_row_input_count": int(
+            summary.get("missing_row_input_count") or len(missing_row_inputs)
+        ),
+        "missing_row_inputs": missing_row_inputs,
+        "blocked_component_ids": blocked_component_ids,
+        "phase2_failed_criteria": failed_criteria,
+        "phase2_failed_criterion_count": int(
+            summary.get("phase2_failed_criterion_count") or len(failed_criteria)
+        ),
+        "phase2_row_closure_matrix_count": int(
+            audit.get("phase2_row_closure_matrix_count") or 0
+        ),
+        "blocker_count": int(summary.get("blocker_count") or len(audit.get("blockers", []))),
+        "command": (
+            "python3 scripts/materialize_public_benchmark_phase2_from_rows.py "
+            f"--out {DEFAULT_PHASE2_ROW_AUDIT} --out-md {DEFAULT_PHASE2_ROW_AUDIT_MD}"
+        ),
+    }
 
 
 def _row_input_contracts() -> list[dict[str, Any]]:
@@ -223,6 +306,8 @@ def build_public_benchmark_phase2_source_acquisition_plan(
     repo_root: Path = ROOT,
 ) -> dict[str, Any]:
     row_input_contracts = _row_input_contracts()
+    phase2_row_audit = _load_json(repo_root, DEFAULT_PHASE2_ROW_AUDIT)
+    phase2_row_audit_summary = _phase2_row_audit_summary(phase2_row_audit)
     blockers = [
         "public_benchmark_subset_rows_not_acquired",
         "public_benchmark_pose_rows_not_acquired",
@@ -238,6 +323,7 @@ def build_public_benchmark_phase2_source_acquisition_plan(
                 Path("scripts/materialize_public_benchmark_operator_bundle_from_rows.py"),
                 Path("scripts/materialize_public_benchmark_phase2_from_rows.py"),
                 Path("scripts/materialize_public_benchmark_harness_bundle.py"),
+                DEFAULT_PHASE2_ROW_AUDIT,
                 Path("scripts/materialize_public_benchmark_subset_manifest.py"),
                 Path("scripts/materialize_public_benchmark_pose_validity_input.py"),
                 Path("scripts/materialize_public_benchmark_posebusters_validity_packet.py"),
@@ -260,6 +346,7 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         "required_row_input_count": len(REQUIRED_ROW_INPUTS),
         "required_row_inputs": list(REQUIRED_ROW_INPUTS),
         "row_input_contracts": row_input_contracts,
+        "phase2_row_audit": phase2_row_audit_summary,
         "operator_acquisition_checklist": [
             "attach_casf_pdbbind_subset_rows_with_local_file_checksums",
             "attach_pose_coordinate_rows_with_symmetry_contracts",
@@ -306,6 +393,19 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
             "minimum_enrichment_target_count": 1,
             "minimum_vina_gnina_comparison_case_count": 1,
+            "phase2_row_audit_status": phase2_row_audit_summary["status"],
+            "phase2_row_audit_blocker_count": phase2_row_audit_summary[
+                "blocker_count"
+            ],
+            "phase2_row_audit_missing_row_input_count": phase2_row_audit_summary[
+                "missing_row_input_count"
+            ],
+            "phase2_row_audit_missing_row_inputs": phase2_row_audit_summary[
+                "missing_row_inputs"
+            ],
+            "phase2_row_audit_failed_criteria": phase2_row_audit_summary[
+                "phase2_failed_criteria"
+            ],
             "phase2_ready": False,
             "actual_closure_ready": False,
             "blocker_count": len(blockers),
@@ -331,6 +431,9 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `phase2_ready`: `{payload['phase2_ready']}`",
         f"- `actual_closure_ready`: `{payload['actual_closure_ready']}`",
         f"- `blocker_count`: `{payload['blocker_count']}`",
+        f"- `phase2_row_audit`: `{payload['phase2_row_audit']['artifact']}`",
+        f"- `phase2_row_audit_status`: `{payload['phase2_row_audit']['status']}`",
+        f"- `phase2_row_audit_missing_row_inputs`: `{', '.join(payload['phase2_row_audit']['missing_row_inputs'])}`",
         "",
         "| Row Input | Source Family | Status | Unblocks |",
         "|---|---|---|---|",

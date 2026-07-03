@@ -18,9 +18,10 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T16:13:53.087376+00:00",
+  "generated_at": "2026-07-03T16:54:56.371181+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:97748c87d05e0d77573817d92ba6c89daedfe31c2fd095ddd93c929038cf2902",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:120e7d3920f6873bf10706f26f843e6566f43bd496ea29d4e6f435add656626a",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:6ffaa18d0620b99e4520b6dc2fcf3300bb9327d7751ef15669ea15cec3f762f4",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
@@ -45,6 +46,41 @@
     "refresh_public_benchmark_source_of_truth"
   ],
   "phase2_ready": false,
+  "phase2_row_audit": {
+    "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
+    "blocked_component_ids": [
+      "casf_pdbbind_pose_success_harness",
+      "symmetry_aware_ligand_rmsd",
+      "posebusters_style_pose_validity",
+      "vina_gnina_comparison_adapter",
+      "dud_e_or_lit_pcba_enrichment"
+    ],
+    "blocker_count": 6,
+    "command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --out implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.md",
+    "component_count": 5,
+    "component_ready_count": 0,
+    "contract_pass": false,
+    "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.md",
+    "missing_row_input_count": 4,
+    "missing_row_inputs": [
+      "subset_rows",
+      "pose_rows",
+      "enrichment_rows",
+      "vina_gnina_rows"
+    ],
+    "phase2_exit_gate_status": "blocked",
+    "phase2_failed_criteria": [
+      "casf_pdbbind_pose_success_harness_ready",
+      "symmetry_aware_ligand_rmsd_ready",
+      "posebusters_style_pose_validity_ready",
+      "vina_gnina_comparison_ready",
+      "dud_e_or_lit_pcba_enrichment_ready"
+    ],
+    "phase2_failed_criterion_count": 5,
+    "phase2_ready": false,
+    "phase2_row_closure_matrix_count": 4,
+    "status": "operator_evidence_required"
+  },
   "required_component_count": 5,
   "required_components": [
     "casf_pdbbind_pose_success_harness",
@@ -376,7 +412,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "e6b75c34b9c563962ff665e4a0b595ae1137c299",
+  "source_commit_sha": "f7a21686f4abc42bd8143b142dd7ed3dfab7edd3",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
@@ -385,6 +421,22 @@
     "minimum_subset_case_count": 12,
     "minimum_vina_gnina_comparison_case_count": 1,
     "phase2_ready": false,
+    "phase2_row_audit_blocker_count": 6,
+    "phase2_row_audit_failed_criteria": [
+      "casf_pdbbind_pose_success_harness_ready",
+      "symmetry_aware_ligand_rmsd_ready",
+      "posebusters_style_pose_validity_ready",
+      "vina_gnina_comparison_ready",
+      "dud_e_or_lit_pcba_enrichment_ready"
+    ],
+    "phase2_row_audit_missing_row_input_count": 4,
+    "phase2_row_audit_missing_row_inputs": [
+      "subset_rows",
+      "pose_rows",
+      "enrichment_rows",
+      "vina_gnina_rows"
+    ],
+    "phase2_row_audit_status": "operator_evidence_required",
     "required_component_count": 5,
     "required_row_input_count": 4
   }

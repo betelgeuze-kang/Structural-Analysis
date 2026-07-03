@@ -5,6 +5,9 @@
 - `phase2_ready`: `False`
 - `actual_closure_ready`: `False`
 - `blocker_count`: `5`
+- `phase2_row_audit`: `implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json`
+- `phase2_row_audit_status`: `operator_evidence_required`
+- `phase2_row_audit_missing_row_inputs`: `subset_rows, pose_rows, enrichment_rows, vina_gnina_rows`
 
 | Row Input | Source Family | Status | Unblocks |
 |---|---|---|---|

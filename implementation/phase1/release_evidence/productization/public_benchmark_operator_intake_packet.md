@@ -39,6 +39,7 @@
 | Step | Ready | Dependency Ready | First Blocker |
 |---|---|---|---|
 | `build_public_benchmark_phase2_source_acquisition_plan` | `True` | `True` | `` |
+| `materialize_public_benchmark_phase2_row_audit` | `False` | `True` | `casf_pdbbind_pose_success_harness::subset_rows_not_provided` |
 | `materialize_subset_manifest` | `False` | `True` | `casf_pdbbind_source_material_not_attached` |
 | `materialize_pose_validity_input` | `False` | `False` | `public_benchmark_real_pose_predictions_missing` |
 | `materialize_posebusters_validity_packet` | `False` | `False` | `public_benchmark_real_pose_predictions_missing` |
@@ -52,6 +53,7 @@
 ## Materialization Sequence
 
 - `build_public_benchmark_phase2_source_acquisition_plan`: `python3 scripts/build_public_benchmark_phase2_source_acquisition_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.md`
+- `materialize_public_benchmark_phase2_row_audit`: `python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked`
 - `materialize_subset_manifest`: `python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked`
 - `materialize_pose_validity_input`: `python3 scripts/materialize_public_benchmark_pose_validity_input.py --subset-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --pose-intake <operator-pose-coordinate-intake.json> --out-input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_materialization_report.json --fail-blocked`
 - `materialize_posebusters_validity_packet`: `python3 scripts/materialize_public_benchmark_posebusters_validity_packet.py --pose-validity-input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --out-packet implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_posebusters_validity_materialization_report.json --fail-blocked`

@@ -6,11 +6,12 @@
     "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T16:13:53.124172+00:00",
+  "generated_at": "2026-07-03T16:54:56.410340+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:25d3c62b8c49b2425ae675079a9d801f26c8e81a07a22a09f4483a621cdb94ac",
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:0403f43a4b29dd679b121f908188cd502836793933818192a70cadbbd6755c2b",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:97748c87d05e0d77573817d92ba6c89daedfe31c2fd095ddd93c929038cf2902",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:120e7d3920f6873bf10706f26f843e6566f43bd496ea29d4e6f435add656626a",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:daec2e3f4257c2fc8b989af7e61e7b0c302ca12f4d27c32cac08352101280be5",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:1c0aff002c19816c2a49c3d110f2ea04f7f2ae7cadb5bfd2172cdf1df5ccac82",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:6ffaa18d0620b99e4520b6dc2fcf3300bb9327d7751ef15669ea15cec3f762f4",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
@@ -155,7 +156,7 @@
   },
   "schema_version": "public-benchmark-operator-template.v1",
   "slot_id": "pose_coordinate_intake",
-  "source_commit_sha": "e6b75c34b9c563962ff665e4a0b595ae1137c299",
+  "source_commit_sha": "f7a21686f4abc42bd8143b142dd7ed3dfab7edd3",
   "status": "operator_template_seed",
   "template": {
     "cases": [
