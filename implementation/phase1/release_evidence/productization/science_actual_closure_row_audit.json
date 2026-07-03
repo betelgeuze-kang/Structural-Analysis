@@ -1440,12 +1440,12 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T22:26:17.693412+00:00",
+  "generated_at": "2026-07-03T22:33:45.268475+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json": "sha256:98255bfca71cb82c3146a11e74e90cc338836518d93672950cbec5defd7d7147",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:f3d18505eb3df9a24fe456a7aceae0d2df7e61e3ef8af292c88090fc8448927a",
     "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:951e69bf4f16e386ac9090aafd60da4e138345003335a57cf1125a1c729400ba",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:2dc44728077cf98392a19f4dccc22f526d65647df3cf94bd8f04d5a5b69a9b7e",
     "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
     "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261",
@@ -1454,7 +1454,7 @@
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:161673d8ff036a7a31d657fb972764eeb4b62f6d55cc0840e26f398565707c6f",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
-    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:b09772cfed185240c50637715362509946897e7dbf18428ccc1bfbf88527ce99",
+    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:8c22a94cdfecbc71b6a04aaea3040cad1ed053419474117fe1f22adf67301354",
     "scripts/materialize_science_actual_closure_from_rows.py": "sha256:86403e76830a92c7b53f1ac5e8cbafd99a276b95ff75edd0e22cf7ff7c490cf7"
   },
   "missing_row_inputs": [
@@ -2869,7 +2869,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "1f063460318cf11acb34d3dfff542fcd78736f4c",
+  "source_commit_sha": "8aacd8f0ee17d7cbb486496cb778f2fa7e2676d3",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,

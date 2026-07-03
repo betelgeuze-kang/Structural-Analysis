@@ -20,9 +20,9 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T22:26:17.513260+00:00",
+  "generated_at": "2026-07-03T22:33:45.091083+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:3bc85c1664140b177d655aab25f4962a67ee1e6016b646f7233cdefafd928f5b",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:45a4e2c310b59cc32f05bccf3edebb3c71901ff4feb6083ae003ad830ffa4641",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:b4c48144c39ff6168b6b97a9e9fa328e7d643286fa8ba6ab10e80f2d91318b77",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:bfa0c55dd4819586351de88656c572b4f13baef4393565cf3f27a7b45f4f3d26",
     "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:f6662b75cccb08dcd09fc464a877a7b6482abbb6249684c92b0f140f77296978",
@@ -31,7 +31,7 @@
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
-    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:b09772cfed185240c50637715362509946897e7dbf18428ccc1bfbf88527ce99",
+    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:8c22a94cdfecbc71b6a04aaea3040cad1ed053419474117fe1f22adf67301354",
     "scripts/materialize_public_benchmark_pose_success_harness.py": "sha256:8a8eccfa010924ca874984fecc8a484a158d974dd7888ba9bf42a01009366e61",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:f3f8ee12c7b15238da7a940bab4c4bfa2ba17cf270ea3522d000430dc20cd4a8",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:373b1e217aaa6bce582e83a3c9d84e8b7e25664362dc91a9ba009ee54a01cf56",
@@ -838,7 +838,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "1f063460318cf11acb34d3dfff542fcd78736f4c",
+  "source_commit_sha": "8aacd8f0ee17d7cbb486496cb778f2fa7e2676d3",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,

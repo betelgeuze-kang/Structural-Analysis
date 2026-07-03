@@ -90,6 +90,10 @@ def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+def _as_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
 def _resolve(repo_root: Path, path: Path) -> Path:
     return path if path.is_absolute() else repo_root / path
 
@@ -897,6 +901,74 @@ def _phase2_row_closure_matrix(
     return rows
 
 
+def _row_input_statuses(
+    phase2_row_closure_matrix: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    statuses: dict[str, dict[str, Any]] = {}
+    for row in phase2_row_closure_matrix:
+        row_input_id = str(row.get("row_input_id") or "")
+        if not row_input_id:
+            continue
+        missing = bool(row.get("missing"))
+        default_paths = [
+            str(item)
+            for item in _as_list(row.get("default_row_path_candidates"))
+            if str(item)
+        ]
+        statuses[row_input_id] = {
+            "row_input_id": row_input_id,
+            "status": "missing" if missing else "provided",
+            "missing": missing,
+            "provided": not missing,
+            "provided_path": str(row.get("provided_path") or ""),
+            "resolved_path": str(row.get("resolved_path") or ""),
+            "auto_detected": bool(row.get("auto_detected")),
+            "preferred_default_row_path": default_paths[0] if default_paths else "",
+            "default_row_path_candidates": default_paths,
+            "feeds_components": [
+                str(item) for item in _as_list(row.get("feeds_components"))
+            ],
+            "closes_phase2_criteria": [
+                str(item)
+                for item in _as_list(row.get("closes_phase2_criteria"))
+            ],
+            "operator_action": (
+                f"attach_{row_input_id}_at_{default_paths[0]}"
+                if missing and default_paths
+                else f"review_{row_input_id}_materialization"
+            ),
+            "operator_blockers_if_missing": [
+                str(item)
+                for item in _as_list(row.get("operator_blockers_if_missing"))
+            ],
+            "row_contract_ref": str(row.get("row_contract_ref") or ""),
+        }
+    return statuses
+
+
+def _row_input_status_summary(
+    row_input_statuses: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    missing_ids = [
+        row_input_id
+        for row_input_id, status in row_input_statuses.items()
+        if bool(status.get("missing"))
+    ]
+    provided_ids = [
+        row_input_id
+        for row_input_id, status in row_input_statuses.items()
+        if bool(status.get("provided"))
+    ]
+    return {
+        "row_input_count": len(row_input_statuses),
+        "provided_row_input_count": len(provided_ids),
+        "missing_row_input_count": len(missing_ids),
+        "provided_row_inputs": provided_ids,
+        "missing_row_inputs": missing_ids,
+        "first_missing_row_input": missing_ids[0] if missing_ids else "",
+    }
+
+
 def _attach_component_requirement_summaries(
     components: list[dict[str, Any]],
     requirements: list[dict[str, Any]],
@@ -1092,6 +1164,8 @@ def build_public_benchmark_phase2_row_audit(
         row_input_resolution=row_input_resolution,
         row_intake_contracts=row_intake_contracts,
     )
+    row_input_statuses = _row_input_statuses(phase2_row_closure_matrix)
+    row_input_status_summary = _row_input_status_summary(row_input_statuses)
     input_paths = [
         Path("scripts/materialize_public_benchmark_phase2_from_rows.py"),
         Path("scripts/materialize_public_benchmark_operator_bundle_from_rows.py"),
@@ -1154,6 +1228,8 @@ def build_public_benchmark_phase2_row_audit(
             "row_intake_contracts": row_intake_contracts,
             "phase2_row_closure_matrix": phase2_row_closure_matrix,
             "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
+            "row_input_statuses": row_input_statuses,
+            "row_input_status_summary": row_input_status_summary,
             "blockers": blockers,
             "component_count": len(components),
             "component_ready_count": sum(
@@ -1250,6 +1326,8 @@ def build_public_benchmark_phase2_row_audit(
             "row_intake_contracts": row_intake_contracts,
             "phase2_row_closure_matrix": phase2_row_closure_matrix,
             "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
+            "row_input_statuses": row_input_statuses,
+            "row_input_status_summary": row_input_status_summary,
             "blockers": blockers,
             "component_count": len(components),
             "component_ready_count": 0,
@@ -1353,6 +1431,8 @@ def build_public_benchmark_phase2_row_audit(
         "row_intake_contracts": row_intake_contracts,
         "phase2_row_closure_matrix": phase2_row_closure_matrix,
         "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
+        "row_input_statuses": row_input_statuses,
+        "row_input_status_summary": row_input_status_summary,
         "operator_bundle_materialization_report": operator_materialization_report,
         "operator_bundle_source_actuality_check": source_actuality_check,
         "phase2_exit_gate": phase2_exit_gate,

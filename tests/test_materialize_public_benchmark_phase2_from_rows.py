@@ -273,6 +273,27 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
     assert audit["row_input_resolution"]["pose_rows"]["missing"] is True
     assert audit["row_input_resolution"]["enrichment_rows"]["missing"] is True
     assert audit["row_input_resolution"]["vina_gnina_rows"]["missing"] is True
+    assert audit["row_input_status_summary"] == {
+        "first_missing_row_input": "subset_rows",
+        "missing_row_input_count": 4,
+        "missing_row_inputs": [
+            "subset_rows",
+            "pose_rows",
+            "enrichment_rows",
+            "vina_gnina_rows",
+        ],
+        "provided_row_input_count": 0,
+        "provided_row_inputs": [],
+        "row_input_count": 4,
+    }
+    assert audit["row_input_statuses"]["subset_rows"]["status"] == "missing"
+    assert audit["row_input_statuses"]["subset_rows"]["operator_action"] == (
+        "attach_subset_rows_at_implementation/phase1/release_evidence/"
+        "productization/public_benchmark_subset_rows.json"
+    )
+    assert audit["row_input_statuses"]["vina_gnina_rows"][
+        "operator_blockers_if_missing"
+    ] == ["vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"]
     closure_matrix = {
         row["row_input_id"]: row for row in audit["phase2_row_closure_matrix"]
     }
@@ -777,6 +798,23 @@ def test_public_benchmark_phase2_row_audit_materializes_pose_rows_without_vina_g
     assert audit["summary"]["phase2_failed_criteria"] == [
         "vina_gnina_comparison_ready"
     ]
+    assert audit["row_input_status_summary"] == {
+        "first_missing_row_input": "vina_gnina_rows",
+        "missing_row_input_count": 1,
+        "missing_row_inputs": ["vina_gnina_rows"],
+        "provided_row_input_count": 3,
+        "provided_row_inputs": ["subset_rows", "pose_rows", "enrichment_rows"],
+        "row_input_count": 4,
+    }
+    assert audit["row_input_statuses"]["subset_rows"]["provided"] is True
+    assert audit["row_input_statuses"]["subset_rows"]["provided_path"] == str(
+        rows["subset"]
+    )
+    assert audit["row_input_statuses"]["vina_gnina_rows"]["missing"] is True
+    assert audit["row_input_statuses"]["vina_gnina_rows"]["operator_action"] == (
+        "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/"
+        "productization/public_benchmark_vina_gnina_rows.json"
+    )
     assert audit["phase2_requirement_summary"] == {
         "required_component_count": 5,
         "ready_component_count": 4,
@@ -901,6 +939,28 @@ def test_public_benchmark_phase2_row_audit_materializes_ready_gate(
     assert audit["summary"]["blocked_requirement_count"] == 0
     assert audit["summary"]["phase2_failed_criteria"] == []
     assert audit["summary"]["blocker_count"] == 0
+    assert audit["row_input_status_summary"] == {
+        "first_missing_row_input": "",
+        "missing_row_input_count": 0,
+        "missing_row_inputs": [],
+        "provided_row_input_count": 4,
+        "provided_row_inputs": [
+            "subset_rows",
+            "pose_rows",
+            "enrichment_rows",
+            "vina_gnina_rows",
+        ],
+        "row_input_count": 4,
+    }
+    assert {
+        row_input_id: row["status"]
+        for row_input_id, row in audit["row_input_statuses"].items()
+    } == {
+        "subset_rows": "provided",
+        "pose_rows": "provided",
+        "enrichment_rows": "provided",
+        "vina_gnina_rows": "provided",
+    }
     assert all(row["ready"] for row in audit["phase2_requirements"])
     assert all(row["phase2_component_ready"] for row in audit["components"])
     assert all(row["failed_criteria"] == [] for row in audit["components"])
