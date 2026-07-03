@@ -596,12 +596,14 @@
     }
   ],
   "gate_unblock_plan_count": 3,
-  "generated_at": "2026-07-01T13:56:04.550449+00:00",
+  "generated_at": "2026-07-03T15:52:49.431865+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:9b88df9031923bd4d55d5a72f3b24a88427e1631a3d51570bebb1917f626e3b7",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.json": "sha256:6ca7364e6af8d7bf7fb28f1360b35f9c15b4f69f477ba676b804ffab3fd3cce1",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:352761100828448d288c3a6cce69151da70c5da55918c9e1022f978c8c11b06d",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:e987ceb5b02a847709d17886810257e923c2b27da2fd03a8264a935cd6aaa2e1",
-    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:64852f5bd48b2c2b8b8607accb86a7ee1689e4bf201e99c31eb4bf96cee31157",
+    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:072e9695e22acc8a80e0d90482f216b362bb2bfe0ff2c18eac6f0aa7cec5985f",
+    "scripts/build_gpcr_hard_decoy_source_acquisition_plan.py": "sha256:8dd565d255b1b8cdf95b73446951ae0d8049ce30c19ffa4c9df2eb794e4c6da4",
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:8824e14602faf05a39d841d8367d5773c76a23ffbf8f614ee99f926a8ff478a6"
   },
@@ -614,9 +616,16 @@
     "row_templates": {
       "gpcr_hard_decoy_rows": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv"
     },
+    "source_acquisition_plan": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.json",
     "suite_report": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json"
   },
   "materialization_sequence": [
+    {
+      "command": "python3 scripts/build_gpcr_hard_decoy_source_acquisition_plan.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.json",
+      "produces": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.json",
+      "schema_version": "gpcr-hard-decoy-source-acquisition-plan.v1",
+      "step_id": "build_gpcr_hard_decoy_source_acquisition_plan"
+    },
     {
       "command": "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py --rows <gpcr_hard_decoy_raw_rows.csv|json|tsv> --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
       "produces": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
@@ -663,6 +672,7 @@
   },
   "minimum_target_count": 3,
   "next_actions": [
+    "complete_gpcr_hard_decoy_source_acquisition_plan",
     "attach_gpcr_hard_decoy_raw_row_file",
     "materialize_gpcr_hard_decoy_operator_template_from_rows",
     "fill_gpcr_hard_decoy_operator_intake_packet",
@@ -1111,6 +1121,34 @@
     "row_template_artifacts": {
       "gpcr_hard_decoy_rows": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv"
     },
+    "source_acquisition_plan": {
+      "actual_closure_ready": false,
+      "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.json",
+      "blocker_count": 3,
+      "blockers": [
+        "gpcr_hard_decoy_rows_not_acquired",
+        "target_specific_hard_decoy_source_not_attached",
+        "gpcr_scoring_protocol_receipts_not_attached"
+      ],
+      "command": "python3 scripts/build_gpcr_hard_decoy_source_acquisition_plan.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.json",
+      "contract_pass": true,
+      "status": "operator_acquisition_required",
+      "target_source_count": 3,
+      "target_source_ids": {
+        "DRD2": {
+          "chembl_target_id": "CHEMBL217",
+          "uniprot_accession": "P14416"
+        },
+        "HTR2A": {
+          "chembl_target_id": "CHEMBL224",
+          "uniprot_accession": "P28223"
+        },
+        "OPRM1": {
+          "chembl_target_id": "CHEMBL233",
+          "uniprot_accession": "P35372"
+        }
+      }
+    },
     "status": "ready_for_operator_rows"
   },
   "raw_row_import": {
@@ -1211,6 +1249,34 @@
       "source_checksum",
       "provenance_ref"
     ],
+    "source_acquisition_plan": {
+      "actual_closure_ready": false,
+      "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.json",
+      "blocker_count": 3,
+      "blockers": [
+        "gpcr_hard_decoy_rows_not_acquired",
+        "target_specific_hard_decoy_source_not_attached",
+        "gpcr_scoring_protocol_receipts_not_attached"
+      ],
+      "command": "python3 scripts/build_gpcr_hard_decoy_source_acquisition_plan.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.json",
+      "contract_pass": true,
+      "status": "operator_acquisition_required",
+      "target_source_count": 3,
+      "target_source_ids": {
+        "DRD2": {
+          "chembl_target_id": "CHEMBL217",
+          "uniprot_accession": "P14416"
+        },
+        "HTR2A": {
+          "chembl_target_id": "CHEMBL224",
+          "uniprot_accession": "P28223"
+        },
+        "OPRM1": {
+          "chembl_target_id": "CHEMBL233",
+          "uniprot_accession": "P35372"
+        }
+      }
+    },
     "source_receipt_requirements": {
       "mode": "raw_hard_decoy_rows",
       "placeholder_block_policy": {
@@ -1292,7 +1358,7 @@
     "gpcr_hard_decoy_rows": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv"
   },
   "schema_version": "gpcr-hard-decoy-operator-intake-packet.v1",
-  "source_commit_sha": "c6fb1fe6c43f2e81816743a9ee4b0f293571aebc",
+  "source_commit_sha": "f88765dcf049dcc948a496d7b7c791a8e4d1ebd1",
   "status": "ready_for_operator_input",
   "summary": {
     "broad_gpcr_family_claim_safe": false,
@@ -1309,6 +1375,8 @@
     "row_template_artifacts": {
       "gpcr_hard_decoy_rows": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv"
     },
+    "source_acquisition_plan_blocker_count": 3,
+    "source_acquisition_plan_status": "operator_acquisition_required",
     "target_execution_preflight_count": 3
   },
   "summary_line": "GPCR hard-decoy operator intake packet: READY | targets=3 | first_blocked_target=DRD2",

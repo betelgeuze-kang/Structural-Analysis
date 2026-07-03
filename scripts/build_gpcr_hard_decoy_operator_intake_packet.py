@@ -43,6 +43,9 @@ DEFAULT_EVIDENCE_SURFACE = SURFACE_DIR / "gpcr_hard_decoy_evidence_surface.json"
 DEFAULT_PRODUCT_REPORT = PRODUCTIZATION / "gpcr_hard_decoy_product_report.json"
 DEFAULT_PRODUCT_CAPABILITIES = SURFACE_DIR / "product_capabilities_surface.json"
 DEFAULT_GOAL_BOTTLENECK = PRODUCTIZATION / "goal_bottleneck_roadmap_surface.json"
+DEFAULT_SOURCE_ACQUISITION_PLAN = (
+    PRODUCTIZATION / "gpcr_hard_decoy_source_acquisition_plan.json"
+)
 DEFAULT_OUT = PRODUCTIZATION / "gpcr_hard_decoy_operator_intake_packet.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_ROW_TEMPLATE_DIR = PRODUCTIZATION
@@ -156,11 +159,13 @@ def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
 def _input_paths() -> list[Path]:
     return [
         Path("scripts/build_gpcr_hard_decoy_operator_intake_packet.py"),
+        Path("scripts/build_gpcr_hard_decoy_source_acquisition_plan.py"),
         Path("scripts/materialize_gpcr_hard_decoy_suite_report.py"),
         DEFAULT_OPERATOR_TEMPLATE_IMPORTER,
         DEFAULT_OPERATOR_TEMPLATE,
         DEFAULT_SUITE_REPORT,
         DEFAULT_EVIDENCE_SURFACE,
+        DEFAULT_SOURCE_ACQUISITION_PLAN,
     ]
 
 
@@ -518,6 +523,7 @@ def build_gpcr_hard_decoy_operator_intake_packet(
     template = _load_json(repo_root, DEFAULT_OPERATOR_TEMPLATE)
     suite = _load_json(repo_root, DEFAULT_SUITE_REPORT)
     surface = _load_json(repo_root, DEFAULT_EVIDENCE_SURFACE)
+    source_acquisition_plan = _load_json(repo_root, DEFAULT_SOURCE_ACQUISITION_PLAN)
     blockers = [str(row) for row in _as_list(suite.get("blockers") or surface.get("blockers"))]
     first_blocked_target = str(
         suite.get("first_blocked_target") or surface.get("first_blocked_target") or "DRD2"
@@ -554,6 +560,29 @@ def build_gpcr_hard_decoy_operator_intake_packet(
         "python3 scripts/build_goal_bottleneck_roadmap_surface.py "
         f"--out {DEFAULT_GOAL_BOTTLENECK}"
     )
+    source_acquisition_command = (
+        "python3 scripts/build_gpcr_hard_decoy_source_acquisition_plan.py "
+        f"--out {DEFAULT_SOURCE_ACQUISITION_PLAN}"
+    )
+    source_acquisition_summary = {
+        "artifact": str(DEFAULT_SOURCE_ACQUISITION_PLAN),
+        "status": str(source_acquisition_plan.get("status") or ""),
+        "contract_pass": source_acquisition_plan.get("contract_pass"),
+        "actual_closure_ready": bool(
+            source_acquisition_plan.get("actual_closure_ready")
+        ),
+        "target_source_count": int(
+            source_acquisition_plan.get("target_source_count") or 0
+        ),
+        "target_source_ids": _as_dict(
+            source_acquisition_plan.get("target_source_ids")
+        ),
+        "blocker_count": int(source_acquisition_plan.get("blocker_count") or 0),
+        "blockers": [
+            str(row) for row in _as_list(source_acquisition_plan.get("blockers"))
+        ],
+        "command": source_acquisition_command,
+    }
     gate_unblock_plan = _gate_unblock_plan(materialize_command=materialize_command)
     phase3_raw_row_closure_matrix = _phase3_raw_row_closure_matrix(
         import_command=import_template_command,
@@ -638,6 +667,7 @@ def build_gpcr_hard_decoy_operator_intake_packet(
             "raw_row_value_contract": dict(RAW_ROW_VALUE_CONTRACT),
             "row_source_receipt_requirements": dict(ROW_SOURCE_RECEIPT_REQUIREMENTS),
             "source_receipt_requirements": dict(SOURCE_RECEIPT_REQUIREMENTS),
+            "source_acquisition_plan": source_acquisition_summary,
             "optional_row_fields": ["score_direction"],
             "required_targets": list(REQUIRED_TARGETS),
             "default_score_direction": "higher_is_better",
@@ -657,6 +687,7 @@ def build_gpcr_hard_decoy_operator_intake_packet(
             ),
             "default_row_path_candidates": DEFAULT_RAW_ROW_INPUT_CANDIDATES,
             "row_template_artifacts": row_template_artifacts,
+            "source_acquisition_plan": source_acquisition_summary,
             "materialization_command": import_template_command,
             "required_row_inputs": ["gpcr_hard_decoy_rows"],
         },
@@ -671,6 +702,12 @@ def build_gpcr_hard_decoy_operator_intake_packet(
             "blocker_count": len(blockers),
         },
         "materialization_sequence": [
+            {
+                "step_id": "build_gpcr_hard_decoy_source_acquisition_plan",
+                "schema_version": "gpcr-hard-decoy-source-acquisition-plan.v1",
+                "command": source_acquisition_command,
+                "produces": str(DEFAULT_SOURCE_ACQUISITION_PLAN),
+            },
             {
                 "step_id": "materialize_gpcr_hard_decoy_operator_template_from_rows",
                 "command": import_template_command,
@@ -716,12 +753,14 @@ def build_gpcr_hard_decoy_operator_intake_packet(
             "operator_template": str(DEFAULT_OPERATOR_TEMPLATE),
             "suite_report": str(DEFAULT_SUITE_REPORT),
             "evidence_surface": str(DEFAULT_EVIDENCE_SURFACE),
+            "source_acquisition_plan": str(DEFAULT_SOURCE_ACQUISITION_PLAN),
             "product_report": str(DEFAULT_PRODUCT_REPORT),
             "product_capabilities_surface": str(DEFAULT_PRODUCT_CAPABILITIES),
             "goal_bottleneck_roadmap_surface": str(DEFAULT_GOAL_BOTTLENECK),
             "row_templates": row_template_artifacts,
         },
         "next_actions": [
+            "complete_gpcr_hard_decoy_source_acquisition_plan",
             "attach_gpcr_hard_decoy_raw_row_file",
             "materialize_gpcr_hard_decoy_operator_template_from_rows",
             "fill_gpcr_hard_decoy_operator_intake_packet",
@@ -749,6 +788,12 @@ def build_gpcr_hard_decoy_operator_intake_packet(
             ),
             "first_target_execution_preflight_blocker": str(
                 first_target_preflight_blocker.get("first_blocker") or ""
+            ),
+            "source_acquisition_plan_status": str(
+                source_acquisition_summary.get("status") or ""
+            ),
+            "source_acquisition_plan_blocker_count": int(
+                source_acquisition_summary.get("blocker_count") or 0
             ),
             "broad_gpcr_family_claim_safe": False,
         },
@@ -825,6 +870,8 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"{json.dumps(payload['raw_row_import']['raw_row_value_contract'], ensure_ascii=False, sort_keys=True)}`",
             f"- `source_receipt_requirements`: `"
             f"{json.dumps(payload['raw_row_import']['source_receipt_requirements'], ensure_ascii=False, sort_keys=True)}`",
+            f"- `source_acquisition_plan`: `"
+            f"{payload['raw_row_import']['source_acquisition_plan']['artifact']}`",
             f"- `row_template_artifacts`: `"
             f"{json.dumps(payload['raw_row_import']['row_template_artifacts'], ensure_ascii=False, sort_keys=True)}`",
         ]
