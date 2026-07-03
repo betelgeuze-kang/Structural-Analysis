@@ -1090,9 +1090,9 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
     assert len(rows) == 6
     assert rows[0] == {
         "case_id": "pocketmd_lite_case_001",
-        "source_family": "CASF/PDBBind or GPCR operator intake",
+        "source_family": "upstream_ranked_top_k_candidate_set",
         "top_k_rank": "1",
-        "candidate_id": "pocketmd_lite_case_001_candidate_001",
+        "candidate_id": "pocketmd_lite_case_001_rank_01",
         "upstream_top_k_provenance_ref": "",
         "upstream_top_k_source_checksum": "",
         "pre_refinement_energy_proxy": "",
@@ -1109,8 +1109,9 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
         "source_checksum": "",
     }
     assert rows[1]["top_k_rank"] == "2"
+    assert rows[1]["candidate_id"] == "pocketmd_lite_case_001_rank_02"
     assert rows[-1]["case_id"] == "pocketmd_lite_case_003"
-    assert rows[-1]["candidate_id"] == "pocketmd_lite_case_003_candidate_002"
+    assert rows[-1]["candidate_id"] == "pocketmd_lite_case_003_rank_02"
     survival_markdown = survival_md_out.read_text(encoding="utf-8")
     assert "# PocketMD Lite Top-K Survival Report" in survival_markdown
     assert "`top_k_refinement_rows_present`" in survival_markdown

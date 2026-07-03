@@ -25,11 +25,11 @@
     "source_acquisition_plan_markdown": "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.md",
     "topk_survival_report": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
   },
-  "generated_at": "2026-07-03T19:47:14.051313+00:00",
+  "generated_at": "2026-07-03T21:00:33.767400+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:eaf39130c43b28e9c877d3f28bcaf6a9cf04175dad7fe0f6921a6ae9c6b37ecd",
-    "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:63575ffc589461c9b6114e0a603b3783bf5b13c164d1fb10259118ad1c53f84b",
-    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:fec3df2575bc3451834172ca615cb7fa7197c932e5127fb534f5f7707444968c",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:304a8d59f8afa28905dffda38f00258526e1f3ebc721d6cb4fdd0619ea3c9efe",
+    "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:3224a7ea04d29e0356404283a5e66f483d2bfe464f2a4722a1cbb5e2b55766f3",
+    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:c10ed60df7b096510507d65ee6fe385ae8d555f4750cba415c424b37e6618ade",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:985edb154d586829d3ec221ee54d820e8b45b880bcfd99a348f1c7037958d6e0",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:161673d8ff036a7a31d657fb972764eeb4b62f6d55cc0840e26f398565707c6f"
   },
@@ -961,6 +961,6 @@
     "source_scope": "bounded_top_k_lite_refinement_rows",
     "status": "operator_acquisition_required"
   },
-  "source_commit_sha": "9bf476d4e4cefaca446b81ee52bc49c3dc481a87",
+  "source_commit_sha": "f40a33124394b829cc7232de6e790c80dd11be7c",
   "status": "handoff_ready_operator_evidence_required"
 }

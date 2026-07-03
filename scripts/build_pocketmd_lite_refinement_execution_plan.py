@@ -85,7 +85,7 @@ def _candidate_slots(minimum_rows: list[dict[str, Any]]) -> list[dict[str, Any]]
                     "case_id": case_id,
                     "top_k_rank": int(rank),
                     "candidate_id_placeholder": f"{case_id}_rank_{int(rank):02d}",
-                    "source_family": "operator_supplied_upstream_top_k",
+                    "source_family": "upstream_ranked_top_k_candidate_set",
                     "required_row_fields": list(REQUIRED_CASE_FIELDS),
                     "required_receipt_fields": [
                         "upstream_top_k_provenance_ref",

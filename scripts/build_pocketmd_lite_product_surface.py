@@ -192,35 +192,90 @@ def _topk_row_template_headers() -> list[str]:
     ]
 
 
-def _topk_row_template_rows() -> list[dict[str, Any]]:
+def _topk_row_template_row(
+    *,
+    case_id: str,
+    source_family: str,
+    top_k_rank: int,
+    candidate_id: str,
+) -> dict[str, Any]:
+    return {
+        "case_id": case_id,
+        "source_family": source_family,
+        "top_k_rank": top_k_rank,
+        "candidate_id": candidate_id,
+        "upstream_top_k_provenance_ref": None,
+        "upstream_top_k_source_checksum": None,
+        "pre_refinement_energy_proxy": None,
+        "post_refinement_energy_proxy": None,
+        "local_min_survived": None,
+        "contact_persistence_rate": None,
+        "h_bond_persistence_rate": None,
+        "clash_count_before": None,
+        "clash_count_after": None,
+        "uncertainty_low": None,
+        "uncertainty_high": None,
+        "uncertainty_unit": "energy_proxy_delta",
+        "provenance_ref": None,
+        "source_checksum": None,
+    }
+
+
+def _topk_row_template_rows_from_refinement_execution_plan(
+    refinement_execution_plan: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    if not isinstance(refinement_execution_plan, dict):
+        return []
+    rows: list[dict[str, Any]] = []
+    for slot in refinement_execution_plan.get("candidate_slots", []):
+        if not isinstance(slot, dict):
+            continue
+        case_id = str(slot.get("case_id") or "").strip()
+        rank = slot.get("top_k_rank")
+        try:
+            top_k_rank = int(rank)
+        except (TypeError, ValueError):
+            continue
+        candidate_id = str(slot.get("candidate_id_placeholder") or "").strip()
+        source_family = str(slot.get("source_family") or "").strip()
+        if not case_id or not candidate_id or not source_family:
+            continue
+        rows.append(
+            _topk_row_template_row(
+                case_id=case_id,
+                source_family=source_family,
+                top_k_rank=top_k_rank,
+                candidate_id=candidate_id,
+            )
+        )
+    return rows
+
+
+def _topk_row_template_rows(
+    refinement_execution_plan: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    plan_rows = _topk_row_template_rows_from_refinement_execution_plan(
+        refinement_execution_plan
+    )
+    if plan_rows:
+        return [
+            {key: _csv_cell(value) for key, value in row.items()}
+            for row in plan_rows
+        ]
+
     rows: list[dict[str, Any]] = []
     for case_index in range(1, POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT + 1):
         case_id = f"pocketmd_lite_case_{case_index:03d}"
         for rank in range(1, POCKETMD_LITE_MINIMUM_TOP_K_RANK_COVERAGE_PER_CASE + 1):
             rows.append(
-                {
-                    "case_id": case_id,
-                    "source_family": "CASF/PDBBind or GPCR operator intake",
-                    "top_k_rank": rank,
-                    "candidate_id": f"{case_id}_candidate_{rank:03d}",
-                    "upstream_top_k_provenance_ref": None,
-                    "upstream_top_k_source_checksum": None,
-                    "pre_refinement_energy_proxy": None,
-                    "post_refinement_energy_proxy": None,
-                    "local_min_survived": None,
-                    "contact_persistence_rate": None,
-                    "h_bond_persistence_rate": None,
-                    "clash_count_before": None,
-                    "clash_count_after": None,
-                    "uncertainty_low": None,
-                    "uncertainty_high": None,
-                    "uncertainty_unit": "energy_proxy_delta",
-                    "provenance_ref": None,
-                    "source_checksum": None,
-                }
+                _topk_row_template_row(
+                    case_id=case_id,
+                    source_family="upstream_ranked_top_k_candidate_set",
+                    top_k_rank=rank,
+                    candidate_id=f"{case_id}_rank_{rank:02d}",
+                )
             )
     return [{key: _csv_cell(value) for key, value in row.items()} for row in rows]
-
 
 def _input_paths() -> list[Path]:
     return [
@@ -1854,6 +1909,7 @@ def _operator_intake_markdown(payload: dict[str, Any]) -> str:
 def write_pocketmd_lite_topk_row_template_csv(
     *,
     packet: dict[str, Any],
+    refinement_execution_plan: dict[str, Any] | None = None,
     repo_root: Path = ROOT,
 ) -> dict[str, Path]:
     raw_paths = packet.get("row_template_artifacts")
@@ -1866,9 +1922,9 @@ def write_pocketmd_lite_topk_row_template_csv(
     resolved = path if path.is_absolute() else repo_root / path
     resolved.parent.mkdir(parents=True, exist_ok=True)
     headers = _topk_row_template_headers()
-    rows = _topk_row_template_rows()
+    rows = _topk_row_template_rows(refinement_execution_plan)
     with resolved.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=headers)
+        writer = csv.DictWriter(handle, fieldnames=headers, lineterminator="\n")
         writer.writeheader()
         for row in rows:
             writer.writerow({header: row.get(header, "") for header in headers})
@@ -1947,7 +2003,42 @@ def write_pocketmd_lite_artifacts(
     )
     write_pocketmd_lite_topk_row_template_csv(
         packet=artifacts["operator_intake_packet"],
+        refinement_execution_plan=artifacts["refinement_execution_plan"],
         repo_root=repo_root,
+    )
+    artifacts["source_acquisition_plan"] = build_pocketmd_lite_source_acquisition_plan(
+        repo_root=repo_root
+    )
+    source_plan_path = (
+        source_acquisition_plan_out
+        if source_acquisition_plan_out.is_absolute()
+        else repo_root / source_acquisition_plan_out
+    )
+    source_plan_path.write_text(
+        _json_text(artifacts["source_acquisition_plan"]),
+        encoding="utf-8",
+    )
+    source_plan_md_path.write_text(
+        render_pocketmd_lite_source_acquisition_markdown(
+            artifacts["source_acquisition_plan"]
+        ),
+        encoding="utf-8",
+    )
+    artifacts["refinement_execution_plan"] = (
+        build_pocketmd_lite_refinement_execution_plan(
+            repo_root=repo_root,
+            source_acquisition_plan_path=source_acquisition_plan_out,
+            survival_report_path=survival_report_out,
+        )
+    )
+    refinement_plan_path = (
+        refinement_execution_plan_out
+        if refinement_execution_plan_out.is_absolute()
+        else repo_root / refinement_execution_plan_out
+    )
+    refinement_plan_path.write_text(
+        _json_text(artifacts["refinement_execution_plan"]),
+        encoding="utf-8",
     )
     return artifacts
 

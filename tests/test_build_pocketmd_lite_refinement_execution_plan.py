@@ -109,6 +109,10 @@ def test_refinement_execution_plan_enumerates_candidate_slots(
     assert payload["candidate_slots"][0]["case_id"] == "case_a"
     assert payload["candidate_slots"][0]["top_k_rank"] == 1
     assert payload["candidate_slots"][0]["status"] == "operator_row_required"
+    assert payload["candidate_slots"][0]["candidate_id_placeholder"] == "case_a_rank_01"
+    assert payload["candidate_slots"][0]["source_family"] == (
+        "upstream_ranked_top_k_candidate_set"
+    )
     assert "upstream_top_k_provenance_ref" in payload["candidate_slots"][0][
         "required_receipt_fields"
     ]
