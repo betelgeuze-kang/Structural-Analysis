@@ -49,7 +49,6 @@
     {
       "classification": "required_for_production_residency",
       "evidence": [
-        "hip_consistency_proof_source_commit_sha_mismatch",
         "hip_consistency_proof_production_hip_path_not_proven",
         "hip_consistency_proof_gate_not_passed",
         "hip_consistency_proof_residual_jvp_worker_path_not_ready",
@@ -99,7 +98,6 @@
       "g1_closure::production_rocm_hip_residual_jvp_worker_required",
       "g1_full_load_lane::checkpoint_load_scale_below_required_full_load",
       "g1_full_load_lane::checkpoint_resolution_no_full_load_candidate",
-      "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch",
       "g1_full_load_lane::hip_consistency_proof_production_hip_path_not_proven",
       "g1_full_load_lane::hip_consistency_proof_gate_not_passed",
       "g1_full_load_lane::hip_consistency_proof_residual_jvp_worker_path_not_ready",
@@ -190,14 +188,13 @@
     "solver_hip_strict_probe_pass": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "g1_closure_blocker_id_count": 23,
+  "g1_closure_blocker_id_count": 22,
   "g1_closure_blocker_ids": [
     "g1_closure::full_load_1p0_checkpoint_candidate_missing",
     "g1_closure::consistent_residual_jacobian_newton_required",
     "g1_closure::production_rocm_hip_residual_jvp_worker_required",
     "g1_full_load_lane::checkpoint_load_scale_below_required_full_load",
     "g1_full_load_lane::checkpoint_resolution_no_full_load_candidate",
-    "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch",
     "g1_full_load_lane::hip_consistency_proof_production_hip_path_not_proven",
     "g1_full_load_lane::hip_consistency_proof_gate_not_passed",
     "g1_full_load_lane::hip_consistency_proof_residual_jvp_worker_path_not_ready",
@@ -216,7 +213,7 @@
     "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing",
     "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing"
   ],
-  "generated_at": "2026-07-03T00:56:31.581625+00:00",
+  "generated_at": "2026-07-03T01:32:11.145968+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -266,7 +263,6 @@
     {
       "classification": "required_for_production_residency",
       "evidence": [
-        "hip_consistency_proof_source_commit_sha_mismatch",
         "hip_consistency_proof_production_hip_path_not_proven",
         "hip_consistency_proof_gate_not_passed",
         "hip_consistency_proof_residual_jvp_worker_path_not_ready",
@@ -300,11 +296,11 @@
     "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json": "sha256:51fcb241f9223f1055fb222f08cedf7e004abb7b3227116defd73232505d3089",
     "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:e18438d69a6f45a18cc8cd0afd15c2b30dd81228ec70b58b8e38204a942a62df",
     "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:43e74595f27fce4e7ff34fa7e9bb832b23c599ac7246d2bb2e7767e91da25424",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:52468a89a55adf10451ac9b4c849b1385d26508657d05291df13d876666bb231",
-    "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:94a7e2a585815054c1c54ab7274b37564776d2ee336228eaf542a55df06e6fd1",
-    "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:8f1082b8a1f3689a5fd9ea1840bf59641339e65e75b1c9b92bfc03d87d555a75",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:396c6be9e3229194736873ec38317cc763a12a5e7038fc83064baaf4e68d7e81",
+    "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:fd327635bb53843b8916ed4b5366e63761a0cf0bba247c808fcd40962dc35b60",
+    "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:65ce31ead6857c512a45d68f01e664740609632652e0b6750dd47edcbe4cbc40",
     "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:8b437a017f328f541ca1a99edc6ff3302ea02cefed1dced8c9d2f62f4111645c",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:fff3f1e0393a6dde86c0ea737f7e51fc95fd41c82f8513656378323c964f3376",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:58cd493acc958b0a40cba57c3e4c9ad374875831f969fe4bfb264da136341f84",
     "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:d29d0d37a3f84ab027144a3998b9a3a451e2e350e1e8be4fc26397b7315b34b9"
   },
   "next_actions": [
@@ -480,7 +476,7 @@
     "solver_hip_strict_probe_pass": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "source_commit_sha": "d7d66e517a575c978aa366d2feda441afdfb40a6",
+  "source_commit_sha": "747a86ce35a2e725bc59daadd93dce243ad57e84",
   "status": "ready",
   "summary": {
     "dominant_near_null_rows": 64,
@@ -491,7 +487,7 @@
     "f2h_lightweight_0p1_0p2_0p4_ready": true,
     "f2h_max_converged_load_scale": 0.4,
     "f2h_residual_trend_across_increasing_load": "nondecreasing",
-    "g1_closure_blocker_id_count": 23,
+    "g1_closure_blocker_id_count": 22,
     "global_frame_shell_tangent_integration_ready": false,
     "load_dependent_geometric_softening_signal": "active_secondary",
     "load_dependent_near_null_geometric_stiffness_comparison_status": "ready",
