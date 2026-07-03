@@ -31,9 +31,9 @@ def test_gpcr_hard_decoy_source_acquisition_plan_exposes_verified_targets() -> N
     assert payload["schema_version"] == (
         "gpcr-hard-decoy-source-acquisition-plan.v1"
     )
-    assert payload["status"] == "operator_acquisition_required"
+    assert payload["status"] == "actual_closure_ready"
     assert payload["contract_pass"] is True
-    assert payload["actual_closure_ready"] is False
+    assert payload["actual_closure_ready"] is True
     assert payload["required_targets"] == ["DRD2", "HTR2A", "OPRM1"]
     assert payload["target_source_count"] == 3
     assert payload["target_source_ids"] == {
@@ -120,6 +120,10 @@ def test_gpcr_hard_decoy_source_acquisition_plan_exposes_verified_targets() -> N
         "HTR2A": {"decoy_count": 20, "positive_count": 12, "total_count": 32},
         "OPRM1": {"decoy_count": 20, "positive_count": 12, "total_count": 32},
     }
+    assert payload["suite_report"]["status"] == "ready"
+    assert payload["suite_report"]["broad_gpcr_family_claim_safe"] is True
+    assert payload["suite_report"]["target_pass_count"] == 3
+    assert payload["suite_report"]["blocker_count"] == 0
     assert payload["acceptable_source_roles"][0]["candidate_snapshot"] == (
         payload["positive_source_snapshot"]
     )
@@ -129,8 +133,8 @@ def test_gpcr_hard_decoy_source_acquisition_plan_exposes_verified_targets() -> N
     assert payload["acceptable_source_roles"][2]["candidate_snapshot"] == (
         payload["chembl_activity_rows"]
     )
-    assert payload["summary"]["actual_closure_ready"] is False
-    assert payload["summary"]["blocker_count"] == 3
+    assert payload["summary"]["actual_closure_ready"] is True
+    assert payload["summary"]["blocker_count"] == 0
     assert payload["summary"]["minimum_decoy_rows_total"] == 60
     assert payload["summary"]["minimum_positive_rows_total"] == 12
     assert payload["summary"]["decoy_candidate_source_ready"] is True
@@ -142,14 +146,13 @@ def test_gpcr_hard_decoy_source_acquisition_plan_exposes_verified_targets() -> N
     assert payload["summary"]["chembl_activity_rows_status"] == (
         "raw_activity_rows_ready"
     )
+    assert payload["summary"]["suite_report_status"] == "ready"
+    assert payload["summary"]["suite_target_pass_count"] == 3
+    assert payload["summary"]["suite_blocker_count"] == 0
     assert payload["summary"]["required_target_count"] == 3
     assert payload["summary"]["target_source_count"] == 3
     assert payload["summary"]["target_source_mapping_complete"] is True
-    assert payload["blockers"] == [
-        "gpcr_activity_ranked_rows_require_operator_promotion_review",
-        "gpcr_activity_ranked_rows_not_imported_to_operator_template",
-        "gpcr_suite_not_rematerialized_from_raw_rows",
-    ]
+    assert payload["blockers"] == []
     assert payload["commands"]["import_rows"].startswith(
         "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py"
     )

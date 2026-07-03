@@ -116,6 +116,7 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
         {
             "slot_id": str(row.get("slot_id") or ""),
             "target_id": str(row.get("target_id") or ""),
+            "status": str(row.get("status") or ""),
             "unblocks_phase3_criteria": [
                 str(item)
                 for item in _as_list(row.get("unblocks_phase3_criteria"))
@@ -135,15 +136,24 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
     first_blocked_target = str(
         suite.get("first_blocked_target") or surface.get("first_blocked_target") or ""
     )
-    first_gate = next(
-        (
-            row
-            for row in gate_unblock_plan
-            if str(row.get("target_id") or "") == first_blocked_target
-        ),
-        gate_unblock_plan[0] if gate_unblock_plan else {},
+    first_gate = (
+        {}
+        if broad_safe
+        else next(
+            (
+                row
+                for row in gate_unblock_plan
+                if str(row.get("target_id") or "") == first_blocked_target
+            ),
+            gate_unblock_plan[0] if gate_unblock_plan else {},
+        )
     )
     science_blocker = science_blockers[0] if science_blockers else ""
+    operator_evidence_gap_count = (
+        int(surface.get("operator_evidence_gap_count") or 0)
+        if "operator_evidence_gap_count" in surface
+        else int(operator_intake.get("required_slot_count") or 0)
+    )
     operator_handoff_summary = {
         "route": str(operator_intake.get("route") or GPCR_OPERATOR_INTAKE_ROUTE),
         "artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET),
@@ -156,11 +166,7 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
             else ""
         ),
         "required_slot_count": int(operator_intake.get("required_slot_count") or 0),
-        "blocked_operator_slot_count": int(
-            surface.get("operator_evidence_gap_count")
-            or operator_intake.get("required_slot_count")
-            or 0
-        ),
+        "blocked_operator_slot_count": operator_evidence_gap_count,
         "minimum_evidence": _as_dict(first_gate.get("minimum_evidence")),
         "materialization_steps": [
             str(row) for row in _as_list(first_gate.get("materialization_steps"))
@@ -217,11 +223,7 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
         "operator_intake_required_slot_count": int(
             operator_intake.get("required_slot_count") or 0
         ),
-        "operator_evidence_gap_count": int(
-            surface.get("operator_evidence_gap_count")
-            or operator_intake.get("required_slot_count")
-            or 0
-        ),
+        "operator_evidence_gap_count": operator_evidence_gap_count,
         "operator_handoff_summary": operator_handoff_summary,
         "linked_artifacts": {
             "operator_intake_packet": str(DEFAULT_OPERATOR_INTAKE_PACKET),

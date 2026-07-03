@@ -1,16 +1,16 @@
 # GPCR Hard-Decoy Operator Intake Packet
 
 - `contract_pass`: `True`
-- `status`: `ready_for_operator_input`
-- `broad_gpcr_family_claim_safe`: `False`
-- `first_blocked_target`: `DRD2`
+- `status`: `ready`
+- `broad_gpcr_family_claim_safe`: `True`
+- `first_blocked_target`: ``
 - `claim_boundary`: This packet is an owner-facing intake contract for GPCR hard-decoy metrics. It does not generate docking results, infer missing values, or promote broad GPCR claims. DRD2, HTR2A, and OPRM1 must all provide raw hard-decoy rows and pass the numeric exit criteria.
 
 | Target | Status | Required Fields |
 |---|---|---|
-| `DRD2` | `operator_input_required` | `target_id, ranking_pr_auc_ci_low, top20_hit_rate, decoys_above_positive_count, positive_out_anchored_by_top_decoys, score_direction, hard_decoy_rows` |
-| `HTR2A` | `operator_input_required` | `target_id, ranking_pr_auc_ci_low, top20_hit_rate, decoys_above_positive_count, positive_out_anchored_by_top_decoys, score_direction, hard_decoy_rows` |
-| `OPRM1` | `operator_input_required` | `target_id, ranking_pr_auc_ci_low, top20_hit_rate, decoys_above_positive_count, positive_out_anchored_by_top_decoys, score_direction, hard_decoy_rows` |
+| `DRD2` | `ready` | `target_id, ranking_pr_auc_ci_low, top20_hit_rate, decoys_above_positive_count, positive_out_anchored_by_top_decoys, score_direction, hard_decoy_rows` |
+| `HTR2A` | `ready` | `target_id, ranking_pr_auc_ci_low, top20_hit_rate, decoys_above_positive_count, positive_out_anchored_by_top_decoys, score_direction, hard_decoy_rows` |
+| `OPRM1` | `ready` | `target_id, ranking_pr_auc_ci_low, top20_hit_rate, decoys_above_positive_count, positive_out_anchored_by_top_decoys, score_direction, hard_decoy_rows` |
 
 ## Gate Unblock Plan
 
@@ -42,9 +42,9 @@
 
 | Target | Ready | Missing Fields | First Blocker |
 |---|---|---|---|
-| `DRD2` | `False` | `ranking_pr_auc_ci_low`, `top20_hit_rate`, `decoys_above_positive_count`, `positive_out_anchored_by_top_decoys`, `score_direction`, `hard_decoy_rows` | `DRD2:hard_decoy_rows_required_for_actual_closure` |
-| `HTR2A` | `False` | `ranking_pr_auc_ci_low`, `top20_hit_rate`, `decoys_above_positive_count`, `positive_out_anchored_by_top_decoys`, `score_direction`, `hard_decoy_rows` | `HTR2A:hard_decoy_rows_required_for_actual_closure` |
-| `OPRM1` | `False` | `ranking_pr_auc_ci_low`, `top20_hit_rate`, `decoys_above_positive_count`, `positive_out_anchored_by_top_decoys`, `score_direction`, `hard_decoy_rows` | `OPRM1:hard_decoy_rows_required_for_actual_closure` |
+| `DRD2` | `True` | `none` | `` |
+| `HTR2A` | `True` | `none` | `` |
+| `OPRM1` | `True` | `none` | `` |
 
 ## Materialization Sequence
 

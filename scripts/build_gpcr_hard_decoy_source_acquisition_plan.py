@@ -43,6 +43,7 @@ DEFAULT_CHEMBL_ACTIVITY_ROWS = (
 DEFAULT_CHEMBL_ACTIVITY_ROWS_MD = DEFAULT_CHEMBL_ACTIVITY_ROWS.with_suffix(".md")
 DEFAULT_OPERATOR_TEMPLATE = PRODUCTIZATION / "gpcr_hard_decoy_operator_template.json"
 DEFAULT_SUITE_REPORT = PRODUCTIZATION / "gpcr_hard_decoy_suite_report.json"
+DEFAULT_SUITE_REPORT_MD = DEFAULT_SUITE_REPORT.with_suffix(".md")
 
 SCHEMA_VERSION = "gpcr-hard-decoy-source-acquisition-plan.v1"
 CHEMBL_API_ROOT = "https://www.ebi.ac.uk/chembl/api/data"
@@ -211,6 +212,34 @@ def _chembl_activity_rows_summary(
     }
 
 
+def _suite_report_summary(report: dict[str, Any]) -> dict[str, Any]:
+    phase3_exit_gate = report.get("phase3_exit_gate")
+    if not isinstance(phase3_exit_gate, dict):
+        phase3_exit_gate = {}
+    return {
+        "artifact": str(DEFAULT_SUITE_REPORT),
+        "markdown_artifact": str(DEFAULT_SUITE_REPORT_MD),
+        "status": str(report.get("status") or "missing"),
+        "contract_pass": report.get("contract_pass"),
+        "broad_gpcr_family_claim_safe": bool(
+            report.get("broad_gpcr_family_claim_safe")
+        ),
+        "target_count": int(report.get("target_count") or 0),
+        "target_pass_count": int(report.get("target_pass_count") or 0),
+        "first_blocked_target": str(report.get("first_blocked_target") or ""),
+        "first_blocker": str(report.get("first_blocker") or ""),
+        "phase3_exit_gate_status": str(phase3_exit_gate.get("status") or ""),
+        "phase3_failed_criteria": [
+            str(row) for row in phase3_exit_gate.get("failed_criteria", [])
+        ]
+        if isinstance(phase3_exit_gate.get("failed_criteria"), list)
+        else [],
+        "blocker_count": len(report.get("blockers", []))
+        if isinstance(report.get("blockers"), list)
+        else 0,
+    }
+
+
 def _target_query_url(uniprot_accession: str) -> str:
     return (
         f"{CHEMBL_API_ROOT}/target.json?"
@@ -290,10 +319,20 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
     chembl_activity_rows_summary = _chembl_activity_rows_summary(
         chembl_activity_rows
     )
+    suite_report = _load_json(repo_root, DEFAULT_SUITE_REPORT)
+    suite_report_summary = _suite_report_summary(suite_report)
     required_targets = list(REQUIRED_TARGETS)
     target_ids = [str(row["target_id"]) for row in target_sources]
     chembl_rows_ready = bool(chembl_activity_rows_summary.get("raw_rows_ready"))
+    actual_closure_ready = bool(
+        suite_report_summary.get("broad_gpcr_family_claim_safe")
+        and suite_report_summary.get("target_pass_count") == len(required_targets)
+        and suite_report_summary.get("blocker_count") == 0
+    )
     blockers = (
+        []
+        if actual_closure_ready
+        else
         [
             "gpcr_activity_ranked_rows_require_operator_promotion_review",
             "gpcr_activity_ranked_rows_not_imported_to_operator_template",
@@ -317,6 +356,7 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
                 DEFAULT_POSITIVE_SOURCE_SNAPSHOT,
                 DEFAULT_DECOY_SOURCE_SNAPSHOT,
                 DEFAULT_CHEMBL_ACTIVITY_ROWS,
+                DEFAULT_SUITE_REPORT,
                 Path("scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py"),
                 Path("scripts/materialize_gpcr_hard_decoy_suite_report.py"),
             ],
@@ -324,9 +364,11 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
             reuse_policy="gpcr_hard_decoy_source_acquisition_plan",
             repo_root=repo_root,
         ),
-        "status": "operator_acquisition_required",
+        "status": "actual_closure_ready"
+        if actual_closure_ready
+        else "operator_acquisition_required",
         "contract_pass": True,
-        "actual_closure_ready": False,
+        "actual_closure_ready": actual_closure_ready,
         "required_targets": required_targets,
         "target_source_count": len(target_sources),
         "target_sources": target_sources,
@@ -340,6 +382,7 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
         "positive_source_snapshot": positive_source_summary,
         "decoy_source_snapshot": decoy_source_summary,
         "chembl_activity_rows": chembl_activity_rows_summary,
+        "suite_report": suite_report_summary,
         "per_target_exit_gates": [
             _per_target_exit_gate(target_id) for target_id in required_targets
         ],
@@ -508,6 +551,11 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
             "chembl_activity_row_count": int(
                 chembl_activity_rows_summary.get("row_count") or 0
             ),
+            "suite_report_status": str(suite_report_summary.get("status") or ""),
+            "suite_target_pass_count": int(
+                suite_report_summary.get("target_pass_count") or 0
+            ),
+            "suite_blocker_count": int(suite_report_summary.get("blocker_count") or 0),
             "minimum_positive_rows_total": int(
                 RAW_ROW_QUALITY_CRITERIA["min_positive_count_per_target"]
             )
@@ -516,7 +564,7 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
                 RAW_ROW_QUALITY_CRITERIA["min_decoy_count_per_target"]
             )
             * len(required_targets),
-            "actual_closure_ready": False,
+            "actual_closure_ready": actual_closure_ready,
             "blocker_count": len(blockers),
         },
         "claim_boundary": (
@@ -544,6 +592,9 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `chembl_activity_rows`: `{payload['chembl_activity_rows']['artifact']}`",
         f"- `chembl_activity_rows_ready`: `{payload['chembl_activity_rows']['raw_rows_ready']}`",
         f"- `chembl_activity_row_count`: `{payload['chembl_activity_rows']['row_count']}`",
+        f"- `suite_report`: `{payload['suite_report']['artifact']}`",
+        f"- `suite_status`: `{payload['suite_report']['status']}`",
+        f"- `suite_target_pass_count`: `{payload['suite_report']['target_pass_count']}`",
         "",
         "| Target | UniProt | ChEMBL | Role |",
         "|---|---|---|---|",

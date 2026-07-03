@@ -119,13 +119,9 @@
       "role": "scoring_protocol"
     }
   ],
-  "actual_closure_ready": false,
-  "blocker_count": 3,
-  "blockers": [
-    "gpcr_activity_ranked_rows_require_operator_promotion_review",
-    "gpcr_activity_ranked_rows_not_imported_to_operator_template",
-    "gpcr_suite_not_rematerialized_from_raw_rows"
-  ],
+  "actual_closure_ready": true,
+  "blocker_count": 0,
+  "blockers": [],
   "chembl_activity_rows": {
     "actual_closure_ready": false,
     "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json",
@@ -210,15 +206,16 @@
     "total_decoy_candidate_count": 60
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T17:06:35.164468+00:00",
+  "generated_at": "2026-07-03T17:14:34.810214+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json": "sha256:6ec740aa2bd6c18684d2ea1eec0d9bc678786aa0fe114b1e632192c1bf4c4b29",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json": "sha256:66ed4370361fd02d9f820067a4ea02506c43834e681972fdb37ee05d6b37c18b",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json": "sha256:14fc63c1890aaaf1e9187a79b47fef21f3dc33511c2cf14e97356942568ae2c4",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:5bb12770e94ce68a1482096dc886c7b4450d75e4b2679f5dcaa90071909c75b7",
     "scripts/build_gpcr_hard_decoy_chembl_activity_rows.py": "sha256:2dafd153b15bf3287f500ebe07f4a47df2bc5973e37391e8ae520bec5f084543",
     "scripts/build_gpcr_hard_decoy_decoy_source_snapshot.py": "sha256:94862b9e94724e136d0bfcd966ad500d196245587f9dfb86bada83ea6c25e250",
     "scripts/build_gpcr_hard_decoy_positive_source_snapshot.py": "sha256:6e27e6448a6114b6defd76f52cf63ef2179ba57bd8895634ec8037f8c3378bc1",
-    "scripts/build_gpcr_hard_decoy_source_acquisition_plan.py": "sha256:d368be4fde41bca56308d8ba85f44618c8e218f18d36241763b49082ce5e1fab",
+    "scripts/build_gpcr_hard_decoy_source_acquisition_plan.py": "sha256:4744de0029ab0431ce15b89b80ff364b0ee75bf0b4a7054249998b0388024d67",
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:8824e14602faf05a39d841d8367d5773c76a23ffbf8f614ee99f926a8ff478a6"
   },
@@ -328,11 +325,25 @@
     "source_attached_candidate_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json"
   },
   "schema_version": "gpcr-hard-decoy-source-acquisition-plan.v1",
-  "source_commit_sha": "2a0302d4b2338b3b699cd167f39cf2666c1ccfaa",
-  "status": "operator_acquisition_required",
+  "source_commit_sha": "919c7f9a482754407d7bea77439628701881dabf",
+  "status": "actual_closure_ready",
+  "suite_report": {
+    "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
+    "blocker_count": 0,
+    "broad_gpcr_family_claim_safe": true,
+    "contract_pass": true,
+    "first_blocked_target": "",
+    "first_blocker": "",
+    "markdown_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.md",
+    "phase3_exit_gate_status": "ready",
+    "phase3_failed_criteria": [],
+    "status": "ready",
+    "target_count": 3,
+    "target_pass_count": 3
+  },
   "summary": {
-    "actual_closure_ready": false,
-    "blocker_count": 3,
+    "actual_closure_ready": true,
+    "blocker_count": 0,
     "chembl_activity_row_count": 96,
     "chembl_activity_rows_ready": true,
     "chembl_activity_rows_status": "raw_activity_rows_ready",
@@ -343,6 +354,9 @@
     "positive_source_ready": true,
     "positive_source_snapshot_status": "positive_sources_ready",
     "required_target_count": 3,
+    "suite_blocker_count": 0,
+    "suite_report_status": "ready",
+    "suite_target_pass_count": 3,
     "target_source_count": 3,
     "target_source_mapping_complete": true,
     "total_decoy_candidate_count": 60,

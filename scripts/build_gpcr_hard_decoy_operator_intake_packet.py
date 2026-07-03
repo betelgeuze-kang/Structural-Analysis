@@ -254,17 +254,21 @@ def _target_template(target_id: str) -> dict[str, Any]:
     }
 
 
-def _target_slot(target_id: str) -> dict[str, Any]:
+def _target_slot(target_id: str, *, current_ready: bool = False) -> dict[str, Any]:
     return {
         "slot_id": f"{target_id.lower()}_hard_decoy_metrics",
         "target_id": target_id,
-        "status": "operator_input_required",
-        "required": True,
+        "status": "ready" if current_ready else "operator_input_required",
+        "required": not current_ready,
         "template_artifact": str(DEFAULT_OPERATOR_TEMPLATE),
         "required_fields": list(REQUIRED_OPERATOR_FIELDS),
         "exit_criteria": EXIT_CRITERIA,
         "template": _target_template(target_id),
         "owner_actions": [
+            "review computed hard-decoy metrics and source receipts",
+        ]
+        if current_ready
+        else [
             "attach authoritative hard-decoy evaluation metrics for this target",
             "keep ranking_pr_auc_ci_low as the lower confidence bound",
             "keep top20_hit_rate as a fraction, not a percent",
@@ -330,17 +334,21 @@ def _target_execution_preflight_checklist(
         template_row = template_rows.get(target_id, {"target_id": target_id})
         suite_row = suite_rows.get(target_id, {})
         blockers = [str(row) for row in _as_list(suite_row.get("blockers"))]
-        missing_fields = _target_missing_fields(template_row)
-        current_values = {
-            field: template_row.get(field)
-            for field in REQUIRED_OPERATOR_FIELDS
-            if field != "target_id"
-        }
         current_ready = bool(
             suite_row.get("status") == "pass"
             and suite_row.get("contract_pass") is True
             and not blockers
         )
+        raw_missing_fields = _target_missing_fields(template_row)
+        missing_fields = [] if current_ready else raw_missing_fields
+        current_values = {}
+        for field in REQUIRED_OPERATOR_FIELDS:
+            if field == "target_id":
+                continue
+            value = suite_row.get(field)
+            if value is None:
+                value = template_row.get(field)
+            current_values[field] = value
         first_blocker = (
             blockers[0]
             if blockers
@@ -408,12 +416,19 @@ def _target_execution_preflight_checklist(
     return rows
 
 
-def _gate_unblock_plan(*, materialize_command: str) -> list[dict[str, Any]]:
+def _gate_unblock_plan(
+    *,
+    materialize_command: str,
+    ready_targets: set[str] | None = None,
+) -> list[dict[str, Any]]:
+    ready_targets = ready_targets or set()
     return [
         {
             "slot_id": f"{target_id.lower()}_hard_decoy_metrics",
             "target_id": target_id,
-            "status": "operator_input_required",
+            "status": "ready"
+            if target_id in ready_targets
+            else "operator_input_required",
             "template_artifact": str(DEFAULT_OPERATOR_TEMPLATE),
             "unblocks_phase3_criteria": list(PHASE3_EXIT_CRITERIA_BY_FIELD.values()),
             "minimum_evidence": {
@@ -457,7 +472,9 @@ def _phase3_raw_row_closure_matrix(
     import_command: str,
     materialize_command: str,
     row_template_artifact: str,
+    ready_targets: set[str] | None = None,
 ) -> list[dict[str, Any]]:
+    ready_targets = ready_targets or set()
     criteria = list(PHASE3_EXIT_CRITERIA_BY_FIELD.values())
     rows: list[dict[str, Any]] = []
     for target_id in REQUIRED_TARGETS:
@@ -466,7 +483,9 @@ def _phase3_raw_row_closure_matrix(
                 "row_input_id": "gpcr_hard_decoy_rows",
                 "target_id": target_id,
                 "slot_id": f"{target_id.lower()}_hard_decoy_metrics",
-                "status": "operator_input_required",
+                "status": "ready"
+                if target_id in ready_targets
+                else "operator_input_required",
                 "default_row_path_candidates": list(DEFAULT_RAW_ROW_INPUT_CANDIDATES),
                 "row_template_artifact": row_template_artifact,
                 "accepted_formats": ["json", "jsonl", "ndjson", "csv", "tsv"],
@@ -529,8 +548,14 @@ def build_gpcr_hard_decoy_operator_intake_packet(
     surface = _load_json(repo_root, DEFAULT_EVIDENCE_SURFACE)
     source_acquisition_plan = _load_json(repo_root, DEFAULT_SOURCE_ACQUISITION_PLAN)
     blockers = [str(row) for row in _as_list(suite.get("blockers") or surface.get("blockers"))]
-    first_blocked_target = str(
-        suite.get("first_blocked_target") or surface.get("first_blocked_target") or "DRD2"
+    broad_gpcr_family_claim_safe = bool(suite.get("broad_gpcr_family_claim_safe"))
+    raw_first_blocked_target = str(
+        suite.get("first_blocked_target") or surface.get("first_blocked_target") or ""
+    )
+    first_blocked_target = (
+        ""
+        if broad_gpcr_family_claim_safe
+        else raw_first_blocked_target or "DRD2"
     )
     root_cause_tags = [
         str(row)
@@ -593,22 +618,32 @@ def build_gpcr_hard_decoy_operator_intake_packet(
         "positive_source_snapshot": positive_source_snapshot,
         "decoy_source_snapshot": decoy_source_snapshot,
         "chembl_activity_rows": chembl_activity_rows,
+        "suite_report": _as_dict(source_acquisition_plan.get("suite_report")),
         "blocker_count": int(source_acquisition_plan.get("blocker_count") or 0),
         "blockers": [
             str(row) for row in _as_list(source_acquisition_plan.get("blockers"))
         ],
         "command": source_acquisition_command,
     }
-    gate_unblock_plan = _gate_unblock_plan(materialize_command=materialize_command)
-    phase3_raw_row_closure_matrix = _phase3_raw_row_closure_matrix(
-        import_command=import_template_command,
-        materialize_command=materialize_command,
-        row_template_artifact=row_template_artifact,
-    )
     target_execution_preflight = _target_execution_preflight_checklist(
         template=template,
         suite=suite,
         materialize_command=materialize_command,
+    )
+    ready_targets = {
+        str(row.get("target_id") or "")
+        for row in target_execution_preflight
+        if bool(row.get("current_ready"))
+    }
+    gate_unblock_plan = _gate_unblock_plan(
+        materialize_command=materialize_command,
+        ready_targets=ready_targets,
+    )
+    phase3_raw_row_closure_matrix = _phase3_raw_row_closure_matrix(
+        import_command=import_template_command,
+        materialize_command=materialize_command,
+        row_template_artifact=row_template_artifact,
+        ready_targets=ready_targets,
     )
     first_target_preflight_blocker = next(
         (row for row in target_execution_preflight if not row["current_ready"]),
@@ -624,8 +659,12 @@ def build_gpcr_hard_decoy_operator_intake_packet(
             repo_root=repo_root,
         ),
         "packet_id": "gpcr_hard_decoy_operator_intake_packet",
-        "status": "ready_for_operator_input",
-        "reason_code": "PASS_INTAKE_PACKET",
+        "status": "ready"
+        if broad_gpcr_family_claim_safe
+        else "ready_for_operator_input",
+        "reason_code": "PASS_ACTUAL_CLOSURE"
+        if broad_gpcr_family_claim_safe
+        else "PASS_INTAKE_PACKET",
         "contract_pass": True,
         "read_model_ready": True,
         "route": GPCR_OPERATOR_INTAKE_ROUTE,
@@ -635,12 +674,15 @@ def build_gpcr_hard_decoy_operator_intake_packet(
             "artifact": str(DEFAULT_OUT),
             "mutation_allowed": False,
         },
-        "broad_gpcr_family_claim_safe": False,
-        "owner_input_required": True,
+        "broad_gpcr_family_claim_safe": broad_gpcr_family_claim_safe,
+        "owner_input_required": not broad_gpcr_family_claim_safe,
         "required_targets": list(REQUIRED_TARGETS),
         "required_operator_fields": list(REQUIRED_OPERATOR_FIELDS),
         "exit_criteria": EXIT_CRITERIA,
-        "target_slots": [_target_slot(target_id) for target_id in REQUIRED_TARGETS],
+        "target_slots": [
+            _target_slot(target_id, current_ready=target_id in ready_targets)
+            for target_id in REQUIRED_TARGETS
+        ],
         "required_slot_count": len(REQUIRED_TARGETS),
         "gate_unblock_plan": gate_unblock_plan,
         "gate_unblock_plan_count": len(gate_unblock_plan),
@@ -699,7 +741,9 @@ def build_gpcr_hard_decoy_operator_intake_packet(
             ),
         },
         "raw_row_dropzone": {
-            "status": "ready_for_operator_rows",
+            "status": "rows_materialized"
+            if broad_gpcr_family_claim_safe
+            else "ready_for_operator_rows",
             "auto_detection_policy": (
                 "Place accepted GPCR hard-decoy row files at the default paths, or "
                 "promote the reviewed ChEMBL activity row artifact, then run the "
@@ -793,6 +837,13 @@ def build_gpcr_hard_decoy_operator_intake_packet(
             "row_templates": row_template_artifacts,
         },
         "next_actions": [
+            "review_gpcr_hard_decoy_suite_report",
+            "refresh_gpcr_hard_decoy_product_report",
+            "regenerate_product_capabilities_surface",
+            "regenerate_goal_bottleneck_roadmap_surface",
+        ]
+        if broad_gpcr_family_claim_safe
+        else [
             "complete_gpcr_hard_decoy_source_acquisition_plan",
             "build_gpcr_hard_decoy_chembl_activity_rows",
             "review_gpcr_chembl_activity_rows_for_hard_decoy_source_acceptance",
@@ -836,11 +887,13 @@ def build_gpcr_hard_decoy_operator_intake_packet(
             "chembl_activity_row_count": int(
                 chembl_activity_rows.get("row_count") or 0
             ),
-            "broad_gpcr_family_claim_safe": False,
+            "broad_gpcr_family_claim_safe": broad_gpcr_family_claim_safe,
+            "owner_input_required": not broad_gpcr_family_claim_safe,
         },
         "summary_line": (
             "GPCR hard-decoy operator intake packet: READY | "
-            f"targets={len(REQUIRED_TARGETS)} | first_blocked_target={first_blocked_target}"
+            f"targets={len(ready_targets)}/{len(REQUIRED_TARGETS)} | "
+            f"first_blocked_target={first_blocked_target or 'none'}"
         ),
         "claim_boundary": (
             "This packet is an owner-facing intake contract for GPCR hard-decoy metrics. "

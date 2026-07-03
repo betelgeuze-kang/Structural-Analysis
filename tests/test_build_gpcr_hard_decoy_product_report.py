@@ -19,11 +19,11 @@ sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
 
-def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> None:
+def test_gpcr_hard_decoy_product_report_is_readonly_and_science_ready() -> None:
     report = module.build_gpcr_hard_decoy_product_report(repo_root=REPO_ROOT)
 
     assert report["schema_version"] == "gpcr-hard-decoy-product-report.v1"
-    assert report["status"] == "ready_science_claim_blocked"
+    assert report["status"] == "ready"
     assert report["reason_code"] == "PASS_READ_MODEL"
     assert report["contract_pass"] is True
     assert report["read_model_ready"] is True
@@ -41,55 +41,30 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> Non
         ),
         "mutation_allowed": False,
     }
-    assert report["broad_gpcr_family_claim_safe"] is False
-    assert report["science_claim_status"] == "blocked"
+    assert report["broad_gpcr_family_claim_safe"] is True
+    assert report["science_claim_status"] == "ready"
     assert report["target_count"] == 3
-    assert report["target_pass_count"] == 0
-    assert report["first_blocked_target"] == "DRD2"
-    assert report["first_blocker"] == "DRD2:hard_decoy_rows_required_for_actual_closure"
-    assert report["root_cause_tags"] == [
-        "hard_decoy_rows_required",
-        "operator_values_required",
-    ]
+    assert report["target_pass_count"] == 3
+    assert report["first_blocked_target"] == ""
+    assert report["first_blocker"] == ""
+    assert report["root_cause_tags"] == []
     assert report["operator_intake_route"] == (
         "/product/gpcr-hard-decoy-suite-report/operator-intake"
     )
     assert report["operator_intake_required_slot_count"] == 3
-    assert report["operator_evidence_gap_count"] == 3
-    assert report["operator_handoff_summary"]["first_blocked_target"] == "DRD2"
-    assert report["operator_handoff_summary"]["first_blocker"] == (
-        "DRD2:hard_decoy_rows_required_for_actual_closure"
-    )
-    assert report["operator_handoff_summary"]["first_next_action"] == (
-        "fill DRD2 hard-decoy metrics in the GPCR operator intake packet"
-    )
+    assert report["operator_evidence_gap_count"] == 0
+    assert report["operator_handoff_summary"]["first_blocked_target"] == ""
+    assert report["operator_handoff_summary"]["first_blocker"] == ""
+    assert report["operator_handoff_summary"]["first_next_action"] == ""
     assert report["operator_handoff_summary"]["required_slot_count"] == 3
-    assert report["operator_handoff_summary"]["blocked_operator_slot_count"] == 3
-    assert report["operator_handoff_summary"]["minimum_evidence"]["target_id"] == (
-        "DRD2"
-    )
-    assert report["operator_handoff_summary"]["materialization_steps"] == [
-        "materialize_gpcr_hard_decoy_suite_report",
-        "refresh_gpcr_hard_decoy_product_report",
-        "refresh_product_capabilities_surface",
-        "refresh_goal_bottleneck_roadmap_surface",
-    ]
-    assert (
-        "materialize_gpcr_hard_decoy_suite_report.py"
-        in report["operator_handoff_summary"]["materialization_command"]
-    )
-    assert report["operator_handoff_summary"]["validation_command"] == report[
-        "operator_handoff_summary"
-    ]["materialization_command"]
-    assert report["phase3_exit_gate"]["status"] == "blocked"
-    assert report["phase3_exit_gate"]["failed_criterion_count"] == 5
-    assert report["phase3_exit_gate"]["failed_criteria"] == [
-        "ranking_pr_auc_ci_low_min",
-        "top20_hit_rate_min",
-        "decoys_above_positive_count_max",
-        "no_positive_out_anchored_by_top_decoys",
-        "raw_hard_decoy_rows_actual_closure",
-    ]
+    assert report["operator_handoff_summary"]["blocked_operator_slot_count"] == 0
+    assert report["operator_handoff_summary"]["minimum_evidence"] == {}
+    assert report["operator_handoff_summary"]["materialization_steps"] == []
+    assert report["operator_handoff_summary"]["materialization_command"] == ""
+    assert report["operator_handoff_summary"]["validation_command"] == ""
+    assert report["phase3_exit_gate"]["status"] == "ready"
+    assert report["phase3_exit_gate"]["failed_criterion_count"] == 0
+    assert report["phase3_exit_gate"]["failed_criteria"] == []
     assert report["required_targets"] == ["DRD2", "HTR2A", "OPRM1"]
     assert report["required_operator_fields"] == [
         "target_id",
@@ -100,7 +75,7 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> Non
         "score_direction",
         "hard_decoy_rows",
     ]
-    assert "DRD2:hard_decoy_rows_required_for_actual_closure" in report["science_blockers"]
+    assert report["science_blockers"] == []
     assert report["linked_artifacts"] == {
         "evidence_surface": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
         "operator_intake_packet": (
@@ -129,7 +104,7 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> Non
         )
     } == {
         "schema_version": "gpcr-hard-decoy-operator-intake-packet.v1",
-        "status": "ready_for_operator_input",
+        "status": "ready",
         "artifact": (
             "implementation/phase1/release_evidence/productization/"
             "gpcr_hard_decoy_operator_intake_packet.json"
@@ -170,6 +145,7 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> Non
     }
     gate_plan = {row["target_id"]: row for row in operator_packet["gate_unblock_plan"]}
     assert gate_plan["DRD2"]["slot_id"] == "drd2_hard_decoy_metrics"
+    assert gate_plan["DRD2"]["status"] == "ready"
     assert gate_plan["DRD2"]["unblocks_phase3_criteria"] == [
         "ranking_pr_auc_ci_low_min",
         "top20_hit_rate_min",
@@ -198,15 +174,8 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> Non
         row["endpoint_id"] for row in report["endpoints"]
     } >= {"get_gpcr_hard_decoy_operator_intake_packet"}
     assert "promote_broad_gpcr_claim" in report["forbidden_operations"]
-    assert report["next_actions"][:4] == [
-        "review_gpcr_chembl_activity_rows_for_hard_decoy_source_acceptance",
-        "promote_gpcr_chembl_activity_rows_to_default_dropzone",
-        "materialize_gpcr_hard_decoy_operator_template_from_rows",
-        "run_gpcr_hard_decoy_materializer",
-    ]
-    assert report["summary"]["operator_intake_packet_status"] == (
-        "ready_for_operator_input"
-    )
+    assert report["next_actions"] == ["review_gpcr_hard_decoy_suite_report"]
+    assert report["summary"]["operator_intake_packet_status"] == "ready"
     assert report["summary"]["chembl_activity_rows_ready"] is True
     assert report["summary"]["chembl_activity_row_count"] == 96
     assert report["summary"]["product_report_route"] == (
@@ -219,15 +188,9 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> Non
     assert report["summary"]["gate_unblock_plan_count"] == 3
     assert report["summary"]["minimum_target_count"] == 3
     assert report["summary"]["minimum_metric_field_count_per_target"] == 4
-    assert report["summary"]["phase3_exit_gate_status"] == "blocked"
-    assert report["summary"]["phase3_failed_criterion_count"] == 5
-    assert report["summary"]["phase3_failed_criteria"] == [
-        "ranking_pr_auc_ci_low_min",
-        "top20_hit_rate_min",
-        "decoys_above_positive_count_max",
-        "no_positive_out_anchored_by_top_decoys",
-        "raw_hard_decoy_rows_actual_closure",
-    ]
+    assert report["summary"]["phase3_exit_gate_status"] == "ready"
+    assert report["summary"]["phase3_failed_criterion_count"] == 0
+    assert report["summary"]["phase3_failed_criteria"] == []
 
 
 def test_gpcr_hard_decoy_product_report_cli_writes_contract(tmp_path: Path) -> None:

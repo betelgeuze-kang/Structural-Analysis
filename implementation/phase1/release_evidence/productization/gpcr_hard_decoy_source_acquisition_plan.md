@@ -1,9 +1,9 @@
 # GPCR Hard-Decoy Source Acquisition Plan
 
-- `status`: `operator_acquisition_required`
+- `status`: `actual_closure_ready`
 - `contract_pass`: `True`
-- `actual_closure_ready`: `False`
-- `blocker_count`: `3`
+- `actual_closure_ready`: `True`
+- `blocker_count`: `0`
 - `positive_source_snapshot`: `implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json`
 - `positive_source_ready`: `True`
 - `decoy_source_snapshot`: `implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json`
@@ -11,6 +11,9 @@
 - `chembl_activity_rows`: `implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json`
 - `chembl_activity_rows_ready`: `True`
 - `chembl_activity_row_count`: `96`
+- `suite_report`: `implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json`
+- `suite_status`: `ready`
+- `suite_target_pass_count`: `3`
 
 | Target | UniProt | ChEMBL | Role |
 |---|---|---|---|

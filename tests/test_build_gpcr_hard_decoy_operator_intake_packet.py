@@ -27,7 +27,7 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
     packet = module.build_gpcr_hard_decoy_operator_intake_packet(repo_root=REPO_ROOT)
 
     assert packet["schema_version"] == "gpcr-hard-decoy-operator-intake-packet.v1"
-    assert packet["status"] == "ready_for_operator_input"
+    assert packet["status"] == "ready"
     assert packet["contract_pass"] is True
     assert packet["read_model_ready"] is True
     assert packet["route"] == "/product/gpcr-hard-decoy-suite-report/operator-intake"
@@ -43,8 +43,8 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         ),
         "mutation_allowed": False,
     }
-    assert packet["broad_gpcr_family_claim_safe"] is False
-    assert packet["owner_input_required"] is True
+    assert packet["broad_gpcr_family_claim_safe"] is True
+    assert packet["owner_input_required"] is False
     assert packet["required_targets"] == ["DRD2", "HTR2A", "OPRM1"]
     assert packet["required_operator_fields"] == [
         "target_id",
@@ -80,7 +80,7 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "gpcr_hard_decoy_source_acquisition_plan.json"
     )
     assert packet["raw_row_import"]["source_acquisition_plan"]["status"] == (
-        "operator_acquisition_required"
+        "actual_closure_ready"
     )
     assert packet["raw_row_import"]["source_acquisition_plan"][
         "target_source_ids"
@@ -122,45 +122,38 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "HTR2A": {"decoy_count": 20, "positive_count": 12, "total_count": 32},
         "OPRM1": {"decoy_count": 20, "positive_count": 12, "total_count": 32},
     }
+    assert packet["raw_row_import"]["source_acquisition_plan"]["suite_report"][
+        "status"
+    ] == "ready"
+    assert packet["raw_row_import"]["source_acquisition_plan"]["suite_report"][
+        "target_pass_count"
+    ] == 3
     assert packet["target_execution_preflight_count"] == 3
-    assert packet["first_target_execution_preflight_blocker"]["target_id"] == "DRD2"
-    assert packet["first_target_execution_preflight_blocker"]["first_blocker"] == (
-        "DRD2:hard_decoy_rows_required_for_actual_closure"
-    )
+    assert packet["first_target_execution_preflight_blocker"] == {}
     assert packet["minimum_target_count"] == 3
     assert packet["minimum_metric_field_count_per_target"] == 4
     preflight = {row["target_id"]: row for row in packet["target_execution_preflight"]}
     assert set(preflight) == {"DRD2", "HTR2A", "OPRM1"}
     assert preflight["DRD2"]["slot_id"] == "drd2_hard_decoy_metrics"
-    assert preflight["DRD2"]["current_ready"] is False
-    assert preflight["DRD2"]["phase3_blocked"] is True
-    assert preflight["DRD2"]["missing_operator_fields"] == [
-        "ranking_pr_auc_ci_low",
-        "top20_hit_rate",
-        "decoys_above_positive_count",
-        "positive_out_anchored_by_top_decoys",
-        "score_direction",
-        "hard_decoy_rows",
-    ]
-    assert preflight["DRD2"]["current_values"] == {
-        "decoys_above_positive_count": None,
-        "hard_decoy_rows": None,
-        "positive_out_anchored_by_top_decoys": None,
-        "ranking_pr_auc_ci_low": None,
-        "score_direction": None,
-        "top20_hit_rate": None,
-    }
-    assert preflight["DRD2"]["blocked_phase3_criteria"] == [
-        "ranking_pr_auc_ci_low_min",
-        "top20_hit_rate_min",
-        "decoys_above_positive_count_max",
-        "no_positive_out_anchored_by_top_decoys",
-        "raw_hard_decoy_rows_actual_closure",
-    ]
-    assert preflight["DRD2"]["root_cause_tags"] == [
-        "hard_decoy_rows_required",
-        "operator_values_required",
-    ]
+    assert preflight["DRD2"]["current_ready"] is True
+    assert preflight["DRD2"]["phase3_blocked"] is False
+    assert preflight["DRD2"]["missing_operator_fields"] == []
+    assert preflight["DRD2"]["current_values"]["ranking_pr_auc_ci_low"] == 1.0
+    assert preflight["DRD2"]["current_values"]["top20_hit_rate"] == 0.6
+    assert preflight["DRD2"]["current_values"]["decoys_above_positive_count"] == 0
+    assert (
+        preflight["DRD2"]["current_values"][
+            "positive_out_anchored_by_top_decoys"
+        ]
+        is False
+    )
+    assert preflight["DRD2"]["current_values"]["score_direction"] == (
+        "higher_is_better"
+    )
+    assert len(preflight["DRD2"]["current_values"]["hard_decoy_rows"]) == 32
+    assert preflight["DRD2"]["blocked_phase3_criteria"] == []
+    assert preflight["DRD2"]["root_cause_tags"] == []
+    assert preflight["DRD2"]["first_blocker"] == ""
     assert (
         "materialize_gpcr_hard_decoy_suite_report.py"
         in preflight["DRD2"]["materialization_command"]
@@ -168,6 +161,7 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
     gate_plan = {row["target_id"]: row for row in packet["gate_unblock_plan"]}
     assert set(gate_plan) == {"DRD2", "HTR2A", "OPRM1"}
     assert gate_plan["DRD2"]["slot_id"] == "drd2_hard_decoy_metrics"
+    assert gate_plan["DRD2"]["status"] == "ready"
     assert gate_plan["DRD2"]["unblocks_phase3_criteria"] == [
         "ranking_pr_auc_ci_low_min",
         "top20_hit_rate_min",
@@ -251,6 +245,7 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
     assert set(closure_matrix) == {"DRD2", "HTR2A", "OPRM1"}
     assert closure_matrix["DRD2"]["row_input_id"] == "gpcr_hard_decoy_rows"
     assert closure_matrix["DRD2"]["slot_id"] == "drd2_hard_decoy_metrics"
+    assert closure_matrix["DRD2"]["status"] == "ready"
     assert closure_matrix["DRD2"]["accepted_formats"] == [
         "json",
         "jsonl",
@@ -299,13 +294,12 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
     assert "materialize_gpcr_hard_decoy_suite_report.py" in (
         closure_matrix["DRD2"]["materialization_command"]
     )
-    assert packet["current_suite_status"]["first_blocked_target"] == "DRD2"
-    assert packet["current_suite_status"]["blocker_count"] == 15
+    assert packet["current_suite_status"]["first_blocked_target"] == ""
+    assert packet["current_suite_status"]["target_pass_count"] == 3
+    assert packet["current_suite_status"]["blocker_count"] == 0
     assert packet["summary"]["target_execution_preflight_count"] == 3
-    assert packet["summary"]["first_target_execution_preflight_target"] == "DRD2"
-    assert packet["summary"]["first_target_execution_preflight_blocker"] == (
-        "DRD2:hard_decoy_rows_required_for_actual_closure"
-    )
+    assert packet["summary"]["first_target_execution_preflight_target"] == ""
+    assert packet["summary"]["first_target_execution_preflight_blocker"] == ""
 
 
 def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> None:
@@ -360,7 +354,7 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
     assert packet["raw_row_import"]["source_receipt_requirements"]["mode"] == (
         "raw_hard_decoy_rows"
     )
-    assert packet["raw_row_import"]["source_acquisition_plan"]["blocker_count"] == 3
+    assert packet["raw_row_import"]["source_acquisition_plan"]["blocker_count"] == 0
     assert packet["raw_row_import"]["source_attached_row_artifacts"] == {
         "chembl_activity_rows": (
             "implementation/phase1/release_evidence/productization/"
@@ -432,7 +426,7 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
         "source_acquisition_plan": packet["raw_row_import"][
             "source_acquisition_plan"
         ],
-        "status": "ready_for_operator_rows",
+        "status": "rows_materialized",
     }
     assert packet["raw_row_import"]["closes_phase3_criteria"] == [
         "ranking_pr_auc_ci_low_min",
@@ -441,12 +435,11 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
         "no_positive_out_anchored_by_top_decoys",
         "raw_hard_decoy_rows_actual_closure",
     ]
-    assert packet["next_actions"][:5] == [
-        "complete_gpcr_hard_decoy_source_acquisition_plan",
-        "build_gpcr_hard_decoy_chembl_activity_rows",
-        "review_gpcr_chembl_activity_rows_for_hard_decoy_source_acceptance",
-        "promote_gpcr_chembl_activity_rows_to_default_dropzone",
-        "materialize_gpcr_hard_decoy_operator_template_from_rows",
+    assert packet["next_actions"] == [
+        "review_gpcr_hard_decoy_suite_report",
+        "refresh_gpcr_hard_decoy_product_report",
+        "regenerate_product_capabilities_surface",
+        "regenerate_goal_bottleneck_roadmap_surface",
     ]
     assert packet["linked_artifacts"]["operator_template"] == (
         "implementation/phase1/release_evidence/productization/"
