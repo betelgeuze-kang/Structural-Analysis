@@ -19,7 +19,9 @@
         "h_bond_persistence_rate",
         "clash_count_before",
         "clash_count_after",
-        "uncertainty_interval"
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit"
       ],
       "required_receipt_fields": [
         "upstream_top_k_provenance_ref",
@@ -46,7 +48,9 @@
         "h_bond_persistence_rate",
         "clash_count_before",
         "clash_count_after",
-        "uncertainty_interval",
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit",
         "provenance_ref",
         "source_checksum"
       ],
@@ -63,7 +67,9 @@
         "h_bond_persistence_rate",
         "clash_count_before",
         "clash_count_after",
-        "uncertainty_interval"
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit"
       ],
       "required_receipt_fields": [
         "upstream_top_k_provenance_ref",
@@ -90,7 +96,9 @@
         "h_bond_persistence_rate",
         "clash_count_before",
         "clash_count_after",
-        "uncertainty_interval",
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit",
         "provenance_ref",
         "source_checksum"
       ],
@@ -107,7 +115,9 @@
         "h_bond_persistence_rate",
         "clash_count_before",
         "clash_count_after",
-        "uncertainty_interval"
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit"
       ],
       "required_receipt_fields": [
         "upstream_top_k_provenance_ref",
@@ -134,7 +144,9 @@
         "h_bond_persistence_rate",
         "clash_count_before",
         "clash_count_after",
-        "uncertainty_interval",
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit",
         "provenance_ref",
         "source_checksum"
       ],
@@ -151,7 +163,9 @@
         "h_bond_persistence_rate",
         "clash_count_before",
         "clash_count_after",
-        "uncertainty_interval"
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit"
       ],
       "required_receipt_fields": [
         "upstream_top_k_provenance_ref",
@@ -178,7 +192,9 @@
         "h_bond_persistence_rate",
         "clash_count_before",
         "clash_count_after",
-        "uncertainty_interval",
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit",
         "provenance_ref",
         "source_checksum"
       ],
@@ -195,7 +211,9 @@
         "h_bond_persistence_rate",
         "clash_count_before",
         "clash_count_after",
-        "uncertainty_interval"
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit"
       ],
       "required_receipt_fields": [
         "upstream_top_k_provenance_ref",
@@ -222,7 +240,9 @@
         "h_bond_persistence_rate",
         "clash_count_before",
         "clash_count_after",
-        "uncertainty_interval",
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit",
         "provenance_ref",
         "source_checksum"
       ],
@@ -239,7 +259,9 @@
         "h_bond_persistence_rate",
         "clash_count_before",
         "clash_count_after",
-        "uncertainty_interval"
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit"
       ],
       "required_receipt_fields": [
         "upstream_top_k_provenance_ref",
@@ -266,7 +288,9 @@
         "h_bond_persistence_rate",
         "clash_count_before",
         "clash_count_after",
-        "uncertainty_interval",
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit",
         "provenance_ref",
         "source_checksum"
       ],
@@ -281,11 +305,11 @@
   "execution_plan_ready": true,
   "expected_operator_intake_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json",
   "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
-  "generated_at": "2026-07-03T21:43:19.073414+00:00",
+  "generated_at": "2026-07-03T22:20:55.622012+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:ad466981c1e07332efc3e657a50e810ae2250aa957e132da60f069fd06e2337a",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:f3d18505eb3df9a24fe456a7aceae0d2df7e61e3ef8af292c88090fc8448927a",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:5fcc8c12182483838f0428f9605628b2c4bc2d3906e1df4f583f839ddf2834ba",
-    "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:0d7940ea6d92856981134420927c304fae8b977d75021c2467ddbff805aa380b"
+    "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:2ab2f9ea0c5384a8c1b48aa1b805a9abd68f3cbad5601920a20496db86f86f53"
   },
   "operator_commands": {
     "import_rows": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
@@ -363,6 +387,44 @@
   },
   "required_candidate_slot_count": 6,
   "required_case_count": 3,
+  "required_case_fields": [
+    "case_id",
+    "source_family",
+    "top_k_rank",
+    "candidate_id",
+    "upstream_top_k_provenance_ref",
+    "upstream_top_k_source_checksum",
+    "pre_refinement_energy_proxy",
+    "post_refinement_energy_proxy",
+    "local_min_survived",
+    "contact_persistence_rate",
+    "h_bond_persistence_rate",
+    "clash_count_before",
+    "clash_count_after",
+    "uncertainty_interval",
+    "provenance_ref",
+    "source_checksum"
+  ],
+  "required_flat_row_fields": [
+    "case_id",
+    "source_family",
+    "top_k_rank",
+    "candidate_id",
+    "upstream_top_k_provenance_ref",
+    "upstream_top_k_source_checksum",
+    "pre_refinement_energy_proxy",
+    "post_refinement_energy_proxy",
+    "local_min_survived",
+    "contact_persistence_rate",
+    "h_bond_persistence_rate",
+    "clash_count_before",
+    "clash_count_after",
+    "uncertainty_low",
+    "uncertainty_high",
+    "uncertainty_unit",
+    "provenance_ref",
+    "source_checksum"
+  ],
   "reuse_policy": "pocketmd_lite_refinement_execution_plan_from_current_contracts",
   "reused_evidence": false,
   "row_value_contract": {
@@ -389,7 +451,7 @@
     "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
   },
   "schema_version": "pocketmd-lite-refinement-execution-plan.v1",
-  "source_commit_sha": "1e3a90d8b8c38e145282be73699ced202dbbf342",
+  "source_commit_sha": "0f84a7118a62dd01876fe6c3f1b6840878bd2714",
   "source_receipt_requirements": {
     "mode": "raw_top_k_refinement_rows",
     "placeholder_block_policy": {

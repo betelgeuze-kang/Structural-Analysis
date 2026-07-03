@@ -68,6 +68,16 @@ def _default_minimum_rows() -> list[dict[str, Any]]:
     ]
 
 
+def _required_flat_row_fields() -> list[str]:
+    fields: list[str] = []
+    for field in REQUIRED_CASE_FIELDS:
+        if field == "uncertainty_interval":
+            fields.extend(["uncertainty_low", "uncertainty_high", "uncertainty_unit"])
+        else:
+            fields.append(field)
+    return fields
+
+
 def _minimum_rows_from_source_plan(source_plan: dict[str, Any]) -> list[dict[str, Any]]:
     rows = source_plan.get("minimum_rows_by_case")
     if not isinstance(rows, list) or not rows:
@@ -77,6 +87,17 @@ def _minimum_rows_from_source_plan(source_plan: dict[str, Any]) -> list[dict[str
 
 def _candidate_slots(minimum_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     slots: list[dict[str, Any]] = []
+    required_flat_row_fields = _required_flat_row_fields()
+    required_metric_fields = [
+        "local_min_survived",
+        "contact_persistence_rate",
+        "h_bond_persistence_rate",
+        "clash_count_before",
+        "clash_count_after",
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit",
+    ]
     for case_row in minimum_rows:
         case_id = str(case_row.get("case_id") or "")
         ranks = case_row.get("required_top_k_rank_prefix")
@@ -89,7 +110,7 @@ def _candidate_slots(minimum_rows: list[dict[str, Any]]) -> list[dict[str, Any]]
                     "top_k_rank": int(rank),
                     "candidate_id_placeholder": f"{case_id}_rank_{int(rank):02d}",
                     "source_family": "upstream_ranked_top_k_candidate_set",
-                    "required_row_fields": list(REQUIRED_CASE_FIELDS),
+                    "required_row_fields": list(required_flat_row_fields),
                     "required_receipt_fields": [
                         "upstream_top_k_provenance_ref",
                         "upstream_top_k_source_checksum",
@@ -101,14 +122,7 @@ def _candidate_slots(minimum_rows: list[dict[str, Any]]) -> list[dict[str, Any]]
                         "operator_input_source.source_url",
                         "operator_input_source.source_license",
                     ],
-                    "required_metric_fields": [
-                        "local_min_survived",
-                        "contact_persistence_rate",
-                        "h_bond_persistence_rate",
-                        "clash_count_before",
-                        "clash_count_after",
-                        "uncertainty_interval",
-                    ],
+                    "required_metric_fields": list(required_metric_fields),
                     "status": "operator_row_required",
                 }
             )
@@ -169,6 +183,8 @@ def build_pocketmd_lite_refinement_execution_plan(
         "expected_rows_artifact": str(rows_out),
         "expected_operator_intake_artifact": str(operator_intake_out),
         "supported_row_formats": list(SUPPORTED_ROW_FORMATS),
+        "required_case_fields": list(REQUIRED_CASE_FIELDS),
+        "required_flat_row_fields": _required_flat_row_fields(),
         "row_value_contract": row_value_contract(max_top_k=20),
         "source_receipt_requirements": dict(SOURCE_RECEIPT_REQUIREMENTS),
         "operator_commands": {

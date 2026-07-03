@@ -190,6 +190,52 @@ def test_refinement_execution_plan_enumerates_candidate_slots(
     assert payload["raw_row_candidate_status"]["detected_row_artifact_count"] == 0
     assert payload["raw_row_candidate_status"]["status"] == "row_artifact_missing"
     assert payload["supported_row_formats"] == ["csv", "tsv", "json", "jsonl", "ndjson"]
+    assert payload["required_case_fields"] == [
+        "case_id",
+        "source_family",
+        "top_k_rank",
+        "candidate_id",
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum",
+        "pre_refinement_energy_proxy",
+        "post_refinement_energy_proxy",
+        "local_min_survived",
+        "contact_persistence_rate",
+        "h_bond_persistence_rate",
+        "clash_count_before",
+        "clash_count_after",
+        "uncertainty_interval",
+        "provenance_ref",
+        "source_checksum",
+    ]
+    assert payload["required_flat_row_fields"] == [
+        "case_id",
+        "source_family",
+        "top_k_rank",
+        "candidate_id",
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum",
+        "pre_refinement_energy_proxy",
+        "post_refinement_energy_proxy",
+        "local_min_survived",
+        "contact_persistence_rate",
+        "h_bond_persistence_rate",
+        "clash_count_before",
+        "clash_count_after",
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit",
+        "provenance_ref",
+        "source_checksum",
+    ]
+    assert "uncertainty_interval" not in payload["candidate_slots"][0][
+        "required_row_fields"
+    ]
+    assert payload["candidate_slots"][0]["required_metric_fields"][-3:] == [
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit",
+    ]
     assert payload["expected_rows_artifact"] == str(rows_out)
     assert payload["expected_operator_intake_artifact"] == str(operator_intake)
     assert "materialize_pocketmd_lite_operator_intake_from_rows.py" in payload[
