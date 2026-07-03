@@ -330,6 +330,51 @@ def test_ux_observation_intake_packet_cli_writes_markdown(tmp_path: Path, capsys
     assert "phase6_ux_observation_status.json" in markdown
 
 
+def test_ux_observation_intake_packet_check_detects_stale_json(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    template = _write_json(tmp_path / "ux-template.json", _template())
+    report = _write_json(
+        tmp_path / "ux-report.json",
+        {
+            "contract_pass": False,
+            "blockers": ["observation_file_missing"],
+            "checks": {},
+            "summary": {},
+        },
+    )
+    out = tmp_path / "packet.json"
+    out_md = tmp_path / "packet.md"
+    args = [
+        "--observation",
+        str(tmp_path / "missing-observation.json"),
+        "--template",
+        str(template),
+        "--observation-report",
+        str(report),
+        "--out",
+        str(out),
+        "--out-md",
+        str(out_md),
+    ]
+
+    assert build_ux_new_user_observation_intake_packet.main(args) == 0
+    capsys.readouterr()
+
+    assert build_ux_new_user_observation_intake_packet.main([*args, "--check"]) == 0
+    captured = capsys.readouterr()
+    assert "ux_new_user_observation_intake_packet_consistent" in captured.out
+
+    stale_payload = json.loads(out.read_text(encoding="utf-8"))
+    stale_payload["summary"]["observation_blocker_count"] = 99
+    _write_json(out, stale_payload)
+
+    assert build_ux_new_user_observation_intake_packet.main([*args, "--check"]) == 1
+    captured = capsys.readouterr()
+    assert "ux_new_user_observation_intake_packet_mismatch" in captured.err
+
+
 def test_ux_observation_intake_reuses_report_gate_unblock_plan(tmp_path: Path) -> None:
     template = _write_json(tmp_path / "ux-template.json", _template())
     report = _write_json(

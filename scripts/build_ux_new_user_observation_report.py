@@ -100,6 +100,23 @@ REQUIRED_WORKFLOW_STEPS = (
 PASS_STEP_STATUSES = {"pass", "passed", "complete", "completed", "accepted", "ok", "success", "successful"}
 
 
+def _json_text(payload: dict[str, Any]) -> str:
+    return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+
+
+def _semantic_normalize(value: Any, path: tuple[str, ...] = ()) -> Any:
+    if isinstance(value, dict):
+        return {
+            str(key): _semantic_normalize(child, path + (str(key),))
+            for key, child in value.items()
+            if str(key) != "generated_at"
+            and not (path == () and str(key) == "source_commit_sha")
+        }
+    if isinstance(value, list):
+        return [_semantic_normalize(item, path) for item in value]
+    return value
+
+
 def _now_utc_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -657,6 +674,55 @@ def _markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _check_json_file(path: Path, expected: dict[str, Any]) -> str:
+    if not path.exists():
+        return f"missing:{path.as_posix()}"
+    try:
+        actual = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return f"unreadable:{path.as_posix()}"
+    if not isinstance(actual, dict):
+        return f"not_object:{path.as_posix()}"
+    if _semantic_normalize(actual) != _semantic_normalize(expected):
+        return f"mismatch:{path.as_posix()}"
+    return ""
+
+
+def _check_text_file(path: Path, expected: str) -> str:
+    if not path.exists():
+        return f"missing:{path.as_posix()}"
+    if path.read_text(encoding="utf-8") != expected:
+        return f"mismatch:{path.as_posix()}"
+    return ""
+
+
+def check_report(
+    *,
+    observation_path: Path = DEFAULT_OBSERVATION,
+    max_completion_minutes: float = 30.0,
+    timestamp_tolerance_minutes: float = DEFAULT_TIMESTAMP_TOLERANCE_MINUTES,
+    out: Path = DEFAULT_OUT,
+    out_md: Path = DEFAULT_OUT_MD,
+) -> tuple[bool, str, dict[str, Any]]:
+    expected = build_report(
+        observation_path=observation_path,
+        max_completion_minutes=max_completion_minutes,
+        timestamp_tolerance_minutes=timestamp_tolerance_minutes,
+    )
+    mismatches = [
+        _check_json_file(out, expected),
+        _check_text_file(out_md, _markdown(expected)),
+    ]
+    mismatches = [item for item in mismatches if item]
+    if mismatches:
+        return (
+            False,
+            "ux_new_user_observation_report_mismatch:" + ",".join(mismatches),
+            expected,
+        )
+    return True, "ux_new_user_observation_report_consistent", expected
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--observation", type=Path, default=DEFAULT_OBSERVATION)
@@ -665,19 +731,39 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--check", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.check:
+        ok, message, payload = check_report(
+            observation_path=args.observation,
+            max_completion_minutes=float(args.max_completion_minutes),
+            timestamp_tolerance_minutes=float(args.timestamp_tolerance_minutes),
+            out=args.out,
+            out_md=args.out_md,
+        )
+        if args.json:
+            print(_json_text(payload), end="")
+        if not ok:
+            print(f"UX new-user observation report check FAILED: {message}", file=sys.stderr)
+            return 1
+        if args.fail_blocked and not payload["contract_pass"]:
+            print("UX new-user observation report check FAILED: blocked", file=sys.stderr)
+            return 1
+        print(f"UX new-user observation report check: {message}")
+        return 0
+
     payload = build_report(
         observation_path=args.observation,
         max_completion_minutes=float(args.max_completion_minutes),
         timestamp_tolerance_minutes=float(args.timestamp_tolerance_minutes),
     )
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    args.out.write_text(_json_text(payload), encoding="utf-8")
     if args.out_md is not None:
         args.out_md.parent.mkdir(parents=True, exist_ok=True)
         args.out_md.write_text(_markdown(payload), encoding="utf-8")

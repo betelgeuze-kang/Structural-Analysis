@@ -449,3 +449,31 @@ def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     markdown = out_md.read_text(encoding="utf-8")
     assert "Required Fields" in markdown
     assert "Gate Unblock Plan" in markdown
+
+
+def test_cli_check_detects_stale_report_json(tmp_path: Path, capsys) -> None:
+    out = tmp_path / "report.json"
+    out_md = tmp_path / "report.md"
+    args = [
+        "--observation",
+        str(tmp_path / "missing.json"),
+        "--out",
+        str(out),
+        "--out-md",
+        str(out_md),
+    ]
+
+    assert build_ux_new_user_observation_report.main(args) == 0
+    capsys.readouterr()
+
+    assert build_ux_new_user_observation_report.main([*args, "--check"]) == 0
+    captured = capsys.readouterr()
+    assert "ux_new_user_observation_report_consistent" in captured.out
+
+    stale_payload = json.loads(out.read_text(encoding="utf-8"))
+    stale_payload["summary"]["release_blocker_count"] = 99
+    _write_json(out, stale_payload)
+
+    assert build_ux_new_user_observation_report.main([*args, "--check"]) == 1
+    captured = capsys.readouterr()
+    assert "ux_new_user_observation_report_mismatch" in captured.err
