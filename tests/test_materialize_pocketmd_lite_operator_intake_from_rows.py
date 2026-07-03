@@ -52,6 +52,14 @@ def _upstream_top_k_provenance_ref(case_id: str, candidate_id: str) -> str:
     )
 
 
+def _source_receipt() -> dict[str, str]:
+    return {
+        "source_id": "pocketmd_lite_topk_refinement_rows_zenodo_7654321",
+        "source_url": "https://zenodo.org/records/7654321",
+        "source_license": "CC-BY-4.0",
+    }
+
+
 def _row(
     *,
     case_id: str,
@@ -366,6 +374,7 @@ def test_materializes_operator_intake_from_nested_json_rows(tmp_path: Path) -> N
         rows_path=rows,
         repo_root=REPO_ROOT,
         max_top_k=5,
+        **_source_receipt(),
     )
 
     assert payload["cases"] == [
@@ -385,6 +394,63 @@ def test_materializes_operator_intake_from_nested_json_rows(tmp_path: Path) -> N
     ].startswith(
         "top_k_rank must parse to a positive integer not exceeding max_top_k (5)"
     )
+
+
+def test_blocks_missing_or_placeholder_operator_input_source_receipt(
+    tmp_path: Path,
+) -> None:
+    rows = tmp_path / "pocketmd_lite_rows.jsonl"
+    _write_jsonl(
+        rows,
+        [
+            _row(
+                case_id="case_source",
+                candidate_id="pose_1",
+                top_k_rank=1,
+                local_min_survived=True,
+                contact_rate=0.9,
+                h_bond_rate=0.8,
+                clash_before=4,
+                clash_after=1,
+            )
+        ],
+    )
+
+    try:
+        module.build_pocketmd_lite_operator_intake_from_rows(
+            rows_path=rows,
+            repo_root=REPO_ROOT,
+        )
+    except ValueError as exc:
+        assert str(exc) == "operator_input_source_source_id_required"
+    else:
+        raise AssertionError("expected required source id error")
+
+    try:
+        module.build_pocketmd_lite_operator_intake_from_rows(
+            rows_path=rows,
+            repo_root=REPO_ROOT,
+            source_id="pocketmd_lite_source_receipt",
+            source_url="local-evidence://pocketmd-lite/topk-rows",
+            source_license="CC-BY-4.0",
+        )
+    except ValueError as exc:
+        assert str(exc) == "operator_input_source_source_url_placeholder"
+    else:
+        raise AssertionError("expected placeholder source url error")
+
+    try:
+        module.build_pocketmd_lite_operator_intake_from_rows(
+            rows_path=rows,
+            repo_root=REPO_ROOT,
+            source_id="pocketmd_lite_source_receipt",
+            source_url="https://zenodo.org/records/7654321",
+            source_license="fixture-only",
+        )
+    except ValueError as exc:
+        assert str(exc) == "operator_input_source_source_license_placeholder"
+    else:
+        raise AssertionError("expected placeholder source license error")
 
 
 def test_materializes_operator_intake_from_ndjson_rows(tmp_path: Path) -> None:

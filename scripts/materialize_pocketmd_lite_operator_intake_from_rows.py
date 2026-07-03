@@ -175,6 +175,34 @@ def _is_repeated_placeholder_checksum(value: str) -> bool:
     return len(set(digest)) == 1
 
 
+def _has_placeholder_url_prefix(value: str) -> bool:
+    lowered = value.lower()
+    return any(lowered.startswith(prefix) for prefix in PLACEHOLDER_SOURCE_URL_PREFIXES)
+
+
+def _validate_operator_input_source_args(
+    *,
+    source_id: str,
+    source_url: str,
+    source_license: str,
+) -> None:
+    source_fields = {
+        "source_id": _string(source_id),
+        "source_url": _string(source_url),
+        "source_license": _string(source_license),
+    }
+    for field_name, value in source_fields.items():
+        if not value:
+            raise ValueError(f"operator_input_source_{field_name}_required")
+        if _contains_marker(value, PLACEHOLDER_SOURCE_TEXT_MARKERS):
+            raise ValueError(f"operator_input_source_{field_name}_placeholder")
+    if (
+        _has_placeholder_url_prefix(source_fields["source_url"])
+        or _contains_marker(source_fields["source_url"], PLACEHOLDER_SOURCE_URL_MARKERS)
+    ):
+        raise ValueError("operator_input_source_source_url_placeholder")
+
+
 def _read_delimited_rows(path: Path, *, delimiter: str) -> list[dict[str, Any]]:
     with path.open("r", encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle, delimiter=delimiter)
@@ -501,6 +529,11 @@ def build_pocketmd_lite_operator_intake_from_rows(
         for index, raw_row in enumerate(flat_rows, start=1)
     ]
     _validate_topk_integrity(cases)
+    _validate_operator_input_source_args(
+        source_id=source_id,
+        source_url=source_url,
+        source_license=source_license,
+    )
     case_ids = sorted({str(row["case_id"]) for row in cases})
     case_row_counts = {
         case_id: sum(1 for row in cases if row["case_id"] == case_id)

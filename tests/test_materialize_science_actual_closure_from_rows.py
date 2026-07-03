@@ -1155,9 +1155,9 @@ def test_science_actual_closure_audit_blocks_placeholder_source_receipts(
         pocketmd_report_out=tmp_path / "pocketmd_report.json",
         pocketmd_surface_out=tmp_path / "pocketmd_surface.json",
         pocketmd_contract_path=pocketmd_contract,
-        source_id="fixture_science_actual_closure_rows",
+        source_id="science_actual_closure_rows_receipt",
         source_url="local-evidence://science-actual-closure/rows",
-        source_license="fixture-only",
+        source_license="CC-BY-4.0",
     )
 
     assert audit["status"] == "operator_evidence_required"
@@ -1174,6 +1174,7 @@ def test_science_actual_closure_audit_blocks_placeholder_source_receipts(
     assert any(
         blocker.startswith(
             "pocketmd_lite_topk_actual_closure::"
+            "pocketmd_lite_topk_actual_closure_materialization_failed:"
             "operator_input_source_source_url_placeholder"
         )
         for blocker in audit["blockers"]
