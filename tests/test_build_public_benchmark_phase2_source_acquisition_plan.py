@@ -169,7 +169,6 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert payload["vina_gnina_execution_plan"]["case_count"] == 12
     assert payload["vina_gnina_execution_plan"]["required_engine_run_count"] == 24
     assert payload["vina_gnina_execution_plan"]["missing_engine_ids"] == [
-        "vina",
         "gnina",
     ]
     assert payload["vina_gnina_runtime_readiness"]["artifact"] == (
@@ -184,12 +183,13 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     ] is False
     assert payload["vina_gnina_runtime_readiness"][
         "ready_engine_run_slot_count"
-    ] == 0
+    ] == 12
+    assert payload["vina_gnina_runtime_readiness"]["available_engine_count"] == 1
+    assert payload["vina_gnina_runtime_readiness"]["missing_engine_count"] == 1
     assert payload["vina_gnina_runtime_readiness"][
         "detected_row_artifact_count"
     ] == 0
     assert payload["vina_gnina_runtime_readiness"]["missing_engine_ids"] == [
-        "vina",
         "gnina",
     ]
     assert payload["vina_gnina_runtime_readiness"]["container_runtime_status"][
@@ -296,13 +296,12 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "vina_gnina_execution_plan_status": "engine_execution_required",
         "vina_gnina_execution_plan_ready": True,
         "vina_gnina_required_engine_run_count": 24,
-        "vina_gnina_missing_engine_count": 2,
+        "vina_gnina_missing_engine_count": 1,
         "vina_gnina_runtime_readiness_status": "engine_runtime_blocked",
         "vina_gnina_runtime_ready_for_engine_execution": False,
-        "vina_gnina_runtime_ready_engine_run_slot_count": 0,
+        "vina_gnina_runtime_ready_engine_run_slot_count": 12,
         "vina_gnina_runtime_detected_row_artifact_count": 0,
         "vina_gnina_runtime_missing_engine_ids": [
-            "vina",
             "gnina",
         ],
         "vina_gnina_runtime_container_daemon_available": True,

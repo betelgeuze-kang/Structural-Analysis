@@ -16,8 +16,8 @@
 - `vina_gnina_required_engine_run_count`: `24`
 - `vina_gnina_runtime_readiness`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json`
 - `vina_gnina_runtime_readiness_status`: `engine_runtime_blocked`
-- `vina_gnina_runtime_ready_engine_run_slot_count`: `0`
-- `vina_gnina_runtime_missing_engine_ids`: `vina, gnina`
+- `vina_gnina_runtime_ready_engine_run_slot_count`: `12`
+- `vina_gnina_runtime_missing_engine_ids`: `gnina`
 
 | Row Input | Source Family | Status | Unblocks |
 |---|---|---|---|
