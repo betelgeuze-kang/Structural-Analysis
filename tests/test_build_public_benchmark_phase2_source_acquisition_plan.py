@@ -321,6 +321,7 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "phase2_row_audit_failed_criteria": [
             "vina_gnina_comparison_ready",
         ],
+        "missing_row_input_action_count": 1,
         "phase2_row_audit_missing_row_input_count": 1,
         "phase2_row_audit_missing_row_inputs": [
             "vina_gnina_rows",
@@ -352,6 +353,24 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
         "public_benchmark_external_receipts_not_attached",
     ]
+    assert payload["missing_row_input_action_count"] == 1
+    missing_action = payload["missing_row_input_actions"][0]
+    assert missing_action["row_input_id"] == "vina_gnina_rows"
+    assert missing_action["status"] == "operator_input_required"
+    assert missing_action["operator_action"] == (
+        "attach_vina_gnina_rows_then_run_phase2_row_audit"
+    )
+    assert missing_action["engine_input_manifest_template"].endswith(
+        "public_benchmark_vina_gnina_input_manifest_template.csv"
+    )
+    assert missing_action["required_engines"] == ["vina", "gnina"]
+    assert "predicted_ligand_checksum" in missing_action[
+        "required_engine_run_fields"
+    ]
+    assert missing_action["materialization_command"] == (
+        "python3 scripts/materialize_public_benchmark_phase2_from_rows.py "
+        "--fail-blocked"
+    )
 
 
 def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
@@ -380,6 +399,8 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "`vina_gnina_required_engine_run_count`: `24`" in markdown
     assert "`vina_gnina_input_manifest_status`: `not_detected`" in markdown
     assert "`vina_gnina_runtime_ready_engine_run_slot_count`: `0`" in markdown
+    assert "## Missing Row Input Actions" in markdown
+    assert "attach_vina_gnina_rows_then_run_phase2_row_audit" in markdown
     assert "## Vina/GNINA Runtime" in markdown
     assert "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE" in markdown
     assert "container_image_not_configured" in markdown

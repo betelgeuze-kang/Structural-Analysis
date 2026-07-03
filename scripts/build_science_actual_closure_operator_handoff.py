@@ -281,6 +281,121 @@ def _component_slot_summary(slots: list[dict[str, Any]]) -> list[dict[str, Any]]
     return summaries
 
 
+def _row_input_materialization_contracts(
+    missing_slots: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    contracts: dict[str, dict[str, Any]] = {}
+    for slot in missing_slots:
+        row_input_id = str(slot.get("row_input_id") or "")
+        if not row_input_id:
+            continue
+        contracts[row_input_id] = {
+            "row_input_id": row_input_id,
+            "status": str(slot.get("status") or ""),
+            "operator_action": str(slot.get("operator_action") or ""),
+            "preferred_default_row_path": str(
+                slot.get("preferred_default_row_path") or ""
+            ),
+            "default_row_path_candidates": [
+                str(item) for item in _as_list(slot.get("default_row_path_candidates"))
+            ],
+            "row_template_artifact": str(slot.get("row_template_artifact") or ""),
+            "row_template_present": bool(slot.get("row_template_present")),
+            "accepted_formats": [
+                str(item) for item in _as_list(slot.get("accepted_formats"))
+            ],
+            "actual_closure_component_id": str(
+                slot.get("actual_closure_component_id") or ""
+            ),
+            "expected_rows_mode": str(slot.get("expected_rows_mode") or ""),
+            "materialization_chain": [
+                str(item) for item in _as_list(slot.get("materialization_chain"))
+            ],
+            "materialization_command": str(
+                slot.get("materialization_command") or ""
+            ),
+            "contract_field_groups": _as_dict(slot.get("contract_field_groups")),
+            "contract_policies": _as_dict(slot.get("contract_policies")),
+            "upstream_source_id": str(slot.get("upstream_source_id") or ""),
+            "upstream_source_blockers": [
+                str(item) for item in _as_list(slot.get("upstream_source_blockers"))
+            ],
+            "source_acquisition_operator_action": str(
+                slot.get("source_acquisition_operator_action") or ""
+            ),
+            "operator_blockers_if_missing": [
+                str(item)
+                for item in _as_list(slot.get("operator_blockers_if_missing"))
+            ],
+            "claim_boundary": str(slot.get("claim_boundary") or ""),
+        }
+    return contracts
+
+
+def _operator_rows_packet(missing_slots: list[dict[str, Any]]) -> dict[str, Any]:
+    contracts = _row_input_materialization_contracts(missing_slots)
+    missing_row_inputs = [str(slot.get("row_input_id") or "") for slot in missing_slots]
+    return {
+        "status": "operator_rows_required" if missing_slots else "ready",
+        "missing_row_input_count": len(missing_slots),
+        "missing_row_inputs": missing_row_inputs,
+        "first_missing_row_input": missing_row_inputs[0] if missing_row_inputs else "",
+        "row_input_materialization_contracts": contracts,
+        "row_input_contract_count": len(contracts),
+        "materialization_command": (
+            "python3 scripts/materialize_science_actual_closure_from_rows.py "
+            "--fail-blocked"
+        ),
+        "claim_boundary": (
+            "This packet summarizes missing operator row inputs only. It does not "
+            "promote any science closure until the referenced materializers accept "
+            "real rows and source receipts."
+        ),
+    }
+
+
+def _blocked_component_operator_actions(
+    slots: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for summary in _component_slot_summary(slots):
+        missing_ids = [
+            str(item) for item in _as_list(summary.get("missing_row_input_ids"))
+        ]
+        if not missing_ids:
+            continue
+        component_slots = [
+            slot
+            for slot in slots
+            if str(slot.get("actual_closure_component_id") or "")
+            == str(summary.get("component_id") or "")
+            and bool(slot.get("missing"))
+        ]
+        rows.append(
+            {
+                "component_id": str(summary.get("component_id") or ""),
+                "missing_row_input_ids": missing_ids,
+                "operator_actions": [
+                    str(slot.get("operator_action") or "") for slot in component_slots
+                ],
+                "source_acquisition_operator_actions": sorted(
+                    {
+                        str(slot.get("source_acquisition_operator_action") or "")
+                        for slot in component_slots
+                        if str(slot.get("source_acquisition_operator_action") or "")
+                    }
+                ),
+                "closes_actual_closure_criteria": [
+                    str(item)
+                    for item in _as_list(
+                        summary.get("closes_actual_closure_criteria")
+                    )
+                ],
+            }
+        )
+    return rows
+
+
 def build_science_actual_closure_operator_handoff(
     *,
     repo_root: Path = ROOT,
@@ -338,6 +453,11 @@ def build_science_actual_closure_operator_handoff(
         for slot in slots
         if not bool(slot.get("row_template_present"))
     ]
+    row_input_materialization_contracts = _row_input_materialization_contracts(
+        missing_slots
+    )
+    operator_rows_packet = _operator_rows_packet(missing_slots)
+    blocked_component_operator_actions = _blocked_component_operator_actions(slots)
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -376,6 +496,12 @@ def build_science_actual_closure_operator_handoff(
                 if _as_dict(source).get("present")
             ),
             "upstream_source_blocker_count": len(upstream_source_blockers),
+            "operator_rows_packet_missing_input_count": operator_rows_packet[
+                "missing_row_input_count"
+            ],
+            "blocked_component_operator_action_count": len(
+                blocked_component_operator_actions
+            ),
         },
         "upstream_source_acquisition": upstream_source_acquisition,
         "upstream_source_blockers": upstream_source_blockers,
@@ -384,6 +510,9 @@ def build_science_actual_closure_operator_handoff(
         "missing_row_inputs": [
             str(slot.get("row_input_id") or "") for slot in missing_slots
         ],
+        "row_input_materialization_contracts": row_input_materialization_contracts,
+        "operator_rows_packet": operator_rows_packet,
+        "blocked_component_operator_actions": blocked_component_operator_actions,
         "first_missing_slot": missing_slots[0] if missing_slots else {},
         "operator_next_actions": [
             str(item) for item in _as_list(audit.get("operator_next_actions"))
@@ -436,6 +565,28 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"`{criteria}` | "
             f"`{slot.get('operator_action')}` |"
         )
+    operator_rows_packet = _as_dict(payload.get("operator_rows_packet"))
+    packet_contracts = _as_dict(
+        operator_rows_packet.get("row_input_materialization_contracts")
+    )
+    if packet_contracts:
+        lines.extend(["", "## Missing Row Packet", ""])
+        lines.extend(
+            [
+                "| Row Input | Action | Template | Materialization |",
+                "| --- | --- | --- | --- |",
+            ]
+        )
+        for row_input_id, contract in packet_contracts.items():
+            if not isinstance(contract, dict):
+                continue
+            lines.append(
+                "| "
+                f"`{row_input_id}` | "
+                f"`{contract.get('operator_action')}` | "
+                f"`{contract.get('row_template_artifact')}` | "
+                f"`{contract.get('materialization_command')}` |"
+            )
     upstream_source_blockers = [
         str(item) for item in _as_list(payload.get("upstream_source_blockers"))
     ]

@@ -41,11 +41,13 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert payload["contract_pass"] is True
     assert payload["science_actual_closure_contract_pass"] is False
     assert payload["summary"] == {
+        "blocked_component_operator_action_count": 2,
         "closes_actual_closure_criteria_count": 19,
         "component_count": 3,
         "expected_slot_count": 6,
         "missing_row_template_artifact_count": 0,
         "missing_slot_count": 2,
+        "operator_rows_packet_missing_input_count": 2,
         "provided_slot_count": 4,
         "row_template_artifact_count": 6,
         "science_actual_closure_blocker_count": 2,
@@ -65,6 +67,34 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "vina_gnina_rows",
         "pocketmd_rows",
     ]
+    assert payload["operator_rows_packet"]["status"] == "operator_rows_required"
+    assert payload["operator_rows_packet"]["missing_row_inputs"] == [
+        "vina_gnina_rows",
+        "pocketmd_rows",
+    ]
+    assert payload["operator_rows_packet"]["row_input_contract_count"] == 2
+    assert payload["operator_rows_packet"]["first_missing_row_input"] == (
+        "vina_gnina_rows"
+    )
+    row_contracts = payload["row_input_materialization_contracts"]
+    assert sorted(row_contracts) == ["pocketmd_rows", "vina_gnina_rows"]
+    assert row_contracts["vina_gnina_rows"]["operator_action"] == (
+        "attach_vina_gnina_rows_at_"
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_rows.json"
+    )
+    assert row_contracts["pocketmd_rows"]["row_template_artifact"].endswith(
+        "pocketmd_lite_topk_rows_template.csv"
+    )
+    blocked_actions = {
+        row["component_id"]: row for row in payload["blocked_component_operator_actions"]
+    }
+    assert blocked_actions["public_benchmark_phase2_actual_closure"][
+        "missing_row_input_ids"
+    ] == ["vina_gnina_rows"]
+    assert blocked_actions["pocketmd_lite_topk_actual_closure"][
+        "missing_row_input_ids"
+    ] == ["pocketmd_rows"]
     assert len(payload["upstream_source_blockers"]) == 8
     assert payload["upstream_source_acquisition"]["public_benchmark_phase2"][
         "present"
@@ -236,6 +266,8 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "| `subset_rows` | `provided` |" in markdown
     assert "| `vina_gnina_rows` | `operator_input_required` |" in markdown
     assert "| `pocketmd_rows` | `operator_input_required` |" in markdown
+    assert "## Missing Row Packet" in markdown
+    assert "attach_pocketmd_rows_at_" in markdown
     assert "CSV Starter" in markdown
     assert "## Upstream Source Blockers" in markdown
     assert "public_benchmark_vina_gnina_engine_runtime_not_ready" in markdown

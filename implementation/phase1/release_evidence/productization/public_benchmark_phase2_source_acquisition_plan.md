@@ -11,6 +11,7 @@
 - `phase2_row_audit`: `implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json`
 - `phase2_row_audit_status`: `operator_evidence_required`
 - `phase2_row_audit_missing_row_inputs`: `vina_gnina_rows`
+- `missing_row_input_action_count`: `1`
 - `vina_gnina_execution_plan`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json`
 - `vina_gnina_execution_plan_status`: `engine_input_blocked`
 - `vina_gnina_required_engine_run_count`: `24`
@@ -28,6 +29,12 @@
 | `pose_rows` | `CASF/PDBBind` | `operator_acquisition_required` | `casf_pdbbind_pose_success_harness`, `symmetry_aware_ligand_rmsd`, `posebusters_style_pose_validity` |
 | `enrichment_rows` | `DUD-E/LIT-PCBA` | `operator_acquisition_required` | `dud_e_or_lit_pcba_enrichment` |
 | `vina_gnina_rows` | `CASF/PDBBind + Vina/GNINA` | `operator_acquisition_required` | `vina_gnina_comparison_adapter` |
+
+## Missing Row Input Actions
+
+| Row Input | Action | Unblocks | Materialization |
+|---|---|---|---|
+| `vina_gnina_rows` | `attach_vina_gnina_rows_then_run_phase2_row_audit` | `vina_gnina_comparison_adapter` | `python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked` |
 
 ## Vina/GNINA Runtime
 

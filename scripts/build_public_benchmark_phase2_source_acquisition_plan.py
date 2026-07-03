@@ -860,6 +860,72 @@ def _official_source_receipt_plan(
     }
 
 
+def _row_input_contract_map(
+    row_input_contracts: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    return {
+        str(row.get("row_input_id") or ""): row
+        for row in row_input_contracts
+        if isinstance(row, dict) and str(row.get("row_input_id") or "")
+    }
+
+
+def _missing_row_input_actions(
+    *,
+    missing_row_inputs: list[str],
+    row_input_contracts: list[dict[str, Any]],
+    commands: dict[str, str],
+) -> list[dict[str, Any]]:
+    contracts = _row_input_contract_map(row_input_contracts)
+    actions: list[dict[str, Any]] = []
+    for row_input_id in missing_row_inputs:
+        contract = contracts.get(row_input_id, {})
+        action = {
+            "row_input_id": row_input_id,
+            "status": "operator_input_required",
+            "source_family": str(contract.get("source_family") or ""),
+            "accepted_formats": list(contract.get("accepted_formats") or []),
+            "depends_on_row_inputs": list(contract.get("depends_on_row_inputs") or []),
+            "unblocks_components": list(contract.get("unblocks_components") or []),
+            "receipt_fields": list(contract.get("receipt_fields") or []),
+            "source_checksum_policy": dict(
+                contract.get("source_checksum_policy") or {}
+            ),
+            "closure_boundary": str(contract.get("closure_boundary") or ""),
+            "operator_action": f"attach_{row_input_id}_then_run_phase2_row_audit",
+            "materialization_command": str(commands.get("phase2_row_audit") or ""),
+            "bundle_import_command": str(commands.get("import_operator_bundle") or ""),
+            "claim_boundary": (
+                "This action identifies the missing operator-attached row input. "
+                "It is not benchmark evidence until the materializer validates "
+                "the row file and receipts."
+            ),
+        }
+        if row_input_id == "vina_gnina_rows":
+            action.update(
+                {
+                    "engine_input_manifest_template": str(
+                        contract.get("engine_input_manifest_template") or ""
+                    ),
+                    "required_engine_input_fields": list(
+                        contract.get("required_engine_input_fields") or []
+                    ),
+                    "required_engine_run_fields": list(
+                        contract.get("required_engine_run_fields") or []
+                    ),
+                    "required_engines": list(contract.get("required_engines") or []),
+                    "build_execution_plan_command": str(
+                        commands.get("build_vina_gnina_execution_plan") or ""
+                    ),
+                    "runtime_readiness_command": str(
+                        commands.get("check_vina_gnina_runtime_readiness") or ""
+                    ),
+                }
+            )
+        actions.append(action)
+    return actions
+
+
 def build_public_benchmark_phase2_source_acquisition_plan(
     *,
     repo_root: Path = ROOT,
@@ -885,6 +951,46 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         phase2_row_audit_summary,
         vina_gnina_execution_plan_summary,
         vina_gnina_runtime_readiness_summary,
+    )
+    commands = {
+        "write_plan": (
+            "python3 scripts/build_public_benchmark_phase2_source_acquisition_plan.py"
+        ),
+        "import_operator_bundle": (
+            "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py "
+            "--subset-rows <operator-casf-pdbbind-subset-rows.jsonl> "
+            "--pose-rows <operator-pose-coordinate-rows.jsonl> "
+            "--enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> "
+            "--vina-gnina-rows <operator-vina-gnina-run-rows.csv> "
+            "--target-subset-case-count 12 "
+            f"--out {DEFAULT_OPERATOR_BUNDLE}"
+        ),
+        "phase2_row_audit": (
+            "python3 scripts/materialize_public_benchmark_phase2_from_rows.py "
+            "--fail-blocked"
+        ),
+        "build_vina_gnina_execution_plan": (
+            "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
+            f"--out {DEFAULT_VINA_GNINA_EXECUTION_PLAN}"
+        ),
+        "check_vina_gnina_runtime_readiness": (
+            "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py "
+            f"--out {DEFAULT_VINA_GNINA_RUNTIME_READINESS}"
+        ),
+        "materialize_harness_bundle": (
+            "python3 scripts/materialize_public_benchmark_harness_bundle.py "
+            f"--bundle {DEFAULT_OPERATOR_BUNDLE} --out-dir {PRODUCTIZATION} "
+            "--fail-blocked"
+        ),
+        "refresh_source_of_truth": (
+            "python3 scripts/build_public_benchmark_source_of_truth.py "
+            f"--source-of-truth-out {DEFAULT_SOURCE_OF_TRUTH}"
+        ),
+    }
+    missing_row_input_actions = _missing_row_input_actions(
+        missing_row_inputs=phase2_row_audit_summary["missing_row_inputs"],
+        row_input_contracts=row_input_contracts,
+        commands=commands,
     )
     return {
         "schema_version": SCHEMA_VERSION,
@@ -926,6 +1032,8 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         "phase2_row_audit": phase2_row_audit_summary,
         "vina_gnina_execution_plan": vina_gnina_execution_plan_summary,
         "vina_gnina_runtime_readiness": vina_gnina_runtime_readiness_summary,
+        "missing_row_input_actions": missing_row_input_actions,
+        "missing_row_input_action_count": len(missing_row_input_actions),
         "operator_acquisition_checklist": [
             "review_official_source_receipt_plan",
             "attach_casf_pdbbind_subset_rows_with_local_file_checksums",
@@ -941,41 +1049,7 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "run_public_benchmark_harness_bundle_materializer",
             "refresh_public_benchmark_source_of_truth",
         ],
-        "commands": {
-            "write_plan": (
-                "python3 scripts/build_public_benchmark_phase2_source_acquisition_plan.py"
-            ),
-            "import_operator_bundle": (
-                "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py "
-                "--subset-rows <operator-casf-pdbbind-subset-rows.jsonl> "
-                "--pose-rows <operator-pose-coordinate-rows.jsonl> "
-                "--enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> "
-                "--vina-gnina-rows <operator-vina-gnina-run-rows.csv> "
-                "--target-subset-case-count 12 "
-                f"--out {DEFAULT_OPERATOR_BUNDLE}"
-            ),
-            "phase2_row_audit": (
-                "python3 scripts/materialize_public_benchmark_phase2_from_rows.py "
-                "--fail-blocked"
-            ),
-            "build_vina_gnina_execution_plan": (
-                "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
-                f"--out {DEFAULT_VINA_GNINA_EXECUTION_PLAN}"
-            ),
-            "check_vina_gnina_runtime_readiness": (
-                "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py "
-                f"--out {DEFAULT_VINA_GNINA_RUNTIME_READINESS}"
-            ),
-            "materialize_harness_bundle": (
-                "python3 scripts/materialize_public_benchmark_harness_bundle.py "
-                f"--bundle {DEFAULT_OPERATOR_BUNDLE} --out-dir {PRODUCTIZATION} "
-                "--fail-blocked"
-            ),
-            "refresh_source_of_truth": (
-                "python3 scripts/build_public_benchmark_source_of_truth.py "
-                f"--source-of-truth-out {DEFAULT_SOURCE_OF_TRUTH}"
-            ),
-        },
+        "commands": commands,
         "blockers": blockers,
         "blocker_count": len(blockers),
         "summary": {
@@ -1006,6 +1080,7 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "phase2_row_audit_failed_criteria": phase2_row_audit_summary[
                 "phase2_failed_criteria"
             ],
+            "missing_row_input_action_count": len(missing_row_input_actions),
             "vina_gnina_execution_plan_status": vina_gnina_execution_plan_summary[
                 "status"
             ],
@@ -1091,6 +1166,7 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `phase2_row_audit`: `{payload['phase2_row_audit']['artifact']}`",
         f"- `phase2_row_audit_status`: `{payload['phase2_row_audit']['status']}`",
         f"- `phase2_row_audit_missing_row_inputs`: `{', '.join(payload['phase2_row_audit']['missing_row_inputs'])}`",
+        f"- `missing_row_input_action_count`: `{payload['missing_row_input_action_count']}`",
         f"- `vina_gnina_execution_plan`: `{payload['vina_gnina_execution_plan']['artifact']}`",
         f"- `vina_gnina_execution_plan_status`: `{payload['vina_gnina_execution_plan']['status']}`",
         f"- `vina_gnina_required_engine_run_count`: `{payload['vina_gnina_execution_plan']['required_engine_run_count']}`",
@@ -1113,6 +1189,28 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
             f"| `{row['row_input_id']}` | `{row['source_family']}` | "
             f"`{row['status']}` | {unblocks} |"
         )
+    missing_actions = [
+        row
+        for row in payload.get("missing_row_input_actions", [])
+        if isinstance(row, dict)
+    ]
+    if missing_actions:
+        lines.extend(["", "## Missing Row Input Actions", ""])
+        lines.extend(
+            [
+                "| Row Input | Action | Unblocks | Materialization |",
+                "|---|---|---|---|",
+            ]
+        )
+        for row in missing_actions:
+            unblocks = ", ".join(
+                f"`{component}`" for component in row.get("unblocks_components", [])
+            )
+            lines.append(
+                f"| `{row.get('row_input_id', '')}` | "
+                f"`{row.get('operator_action', '')}` | {unblocks} | "
+                f"`{row.get('materialization_command', '')}` |"
+            )
     lines.extend(["", "## Vina/GNINA Runtime", ""])
     lines.extend(
         [
