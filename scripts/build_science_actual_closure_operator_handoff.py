@@ -83,6 +83,11 @@ def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+def _comma(values: list[Any]) -> str:
+    rendered = [str(item) for item in values if str(item)]
+    return ", ".join(rendered) if rendered else ""
+
+
 def _as_dict(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
@@ -1055,21 +1060,39 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.extend(["", "## Blocked Component Actions", ""])
         lines.extend(
             [
-                "| Component | Row Input | Action | Default Artifact | Source Action |",
-                "| --- | --- | --- | --- | --- |",
+                "| Component | Row Input | Action | Default Artifact | Source Action | Source Row Action | Source Command | Required Receipts |",
+                "| --- | --- | --- | --- | --- | --- | --- | --- |",
             ]
         )
         for component in blocked_component_actions:
             for action in _as_list(component.get("missing_row_input_actions")):
                 if not isinstance(action, dict):
                     continue
+                source_action = _as_dict(action.get("source_acquisition_row_action"))
+                source_commands = _as_dict(source_action.get("commands"))
+                source_command = (
+                    str(source_action.get("runtime_readiness_command") or "")
+                    or str(source_commands.get("import_rows") or "")
+                    or str(source_action.get("materialization_command") or "")
+                    or str(source_commands.get("materialize_survival") or "")
+                    or str(source_commands.get("science_actual_closure") or "")
+                )
+                required_receipts = _comma(
+                    [
+                        *_as_list(source_action.get("receipt_fields")),
+                        *_as_list(source_action.get("required_receipt_roles")),
+                    ]
+                )
                 lines.append(
                     "| "
                     f"`{component.get('component_id')}` | "
                     f"`{action.get('row_input_id')}` | "
                     f"`{action.get('operator_action')}` | "
                     f"`{action.get('preferred_default_row_path')}` | "
-                    f"`{action.get('source_acquisition_operator_action')}` |"
+                    f"`{action.get('source_acquisition_operator_action')}` | "
+                    f"`{source_action.get('operator_action') or ''}` | "
+                    f"`{source_command}` | "
+                    f"`{required_receipts}` |"
                 )
     upstream_source_blockers = [
         str(item) for item in _as_list(payload.get("upstream_source_blockers"))

@@ -71,10 +71,10 @@
 
 ## Blocked Component Actions
 
-| Component | Row Input | Action | Default Artifact | Source Action |
-| --- | --- | --- | --- | --- |
-| `pocketmd_lite_topk_actual_closure` | `pocketmd_rows` | `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `resolve_pocketmd_lite_source_acquisition_blockers` |
-| `public_benchmark_phase2_actual_closure` | `vina_gnina_rows` | `attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `resolve_public_benchmark_phase2_source_acquisition_blockers` |
+| Component | Row Input | Action | Default Artifact | Source Action | Source Row Action | Source Command | Required Receipts |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `pocketmd_lite_topk_actual_closure` | `pocketmd_rows` | `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `resolve_pocketmd_lite_source_acquisition_blockers` | `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>` | `upstream_top_k_candidate_scope_receipt, lite_refinement_run_receipt, interaction_persistence_receipt, uncertainty_interval_receipt` |
+| `public_benchmark_phase2_actual_closure` | `vina_gnina_rows` | `attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `resolve_public_benchmark_phase2_source_acquisition_blockers` | `attach_vina_gnina_rows_then_run_phase2_row_audit` | `python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json` | `source_license_or_accession, source_checksum, provenance_ref, predicted_ligand_checksum, engine_config_checksum, engine_run_provenance_ref` |
 
 ## Provided Closure Evidence
 

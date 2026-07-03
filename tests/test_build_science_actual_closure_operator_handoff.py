@@ -515,6 +515,14 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "## Blocked Component Actions" in markdown
     assert "public_benchmark_phase2_actual_closure" in markdown
     assert "pocketmd_lite_topk_actual_closure" in markdown
+    assert "Source Row Action" in markdown
+    assert "Source Command" in markdown
+    assert "Required Receipts" in markdown
+    assert "attach_vina_gnina_rows_then_run_phase2_row_audit" in markdown
+    assert "build_public_benchmark_vina_gnina_runtime_readiness.py" in markdown
+    assert "engine_config_checksum" in markdown
+    assert "materialize_pocketmd_lite_operator_intake_from_rows.py" in markdown
+    assert "uncertainty_interval_receipt" in markdown
     assert "attach_pocketmd_rows_at_" in markdown
     assert "CSV Starter" in markdown
     assert "## Upstream Source Blockers" in markdown
