@@ -81,15 +81,29 @@ def test_gpcr_hard_decoy_source_acquisition_plan_exposes_verified_targets() -> N
         "source_checksum",
         "provenance_ref",
     ]
-    assert payload["summary"] == {
-        "actual_closure_ready": False,
-        "blocker_count": 3,
-        "minimum_decoy_rows_total": 60,
-        "minimum_positive_rows_total": 12,
-        "required_target_count": 3,
-        "target_source_count": 3,
-        "target_source_mapping_complete": True,
+    assert payload["positive_source_snapshot"]["artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "gpcr_hard_decoy_positive_source_snapshot.json"
+    )
+    assert payload["positive_source_snapshot"]["actual_closure_ready"] is False
+    assert payload["positive_source_snapshot"]["positive_source_ready"] is True
+    assert payload["positive_source_snapshot"]["target_candidate_counts"] == {
+        "DRD2": 12,
+        "HTR2A": 12,
+        "OPRM1": 12,
     }
+    assert payload["acceptable_source_roles"][0]["candidate_snapshot"] == (
+        payload["positive_source_snapshot"]
+    )
+    assert payload["summary"]["actual_closure_ready"] is False
+    assert payload["summary"]["blocker_count"] == 3
+    assert payload["summary"]["minimum_decoy_rows_total"] == 60
+    assert payload["summary"]["minimum_positive_rows_total"] == 12
+    assert payload["summary"]["positive_source_ready"] is True
+    assert payload["summary"]["total_positive_candidate_count"] == 36
+    assert payload["summary"]["required_target_count"] == 3
+    assert payload["summary"]["target_source_count"] == 3
+    assert payload["summary"]["target_source_mapping_complete"] is True
     assert payload["blockers"] == [
         "gpcr_hard_decoy_rows_not_acquired",
         "target_specific_hard_decoy_source_not_attached",
@@ -97,6 +111,9 @@ def test_gpcr_hard_decoy_source_acquisition_plan_exposes_verified_targets() -> N
     ]
     assert payload["commands"]["import_rows"].startswith(
         "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py"
+    )
+    assert payload["commands"]["build_positive_source_snapshot"].startswith(
+        "python3 scripts/build_gpcr_hard_decoy_positive_source_snapshot.py"
     )
 
 
@@ -116,4 +133,5 @@ def test_gpcr_hard_decoy_source_acquisition_plan_cli_writes_markdown(
     assert "`DRD2` | `P14416` | `CHEMBL217`" in markdown
     assert "`HTR2A` | `P28223` | `CHEMBL224`" in markdown
     assert "`OPRM1` | `P35372` | `CHEMBL233`" in markdown
+    assert "gpcr_hard_decoy_positive_source_snapshot.json" in markdown
     assert "materialize_gpcr_hard_decoy_operator_template_from_rows.py" in markdown

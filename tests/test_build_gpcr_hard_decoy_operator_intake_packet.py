@@ -89,6 +89,16 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "HTR2A": {"chembl_target_id": "CHEMBL224", "uniprot_accession": "P28223"},
         "OPRM1": {"chembl_target_id": "CHEMBL233", "uniprot_accession": "P35372"},
     }
+    assert packet["raw_row_import"]["source_acquisition_plan"][
+        "positive_source_snapshot"
+    ]["positive_source_ready"] is True
+    assert packet["raw_row_import"]["source_acquisition_plan"][
+        "positive_source_snapshot"
+    ]["target_candidate_counts"] == {
+        "DRD2": 12,
+        "HTR2A": 12,
+        "OPRM1": 12,
+    }
     assert packet["target_execution_preflight_count"] == 3
     assert packet["first_target_execution_preflight_blocker"]["target_id"] == "DRD2"
     assert packet["first_target_execution_preflight_blocker"]["first_blocker"] == (

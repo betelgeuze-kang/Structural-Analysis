@@ -4,6 +4,8 @@
 - `contract_pass`: `True`
 - `actual_closure_ready`: `False`
 - `blocker_count`: `3`
+- `positive_source_snapshot`: `implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json`
+- `positive_source_ready`: `True`
 
 | Target | UniProt | ChEMBL | Role |
 |---|---|---|---|
@@ -14,6 +16,7 @@
 ## Commands
 
 - `write_plan`: `python3 scripts/build_gpcr_hard_decoy_source_acquisition_plan.py`
+- `build_positive_source_snapshot`: `python3 scripts/build_gpcr_hard_decoy_positive_source_snapshot.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json --out-md implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.md`
 - `import_rows`: `python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py --rows implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --source-id <source-id> --source-url <source-url> --source-license <license>`
 - `materialize_suite`: `python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --fail-blocked`
 - `science_actual_closure`: `python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked`

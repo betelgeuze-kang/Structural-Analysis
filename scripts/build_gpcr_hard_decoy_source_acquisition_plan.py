@@ -27,6 +27,12 @@ PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "gpcr_hard_decoy_source_acquisition_plan.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_ROWS_OUT = PRODUCTIZATION / "gpcr_hard_decoy_rows.json"
+DEFAULT_POSITIVE_SOURCE_SNAPSHOT = (
+    PRODUCTIZATION / "gpcr_hard_decoy_positive_source_snapshot.json"
+)
+DEFAULT_POSITIVE_SOURCE_SNAPSHOT_MD = DEFAULT_POSITIVE_SOURCE_SNAPSHOT.with_suffix(
+    ".md"
+)
 DEFAULT_OPERATOR_TEMPLATE = PRODUCTIZATION / "gpcr_hard_decoy_operator_template.json"
 DEFAULT_SUITE_REPORT = PRODUCTIZATION / "gpcr_hard_decoy_suite_report.json"
 
@@ -65,6 +71,51 @@ TARGET_SOURCES = (
 
 def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+
+
+def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
+    resolved = path if path.is_absolute() else repo_root / path
+    if not resolved.exists():
+        return {}
+    try:
+        payload = json.loads(resolved.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _positive_source_snapshot_summary(
+    snapshot: dict[str, Any],
+) -> dict[str, Any]:
+    summary = snapshot.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+    return {
+        "artifact": str(DEFAULT_POSITIVE_SOURCE_SNAPSHOT),
+        "markdown_artifact": str(DEFAULT_POSITIVE_SOURCE_SNAPSHOT_MD),
+        "status": str(snapshot.get("status") or "missing"),
+        "contract_pass": snapshot.get("contract_pass"),
+        "positive_source_ready": bool(snapshot.get("positive_source_ready")),
+        "actual_closure_ready": bool(snapshot.get("actual_closure_ready")),
+        "target_candidate_counts": dict(snapshot.get("target_candidate_counts") or {}),
+        "total_positive_candidate_count": int(
+            snapshot.get("total_positive_candidate_count") or 0
+        ),
+        "minimum_positive_rows_per_target": int(
+            snapshot.get("minimum_positive_rows_per_target") or 0
+        ),
+        "closure_blockers": [
+            str(row) for row in snapshot.get("closure_blockers", [])
+        ]
+        if isinstance(snapshot.get("closure_blockers"), list)
+        else [],
+        "blocker_count": int(snapshot.get("blocker_count") or 0),
+        "command": (
+            "python3 scripts/build_gpcr_hard_decoy_positive_source_snapshot.py "
+            f"--out {DEFAULT_POSITIVE_SOURCE_SNAPSHOT} "
+            f"--out-md {DEFAULT_POSITIVE_SOURCE_SNAPSHOT_MD}"
+        ),
+    }
 
 
 def _target_query_url(uniprot_accession: str) -> str:
@@ -135,6 +186,10 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
     repo_root: Path = ROOT,
 ) -> dict[str, Any]:
     target_sources = [_target_source(dict(row)) for row in TARGET_SOURCES]
+    positive_source_snapshot = _load_json(repo_root, DEFAULT_POSITIVE_SOURCE_SNAPSHOT)
+    positive_source_summary = _positive_source_snapshot_summary(
+        positive_source_snapshot
+    )
     required_targets = list(REQUIRED_TARGETS)
     target_ids = [str(row["target_id"]) for row in target_sources]
     blockers = [
@@ -147,6 +202,8 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
         **release_evidence_metadata(
             input_paths=[
                 Path("scripts/build_gpcr_hard_decoy_source_acquisition_plan.py"),
+                Path("scripts/build_gpcr_hard_decoy_positive_source_snapshot.py"),
+                DEFAULT_POSITIVE_SOURCE_SNAPSHOT,
                 Path("scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py"),
                 Path("scripts/materialize_gpcr_hard_decoy_suite_report.py"),
             ],
@@ -167,6 +224,7 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
             }
             for row in target_sources
         },
+        "positive_source_snapshot": positive_source_summary,
         "per_target_exit_gates": [
             _per_target_exit_gate(target_id) for target_id in required_targets
         ],
@@ -199,6 +257,7 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
                     RAW_ROW_QUALITY_CRITERIA["min_positive_count_per_target"]
                 ),
                 "candidate_source": "ChEMBL target activity rows or stronger operator-attached source",
+                "candidate_snapshot": positive_source_summary,
                 "closure_boundary": (
                     "Positive candidate sources do not close hard-decoy evaluation "
                     "without target-specific decoys and a scoring run."
@@ -235,6 +294,7 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
         ],
         "operator_acquisition_checklist": [
             "verify_human_target_mapping_against_chembl_target_endpoint",
+            "build_gpcr_hard_decoy_positive_source_snapshot",
             "attach_positive_ligand_candidates_with_activity_receipts",
             "attach_target_specific_hard_decoy_candidates_with_license_receipts",
             "run_one_documented_scoring_protocol_for_all_rows_per_target",
@@ -245,6 +305,11 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
         "commands": {
             "write_plan": (
                 "python3 scripts/build_gpcr_hard_decoy_source_acquisition_plan.py"
+            ),
+            "build_positive_source_snapshot": (
+                "python3 scripts/build_gpcr_hard_decoy_positive_source_snapshot.py "
+                f"--out {DEFAULT_POSITIVE_SOURCE_SNAPSHOT} "
+                f"--out-md {DEFAULT_POSITIVE_SOURCE_SNAPSHOT_MD}"
             ),
             "import_rows": (
                 "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py "
@@ -268,6 +333,15 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
             "target_source_count": len(target_sources),
             "required_target_count": len(required_targets),
             "target_source_mapping_complete": target_ids == required_targets,
+            "positive_source_ready": bool(
+                positive_source_summary.get("positive_source_ready")
+            ),
+            "positive_source_snapshot_status": str(
+                positive_source_summary.get("status") or ""
+            ),
+            "total_positive_candidate_count": int(
+                positive_source_summary.get("total_positive_candidate_count") or 0
+            ),
             "minimum_positive_rows_total": int(
                 RAW_ROW_QUALITY_CRITERIA["min_positive_count_per_target"]
             )
@@ -296,6 +370,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `contract_pass`: `{payload['contract_pass']}`",
         f"- `actual_closure_ready`: `{payload['actual_closure_ready']}`",
         f"- `blocker_count`: `{payload['blocker_count']}`",
+        f"- `positive_source_snapshot`: `{payload['positive_source_snapshot']['artifact']}`",
+        f"- `positive_source_ready`: `{payload['positive_source_snapshot']['positive_source_ready']}`",
         "",
         "| Target | UniProt | ChEMBL | Role |",
         "|---|---|---|---|",

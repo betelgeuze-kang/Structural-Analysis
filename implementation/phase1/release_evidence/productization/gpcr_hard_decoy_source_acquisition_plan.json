@@ -1,6 +1,28 @@
 {
   "acceptable_source_roles": [
     {
+      "candidate_snapshot": {
+        "actual_closure_ready": false,
+        "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json",
+        "blocker_count": 0,
+        "closure_blockers": [
+          "target_specific_hard_decoy_source_not_attached",
+          "gpcr_scoring_protocol_receipts_not_attached",
+          "gpcr_hard_decoy_rows_not_materialized"
+        ],
+        "command": "python3 scripts/build_gpcr_hard_decoy_positive_source_snapshot.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json --out-md implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.md",
+        "contract_pass": true,
+        "markdown_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.md",
+        "minimum_positive_rows_per_target": 4,
+        "positive_source_ready": true,
+        "status": "positive_sources_ready",
+        "target_candidate_counts": {
+          "DRD2": 12,
+          "HTR2A": 12,
+          "OPRM1": 12
+        },
+        "total_positive_candidate_count": 36
+      },
       "candidate_source": "ChEMBL target activity rows or stronger operator-attached source",
       "closure_boundary": "Positive candidate sources do not close hard-decoy evaluation without target-specific decoys and a scoring run.",
       "minimum_per_target": 4,
@@ -28,6 +50,7 @@
   ],
   "claim_boundary": "This plan records verified public target identifiers and the row/source contract needed to acquire GPCR hard-decoy evidence. It does not download or attach activity data, decoys, docking scores, or licenses, and it does not close Phase 3 until the raw rows pass the suite materializer.",
   "commands": {
+    "build_positive_source_snapshot": "python3 scripts/build_gpcr_hard_decoy_positive_source_snapshot.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json --out-md implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.md",
     "import_rows": "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py --rows implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --source-id <source-id> --source-url <source-url> --source-license <license>",
     "materialize_suite": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --fail-blocked",
     "science_actual_closure": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
@@ -35,14 +58,17 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T15:52:45.712971+00:00",
+  "generated_at": "2026-07-03T16:20:47.626126+00:00",
   "input_checksums": {
-    "scripts/build_gpcr_hard_decoy_source_acquisition_plan.py": "sha256:8dd565d255b1b8cdf95b73446951ae0d8049ce30c19ffa4c9df2eb794e4c6da4",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json": "sha256:14fc63c1890aaaf1e9187a79b47fef21f3dc33511c2cf14e97356942568ae2c4",
+    "scripts/build_gpcr_hard_decoy_positive_source_snapshot.py": "sha256:6e27e6448a6114b6defd76f52cf63ef2179ba57bd8895634ec8037f8c3378bc1",
+    "scripts/build_gpcr_hard_decoy_source_acquisition_plan.py": "sha256:92ad1d38bb15d1c2ac2bac95a740d0c3f16d953c252bd05aacc06a4095bc8988",
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:8824e14602faf05a39d841d8367d5773c76a23ffbf8f614ee99f926a8ff478a6"
   },
   "operator_acquisition_checklist": [
     "verify_human_target_mapping_against_chembl_target_endpoint",
+    "build_gpcr_hard_decoy_positive_source_snapshot",
     "attach_positive_ligand_candidates_with_activity_receipts",
     "attach_target_specific_hard_decoy_candidates_with_license_receipts",
     "run_one_documented_scoring_protocol_for_all_rows_per_target",
@@ -97,6 +123,28 @@
       "target_id": "OPRM1"
     }
   ],
+  "positive_source_snapshot": {
+    "actual_closure_ready": false,
+    "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json",
+    "blocker_count": 0,
+    "closure_blockers": [
+      "target_specific_hard_decoy_source_not_attached",
+      "gpcr_scoring_protocol_receipts_not_attached",
+      "gpcr_hard_decoy_rows_not_materialized"
+    ],
+    "command": "python3 scripts/build_gpcr_hard_decoy_positive_source_snapshot.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json --out-md implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.md",
+    "contract_pass": true,
+    "markdown_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.md",
+    "minimum_positive_rows_per_target": 4,
+    "positive_source_ready": true,
+    "status": "positive_sources_ready",
+    "target_candidate_counts": {
+      "DRD2": 12,
+      "HTR2A": 12,
+      "OPRM1": 12
+    },
+    "total_positive_candidate_count": 36
+  },
   "required_targets": [
     "DRD2",
     "HTR2A",
@@ -120,16 +168,19 @@
     "score_direction_policy": "Use one score_direction per target and preserve the direction used by the scoring protocol."
   },
   "schema_version": "gpcr-hard-decoy-source-acquisition-plan.v1",
-  "source_commit_sha": "f88765dcf049dcc948a496d7b7c791a8e4d1ebd1",
+  "source_commit_sha": "ab5a547ffe624993935135002493a8d6a1c149ce",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
     "blocker_count": 3,
     "minimum_decoy_rows_total": 60,
     "minimum_positive_rows_total": 12,
+    "positive_source_ready": true,
+    "positive_source_snapshot_status": "positive_sources_ready",
     "required_target_count": 3,
     "target_source_count": 3,
-    "target_source_mapping_complete": true
+    "target_source_mapping_complete": true,
+    "total_positive_candidate_count": 36
   },
   "target_source_count": 3,
   "target_source_ids": {
