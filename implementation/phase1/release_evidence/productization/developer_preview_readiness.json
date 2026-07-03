@@ -209,7 +209,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-07-03T01:27:16.690239+00:00",
+  "generated_at": "2026-07-03T02:05:13.260383+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -228,11 +228,11 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:6d1fc2f397655181b1ce8f03fd00d7cc4cfbb1e3c74edabd78ad06d9e1a2fcae",
+      "input_checksum": "sha256:df641c7feeb7b756e3eaa3360ba9b82b739c4905fc9765a6ae596f095af31e86",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "73db92d3f51fb2cf03e8324731c50693815d9749",
+      "source_commit_sha": "5e685828225a456a4f6cb1f4745397ada1c37f31",
       "status": "blocked"
     }
   },
@@ -240,7 +240,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:416c1c6241be873d9dad7416b3ec32bd51276706a013a36f3e501385348a71e7",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:6d1fc2f397655181b1ce8f03fd00d7cc4cfbb1e3c74edabd78ad06d9e1a2fcae"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:df641c7feeb7b756e3eaa3360ba9b82b739c4905fc9765a6ae596f095af31e86"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "blocked",
@@ -400,7 +400,6 @@
           "g1_full_load_lane::hip_consistency_proof_residual_jvp_worker_path_not_ready": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing": "g1::production_rocm_hip_residency_not_closed",
-          "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed": "g1::material_newton_breadth_not_closed",
           "g1_full_load_lane::hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_worker::direct_probe_not_executed_preflight_only": "g1::production_rocm_hip_residency_not_closed",
@@ -442,11 +441,11 @@
           {
             "active": true,
             "closure_dimension": "gpu_hip_followup_performance_and_residency",
-            "represented_detail_blocker_count": 19,
+            "represented_detail_blocker_count": 18,
             "root_blocker": "g1::production_rocm_hip_residency_not_closed"
           }
         ],
-        "suppressed_detail_blocker_count": 35,
+        "suppressed_detail_blocker_count": 34,
         "unmatched_detail_blockers": [
           "g1_full_load_lane::checkpoint_resolution_no_full_load_candidate"
         ]
@@ -559,7 +558,6 @@
         "g1_full_load_lane::hip_consistency_proof_residual_jvp_worker_path_not_ready": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing": "g1::*",
-        "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_worker::direct_probe_not_executed_preflight_only": "g1::*",
@@ -1790,7 +1788,6 @@
           "hip_consistency_proof_residual_jvp_worker_path_not_ready",
           "hip_consistency_proof_runtime::dev_dri_missing",
           "hip_consistency_proof_runtime::dev_kfd_missing",
-          "hip_consistency_proof_source_commit_sha_mismatch",
           "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
           "hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven",
           "hip_consistency_proof_worker::direct_probe_not_executed_preflight_only",
@@ -1803,11 +1800,7 @@
           "hip_consistency_proof_worker::runtime::dev_kfd_missing",
           "hip_consistency_proof_worker_g1_closure_gate_not_ready"
         ],
-        "changed_paths_since_source_commit": [
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
-          "scripts/build_g1_load_dependent_near_null_packet.py"
-        ],
+        "changed_paths_since_source_commit": [],
         "consistent_residual_jacobian_newton_gate_passed": false,
         "cpu_diagnostic_assembler_used": false,
         "execution_mode": "hip_required_runtime_preflight_only_no_child_execution",
@@ -1862,9 +1855,9 @@
           "dev_kfd_missing",
           "dev_dri_missing"
         ],
-        "source_commit_sha": "ab0aee6bfb8a3aa94b9e04e51e1deed8237bfbe2",
-        "source_state_fresh": false,
-        "source_state_kind": "g1_hip_paths_changed",
+        "source_commit_sha": "82fc1a4a19e4d61a3fb634e548afb5f76f3a6465",
+        "source_state_fresh": true,
+        "source_state_kind": "exact",
         "status": "partial"
       },
       "full_load_hip_newton_hip_consistency_proof_ready": false,
@@ -1876,7 +1869,7 @@
       "full_load_hip_newton_lane_reused_evidence": false,
       "full_load_hip_newton_lane_status": "blocked",
       "full_mesh_full_load_ready": false,
-      "suppressed_detail_blocker_count": 35,
+      "suppressed_detail_blocker_count": 34,
       "suppressed_detail_blockers": [
         "g1_full_load_lane::checkpoint_load_scale_below_required_full_load",
         "g1_full_load_lane::checkpoint_resolution_no_full_load_candidate",
@@ -1898,7 +1891,6 @@
         "g1_full_load_lane::hip_consistency_proof_residual_jvp_worker_path_not_ready",
         "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing",
         "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing",
-        "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch",
         "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
         "g1_full_load_lane::hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven",
         "g1_full_load_lane::hip_consistency_proof_worker::direct_probe_not_executed_preflight_only",
@@ -2235,6 +2227,6 @@
       }
     }
   },
-  "source_commit_sha": "73db92d3f51fb2cf03e8324731c50693815d9749",
+  "source_commit_sha": "79e1c1b98f9168d6fb8cd1b1120499e7e4503221",
   "status": "blocked"
 }

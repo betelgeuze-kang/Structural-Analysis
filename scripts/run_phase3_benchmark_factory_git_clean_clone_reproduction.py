@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -33,6 +34,10 @@ from release_evidence_metadata import git_head, input_checksums  # noqa: E402
 DEFAULT_BUNDLE = PRODUCTIZATION / "phase3_benchmark_factory_seed_reproducibility_bundle.json"
 DEFAULT_OUT = PRODUCTIZATION / "phase3_benchmark_factory_seed_git_clean_clone_reproduction.json"
 SCHEMA_VERSION = "phase3-benchmark-factory-git-clean-clone-reproduction.v1"
+VOLATILE_TMP_PATH_PATTERNS = (
+    re.compile(r"/tmp/phase3-benchmark-git-clean-clone-[^/\s]+/checkout"),
+    re.compile(r"/tmp/phase3-benchmark-clean-checkout-[^/\s]+"),
+)
 
 PATH_ROLE_SOURCE_INPUT_REPORT = "source_input_report"
 PATH_ROLE_GENERATED_PRODUCTIZATION_EVIDENCE = "generated_productization_evidence"
@@ -131,6 +136,11 @@ def _strip_volatile(payload: Any) -> Any:
         }
     if isinstance(payload, list):
         return [_strip_volatile(item) for item in payload]
+    if isinstance(payload, str):
+        normalized = payload
+        for pattern in VOLATILE_TMP_PATH_PATTERNS:
+            normalized = pattern.sub("<volatile-phase3-tmp-path>", normalized)
+        return normalized
     return payload
 
 

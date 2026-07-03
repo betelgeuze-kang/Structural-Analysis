@@ -100,6 +100,49 @@ def test_required_path_blocker_summary_by_role_groups_blockers() -> None:
     assert summary[module.PATH_ROLE_FOCUSED_TEST]["blocker_count"] == 0
 
 
+def test_strip_volatile_normalizes_clone_temp_paths() -> None:
+    left = {
+        "command_results": [
+            {
+                "command": (
+                    "git clone --no-local --quiet /repo "
+                    "/tmp/phase3-benchmark-git-clean-clone-abc123/checkout"
+                ),
+                "clone_checkout_path": "/tmp/phase3-benchmark-git-clean-clone-abc123/checkout",
+                "elapsed_seconds": 1.23,
+            },
+            {
+                "command": (
+                    "python3 scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py "
+                    "--checkout /tmp/phase3-benchmark-clean-checkout-left"
+                ),
+            },
+        ],
+        "generated_at": "2026-07-01T00:00:00+00:00",
+    }
+    right = {
+        "command_results": [
+            {
+                "command": (
+                    "git clone --no-local --quiet /repo "
+                    "/tmp/phase3-benchmark-git-clean-clone-def456/checkout"
+                ),
+                "clone_checkout_path": "/tmp/phase3-benchmark-git-clean-clone-def456/checkout",
+                "elapsed_seconds": 9.87,
+            },
+            {
+                "command": (
+                    "python3 scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py "
+                    "--checkout /tmp/phase3-benchmark-clean-checkout-right"
+                ),
+            },
+        ],
+        "generated_at": "2026-07-02T00:00:00+00:00",
+    }
+
+    assert module._strip_volatile(left) == module._strip_volatile(right)
+
+
 def test_git_preflight_blocks_untracked_required_path(tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
     repo_root.mkdir()
