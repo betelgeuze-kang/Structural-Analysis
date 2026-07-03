@@ -1,91 +1,137 @@
 {
-  "benchmark_family_target_counts": {},
-  "blockers": [
-    "dud_e_lit_pcba_enrichment_targets_missing",
-    "dud_e_lit_pcba_scored_molecules_missing",
-    "dud_e_lit_pcba_active_decoy_labels_missing"
-  ],
-  "claim_boundary": "This seed defines the DUD-E/LIT-PCBA enrichment scorecard shape and materializer command. With zero operator-attached target rows it is intentionally blocked and cannot support an enrichment claim.",
-  "contract_pass": false,
+  "active_decoy_policy": {
+    "per_target_requirement": "each target must contain at least one active molecule and one decoy molecule"
+  },
+  "benchmark_family_target_counts": {
+    "DUD-E": 1
+  },
+  "blockers": [],
+  "boolean_label_policy": {
+    "is_active": "must be a JSON boolean true/false; strings and numbers are rejected"
+  },
+  "claim_boundary": "This scorecard computes DUD-E/LIT-PCBA enrichment metrics from operator-attached scored molecule rows. It does not download benchmark data, validate ligand chemistry, compare docking engines, or close Tier beta by itself.",
+  "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T17:59:52.707716+00:00",
+  "first_blocked_target": "",
+  "generated_at": "2026-07-03T18:05:42.510044+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:a2f8dde118e607325074a1ca5aea075228426295eedc9cdb10553184a324f2b2",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:e6a480fa8d1aa1436a403fa27b9d5a034e98772c3419910f443c595282aa7e2d",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:57e7df559ab42c7f3591f00a5ea6df353e0b81cfbbf12c1b5996df4932da536c",
-    "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
-    "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
-    "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
-    "scripts/materialize_public_benchmark_pose_success_harness.py": "sha256:8a8eccfa010924ca874984fecc8a484a158d974dd7888ba9bf42a01009366e61",
-    "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:f3f8ee12c7b15238da7a940bab4c4bfa2ba17cf270ea3522d000430dc20cd4a8",
-    "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:373b1e217aaa6bce582e83a3c9d84e8b7e25664362dc91a9ba009ee54a01cf56",
-    "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:988022141137fa8dd3f56ff4feaebad1bdc218c838ed4cc9028f85bcc510d6e7",
-    "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:58d09754c886a093ceccc0305fcad5099a9160de2890f3795fe00d0c8e53f606",
-    "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:1741e0d4261554b76e9eb649028430ce0d3e96626358a6bc2bc31db6c16d650d",
-    "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:4718c87bbcef615afc9f3ab4cce2e1e7a74e4f767d14d7558903d6cfec59dab3",
-    "scripts/validate_public_benchmark_external_receipts.py": "sha256:efe47b90b4d467b89ea13797c2681851e7cffc4f8ab8ba15f9d11bb0a765a8e0",
-    "scripts/validate_public_benchmark_pose_validity.py": "sha256:781e1a90205d6e04929d2bd29f7519427db86eefb708320e12a0ebc5559fea9d",
-    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:1750e9440703be1f4e85fbc950adc15b197466af19cd3c8c21df9f46bae5dcf5"
+    "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
+    "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6"
   },
-  "materializer": {
-    "claim_boundary": "The materializer consumes operator-attached DUD-E/LIT-PCBA scored molecule rows and computes EF@1%, EF@5%, and ROC-AUC. It does not fetch public benchmark files, infer ligand chemistry, or close Tier beta.",
-    "family_coverage_fields": [
-      "benchmark_family_target_counts",
-      "covered_supported_family_count",
-      "missing_supported_families"
-    ],
-    "intake_target_key": "targets",
-    "materialization_command": "python3 scripts/materialize_public_benchmark_enrichment_scorecard.py --intake <operator-dud-e-lit-pcba-enrichment-intake.json> --out-scorecard implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_enrichment_materialization_report.json --fail-blocked",
-    "required_molecule_fields": [
-      "molecule_id",
-      "is_active",
-      "score"
-    ],
-    "required_target_fields": [
-      "benchmark_family",
-      "target_id",
-      "score_direction",
-      "scored_molecules",
-      "source_license_or_accession",
-      "source_checksum",
-      "provenance_ref"
-    ],
-    "schema_version": "public-benchmark-enrichment-materialization.v1",
-    "source_checksum_policy": {
-      "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
-      "required_receipt_field": "source_checksum"
+  "materialization_report": {
+    "benchmark_family_target_counts": {
+      "DUD-E": 1
     },
-    "status": "ready_for_operator_intake",
-    "supported_families": [
-      "DUD-E",
-      "LIT-PCBA"
-    ]
+    "blocker_count": 0,
+    "materialized_target_count": 1,
+    "operator_target_count": 1,
+    "public_benchmark_enrichment_ready": true,
+    "ready_target_count": 1,
+    "schema_version": "public-benchmark-enrichment-materialization.v1"
   },
-  "public_benchmark_enrichment_ready": false,
-  "real_enrichment_target_count": 0,
-  "reuse_policy": "public_benchmark_enrichment_scorecard_seed_from_repo_contract",
+  "numeric_value_policy": {
+    "score": "must parse to a finite float; NaN and Infinity are rejected"
+  },
+  "public_benchmark_enrichment_ready": true,
+  "real_enrichment_target_count": 1,
+  "required_molecule_fields": [
+    "molecule_id",
+    "is_active",
+    "score"
+  ],
+  "required_target_fields": [
+    "benchmark_family",
+    "target_id",
+    "score_direction",
+    "scored_molecules",
+    "source_license_or_accession",
+    "source_checksum",
+    "provenance_ref"
+  ],
+  "reuse_policy": "public_benchmark_enrichment_scorecard_materialized_from_operator_intake",
   "reused_evidence": false,
+  "root_cause_tags": [],
+  "row_integrity_policy": {
+    "purpose": "Duplicate enrichment targets or scored molecules cannot be used to inflate Public Benchmark enrichment coverage or active/decoy counts.",
+    "required_unique_row_keys": {
+      "target_scored_molecules": [
+        "molecule_id"
+      ],
+      "targets": [
+        "target_id"
+      ]
+    }
+  },
   "schema_version": "public-benchmark-enrichment-scorecard.v1",
-  "source_commit_sha": "bc1b5f42825201a2cb5fe8b995c0eb8c5f0a53b2",
-  "status": "operator_evidence_required",
+  "score_direction_policy": {
+    "accepted_aliases": {
+      "higher_is_better": [
+        "higher",
+        "higher_is_better",
+        "descending"
+      ],
+      "lower_is_better": [
+        "lower",
+        "lower_is_better",
+        "ascending"
+      ]
+    },
+    "accepted_values": [
+      "higher_is_better",
+      "lower_is_better"
+    ],
+    "blank_values": "rejected; no implicit default is applied",
+    "required": true
+  },
+  "source_commit_sha": "4b8b6202704653d3cde5e710db0625eeb64e5a82",
+  "status": "ready",
   "summary": {
-    "active_count": 0,
-    "benchmark_families": [],
-    "benchmark_family_count": 0,
-    "benchmark_family_target_counts": {},
-    "blocker_count": 3,
-    "covered_supported_family_count": 0,
-    "decoy_count": 0,
-    "enrichment_factor_1pct_median": null,
-    "enrichment_factor_5pct_median": null,
+    "active_count": 25,
+    "benchmark_families": [
+      "DUD-E"
+    ],
+    "benchmark_family_count": 1,
+    "benchmark_family_target_counts": {
+      "DUD-E": 1
+    },
+    "blocker_count": 0,
+    "covered_supported_family_count": 1,
+    "decoy_count": 250,
+    "enrichment_factor_1pct_median": 7.333333333333333,
+    "enrichment_factor_5pct_median": 2.3571428571428568,
     "missing_supported_families": [
-      "DUD-E",
       "LIT-PCBA"
     ],
-    "molecule_count": 0,
-    "ready_target_count": 0,
-    "roc_auc_median": null,
-    "target_count": 0
+    "molecule_count": 275,
+    "ready_target_count": 1,
+    "roc_auc_median": 0.39552,
+    "target_count": 1
   },
-  "target_rows": []
+  "summary_line": "Public benchmark enrichment scorecard: PASS | targets=1 | families=DUD-E",
+  "supported_benchmark_families": [
+    "DUD-E",
+    "LIT-PCBA"
+  ],
+  "target_rows": [
+    {
+      "active_count": 25,
+      "benchmark_family": "DUD-E",
+      "blockers": [],
+      "contract_pass": true,
+      "decoy_count": 250,
+      "enrichment_factor_1pct": 7.333333333333333,
+      "enrichment_factor_5pct": 2.3571428571428568,
+      "molecule_count": 275,
+      "provenance_ref": "https://dude.docking.org/targets/aa2ar/",
+      "roc_auc": 0.39552,
+      "root_cause_tags": [],
+      "score_direction": "higher_is_better",
+      "source_checksum": "sha256:5b25a7234359a697af7a4f48892bb776681d5d2121bab01325458d23becf366f",
+      "source_license_or_accession": "DUD-E:AA2AR:official_actives_final_and_decoys_final",
+      "status": "pass",
+      "target_id": "AA2AR",
+      "top_1pct_count": 3,
+      "top_5pct_count": 14
+    }
+  ]
 }

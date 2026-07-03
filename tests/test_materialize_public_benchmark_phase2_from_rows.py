@@ -252,7 +252,7 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
     tmp_path: Path,
 ) -> None:
     audit = module.build_public_benchmark_phase2_row_audit(
-        repo_root=REPO_ROOT,
+        repo_root=tmp_path,
         operator_bundle_out=tmp_path / "operator_bundle.json",
         out_dir=tmp_path / "out",
         harness_report_out=tmp_path / "harness_report.json",

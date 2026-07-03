@@ -4,12 +4,11 @@
     "casf_pdbbind_pose_success_harness::pose_rows_not_provided",
     "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
     "posebusters_style_pose_validity::pose_rows_not_provided",
-    "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
-    "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
+    "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
   ],
   "claim_boundary": "This runner only materializes operator-attached public benchmark row files through the existing Public Benchmark harness materializers. It does not download CASF/PDBBind, DUD-E, or LIT-PCBA data, approve licenses, run docking engines, infer chemistry, or treat fixture/proxy rows as actual Phase 2 evidence.",
   "component_count": 5,
-  "component_ready_count": 0,
+  "component_ready_count": 1,
   "component_requirement_summaries": [
     {
       "blocked_requirement_count": 1,
@@ -90,19 +89,15 @@
       "requirement_count": 1
     },
     {
-      "blocked_requirement_count": 1,
-      "blocker_count": 1,
+      "blocked_requirement_count": 0,
+      "blocker_count": 0,
       "component_id": "dud_e_or_lit_pcba_enrichment",
-      "failed_criteria": [
-        "dud_e_or_lit_pcba_enrichment_ready"
-      ],
-      "failed_criterion_count": 1,
-      "missing_row_input_count": 1,
-      "missing_row_inputs": [
-        "enrichment_rows"
-      ],
-      "phase2_component_ready": false,
-      "ready_requirement_count": 0,
+      "failed_criteria": [],
+      "failed_criterion_count": 0,
+      "missing_row_input_count": 0,
+      "missing_row_inputs": [],
+      "phase2_component_ready": true,
+      "ready_requirement_count": 1,
       "required_row_inputs": [
         "enrichment_rows"
       ],
@@ -280,51 +275,51 @@
       "status": "operator_evidence_required"
     },
     {
-      "blockers": [
-        "enrichment_rows_not_provided"
-      ],
+      "artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
+      "artifact_role": "enrichment_scorecard",
+      "blockers": [],
       "component_id": "dud_e_or_lit_pcba_enrichment",
-      "contract_pass": false,
+      "contract_pass": true,
+      "count_field": "real_enrichment_target_count",
+      "current_count": 1,
       "expected_rows_mode": "operator_attached_public_benchmark_rows",
-      "failed_criteria": [
-        "dud_e_or_lit_pcba_enrichment_ready"
-      ],
-      "materialized": false,
-      "missing_row_inputs": [
-        "enrichment_rows"
-      ],
-      "outputs": {},
-      "phase2_component_ready": false,
-      "ready": false,
+      "failed_criteria": [],
+      "materialized": true,
+      "missing_row_inputs": [],
+      "operator_evidence_required": false,
+      "outputs": {
+        "enrichment_scorecard": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json"
+      },
+      "phase2_component_ready": true,
+      "ready": true,
+      "required_minimum_count": 1,
       "required_row_inputs": [
         "enrichment_rows"
       ],
       "requirement_summary": {
-        "blocked_requirement_count": 1,
-        "blocker_count": 1,
+        "blocked_requirement_count": 0,
+        "blocker_count": 0,
         "component_id": "dud_e_or_lit_pcba_enrichment",
-        "failed_criteria": [
-          "dud_e_or_lit_pcba_enrichment_ready"
-        ],
-        "failed_criterion_count": 1,
-        "missing_row_input_count": 1,
-        "missing_row_inputs": [
-          "enrichment_rows"
-        ],
-        "phase2_component_ready": false,
-        "ready_requirement_count": 0,
+        "failed_criteria": [],
+        "failed_criterion_count": 0,
+        "missing_row_input_count": 0,
+        "missing_row_inputs": [],
+        "phase2_component_ready": true,
+        "ready_requirement_count": 1,
         "required_row_inputs": [
           "enrichment_rows"
         ],
         "requirement_count": 1
       },
-      "status": "operator_evidence_required"
+      "source_artifact_contract_pass": true,
+      "status": "ready"
     }
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T17:59:25.712530+00:00",
+  "generated_at": "2026-07-03T18:05:42.512344+00:00",
   "input_checksums": {
+    "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
     "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:d47f7e7439be66ddd781edfbbb562662e04f74700a70e3c40f33b6dc3c44eff1"
@@ -332,10 +327,11 @@
   "missing_row_inputs": [
     "subset_rows",
     "pose_rows",
-    "enrichment_rows",
     "vina_gnina_rows"
   ],
-  "outputs": {},
+  "outputs": {
+    "enrichment_scorecard": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json"
+  },
   "phase2_exit_gate": {
     "claim": "public_benchmark_harness_phase2_exit_gate",
     "component_count": 5,
@@ -419,17 +415,15 @@
       },
       {
         "artifact_role": "enrichment_scorecard",
-        "blockers": [
-          "enrichment_rows_not_provided"
-        ],
+        "blockers": [],
         "component_id": "dud_e_or_lit_pcba_enrichment",
         "criterion_id": "dud_e_or_lit_pcba_enrichment_ready",
         "current": {
-          "contract_pass": false,
-          "ready": false,
-          "real_enrichment_target_count": 0
+          "contract_pass": true,
+          "ready": true,
+          "real_enrichment_target_count": 1
         },
-        "pass": false,
+        "pass": true,
         "required": {
           "contract_pass": true,
           "ready": true,
@@ -441,35 +435,32 @@
       "casf_pdbbind_pose_success_harness_ready",
       "symmetry_aware_ligand_rmsd_ready",
       "posebusters_style_pose_validity_ready",
-      "vina_gnina_comparison_ready",
-      "dud_e_or_lit_pcba_enrichment_ready"
+      "vina_gnina_comparison_ready"
     ],
-    "failed_criterion_count": 5,
-    "ready_component_count": 0,
+    "failed_criterion_count": 4,
+    "ready_component_count": 1,
     "required_component_count": 5,
     "status": "blocked"
   },
   "phase2_ready": false,
   "phase2_requirement_summary": {
-    "blocked_component_count": 5,
+    "blocked_component_count": 4,
     "blocked_component_ids": [
       "casf_pdbbind_pose_success_harness",
       "symmetry_aware_ligand_rmsd",
       "posebusters_style_pose_validity",
-      "vina_gnina_comparison_adapter",
-      "dud_e_or_lit_pcba_enrichment"
+      "vina_gnina_comparison_adapter"
     ],
-    "materialized_component_count": 0,
-    "missing_row_input_count": 4,
+    "materialized_component_count": 1,
+    "missing_row_input_count": 3,
     "missing_row_inputs": [
-      "enrichment_rows",
       "pose_rows",
       "subset_rows",
       "vina_gnina_rows"
     ],
-    "operator_evidence_required_count": 5,
+    "operator_evidence_required_count": 4,
     "phase2_ready": false,
-    "ready_component_count": 0,
+    "ready_component_count": 1,
     "required_component_count": 5
   },
   "phase2_requirements": [
@@ -589,32 +580,27 @@
       "status": "operator_evidence_required"
     },
     {
-      "artifact": "",
+      "artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
       "artifact_role": "enrichment_scorecard",
-      "blocker_count": 1,
-      "blockers": [
-        "enrichment_rows_not_provided"
-      ],
+      "blocker_count": 0,
+      "blockers": [],
       "component_id": "dud_e_or_lit_pcba_enrichment",
-      "contract_pass": false,
+      "contract_pass": true,
       "count_field": "real_enrichment_target_count",
       "criterion_id": "dud_e_or_lit_pcba_enrichment_ready",
-      "current_count": 0,
+      "current_count": 1,
       "expected_rows_mode": "operator_attached_public_benchmark_rows",
-      "materialized": false,
-      "missing_row_inputs": [
-        "enrichment_rows"
-      ],
-      "operator_evidence_required": true,
-      "ready": false,
+      "materialized": true,
+      "operator_evidence_required": false,
+      "ready": true,
       "ready_field": "public_benchmark_enrichment_ready",
       "required_minimum_count": 1,
       "required_row_inputs": [
         "enrichment_rows"
       ],
       "requirement": "DUD-E or LIT-PCBA enrichment scorecard",
-      "source_artifact_contract_pass": false,
-      "status": "operator_evidence_required"
+      "source_artifact_contract_pass": true,
+      "status": "ready"
     }
   ],
   "phase2_row_closure_matrix": [
@@ -744,7 +730,7 @@
         "ndjson",
         "csv"
       ],
-      "auto_detected": false,
+      "auto_detected": true,
       "claim_boundary": "This row documents which Phase 2 readiness criteria a real operator-attached row file can unblock; it is not evidence by itself.",
       "closes_phase2_criteria": [
         "dud_e_or_lit_pcba_enrichment_ready"
@@ -762,11 +748,11 @@
       "materialization_chain": [
         "materialize_public_benchmark_enrichment_scorecard"
       ],
-      "missing": true,
+      "missing": false,
       "operator_blockers_if_missing": [
         "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
       ],
-      "provided_path": "",
+      "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
       "required_by_components": [
         {
           "artifact_role": "enrichment_scorecard",
@@ -777,10 +763,10 @@
           "required_minimum_count": 1
         }
       ],
-      "resolved_path": "",
+      "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
       "row_contract_ref": "row_intake_contracts.enrichment_rows",
       "row_input_id": "enrichment_rows",
-      "status": "missing"
+      "status": "provided"
     },
     {
       "accepted_formats": [
@@ -886,7 +872,7 @@
   },
   "row_input_resolution": {
     "enrichment_rows": {
-      "auto_detected": false,
+      "auto_detected": true,
       "candidate_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
         "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.jsonl",
@@ -894,8 +880,8 @@
         "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.csv"
       ],
       "explicit_path": "",
-      "missing": true,
-      "resolved_path": "",
+      "missing": false,
+      "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
       "row_input_id": "enrichment_rows"
     },
     "pose_rows": {
@@ -1654,26 +1640,24 @@
     }
   },
   "schema_version": "public-benchmark-phase2-row-audit.v1",
-  "source_commit_sha": "bc1b5f42825201a2cb5fe8b995c0eb8c5f0a53b2",
+  "source_commit_sha": "4b8b6202704653d3cde5e710db0625eeb64e5a82",
   "status": "operator_evidence_required",
   "summary": {
     "blocked_component_ids": [
       "casf_pdbbind_pose_success_harness",
       "symmetry_aware_ligand_rmsd",
       "posebusters_style_pose_validity",
-      "vina_gnina_comparison_adapter",
-      "dud_e_or_lit_pcba_enrichment"
+      "vina_gnina_comparison_adapter"
     ],
-    "blocked_requirement_count": 5,
-    "blocker_count": 6,
-    "component_blocked_count": 5,
+    "blocked_requirement_count": 4,
+    "blocker_count": 5,
+    "component_blocked_count": 4,
     "component_count": 5,
-    "component_ready_count": 0,
-    "missing_row_input_count": 4,
+    "component_ready_count": 1,
+    "missing_row_input_count": 3,
     "missing_row_inputs": [
       "subset_rows",
       "pose_rows",
-      "enrichment_rows",
       "vina_gnina_rows"
     ],
     "phase2_exit_gate_status": "blocked",
@@ -1681,12 +1665,11 @@
       "casf_pdbbind_pose_success_harness_ready",
       "symmetry_aware_ligand_rmsd_ready",
       "posebusters_style_pose_validity_ready",
-      "vina_gnina_comparison_ready",
-      "dud_e_or_lit_pcba_enrichment_ready"
+      "vina_gnina_comparison_ready"
     ],
-    "phase2_failed_criterion_count": 5,
+    "phase2_failed_criterion_count": 4,
     "phase2_ready": false,
-    "ready_requirement_count": 0,
+    "ready_requirement_count": 1,
     "requirement_count": 5
   }
 }

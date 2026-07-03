@@ -1306,7 +1306,7 @@
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
   "first_required_operator_slot": "casf_pdbbind_subset_intake",
-  "generated_at": "2026-07-03T17:59:52.719750+00:00",
+  "generated_at": "2026-07-03T18:05:17.954919+00:00",
   "harness_bundle_index": {
     "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
     "artifact_index_command": "python3 scripts/materialize_public_benchmark_harness_bundle.py --out implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
@@ -4479,20 +4479,18 @@
           "casf_pdbbind_pose_success_harness",
           "symmetry_aware_ligand_rmsd",
           "posebusters_style_pose_validity",
-          "vina_gnina_comparison_adapter",
-          "dud_e_or_lit_pcba_enrichment"
+          "vina_gnina_comparison_adapter"
         ],
-        "blocker_count": 6,
+        "blocker_count": 5,
         "command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --out implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.md",
         "component_count": 5,
-        "component_ready_count": 0,
+        "component_ready_count": 1,
         "contract_pass": false,
         "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.md",
-        "missing_row_input_count": 4,
+        "missing_row_input_count": 3,
         "missing_row_inputs": [
           "subset_rows",
           "pose_rows",
-          "enrichment_rows",
           "vina_gnina_rows"
         ],
         "phase2_exit_gate_status": "blocked",
@@ -4500,10 +4498,9 @@
           "casf_pdbbind_pose_success_harness_ready",
           "symmetry_aware_ligand_rmsd_ready",
           "posebusters_style_pose_validity_ready",
-          "vina_gnina_comparison_ready",
-          "dud_e_or_lit_pcba_enrichment_ready"
+          "vina_gnina_comparison_ready"
         ],
-        "phase2_failed_criterion_count": 5,
+        "phase2_failed_criterion_count": 4,
         "phase2_ready": false,
         "phase2_row_closure_matrix_count": 4,
         "status": "operator_evidence_required"
@@ -5216,20 +5213,18 @@
         "casf_pdbbind_pose_success_harness",
         "symmetry_aware_ligand_rmsd",
         "posebusters_style_pose_validity",
-        "vina_gnina_comparison_adapter",
-        "dud_e_or_lit_pcba_enrichment"
+        "vina_gnina_comparison_adapter"
       ],
-      "blocker_count": 6,
+      "blocker_count": 5,
       "command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --out implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.md",
       "component_count": 5,
-      "component_ready_count": 0,
+      "component_ready_count": 1,
       "contract_pass": false,
       "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.md",
-      "missing_row_input_count": 4,
+      "missing_row_input_count": 3,
       "missing_row_inputs": [
         "subset_rows",
         "pose_rows",
-        "enrichment_rows",
         "vina_gnina_rows"
       ],
       "phase2_exit_gate_status": "blocked",
@@ -5237,10 +5232,9 @@
         "casf_pdbbind_pose_success_harness_ready",
         "symmetry_aware_ligand_rmsd_ready",
         "posebusters_style_pose_validity_ready",
-        "vina_gnina_comparison_ready",
-        "dud_e_or_lit_pcba_enrichment_ready"
+        "vina_gnina_comparison_ready"
       ],
-      "phase2_failed_criterion_count": 5,
+      "phase2_failed_criterion_count": 4,
       "phase2_ready": false,
       "phase2_row_closure_matrix_count": 4,
       "status": "operator_evidence_required"
@@ -5262,7 +5256,7 @@
     ],
     "status": "operator_acquisition_required"
   },
-  "source_commit_sha": "bc1b5f42825201a2cb5fe8b995c0eb8c5f0a53b2",
+  "source_commit_sha": "4b8b6202704653d3cde5e710db0625eeb64e5a82",
   "source_families": [
     {
       "family_id": "casf_pdbbind",

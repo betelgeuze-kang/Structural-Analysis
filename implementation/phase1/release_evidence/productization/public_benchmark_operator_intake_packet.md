@@ -45,7 +45,7 @@
 | `materialize_posebusters_validity_packet` | `False` | `False` | `public_benchmark_real_pose_predictions_missing` |
 | `materialize_symmetry_rmsd_scorecard` | `False` | `False` | `public_benchmark_real_pose_predictions_missing` |
 | `materialize_pose_success_harness` | `False` | `False` | `public_benchmark_real_pose_predictions_missing` |
-| `materialize_enrichment_scorecard` | `False` | `True` | `dud_e_lit_pcba_enrichment_targets_missing` |
+| `materialize_enrichment_scorecard` | `True` | `True` | `` |
 | `materialize_vina_gnina_comparison_adapter` | `False` | `False` | `vina_gnina_comparison_cases_missing` |
 | `validate_external_receipts` | `False` | `False` | `public_benchmark_external_receipts_missing` |
 | `refresh_public_benchmark_source_of_truth` | `False` | `False` | `casf_pdbbind_source_material_not_attached` |

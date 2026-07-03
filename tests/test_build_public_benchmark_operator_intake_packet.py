@@ -88,7 +88,6 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     ] == [
         "subset_rows",
         "pose_rows",
-        "enrichment_rows",
         "vina_gnina_rows",
     ]
     receipt_plan = packet["source_acquisition_plan"][
@@ -406,7 +405,7 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "current_artifact"
     ]["ready_values"] == {
         "phase2_ready": False,
-        "component_ready_count": 0,
+        "component_ready_count": 1,
         "component_count": 5,
     }
     assert execution["materialize_subset_manifest"]["current_ready"] is False
@@ -453,7 +452,7 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert packet["summary"]["phase2_row_audit_status"] == (
         "operator_evidence_required"
     )
-    assert packet["summary"]["phase2_row_audit_missing_row_input_count"] == 4
+    assert packet["summary"]["phase2_row_audit_missing_row_input_count"] == 3
     gate_plan = {row["slot_id"]: row for row in packet["gate_unblock_plan"]}
     assert gate_plan["casf_pdbbind_subset_intake"]["unblocks_tier_beta_criteria"] == [
         "casf_pdbbind_subset_materialized",

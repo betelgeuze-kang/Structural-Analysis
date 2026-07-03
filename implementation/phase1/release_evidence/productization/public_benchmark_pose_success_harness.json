@@ -26,7 +26,7 @@
   "contract_pass": true,
   "dry_run_case_count": 1,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T17:59:52.705464+00:00",
+  "generated_at": "2026-07-03T18:05:17.939595+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:a2f8dde118e607325074a1ca5aea075228426295eedc9cdb10553184a324f2b2",
     "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:e6a480fa8d1aa1436a403fa27b9d5a034e98772c3419910f443c595282aa7e2d",
@@ -60,6 +60,6 @@
   "reuse_policy": "public_benchmark_pose_success_harness_seed_from_repo_contract",
   "reused_evidence": false,
   "schema_version": "public-benchmark-pose-success-harness.v1",
-  "source_commit_sha": "bc1b5f42825201a2cb5fe8b995c0eb8c5f0a53b2",
+  "source_commit_sha": "4b8b6202704653d3cde5e710db0625eeb64e5a82",
   "status": "ready_for_real_benchmark_rows"
 }

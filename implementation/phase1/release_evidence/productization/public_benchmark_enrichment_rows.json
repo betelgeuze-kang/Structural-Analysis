@@ -1,0 +1,2817 @@
+{
+  "claim_boundary": "These rows use official DUD-E target SMILES and a deterministic RDKit QED baseline score. They close only the enrichment row-ingestion contract; they do not claim docking-engine enrichment, CASF/PDBBind pose success, or full Public Benchmark Phase 2 readiness.",
+  "row_source": "DUD-E official target actives_final.ism and decoys_final.ism",
+  "schema_version": "public-benchmark-dude-enrichment-rows.v1",
+  "score_policy": {
+    "label_independent": true,
+    "score_direction": "higher_is_better",
+    "score_method": "rdkit_qed_baseline_label_independent",
+    "uses_active_decoy_label_for_score": false
+  },
+  "selection_policy": {
+    "active_limit": 25,
+    "decoy_limit": 250,
+    "invalid_smiles": "skipped_before_limit_counting",
+    "ordering": "official_file_order"
+  },
+  "source_checksums": {
+    "actives_final": "sha256:690845896b1f1c0b4a41623c9f9c9e0a5a973cf972513aa33bad2749f59e1e63",
+    "combined_source": "sha256:5b25a7234359a697af7a4f48892bb776681d5d2121bab01325458d23becf366f",
+    "decoys_final": "sha256:b572781d1316c3b13b955ddc8f1cc111b4773009a1bcc3d3940db9f37835bbd8"
+  },
+  "source_refs": {
+    "actives_final": "https://dude.docking.org/targets/aa2ar/actives_final.ism",
+    "decoys_final": "https://dude.docking.org/targets/aa2ar/decoys_final.ism"
+  },
+  "source_urls": {
+    "actives_final": "https://dude.docking.org/targets/aa2ar/actives_final.ism",
+    "decoys_final": "https://dude.docking.org/targets/aa2ar/decoys_final.ism",
+    "target_page": "https://dude.docking.org/targets/aa2ar/"
+  },
+  "target_id": "AA2AR",
+  "target_slug": "aa2ar",
+  "targets": [
+    {
+      "benchmark_family": "DUD-E",
+      "invalid_smiles_counts": {
+        "active": 0,
+        "decoy": 0
+      },
+      "provenance_ref": "https://dude.docking.org/targets/aa2ar/",
+      "score_direction": "higher_is_better",
+      "score_method": "rdkit_qed_baseline_label_independent",
+      "scored_molecules": [
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_1_CHEMBL1087078",
+          "score": 0.689254,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:6bbdd0ae5243b2cd74c5bc2df959118566f298e4aea301c71e53bbcc39aa022c",
+          "source_id": "CHEMBL1087078",
+          "source_role": "active",
+          "source_row_number": 1
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_2_CHEMBL610435",
+          "score": 0.343716,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:d4b67e47103f2a00c35c640a6fe45de0856bd585667a79f6fa280046b531fd40",
+          "source_id": "CHEMBL610435",
+          "source_role": "active",
+          "source_row_number": 2
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_3_CHEMBL605065",
+          "score": 0.290169,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:b097ab8102d9d9953c3ff6d796a7d8b23cfe17af8a2b98854b614f60bb8a2d6b",
+          "source_id": "CHEMBL605065",
+          "source_role": "active",
+          "source_row_number": 3
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_4_CHEMBL1093479",
+          "score": 0.27207,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:13402b8bc7ee14a8c6a8718c8b0b8af50ab04c2e7dc28901c03352a3bed9ec9d",
+          "source_id": "CHEMBL1093479",
+          "source_role": "active",
+          "source_row_number": 4
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_5_CHEMBL1092271",
+          "score": 0.428584,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:9e092dd45b02475ec7e51db06e9839958fe5d3b86a9cbd5835eee42fc4bdc7c9",
+          "source_id": "CHEMBL1092271",
+          "source_role": "active",
+          "source_row_number": 5
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_6_CHEMBL336608",
+          "score": 0.125076,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:5fa5f9f768bb66e14ae1af4d5bdca13b2d748c611e1ac241169a4fdb6558211b",
+          "source_id": "CHEMBL336608",
+          "source_role": "active",
+          "source_row_number": 6
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_7_CHEMBL136689",
+          "score": 0.47533,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:f3c8d2dbe065bb98917a9540314fff242cd68e15202597d211e13796f6344fa5",
+          "source_id": "CHEMBL136689",
+          "source_role": "active",
+          "source_row_number": 7
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_8_CHEMBL130830",
+          "score": 0.340827,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:37aa523d0e5028698562e8b55f582d4ae05006240880955bb0d8d0382fe2776b",
+          "source_id": "CHEMBL130830",
+          "source_role": "active",
+          "source_row_number": 8
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_9_CHEMBL1095999",
+          "score": 0.570282,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:3caad97fd5e8f7d61221f4d0dd26cff00bb6541bbd594672e12571aeaefe8555",
+          "source_id": "CHEMBL1095999",
+          "source_role": "active",
+          "source_row_number": 9
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_10_CHEMBL369573",
+          "score": 0.578631,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:1268136c8d9e41fd960aed9cb2493014edccb52587d47e92d44c4f1f336cdced",
+          "source_id": "CHEMBL369573",
+          "source_role": "active",
+          "source_row_number": 10
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_11_CHEMBL113142",
+          "score": 0.502136,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:0f50bca18c6a8fea76c30710c43dedb9789a7397c3bcd657d87ea0794164449c",
+          "source_id": "CHEMBL113142",
+          "source_role": "active",
+          "source_row_number": 11
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_12_CHEMBL245848",
+          "score": 0.407617,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:5e6b137ca8c05b8622c5dd00f80378419f19f35031879c665175c8c71c7a2013",
+          "source_id": "CHEMBL245848",
+          "source_role": "active",
+          "source_row_number": 12
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_13_CHEMBL22202",
+          "score": 0.304245,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:f49465a6af2241fc2335075bd73ef96b75d7f6a9f9e44cfb12b6e367189ef7c1",
+          "source_id": "CHEMBL22202",
+          "source_role": "active",
+          "source_row_number": 13
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_14_CHEMBL16687",
+          "score": 0.581309,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:2ea9f4ccfdc19db3e368fda483d29e2aedd9edea1114fec5e056c59d6bae9d31",
+          "source_id": "CHEMBL16687",
+          "source_role": "active",
+          "source_row_number": 14
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_15_CHEMBL131457",
+          "score": 0.161837,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:0b39cd71ed4e08e601508fae2c424873e2f71d657207b944f44027d496f640cb",
+          "source_id": "CHEMBL131457",
+          "source_role": "active",
+          "source_row_number": 15
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_16_CHEMBL423542",
+          "score": 0.517742,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:00fe5a3e9e263b2c16b0656e2a9aecc1ef406f5f46be85c56c164114e584932c",
+          "source_id": "CHEMBL423542",
+          "source_role": "active",
+          "source_row_number": 16
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_17_CHEMBL281811",
+          "score": 0.780931,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:1486792a15d050812a2a4b2819b8dd1714ed3da1fbafbb8ecebd188768f158fe",
+          "source_id": "CHEMBL281811",
+          "source_role": "active",
+          "source_row_number": 17
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_18_CHEMBL282888",
+          "score": 0.321917,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:7ac0374dc322eaf0e3878becfd666ffcd4883fd16b759d2c926c020b9ba1a263",
+          "source_id": "CHEMBL282888",
+          "source_role": "active",
+          "source_row_number": 18
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_19_CHEMBL487569",
+          "score": 0.745497,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:6a5512157d9672fdb4ad070813fbe6d3aa76d3710e21497ad18867bdadad6aa4",
+          "source_id": "CHEMBL487569",
+          "source_role": "active",
+          "source_row_number": 19
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_20_CHEMBL605668",
+          "score": 0.445833,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:0948a0b2d4d52e6ce603e59f5b2444a835d6e9e266e304c579776d5af84935d6",
+          "source_id": "CHEMBL605668",
+          "source_role": "active",
+          "source_row_number": 20
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_21_CHEMBL429125",
+          "score": 0.376014,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:32d7fadf109f6ae853389e78a14e7cf20c244e1cb53e8aaef112effeb486a506",
+          "source_id": "CHEMBL429125",
+          "source_role": "active",
+          "source_row_number": 21
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_22_CHEMBL255739",
+          "score": 0.461841,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:8f990b736b24585d4fa2606c4f8eca44043edb3216becaa412077da0ecbda0cd",
+          "source_id": "CHEMBL255739",
+          "source_role": "active",
+          "source_row_number": 22
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_23_CHEMBL373700",
+          "score": 0.476089,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:13bd79e5f55bd6d8823b018f41b9158d98fbb25c30dcbaaa7ab0551f93200ed0",
+          "source_id": "CHEMBL373700",
+          "source_role": "active",
+          "source_row_number": 23
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_24_CHEMBL327708",
+          "score": 0.26798,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:9ffec1147bf945eb0931c18e81f5e06103a598300b47336f55b6062110addc7a",
+          "source_id": "CHEMBL327708",
+          "source_role": "active",
+          "source_row_number": 24
+        },
+        {
+          "is_active": true,
+          "molecule_id": "AA2AR_active_25_CHEMBL609256",
+          "score": 0.348323,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:eab33076963da2710227434bf486e06d55a742afaf236e7bc78cc824be2038c9",
+          "source_id": "CHEMBL609256",
+          "source_role": "active",
+          "source_row_number": 25
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_1_C03457380",
+          "score": 0.421088,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:4c76e1eadd6e9a0748881bdb945e067d1f66c7204c5711254c6d1c4c90b6c0df",
+          "source_id": "C03457380",
+          "source_role": "decoy",
+          "source_row_number": 1
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_2_C08919992",
+          "score": 0.552967,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:6598edceab7e3ac0249ff15edb4b073cfec0705d3b6203842ff96ab1a10062ce",
+          "source_id": "C08919992",
+          "source_role": "decoy",
+          "source_row_number": 2
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_3_C08940155",
+          "score": 0.567181,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:00dad023c087842fd6ffce40ac6f57cb899d4ba162e5160f6273a721e961316d",
+          "source_id": "C08940155",
+          "source_role": "decoy",
+          "source_row_number": 3
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_4_C09135792",
+          "score": 0.341547,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:a7db7ec6b869e238a016113d919d94bd3b1ca7a39063a9ea774eb7e77abf7bf6",
+          "source_id": "C09135792",
+          "source_role": "decoy",
+          "source_row_number": 4
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_5_C09171978",
+          "score": 0.437946,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:e3950eed6f90842522616d3ccd6fa88736580aef1cb9053274ad3374556c0ff9",
+          "source_id": "C09171978",
+          "source_role": "decoy",
+          "source_row_number": 5
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_6_C09233392",
+          "score": 0.381539,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:8c0107c2e445b5d816f4b02bc085558f5b432ed0ad7e85451f8a28736a92292e",
+          "source_id": "C09233392",
+          "source_role": "decoy",
+          "source_row_number": 6
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_7_C11898488",
+          "score": 0.294059,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:a382b48e3a80b94f085ef312b0a816705e39cd15ac01f350e1d536f8f0a1bfdd",
+          "source_id": "C11898488",
+          "source_role": "decoy",
+          "source_row_number": 7
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_8_C12497914",
+          "score": 0.47606,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:ef884995632cdfdb37a2d33282996cfe5ff55bd595c56fa8f39ed7156608c3ad",
+          "source_id": "C12497914",
+          "source_role": "decoy",
+          "source_row_number": 8
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_9_C12498035",
+          "score": 0.388281,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:030c8887ed56ff0cf7d7aa9517d0bfd94ec525a66a21e5339506a4f7af107281",
+          "source_id": "C12498035",
+          "source_role": "decoy",
+          "source_row_number": 9
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_10_C15488638",
+          "score": 0.470614,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:10c1cf145a3ceffc0b6d02669d59d17aead41be8e7c86a0249bd9ac25a0f0891",
+          "source_id": "C15488638",
+          "source_role": "decoy",
+          "source_row_number": 10
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_11_C20687408",
+          "score": 0.539106,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:d7b0c47fb2f4fb497f60085eceff92d4ebbeac81549ec05f8a846cff8a99cc05",
+          "source_id": "C20687408",
+          "source_role": "decoy",
+          "source_row_number": 11
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_12_C21778257",
+          "score": 0.618152,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:57b1763f0df7e72ccd4fd50b45e3629b59d5e46d98f50c0a075228f0973428d9",
+          "source_id": "C21778257",
+          "source_role": "decoy",
+          "source_row_number": 12
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_13_C24779627",
+          "score": 0.468797,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:c12254a47ca5d0c37c43ce3a45fa3adc22d92aedc7393c00db4f4870a11d89a2",
+          "source_id": "C24779627",
+          "source_role": "decoy",
+          "source_row_number": 13
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_14_C27354283",
+          "score": 0.541688,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:124e939fb4760e0d41cbf0ee5a619ccb7e5aa87932491aa23ac946d3ab23175e",
+          "source_id": "C27354283",
+          "source_role": "decoy",
+          "source_row_number": 14
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_15_C32894927",
+          "score": 0.573039,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:d086c5bfb770980d650e97aa8bf7c9e512b196d7488df29ba7a6ceb5ecff1f57",
+          "source_id": "C32894927",
+          "source_role": "decoy",
+          "source_row_number": 15
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_16_C32958670",
+          "score": 0.480865,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:1d026f9213d26a4721b402c26407aa99d297442581fdeb58df018e5858817d71",
+          "source_id": "C32958670",
+          "source_role": "decoy",
+          "source_row_number": 16
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_17_C34792015",
+          "score": 0.734271,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:4f850aef5071506ffd6b0313a7a4a19b606e1aab5a854943a2886685874b4898",
+          "source_id": "C34792015",
+          "source_role": "decoy",
+          "source_row_number": 17
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_18_C35894347",
+          "score": 0.492333,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:d61711c8673a06de1bf68c3b7d87b9fe9f0bc67cc443f7345966073b7646b60e",
+          "source_id": "C35894347",
+          "source_role": "decoy",
+          "source_row_number": 18
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_19_C36584789",
+          "score": 0.667459,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:f65f7884508dcc0a37b4a93238142e2ddad85059acde590b10d345ec431b9e40",
+          "source_id": "C36584789",
+          "source_role": "decoy",
+          "source_row_number": 19
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_20_C38599162",
+          "score": 0.3648,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:afdc664b993b6314f4f3a816a3b5ffa9048c731dc183fda68640773731e475f5",
+          "source_id": "C38599162",
+          "source_role": "decoy",
+          "source_row_number": 20
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_21_C39021732",
+          "score": 0.301756,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:7c768bf47e5a3e958b73a5c01c857cbbd0137e1ffd1c0de0800c4dc3217018ee",
+          "source_id": "C39021732",
+          "source_role": "decoy",
+          "source_row_number": 21
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_22_C39622977",
+          "score": 0.537637,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:2c200aef06f60057e1196c0a1c82ec68a042aab8c94e9098dd53b4e09ea5f301",
+          "source_id": "C39622977",
+          "source_role": "decoy",
+          "source_row_number": 22
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_23_C39639197",
+          "score": 0.596212,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:5a6f006fe612be4176af443c9b9420c26bb33217bb6910b8cc17dc495297f4c7",
+          "source_id": "C39639197",
+          "source_role": "decoy",
+          "source_row_number": 23
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_24_C39659555",
+          "score": 0.59405,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:46e625666b9fca16362c32bd5d602119c122c53e32069428aaaddf9f21c42541",
+          "source_id": "C39659555",
+          "source_role": "decoy",
+          "source_row_number": 24
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_25_C39665843",
+          "score": 0.629913,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:2101c65a3981a4ae46f68727c900633891ec236c3f3903bf56f2a05e79b380ed",
+          "source_id": "C39665843",
+          "source_role": "decoy",
+          "source_row_number": 25
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_26_C39668711",
+          "score": 0.626265,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:7f92c38ab3f095e066c2e24413e1416bac185cba94bc9ffcbb92fcb14185d493",
+          "source_id": "C39668711",
+          "source_role": "decoy",
+          "source_row_number": 26
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_27_C39669362",
+          "score": 0.59475,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:d423bc9e83cc66da25568ba254645946bdae163f692e432a95b91fa47b351418",
+          "source_id": "C39669362",
+          "source_role": "decoy",
+          "source_row_number": 27
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_28_C39671058",
+          "score": 0.477275,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:f632400d5f646bf988a75094051c65ca6d30eef9e93ba16d3573a71bc7a6365a",
+          "source_id": "C39671058",
+          "source_role": "decoy",
+          "source_row_number": 28
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_29_C39671059",
+          "score": 0.477275,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:86dd866bebac2eadae861d2c9c15c160f9d7855d1fc551ee0faa85d8e14d1f76",
+          "source_id": "C39671059",
+          "source_role": "decoy",
+          "source_row_number": 29
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_30_C39674316",
+          "score": 0.622118,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:a6326641976fc0413e4114022bb1e106fe146dcd431360bdb0b60f4325d829d9",
+          "source_id": "C39674316",
+          "source_role": "decoy",
+          "source_row_number": 30
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_31_C39674480",
+          "score": 0.631065,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:97a47a0f9fda2550ce97c6afe826304e801a60f6c0b14e8e8c2e8852dd97c42c",
+          "source_id": "C39674480",
+          "source_role": "decoy",
+          "source_row_number": 31
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_32_C39674483",
+          "score": 0.631065,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:46a9d4b64b661ea8ef70377e85e634500c7f4340889032ba79e66a8a50215e3a",
+          "source_id": "C39674483",
+          "source_role": "decoy",
+          "source_row_number": 32
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_33_C39675061",
+          "score": 0.592967,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:19922084d08800162c35a970abae97e0652e8033a143b66554e114c17891e2b6",
+          "source_id": "C39675061",
+          "source_role": "decoy",
+          "source_row_number": 33
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_34_C39681112",
+          "score": 0.491087,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:2e8064caa639b6fe7b581e544fec2e1485f9cc4af5274a1aab53bb000d387618",
+          "source_id": "C39681112",
+          "source_role": "decoy",
+          "source_row_number": 34
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_35_C39685940",
+          "score": 0.602374,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:cfe0de723ae1c016f3cfae1833839590eb3538d3049ff93e6ed985edbfd96381",
+          "source_id": "C39685940",
+          "source_role": "decoy",
+          "source_row_number": 35
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_36_C39685941",
+          "score": 0.602374,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:2d093e537dbb94efb40b58abe12143c14ff621fc73f28a9a06d8da2930fe133d",
+          "source_id": "C39685941",
+          "source_role": "decoy",
+          "source_row_number": 36
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_37_C39694370",
+          "score": 0.603966,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:390600281d76d12a6c5ea04559ad19b2c6c997a078d1343161cbab28b5f526d1",
+          "source_id": "C39694370",
+          "source_role": "decoy",
+          "source_row_number": 37
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_38_C39694586",
+          "score": 0.53597,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:130ac3a4a1153638c96d6aad3c8e99035f0a6da15f0d939562431cedf9025800",
+          "source_id": "C39694586",
+          "source_role": "decoy",
+          "source_row_number": 38
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_39_C39694616",
+          "score": 0.53597,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:afb00e4dced9569906bc5aa3e0aa0243c19a7c7dd53a9a9a0fec76961391fe0e",
+          "source_id": "C39694616",
+          "source_role": "decoy",
+          "source_row_number": 39
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_40_C40157216",
+          "score": 0.528973,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:ca6caa546c627930f1bcdc5670fffe309a683a922c32bf36ec4be3b65b7c6ae4",
+          "source_id": "C40157216",
+          "source_role": "decoy",
+          "source_row_number": 40
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_41_C49508919",
+          "score": 0.490276,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:84508dc1e4a6ac40cb9dab1dc359535d26fcb918e9365a9a410ff51c992584a2",
+          "source_id": "C49508919",
+          "source_role": "decoy",
+          "source_row_number": 41
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_42_C20206803",
+          "score": 0.300996,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:e1310be06b5689ac2360a4166b8be4a8a0a934aca8dd2f6f0d7ecbbac56f302b",
+          "source_id": "C20206803",
+          "source_role": "decoy",
+          "source_row_number": 42
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_43_C32964363",
+          "score": 0.326184,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:a048dba920121240f9d6646cdac5bcad4debe1378e387650583f56411f749b10",
+          "source_id": "C32964363",
+          "source_role": "decoy",
+          "source_row_number": 43
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_44_C63117876",
+          "score": 0.457554,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:c22a862ff6be3d95ed6f56a481051cda2228d369dff9056f23f1a11c16d3063e",
+          "source_id": "C63117876",
+          "source_role": "decoy",
+          "source_row_number": 44
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_45_C39939619",
+          "score": 0.476545,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:558f3c9e0263e1ff763f6a5adea4cb6e33ac41763bb96eb92214530b18be3e1b",
+          "source_id": "C39939619",
+          "source_role": "decoy",
+          "source_row_number": 45
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_46_C63818744",
+          "score": 0.512143,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:c6a410df7859c0dc80a6004e45288dba7f1553a33a10f7ca3e3c4bd12631caa5",
+          "source_id": "C63818744",
+          "source_role": "decoy",
+          "source_row_number": 46
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_47_C64471143",
+          "score": 0.560945,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:6f29cae6d343fae44e2692422b494b789c0eaeb96fab8e98a7e1f68643dfeab9",
+          "source_id": "C64471143",
+          "source_role": "decoy",
+          "source_row_number": 47
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_48_C35378950",
+          "score": 0.484564,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:b0576beb543f5713101e828e462dae232075d6cead8eac085c873e97a2d8787f",
+          "source_id": "C35378950",
+          "source_role": "decoy",
+          "source_row_number": 48
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_49_C35378951",
+          "score": 0.484564,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:07c4bf67878f658a34970a0c69c9c45aefe9fe6bc57b26d5824eba881ea35626",
+          "source_id": "C35378951",
+          "source_role": "decoy",
+          "source_row_number": 49
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_50_C19960410",
+          "score": 0.562527,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:6dad8eb1ae95d249d5bd0ea56da95ccfe958d7011c5858a938465b6b4f8d4062",
+          "source_id": "C19960410",
+          "source_role": "decoy",
+          "source_row_number": 50
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_51_C01162299",
+          "score": 0.457506,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:7981c6838f3556836c83a54ab3a43e3f3df2d99568f80d8af33fe0add8a71055",
+          "source_id": "C01162299",
+          "source_role": "decoy",
+          "source_row_number": 51
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_52_C08412134",
+          "score": 0.588396,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:ec283b4796e0e277f742f93117ae7b6a5699c5bff14056d419f3a2345b67f27b",
+          "source_id": "C08412134",
+          "source_role": "decoy",
+          "source_row_number": 52
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_53_C08412139",
+          "score": 0.588396,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:0d78eee9489cb5993166e82aa40bc0da65d1ea93b944af2dd7872e0651f90773",
+          "source_id": "C08412139",
+          "source_role": "decoy",
+          "source_row_number": 53
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_54_C12038200",
+          "score": 0.461705,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:7aaeb9ff30bdee83cc1338c1f12b39f674e9c11c4f2668b13e91097e145ca799",
+          "source_id": "C12038200",
+          "source_role": "decoy",
+          "source_row_number": 54
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_55_C38600716",
+          "score": 0.393179,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:9768b179922e854d98a407bf19e953b630eadb67de49a99311fcdd958878eaf8",
+          "source_id": "C38600716",
+          "source_role": "decoy",
+          "source_row_number": 55
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_56_C38664288",
+          "score": 0.393092,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:0be4255ddd85efbb8eda2a71e1e8bc5470e27f512888e79b34fec8d03033f434",
+          "source_id": "C38664288",
+          "source_role": "decoy",
+          "source_row_number": 56
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_57_C38965213",
+          "score": 0.323074,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:5871777f8f202390f61e9aacfd74cb81a497109618ec8077311a4e2e66a91927",
+          "source_id": "C38965213",
+          "source_role": "decoy",
+          "source_row_number": 57
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_58_C38966590",
+          "score": 0.356577,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:c523af27b29cd465b7b550290db83c05d012c48bd78432502793d74107c116f4",
+          "source_id": "C38966590",
+          "source_role": "decoy",
+          "source_row_number": 58
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_59_C38975149",
+          "score": 0.433288,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:342bc9e3c72e1c6042af1987ecfb1073890d0d2806cafdb241d477f9f3d1fe20",
+          "source_id": "C38975149",
+          "source_role": "decoy",
+          "source_row_number": 59
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_60_C38980023",
+          "score": 0.491205,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:680d63d0bb0cbb715c1e8045b63dc8136d594043c4dcbd8c8b369e1fc9b10ae6",
+          "source_id": "C38980023",
+          "source_role": "decoy",
+          "source_row_number": 60
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_61_C38984593",
+          "score": 0.346499,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:8e042402537b70e4447fa6bd37001dd773c672ae7a8009d5b4bab0382868c8e6",
+          "source_id": "C38984593",
+          "source_role": "decoy",
+          "source_row_number": 61
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_62_C38989474",
+          "score": 0.426544,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:e0b0934827c0956a92128fe89e4ee4fe75710aace64aa1770b1ec088f1d1866b",
+          "source_id": "C38989474",
+          "source_role": "decoy",
+          "source_row_number": 62
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_63_C39319110",
+          "score": 0.375048,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:bb2465167f25c3c1190a193b03320a3bf61728a15857875d1af2276de71d926c",
+          "source_id": "C39319110",
+          "source_role": "decoy",
+          "source_row_number": 63
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_64_C39351944",
+          "score": 0.265706,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:0f902027cc419aae746feca84c599e04b100d15368fa50a6b81ae223acd648a2",
+          "source_id": "C39351944",
+          "source_role": "decoy",
+          "source_row_number": 64
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_65_C39377150",
+          "score": 0.260279,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:11b6423b3dfef237e642841a5db0ce733452d86f50e1f81f4146f16aba326c69",
+          "source_id": "C39377150",
+          "source_role": "decoy",
+          "source_row_number": 65
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_66_C39395122",
+          "score": 0.341505,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:597ceb0f2678fce29d29dd67504347a145a869ad1a5c51b4b58cba1b9784dc43",
+          "source_id": "C39395122",
+          "source_role": "decoy",
+          "source_row_number": 66
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_67_C39439912",
+          "score": 0.334306,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:3e6eb382b8051a2e30e54c4d4f5a35e7c9b2ecd960d2094b3fbbaf9f49d2088f",
+          "source_id": "C39439912",
+          "source_role": "decoy",
+          "source_row_number": 67
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_68_C39444094",
+          "score": 0.340015,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:851b73b68c548a5d8aa798a2890bf7500bc5d77a22486d16e6bc6f0926df967a",
+          "source_id": "C39444094",
+          "source_role": "decoy",
+          "source_row_number": 68
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_69_C39549744",
+          "score": 0.306865,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:234a2fda0aea6b323005d01cb023941f132143d3faf7b13b02a73f4747cf4e6d",
+          "source_id": "C39549744",
+          "source_role": "decoy",
+          "source_row_number": 69
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_70_C39634844",
+          "score": 0.494753,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:608bf0db503a3f61dc2ecbeb385a365e222ff89aa3814fa744aae8d54cac5bb0",
+          "source_id": "C39634844",
+          "source_role": "decoy",
+          "source_row_number": 70
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_71_C39664115",
+          "score": 0.437238,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:f7cda20396d1f945aab084e4c18f3c882fc0df2a1398634a699dc2573f956c74",
+          "source_id": "C39664115",
+          "source_role": "decoy",
+          "source_row_number": 71
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_72_C39664116",
+          "score": 0.437238,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:ddfce01b301b8e05b0dd4f60e29eca5860feb4198f3cf7a9692a5ddb6ed04041",
+          "source_id": "C39664116",
+          "source_role": "decoy",
+          "source_row_number": 72
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_73_C39664117",
+          "score": 0.437238,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:f0a26b7d59488acc1cc491ee2739b6b6102f7f705cce5f2dfa52a0e29dc0cb9e",
+          "source_id": "C39664117",
+          "source_role": "decoy",
+          "source_row_number": 73
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_74_C39664118",
+          "score": 0.437238,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:4f7a180dbcb7f1eb261de97270118366c53aa041367ab65c6039b7f89b7fe40d",
+          "source_id": "C39664118",
+          "source_role": "decoy",
+          "source_row_number": 74
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_75_C39710865",
+          "score": 0.45278,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:31aaaaeb08edbfea1a201446843835cb88a606b9524e29a49115813f809eac1a",
+          "source_id": "C39710865",
+          "source_role": "decoy",
+          "source_row_number": 75
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_76_C39710996",
+          "score": 0.468693,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:35ec90373566a12214db6a444f9694b85e6e171dcda6ea8969e3eb2fb20a4ef5",
+          "source_id": "C39710996",
+          "source_role": "decoy",
+          "source_row_number": 76
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_77_C39711393",
+          "score": 0.534838,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:cf44f41e78fd4dc45ddae9d970ca0b9cedd743e781dc092184eb13d4fb174202",
+          "source_id": "C39711393",
+          "source_role": "decoy",
+          "source_row_number": 77
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_78_C39711602",
+          "score": 0.501614,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:e8fb07fe2e3c08eec4c0e8aa7dc3bca1a37fc3155b9489f29e610d42835307e7",
+          "source_id": "C39711602",
+          "source_role": "decoy",
+          "source_row_number": 78
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_79_C52637235",
+          "score": 0.526853,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:36ce42eebff043069a398b82c370f70713dc2ec99be21535afe3670dff4b293e",
+          "source_id": "C52637235",
+          "source_role": "decoy",
+          "source_row_number": 79
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_80_C15821489",
+          "score": 0.588396,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:7e65068227930dfb1fc86c52ce25981e477b50add025fc0663c950432418404b",
+          "source_id": "C15821489",
+          "source_role": "decoy",
+          "source_row_number": 80
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_81_C63089220",
+          "score": 0.320365,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:72db40a08c91e842c55a3cec51c9011bb66f0a3be2705eea00265c9f6074e3ae",
+          "source_id": "C63089220",
+          "source_role": "decoy",
+          "source_row_number": 81
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_82_C39779645",
+          "score": 0.498989,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:bd6d5503a8704800f4fc2a12b70d7e74f16421ae37cb60008166b7ecd8d7204d",
+          "source_id": "C39779645",
+          "source_role": "decoy",
+          "source_row_number": 82
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_83_C63137439",
+          "score": 0.441719,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:27c0a5336ab03f62325347816be12a4511dde8c8cd303806c1976fb2c96b7cea",
+          "source_id": "C63137439",
+          "source_role": "decoy",
+          "source_row_number": 83
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_84_C63139015",
+          "score": 0.34053,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:831d7f86653642c33609f5ded0736c559c132b9e4ca86a8b5ad9fcb1a90ccb9a",
+          "source_id": "C63139015",
+          "source_role": "decoy",
+          "source_row_number": 84
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_85_C63142071",
+          "score": 0.449086,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:8447a97487e7c22698c179469a472ce37eb4b0aaad62762510c6428d3c4face4",
+          "source_id": "C63142071",
+          "source_role": "decoy",
+          "source_row_number": 85
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_86_C17824391",
+          "score": 0.413893,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:eca7e3b0126fa9870e166bf1a58e150529001973487eb6234d0cf8b5a638e1d6",
+          "source_id": "C17824391",
+          "source_role": "decoy",
+          "source_row_number": 86
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_87_C15821489",
+          "score": 0.588396,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:a4858d05ebdd599a5954171a48861bbbc2bd36dbcf752a42ff6c115595db771e",
+          "source_id": "C15821489",
+          "source_role": "decoy",
+          "source_row_number": 87
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_88_C63312516",
+          "score": 0.377548,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:cdf3b3f71c58cf275b11a88235557463a23c3837baac189a2f6a1c9a7f8c7615",
+          "source_id": "C63312516",
+          "source_role": "decoy",
+          "source_row_number": 88
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_89_C13687433",
+          "score": 0.580915,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:4669de3e4410574fc34dff1c66e97f6bade57dda8433151a604610bebf791089",
+          "source_id": "C13687433",
+          "source_role": "decoy",
+          "source_row_number": 89
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_90_C13690262",
+          "score": 0.516486,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:a7f5bf8401640999792b34711c4e4e54a30b75ac7f15e91e816e3682570f6e00",
+          "source_id": "C13690262",
+          "source_role": "decoy",
+          "source_row_number": 90
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_91_C13736177",
+          "score": 0.444843,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:7e4ca23ad45e2c54485b3dc58c5e38c64548f6be7308028498db0c968cb447b7",
+          "source_id": "C13736177",
+          "source_role": "decoy",
+          "source_row_number": 91
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_92_C63526757",
+          "score": 0.454569,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:275b3536e4cb645fa8af270eae2cf84a68baedfe7573783b5ef1dc3a39d5b843",
+          "source_id": "C63526757",
+          "source_role": "decoy",
+          "source_row_number": 92
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_93_C63666861",
+          "score": 0.433766,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:dbdb59fdaad6ea2357b7d3b6402a85e8916b0fdde6dcc5d6fc66677d26a557f7",
+          "source_id": "C63666861",
+          "source_role": "decoy",
+          "source_row_number": 93
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_94_C63666876",
+          "score": 0.39142,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:20ca630ad1e19a2c7d88a52e6d355b9bec3a8ccb883a6337db49e48c3659b7d5",
+          "source_id": "C63666876",
+          "source_role": "decoy",
+          "source_row_number": 94
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_95_C63994364",
+          "score": 0.3403,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:d3413b6cd804d7b5fb091e3e8ddca68c04d27f79fb48261e8bcdeb48df1d5c6c",
+          "source_id": "C63994364",
+          "source_role": "decoy",
+          "source_row_number": 95
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_96_C64043915",
+          "score": 0.404123,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:86ac5d949519a15eb9c3de9975e1abe8b0a60113c8a3c8764491908592ed0322",
+          "source_id": "C64043915",
+          "source_role": "decoy",
+          "source_row_number": 96
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_97_C64066880",
+          "score": 0.430243,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:013f2c3051a3fed637c752926f1160d734358e0260744b003aa03383d977f064",
+          "source_id": "C64066880",
+          "source_role": "decoy",
+          "source_row_number": 97
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_98_C64164179",
+          "score": 0.426418,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:0b7f12379537b2ec32839ee7aa8bb74b70c7aa01829c851c4638faabcec0e522",
+          "source_id": "C64164179",
+          "source_role": "decoy",
+          "source_row_number": 98
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_99_C64228217",
+          "score": 0.34053,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:032a93e93c296f245630e21a19cb2e5271a463bc258cfcdf85a0f1fefbeb61e2",
+          "source_id": "C64228217",
+          "source_role": "decoy",
+          "source_row_number": 99
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_100_C64657141",
+          "score": 0.290081,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:cdd5ae94ea984b78ec106d6dc7249728b8059bf3f93ab7e0157f935ec443b571",
+          "source_id": "C64657141",
+          "source_role": "decoy",
+          "source_row_number": 100
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_101_C03539188",
+          "score": 0.475856,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:9e42ad473a4eb0b2dcac57cbfca759ce318e890f95c9af31251e637a093866b5",
+          "source_id": "C03539188",
+          "source_role": "decoy",
+          "source_row_number": 101
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_102_C02369017",
+          "score": 0.412255,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:0c9465f3cd5ef6d1db19f4e6d179149644559ad9c89cd38c89fb21d3405c950c",
+          "source_id": "C02369017",
+          "source_role": "decoy",
+          "source_row_number": 102
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_103_C09138019",
+          "score": 0.342026,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:103d4a5f5cf2e4f4bcad950c3c1890f68db71abcc5a4d7f39fef553817a2c94b",
+          "source_id": "C09138019",
+          "source_role": "decoy",
+          "source_row_number": 103
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_104_C09329438",
+          "score": 0.281948,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:afd703e15fa796c599ab0df40d6114edece748c630c101a5a6f513aae0019e64",
+          "source_id": "C09329438",
+          "source_role": "decoy",
+          "source_row_number": 104
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_105_C10086530",
+          "score": 0.295914,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:e60c964b09bb8b302aee9d9bf0c11a99ebd36c17b5387bb3c68c9ee11ab41bbb",
+          "source_id": "C10086530",
+          "source_role": "decoy",
+          "source_row_number": 105
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_106_C06410076",
+          "score": 0.414829,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:65748306a885f730b3afab5705996749a36b9c4794212d69ea9475338b832f3b",
+          "source_id": "C06410076",
+          "source_role": "decoy",
+          "source_row_number": 106
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_107_C12498032",
+          "score": 0.388281,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:f11063023636f7e68c2b517e672cf1c43b4b8df47dd7557d8988a9ee3cbe015d",
+          "source_id": "C12498032",
+          "source_role": "decoy",
+          "source_row_number": 107
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_108_C12658762",
+          "score": 0.295677,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:d3f6f81840d9ef5fe54aa34550d23d6eba2f9e2e272cb230e13a6df069263b51",
+          "source_id": "C12658762",
+          "source_role": "decoy",
+          "source_row_number": 108
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_109_C06281780",
+          "score": 0.314895,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:dc55b88f4ce55927ca4b48a349065f5e5ac68d9032b50405a8d31fac0d8aee33",
+          "source_id": "C06281780",
+          "source_role": "decoy",
+          "source_row_number": 109
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_110_C15418201",
+          "score": 0.404374,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:f2e1a157846c1c4ebbc350f40e6a23f28d98c78da46435394ee591cf61806863",
+          "source_id": "C15418201",
+          "source_role": "decoy",
+          "source_row_number": 110
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_111_C15488560",
+          "score": 0.470614,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:040fe083ceebb0693de0935240c71a4f4932dfea3ae8db5a2fec9420fc032e07",
+          "source_id": "C15488560",
+          "source_role": "decoy",
+          "source_row_number": 111
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_112_C16020276",
+          "score": 0.281948,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:adad3d5f6ae9885df12fccfbc7d5f0f5a6f67925a88570d31d380ec014497c30",
+          "source_id": "C16020276",
+          "source_role": "decoy",
+          "source_row_number": 112
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_113_C16042027",
+          "score": 0.292121,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:128d4ff5820ae9cfbb0ae0122f29f8727a32e63a3ddf3dfd4962ab556a7ce95c",
+          "source_id": "C16042027",
+          "source_role": "decoy",
+          "source_row_number": 113
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_114_C09316520",
+          "score": 0.390418,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:052e6e6391a7b2c81c558ef250a187625f6167cafa4c6ec4376acc0ca73e800a",
+          "source_id": "C09316520",
+          "source_role": "decoy",
+          "source_row_number": 114
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_115_C02129521",
+          "score": 0.490566,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:28144a05857c590beee819c33e9a9c0ed2a4b7699c9345bfddf955b9ec1f83e9",
+          "source_id": "C02129521",
+          "source_role": "decoy",
+          "source_row_number": 115
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_116_C19627878",
+          "score": 0.442553,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:e33338e91fd157a0db07b132ca61ab102db56e7b1ddadadd33f6b31d630771c3",
+          "source_id": "C19627878",
+          "source_role": "decoy",
+          "source_row_number": 116
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_117_C26203215",
+          "score": 0.470614,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:d95c72486bf306d04276b40deda2c5cee4d8ad555c96144dfb7a03c61b80aa4a",
+          "source_id": "C26203215",
+          "source_role": "decoy",
+          "source_row_number": 117
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_118_C15998880",
+          "score": 0.376853,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:41feb7cdab10e19fd7252e6b16c408be69352edd06b5c1ccccfb45ea556402dc",
+          "source_id": "C15998880",
+          "source_role": "decoy",
+          "source_row_number": 118
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_119_C16010315",
+          "score": 0.40837,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:f7a96618385a5afb4435916e8133e2f2056e6ee27d26eeb4bcb5732f58f9c0ab",
+          "source_id": "C16010315",
+          "source_role": "decoy",
+          "source_row_number": 119
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_120_C16010361",
+          "score": 0.376853,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:4020f26062e1eb3858f743c03c5ccdf3745930500570f63325d3a1ac1c9c31ee",
+          "source_id": "C16010361",
+          "source_role": "decoy",
+          "source_row_number": 120
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_121_C29851546",
+          "score": 0.43524,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:7ceb000f70c5bc6beec14c28250de67d7b236c2d5c696375c5582ce71a303ccb",
+          "source_id": "C29851546",
+          "source_role": "decoy",
+          "source_row_number": 121
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_122_C32689002",
+          "score": 0.404063,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:63e90d13099154304fc62ed9ff5f75f575a7117524d25dd7234990e453677e4c",
+          "source_id": "C32689002",
+          "source_role": "decoy",
+          "source_row_number": 122
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_123_C33435762",
+          "score": 0.567952,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:9d92c6c54821c18c01d9485f4b38de0a9f9d8f8625dc138532c9195fc8e2fc03",
+          "source_id": "C33435762",
+          "source_role": "decoy",
+          "source_row_number": 123
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_124_C34762217",
+          "score": 0.414997,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:c0620da27c9d6122575ef72e3210f29706161f4faf96922bc7f1172ce8c1b42f",
+          "source_id": "C34762217",
+          "source_role": "decoy",
+          "source_row_number": 124
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_125_C35543737",
+          "score": 0.417732,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:4839459853bc77c952b7919e8c3e9070fc634f76d8950f9fc7f9e96daf94f6e9",
+          "source_id": "C35543737",
+          "source_role": "decoy",
+          "source_row_number": 125
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_126_C38599160",
+          "score": 0.3648,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:ae7822ba4b1cf4eed4fbf9b23f57a6104b34d9ca4b91100a5ca0e543bdfc4d0d",
+          "source_id": "C38599160",
+          "source_role": "decoy",
+          "source_row_number": 126
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_127_C39302181",
+          "score": 0.52279,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:b51eefc3ab0f3e6c99823b0aad17cfde8cfb4becda2560c88ade5f33460caa07",
+          "source_id": "C39302181",
+          "source_role": "decoy",
+          "source_row_number": 127
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_128_C39469635",
+          "score": 0.530469,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:1aad327c4b30c15bd01fc243d0e32bbdf5ad343a47d675161659c99f07492d96",
+          "source_id": "C39469635",
+          "source_role": "decoy",
+          "source_row_number": 128
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_129_C39639123",
+          "score": 0.622099,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:fa8cda867210a477e607a97cf61c5de3ab53da205c5264872e9b19f11e018d3a",
+          "source_id": "C39639123",
+          "source_role": "decoy",
+          "source_row_number": 129
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_130_C39659581",
+          "score": 0.602624,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:be88687811073ca2f6b647dee9523bb08b1b4ad60ca8ebb3b63c3a03f24df92e",
+          "source_id": "C39659581",
+          "source_role": "decoy",
+          "source_row_number": 130
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_131_C39664437",
+          "score": 0.568788,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:ffa7fd34e96ccf790cdaa1a8d5bf6f9a806126a656d2ba7bf028071de2d85a12",
+          "source_id": "C39664437",
+          "source_role": "decoy",
+          "source_row_number": 131
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_132_C39665842",
+          "score": 0.629913,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:27611f257666ed92f5329f9a2b174d9181afcd33d34fa889bcb641eea3d58b13",
+          "source_id": "C39665842",
+          "source_role": "decoy",
+          "source_row_number": 132
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_133_C39669361",
+          "score": 0.59475,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:2cc225784044bcc848423515cbeb9b5f9fffc2f6d2449c83b2c3cfe6af2fcb8c",
+          "source_id": "C39669361",
+          "source_role": "decoy",
+          "source_row_number": 133
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_134_C39674449",
+          "score": 0.612523,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:acc2caa707890babb49fa6b71c65b1d430dbb4da46f723d25d7572271cf86480",
+          "source_id": "C39674449",
+          "source_role": "decoy",
+          "source_row_number": 134
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_135_C39674474",
+          "score": 0.660141,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:9160a2f9dbacb888f1b3e84dbaeb839fc23cfc0ee2e0452740e1bcdae98a0333",
+          "source_id": "C39674474",
+          "source_role": "decoy",
+          "source_row_number": 135
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_136_C39685216",
+          "score": 0.472635,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:1f89dd47b0b2de3cc24cd5be8c3f2d5ebd06619f942643821d9fe52a92843f30",
+          "source_id": "C39685216",
+          "source_role": "decoy",
+          "source_row_number": 136
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_137_C39687108",
+          "score": 0.525293,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:d7becf27e79e2c9b5307faf54430b86a9c75e9d9d21f83cab3aebd5a5d4f8a1d",
+          "source_id": "C39687108",
+          "source_role": "decoy",
+          "source_row_number": 137
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_138_C39696810",
+          "score": 0.605091,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:42ba6aaf9d6d480cb26fe7ccde326fd1cce98f6ab23cd0b9d2a1ebd84acb9feb",
+          "source_id": "C39696810",
+          "source_role": "decoy",
+          "source_row_number": 138
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_139_C39707101",
+          "score": 0.432029,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:c05d460f87932ca474a3ca3729459e1870edbb9cc22ff3bd42226fe966019200",
+          "source_id": "C39707101",
+          "source_role": "decoy",
+          "source_row_number": 139
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_140_C49512826",
+          "score": 0.520873,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:1bfa4b0558c4c01aa63c0e8f0eb2bd1253b8ac6d7120a9bcc7a8535f2ee9457e",
+          "source_id": "C49512826",
+          "source_role": "decoy",
+          "source_row_number": 140
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_141_C20205685",
+          "score": 0.405154,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:3a479438659c385e29979256cb489303fc9541ff3cb43d03dd091a7d915151e5",
+          "source_id": "C20205685",
+          "source_role": "decoy",
+          "source_row_number": 141
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_142_C20207118",
+          "score": 0.495017,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:c56f5a276facb7684bb0d322a91b6fb5fefb2fada549bd63fa03f294314130e7",
+          "source_id": "C20207118",
+          "source_role": "decoy",
+          "source_row_number": 142
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_143_C36648962",
+          "score": 0.519554,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:3ada4c6de84a4c4921c3b6ba50256b510f1388e30657f945751c2f4978e72ea1",
+          "source_id": "C36648962",
+          "source_role": "decoy",
+          "source_row_number": 143
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_144_C39938829",
+          "score": 0.463854,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:9880643e3e75e8d322e5e5b815336eea499b200ae76eebc1a2a94ab025abd8a7",
+          "source_id": "C39938829",
+          "source_role": "decoy",
+          "source_row_number": 144
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_145_C63351529",
+          "score": 0.503039,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:57a41854d5d290ee8bb4054f463937fd52975de74def2e6db507bf083bb06a53",
+          "source_id": "C63351529",
+          "source_role": "decoy",
+          "source_row_number": 145
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_146_C58167351",
+          "score": 0.416484,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:f016b39cd7240dd8f7623c4724631debe0870f089f06824a2be9d30477d56efc",
+          "source_id": "C58167351",
+          "source_role": "decoy",
+          "source_row_number": 146
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_147_C64201854",
+          "score": 0.644101,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:aac04be9d877cf2686f751e3abe715dd380387536a79f05ed00205220b931e1c",
+          "source_id": "C64201854",
+          "source_role": "decoy",
+          "source_row_number": 147
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_148_C64416596",
+          "score": 0.385589,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:62809080acd37b89a5ef137e29b4d097a366ef73161a461ea4b8e09b482c82ea",
+          "source_id": "C64416596",
+          "source_role": "decoy",
+          "source_row_number": 148
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_149_C64471141",
+          "score": 0.560945,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:b482664f4cf33c1ec794ff472e0bc2dc20f5d1837cebafee668d9f13b53c0d2b",
+          "source_id": "C64471141",
+          "source_role": "decoy",
+          "source_row_number": 149
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_150_C35379147",
+          "score": 0.630851,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:e2f177d98d26446c98b6b2d0cb507140372777b49706bb530c580bd1043e1184",
+          "source_id": "C35379147",
+          "source_role": "decoy",
+          "source_row_number": 150
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_151_C04163788",
+          "score": 0.457506,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:7053ca43187f19f1fd3f4393b2806b2c71efc7f4f0cf8a71362e08d06ac9ade5",
+          "source_id": "C04163788",
+          "source_role": "decoy",
+          "source_row_number": 151
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_152_C09087954",
+          "score": 0.321414,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:999486c204ecbe5da8e85f213790269e2bb54bc46b986b9ebd9add77e42f1652",
+          "source_id": "C09087954",
+          "source_role": "decoy",
+          "source_row_number": 152
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_153_C11870645",
+          "score": 0.532969,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:f541abe8b80df9d670b89df452d7ada15df5f25f9c4988764a7707e8b74b0e63",
+          "source_id": "C11870645",
+          "source_role": "decoy",
+          "source_row_number": 153
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_154_C38596651",
+          "score": 0.399341,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:0492ecb3a938d6b023271c6c9e72808730f571edcf575f2401a101e683ac150a",
+          "source_id": "C38596651",
+          "source_role": "decoy",
+          "source_row_number": 154
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_155_C38610106",
+          "score": 0.439742,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:89b8bc33e703ad665ed456c6844ab48677941be3f22ea289a5de56a06877cb2a",
+          "source_id": "C38610106",
+          "source_role": "decoy",
+          "source_row_number": 155
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_156_C38626582",
+          "score": 0.414556,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:03bd890d1fa111ea065b2f6b54dd4f9be29fe434568a953ab1541b84d14e39a5",
+          "source_id": "C38626582",
+          "source_role": "decoy",
+          "source_row_number": 156
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_157_C38789177",
+          "score": 0.496375,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:a3accad6e9dc9e6566cd545fbd3f288d99a25e4876ceb97a193c165c892494ae",
+          "source_id": "C38789177",
+          "source_role": "decoy",
+          "source_row_number": 157
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_158_C38974865",
+          "score": 0.418181,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:3f129b1bebc7c6b09ae09858bcb8a2718fffa72f9a606f2e1c1d820bb3f17c90",
+          "source_id": "C38974865",
+          "source_role": "decoy",
+          "source_row_number": 158
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_159_C38976230",
+          "score": 0.418181,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:8f051e53e9429d0d7c475e888c71c288aa1948e2f072700239c0a89b0f89f390",
+          "source_id": "C38976230",
+          "source_role": "decoy",
+          "source_row_number": 159
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_160_C39357229",
+          "score": 0.297063,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:1006d028c3481be7162ca12b163a6ddb7f629db6be5e1135ae6daf12ed6ee032",
+          "source_id": "C39357229",
+          "source_role": "decoy",
+          "source_row_number": 160
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_161_C39634843",
+          "score": 0.494753,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:9bba5fbfc4812e3f8cd807e064ba5cfcc5b2f8bad90a5fdc909b1ad3ddef7943",
+          "source_id": "C39634843",
+          "source_role": "decoy",
+          "source_row_number": 161
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_162_C39663006",
+          "score": 0.5235,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:ab88502b47669c9493c592ba5cb970f71f1ba37671b79f1073105081e6f98053",
+          "source_id": "C39663006",
+          "source_role": "decoy",
+          "source_row_number": 162
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_163_C39683419",
+          "score": 0.416005,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:a8b0a689a57ec76388fdab438fd39d48192581c6beaa38c97fb2ef56777e74ed",
+          "source_id": "C39683419",
+          "source_role": "decoy",
+          "source_row_number": 163
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_164_C39687580",
+          "score": 0.650628,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:e2a69f8b783b96fa668d5a0f625e2d7373f67fa75503ad88a5062b7c4534b54a",
+          "source_id": "C39687580",
+          "source_role": "decoy",
+          "source_row_number": 164
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_165_C39687650",
+          "score": 0.442447,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:585d3eca5cfc251db8cfd5bbd9417605a3fced512d696b548b7124a6309ce15e",
+          "source_id": "C39687650",
+          "source_role": "decoy",
+          "source_row_number": 165
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_166_C39689215",
+          "score": 0.496345,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:f93dceef513ea6bb917639ea953aa96374bf8fd91da95da79223b17bf22d2f81",
+          "source_id": "C39689215",
+          "source_role": "decoy",
+          "source_row_number": 166
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_167_C39702037",
+          "score": 0.36868,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:fdb06d592121996a8022cdac08895d40c031ffb73697736829cbf208b5d0bb4c",
+          "source_id": "C39702037",
+          "source_role": "decoy",
+          "source_row_number": 167
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_168_C39710411",
+          "score": 0.512731,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:94a9b9c96a12af0cdaa3ef9e379a481b2bd528fa365cbf54d7378a92477e9b06",
+          "source_id": "C39710411",
+          "source_role": "decoy",
+          "source_row_number": 168
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_169_C39710418",
+          "score": 0.518558,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:fc7b166efb0215003940fa446274d3f706c76af7c97c2983a80ee3be5853343a",
+          "source_id": "C39710418",
+          "source_role": "decoy",
+          "source_row_number": 169
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_170_C39710994",
+          "score": 0.468693,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:3e49ec8147fb7c27ef8c3892dc3c91c56dbe56a8600520fd08652f375b4089ae",
+          "source_id": "C39710994",
+          "source_role": "decoy",
+          "source_row_number": 170
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_171_C39711004",
+          "score": 0.567045,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:51a31d1540d574243c73ea5dde19b72e295237a864e6eede150616daf56fea06",
+          "source_id": "C39711004",
+          "source_role": "decoy",
+          "source_row_number": 171
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_172_C39711301",
+          "score": 0.487211,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:8cb0418e49baf5e33da2744f94a1c678ec0e2a7bea10f1e3ab533dceaa97a835",
+          "source_id": "C39711301",
+          "source_role": "decoy",
+          "source_row_number": 172
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_173_C39711600",
+          "score": 0.501614,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:3a5033edae14b8c6f086b0f7106ea090f6b1b5609b812e9933a5d61cbdd6e11b",
+          "source_id": "C39711600",
+          "source_role": "decoy",
+          "source_row_number": 173
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_174_C39934825",
+          "score": 0.370857,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:0a6aaacda8c5aca30fb78e4a87ec8def7054aaa3f807a5a35fa6f5507564c989",
+          "source_id": "C39934825",
+          "source_role": "decoy",
+          "source_row_number": 174
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_175_C39964785",
+          "score": 0.370857,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:d9a60857d4bb04ccdebf2cc1d4ab08afa0d495d5d15cdbbcfbce31546ddc34b9",
+          "source_id": "C39964785",
+          "source_role": "decoy",
+          "source_row_number": 175
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_176_C39969340",
+          "score": 0.30014,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:62dab911e41a84be3fa078da66e65ae475ad1da6f6236f881a628e6986ea6cba",
+          "source_id": "C39969340",
+          "source_role": "decoy",
+          "source_row_number": 176
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_177_C40161542",
+          "score": 0.540084,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:28a21a93940cfe364b4a01fc1ac2f805c680703148fba8580ddd85b1b7a769f8",
+          "source_id": "C40161542",
+          "source_role": "decoy",
+          "source_row_number": 177
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_178_C63089213",
+          "score": 0.320365,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:e8f72af89c0bb9eac24db40dfa74c23b325814b4a87ce1f41ef46b7b51c93176",
+          "source_id": "C63089213",
+          "source_role": "decoy",
+          "source_row_number": 178
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_179_C63137435",
+          "score": 0.441719,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:5cac948914581daa4d589c85b5cbff3b7b1e706db657fc582b677f24cb0cf746",
+          "source_id": "C63137435",
+          "source_role": "decoy",
+          "source_row_number": 179
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_180_C63139020",
+          "score": 0.34053,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:cbb447abd06692a3e2919f03c741451d2c93ca490be5fae6619d6ce0a4503ac2",
+          "source_id": "C63139020",
+          "source_role": "decoy",
+          "source_row_number": 180
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_181_C63139768",
+          "score": 0.274897,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:bdd749c26aa10e95a6383edb7a7c4a11cbac57bdfed9edb9db56609add39d3e4",
+          "source_id": "C63139768",
+          "source_role": "decoy",
+          "source_row_number": 181
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_182_C63142067",
+          "score": 0.449086,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:7d162cfd3eb57c7ea52c6bee30bb092f42d2fc0df25980bf4d7989d3c4a276cf",
+          "source_id": "C63142067",
+          "source_role": "decoy",
+          "source_row_number": 182
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_183_C39747218",
+          "score": 0.538604,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:2a699b65211ff02c9abf4963cfdfc72bfddf0ffd46daf1d9baadbde3993a992e",
+          "source_id": "C39747218",
+          "source_role": "decoy",
+          "source_row_number": 183
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_184_C39699839",
+          "score": 0.196402,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:60f5bd5868f4e3e218b27e197063f659a4d4293c18a4f169d6f5f01f39d110bf",
+          "source_id": "C39699839",
+          "source_role": "decoy",
+          "source_row_number": 184
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_185_C39699840",
+          "score": 0.196402,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:1ea79e85711ff0e67452ef8f895b4622e1032355b6c0ccbd099a57eec692601d",
+          "source_id": "C39699840",
+          "source_role": "decoy",
+          "source_row_number": 185
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_186_C63271228",
+          "score": 0.336714,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:fe6f54ab63663e0b8c55621bdd747ccac372fceb737449f0487007341d2c0206",
+          "source_id": "C63271228",
+          "source_role": "decoy",
+          "source_row_number": 186
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_187_C13687429",
+          "score": 0.580915,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:c22610ab6304f245f1a625cf014ce38756fbab4024d92270140265e4acc8756c",
+          "source_id": "C13687429",
+          "source_role": "decoy",
+          "source_row_number": 187
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_188_C08791919",
+          "score": 0.493542,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:661561e964ec1e651ae956b15d302d320a9a9ba0e43a8c6d214ef6086d78b46a",
+          "source_id": "C08791919",
+          "source_role": "decoy",
+          "source_row_number": 188
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_189_C63372676",
+          "score": 0.416296,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:4bbeeabe6cf4fc42b9879f28fdaa4167865980a9cd69c980833ac5674254bbf3",
+          "source_id": "C63372676",
+          "source_role": "decoy",
+          "source_row_number": 189
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_190_C63526755",
+          "score": 0.454569,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:7129072668711619f125a61f628eadaf70fbf86d341446762e665756dc59048e",
+          "source_id": "C63526755",
+          "source_role": "decoy",
+          "source_row_number": 190
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_191_C63666855",
+          "score": 0.433766,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:5f7efbd8ceb625819350a2e674da69b74d2c67a61ed281cb9cd1f844c52fbf1f",
+          "source_id": "C63666855",
+          "source_role": "decoy",
+          "source_row_number": 191
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_192_C63666867",
+          "score": 0.39142,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:1c8c49abb3a015f299af25f72f1eb4e3b12dc77f2498f96f5be9348f9a5634c9",
+          "source_id": "C63666867",
+          "source_role": "decoy",
+          "source_row_number": 192
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_193_C63847254",
+          "score": 0.453942,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:ff366b5584048d9279e0dc80391dddaf3ae104138c67f9ac05cc68b2062c5b84",
+          "source_id": "C63847254",
+          "source_role": "decoy",
+          "source_row_number": 193
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_194_C63994361",
+          "score": 0.3403,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:530fb7cb7ab3474e223b0a636a084fbdef6276fcbbde2618cad01a43493f4f7a",
+          "source_id": "C63994361",
+          "source_role": "decoy",
+          "source_row_number": 194
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_195_C64040730",
+          "score": 0.373113,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:45a5f694fe11052c87a2d00565cb4b003e3b9319d10b2fc93feae5e29f1e843c",
+          "source_id": "C64040730",
+          "source_role": "decoy",
+          "source_row_number": 195
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_196_C64057889",
+          "score": 0.400058,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:81716cbcdd63a9df21adba185ff46c43992c50b3d654c6e6e8c387b8758d07d0",
+          "source_id": "C64057889",
+          "source_role": "decoy",
+          "source_row_number": 196
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_197_C64084142",
+          "score": 0.373569,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:daf6bb6cbfd8aceb6f8a7a233d81e5f0929fe5b28c9fff4c6ef84105550f36c6",
+          "source_id": "C64084142",
+          "source_role": "decoy",
+          "source_row_number": 197
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_198_C64604111",
+          "score": 0.354581,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:6832758fe3fd78eb3bfd85782e38869ecc8cdf6b0fc6bf09900267b513242606",
+          "source_id": "C64604111",
+          "source_role": "decoy",
+          "source_row_number": 198
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_199_C64626544",
+          "score": 0.448724,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:363c59c5354fba0b39083d27d3019e17b9c0c381562a66ad30a2618e79ae23ad",
+          "source_id": "C64626544",
+          "source_role": "decoy",
+          "source_row_number": 199
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_200_C65549503",
+          "score": 0.243141,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:0b223d0586ef5dd13545d23f7470f17e868e44d5766ff4fadc7c0cd8d390c456",
+          "source_id": "C65549503",
+          "source_role": "decoy",
+          "source_row_number": 200
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_201_C08777422",
+          "score": 0.56005,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:896fa2b7f6c703c62129ea6172cc1d6bd967e40b4ed9902af38e20d9e21289cc",
+          "source_id": "C08777422",
+          "source_role": "decoy",
+          "source_row_number": 201
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_202_C09046365",
+          "score": 0.516911,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:7e13ec58c8bb46ff9d6873009b0016b93eb23f1b038fa7437c79d3afcc4e3592",
+          "source_id": "C09046365",
+          "source_role": "decoy",
+          "source_row_number": 202
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_203_C09183772",
+          "score": 0.624554,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:80dbe1c1a98931130a5083c9e89391830cb19b092be64ee1266691b3a0311079",
+          "source_id": "C09183772",
+          "source_role": "decoy",
+          "source_row_number": 203
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_204_C02652250",
+          "score": 0.350432,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:a858554d79dd409a129226e1d20cfb495860e41fabe8dca3c863412709cb6f05",
+          "source_id": "C02652250",
+          "source_role": "decoy",
+          "source_row_number": 204
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_205_C09646226",
+          "score": 0.430048,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:03ae5c7f08ea13c572494d2f8767ec9241ec5030080ce14bd959cb9774ff4adc",
+          "source_id": "C09646226",
+          "source_role": "decoy",
+          "source_row_number": 205
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_206_C12156004",
+          "score": 0.625836,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:dd213dcddc9ece98cfa86d85ecd59b4cf42cba761dcf5304cb062de4b8ac64a5",
+          "source_id": "C12156004",
+          "source_role": "decoy",
+          "source_row_number": 206
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_207_C12420037",
+          "score": 0.532172,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:d506e2c805bdaccc2a64101437995d06a0dd170db826697ae81334e334bd773a",
+          "source_id": "C12420037",
+          "source_role": "decoy",
+          "source_row_number": 207
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_208_C13552035",
+          "score": 0.73958,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:ce7c60ef287ba20dac0d6d50df0ae4762117f53620cd3d60f020b8de7bdddfb4",
+          "source_id": "C13552035",
+          "source_role": "decoy",
+          "source_row_number": 208
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_209_C16401960",
+          "score": 0.73826,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:23168719889ea5b87f350ffd7f1db267503ebf6ed71ebcd5bf316f4e9ee0f5a0",
+          "source_id": "C16401960",
+          "source_role": "decoy",
+          "source_row_number": 209
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_210_C16807503",
+          "score": 0.700786,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:3004887d3d61b09ab2763f96be832b89e94382c5f49dc1f3c67d9bd31d7e3156",
+          "source_id": "C16807503",
+          "source_role": "decoy",
+          "source_row_number": 210
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_211_C17446206",
+          "score": 0.681272,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:6da90fa47c8c3b481404f25487cf71d8cd130410f6a31614d881de92479042d2",
+          "source_id": "C17446206",
+          "source_role": "decoy",
+          "source_row_number": 211
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_212_C18023578",
+          "score": 0.639841,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:e124c3413987f9dfb8046d388f6a39440886a4b33a9c20ff693a6b37e8267565",
+          "source_id": "C18023578",
+          "source_role": "decoy",
+          "source_row_number": 212
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_213_C19460589",
+          "score": 0.548088,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:d3652fd7e46b12a99102e81e60c82ab8e48cc4da11abaacb296a52d7706584d8",
+          "source_id": "C19460589",
+          "source_role": "decoy",
+          "source_row_number": 213
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_214_C21475396",
+          "score": 0.594156,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:df0985065eb5b141246afbbb492527428fcb1a7d914b14b5fff7730a769fd733",
+          "source_id": "C21475396",
+          "source_role": "decoy",
+          "source_row_number": 214
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_215_C22284330",
+          "score": 0.66428,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:77b3788b390f5a36770900460d075c9e68923a755c76f9907103d4ddb3af9f16",
+          "source_id": "C22284330",
+          "source_role": "decoy",
+          "source_row_number": 215
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_216_C23177664",
+          "score": 0.459484,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:dea5ba14917f56e22da5e7ceee7dcc5f1205b23a409e6f641ec621daf3ce727a",
+          "source_id": "C23177664",
+          "source_role": "decoy",
+          "source_row_number": 216
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_217_C23177667",
+          "score": 0.459484,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:bd9e409dfdeb946dc90c772951000995e201c8924d7c2de46ccce544e2e93b33",
+          "source_id": "C23177667",
+          "source_role": "decoy",
+          "source_row_number": 217
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_218_C23948815",
+          "score": 0.671417,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:bef82d722489de610bbafa04241af65660d273c23cc2bf4f8545f5da9fd869ae",
+          "source_id": "C23948815",
+          "source_role": "decoy",
+          "source_row_number": 218
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_219_C31160279",
+          "score": 0.321588,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:0defb714b12f3287abdd6272d313ab0775a6b5324260b0316ce37c52c0d59c7e",
+          "source_id": "C31160279",
+          "source_role": "decoy",
+          "source_row_number": 219
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_220_C31160289",
+          "score": 0.321588,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:62ae949a5caa0784667b377a044355f9b664c13f5f0ed2f4aa32f0e50a7f26be",
+          "source_id": "C31160289",
+          "source_role": "decoy",
+          "source_row_number": 220
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_221_C32768470",
+          "score": 0.725902,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:2fa37511eb49fe05193d8b603a366e734704be14af02753ee291330d80925141",
+          "source_id": "C32768470",
+          "source_role": "decoy",
+          "source_row_number": 221
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_222_C33021339",
+          "score": 0.709694,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:49387f473aaf550434ea24c9f254bc763a7f34e4b19783afdacdf7303aae41ac",
+          "source_id": "C33021339",
+          "source_role": "decoy",
+          "source_row_number": 222
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_223_C33141132",
+          "score": 0.595127,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:72a470c01c194c0948b31c0ce850cc9236f28e1b1cd0a22fc8872366931b1b92",
+          "source_id": "C33141132",
+          "source_role": "decoy",
+          "source_row_number": 223
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_224_C33811250",
+          "score": 0.414062,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:827143ab3ee3fbc3df67fad376331228d5b6a8b0667cf018e57067f01d21f365",
+          "source_id": "C33811250",
+          "source_role": "decoy",
+          "source_row_number": 224
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_225_C35270836",
+          "score": 0.321588,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:d1c39522911d79b403f37d8ca93e9a63a63c807f7654acb6af8461f5db1d65df",
+          "source_id": "C35270836",
+          "source_role": "decoy",
+          "source_row_number": 225
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_226_C35271643",
+          "score": 0.621771,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:ce118f7353bacb53892cd6066ee1f3d5eeaa678d88e436789546b66dae9342c3",
+          "source_id": "C35271643",
+          "source_role": "decoy",
+          "source_row_number": 226
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_227_C35271656",
+          "score": 0.621771,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:6cc34b9c4bafd91b76b6c3daba9a8ca410526219a2eb8b71cb64647567331bfd",
+          "source_id": "C35271656",
+          "source_role": "decoy",
+          "source_row_number": 227
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_228_C12950038",
+          "score": 0.754055,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:3ef7e9a1800742d9ea9fd66ad0b440c97d59df5eacf2a9fc85ea16d4e2a79842",
+          "source_id": "C12950038",
+          "source_role": "decoy",
+          "source_row_number": 228
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_229_C12642901",
+          "score": 0.687358,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:7972318637f0036abe468c6a692893c9776672b07e7d523dbc66a2a0cac94a15",
+          "source_id": "C12642901",
+          "source_role": "decoy",
+          "source_row_number": 229
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_230_C12849533",
+          "score": 0.562309,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:7e1766be02204acad9ab2e58300e318277612ebc2faf2f3f5448e16cf95d29e4",
+          "source_id": "C12849533",
+          "source_role": "decoy",
+          "source_row_number": 230
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_231_C39359401",
+          "score": 0.715717,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:6a96e52708f172d1f96806ab61a7a39b4ecedeed50f5db0cb94a28d28d42cffd",
+          "source_id": "C39359401",
+          "source_role": "decoy",
+          "source_row_number": 231
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_232_C39446402",
+          "score": 0.690149,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:f8d651beb73cf118f03d6ca3b45d20759a35bec40d4bc0b556595667c8ecf89e",
+          "source_id": "C39446402",
+          "source_role": "decoy",
+          "source_row_number": 232
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_233_C39450514",
+          "score": 0.448802,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:05b7c2ba75599b80214b9b5394aed114e47ee09d4161e2cbff33ac640a5906da",
+          "source_id": "C39450514",
+          "source_role": "decoy",
+          "source_row_number": 233
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_234_C39450526",
+          "score": 0.589789,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:db708eeff974780596472c352c9d9a077fb75f0b24ca82739e13041caa64a37d",
+          "source_id": "C39450526",
+          "source_role": "decoy",
+          "source_row_number": 234
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_235_C39453542",
+          "score": 0.599294,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:51fd3a60d01fbfc301fc155ba66d4be635266d8f9c0415191d4592c28254bfe2",
+          "source_id": "C39453542",
+          "source_role": "decoy",
+          "source_row_number": 235
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_236_C39467870",
+          "score": 0.550753,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:3e4019066b5478ddfa5764e5a530c8f1d9ee99d9ac1b7bd2220cc7abd67bfc06",
+          "source_id": "C39467870",
+          "source_role": "decoy",
+          "source_row_number": 236
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_237_C39468131",
+          "score": 0.550753,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:516827ac85b7daf6653813340a9a4657ac5c92f78914a0e9346ac749be5f0e47",
+          "source_id": "C39468131",
+          "source_role": "decoy",
+          "source_row_number": 237
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_238_C39469572",
+          "score": 0.524648,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:3379a2af5e4caeaf1c8b88649fe4fdbb2ee58191b9ef0d2da35d0b4efd60730c",
+          "source_id": "C39469572",
+          "source_role": "decoy",
+          "source_row_number": 238
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_239_C45521223",
+          "score": 0.553505,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:a513128539db99741bcf244155a04c868acdc82a58e0c18b03b1fce7f489000b",
+          "source_id": "C45521223",
+          "source_role": "decoy",
+          "source_row_number": 239
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_240_C45573769",
+          "score": 0.690886,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:d5b92b6d74069d2beeec960d6c46d26516c3835abe8d76f7ced80abee0ed7181",
+          "source_id": "C45573769",
+          "source_role": "decoy",
+          "source_row_number": 240
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_241_C14329306",
+          "score": 0.68011,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:de91f1559bfb79e881eb52421bc7724dc1655095ebad9ba6a54e0c375f98cdb4",
+          "source_id": "C14329306",
+          "source_role": "decoy",
+          "source_row_number": 241
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_242_C14329308",
+          "score": 0.68011,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:50dfa577d76210d408afba6192fbbca919ebe8296314adc3e8ec41f5ff6a0feb",
+          "source_id": "C14329308",
+          "source_role": "decoy",
+          "source_row_number": 242
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_243_C49522847",
+          "score": 0.638392,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:59d148df07decfd28a2a1bed403cb0e92b32052cc968941684997b7942a4c968",
+          "source_id": "C49522847",
+          "source_role": "decoy",
+          "source_row_number": 243
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_244_C52637568",
+          "score": 0.578343,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:3a5990944a3d311f83a7d3bd41ab6d3943f117d26a79d419adbfcc110fa327cb",
+          "source_id": "C52637568",
+          "source_role": "decoy",
+          "source_row_number": 244
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_245_C12412766",
+          "score": 0.467097,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:2f8d38a262ae5dc080659e46aee7f301f302e3d2a6e0ed672b944534a3e902fa",
+          "source_id": "C12412766",
+          "source_role": "decoy",
+          "source_row_number": 245
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_246_C32319195",
+          "score": 0.441947,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:bafae8e1d9a5376cfb69c7fe89604e3029b1656a8def04412462082ec5287f3c",
+          "source_id": "C32319195",
+          "source_role": "decoy",
+          "source_row_number": 246
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_247_C60362283",
+          "score": 0.622599,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:d3164b4c3fa6e4e9419682aa74259a8af5c653557ce4edfbd8a1865e5da0d1b2",
+          "source_id": "C60362283",
+          "source_role": "decoy",
+          "source_row_number": 247
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_248_C31968386",
+          "score": 0.449153,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:2aaca195a24d59ba570a334998e58b5f977378bb4d092298c36c82ed2e993b05",
+          "source_id": "C31968386",
+          "source_role": "decoy",
+          "source_row_number": 248
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_249_C64789347",
+          "score": 0.513582,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:0f333036d6a16c3fdccbf49be92dd2f8eadd45b87cea7f2bf5cc98d30d7a86a9",
+          "source_id": "C64789347",
+          "source_role": "decoy",
+          "source_row_number": 249
+        },
+        {
+          "is_active": false,
+          "molecule_id": "AA2AR_decoy_250_C65575615",
+          "score": 0.731209,
+          "score_method": "rdkit_qed_baseline_label_independent",
+          "smiles_sha256": "sha256:c0d63b9961fd9b2d6c7bd8cc9abe1960f635f216f7bb8f17d17cc8ff2ceb2f5b",
+          "source_id": "C65575615",
+          "source_role": "decoy",
+          "source_row_number": 250
+        }
+      ],
+      "selected_row_counts": {
+        "active": 25,
+        "decoy": 250
+      },
+      "selection_policy": {
+        "active_limit": 25,
+        "decoy_limit": 250,
+        "ordering": "official_file_order"
+      },
+      "source_checksum": "sha256:5b25a7234359a697af7a4f48892bb776681d5d2121bab01325458d23becf366f",
+      "source_license_or_accession": "DUD-E:AA2AR:official_actives_final_and_decoys_final",
+      "source_row_counts": {
+        "actives_final": 482,
+        "decoys_final": 31550
+      },
+      "source_urls": {
+        "actives_final": "https://dude.docking.org/targets/aa2ar/actives_final.ism",
+        "decoys_final": "https://dude.docking.org/targets/aa2ar/decoys_final.ism"
+      },
+      "target_id": "AA2AR"
+    }
+  ]
+}

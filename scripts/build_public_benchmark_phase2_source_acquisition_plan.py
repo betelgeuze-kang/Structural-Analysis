@@ -184,6 +184,12 @@ REQUIRED_ROW_INPUTS = [
     "enrichment_rows",
     "vina_gnina_rows",
 ]
+ROW_INPUT_ACQUISITION_BLOCKERS = {
+    "subset_rows": "public_benchmark_subset_rows_not_acquired",
+    "pose_rows": "public_benchmark_pose_rows_not_acquired",
+    "enrichment_rows": "public_benchmark_enrichment_rows_not_acquired",
+    "vina_gnina_rows": "public_benchmark_vina_gnina_rows_not_acquired",
+}
 PHASE2_COMPONENTS = [
     "casf_pdbbind_pose_success_harness",
     "symmetry_aware_ligand_rmsd",
@@ -206,6 +212,23 @@ def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
     except Exception:
         return {}
     return payload if isinstance(payload, dict) else {}
+
+
+def _source_acquisition_blockers(
+    phase2_row_audit_summary: dict[str, Any],
+) -> list[str]:
+    missing_row_inputs = {
+        str(row_input)
+        for row_input in phase2_row_audit_summary.get("missing_row_inputs", [])
+        if str(row_input)
+    }
+    blockers = [
+        ROW_INPUT_ACQUISITION_BLOCKERS[row_input]
+        for row_input in REQUIRED_ROW_INPUTS
+        if row_input in missing_row_inputs
+    ]
+    blockers.append("public_benchmark_external_receipts_not_attached")
+    return blockers
 
 
 def _phase2_row_audit_summary(audit: dict[str, Any]) -> dict[str, Any]:
@@ -627,13 +650,7 @@ def build_public_benchmark_phase2_source_acquisition_plan(
     )
     phase2_row_audit = _load_json(repo_root, DEFAULT_PHASE2_ROW_AUDIT)
     phase2_row_audit_summary = _phase2_row_audit_summary(phase2_row_audit)
-    blockers = [
-        "public_benchmark_subset_rows_not_acquired",
-        "public_benchmark_pose_rows_not_acquired",
-        "public_benchmark_enrichment_rows_not_acquired",
-        "public_benchmark_vina_gnina_rows_not_acquired",
-        "public_benchmark_external_receipts_not_attached",
-    ]
+    blockers = _source_acquisition_blockers(phase2_row_audit_summary)
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(

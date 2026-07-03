@@ -148,11 +148,10 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     )
     assert payload["phase2_row_audit"]["status"] == "operator_evidence_required"
     assert payload["phase2_row_audit"]["phase2_ready"] is False
-    assert payload["phase2_row_audit"]["missing_row_input_count"] == 4
+    assert payload["phase2_row_audit"]["missing_row_input_count"] == 3
     assert payload["phase2_row_audit"]["missing_row_inputs"] == [
         "subset_rows",
         "pose_rows",
-        "enrichment_rows",
         "vina_gnina_rows",
     ]
     assert payload["phase2_row_audit"]["phase2_failed_criteria"] == [
@@ -160,7 +159,6 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "symmetry_aware_ligand_rmsd_ready",
         "posebusters_style_pose_validity_ready",
         "vina_gnina_comparison_ready",
-        "dud_e_or_lit_pcba_enrichment_ready",
     ]
 
     subset = row_contracts["subset_rows"]
@@ -228,26 +226,24 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
 
     assert payload["summary"] == {
         "actual_closure_ready": False,
-        "blocker_count": 5,
+        "blocker_count": 4,
         "minimum_enrichment_target_count": 1,
         "minimum_subset_case_count": 12,
         "minimum_vina_gnina_comparison_case_count": 1,
         "official_source_receipt_plan_status": "operator_receipts_required",
         "official_source_receipt_role_count": 4,
         "official_source_catalog_count": 6,
-        "phase2_row_audit_blocker_count": 6,
+        "phase2_row_audit_blocker_count": 5,
         "phase2_row_audit_failed_criteria": [
             "casf_pdbbind_pose_success_harness_ready",
             "symmetry_aware_ligand_rmsd_ready",
             "posebusters_style_pose_validity_ready",
             "vina_gnina_comparison_ready",
-            "dud_e_or_lit_pcba_enrichment_ready",
         ],
-        "phase2_row_audit_missing_row_input_count": 4,
+        "phase2_row_audit_missing_row_input_count": 3,
         "phase2_row_audit_missing_row_inputs": [
             "subset_rows",
             "pose_rows",
-            "enrichment_rows",
             "vina_gnina_rows",
         ],
         "phase2_row_audit_status": "operator_evidence_required",
@@ -258,7 +254,6 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert payload["blockers"] == [
         "public_benchmark_subset_rows_not_acquired",
         "public_benchmark_pose_rows_not_acquired",
-        "public_benchmark_enrichment_rows_not_acquired",
         "public_benchmark_vina_gnina_rows_not_acquired",
         "public_benchmark_external_receipts_not_attached",
     ]

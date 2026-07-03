@@ -23,7 +23,6 @@
       "artifact_blockers": [
         "public_benchmark_subset_rows_not_acquired",
         "public_benchmark_pose_rows_not_acquired",
-        "public_benchmark_enrichment_rows_not_acquired",
         "public_benchmark_vina_gnina_rows_not_acquired",
         "public_benchmark_external_receipts_not_attached"
       ],
@@ -35,15 +34,14 @@
         "blockers": [
           "public_benchmark_subset_rows_not_acquired",
           "public_benchmark_pose_rows_not_acquired",
-          "public_benchmark_enrichment_rows_not_acquired",
           "public_benchmark_vina_gnina_rows_not_acquired",
           "public_benchmark_external_receipts_not_attached"
         ],
         "contract_pass": true,
-        "generated_at": "2026-07-03T17:52:55.614174+00:00",
+        "generated_at": "2026-07-03T18:11:51.401568+00:00",
         "ready_values": {},
         "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-        "source_commit_sha": "04efeaf94ba0e58d1cce8608bb3c5f37e6ace4db",
+        "source_commit_sha": "4b8b6202704653d3cde5e710db0625eeb64e5a82",
         "status": "operator_acquisition_required"
       },
       "current_ready": true,
@@ -65,8 +63,7 @@
         "casf_pdbbind_pose_success_harness::pose_rows_not_provided",
         "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
         "posebusters_style_pose_validity::pose_rows_not_provided",
-        "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
-        "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
+        "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
       ],
       "claim_boundary": "This row is a read-only execution preflight over current local artifacts and source-of-truth blockers. It does not run the materializer or create benchmark evidence.",
       "command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
@@ -78,18 +75,17 @@
           "casf_pdbbind_pose_success_harness::pose_rows_not_provided",
           "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
           "posebusters_style_pose_validity::pose_rows_not_provided",
-          "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
-          "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
+          "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
         ],
         "contract_pass": false,
-        "generated_at": "2026-07-03T17:59:25.712530+00:00",
+        "generated_at": "2026-07-03T18:05:42.512344+00:00",
         "ready_values": {
           "component_count": 5,
-          "component_ready_count": 0,
+          "component_ready_count": 1,
           "phase2_ready": false
         },
         "schema_version": "public-benchmark-phase2-row-audit.v1",
-        "source_commit_sha": "bc1b5f42825201a2cb5fe8b995c0eb8c5f0a53b2",
+        "source_commit_sha": "4b8b6202704653d3cde5e710db0625eeb64e5a82",
         "status": "operator_evidence_required"
       },
       "current_ready": false,
@@ -122,14 +118,14 @@
           "casf_pdbbind_ligand_symmetry_contracts_missing"
         ],
         "contract_pass": true,
-        "generated_at": "2026-07-03T17:52:55.616786+00:00",
+        "generated_at": "2026-07-03T18:05:17.931429+00:00",
         "ready_values": {
           "materialized_case_count": 0,
           "public_benchmark_ready": false,
           "target_subset_case_count": 12
         },
         "schema_version": "public-benchmark-subset-manifest.v1",
-        "source_commit_sha": "04efeaf94ba0e58d1cce8608bb3c5f37e6ace4db",
+        "source_commit_sha": "4b8b6202704653d3cde5e710db0625eeb64e5a82",
         "status": "source_material_required"
       },
       "current_ready": false,
@@ -199,12 +195,12 @@
         "artifact_exists": true,
         "blockers": [],
         "contract_pass": true,
-        "generated_at": "2026-07-03T17:52:55.619735+00:00",
+        "generated_at": "2026-07-03T18:05:17.934586+00:00",
         "ready_values": {
           "real_benchmark_case_count": 0
         },
         "schema_version": "public-benchmark-pose-validity-packet.v1",
-        "source_commit_sha": "04efeaf94ba0e58d1cce8608bb3c5f37e6ace4db",
+        "source_commit_sha": "4b8b6202704653d3cde5e710db0625eeb64e5a82",
         "status": "ready_for_dry_run"
       },
       "current_ready": false,
@@ -241,13 +237,13 @@
         "artifact_exists": true,
         "blockers": [],
         "contract_pass": true,
-        "generated_at": "2026-07-03T17:52:55.622162+00:00",
+        "generated_at": "2026-07-03T18:05:17.937228+00:00",
         "ready_values": {
           "dry_run_case_count": 1,
           "real_benchmark_case_count": 0
         },
         "schema_version": "public-benchmark-symmetry-rmsd-scorecard.v1",
-        "source_commit_sha": "04efeaf94ba0e58d1cce8608bb3c5f37e6ace4db",
+        "source_commit_sha": "4b8b6202704653d3cde5e710db0625eeb64e5a82",
         "status": "ready"
       },
       "current_ready": false,
@@ -288,14 +284,14 @@
           "public_benchmark_pose_success_harness_rows_missing"
         ],
         "contract_pass": true,
-        "generated_at": "2026-07-03T17:52:55.624366+00:00",
+        "generated_at": "2026-07-03T18:05:17.939595+00:00",
         "ready_values": {
           "pose_success_count": 1,
           "pose_success_harness_ready": false,
           "real_benchmark_case_count": 0
         },
         "schema_version": "public-benchmark-pose-success-harness.v1",
-        "source_commit_sha": "04efeaf94ba0e58d1cce8608bb3c5f37e6ace4db",
+        "source_commit_sha": "4b8b6202704653d3cde5e710db0625eeb64e5a82",
         "status": "ready_for_real_benchmark_rows"
       },
       "current_ready": false,
@@ -329,36 +325,28 @@
       "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json"
     },
     {
-      "artifact_blockers": [
-        "dud_e_lit_pcba_enrichment_targets_missing",
-        "dud_e_lit_pcba_scored_molecules_missing",
-        "dud_e_lit_pcba_active_decoy_labels_missing"
-      ],
+      "artifact_blockers": [],
       "claim_boundary": "This row is a read-only execution preflight over current local artifacts and source-of-truth blockers. It does not run the materializer or create benchmark evidence.",
       "command": "python3 scripts/materialize_public_benchmark_enrichment_scorecard.py --intake <operator-dud-e-lit-pcba-enrichment-intake.json> --out-scorecard implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_enrichment_materialization_report.json --fail-blocked",
       "current_artifact": {
         "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
         "artifact_exists": true,
-        "blockers": [
-          "dud_e_lit_pcba_enrichment_targets_missing",
-          "dud_e_lit_pcba_scored_molecules_missing",
-          "dud_e_lit_pcba_active_decoy_labels_missing"
-        ],
-        "contract_pass": false,
-        "generated_at": "2026-07-03T17:52:55.626916+00:00",
+        "blockers": [],
+        "contract_pass": true,
+        "generated_at": "2026-07-03T18:05:42.510044+00:00",
         "ready_values": {
-          "public_benchmark_enrichment_ready": false,
-          "real_enrichment_target_count": 0
+          "public_benchmark_enrichment_ready": true,
+          "real_enrichment_target_count": 1
         },
         "schema_version": "public-benchmark-enrichment-scorecard.v1",
-        "source_commit_sha": "04efeaf94ba0e58d1cce8608bb3c5f37e6ace4db",
-        "status": "operator_evidence_required"
+        "source_commit_sha": "4b8b6202704653d3cde5e710db0625eeb64e5a82",
+        "status": "ready"
       },
-      "current_ready": false,
+      "current_ready": true,
       "dependency_ready": true,
       "dependency_states": [],
       "depends_on": [],
-      "first_blocker": "dud_e_lit_pcba_enrichment_targets_missing",
+      "first_blocker": "",
       "operator_slot_id": "dud_e_lit_pcba_enrichment_intake",
       "produces": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
       "source_of_truth_blockers": [
@@ -367,7 +355,7 @@
         "dud_e_lit_pcba_active_decoy_labels_missing",
         "public_benchmark_external_receipts_missing"
       ],
-      "status": "operator_input_required",
+      "status": "ready",
       "step_id": "materialize_enrichment_scorecard",
       "step_order": 8,
       "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json"
@@ -389,13 +377,13 @@
           "vina_gnina_external_receipts_missing"
         ],
         "contract_pass": false,
-        "generated_at": "2026-07-03T17:52:55.629224+00:00",
+        "generated_at": "2026-07-03T18:05:17.944143+00:00",
         "ready_values": {
           "public_benchmark_engine_comparison_ready": false,
           "real_comparison_case_count": 0
         },
         "schema_version": "public-benchmark-vina-gnina-comparison-adapter.v1",
-        "source_commit_sha": "04efeaf94ba0e58d1cce8608bb3c5f37e6ace4db",
+        "source_commit_sha": "4b8b6202704653d3cde5e710db0625eeb64e5a82",
         "status": "operator_evidence_required"
       },
       "current_ready": false,
@@ -460,7 +448,7 @@
         },
         {
           "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
-          "ready": false
+          "ready": true
         },
         {
           "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json",
@@ -512,14 +500,14 @@
           "public_benchmark_external_receipts_missing"
         ],
         "contract_pass": true,
-        "generated_at": "2026-07-03T17:52:55.639236+00:00",
+        "generated_at": "2026-07-03T18:05:17.954919+00:00",
         "ready_values": {
           "blocker_count": 10,
           "public_benchmark_ready": false,
           "tier_beta_ready": false
         },
         "schema_version": "public-benchmark-source-of-truth.v1",
-        "source_commit_sha": "04efeaf94ba0e58d1cce8608bb3c5f37e6ace4db",
+        "source_commit_sha": "4b8b6202704653d3cde5e710db0625eeb64e5a82",
         "status": "seed_ready_materialization_blocked"
       },
       "current_ready": false,
@@ -543,7 +531,7 @@
         },
         {
           "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
-          "ready": false
+          "ready": true
         },
         {
           "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json",
@@ -581,8 +569,7 @@
       "casf_pdbbind_pose_success_harness::pose_rows_not_provided",
       "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
       "posebusters_style_pose_validity::pose_rows_not_provided",
-      "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
-      "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
+      "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
     ],
     "claim_boundary": "This row is a read-only execution preflight over current local artifacts and source-of-truth blockers. It does not run the materializer or create benchmark evidence.",
     "command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
@@ -594,18 +581,17 @@
         "casf_pdbbind_pose_success_harness::pose_rows_not_provided",
         "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
         "posebusters_style_pose_validity::pose_rows_not_provided",
-        "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
-        "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
+        "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
       ],
       "contract_pass": false,
-      "generated_at": "2026-07-03T17:59:25.712530+00:00",
+      "generated_at": "2026-07-03T18:05:42.512344+00:00",
       "ready_values": {
         "component_count": 5,
-        "component_ready_count": 0,
+        "component_ready_count": 1,
         "phase2_ready": false
       },
       "schema_version": "public-benchmark-phase2-row-audit.v1",
-      "source_commit_sha": "bc1b5f42825201a2cb5fe8b995c0eb8c5f0a53b2",
+      "source_commit_sha": "4b8b6202704653d3cde5e710db0625eeb64e5a82",
       "status": "operator_evidence_required"
     },
     "current_ready": false,
@@ -1227,12 +1213,12 @@
     }
   ],
   "gate_unblock_plan_count": 4,
-  "generated_at": "2026-07-03T17:59:52.717332+00:00",
+  "generated_at": "2026-07-03T18:11:51.505211+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:bb28c21a3e2ea5722e5e4f62bfa4adc44319eb2620e601aab44160055800a4a0",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:92ee665b8b55d1a0d3eff98777fe2d38e55ab37fa6543d5a2f7d33d18e47158e",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:a93502ef227e700cee7d0905385b518bcead08561acce0485930bee3f94d8985",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:a02e0f8d2ec8ff40b696fac003e92b82ef7a7296fb3517bf1f869e97f57c640f",
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:a2f8dde118e607325074a1ca5aea075228426295eedc9cdb10553184a324f2b2",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:e6a480fa8d1aa1436a403fa27b9d5a034e98772c3419910f443c595282aa7e2d",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:b07d6de8afc6b8f42cdc6aea3d2a3eebe2d9c5cca8eba066aa4b0d259200f748",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
@@ -3130,20 +3116,18 @@
         "casf_pdbbind_pose_success_harness",
         "symmetry_aware_ligand_rmsd",
         "posebusters_style_pose_validity",
-        "vina_gnina_comparison_adapter",
-        "dud_e_or_lit_pcba_enrichment"
+        "vina_gnina_comparison_adapter"
       ],
-      "blocker_count": 6,
+      "blocker_count": 5,
       "command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --out implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.md",
       "component_count": 5,
-      "component_ready_count": 0,
+      "component_ready_count": 1,
       "contract_pass": false,
       "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.md",
-      "missing_row_input_count": 4,
+      "missing_row_input_count": 3,
       "missing_row_inputs": [
         "subset_rows",
         "pose_rows",
-        "enrichment_rows",
         "vina_gnina_rows"
       ],
       "phase2_exit_gate_status": "blocked",
@@ -3151,10 +3135,9 @@
         "casf_pdbbind_pose_success_harness_ready",
         "symmetry_aware_ligand_rmsd_ready",
         "posebusters_style_pose_validity_ready",
-        "vina_gnina_comparison_ready",
-        "dud_e_or_lit_pcba_enrichment_ready"
+        "vina_gnina_comparison_ready"
       ],
-      "phase2_failed_criterion_count": 5,
+      "phase2_failed_criterion_count": 4,
       "phase2_ready": false,
       "phase2_row_closure_matrix_count": 4,
       "status": "operator_evidence_required"
@@ -3175,11 +3158,10 @@
     "source_acquisition_plan": {
       "actual_closure_ready": false,
       "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
-      "blocker_count": 5,
+      "blocker_count": 4,
       "blockers": [
         "public_benchmark_subset_rows_not_acquired",
         "public_benchmark_pose_rows_not_acquired",
-        "public_benchmark_enrichment_rows_not_acquired",
         "public_benchmark_vina_gnina_rows_not_acquired",
         "public_benchmark_external_receipts_not_attached"
       ],
@@ -3509,20 +3491,18 @@
           "casf_pdbbind_pose_success_harness",
           "symmetry_aware_ligand_rmsd",
           "posebusters_style_pose_validity",
-          "vina_gnina_comparison_adapter",
-          "dud_e_or_lit_pcba_enrichment"
+          "vina_gnina_comparison_adapter"
         ],
-        "blocker_count": 6,
+        "blocker_count": 5,
         "command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --out implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.md",
         "component_count": 5,
-        "component_ready_count": 0,
+        "component_ready_count": 1,
         "contract_pass": false,
         "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.md",
-        "missing_row_input_count": 4,
+        "missing_row_input_count": 3,
         "missing_row_inputs": [
           "subset_rows",
           "pose_rows",
-          "enrichment_rows",
           "vina_gnina_rows"
         ],
         "phase2_exit_gate_status": "blocked",
@@ -3530,10 +3510,9 @@
           "casf_pdbbind_pose_success_harness_ready",
           "symmetry_aware_ligand_rmsd_ready",
           "posebusters_style_pose_validity_ready",
-          "vina_gnina_comparison_ready",
-          "dud_e_or_lit_pcba_enrichment_ready"
+          "vina_gnina_comparison_ready"
         ],
-        "phase2_failed_criterion_count": 5,
+        "phase2_failed_criterion_count": 4,
         "phase2_ready": false,
         "phase2_row_closure_matrix_count": 4,
         "status": "operator_evidence_required"
@@ -3606,11 +3585,10 @@
   "source_acquisition_plan": {
     "actual_closure_ready": false,
     "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
-    "blocker_count": 5,
+    "blocker_count": 4,
     "blockers": [
       "public_benchmark_subset_rows_not_acquired",
       "public_benchmark_pose_rows_not_acquired",
-      "public_benchmark_enrichment_rows_not_acquired",
       "public_benchmark_vina_gnina_rows_not_acquired",
       "public_benchmark_external_receipts_not_attached"
     ],
@@ -3940,20 +3918,18 @@
         "casf_pdbbind_pose_success_harness",
         "symmetry_aware_ligand_rmsd",
         "posebusters_style_pose_validity",
-        "vina_gnina_comparison_adapter",
-        "dud_e_or_lit_pcba_enrichment"
+        "vina_gnina_comparison_adapter"
       ],
-      "blocker_count": 6,
+      "blocker_count": 5,
       "command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --out implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.md",
       "component_count": 5,
-      "component_ready_count": 0,
+      "component_ready_count": 1,
       "contract_pass": false,
       "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.md",
-      "missing_row_input_count": 4,
+      "missing_row_input_count": 3,
       "missing_row_inputs": [
         "subset_rows",
         "pose_rows",
-        "enrichment_rows",
         "vina_gnina_rows"
       ],
       "phase2_exit_gate_status": "blocked",
@@ -3961,10 +3937,9 @@
         "casf_pdbbind_pose_success_harness_ready",
         "symmetry_aware_ligand_rmsd_ready",
         "posebusters_style_pose_validity_ready",
-        "vina_gnina_comparison_ready",
-        "dud_e_or_lit_pcba_enrichment_ready"
+        "vina_gnina_comparison_ready"
       ],
-      "phase2_failed_criterion_count": 5,
+      "phase2_failed_criterion_count": 4,
       "phase2_ready": false,
       "phase2_row_closure_matrix_count": 4,
       "status": "operator_evidence_required"
@@ -3986,7 +3961,7 @@
     ],
     "status": "operator_acquisition_required"
   },
-  "source_commit_sha": "bc1b5f42825201a2cb5fe8b995c0eb8c5f0a53b2",
+  "source_commit_sha": "4b8b6202704653d3cde5e710db0625eeb64e5a82",
   "source_of_truth_blocker_detail_count": 4,
   "source_of_truth_blocker_detail_register": [
     {
@@ -4617,7 +4592,7 @@
       "pose_coordinate_intake": "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
       "vina_gnina_comparison_intake": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json"
     },
-    "phase2_row_audit_missing_row_input_count": 4,
+    "phase2_row_audit_missing_row_input_count": 3,
     "phase2_row_audit_status": "operator_evidence_required",
     "phase2_row_closure_matrix_count": 4,
     "public_benchmark_ready": false,
@@ -4627,7 +4602,7 @@
       "operator_receipts_required"
     ],
     "row_template_artifact_count": 4,
-    "source_acquisition_plan_blocker_count": 5,
+    "source_acquisition_plan_blocker_count": 4,
     "source_acquisition_plan_status": "operator_acquisition_required",
     "source_of_truth_blocker_count": 10,
     "source_of_truth_blocker_detail_count": 4,
