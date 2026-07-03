@@ -222,6 +222,7 @@ def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
 
 def _source_acquisition_blockers(
     phase2_row_audit_summary: dict[str, Any],
+    vina_gnina_runtime_readiness_summary: dict[str, Any],
 ) -> list[str]:
     missing_row_inputs = {
         str(row_input)
@@ -233,6 +234,17 @@ def _source_acquisition_blockers(
         for row_input in REQUIRED_ROW_INPUTS
         if row_input in missing_row_inputs
     ]
+    if (
+        "vina_gnina_rows" in missing_row_inputs
+        and not vina_gnina_runtime_readiness_summary.get(
+            "runtime_ready_for_engine_execution"
+        )
+    ):
+        blockers.append("public_benchmark_vina_gnina_engine_runtime_not_ready")
+    if int(vina_gnina_runtime_readiness_summary.get("missing_engine_count") or 0) > 0:
+        blockers.append(
+            "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing"
+        )
     blockers.append("public_benchmark_external_receipts_not_attached")
     return blockers
 
@@ -351,6 +363,12 @@ def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, 
     blockers = payload.get("blockers")
     if not isinstance(blockers, list):
         blockers = []
+    container_runtime_status = payload.get("container_runtime_status")
+    if not isinstance(container_runtime_status, dict):
+        container_runtime_status = {}
+    engine_container_statuses = payload.get("current_engine_container_statuses")
+    if not isinstance(engine_container_statuses, list):
+        engine_container_statuses = []
     return {
         "artifact": str(DEFAULT_VINA_GNINA_RUNTIME_READINESS),
         "status": str(payload.get("status") or "missing"),
@@ -373,6 +391,33 @@ def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, 
         "detected_row_artifact_count": int(
             summary.get("detected_row_artifact_count") or 0
         ),
+        "missing_engine_ids": [
+            str(row) for row in payload.get("missing_engine_ids", []) if str(row)
+        ]
+        if isinstance(payload.get("missing_engine_ids"), list)
+        else [],
+        "container_runtime_status": {
+            "available": bool(container_runtime_status.get("available")),
+            "executable": str(container_runtime_status.get("executable") or ""),
+            "binary_source": str(container_runtime_status.get("binary_source") or ""),
+            "blocker": str(container_runtime_status.get("blocker") or ""),
+        },
+        "engine_container_statuses": [
+            {
+                "engine_id": str(row.get("engine_id") or ""),
+                "status": str(row.get("status") or ""),
+                "available": bool(row.get("available")),
+                "image_env_var": str(row.get("image_env_var") or ""),
+                "image": str(row.get("image") or ""),
+                "image_present": bool(row.get("image_present")),
+                "docker_binary_available": bool(row.get("docker_binary_available")),
+                "docker_daemon_available": bool(row.get("docker_daemon_available")),
+                "docker_server_version": str(row.get("docker_server_version") or ""),
+                "blocker": str(row.get("blocker") or ""),
+            }
+            for row in engine_container_statuses
+            if isinstance(row, dict)
+        ],
         "blocker_count": len(blockers),
         "blockers": [str(row) for row in blockers],
         "command": (
@@ -741,7 +786,10 @@ def build_public_benchmark_phase2_source_acquisition_plan(
     vina_gnina_runtime_readiness_summary = _vina_gnina_runtime_readiness_summary(
         vina_gnina_runtime_readiness
     )
-    blockers = _source_acquisition_blockers(phase2_row_audit_summary)
+    blockers = _source_acquisition_blockers(
+        phase2_row_audit_summary,
+        vina_gnina_runtime_readiness_summary,
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -889,6 +937,15 @@ def build_public_benchmark_phase2_source_acquisition_plan(
                     "detected_row_artifact_count"
                 ]
             ),
+            "vina_gnina_runtime_missing_engine_ids": (
+                vina_gnina_runtime_readiness_summary["missing_engine_ids"]
+            ),
+            "vina_gnina_runtime_container_daemon_available": any(
+                row["docker_daemon_available"]
+                for row in vina_gnina_runtime_readiness_summary[
+                    "engine_container_statuses"
+                ]
+            ),
             "phase2_ready": False,
             "actual_closure_ready": False,
             "blocker_count": len(blockers),
@@ -926,6 +983,7 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `vina_gnina_runtime_readiness`: `{payload['vina_gnina_runtime_readiness']['artifact']}`",
         f"- `vina_gnina_runtime_readiness_status`: `{payload['vina_gnina_runtime_readiness']['status']}`",
         f"- `vina_gnina_runtime_ready_engine_run_slot_count`: `{payload['vina_gnina_runtime_readiness']['ready_engine_run_slot_count']}`",
+        f"- `vina_gnina_runtime_missing_engine_ids`: `{', '.join(payload['vina_gnina_runtime_readiness']['missing_engine_ids'])}`",
         "",
         "| Row Input | Source Family | Status | Unblocks |",
         "|---|---|---|---|",
@@ -937,6 +995,21 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         lines.append(
             f"| `{row['row_input_id']}` | `{row['source_family']}` | "
             f"`{row['status']}` | {unblocks} |"
+        )
+    lines.extend(["", "## Vina/GNINA Runtime", ""])
+    lines.extend(
+        [
+            "| Engine | Container Status | Docker Daemon | Image Env Var | Image Present |",
+            "|---|---|---|---|---|",
+        ]
+    )
+    for row in payload["vina_gnina_runtime_readiness"][
+        "engine_container_statuses"
+    ]:
+        lines.append(
+            f"| `{row['engine_id']}` | `{row['status']}` | "
+            f"`{row['docker_daemon_available']}` | `{row['image_env_var']}` | "
+            f"`{row['image_present']}` |"
         )
     lines.extend(["", "## Source Receipt Roles", ""])
     lines.extend(["| Row Input | Receipt Role | Required Receipt Fields |", "|---|---|---|"])

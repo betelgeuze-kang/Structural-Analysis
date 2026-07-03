@@ -188,6 +188,29 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert payload["vina_gnina_runtime_readiness"][
         "detected_row_artifact_count"
     ] == 0
+    assert payload["vina_gnina_runtime_readiness"]["missing_engine_ids"] == [
+        "vina",
+        "gnina",
+    ]
+    assert payload["vina_gnina_runtime_readiness"]["container_runtime_status"][
+        "available"
+    ] is True
+    container_statuses = {
+        row["engine_id"]: row
+        for row in payload["vina_gnina_runtime_readiness"][
+            "engine_container_statuses"
+        ]
+    }
+    assert set(container_statuses) == {"vina", "gnina"}
+    assert container_statuses["vina"]["status"] == "container_image_not_configured"
+    assert container_statuses["vina"]["docker_daemon_available"] is True
+    assert container_statuses["vina"]["image_env_var"] == (
+        "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE"
+    )
+    assert container_statuses["gnina"]["status"] == "container_image_not_configured"
+    assert container_statuses["gnina"]["image_env_var"] == (
+        "PUBLIC_BENCHMARK_GNINA_CONTAINER_IMAGE"
+    )
 
     subset = row_contracts["subset_rows"]
     assert subset["source_family"] == "CASF/PDBBind"
@@ -254,7 +277,7 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
 
     assert payload["summary"] == {
         "actual_closure_ready": False,
-        "blocker_count": 2,
+        "blocker_count": 4,
         "minimum_enrichment_target_count": 1,
         "minimum_subset_case_count": 12,
         "minimum_vina_gnina_comparison_case_count": 1,
@@ -278,12 +301,19 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "vina_gnina_runtime_ready_for_engine_execution": False,
         "vina_gnina_runtime_ready_engine_run_slot_count": 0,
         "vina_gnina_runtime_detected_row_artifact_count": 0,
+        "vina_gnina_runtime_missing_engine_ids": [
+            "vina",
+            "gnina",
+        ],
+        "vina_gnina_runtime_container_daemon_available": True,
         "phase2_ready": False,
         "required_component_count": 5,
         "required_row_input_count": 4,
     }
     assert payload["blockers"] == [
         "public_benchmark_vina_gnina_rows_not_acquired",
+        "public_benchmark_vina_gnina_engine_runtime_not_ready",
+        "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
         "public_benchmark_external_receipts_not_attached",
     ]
 
@@ -312,6 +342,9 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "public_benchmark_vina_gnina_execution_plan.json" in markdown
     assert "public_benchmark_vina_gnina_runtime_readiness.json" in markdown
     assert "`vina_gnina_required_engine_run_count`: `24`" in markdown
+    assert "## Vina/GNINA Runtime" in markdown
+    assert "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE" in markdown
+    assert "container_image_not_configured" in markdown
     assert "`subset_rows` | `CASF/PDBBind`" in markdown
     assert "`vina_gnina_rows` | `CASF/PDBBind + Vina/GNINA`" in markdown
     assert "## Source Receipt Roles" in markdown

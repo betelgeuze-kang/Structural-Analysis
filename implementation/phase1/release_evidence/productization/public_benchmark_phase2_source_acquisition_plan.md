@@ -4,7 +4,7 @@
 - `contract_pass`: `True`
 - `phase2_ready`: `False`
 - `actual_closure_ready`: `False`
-- `blocker_count`: `2`
+- `blocker_count`: `4`
 - `official_source_receipt_plan_status`: `operator_receipts_required`
 - `official_source_receipt_role_count`: `4`
 - `official_source_catalog_count`: `6`
@@ -17,6 +17,7 @@
 - `vina_gnina_runtime_readiness`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json`
 - `vina_gnina_runtime_readiness_status`: `engine_runtime_blocked`
 - `vina_gnina_runtime_ready_engine_run_slot_count`: `0`
+- `vina_gnina_runtime_missing_engine_ids`: `vina, gnina`
 
 | Row Input | Source Family | Status | Unblocks |
 |---|---|---|---|
@@ -24,6 +25,13 @@
 | `pose_rows` | `CASF/PDBBind` | `operator_acquisition_required` | `casf_pdbbind_pose_success_harness`, `symmetry_aware_ligand_rmsd`, `posebusters_style_pose_validity` |
 | `enrichment_rows` | `DUD-E/LIT-PCBA` | `operator_acquisition_required` | `dud_e_or_lit_pcba_enrichment` |
 | `vina_gnina_rows` | `CASF/PDBBind + Vina/GNINA` | `operator_acquisition_required` | `vina_gnina_comparison_adapter` |
+
+## Vina/GNINA Runtime
+
+| Engine | Container Status | Docker Daemon | Image Env Var | Image Present |
+|---|---|---|---|---|
+| `vina` | `container_image_not_configured` | `True` | `PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE` | `False` |
+| `gnina` | `container_image_not_configured` | `True` | `PUBLIC_BENCHMARK_GNINA_CONTAINER_IMAGE` | `False` |
 
 ## Source Receipt Roles
 
