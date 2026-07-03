@@ -26,6 +26,169 @@
           "row_input_id": "pocketmd_rows",
           "row_template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
           "source_acquisition_operator_action": "resolve_pocketmd_lite_source_acquisition_blockers",
+          "source_acquisition_row_action": {
+            "accepted_formats": [
+              "csv",
+              "tsv",
+              "json",
+              "jsonl",
+              "ndjson"
+            ],
+            "claim_boundary": "This action identifies the PocketMD Lite top-k row input needed for Phase 4 actual closure. It is not closure evidence until real rows and source receipts pass the importer and survival materializer.",
+            "closes_phase4_criteria": [
+              "top_k_refinement_rows_present",
+              "top_k_refinement_case_coverage",
+              "local_min_survival_materialized",
+              "contact_persistence_materialized",
+              "h_bond_persistence_materialized",
+              "clash_relief_materialized",
+              "uncertainty_summary_materialized",
+              "report_blockers_resolved"
+            ],
+            "commands": {
+              "import_rows": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
+              "materialize_survival": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+              "review_row_template": "sed -n '1,20p' implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+              "science_actual_closure": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+            },
+            "default_row_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "operator_blockers_if_missing": [
+              "pocketmd_lite_topk_rows_not_acquired"
+            ],
+            "raw_row_candidate_status": {
+              "blocker": "pocketmd_lite_topk_rows_not_acquired",
+              "candidate_paths": [
+                {
+                  "exists": false,
+                  "is_file": false,
+                  "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json"
+                },
+                {
+                  "exists": false,
+                  "is_file": false,
+                  "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl"
+                },
+                {
+                  "exists": false,
+                  "is_file": false,
+                  "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson"
+                },
+                {
+                  "exists": false,
+                  "is_file": false,
+                  "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv"
+                },
+                {
+                  "exists": false,
+                  "is_file": false,
+                  "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+                }
+              ],
+              "case_top_k_rank_prefixes": {},
+              "coverage_ready": false,
+              "covered_required_slot_count": 0,
+              "default_rows_out": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "detected_row_artifact_count": 0,
+              "first_detected_path": "",
+              "missing_required_slots": [
+                {
+                  "case_id": "pocketmd_lite_case_001",
+                  "top_k_rank": 1
+                },
+                {
+                  "case_id": "pocketmd_lite_case_001",
+                  "top_k_rank": 2
+                },
+                {
+                  "case_id": "pocketmd_lite_case_002",
+                  "top_k_rank": 1
+                },
+                {
+                  "case_id": "pocketmd_lite_case_002",
+                  "top_k_rank": 2
+                },
+                {
+                  "case_id": "pocketmd_lite_case_003",
+                  "top_k_rank": 1
+                },
+                {
+                  "case_id": "pocketmd_lite_case_003",
+                  "top_k_rank": 2
+                }
+              ],
+              "required_candidate_slot_count": 6,
+              "selected_path": "",
+              "selected_row_count": 0,
+              "status": "row_artifact_missing",
+              "validated_case_count": 0,
+              "validated_row_count": 0,
+              "validation_error": ""
+            },
+            "required_candidate_rows_per_case": 2,
+            "required_candidate_slot_count": 6,
+            "required_case_count": 3,
+            "required_flat_row_fields": [
+              "case_id",
+              "source_family",
+              "top_k_rank",
+              "candidate_id",
+              "upstream_top_k_provenance_ref",
+              "upstream_top_k_source_checksum",
+              "pre_refinement_energy_proxy",
+              "post_refinement_energy_proxy",
+              "local_min_survived",
+              "contact_persistence_rate",
+              "h_bond_persistence_rate",
+              "clash_count_before",
+              "clash_count_after",
+              "uncertainty_low",
+              "uncertainty_high",
+              "uncertainty_unit",
+              "provenance_ref",
+              "source_checksum"
+            ],
+            "required_minimum_rows_by_case": [
+              {
+                "candidate_scope": "upstream_ranked_top_k_candidates_only",
+                "case_id": "pocketmd_lite_case_001",
+                "minimum_candidate_rows": 2,
+                "required_top_k_rank_prefix": [
+                  1,
+                  2
+                ]
+              },
+              {
+                "candidate_scope": "upstream_ranked_top_k_candidates_only",
+                "case_id": "pocketmd_lite_case_002",
+                "minimum_candidate_rows": 2,
+                "required_top_k_rank_prefix": [
+                  1,
+                  2
+                ]
+              },
+              {
+                "candidate_scope": "upstream_ranked_top_k_candidates_only",
+                "case_id": "pocketmd_lite_case_003",
+                "minimum_candidate_rows": 2,
+                "required_top_k_rank_prefix": [
+                  1,
+                  2
+                ]
+              }
+            ],
+            "required_receipt_roles": [
+              "upstream_top_k_candidate_scope_receipt",
+              "lite_refinement_run_receipt",
+              "interaction_persistence_receipt",
+              "uncertainty_interval_receipt"
+            ],
+            "required_top_k_rank_coverage_per_case": 2,
+            "required_total_candidate_rows": 6,
+            "row_input_id": "pocketmd_rows",
+            "status": "missing",
+            "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv"
+          },
           "upstream_source_blockers": [
             "pocketmd_lite_topk_rows_not_acquired",
             "upstream_top_k_candidate_receipts_not_attached",
@@ -64,6 +227,73 @@
           "row_input_id": "vina_gnina_rows",
           "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
           "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
+          "source_acquisition_row_action": {
+            "accepted_formats": [
+              "csv",
+              "json",
+              "jsonl",
+              "ndjson"
+            ],
+            "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+            "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
+            "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
+            "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+            "depends_on_row_inputs": [
+              "subset_rows",
+              "pose_rows"
+            ],
+            "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+            "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+            "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
+            "receipt_fields": [
+              "source_license_or_accession",
+              "source_checksum",
+              "provenance_ref",
+              "predicted_ligand_checksum",
+              "engine_config_checksum",
+              "engine_run_provenance_ref"
+            ],
+            "required_engine_input_fields": [
+              "case_id",
+              "complex_id",
+              "protein_structure_path",
+              "protein_structure_checksum",
+              "reference_ligand_path",
+              "reference_ligand_checksum",
+              "prepared_receptor_path",
+              "prepared_receptor_checksum",
+              "prepared_ligand_path",
+              "prepared_ligand_checksum"
+            ],
+            "required_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "required_engines": [
+              "vina",
+              "gnina"
+            ],
+            "row_input_id": "vina_gnina_rows",
+            "runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
+            "source_checksum_policy": {
+              "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+              "required_receipt_field": "source_checksum"
+            },
+            "source_family": "CASF/PDBBind + Vina/GNINA",
+            "status": "operator_input_required",
+            "unblocks_components": [
+              "vina_gnina_comparison_adapter"
+            ]
+          },
           "upstream_source_blockers": [
             "public_benchmark_vina_gnina_rows_not_acquired",
             "public_benchmark_vina_gnina_engine_runtime_not_ready",
@@ -1495,6 +1725,73 @@
     "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
     "row_template_present": true,
     "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
+    "source_acquisition_row_action": {
+      "accepted_formats": [
+        "csv",
+        "json",
+        "jsonl",
+        "ndjson"
+      ],
+      "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+      "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
+      "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
+      "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+      "depends_on_row_inputs": [
+        "subset_rows",
+        "pose_rows"
+      ],
+      "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+      "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+      "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
+      "receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "predicted_ligand_checksum",
+        "engine_config_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "required_engine_input_fields": [
+        "case_id",
+        "complex_id",
+        "protein_structure_path",
+        "protein_structure_checksum",
+        "reference_ligand_path",
+        "reference_ligand_checksum",
+        "prepared_receptor_path",
+        "prepared_receptor_checksum",
+        "prepared_ligand_path",
+        "prepared_ligand_checksum"
+      ],
+      "required_engine_run_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_version",
+        "engine_config_checksum",
+        "engine_run_provenance_ref",
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "required_engines": [
+        "vina",
+        "gnina"
+      ],
+      "row_input_id": "vina_gnina_rows",
+      "runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
+      "source_checksum_policy": {
+        "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+        "required_receipt_field": "source_checksum"
+      },
+      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "status": "operator_input_required",
+      "unblocks_components": [
+        "vina_gnina_comparison_adapter"
+      ]
+    },
     "status": "operator_input_required",
     "upstream_source_acquisition": {
       "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
@@ -1507,6 +1804,76 @@
         "public_benchmark_external_receipts_not_attached"
       ],
       "contract_pass": true,
+      "missing_row_input_action_count": 1,
+      "missing_row_input_actions": [
+        {
+          "accepted_formats": [
+            "csv",
+            "json",
+            "jsonl",
+            "ndjson"
+          ],
+          "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+          "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
+          "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
+          "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+          "depends_on_row_inputs": [
+            "subset_rows",
+            "pose_rows"
+          ],
+          "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+          "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+          "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
+          "receipt_fields": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref",
+            "predicted_ligand_checksum",
+            "engine_config_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "required_engine_input_fields": [
+            "case_id",
+            "complex_id",
+            "protein_structure_path",
+            "protein_structure_checksum",
+            "reference_ligand_path",
+            "reference_ligand_checksum",
+            "prepared_receptor_path",
+            "prepared_receptor_checksum",
+            "prepared_ligand_path",
+            "prepared_ligand_checksum"
+          ],
+          "required_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "required_engines": [
+            "vina",
+            "gnina"
+          ],
+          "row_input_id": "vina_gnina_rows",
+          "runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
+          "source_checksum_policy": {
+            "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+            "required_receipt_field": "source_checksum"
+          },
+          "source_family": "CASF/PDBBind + Vina/GNINA",
+          "status": "operator_input_required",
+          "unblocks_components": [
+            "vina_gnina_comparison_adapter"
+          ]
+        }
+      ],
       "operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
       "present": true,
       "source_id": "public_benchmark_phase2",
@@ -1566,13 +1933,13 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-03T23:46:38.400753+00:00",
+  "generated_at": "2026-07-03T23:50:08.037466+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:9dd7c97c8a2b978436c07f11bfb088a2cef94f1fd1f33bc651ba8a4c09440b2b",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:ebcb1c99dd315cdda60be5b3177b003066eac8a696c7014c5a3b564ed437f991",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:bc734b71fe231cae6b4c1ab875507644db77164038387495a3ce904f75b43960",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:6e75a02c6b13b518bf6087e44db30b84c243e4935d2b50611e2fd0411e476118",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:412fbafe7fed641a2fbffb3be85e68b6b180763709d75eaa607fdea51dc73e7f",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:c5aa5808791b27ae81ebd3e74e8eb946ca0eecd7f4295b920839a332d3b20f1c"
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:d073f8c32e2888da8959b37dfb9ba9de5eb60469946da5bd20826f958f9fcdb6",
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:ed56f957c341b56a2cbf23e128943446f43083be9080b469130a41152904863c"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -5274,6 +5641,7 @@
       "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows_template.csv",
       "row_template_present": true,
       "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
+      "source_acquisition_row_action": {},
       "status": "provided",
       "upstream_source_acquisition": {
         "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
@@ -5286,6 +5654,76 @@
           "public_benchmark_external_receipts_not_attached"
         ],
         "contract_pass": true,
+        "missing_row_input_action_count": 1,
+        "missing_row_input_actions": [
+          {
+            "accepted_formats": [
+              "csv",
+              "json",
+              "jsonl",
+              "ndjson"
+            ],
+            "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+            "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
+            "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
+            "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+            "depends_on_row_inputs": [
+              "subset_rows",
+              "pose_rows"
+            ],
+            "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+            "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+            "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
+            "receipt_fields": [
+              "source_license_or_accession",
+              "source_checksum",
+              "provenance_ref",
+              "predicted_ligand_checksum",
+              "engine_config_checksum",
+              "engine_run_provenance_ref"
+            ],
+            "required_engine_input_fields": [
+              "case_id",
+              "complex_id",
+              "protein_structure_path",
+              "protein_structure_checksum",
+              "reference_ligand_path",
+              "reference_ligand_checksum",
+              "prepared_receptor_path",
+              "prepared_receptor_checksum",
+              "prepared_ligand_path",
+              "prepared_ligand_checksum"
+            ],
+            "required_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "required_engines": [
+              "vina",
+              "gnina"
+            ],
+            "row_input_id": "vina_gnina_rows",
+            "runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
+            "source_checksum_policy": {
+              "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+              "required_receipt_field": "source_checksum"
+            },
+            "source_family": "CASF/PDBBind + Vina/GNINA",
+            "status": "operator_input_required",
+            "unblocks_components": [
+              "vina_gnina_comparison_adapter"
+            ]
+          }
+        ],
         "operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
         "present": true,
         "source_id": "public_benchmark_phase2",
@@ -5460,6 +5898,7 @@
       "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows_template.csv",
       "row_template_present": true,
       "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
+      "source_acquisition_row_action": {},
       "status": "provided",
       "upstream_source_acquisition": {
         "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
@@ -5472,6 +5911,76 @@
           "public_benchmark_external_receipts_not_attached"
         ],
         "contract_pass": true,
+        "missing_row_input_action_count": 1,
+        "missing_row_input_actions": [
+          {
+            "accepted_formats": [
+              "csv",
+              "json",
+              "jsonl",
+              "ndjson"
+            ],
+            "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+            "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
+            "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
+            "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+            "depends_on_row_inputs": [
+              "subset_rows",
+              "pose_rows"
+            ],
+            "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+            "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+            "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
+            "receipt_fields": [
+              "source_license_or_accession",
+              "source_checksum",
+              "provenance_ref",
+              "predicted_ligand_checksum",
+              "engine_config_checksum",
+              "engine_run_provenance_ref"
+            ],
+            "required_engine_input_fields": [
+              "case_id",
+              "complex_id",
+              "protein_structure_path",
+              "protein_structure_checksum",
+              "reference_ligand_path",
+              "reference_ligand_checksum",
+              "prepared_receptor_path",
+              "prepared_receptor_checksum",
+              "prepared_ligand_path",
+              "prepared_ligand_checksum"
+            ],
+            "required_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "required_engines": [
+              "vina",
+              "gnina"
+            ],
+            "row_input_id": "vina_gnina_rows",
+            "runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
+            "source_checksum_policy": {
+              "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+              "required_receipt_field": "source_checksum"
+            },
+            "source_family": "CASF/PDBBind + Vina/GNINA",
+            "status": "operator_input_required",
+            "unblocks_components": [
+              "vina_gnina_comparison_adapter"
+            ]
+          }
+        ],
         "operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
         "present": true,
         "source_id": "public_benchmark_phase2",
@@ -5698,6 +6207,7 @@
       "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows_template.csv",
       "row_template_present": true,
       "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
+      "source_acquisition_row_action": {},
       "status": "provided",
       "upstream_source_acquisition": {
         "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
@@ -5710,6 +6220,76 @@
           "public_benchmark_external_receipts_not_attached"
         ],
         "contract_pass": true,
+        "missing_row_input_action_count": 1,
+        "missing_row_input_actions": [
+          {
+            "accepted_formats": [
+              "csv",
+              "json",
+              "jsonl",
+              "ndjson"
+            ],
+            "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+            "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
+            "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
+            "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+            "depends_on_row_inputs": [
+              "subset_rows",
+              "pose_rows"
+            ],
+            "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+            "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+            "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
+            "receipt_fields": [
+              "source_license_or_accession",
+              "source_checksum",
+              "provenance_ref",
+              "predicted_ligand_checksum",
+              "engine_config_checksum",
+              "engine_run_provenance_ref"
+            ],
+            "required_engine_input_fields": [
+              "case_id",
+              "complex_id",
+              "protein_structure_path",
+              "protein_structure_checksum",
+              "reference_ligand_path",
+              "reference_ligand_checksum",
+              "prepared_receptor_path",
+              "prepared_receptor_checksum",
+              "prepared_ligand_path",
+              "prepared_ligand_checksum"
+            ],
+            "required_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "required_engines": [
+              "vina",
+              "gnina"
+            ],
+            "row_input_id": "vina_gnina_rows",
+            "runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
+            "source_checksum_policy": {
+              "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+              "required_receipt_field": "source_checksum"
+            },
+            "source_family": "CASF/PDBBind + Vina/GNINA",
+            "status": "operator_input_required",
+            "unblocks_components": [
+              "vina_gnina_comparison_adapter"
+            ]
+          }
+        ],
         "operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
         "present": true,
         "source_id": "public_benchmark_phase2",
@@ -7103,6 +7683,73 @@
       "row_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
       "row_template_present": true,
       "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
+      "source_acquisition_row_action": {
+        "accepted_formats": [
+          "csv",
+          "json",
+          "jsonl",
+          "ndjson"
+        ],
+        "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+        "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
+        "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
+        "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+        "depends_on_row_inputs": [
+          "subset_rows",
+          "pose_rows"
+        ],
+        "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+        "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
+        "receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref",
+          "predicted_ligand_checksum",
+          "engine_config_checksum",
+          "engine_run_provenance_ref"
+        ],
+        "required_engine_input_fields": [
+          "case_id",
+          "complex_id",
+          "protein_structure_path",
+          "protein_structure_checksum",
+          "reference_ligand_path",
+          "reference_ligand_checksum",
+          "prepared_receptor_path",
+          "prepared_receptor_checksum",
+          "prepared_ligand_path",
+          "prepared_ligand_checksum"
+        ],
+        "required_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "required_engines": [
+          "vina",
+          "gnina"
+        ],
+        "row_input_id": "vina_gnina_rows",
+        "runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
+        "source_checksum_policy": {
+          "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+          "required_receipt_field": "source_checksum"
+        },
+        "source_family": "CASF/PDBBind + Vina/GNINA",
+        "status": "operator_input_required",
+        "unblocks_components": [
+          "vina_gnina_comparison_adapter"
+        ]
+      },
       "status": "operator_input_required",
       "upstream_source_acquisition": {
         "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
@@ -7115,6 +7762,76 @@
           "public_benchmark_external_receipts_not_attached"
         ],
         "contract_pass": true,
+        "missing_row_input_action_count": 1,
+        "missing_row_input_actions": [
+          {
+            "accepted_formats": [
+              "csv",
+              "json",
+              "jsonl",
+              "ndjson"
+            ],
+            "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+            "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
+            "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
+            "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+            "depends_on_row_inputs": [
+              "subset_rows",
+              "pose_rows"
+            ],
+            "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+            "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+            "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
+            "receipt_fields": [
+              "source_license_or_accession",
+              "source_checksum",
+              "provenance_ref",
+              "predicted_ligand_checksum",
+              "engine_config_checksum",
+              "engine_run_provenance_ref"
+            ],
+            "required_engine_input_fields": [
+              "case_id",
+              "complex_id",
+              "protein_structure_path",
+              "protein_structure_checksum",
+              "reference_ligand_path",
+              "reference_ligand_checksum",
+              "prepared_receptor_path",
+              "prepared_receptor_checksum",
+              "prepared_ligand_path",
+              "prepared_ligand_checksum"
+            ],
+            "required_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "required_engines": [
+              "vina",
+              "gnina"
+            ],
+            "row_input_id": "vina_gnina_rows",
+            "runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
+            "source_checksum_policy": {
+              "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+              "required_receipt_field": "source_checksum"
+            },
+            "source_family": "CASF/PDBBind + Vina/GNINA",
+            "status": "operator_input_required",
+            "unblocks_components": [
+              "vina_gnina_comparison_adapter"
+            ]
+          }
+        ],
         "operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
         "present": true,
         "source_id": "public_benchmark_phase2",
@@ -7438,12 +8155,15 @@
       "row_template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv",
       "row_template_present": true,
       "source_acquisition_operator_action": "",
+      "source_acquisition_row_action": {},
       "status": "provided",
       "upstream_source_acquisition": {
         "artifact": "",
         "blocker_count": 0,
         "blockers": [],
         "contract_pass": null,
+        "missing_row_input_action_count": 0,
+        "missing_row_input_actions": [],
         "operator_action": "",
         "present": false,
         "source_id": "",
@@ -7898,6 +8618,169 @@
       "row_template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
       "row_template_present": true,
       "source_acquisition_operator_action": "resolve_pocketmd_lite_source_acquisition_blockers",
+      "source_acquisition_row_action": {
+        "accepted_formats": [
+          "csv",
+          "tsv",
+          "json",
+          "jsonl",
+          "ndjson"
+        ],
+        "claim_boundary": "This action identifies the PocketMD Lite top-k row input needed for Phase 4 actual closure. It is not closure evidence until real rows and source receipts pass the importer and survival materializer.",
+        "closes_phase4_criteria": [
+          "top_k_refinement_rows_present",
+          "top_k_refinement_case_coverage",
+          "local_min_survival_materialized",
+          "contact_persistence_materialized",
+          "h_bond_persistence_materialized",
+          "clash_relief_materialized",
+          "uncertainty_summary_materialized",
+          "report_blockers_resolved"
+        ],
+        "commands": {
+          "import_rows": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
+          "materialize_survival": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+          "review_row_template": "sed -n '1,20p' implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+          "science_actual_closure": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+        },
+        "default_row_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+        "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+        "operator_blockers_if_missing": [
+          "pocketmd_lite_topk_rows_not_acquired"
+        ],
+        "raw_row_candidate_status": {
+          "blocker": "pocketmd_lite_topk_rows_not_acquired",
+          "candidate_paths": [
+            {
+              "exists": false,
+              "is_file": false,
+              "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json"
+            },
+            {
+              "exists": false,
+              "is_file": false,
+              "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl"
+            },
+            {
+              "exists": false,
+              "is_file": false,
+              "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson"
+            },
+            {
+              "exists": false,
+              "is_file": false,
+              "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv"
+            },
+            {
+              "exists": false,
+              "is_file": false,
+              "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+            }
+          ],
+          "case_top_k_rank_prefixes": {},
+          "coverage_ready": false,
+          "covered_required_slot_count": 0,
+          "default_rows_out": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+          "detected_row_artifact_count": 0,
+          "first_detected_path": "",
+          "missing_required_slots": [
+            {
+              "case_id": "pocketmd_lite_case_001",
+              "top_k_rank": 1
+            },
+            {
+              "case_id": "pocketmd_lite_case_001",
+              "top_k_rank": 2
+            },
+            {
+              "case_id": "pocketmd_lite_case_002",
+              "top_k_rank": 1
+            },
+            {
+              "case_id": "pocketmd_lite_case_002",
+              "top_k_rank": 2
+            },
+            {
+              "case_id": "pocketmd_lite_case_003",
+              "top_k_rank": 1
+            },
+            {
+              "case_id": "pocketmd_lite_case_003",
+              "top_k_rank": 2
+            }
+          ],
+          "required_candidate_slot_count": 6,
+          "selected_path": "",
+          "selected_row_count": 0,
+          "status": "row_artifact_missing",
+          "validated_case_count": 0,
+          "validated_row_count": 0,
+          "validation_error": ""
+        },
+        "required_candidate_rows_per_case": 2,
+        "required_candidate_slot_count": 6,
+        "required_case_count": 3,
+        "required_flat_row_fields": [
+          "case_id",
+          "source_family",
+          "top_k_rank",
+          "candidate_id",
+          "upstream_top_k_provenance_ref",
+          "upstream_top_k_source_checksum",
+          "pre_refinement_energy_proxy",
+          "post_refinement_energy_proxy",
+          "local_min_survived",
+          "contact_persistence_rate",
+          "h_bond_persistence_rate",
+          "clash_count_before",
+          "clash_count_after",
+          "uncertainty_low",
+          "uncertainty_high",
+          "uncertainty_unit",
+          "provenance_ref",
+          "source_checksum"
+        ],
+        "required_minimum_rows_by_case": [
+          {
+            "candidate_scope": "upstream_ranked_top_k_candidates_only",
+            "case_id": "pocketmd_lite_case_001",
+            "minimum_candidate_rows": 2,
+            "required_top_k_rank_prefix": [
+              1,
+              2
+            ]
+          },
+          {
+            "candidate_scope": "upstream_ranked_top_k_candidates_only",
+            "case_id": "pocketmd_lite_case_002",
+            "minimum_candidate_rows": 2,
+            "required_top_k_rank_prefix": [
+              1,
+              2
+            ]
+          },
+          {
+            "candidate_scope": "upstream_ranked_top_k_candidates_only",
+            "case_id": "pocketmd_lite_case_003",
+            "minimum_candidate_rows": 2,
+            "required_top_k_rank_prefix": [
+              1,
+              2
+            ]
+          }
+        ],
+        "required_receipt_roles": [
+          "upstream_top_k_candidate_scope_receipt",
+          "lite_refinement_run_receipt",
+          "interaction_persistence_receipt",
+          "uncertainty_interval_receipt"
+        ],
+        "required_top_k_rank_coverage_per_case": 2,
+        "required_total_candidate_rows": 6,
+        "row_input_id": "pocketmd_rows",
+        "status": "missing",
+        "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv"
+      },
       "status": "operator_input_required",
       "upstream_source_acquisition": {
         "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json",
@@ -7908,6 +8791,172 @@
           "lite_refinement_metric_receipts_not_attached"
         ],
         "contract_pass": true,
+        "missing_row_input_action_count": 1,
+        "missing_row_input_actions": [
+          {
+            "accepted_formats": [
+              "csv",
+              "tsv",
+              "json",
+              "jsonl",
+              "ndjson"
+            ],
+            "claim_boundary": "This action identifies the PocketMD Lite top-k row input needed for Phase 4 actual closure. It is not closure evidence until real rows and source receipts pass the importer and survival materializer.",
+            "closes_phase4_criteria": [
+              "top_k_refinement_rows_present",
+              "top_k_refinement_case_coverage",
+              "local_min_survival_materialized",
+              "contact_persistence_materialized",
+              "h_bond_persistence_materialized",
+              "clash_relief_materialized",
+              "uncertainty_summary_materialized",
+              "report_blockers_resolved"
+            ],
+            "commands": {
+              "import_rows": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
+              "materialize_survival": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+              "review_row_template": "sed -n '1,20p' implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+              "science_actual_closure": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+            },
+            "default_row_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "operator_blockers_if_missing": [
+              "pocketmd_lite_topk_rows_not_acquired"
+            ],
+            "raw_row_candidate_status": {
+              "blocker": "pocketmd_lite_topk_rows_not_acquired",
+              "candidate_paths": [
+                {
+                  "exists": false,
+                  "is_file": false,
+                  "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json"
+                },
+                {
+                  "exists": false,
+                  "is_file": false,
+                  "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl"
+                },
+                {
+                  "exists": false,
+                  "is_file": false,
+                  "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson"
+                },
+                {
+                  "exists": false,
+                  "is_file": false,
+                  "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv"
+                },
+                {
+                  "exists": false,
+                  "is_file": false,
+                  "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+                }
+              ],
+              "case_top_k_rank_prefixes": {},
+              "coverage_ready": false,
+              "covered_required_slot_count": 0,
+              "default_rows_out": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "detected_row_artifact_count": 0,
+              "first_detected_path": "",
+              "missing_required_slots": [
+                {
+                  "case_id": "pocketmd_lite_case_001",
+                  "top_k_rank": 1
+                },
+                {
+                  "case_id": "pocketmd_lite_case_001",
+                  "top_k_rank": 2
+                },
+                {
+                  "case_id": "pocketmd_lite_case_002",
+                  "top_k_rank": 1
+                },
+                {
+                  "case_id": "pocketmd_lite_case_002",
+                  "top_k_rank": 2
+                },
+                {
+                  "case_id": "pocketmd_lite_case_003",
+                  "top_k_rank": 1
+                },
+                {
+                  "case_id": "pocketmd_lite_case_003",
+                  "top_k_rank": 2
+                }
+              ],
+              "required_candidate_slot_count": 6,
+              "selected_path": "",
+              "selected_row_count": 0,
+              "status": "row_artifact_missing",
+              "validated_case_count": 0,
+              "validated_row_count": 0,
+              "validation_error": ""
+            },
+            "required_candidate_rows_per_case": 2,
+            "required_candidate_slot_count": 6,
+            "required_case_count": 3,
+            "required_flat_row_fields": [
+              "case_id",
+              "source_family",
+              "top_k_rank",
+              "candidate_id",
+              "upstream_top_k_provenance_ref",
+              "upstream_top_k_source_checksum",
+              "pre_refinement_energy_proxy",
+              "post_refinement_energy_proxy",
+              "local_min_survived",
+              "contact_persistence_rate",
+              "h_bond_persistence_rate",
+              "clash_count_before",
+              "clash_count_after",
+              "uncertainty_low",
+              "uncertainty_high",
+              "uncertainty_unit",
+              "provenance_ref",
+              "source_checksum"
+            ],
+            "required_minimum_rows_by_case": [
+              {
+                "candidate_scope": "upstream_ranked_top_k_candidates_only",
+                "case_id": "pocketmd_lite_case_001",
+                "minimum_candidate_rows": 2,
+                "required_top_k_rank_prefix": [
+                  1,
+                  2
+                ]
+              },
+              {
+                "candidate_scope": "upstream_ranked_top_k_candidates_only",
+                "case_id": "pocketmd_lite_case_002",
+                "minimum_candidate_rows": 2,
+                "required_top_k_rank_prefix": [
+                  1,
+                  2
+                ]
+              },
+              {
+                "candidate_scope": "upstream_ranked_top_k_candidates_only",
+                "case_id": "pocketmd_lite_case_003",
+                "minimum_candidate_rows": 2,
+                "required_top_k_rank_prefix": [
+                  1,
+                  2
+                ]
+              }
+            ],
+            "required_receipt_roles": [
+              "upstream_top_k_candidate_scope_receipt",
+              "lite_refinement_run_receipt",
+              "interaction_persistence_receipt",
+              "uncertainty_interval_receipt"
+            ],
+            "required_top_k_rank_coverage_per_case": 2,
+            "required_total_candidate_rows": 6,
+            "row_input_id": "pocketmd_rows",
+            "status": "missing",
+            "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv"
+          }
+        ],
         "operator_action": "resolve_pocketmd_lite_source_acquisition_blockers",
         "present": true,
         "source_id": "pocketmd_lite",
@@ -7919,6 +8968,7 @@
           "covered_required_slot_count": 0,
           "detected_row_artifact_count": 0,
           "minimum_rows_by_case_count": 3,
+          "missing_row_input_action_count": 1,
           "operator_rows_ready": false,
           "phase4_refinement_receipt_plan_status": "operator_receipts_required",
           "phase4_refinement_receipt_role_count": 4,
@@ -7956,7 +9006,7 @@
   ],
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "5dfd6fbebea019e327d04d29992ea2d5056440bd",
+  "source_commit_sha": "a1b344027e0e1cf25127f6c41f12b6a82bb4ab64",
   "status": "operator_rows_required",
   "summary": {
     "blocked_component_operator_action_count": 2,
@@ -7984,6 +9034,172 @@
         "lite_refinement_metric_receipts_not_attached"
       ],
       "contract_pass": true,
+      "missing_row_input_action_count": 1,
+      "missing_row_input_actions": [
+        {
+          "accepted_formats": [
+            "csv",
+            "tsv",
+            "json",
+            "jsonl",
+            "ndjson"
+          ],
+          "claim_boundary": "This action identifies the PocketMD Lite top-k row input needed for Phase 4 actual closure. It is not closure evidence until real rows and source receipts pass the importer and survival materializer.",
+          "closes_phase4_criteria": [
+            "top_k_refinement_rows_present",
+            "top_k_refinement_case_coverage",
+            "local_min_survival_materialized",
+            "contact_persistence_materialized",
+            "h_bond_persistence_materialized",
+            "clash_relief_materialized",
+            "uncertainty_summary_materialized",
+            "report_blockers_resolved"
+          ],
+          "commands": {
+            "import_rows": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
+            "materialize_survival": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+            "review_row_template": "sed -n '1,20p' implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+            "science_actual_closure": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+          },
+          "default_row_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+          "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+          "operator_blockers_if_missing": [
+            "pocketmd_lite_topk_rows_not_acquired"
+          ],
+          "raw_row_candidate_status": {
+            "blocker": "pocketmd_lite_topk_rows_not_acquired",
+            "candidate_paths": [
+              {
+                "exists": false,
+                "is_file": false,
+                "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json"
+              },
+              {
+                "exists": false,
+                "is_file": false,
+                "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl"
+              },
+              {
+                "exists": false,
+                "is_file": false,
+                "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson"
+              },
+              {
+                "exists": false,
+                "is_file": false,
+                "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv"
+              },
+              {
+                "exists": false,
+                "is_file": false,
+                "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+              }
+            ],
+            "case_top_k_rank_prefixes": {},
+            "coverage_ready": false,
+            "covered_required_slot_count": 0,
+            "default_rows_out": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "detected_row_artifact_count": 0,
+            "first_detected_path": "",
+            "missing_required_slots": [
+              {
+                "case_id": "pocketmd_lite_case_001",
+                "top_k_rank": 1
+              },
+              {
+                "case_id": "pocketmd_lite_case_001",
+                "top_k_rank": 2
+              },
+              {
+                "case_id": "pocketmd_lite_case_002",
+                "top_k_rank": 1
+              },
+              {
+                "case_id": "pocketmd_lite_case_002",
+                "top_k_rank": 2
+              },
+              {
+                "case_id": "pocketmd_lite_case_003",
+                "top_k_rank": 1
+              },
+              {
+                "case_id": "pocketmd_lite_case_003",
+                "top_k_rank": 2
+              }
+            ],
+            "required_candidate_slot_count": 6,
+            "selected_path": "",
+            "selected_row_count": 0,
+            "status": "row_artifact_missing",
+            "validated_case_count": 0,
+            "validated_row_count": 0,
+            "validation_error": ""
+          },
+          "required_candidate_rows_per_case": 2,
+          "required_candidate_slot_count": 6,
+          "required_case_count": 3,
+          "required_flat_row_fields": [
+            "case_id",
+            "source_family",
+            "top_k_rank",
+            "candidate_id",
+            "upstream_top_k_provenance_ref",
+            "upstream_top_k_source_checksum",
+            "pre_refinement_energy_proxy",
+            "post_refinement_energy_proxy",
+            "local_min_survived",
+            "contact_persistence_rate",
+            "h_bond_persistence_rate",
+            "clash_count_before",
+            "clash_count_after",
+            "uncertainty_low",
+            "uncertainty_high",
+            "uncertainty_unit",
+            "provenance_ref",
+            "source_checksum"
+          ],
+          "required_minimum_rows_by_case": [
+            {
+              "candidate_scope": "upstream_ranked_top_k_candidates_only",
+              "case_id": "pocketmd_lite_case_001",
+              "minimum_candidate_rows": 2,
+              "required_top_k_rank_prefix": [
+                1,
+                2
+              ]
+            },
+            {
+              "candidate_scope": "upstream_ranked_top_k_candidates_only",
+              "case_id": "pocketmd_lite_case_002",
+              "minimum_candidate_rows": 2,
+              "required_top_k_rank_prefix": [
+                1,
+                2
+              ]
+            },
+            {
+              "candidate_scope": "upstream_ranked_top_k_candidates_only",
+              "case_id": "pocketmd_lite_case_003",
+              "minimum_candidate_rows": 2,
+              "required_top_k_rank_prefix": [
+                1,
+                2
+              ]
+            }
+          ],
+          "required_receipt_roles": [
+            "upstream_top_k_candidate_scope_receipt",
+            "lite_refinement_run_receipt",
+            "interaction_persistence_receipt",
+            "uncertainty_interval_receipt"
+          ],
+          "required_top_k_rank_coverage_per_case": 2,
+          "required_total_candidate_rows": 6,
+          "row_input_id": "pocketmd_rows",
+          "status": "missing",
+          "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv"
+        }
+      ],
       "present": true,
       "status": "operator_acquisition_required",
       "summary": {
@@ -7993,6 +9209,7 @@
         "covered_required_slot_count": 0,
         "detected_row_artifact_count": 0,
         "minimum_rows_by_case_count": 3,
+        "missing_row_input_action_count": 1,
         "operator_rows_ready": false,
         "phase4_refinement_receipt_plan_status": "operator_receipts_required",
         "phase4_refinement_receipt_role_count": 4,
@@ -8018,6 +9235,76 @@
         "public_benchmark_external_receipts_not_attached"
       ],
       "contract_pass": true,
+      "missing_row_input_action_count": 1,
+      "missing_row_input_actions": [
+        {
+          "accepted_formats": [
+            "csv",
+            "json",
+            "jsonl",
+            "ndjson"
+          ],
+          "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+          "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
+          "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
+          "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+          "depends_on_row_inputs": [
+            "subset_rows",
+            "pose_rows"
+          ],
+          "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+          "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+          "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
+          "receipt_fields": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref",
+            "predicted_ligand_checksum",
+            "engine_config_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "required_engine_input_fields": [
+            "case_id",
+            "complex_id",
+            "protein_structure_path",
+            "protein_structure_checksum",
+            "reference_ligand_path",
+            "reference_ligand_checksum",
+            "prepared_receptor_path",
+            "prepared_receptor_checksum",
+            "prepared_ligand_path",
+            "prepared_ligand_checksum"
+          ],
+          "required_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "required_engines": [
+            "vina",
+            "gnina"
+          ],
+          "row_input_id": "vina_gnina_rows",
+          "runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
+          "source_checksum_policy": {
+            "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+            "required_receipt_field": "source_checksum"
+          },
+          "source_family": "CASF/PDBBind + Vina/GNINA",
+          "status": "operator_input_required",
+          "unblocks_components": [
+            "vina_gnina_comparison_adapter"
+          ]
+        }
+      ],
       "present": true,
       "status": "operator_acquisition_required",
       "summary": {

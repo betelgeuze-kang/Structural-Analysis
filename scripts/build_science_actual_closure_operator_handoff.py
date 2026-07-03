@@ -151,11 +151,18 @@ def _slot_source_context(
             "contract_pass": None,
             "blocker_count": 0,
             "blockers": [],
+            "missing_row_input_action_count": 0,
+            "missing_row_input_actions": [],
             "summary": {},
             "operator_action": "",
         }
     source = _as_dict(upstream_source_acquisition.get(source_id))
     blockers = [str(item) for item in _as_list(source.get("blockers"))]
+    missing_row_input_actions = [
+        row
+        for row in _as_list(source.get("missing_row_input_actions"))
+        if isinstance(row, dict)
+    ]
     return {
         "source_id": source_id,
         "present": bool(source.get("present")),
@@ -164,6 +171,11 @@ def _slot_source_context(
         "contract_pass": source.get("contract_pass"),
         "blocker_count": int(source.get("blocker_count") or len(blockers)),
         "blockers": blockers,
+        "missing_row_input_action_count": int(
+            source.get("missing_row_input_action_count")
+            or len(missing_row_input_actions)
+        ),
+        "missing_row_input_actions": missing_row_input_actions,
         "summary": _as_dict(source.get("summary")),
         "operator_action": (
             f"resolve_{source_id}_source_acquisition_blockers"
@@ -171,6 +183,18 @@ def _slot_source_context(
             else ""
         ),
     }
+
+
+def _source_acquisition_row_action(
+    row_input_id: str,
+    source_context: dict[str, Any],
+) -> dict[str, Any]:
+    for action in _as_list(source_context.get("missing_row_input_actions")):
+        if not isinstance(action, dict):
+            continue
+        if str(action.get("row_input_id") or "") == row_input_id:
+            return action
+    return {}
 
 
 def _compact_candidate_slot_status(row: dict[str, Any]) -> dict[str, Any]:
@@ -440,6 +464,10 @@ def _slot(
     row_input_id = str(row.get("row_input_id") or "")
     missing = bool(row.get("missing"))
     source_context = _slot_source_context(row_input_id, upstream_source_acquisition)
+    source_acquisition_row_action = _source_acquisition_row_action(
+        row_input_id,
+        source_context,
+    )
     row_input_slot_detail = _as_dict(row_input_slot_details.get(row_input_id))
     row_template_artifact = _row_template_artifact(row_input_id)
     row_template_path = (
@@ -493,6 +521,7 @@ def _slot(
         "upstream_source_acquisition": source_context,
         "upstream_source_blockers": source_context["blockers"],
         "source_acquisition_operator_action": source_context["operator_action"],
+        "source_acquisition_row_action": source_acquisition_row_action,
         "row_input_slot_detail": row_input_slot_detail,
         "row_contract_ref": str(row.get("row_contract_ref") or ""),
         "contract_field_groups": _contract_field_groups(contract),
@@ -660,6 +689,9 @@ def _blocked_component_operator_actions(
                 ),
                 "source_acquisition_operator_action": str(
                     slot.get("source_acquisition_operator_action") or ""
+                ),
+                "source_acquisition_row_action": _as_dict(
+                    slot.get("source_acquisition_row_action")
                 ),
                 "upstream_source_blockers": [
                     str(item) for item in _as_list(slot.get("upstream_source_blockers"))

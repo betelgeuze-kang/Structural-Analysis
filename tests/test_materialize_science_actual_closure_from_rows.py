@@ -840,6 +840,15 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
                     "public_benchmark_vina_gnina_engine_inputs_not_ready",
                 ],
                 "summary": {"vina_gnina_runtime_ready_engine_run_slot_count": 0},
+                "missing_row_input_action_count": 1,
+                "missing_row_input_actions": [
+                    {
+                        "row_input_id": "vina_gnina_rows",
+                        "operator_action": (
+                            "attach_vina_gnina_rows_then_run_phase2_row_audit"
+                        ),
+                    }
+                ],
             },
             sort_keys=True,
         ),
@@ -853,6 +862,15 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
                 "blocker_count": 1,
                 "blockers": ["pocketmd_lite_topk_rows_not_acquired"],
                 "summary": {"operator_rows_ready": False},
+                "missing_row_input_action_count": 1,
+                "missing_row_input_actions": [
+                    {
+                        "row_input_id": "pocketmd_rows",
+                        "operator_action": (
+                            "attach_pocketmd_rows_at_pocketmd_lite_topk_rows.json"
+                        ),
+                    }
+                ],
             },
             sort_keys=True,
         ),
@@ -880,6 +898,14 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
         "pocketmd_lite_source_acquisition::"
         "pocketmd_lite_topk_rows_not_acquired",
     ]
+    assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
+        "missing_row_input_actions"
+    ][0]["operator_action"] == "attach_vina_gnina_rows_then_run_phase2_row_audit"
+    assert audit["upstream_source_acquisition"]["pocketmd_lite"][
+        "missing_row_input_actions"
+    ][0]["operator_action"] == (
+        "attach_pocketmd_rows_at_pocketmd_lite_topk_rows.json"
+    )
     assert audit["operator_next_actions"] == [
         "attach_subset_rows",
         "attach_pose_rows",

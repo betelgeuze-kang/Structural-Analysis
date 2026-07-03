@@ -157,6 +157,15 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert public_action["source_acquisition_operator_action"] == (
         "resolve_public_benchmark_phase2_source_acquisition_blockers"
     )
+    assert public_action["source_acquisition_row_action"]["operator_action"] == (
+        "attach_vina_gnina_rows_then_run_phase2_row_audit"
+    )
+    assert public_action["source_acquisition_row_action"][
+        "runtime_readiness_command"
+    ].startswith("python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py")
+    assert "engine_config_checksum" in public_action["source_acquisition_row_action"][
+        "receipt_fields"
+    ]
     assert "public_benchmark_vina_gnina_engine_runtime_not_ready" in public_action[
         "upstream_source_blockers"
     ]
@@ -183,6 +192,16 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert pocketmd_action["source_acquisition_operator_action"] == (
         "resolve_pocketmd_lite_source_acquisition_blockers"
     )
+    assert pocketmd_action["source_acquisition_row_action"]["operator_action"] == (
+        "attach_pocketmd_rows_at_implementation/phase1/release_evidence/"
+        "productization/pocketmd_lite_topk_rows.json"
+    )
+    assert "materialize_survival" in pocketmd_action["source_acquisition_row_action"][
+        "commands"
+    ]
+    assert "uncertainty_interval_receipt" in pocketmd_action[
+        "source_acquisition_row_action"
+    ]["required_receipt_roles"]
     assert "pocketmd_lite_topk_rows_not_acquired" in pocketmd_action[
         "upstream_source_blockers"
     ]

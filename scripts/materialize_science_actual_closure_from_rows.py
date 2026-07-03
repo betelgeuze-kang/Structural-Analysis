@@ -107,6 +107,11 @@ def _source_acquisition_summary(
     summary = payload.get("summary")
     if not isinstance(summary, dict):
         summary = {}
+    missing_row_input_actions = [
+        row
+        for row in payload.get("missing_row_input_actions", [])
+        if isinstance(row, dict)
+    ] if isinstance(payload.get("missing_row_input_actions"), list) else []
     return {
         "artifact": str(artifact),
         "present": True,
@@ -114,6 +119,11 @@ def _source_acquisition_summary(
         "contract_pass": payload.get("contract_pass"),
         "blocker_count": int(payload.get("blocker_count") or len(blockers)),
         "blockers": blockers,
+        "missing_row_input_action_count": int(
+            payload.get("missing_row_input_action_count")
+            or len(missing_row_input_actions)
+        ),
+        "missing_row_input_actions": missing_row_input_actions,
         "summary": summary,
     }
 
