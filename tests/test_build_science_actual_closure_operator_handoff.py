@@ -41,6 +41,7 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert payload["contract_pass"] is True
     assert payload["science_actual_closure_contract_pass"] is False
     assert payload["summary"] == {
+        "blocker_count": 10,
         "blocked_component_operator_action_count": 2,
         "closes_actual_closure_criteria_count": 19,
         "component_count": 3,
@@ -55,6 +56,25 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "upstream_source_blocker_count": 8,
         "upstream_source_context_count": 2,
     }
+    assert payload["blocker_count"] == 10
+    assert payload["science_actual_closure_blockers"] == [
+        (
+            "public_benchmark_phase2_actual_closure::"
+            "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
+        ),
+        "pocketmd_lite_topk_actual_closure::pocketmd_lite_topk_rows_not_provided",
+    ]
+    assert payload["blockers"][:2] == [
+        (
+            "science_actual_closure::public_benchmark_phase2_actual_closure::"
+            "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
+        ),
+        (
+            "science_actual_closure::pocketmd_lite_topk_actual_closure::"
+            "pocketmd_lite_topk_rows_not_provided"
+        ),
+    ]
+    assert payload["blockers"][2:] == payload["upstream_source_blockers"]
     assert list(slots) == [
         "subset_rows",
         "pose_rows",
@@ -424,6 +444,7 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "| `subset_rows` | `provided` |" in markdown
     assert "| `vina_gnina_rows` | `operator_input_required` |" in markdown
     assert "| `pocketmd_rows` | `operator_input_required` |" in markdown
+    assert "- `blocker_count`: `10`" in markdown
     assert "## Missing Row Packet" in markdown
     assert "attach_pocketmd_rows_at_" in markdown
     assert "CSV Starter" in markdown

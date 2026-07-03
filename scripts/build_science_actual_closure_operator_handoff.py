@@ -686,9 +686,20 @@ def build_science_actual_closure_operator_handoff(
     ]
     contracts = _as_dict(audit.get("row_intake_contracts"))
     upstream_source_acquisition = _as_dict(audit.get("upstream_source_acquisition"))
+    science_actual_closure_blockers = [
+        str(item) for item in _as_list(audit.get("blockers"))
+    ]
     upstream_source_blockers = [
         str(item) for item in _as_list(audit.get("upstream_source_blockers"))
     ]
+    blockers = list(
+        dict.fromkeys(
+            [
+                *(f"science_actual_closure::{item}" for item in science_actual_closure_blockers),
+                *upstream_source_blockers,
+            ]
+        )
+    )
     pocketmd_refinement_plan = _load_json(
         repo_root,
         DEFAULT_POCKETMD_REFINEMENT_PLAN,
@@ -787,7 +798,7 @@ def build_science_actual_closure_operator_handoff(
             "component_count": len(_component_slot_summary(slots)),
             "closes_actual_closure_criteria_count": len(set(criteria)),
             "science_actual_closure_blocker_count": len(
-                _as_list(audit.get("blockers"))
+                science_actual_closure_blockers
             ),
             "row_template_artifact_count": len(row_template_artifacts),
             "missing_row_template_artifact_count": len(
@@ -805,7 +816,11 @@ def build_science_actual_closure_operator_handoff(
             "blocked_component_operator_action_count": len(
                 blocked_component_operator_actions
             ),
+            "blocker_count": len(blockers),
         },
+        "blockers": blockers,
+        "blocker_count": len(blockers),
+        "science_actual_closure_blockers": science_actual_closure_blockers,
         "upstream_source_acquisition": upstream_source_acquisition,
         "upstream_source_blockers": upstream_source_blockers,
         "row_template_artifacts": row_template_artifacts,
@@ -849,6 +864,7 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"`{payload.get('science_actual_closure_contract_pass')}`",
         f"- `missing_slot_count`: `{summary.get('missing_slot_count')}`",
         f"- `slot_count`: `{summary.get('slot_count')}`",
+        f"- `blocker_count`: `{payload.get('blocker_count')}`",
         "",
         "| Row Input | Status | Preferred Path | CSV Starter | Closes Criteria | Action |",
         "| --- | --- | --- | --- | --- | --- |",

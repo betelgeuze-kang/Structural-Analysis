@@ -5,6 +5,7 @@
 - `science_actual_closure_contract_pass`: `False`
 - `missing_slot_count`: `2`
 - `slot_count`: `6`
+- `blocker_count`: `10`
 
 | Row Input | Status | Preferred Path | CSV Starter | Closes Criteria | Action |
 | --- | --- | --- | --- | --- | --- |
