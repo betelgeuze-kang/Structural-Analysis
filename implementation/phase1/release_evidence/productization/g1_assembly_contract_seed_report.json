@@ -1,0 +1,551 @@
+{
+  "artifacts": {
+    "related_full_load_lane": "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
+    "related_runner_contract": "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
+    "report": "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json"
+  },
+  "assembly_contract_schema": "g1-assembly-result.v1",
+  "blockers_remaining": [
+    "full_load_gate_not_closed",
+    "full_mesh_nonlinear_equilibrium_not_closed",
+    "material_newton_breadth_not_closed",
+    "production_rocm_hip_residency_not_closed",
+    "g1_consistent_residual_jacobian_newton_gate_not_closed_by_cpu_seed",
+    "full_load_checkpoint_1p0_not_created_by_this_seed_report",
+    "hip_residual_jvp_worker_not_executed_by_this_seed_report"
+  ],
+  "case_count": 2,
+  "cases": [
+    {
+      "assembly_contract_check": {
+        "contract_pass": true,
+        "fixed_point_residual_used_as_physical": false,
+        "free_dof_count": 2,
+        "regularized_fixed_point_substitute": false,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_inf_norm": 2.842170943040401e-14,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-contract-check.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_inf_norm": 1690.0603755491154
+      },
+      "assembly_result": {
+        "external_forces": [
+          0.0,
+          0.0,
+          100.0
+        ],
+        "internal_forces": [
+          -99.99999999999997,
+          0.0,
+          99.99999999999997
+        ],
+        "material_state_next": {
+          "assembly_scope": "narrow_axial_chain_seed",
+          "element_material_states": [
+            {
+              "element_id": "e1",
+              "elongation_m": 0.3930027389711051,
+              "internal_force_kn": 99.99999999999997,
+              "material_state_policy": "stateless_trial_equals_committed_seed",
+              "path_dependent_state_updated": false,
+              "tangent_kn_per_m": 563.3534585163718
+            },
+            {
+              "element_id": "e2",
+              "elongation_m": 0.3930027389711051,
+              "internal_force_kn": 99.99999999999997,
+              "material_state_policy": "stateless_trial_equals_committed_seed",
+              "path_dependent_state_updated": false,
+              "tangent_kn_per_m": 563.3534585163718
+            }
+          ],
+          "path_dependent_state": false,
+          "state_schema": "g1-material-state-next.seed.v1",
+          "state_updated_material_newton": false
+        },
+        "metrics": {
+          "assembly_scope": "narrow_axial_chain_seed",
+          "fixed_point_residual_used_as_physical": false,
+          "free_dof_count": 2,
+          "free_dof_indices": [
+            1,
+            2
+          ],
+          "g1_closure_claim": false,
+          "map_residual_used_as_physical": false,
+          "regularized_fixed_point_substitute": false,
+          "residual_inf_norm": 2.842170943040401e-14,
+          "solver_normalized_residual_used_as_physical": false,
+          "tangent_inf_norm": 1690.0603755491154
+        },
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_free": [
+          0.0,
+          -2.842170943040401e-14
+        ],
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-result.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_free": [
+          [
+            1126.7069170327436,
+            -563.3534585163718
+          ],
+          [
+            -563.3534585163718,
+            563.3534585163718
+          ]
+        ]
+      },
+      "assembly_scope": "narrow_axial_chain_seed",
+      "case_id": "phase2_material_mesh_newton_axial_chain_cubic_spring",
+      "contract_pass": true,
+      "direct_residual_newton_parity_check": {
+        "consistent_residual_jacobian_newton_gate_passed": false,
+        "cpu_diagnostic_substitute_used_as_g1_closure": false,
+        "cpu_seed_consistent_newton_gate_passed": true,
+        "direct_solver_residual_match": true,
+        "fallback_used": false,
+        "final_direct_residual_inf_norm": 2.842170943040401e-14,
+        "final_relative_increment": 1.0090187253045163e-16,
+        "final_residual_max_abs_delta": 0.0,
+        "final_residual_relative_delta": 0.0,
+        "final_solver_residual_inf_norm": 2.842170943040401e-14,
+        "history_replay": [
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 100.0,
+            "direct_solver_residual_match": true,
+            "iteration": 0,
+            "line_search_alpha": 0.5,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 100.0
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 75.0,
+            "direct_solver_residual_match": true,
+            "iteration": 1,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 75.0
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 10.991247710156713,
+            "direct_solver_residual_match": true,
+            "iteration": 2,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 10.991247710156713
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 0.3969471511987166,
+            "direct_solver_residual_match": true,
+            "iteration": 3,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 0.3969471511987166
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 0.0005826157356523254,
+            "direct_solver_residual_match": true,
+            "iteration": 4,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 0.0005826157356523254
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 1.261014404008165e-09,
+            "direct_solver_residual_match": true,
+            "iteration": 5,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 1.261014404008165e-09
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 2.842170943040401e-14,
+            "direct_solver_residual_match": true,
+            "iteration": 6,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 2.842170943040401e-14
+          }
+        ],
+        "line_search_replay": [
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 0,
+            "residual_reduction_ratio": 0.75,
+            "selected_alpha": 0.5,
+            "starting_residual_inf_norm": 100.0,
+            "trial_residual_inf_norm": 75.0
+          },
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 1,
+            "residual_reduction_ratio": 0.14654996946875617,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 75.0,
+            "trial_residual_inf_norm": 10.991247710156713
+          },
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 2,
+            "residual_reduction_ratio": 0.03611483988591291,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 10.991247710156713,
+            "trial_residual_inf_norm": 0.3969471511987166
+          },
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 3,
+            "residual_reduction_ratio": 0.0005826157356523254,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 0.3969471511987166,
+            "trial_residual_inf_norm": 0.0005826157356523254
+          },
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 4,
+            "residual_reduction_ratio": 1.261014404008165e-09,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 0.0005826157356523254,
+            "trial_residual_inf_norm": 1.261014404008165e-09
+          },
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 5,
+            "residual_reduction_ratio": 2.842170943040401e-14,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 1.261014404008165e-09,
+            "trial_residual_inf_norm": 2.842170943040401e-14
+          }
+        ],
+        "phase": "phase2_cpu_seed_consistent_residual_jacobian_newton",
+        "promotes_g1_closure": false,
+        "regularization_used": false,
+        "regularized_fixed_point_substitute": false,
+        "relative_increment_gate_passed": true,
+        "relative_increment_tolerance": 1e-12,
+        "residual_descent_passed": true,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_gate_passed": true,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-direct-residual-newton-parity-check.v1"
+      },
+      "fallback_used": false,
+      "g1_closure_claim": false,
+      "jvp_finite_difference_check": {
+        "absolute_tolerance": 1e-08,
+        "analytic_jvp": [
+          1408.3836462909294,
+          -845.0301877745577
+        ],
+        "direction": [
+          1.0,
+          -0.5
+        ],
+        "finite_difference_epsilon": 1e-07,
+        "finite_difference_jvp": [
+          1408.3836463640864,
+          -845.030187903717
+        ],
+        "finite_difference_scheme": "central",
+        "max_abs_error": 1.291592752750148e-07,
+        "pass": true,
+        "relative_error": 9.170745173621916e-11,
+        "relative_tolerance": 1e-06,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-jvp-finite-difference-check.v1",
+        "tangent_definition": "dR_du_consistent"
+      },
+      "regularization_used": false,
+      "solution_contract_pass": true,
+      "solution_status": "ready",
+      "status": "ready"
+    },
+    {
+      "assembly_contract_check": {
+        "contract_pass": true,
+        "fixed_point_residual_used_as_physical": false,
+        "free_dof_count": 2,
+        "regularized_fixed_point_substitute": false,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_inf_norm": 3.552713678800501e-15,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-contract-check.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_inf_norm": 200.38642576890896
+      },
+      "assembly_result": {
+        "external_forces": [
+          50.0,
+          20.0
+        ],
+        "internal_forces": [
+          50.0,
+          19.999999999999996
+        ],
+        "material_state_next": {
+          "assembly_scope": "frame_shell_material_coupled_2dof_seed",
+          "component_material_states": [
+            {
+              "component": "frame_axial_material",
+              "dof": "frame_node_ux",
+              "force_kn": 48.324044103640794,
+              "tangent_kn_per_m": 188.38642576890896
+            },
+            {
+              "component": "shell_diaphragm_shear_material",
+              "dof": "shell_node_uy",
+              "force_kn": 16.827664752474803,
+              "tangent_kn_per_m": 121.46293133674021
+            },
+            {
+              "component": "frame_shell_material_coupling",
+              "dofs": [
+                "frame_node_ux",
+                "shell_node_uy"
+              ],
+              "frame_force_kn": 1.6759558963592072,
+              "off_diagonal_tangent_kn_per_m": 12.0,
+              "shell_force_kn": 3.172335247525195
+            }
+          ],
+          "path_dependent_state": false,
+          "state_schema": "g1-material-state-next.seed.v1",
+          "state_updated_material_newton": false
+        },
+        "metrics": {
+          "assembly_scope": "frame_shell_material_coupled_2dof_seed",
+          "fixed_point_residual_used_as_physical": false,
+          "free_dof_count": 2,
+          "free_dof_labels": [
+            "frame_node_ux",
+            "shell_node_uy"
+          ],
+          "g1_closure_claim": false,
+          "map_residual_used_as_physical": false,
+          "regularized_fixed_point_substitute": false,
+          "residual_inf_norm": 3.552713678800501e-15,
+          "solver_normalized_residual_used_as_physical": false,
+          "tangent_inf_norm": 200.38642576890896
+        },
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_free": [
+          0.0,
+          -3.552713678800501e-15
+        ],
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-result.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_free": [
+          [
+            188.38642576890896,
+            12.0
+          ],
+          [
+            12.0,
+            121.46293133674021
+          ]
+        ]
+      },
+      "assembly_scope": "frame_shell_material_coupled_2dof_seed",
+      "case_id": "phase2_frame_shell_material_coupled_2dof_seed",
+      "contract_pass": true,
+      "direct_residual_newton_parity_check": {
+        "consistent_residual_jacobian_newton_gate_passed": false,
+        "cpu_diagnostic_substitute_used_as_g1_closure": false,
+        "cpu_seed_consistent_newton_gate_passed": true,
+        "direct_solver_residual_match": true,
+        "fallback_used": false,
+        "final_direct_residual_inf_norm": 3.552713678800501e-15,
+        "final_relative_increment": 2.9434602357932303e-17,
+        "final_residual_max_abs_delta": 0.0,
+        "final_residual_relative_delta": 0.0,
+        "final_solver_residual_inf_norm": 3.552713678800501e-15,
+        "history_replay": [
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 50.0,
+            "direct_solver_residual_match": true,
+            "iteration": 0,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 50.0
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 0.7738934306423673,
+            "direct_solver_residual_match": true,
+            "iteration": 1,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 0.7738934306423673
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 0.0005367405541392145,
+            "direct_solver_residual_match": true,
+            "iteration": 2,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 0.0005367405541392145
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 2.6076207859659917e-10,
+            "direct_solver_residual_match": true,
+            "iteration": 3,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 2.6076207859659917e-10
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 3.552713678800501e-15,
+            "direct_solver_residual_match": true,
+            "iteration": 4,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 3.552713678800501e-15
+          }
+        ],
+        "line_search_replay": [
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 0,
+            "residual_reduction_ratio": 0.015477868612847345,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 50.0,
+            "trial_residual_inf_norm": 0.7738934306423673
+          },
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 1,
+            "residual_reduction_ratio": 0.0005367405541392145,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 0.7738934306423673,
+            "trial_residual_inf_norm": 0.0005367405541392145
+          },
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 2,
+            "residual_reduction_ratio": 2.6076207859659917e-10,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 0.0005367405541392145,
+            "trial_residual_inf_norm": 2.6076207859659917e-10
+          },
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 3,
+            "residual_reduction_ratio": 3.552713678800501e-15,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 2.6076207859659917e-10,
+            "trial_residual_inf_norm": 3.552713678800501e-15
+          }
+        ],
+        "phase": "phase2_cpu_seed_consistent_residual_jacobian_newton",
+        "promotes_g1_closure": false,
+        "regularization_used": false,
+        "regularized_fixed_point_substitute": false,
+        "relative_increment_gate_passed": true,
+        "relative_increment_tolerance": 1e-12,
+        "residual_descent_passed": true,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_gate_passed": true,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-direct-residual-newton-parity-check.v1"
+      },
+      "fallback_used": false,
+      "g1_closure_claim": false,
+      "jvp_finite_difference_check": {
+        "absolute_tolerance": 1e-08,
+        "analytic_jvp": [
+          182.38642576890896,
+          -48.731465668370106
+        ],
+        "direction": [
+          1.0,
+          -0.5
+        ],
+        "finite_difference_epsilon": 1e-07,
+        "finite_difference_jvp": [
+          182.38642578438657,
+          -48.73146568940001
+        ],
+        "finite_difference_scheme": "central",
+        "max_abs_error": 2.1029904928582255e-08,
+        "pass": true,
+        "relative_error": 1.1530411234355438e-10,
+        "relative_tolerance": 1e-06,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-jvp-finite-difference-check.v1",
+        "tangent_definition": "dR_du_consistent"
+      },
+      "regularization_used": false,
+      "solution_contract_pass": true,
+      "solution_status": "ready",
+      "status": "ready"
+    }
+  ],
+  "claim_boundary": "This report validates the shared AssemblyResult shape, physical R=F_internal-F_external convention, and central-difference JVP guard on two deterministic CPU seed assemblies. It also replays each seed Newton history through the same physical assembly to verify direct residual/Newton residual parity and residual descent. It does not create a full-load 1.0 checkpoint, prove full-mesh nonlinear equilibrium, close state-updated material Newton breadth, execute ROCm/HIP, or promote G1.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "consistent_residual_jacobian_newton_gate_passed": false,
+  "contract_pass": true,
+  "cpu_seed_consistent_newton_gate_passed": true,
+  "engine_version": "1.0.0",
+  "fixed_point_residual_promoted_to_physical": false,
+  "g1_closure_claim": false,
+  "generated_at": "2026-07-03T22:10:30.952465+00:00",
+  "globalization": "backtracking_line_search",
+  "input_checksums": {
+    "scripts/build_g1_assembly_contract_seed_report.py": "sha256:1002c277ac685bb27877be46aad280d4937af3e9e44b0d020d9377a23689a41e",
+    "src/structural_analysis/assembly/coupled_static.py": "sha256:56e1c3f1b09b6e47181d3c877397d6a109af41b5dc3fa459973cf650df9e611a",
+    "src/structural_analysis/assembly/g1_contract.py": "sha256:934a271886c23fc900d81b25e0b72f6276725042c709491b9b8ac45b4a30d31e",
+    "src/structural_analysis/assembly/nonlinear_static.py": "sha256:afc7ecf37b7fe7c2fc172b9b223d18640a44c22f6896aa47c20fdf35761fb41b",
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:c43772246853be09cacee662312fadac9de5d87b91e9ff2d105e9cb6342d16c6",
+    "tests/test_g1_assembly_contract.py": "sha256:3b527ae9be8ba6c53c947c5bd97c10791425d6ff2c8fc6fded3a895d7c2d6eb2"
+  },
+  "phase_covered": "phase1_phase2_cpu_seed_contract_and_newton_parity",
+  "prohibited_physical_residual_substitutes": [
+    "fixed_point_residual",
+    "map_residual",
+    "regularized_residual",
+    "solver_normalized_residual"
+  ],
+  "promotes_g1_closure": false,
+  "regularized_fixed_point_substitute": false,
+  "required_fields": [
+    "residual_free",
+    "tangent_free",
+    "internal_forces",
+    "external_forces",
+    "material_state_next",
+    "metrics"
+  ],
+  "residual_formula": "F_internal_minus_F_external",
+  "schema_version": "g1-assembly-contract-seed-report.v1",
+  "source_commit_sha": "df149d71e2a2a7a1db92a41683e84ffb151e92ec",
+  "status": "ready"
+}

@@ -23,6 +23,7 @@ DEFAULT_G1_LANE = PRODUCTIZATION / "g1_full_load_hip_newton_lane_report.json"
 DEFAULT_CAUSE_NARROWING = PRODUCTIZATION / "g1_f2g_f2h_cause_narrowing_status.json"
 DEFAULT_HIP_PROBE = PRODUCTIZATION / "mgt_residual_jacobian_consistency_hip_required_probe.json"
 DEFAULT_GLOBAL_CONNECTIVITY = PRODUCTIZATION / "g1_global_connectivity_load_path_audit.json"
+DEFAULT_ASSEMBLY_CONTRACT_SEED = PRODUCTIZATION / "g1_assembly_contract_seed_report.json"
 DEFAULT_OUT = PRODUCTIZATION / "g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_SOLVER_HIP_E2E = Path(
@@ -127,6 +128,7 @@ def _missing_artifact_blockers(
     g1_lane: dict[str, Any],
     cause_narrowing: dict[str, Any],
     hip_probe: dict[str, Any],
+    assembly_contract_seed: dict[str, Any],
 ) -> list[str]:
     blockers: list[str] = []
     if not g1_lane:
@@ -135,6 +137,29 @@ def _missing_artifact_blockers(
         blockers.append("g1_f2g_f2h_cause_narrowing_status_missing")
     if not hip_probe:
         blockers.append("mgt_residual_jacobian_consistency_hip_required_probe_missing")
+    if not assembly_contract_seed:
+        blockers.append("g1_assembly_contract_seed_report_missing")
+    return blockers
+
+
+def _assembly_contract_seed_blockers(assembly_contract_seed: dict[str, Any]) -> list[str]:
+    blockers: list[str] = []
+    if not assembly_contract_seed:
+        return blockers
+    if assembly_contract_seed.get("contract_pass") is not True:
+        blockers.append("g1_assembly_contract_seed_contract_not_passed")
+    if assembly_contract_seed.get("promotes_g1_closure") is not False:
+        blockers.append("g1_assembly_contract_seed_promotes_g1_closure")
+    if assembly_contract_seed.get("residual_formula") != "F_internal_minus_F_external":
+        blockers.append("g1_assembly_contract_seed_residual_formula_mismatch")
+    if assembly_contract_seed.get("fixed_point_residual_promoted_to_physical") is not False:
+        blockers.append("g1_assembly_contract_seed_fixed_point_residual_promoted")
+    if assembly_contract_seed.get("regularized_fixed_point_substitute") is not False:
+        blockers.append("g1_assembly_contract_seed_regularized_fixed_point_substitute")
+    if assembly_contract_seed.get("cpu_seed_consistent_newton_gate_passed") is not True:
+        blockers.append("g1_assembly_contract_seed_cpu_newton_parity_not_passed")
+    if assembly_contract_seed.get("consistent_residual_jacobian_newton_gate_passed") is not False:
+        blockers.append("g1_assembly_contract_seed_claims_full_consistent_newton_gate")
     return blockers
 
 
@@ -421,8 +446,24 @@ def _next_actions(
     highest_observed: float,
     g1_lane_path: Path,
     hip_probe_path: Path,
+    assembly_contract_seed_path: Path,
 ) -> list[dict[str, Any]]:
     return [
+        {
+            "id": "promote_g1_assembly_contract_to_live_runner",
+            "owner": "solver_numerics_owner",
+            "status": "required",
+            "required_receipts": [
+                assembly_contract_seed_path.as_posix(),
+                hip_probe_path.as_posix(),
+            ],
+            "acceptance": [
+                "g1_assembly_contract_seed_report.contract_pass == true",
+                "cpu seed direct residual/Newton residual parity passes",
+                "live G1 residual/Jacobian proof keeps the same AssemblyResult contract",
+                "fixed-point, map, and regularized residuals remain non-physical metrics",
+            ],
+        },
         {
             "id": "generate_full_load_1p0_checkpoint_candidate",
             "owner": "g1_solver_owner",
@@ -448,9 +489,11 @@ def _next_actions(
             "owner": "solver_numerics_owner",
             "status": "required",
             "required_receipts": [
+                assembly_contract_seed_path.as_posix(),
                 hip_probe_path.as_posix(),
             ],
             "acceptance": [
+                "AssemblyResult residual_free/tangent_free/Fint/Fext/material_state contract is live on the G1 runner",
                 "consistent_residual_jacobian_newton_gate_passed == true",
                 "regularized fixed-point residual is not used as the physical residual",
                 "direct residual gate closes without CPU diagnostic assembler substitution",
@@ -480,12 +523,14 @@ def build_runner_packet(
     cause_narrowing_path: Path = DEFAULT_CAUSE_NARROWING,
     hip_probe_path: Path = DEFAULT_HIP_PROBE,
     global_connectivity_path: Path = DEFAULT_GLOBAL_CONNECTIVITY,
+    assembly_contract_seed_path: Path = DEFAULT_ASSEMBLY_CONTRACT_SEED,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     g1_lane = _load_json(repo_root, g1_lane_path)
     cause_narrowing = _load_json(repo_root, cause_narrowing_path)
     hip_probe = _load_json(repo_root, hip_probe_path)
     global_connectivity = _load_json(repo_root, global_connectivity_path)
+    assembly_contract_seed = _load_json(repo_root, assembly_contract_seed_path)
     action = _find_runner_action(g1_lane)
     checkpoint_gate = _as_dict(g1_lane.get("checkpoint_resolution_gate"))
     worker = _as_dict(hip_probe.get("production_rocm_hip_residual_jvp_worker"))
@@ -505,8 +550,10 @@ def build_runner_packet(
             g1_lane=g1_lane,
             cause_narrowing=cause_narrowing,
             hip_probe=hip_probe,
+            assembly_contract_seed=assembly_contract_seed,
         ),
         *routing_blockers,
+        *_assembly_contract_seed_blockers(assembly_contract_seed),
     ]
     if worker and worker.get("residual_jvp_worker_path_ready") is not True:
         contract_blockers.append("production_rocm_hip_residual_jvp_worker_path_not_ready")
@@ -545,12 +592,14 @@ def build_runner_packet(
         highest_observed=highest_observed,
         g1_lane_path=g1_lane_path,
         hip_probe_path=hip_probe_path,
+        assembly_contract_seed_path=assembly_contract_seed_path,
     )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
             input_paths=[
                 Path("scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py"),
+                assembly_contract_seed_path,
                 g1_lane_path,
                 cause_narrowing_path,
                 hip_probe_path,
@@ -588,6 +637,12 @@ def build_runner_packet(
                 checkpoint_gate.get("full_load_candidate_count")
                 or action.get("workspace_full_load_candidate_count")
             ),
+            "assembly_contract_seed_ready": assembly_contract_seed.get("contract_pass")
+            is True,
+            "assembly_contract_cpu_seed_newton_gate_passed": assembly_contract_seed.get(
+                "cpu_seed_consistent_newton_gate_passed"
+            )
+            is True,
             "contract_blocker_count": len(contract_blockers),
             "closure_blocker_count": len(closure_blockers),
             "residual_jvp_worker_path_ready": worker.get(
@@ -631,8 +686,12 @@ def build_runner_packet(
                 cause_narrowing_path.as_posix(),
                 hip_probe_path.as_posix(),
                 global_connectivity_path.as_posix(),
+                assembly_contract_seed_path.as_posix(),
             ],
             "acceptance_criteria": [
+                "g1_assembly_contract_seed_report_contract_passes",
+                "cpu_seed_direct_residual_newton_parity_passes",
+                "live_g1_runner_uses_assembly_result_residual_jacobian_contract",
                 "loadable_checkpoint_schema_mgt_direct_residual_newton_state_v1",
                 "checkpoint_load_scale_gte_1p0",
                 "no_load_path_provenance_contradiction",
@@ -720,9 +779,38 @@ def build_runner_packet(
             ),
             "worker_path_repair_plan": worker_path_repair_plan,
         },
+        "assembly_contract_seed": {
+            "path": assembly_contract_seed_path.as_posix(),
+            "status": str(assembly_contract_seed.get("status") or ""),
+            "contract_pass": assembly_contract_seed.get("contract_pass") is True,
+            "promotes_g1_closure": assembly_contract_seed.get("promotes_g1_closure")
+            is True,
+            "phase_covered": str(assembly_contract_seed.get("phase_covered") or ""),
+            "residual_formula": str(assembly_contract_seed.get("residual_formula") or ""),
+            "fixed_point_residual_promoted_to_physical": assembly_contract_seed.get(
+                "fixed_point_residual_promoted_to_physical"
+            )
+            is True,
+            "regularized_fixed_point_substitute": assembly_contract_seed.get(
+                "regularized_fixed_point_substitute"
+            )
+            is True,
+            "cpu_seed_consistent_newton_gate_passed": assembly_contract_seed.get(
+                "cpu_seed_consistent_newton_gate_passed"
+            )
+            is True,
+            "consistent_residual_jacobian_newton_gate_passed": assembly_contract_seed.get(
+                "consistent_residual_jacobian_newton_gate_passed"
+            )
+            is True,
+            "case_count": _as_int(assembly_contract_seed.get("case_count")),
+        },
         "worker_path_repair_plan": worker_path_repair_plan,
         "worker_path_operator_sequence": worker_path_operator_sequence,
         "verification_commands": [
+            (
+                "python3 scripts/build_g1_assembly_contract_seed_report.py --check"
+            ),
             (
                 "python3 scripts/run_g1_full_load_hip_newton_lane.py "
                 "--checkpoint-npz <full-load-checkpoint.npz> --fail-blocked"
@@ -741,6 +829,7 @@ def build_runner_packet(
             "g1_f2g_f2h_cause_narrowing_status": cause_narrowing_path.as_posix(),
             "mgt_residual_jacobian_consistency_hip_required_probe": hip_probe_path.as_posix(),
             "g1_global_connectivity_load_path_audit": global_connectivity_path.as_posix(),
+            "g1_assembly_contract_seed_report": assembly_contract_seed_path.as_posix(),
         },
         "claim_boundary": (
             "This packet defines the next G1 runner contract for generating a "
@@ -756,6 +845,7 @@ def _markdown(payload: dict[str, Any]) -> str:
     contract = _as_dict(payload.get("runner_contract"))
     checkpoint = _as_dict(payload.get("checkpoint_gap"))
     hip = _as_dict(payload.get("hip_worker_contract"))
+    assembly = _as_dict(payload.get("assembly_contract_seed"))
     lines = [
         "# G1 Consistent Newton Full-Load Runner Contract",
         "",
@@ -768,6 +858,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `required_load_scale`: `{checkpoint.get('required_load_scale')}`",
         f"- `worker_path_ready`: `{hip.get('residual_jvp_worker_path_ready')}`",
         f"- `worker_g1_closure_gate_ready`: `{hip.get('g1_closure_gate_ready')}`",
+        f"- `assembly_contract_seed_ready`: `{assembly.get('contract_pass')}`",
+        f"- `cpu_seed_newton_parity`: `{assembly.get('cpu_seed_consistent_newton_gate_passed')}`",
         "",
         "## Acceptance Criteria",
         "",
@@ -820,6 +912,7 @@ def write_runner_packet(
     cause_narrowing_path: Path = DEFAULT_CAUSE_NARROWING,
     hip_probe_path: Path = DEFAULT_HIP_PROBE,
     global_connectivity_path: Path = DEFAULT_GLOBAL_CONNECTIVITY,
+    assembly_contract_seed_path: Path = DEFAULT_ASSEMBLY_CONTRACT_SEED,
     out: Path = DEFAULT_OUT,
     out_md: Path = DEFAULT_OUT_MD,
 ) -> dict[str, Any]:
@@ -829,6 +922,7 @@ def write_runner_packet(
         cause_narrowing_path=cause_narrowing_path,
         hip_probe_path=hip_probe_path,
         global_connectivity_path=global_connectivity_path,
+        assembly_contract_seed_path=assembly_contract_seed_path,
     )
     resolved_out = _resolve(repo_root, out)
     resolved_out_md = _resolve(repo_root, out_md)
@@ -846,6 +940,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--cause-narrowing", type=Path, default=DEFAULT_CAUSE_NARROWING)
     parser.add_argument("--hip-probe", type=Path, default=DEFAULT_HIP_PROBE)
     parser.add_argument("--global-connectivity", type=Path, default=DEFAULT_GLOBAL_CONNECTIVITY)
+    parser.add_argument(
+        "--assembly-contract-seed",
+        type=Path,
+        default=DEFAULT_ASSEMBLY_CONTRACT_SEED,
+    )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
     parser.add_argument("--json", action="store_true")
@@ -861,6 +960,7 @@ def main(argv: list[str] | None = None) -> int:
         cause_narrowing_path=args.cause_narrowing,
         hip_probe_path=args.hip_probe,
         global_connectivity_path=args.global_connectivity,
+        assembly_contract_seed_path=args.assembly_contract_seed,
         out=args.out,
         out_md=args.out_md,
     )

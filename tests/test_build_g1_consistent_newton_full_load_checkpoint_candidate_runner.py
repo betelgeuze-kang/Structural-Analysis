@@ -135,6 +135,23 @@ def _hip_probe_payload() -> dict:
     }
 
 
+def _assembly_contract_seed_payload() -> dict:
+    return {
+        "schema_version": "g1-assembly-contract-seed-report.v1",
+        "status": "ready",
+        "contract_pass": True,
+        "promotes_g1_closure": False,
+        "g1_closure_claim": False,
+        "phase_covered": "phase1_phase2_cpu_seed_contract_and_newton_parity",
+        "residual_formula": "F_internal_minus_F_external",
+        "fixed_point_residual_promoted_to_physical": False,
+        "regularized_fixed_point_substitute": False,
+        "cpu_seed_consistent_newton_gate_passed": True,
+        "consistent_residual_jacobian_newton_gate_passed": False,
+        "case_count": 2,
+    }
+
+
 def _global_connectivity_payload() -> dict:
     return {
         "schema_version": "g1-global-connectivity-load-path-audit.v1",
@@ -152,11 +169,13 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
         "cause": tmp_path / "g1_f2g_f2h_cause_narrowing_status.json",
         "hip": tmp_path / "mgt_residual_jacobian_consistency_hip_required_probe.json",
         "global": tmp_path / "g1_global_connectivity_load_path_audit.json",
+        "assembly": tmp_path / "g1_assembly_contract_seed_report.json",
     }
     _write_json(paths["g1_lane"], _g1_lane_payload(action_id=action_id))
     _write_json(paths["cause"], _cause_narrowing_payload())
     _write_json(paths["hip"], _hip_probe_payload())
     _write_json(paths["global"], _global_connectivity_payload())
+    _write_json(paths["assembly"], _assembly_contract_seed_payload())
     return paths
 
 
@@ -171,6 +190,7 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
         cause_narrowing_path=paths["cause"],
         hip_probe_path=paths["hip"],
         global_connectivity_path=paths["global"],
+        assembly_contract_seed_path=paths["assembly"],
     )
 
     assert payload["status"] == "ready_for_runner_implementation"
@@ -182,6 +202,7 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
         payload["closure_blockers"]
     )
     assert payload["summary"]["next_action_ids"] == [
+        "promote_g1_assembly_contract_to_live_runner",
         "generate_full_load_1p0_checkpoint_candidate",
         "close_consistent_residual_jacobian_newton_gate",
         "prove_production_rocm_hip_residual_jvp_worker",
@@ -198,6 +219,21 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     assert payload["routing_evidence"]["row_only_correction_loop_stopped"] is True
     assert payload["routing_evidence"]["support_or_link_row_gap_disfavored"] is True
     assert payload["checkpoint_gap"]["highest_observed_load_scale"] == 0.656
+    assert payload["assembly_contract_seed"] == {
+        "path": paths["assembly"].as_posix(),
+        "status": "ready",
+        "contract_pass": True,
+        "promotes_g1_closure": False,
+        "phase_covered": "phase1_phase2_cpu_seed_contract_and_newton_parity",
+        "residual_formula": "F_internal_minus_F_external",
+        "fixed_point_residual_promoted_to_physical": False,
+        "regularized_fixed_point_substitute": False,
+        "cpu_seed_consistent_newton_gate_passed": True,
+        "consistent_residual_jacobian_newton_gate_passed": False,
+        "case_count": 2,
+    }
+    assert payload["summary"]["assembly_contract_seed_ready"] is True
+    assert payload["summary"]["assembly_contract_cpu_seed_newton_gate_passed"] is True
     assert payload["hip_worker_contract"]["residual_jvp_worker_path_ready"] is True
     assert payload["hip_worker_contract"]["g1_closure_gate_ready"] is False
     assert payload["worker_path_repair_plan"] == {
@@ -221,10 +257,21 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
             "full-load checkpoint, or promote G1 closure."
         ),
     }
-    assert payload["next_actions"][0]["gap_to_required_load_scale"] == 0.344
-    assert payload["next_actions"][1]["required_receipts"] == [
+    assert payload["next_actions"][0]["required_receipts"] == [
+        paths["assembly"].as_posix(),
+        paths["hip"].as_posix(),
+    ]
+    assert payload["next_actions"][1]["gap_to_required_load_scale"] == 0.344
+    assert payload["next_actions"][2]["required_receipts"] == [
+        paths["assembly"].as_posix(),
         paths["hip"].as_posix()
     ]
+    assert "g1_assembly_contract_seed_report_contract_passes" in payload[
+        "runner_contract"
+    ]["acceptance_criteria"]
+    assert "cpu_seed_direct_residual_newton_parity_passes" in payload[
+        "runner_contract"
+    ]["acceptance_criteria"]
     assert "checkpoint_load_scale_gte_1p0" in payload["runner_contract"][
         "acceptance_criteria"
     ]
@@ -270,6 +317,7 @@ def test_runner_packet_classifies_blocked_worker_path_repair_plan(tmp_path: Path
         cause_narrowing_path=paths["cause"],
         hip_probe_path=paths["hip"],
         global_connectivity_path=paths["global"],
+        assembly_contract_seed_path=paths["assembly"],
     )
 
     assert payload["status"] == "blocked_runner_contract"
@@ -317,6 +365,7 @@ def test_runner_packet_blocks_when_lane_does_not_route_to_runner(tmp_path: Path)
         cause_narrowing_path=paths["cause"],
         hip_probe_path=paths["hip"],
         global_connectivity_path=paths["global"],
+        assembly_contract_seed_path=paths["assembly"],
     )
 
     assert payload["status"] == "blocked_runner_contract"
@@ -335,6 +384,7 @@ def test_runner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
         cause_narrowing_path=paths["cause"],
         hip_probe_path=paths["hip"],
         global_connectivity_path=paths["global"],
+        assembly_contract_seed_path=paths["assembly"],
         out=out,
         out_md=out_md,
     )
@@ -346,6 +396,7 @@ def test_runner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
     assert "# G1 Consistent Newton Full-Load Runner Contract" in markdown
     assert runner.RUNNER_ID in markdown
     assert "## Next Actions" in markdown
+    assert "promote_g1_assembly_contract_to_live_runner" in markdown
     assert "generate_full_load_1p0_checkpoint_candidate" in markdown
     assert "## Worker Path Operator Sequence" in markdown
     assert "run_hip_required_direct_probe" in markdown
