@@ -65,6 +65,9 @@ DEFAULT_VINA_GNINA_EXECUTION_PLAN = (
 DEFAULT_VINA_GNINA_RUNTIME_READINESS = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_runtime_readiness.json"
 )
+DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest_template.csv"
+)
 
 SCHEMA_VERSION = "public-benchmark-phase2-source-acquisition-plan.v1"
 TIER_BETA_MINIMUM_SUBSET_CASE_COUNT = 12
@@ -364,6 +367,21 @@ def _vina_gnina_execution_plan_summary(payload: dict[str, Any]) -> dict[str, Any
         "blocker_count": len(payload.get("blockers", []))
         if isinstance(payload.get("blockers"), list)
         else 0,
+        "engine_input_manifest_template": str(
+            DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE
+        ),
+        "required_engine_input_fields": [
+            "case_id",
+            "complex_id",
+            "protein_structure_path",
+            "protein_structure_checksum",
+            "reference_ligand_path",
+            "reference_ligand_checksum",
+            "prepared_receptor_path",
+            "prepared_receptor_checksum",
+            "prepared_ligand_path",
+            "prepared_ligand_checksum",
+        ],
         "command": (
             "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
             f"--out {DEFAULT_VINA_GNINA_EXECUTION_PLAN}"
@@ -555,6 +573,21 @@ def _row_input_contracts() -> list[dict[str, Any]]:
             "required_engine_run_fields": list(VINA_GNINA_REQUIRED_ENGINE_RUN_FIELDS),
             "required_engines": list(VINA_GNINA_SUPPORTED_ENGINES),
             "supported_benchmark_splits": list(VINA_GNINA_SUPPORTED_BENCHMARK_SPLITS),
+            "engine_input_manifest_template": str(
+                DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE
+            ),
+            "required_engine_input_fields": [
+                "case_id",
+                "complex_id",
+                "protein_structure_path",
+                "protein_structure_checksum",
+                "reference_ligand_path",
+                "reference_ligand_checksum",
+                "prepared_receptor_path",
+                "prepared_receptor_checksum",
+                "prepared_ligand_path",
+                "prepared_ligand_checksum",
+            ],
             "receipt_fields": [
                 "source_license_or_accession",
                 "source_checksum",

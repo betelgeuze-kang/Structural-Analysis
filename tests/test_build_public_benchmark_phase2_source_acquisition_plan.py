@@ -169,6 +169,22 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert payload["vina_gnina_execution_plan"]["case_count"] == 12
     assert payload["vina_gnina_execution_plan"]["required_engine_run_count"] == 24
     assert payload["vina_gnina_execution_plan"]["missing_engine_ids"] == []
+    assert payload["vina_gnina_execution_plan"]["engine_input_manifest_template"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_input_manifest_template.csv"
+    )
+    assert payload["vina_gnina_execution_plan"]["required_engine_input_fields"] == [
+        "case_id",
+        "complex_id",
+        "protein_structure_path",
+        "protein_structure_checksum",
+        "reference_ligand_path",
+        "reference_ligand_checksum",
+        "prepared_receptor_path",
+        "prepared_receptor_checksum",
+        "prepared_ligand_path",
+        "prepared_ligand_checksum",
+    ]
     assert payload["vina_gnina_runtime_readiness"]["artifact"] == (
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_runtime_readiness.json"
@@ -266,6 +282,13 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     vina_gnina = row_contracts["vina_gnina_rows"]
     assert vina_gnina["minimum_comparison_case_count_required"] == 1
     assert vina_gnina["depends_on_row_inputs"] == ["subset_rows", "pose_rows"]
+    assert vina_gnina["engine_input_manifest_template"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_input_manifest_template.csv"
+    )
+    assert "prepared_receptor_checksum" in vina_gnina[
+        "required_engine_input_fields"
+    ]
     assert vina_gnina["required_engines"] == ["vina", "gnina"]
     assert vina_gnina["row_validation_policies"]["engine_pair_policy"] == (
         module.ENGINE_PAIR_POLICY

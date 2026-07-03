@@ -18,14 +18,14 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T20:40:34.712049+00:00",
+  "generated_at": "2026-07-03T21:09:27.003427+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:e265c7a6bed9b5bfc80b29b5f3631c2575b05eaf9a85de4e411139f56f5c6ad9",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:a271a849740a0c515d28653ae1199e44ecf95162aa1b08473f66af3f9bef8e34",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:7eb237cc774abe6a4724103fbe85f4acc5ef0d6bf7aba92e9b8f7506b899e82d",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:67ace682c75b6aab235041e904b08c5a3124763a8cc19135df0937fd501b97dc",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:7ff64da5894edf6199e2e941bba91f517bfe16a01ecdad4d2a40a2a3138c579b",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:957ce1414a87e3cef6abc651668b85fe3df1d83aff274ac84f99941dd14bb738",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:ca8f09a0d98d8a0245f7e530194e8574db9043217a144adf9b26e231c18d630f",
-    "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:b2869b42444566284a2114da4e4685e441288b57dee57660905bd29964516587",
+    "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:017066949dcc9044edee289094c11caf8ecddf51c8d6f6877260ffeedf9fd1ae",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
@@ -642,6 +642,7 @@
         "subset_rows",
         "pose_rows"
       ],
+      "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
       "minimum_comparison_case_count_required": 1,
       "receipt_fields": [
         "source_license_or_accession",
@@ -661,6 +662,18 @@
         "source_license_or_accession",
         "source_checksum",
         "provenance_ref"
+      ],
+      "required_engine_input_fields": [
+        "case_id",
+        "complex_id",
+        "protein_structure_path",
+        "protein_structure_checksum",
+        "reference_ligand_path",
+        "reference_ligand_checksum",
+        "prepared_receptor_path",
+        "prepared_receptor_checksum",
+        "prepared_ligand_path",
+        "prepared_ligand_checksum"
       ],
       "required_engine_run_fields": [
         "engine_id",
@@ -752,7 +765,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "4eca0a9ffa859f5f37c2d98f69a392cad0dfe2c6",
+  "source_commit_sha": "fd2b3e5019b7f533a16787c4e692b7106625d7a9",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
@@ -794,10 +807,23 @@
     "case_count": 12,
     "command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
     "contract_pass": true,
+    "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
     "execution_plan_ready": false,
     "missing_engine_count": 0,
     "missing_engine_ids": [],
     "operator_execution_ready": false,
+    "required_engine_input_fields": [
+      "case_id",
+      "complex_id",
+      "protein_structure_path",
+      "protein_structure_checksum",
+      "reference_ligand_path",
+      "reference_ligand_checksum",
+      "prepared_receptor_path",
+      "prepared_receptor_checksum",
+      "prepared_ligand_path",
+      "prepared_ligand_checksum"
+    ],
     "required_engine_run_count": 24,
     "status": "engine_input_blocked"
   },

@@ -70,6 +70,7 @@ from validate_public_benchmark_external_receipts import (  # noqa: E402
 from build_public_benchmark_phase2_source_acquisition_plan import (  # noqa: E402
     DEFAULT_OUT as SOURCE_ACQUISITION_PLAN_DEFAULT_OUT,
     DEFAULT_OUT_MD as SOURCE_ACQUISITION_PLAN_DEFAULT_OUT_MD,
+    DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE,
     DEFAULT_VINA_GNINA_EXECUTION_PLAN as SOURCE_ACQUISITION_VINA_GNINA_EXECUTION_PLAN,
     SCHEMA_VERSION as SOURCE_ACQUISITION_PLAN_SCHEMA_VERSION,
     build_public_benchmark_phase2_source_acquisition_plan,
@@ -121,6 +122,9 @@ DEFAULT_ENRICHMENT_OPERATOR_TEMPLATE = (
 DEFAULT_VINA_GNINA_OPERATOR_TEMPLATE = (
     DEFAULT_OPERATOR_TEMPLATE_DIR / "public_benchmark_vina_gnina_operator_template.json"
 )
+DEFAULT_ENGINE_INPUT_TEMPLATE_FILENAMES = {
+    "vina_gnina_input_manifest": DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE.name,
+}
 DEFAULT_PHASE2_ROW_TEMPLATE_FILENAMES = {
     "subset_rows": "public_benchmark_subset_rows_template.csv",
     "pose_rows": "public_benchmark_pose_rows_template.csv",
@@ -516,6 +520,13 @@ def _row_template_paths(row_template_dir: Path) -> dict[str, Path]:
     }
 
 
+def _engine_input_template_paths(row_template_dir: Path) -> dict[str, Path]:
+    return {
+        template_id: row_template_dir / filename
+        for template_id, filename in DEFAULT_ENGINE_INPUT_TEMPLATE_FILENAMES.items()
+    }
+
+
 def _phase2_row_template_rows() -> dict[str, list[dict[str, Any]]]:
     subset = _subset_case_template()
     pose = _pose_case_template()
@@ -613,6 +624,113 @@ def _phase2_row_template_rows_for_repo(repo_root: Path) -> dict[str, list[dict[s
     if vina_gnina_rows:
         rows_by_input["vina_gnina_rows"] = vina_gnina_rows
     return rows_by_input
+
+
+def _vina_gnina_input_manifest_template_headers() -> list[str]:
+    return [
+        "case_id",
+        "complex_id",
+        "benchmark_split",
+        "source_family",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "protein_structure_path",
+        "protein_structure_checksum",
+        "reference_ligand_path",
+        "reference_ligand_checksum",
+        "prepared_receptor_path",
+        "prepared_receptor_checksum",
+        "prepared_ligand_path",
+        "prepared_ligand_checksum",
+        "docking_box_center_x",
+        "docking_box_center_y",
+        "docking_box_center_z",
+        "docking_box_size_x",
+        "docking_box_size_y",
+        "docking_box_size_z",
+        "vina_config_ref",
+        "gnina_config_ref",
+        "vina_run_receipt_ref",
+        "gnina_run_receipt_ref",
+        "input_preparation_provenance_ref",
+    ]
+
+
+def _vina_gnina_input_manifest_rows_from_execution_plan(
+    repo_root: Path,
+) -> list[dict[str, Any]]:
+    execution_plan = _load_json(repo_root, DEFAULT_VINA_GNINA_EXECUTION_PLAN)
+    case_plans = [
+        row
+        for row in _as_list(execution_plan.get("case_execution_plans"))
+        if isinstance(row, dict)
+    ]
+    rows: list[dict[str, Any]] = []
+    for case_plan in case_plans:
+        docking_box = _as_dict(case_plan.get("docking_box"))
+        center = _as_dict(docking_box.get("center"))
+        size = _as_dict(docking_box.get("size"))
+        prepared_status = _as_dict(case_plan.get("prepared_input_status"))
+        prepared_paths = _as_dict(prepared_status.get("expected_paths"))
+        engine_runs = {
+            str(row.get("engine_id") or ""): row
+            for row in _as_list(case_plan.get("engine_runs"))
+            if isinstance(row, dict)
+        }
+        rows.append(
+            {
+                "case_id": str(case_plan.get("case_id") or ""),
+                "complex_id": str(case_plan.get("complex_id") or ""),
+                "benchmark_split": str(case_plan.get("benchmark_split") or ""),
+                "source_family": "CASF/PDBBind + Vina/GNINA",
+                "source_license_or_accession": str(
+                    case_plan.get("source_license_or_accession") or ""
+                ),
+                "source_checksum": str(case_plan.get("subset_source_checksum") or ""),
+                "provenance_ref": str(case_plan.get("provenance_ref") or ""),
+                "protein_structure_path": str(
+                    case_plan.get("protein_structure_path") or ""
+                ),
+                "protein_structure_checksum": "",
+                "reference_ligand_path": str(
+                    case_plan.get("reference_ligand_path") or ""
+                ),
+                "reference_ligand_checksum": "",
+                "prepared_receptor_path": str(prepared_paths.get("receptor") or ""),
+                "prepared_receptor_checksum": "",
+                "prepared_ligand_path": str(prepared_paths.get("ligand") or ""),
+                "prepared_ligand_checksum": "",
+                "docking_box_center_x": center.get("x", ""),
+                "docking_box_center_y": center.get("y", ""),
+                "docking_box_center_z": center.get("z", ""),
+                "docking_box_size_x": size.get("x", ""),
+                "docking_box_size_y": size.get("y", ""),
+                "docking_box_size_z": size.get("z", ""),
+                "vina_config_ref": str(
+                    _as_dict(engine_runs.get("vina")).get("expected_engine_config_ref")
+                    or ""
+                ),
+                "gnina_config_ref": str(
+                    _as_dict(engine_runs.get("gnina")).get("expected_engine_config_ref")
+                    or ""
+                ),
+                "vina_run_receipt_ref": str(
+                    _as_dict(engine_runs.get("vina")).get(
+                        "expected_engine_run_provenance_ref"
+                    )
+                    or ""
+                ),
+                "gnina_run_receipt_ref": str(
+                    _as_dict(engine_runs.get("gnina")).get(
+                        "expected_engine_run_provenance_ref"
+                    )
+                    or ""
+                ),
+                "input_preparation_provenance_ref": "",
+            }
+        )
+    return rows
 
 
 def _phase2_row_template_headers() -> dict[str, list[str]]:
@@ -1510,6 +1628,12 @@ def build_public_benchmark_operator_intake_packet(
         row_input_id: str(path)
         for row_input_id, path in _row_template_paths(operator_template_dir).items()
     }
+    engine_input_template_artifacts = {
+        template_id: str(path)
+        for template_id, path in _engine_input_template_paths(
+            operator_template_dir
+        ).items()
+    }
     materialization_sequence = [
         {
             "step_id": "build_public_benchmark_phase2_source_acquisition_plan",
@@ -1650,6 +1774,8 @@ def build_public_benchmark_operator_intake_packet(
         "operator_template_artifacts": operator_template_artifacts,
         "row_template_artifact_count": len(row_template_artifacts),
         "row_template_artifacts": row_template_artifacts,
+        "engine_input_template_artifact_count": len(engine_input_template_artifacts),
+        "engine_input_template_artifacts": engine_input_template_artifacts,
         "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
         "phase2_row_dropzone": {
             "status": "ready_for_operator_rows",
@@ -1659,6 +1785,12 @@ def build_public_benchmark_operator_intake_packet(
             ),
             "default_row_path_candidates": DEFAULT_PHASE2_ROW_INPUT_CANDIDATES,
             "row_template_artifacts": row_template_artifacts,
+            "engine_input_template_artifacts": engine_input_template_artifacts,
+            "engine_input_manifest_policy": (
+                "Fill the Vina/GNINA input manifest before engine execution so "
+                "source CASF files, prepared receptor/ligand files, docking-box "
+                "parameters, and per-file checksums are tied to the comparison rows."
+            ),
             "source_acquisition_plan": source_acquisition_summary,
             "phase2_row_audit": source_acquisition_summary.get(
                 "phase2_row_audit", {}
@@ -1761,9 +1893,11 @@ def build_public_benchmark_operator_intake_packet(
             "harness_bundle_report": str(DEFAULT_HARNESS_BUNDLE_REPORT),
             "operator_templates": operator_template_artifacts,
             "row_templates": row_template_artifacts,
+            "engine_input_templates": engine_input_template_artifacts,
         },
         "next_actions": [
             "complete_public_benchmark_phase2_source_acquisition_plan",
+            "fill_public_benchmark_vina_gnina_input_manifest",
             "fill_public_benchmark_operator_intake_packet",
             "materialize_public_benchmark_operator_bundle_from_rows",
             "run_public_benchmark_harness_bundle_materializer",
@@ -1791,6 +1925,9 @@ def build_public_benchmark_operator_intake_packet(
             "first_operator_evidence_gap": first_operator_evidence_gap,
             "operator_template_artifact_count": len(operator_template_artifacts),
             "row_template_artifact_count": len(row_template_artifacts),
+            "engine_input_template_artifact_count": len(
+                engine_input_template_artifacts
+            ),
             "operator_template_artifacts": operator_template_artifacts,
             "first_manifest_contract_id": casf_pdbbind_manifest_contract["contract_id"],
             "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
@@ -1892,6 +2029,12 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"{criteria} | `{row['template_artifact']}` | "
             f"`{row_template_artifact}` |"
         )
+    engine_input_templates = _as_dict(payload.get("engine_input_template_artifacts"))
+    if engine_input_templates:
+        lines.extend(["", "## Engine Input Templates", "", "| Template | CSV Starter |"])
+        lines.append("|---|---|")
+        for template_id, artifact in engine_input_templates.items():
+            lines.append(f"| `{template_id}` | `{artifact}` |")
     lines.extend(
         [
             "",
@@ -2033,6 +2176,30 @@ def write_public_benchmark_row_template_csvs(
     return written
 
 
+def write_public_benchmark_engine_input_template_csvs(
+    *,
+    packet: dict[str, Any],
+    repo_root: Path = ROOT,
+) -> dict[str, Path]:
+    raw_paths = _as_dict(packet.get("engine_input_template_artifacts"))
+    headers = _vina_gnina_input_manifest_template_headers()
+    rows = _vina_gnina_input_manifest_rows_from_execution_plan(repo_root)
+    written: dict[str, Path] = {}
+    for template_id, raw_path in raw_paths.items():
+        path = Path(str(raw_path))
+        if not path:
+            continue
+        resolved = path if path.is_absolute() else repo_root / path
+        resolved.parent.mkdir(parents=True, exist_ok=True)
+        with resolved.open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=headers, lineterminator="\n")
+            writer.writeheader()
+            for row in rows:
+                writer.writerow({header: row.get(header, "") for header in headers})
+        written[str(template_id)] = resolved
+    return written
+
+
 def write_public_benchmark_operator_intake_packet(
     *,
     repo_root: Path = ROOT,
@@ -2061,6 +2228,10 @@ def write_public_benchmark_operator_intake_packet(
         source_of_truth_path=source_of_truth_path,
     )
     write_public_benchmark_row_template_csvs(packet=payload, repo_root=repo_root)
+    write_public_benchmark_engine_input_template_csvs(
+        packet=payload,
+        repo_root=repo_root,
+    )
     return payload
 
 

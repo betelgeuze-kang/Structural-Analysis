@@ -34,6 +34,12 @@
 | `enrichment_rows` | `dud_e_lit_pcba_enrichment_intake` | `dud_e_or_lit_pcba_enrichment_ready` | `implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json` | `implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows_template.csv` |
 | `vina_gnina_rows` | `vina_gnina_comparison_intake` | `vina_gnina_comparison_ready` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv` |
 
+## Engine Input Templates
+
+| Template | CSV Starter |
+|---|---|
+| `vina_gnina_input_manifest` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv` |
+
 ## Execution Preflight
 
 | Step | Ready | Dependency Ready | First Blocker |

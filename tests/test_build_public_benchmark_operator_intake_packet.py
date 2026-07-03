@@ -649,8 +649,9 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_execution_plan.json"
     )
-    assert packet["next_actions"][:3] == [
+    assert packet["next_actions"][:4] == [
         "complete_public_benchmark_phase2_source_acquisition_plan",
+        "fill_public_benchmark_vina_gnina_input_manifest",
         "fill_public_benchmark_operator_intake_packet",
         "materialize_public_benchmark_operator_bundle_from_rows",
     ]
@@ -717,6 +718,17 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
             "python3 scripts/materialize_public_benchmark_phase2_from_rows.py "
             "--fail-blocked"
         ),
+        "engine_input_manifest_policy": (
+            "Fill the Vina/GNINA input manifest before engine execution so "
+            "source CASF files, prepared receptor/ligand files, docking-box "
+            "parameters, and per-file checksums are tied to the comparison rows."
+        ),
+        "engine_input_template_artifacts": {
+            "vina_gnina_input_manifest": (
+                "implementation/phase1/release_evidence/productization/"
+                "public_benchmark_vina_gnina_input_manifest_template.csv"
+            )
+        },
         "produces": (
             "implementation/phase1/release_evidence/productization/"
             "public_benchmark_phase2_row_audit.json"
@@ -765,10 +777,10 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
     assert "public_benchmark_harness_bundle.json" in packet[
         "operator_bundle_materialization"
     ]["artifact_index_command"]
-    assert packet["next_actions"][2] == (
+    assert packet["next_actions"][3] == (
         "materialize_public_benchmark_operator_bundle_from_rows"
     )
-    assert packet["next_actions"][3] == (
+    assert packet["next_actions"][4] == (
         "run_public_benchmark_harness_bundle_materializer"
     )
     assert packet["operator_template_schema_version"] == (
@@ -820,6 +832,9 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
     vina_gnina_rows_template_path = (
         template_dir / "public_benchmark_vina_gnina_rows_template.csv"
     )
+    vina_gnina_input_manifest_template_path = (
+        template_dir / "public_benchmark_vina_gnina_input_manifest_template.csv"
+    )
     template = json.loads(template_path.read_text(encoding="utf-8"))
     enrichment_template = json.loads(
         enrichment_template_path.read_text(encoding="utf-8")
@@ -835,6 +850,10 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
     assert template["status"] == "operator_template_seed"
     assert template["operator_values_filled"] is False
     assert payload["row_template_artifact_count"] == 4
+    assert payload["engine_input_template_artifact_count"] == 1
+    assert payload["engine_input_template_artifacts"] == {
+        "vina_gnina_input_manifest": str(vina_gnina_input_manifest_template_path)
+    }
     assert payload["row_template_artifacts"]["subset_rows"] == str(
         subset_rows_template_path
     )
@@ -846,6 +865,7 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
         pose_rows_template_path,
         enrichment_rows_template_path,
         vina_gnina_rows_template_path,
+        vina_gnina_input_manifest_template_path,
     ):
         assert path.exists()
     subset_rows = list(
@@ -858,11 +878,26 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
     vina_gnina_rows = list(
         csv.DictReader(vina_gnina_rows_template_path.open(encoding="utf-8"))
     )
+    vina_gnina_input_manifest = list(
+        csv.DictReader(vina_gnina_input_manifest_template_path.open(encoding="utf-8"))
+    )
     assert subset_rows[0]["benchmark_split"] == "CASF-core"
     assert "symmetry_permutation_contract" in subset_rows[0]
     assert "reference_atoms" in pose_rows[0]
     assert [row["is_active"] for row in enrichment_rows] == ["True", "False"]
     assert len(vina_gnina_rows) == 24
+    assert len(vina_gnina_input_manifest) == 12
+    assert vina_gnina_input_manifest[0]["case_id"] == "casf2016_4llx"
+    assert vina_gnina_input_manifest[0]["protein_structure_path"] == (
+        "CASF-2016/coreset/4llx/4llx_protein.pdb"
+    )
+    assert vina_gnina_input_manifest[0]["prepared_receptor_path"] == (
+        "prepared/4llx_receptor"
+    )
+    assert vina_gnina_input_manifest[0]["vina_config_ref"] == (
+        "operator_attached/vina_gnina/casf2016_4llx/vina_config.json"
+    )
+    assert vina_gnina_input_manifest[-1]["case_id"] == "casf2016_4m0y"
     assert vina_gnina_rows[0]["case_id"] == "casf2016_4llx"
     assert vina_gnina_rows[0]["engine_id"] == "vina"
     assert vina_gnina_rows[0]["docking_run_id"] == "casf2016_4llx_vina_run"
@@ -884,6 +919,8 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
     ]["consistency_rule"].startswith("pose_success must equal")
     assert "# Public Benchmark Operator Intake Packet" in markdown
     assert "## Phase 2 Row Closure Matrix" in markdown
+    assert "## Engine Input Templates" in markdown
+    assert "public_benchmark_vina_gnina_input_manifest_template.csv" in markdown
     assert "public_benchmark_pose_rows_template.csv" in markdown
     assert "`pose_rows` | `pose_coordinate_intake`" in markdown
     assert "materialize_subset_manifest" in markdown
