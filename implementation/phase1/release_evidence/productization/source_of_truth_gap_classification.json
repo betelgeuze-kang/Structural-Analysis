@@ -1,4 +1,34 @@
 {
+  "accuracy_parity_scorecard_priority_review": {
+    "candidate": "accuracy_parity_scorecard",
+    "claim_boundary": "Accuracy parity is treated as a direct science scorecard fix only because the live scorecard exposes and passes the required science checks. This review does not rerun the heavy validation.",
+    "classification": "fix",
+    "contract_pass": true,
+    "current_repo_paths": [
+      "implementation/phase1/real_accuracy_validation_report.json"
+    ],
+    "decision": "Direct science scorecard receipt with freshness source tracking; the artifact itself carries overall_pass, benchmark contract/KPI pass, direct-metric/source-family/public-HF checks, and stability-suite pass.",
+    "operator_action": "keep_accuracy_parity_scorecard_as_direct_freshness_leaf",
+    "science_checks": {
+      "benchmark_contract_pass": true,
+      "benchmark_kpi_pass": true,
+      "direct_metric_source_pass": true,
+      "overall_pass": true,
+      "public_hf_case_count_pass": true,
+      "source_family_pass": true,
+      "stability_pass": true,
+      "stability_suite_pass": true
+    },
+    "science_contract_pass": true,
+    "status": "classified",
+    "validation_basis": [
+      "leaf_artifact_in_default_freshness_rows",
+      "science_scorecard_overall_pass_field",
+      "benchmark_contract_and_kpi_fields",
+      "public_hf_and_source_family_checks",
+      "stability_suite_pass_field"
+    ]
+  },
   "blockers": [],
   "claim_boundary": "This artifact classifies the five remaining source-of-truth gap candidates. It records freshness policy and live artifact checks, but does not promote aggregator rollups or replace the heavy validation receipts themselves.",
   "classification_by_bucket": {
@@ -181,6 +211,84 @@
       ]
     }
   },
+  "classification_index": {
+    "accuracy_parity_scorecard": {
+      "accuracy_scorecard_science_contract_pass": true,
+      "candidate": "accuracy_parity_scorecard",
+      "classification": "fix",
+      "contract_pass": true,
+      "current_repo_paths": [
+        "implementation/phase1/real_accuracy_validation_report.json"
+      ],
+      "freshness_label": "accuracy_parity_scorecard",
+      "freshness_policy": "direct_leaf_row",
+      "operator_action": "keep_accuracy_parity_scorecard_as_direct_freshness_leaf",
+      "priority_rank": 1,
+      "science_scorecard_priority_review": true,
+      "status": "classified"
+    },
+    "goal_operator_action_board": {
+      "accuracy_scorecard_science_contract_pass": false,
+      "candidate": "goal_operator_action_board",
+      "classification": "aggregator-review",
+      "contract_pass": true,
+      "current_repo_paths": [
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json"
+      ],
+      "freshness_label": "",
+      "freshness_policy": "aggregator_source_tracking_only",
+      "operator_action": "review_goal_operator_action_board_upstream_source_tracking",
+      "priority_rank": 5,
+      "science_scorecard_priority_review": false,
+      "status": "classified"
+    },
+    "goal_readiness_rollup": {
+      "accuracy_scorecard_science_contract_pass": false,
+      "candidate": "goal_readiness_rollup",
+      "classification": "aggregator-review",
+      "contract_pass": true,
+      "current_repo_paths": [
+        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+      ],
+      "freshness_label": "",
+      "freshness_policy": "aggregator_source_tracking_only",
+      "operator_action": "review_goal_readiness_rollup_upstream_source_tracking",
+      "priority_rank": 3,
+      "science_scorecard_priority_review": false,
+      "status": "classified"
+    },
+    "product_goal_completion_audit": {
+      "accuracy_scorecard_science_contract_pass": false,
+      "candidate": "product_goal_completion_audit",
+      "classification": "aggregator-review",
+      "contract_pass": true,
+      "current_repo_paths": [
+        "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json"
+      ],
+      "freshness_label": "",
+      "freshness_policy": "aggregator_source_tracking_only",
+      "operator_action": "review_product_goal_completion_audit_upstream_source_tracking",
+      "priority_rank": 4,
+      "science_scorecard_priority_review": false,
+      "status": "classified"
+    },
+    "product_production_ai_checkpoint_readiness": {
+      "accuracy_scorecard_science_contract_pass": false,
+      "candidate": "product_production_ai_checkpoint_readiness",
+      "classification": "fix",
+      "contract_pass": true,
+      "current_repo_paths": [
+        "implementation/phase1/release_evidence/productization/ai_engine_productization_contracts.json"
+      ],
+      "freshness_label": "product_production_ai_checkpoint_readiness",
+      "freshness_policy": "direct_leaf_row",
+      "operator_action": "keep_product_production_ai_checkpoint_readiness_as_direct_freshness_leaf",
+      "priority_rank": 2,
+      "science_scorecard_priority_review": false,
+      "status": "classified"
+    }
+  },
   "classification_rows": [
     {
       "candidate": "accuracy_parity_scorecard",
@@ -346,18 +454,83 @@
     "product_goal_completion_audit",
     "goal_operator_action_board"
   ],
-  "generated_at": "2026-07-03T22:29:54.949858+00:00",
+  "generated_at": "2026-07-03T22:46:59.520933+00:00",
   "input_checksums": {
-    "docs/source-of-truth-gap-classification.md": "sha256:d4cd1134e78f6acedaf39c09c5ff2fc0fcbf62451e60e6530686269b855a8c09",
+    "docs/source-of-truth-gap-classification.md": "sha256:296dd19b9dc9c36e8d2229db29f880f4097c0fada23eaf4ef970dd3f6e9d11fe",
     "implementation/phase1/real_accuracy_validation_report.json": "sha256:ca845f2afd861499dc1aa2457dd43546130272cbb595007548684a1b691780dd",
     "implementation/phase1/release_evidence/productization/ai_engine_productization_contracts.json": "sha256:0fe800e9ef001f809296db96515bced5389642b93e3217e58f47afc1221c35cf",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:5558e5f0d82be0cbcb22c4431c0247939a1a9f780938f6d40bcf8484561b0eed",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:189416fc44179d892e0fe0012a380fda9f1bbe1552256b53871db92a9a681360",
     "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json": "sha256:ef2c7ea4bc559336fc47b42e185ce64ce167557a8697809a4a9a47dcf7e6ed27",
     "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:c31a592285e990edbc4fa2a5c8db03f09ec9d65d0f01509f51f87436d63e134a",
-    "scripts/build_source_of_truth_gap_classification.py": "sha256:2c7409009d3f94f6ea6399e003d46ec4ecff468127f62da00d0b20c9124b8c64",
+    "scripts/build_source_of_truth_gap_classification.py": "sha256:22149e527f08c87c8e446a4616f9c047c35aceff6751d37d0a1f8746240162c3",
     "scripts/report_release_evidence_freshness.py": "sha256:f351ba020542bb073efe698856bf518d93a1e1abdd11009c340c136bc78d3a02"
   },
+  "operator_action_index": {
+    "accuracy_parity_scorecard": "keep_accuracy_parity_scorecard_as_direct_freshness_leaf",
+    "goal_operator_action_board": "review_goal_operator_action_board_upstream_source_tracking",
+    "goal_readiness_rollup": "review_goal_readiness_rollup_upstream_source_tracking",
+    "product_goal_completion_audit": "review_product_goal_completion_audit_upstream_source_tracking",
+    "product_production_ai_checkpoint_readiness": "keep_product_production_ai_checkpoint_readiness_as_direct_freshness_leaf"
+  },
+  "operator_actions": [
+    {
+      "candidate": "accuracy_parity_scorecard",
+      "claim_boundary": "This action routes source-of-truth classification maintenance. It does not replace the referenced validation or aggregator receipt.",
+      "classification": "fix",
+      "contract_pass": true,
+      "current_repo_paths": [
+        "implementation/phase1/real_accuracy_validation_report.json"
+      ],
+      "operator_action": "keep_accuracy_parity_scorecard_as_direct_freshness_leaf",
+      "status": "classified"
+    },
+    {
+      "candidate": "product_production_ai_checkpoint_readiness",
+      "claim_boundary": "This action routes source-of-truth classification maintenance. It does not replace the referenced validation or aggregator receipt.",
+      "classification": "fix",
+      "contract_pass": true,
+      "current_repo_paths": [
+        "implementation/phase1/release_evidence/productization/ai_engine_productization_contracts.json"
+      ],
+      "operator_action": "keep_product_production_ai_checkpoint_readiness_as_direct_freshness_leaf",
+      "status": "classified"
+    },
+    {
+      "candidate": "goal_readiness_rollup",
+      "claim_boundary": "This action routes source-of-truth classification maintenance. It does not replace the referenced validation or aggregator receipt.",
+      "classification": "aggregator-review",
+      "contract_pass": true,
+      "current_repo_paths": [
+        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+      ],
+      "operator_action": "review_goal_readiness_rollup_upstream_source_tracking",
+      "status": "classified"
+    },
+    {
+      "candidate": "product_goal_completion_audit",
+      "claim_boundary": "This action routes source-of-truth classification maintenance. It does not replace the referenced validation or aggregator receipt.",
+      "classification": "aggregator-review",
+      "contract_pass": true,
+      "current_repo_paths": [
+        "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json"
+      ],
+      "operator_action": "review_product_goal_completion_audit_upstream_source_tracking",
+      "status": "classified"
+    },
+    {
+      "candidate": "goal_operator_action_board",
+      "claim_boundary": "This action routes source-of-truth classification maintenance. It does not replace the referenced validation or aggregator receipt.",
+      "classification": "aggregator-review",
+      "contract_pass": true,
+      "current_repo_paths": [
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json"
+      ],
+      "operator_action": "review_goal_operator_action_board_upstream_source_tracking",
+      "status": "classified"
+    }
+  ],
   "reason_code": "PASS",
   "reuse_policy": "source_of_truth_gap_classification_materialized_from_freshness_policy",
   "reused_evidence": true,
@@ -518,17 +691,20 @@
     }
   ],
   "schema_version": "source-of-truth-gap-classification.v1",
-  "source_commit_sha": "47512a7cae2f5db404de3715594df4fb4416d3fc",
+  "source_commit_sha": "e96b532c6400c0c53f390ec1ef619426ff99a133",
   "status": "ready",
   "summary": {
+    "accuracy_parity_scorecard_science_contract_pass": true,
     "aggregator_review_count": 3,
     "aggregator_reviewed_count": 3,
     "blocker_count": 0,
     "candidate_count": 5,
     "classification_bucket_count": 3,
+    "classification_index_candidate_count": 5,
     "expected_candidate_count": 5,
     "fix_count": 2,
     "fixed_count": 2,
-    "no_op_count": 0
+    "no_op_count": 0,
+    "operator_action_count": 5
   }
 }

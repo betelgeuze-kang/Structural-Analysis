@@ -161,6 +161,98 @@ def _row(
     }
 
 
+def _operator_action(row: dict[str, Any]) -> str:
+    candidate = str(row.get("candidate") or "")
+    classification = str(row.get("classification") or "")
+    if not bool(row.get("contract_pass")):
+        return f"repair_{candidate}_classification_contract"
+    if classification == "fix":
+        return f"keep_{candidate}_as_direct_freshness_leaf"
+    if classification == "aggregator-review":
+        return f"review_{candidate}_upstream_source_tracking"
+    if classification == "no-op":
+        return f"record_{candidate}_as_no_op"
+    return f"review_{candidate}_classification"
+
+
+def _classification_index(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    index: dict[str, dict[str, Any]] = {}
+    for priority_rank, row in enumerate(rows, start=1):
+        candidate = str(row["candidate"])
+        live_checks = _as_dict(row.get("live_checks"))
+        index[candidate] = {
+            "candidate": candidate,
+            "priority_rank": priority_rank,
+            "classification": str(row.get("classification") or ""),
+            "status": str(row.get("status") or ""),
+            "contract_pass": bool(row.get("contract_pass")),
+            "freshness_policy": str(row.get("freshness_policy") or ""),
+            "freshness_label": str(row.get("freshness_label") or ""),
+            "current_repo_paths": [
+                str(item) for item in row.get("current_repo_paths", [])
+            ],
+            "operator_action": _operator_action(row),
+            "science_scorecard_priority_review": candidate
+            == "accuracy_parity_scorecard",
+            "accuracy_scorecard_science_contract_pass": bool(
+                live_checks.get("accuracy_scorecard_science_contract_pass")
+            ),
+        }
+    return index
+
+
+def _operator_actions(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "candidate": str(row.get("candidate") or ""),
+            "classification": str(row.get("classification") or ""),
+            "status": str(row.get("status") or ""),
+            "contract_pass": bool(row.get("contract_pass")),
+            "operator_action": _operator_action(row),
+            "current_repo_paths": [
+                str(item) for item in row.get("current_repo_paths", [])
+            ],
+            "claim_boundary": (
+                "This action routes source-of-truth classification maintenance. "
+                "It does not replace the referenced validation or aggregator "
+                "receipt."
+            ),
+        }
+        for row in rows
+    ]
+
+
+def _accuracy_priority_review(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    by_candidate = _classification_by_candidate(rows)
+    row = _as_dict(by_candidate.get("accuracy_parity_scorecard"))
+    live_checks = _as_dict(row.get("live_checks"))
+    return {
+        "candidate": "accuracy_parity_scorecard",
+        "classification": str(row.get("classification") or ""),
+        "status": str(row.get("status") or ""),
+        "contract_pass": bool(row.get("contract_pass")),
+        "operator_action": _operator_action(row) if row else "",
+        "current_repo_paths": [
+            str(item) for item in row.get("current_repo_paths", [])
+        ],
+        "science_contract_pass": bool(
+            live_checks.get("accuracy_scorecard_science_contract_pass")
+        ),
+        "science_checks": _as_dict(
+            live_checks.get("accuracy_scorecard_science_checks")
+        ),
+        "validation_basis": [
+            str(item) for item in row.get("validation_basis", [])
+        ],
+        "decision": str(row.get("decision") or ""),
+        "claim_boundary": (
+            "Accuracy parity is treated as a direct science scorecard fix only "
+            "because the live scorecard exposes and passes the required science "
+            "checks. This review does not rerun the heavy validation."
+        ),
+    }
+
+
 def _classification_by_candidate(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     return {str(row["candidate"]): row for row in rows}
 
@@ -198,6 +290,9 @@ def build_source_of_truth_gap_classification(
     ]
     classifications = [str(row["classification"]) for row in rows]
     classification_by_bucket = _classification_by_bucket(rows)
+    classification_index = _classification_index(rows)
+    operator_actions = _operator_actions(rows)
+    accuracy_priority_review = _accuracy_priority_review(rows)
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -224,6 +319,13 @@ def build_source_of_truth_gap_classification(
         "classification_rows": rows,
         "classification_by_candidate": _classification_by_candidate(rows),
         "classification_by_bucket": classification_by_bucket,
+        "classification_index": classification_index,
+        "operator_actions": operator_actions,
+        "operator_action_index": {
+            str(row["candidate"]): _operator_action(row)
+            for row in rows
+        },
+        "accuracy_parity_scorecard_priority_review": accuracy_priority_review,
         "summary": {
             "candidate_count": len(rows),
             "expected_candidate_count": len(EXPECTED_CANDIDATES),
@@ -241,6 +343,11 @@ def build_source_of_truth_gap_classification(
                 for row in rows
                 if row["classification"] == "aggregator-review"
                 and row["contract_pass"]
+            ),
+            "classification_index_candidate_count": len(classification_index),
+            "operator_action_count": len(operator_actions),
+            "accuracy_parity_scorecard_science_contract_pass": bool(
+                accuracy_priority_review.get("science_contract_pass")
             ),
             "blocker_count": len(blockers),
         },

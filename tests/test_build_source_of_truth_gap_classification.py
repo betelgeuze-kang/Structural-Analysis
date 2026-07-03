@@ -30,20 +30,42 @@ def test_source_of_truth_gap_classification_materializes_live_scan() -> None:
     assert payload["status"] == "ready"
     assert payload["contract_pass"] is True
     assert payload["summary"] == {
+        "accuracy_parity_scorecard_science_contract_pass": True,
         "aggregator_review_count": 3,
         "aggregator_reviewed_count": 3,
         "blocker_count": 0,
         "candidate_count": 5,
         "classification_bucket_count": 3,
+        "classification_index_candidate_count": 5,
         "expected_candidate_count": 5,
         "fix_count": 2,
         "fixed_count": 2,
         "no_op_count": 0,
+        "operator_action_count": 5,
     }
     assert payload["expected_candidates"] == list(module.EXPECTED_CANDIDATE_ORDER)
     assert set(rows) == module.EXPECTED_CANDIDATES
     assert payload["classification_rows"] == payload["rows"]
     assert set(payload["classification_by_candidate"]) == module.EXPECTED_CANDIDATES
+    assert set(payload["classification_index"]) == module.EXPECTED_CANDIDATES
+    assert len(payload["operator_actions"]) == 5
+    assert payload["operator_action_index"] == {
+        "accuracy_parity_scorecard": (
+            "keep_accuracy_parity_scorecard_as_direct_freshness_leaf"
+        ),
+        "goal_operator_action_board": (
+            "review_goal_operator_action_board_upstream_source_tracking"
+        ),
+        "goal_readiness_rollup": (
+            "review_goal_readiness_rollup_upstream_source_tracking"
+        ),
+        "product_goal_completion_audit": (
+            "review_product_goal_completion_audit_upstream_source_tracking"
+        ),
+        "product_production_ai_checkpoint_readiness": (
+            "keep_product_production_ai_checkpoint_readiness_as_direct_freshness_leaf"
+        ),
+    }
     assert payload["classification_by_bucket"] == {
         "aggregator-review": {
             "candidate_ids": [
@@ -77,6 +99,63 @@ def test_source_of_truth_gap_classification_materializes_live_scan() -> None:
     assert all(
         accuracy["live_checks"]["accuracy_scorecard_science_checks"].values()
     )
+    assert payload["classification_index"]["accuracy_parity_scorecard"] == {
+        "accuracy_scorecard_science_contract_pass": True,
+        "candidate": "accuracy_parity_scorecard",
+        "classification": "fix",
+        "contract_pass": True,
+        "current_repo_paths": [
+            "implementation/phase1/real_accuracy_validation_report.json"
+        ],
+        "freshness_label": "accuracy_parity_scorecard",
+        "freshness_policy": "direct_leaf_row",
+        "operator_action": (
+            "keep_accuracy_parity_scorecard_as_direct_freshness_leaf"
+        ),
+        "priority_rank": 1,
+        "science_scorecard_priority_review": True,
+        "status": "classified",
+    }
+    assert payload["accuracy_parity_scorecard_priority_review"] == {
+        "candidate": "accuracy_parity_scorecard",
+        "claim_boundary": (
+            "Accuracy parity is treated as a direct science scorecard fix only "
+            "because the live scorecard exposes and passes the required science "
+            "checks. This review does not rerun the heavy validation."
+        ),
+        "classification": "fix",
+        "contract_pass": True,
+        "current_repo_paths": [
+            "implementation/phase1/real_accuracy_validation_report.json"
+        ],
+        "decision": (
+            "Direct science scorecard receipt with freshness source tracking; "
+            "the artifact itself carries overall_pass, benchmark contract/KPI pass, "
+            "direct-metric/source-family/public-HF checks, and stability-suite pass."
+        ),
+        "operator_action": (
+            "keep_accuracy_parity_scorecard_as_direct_freshness_leaf"
+        ),
+        "science_checks": {
+            "benchmark_contract_pass": True,
+            "benchmark_kpi_pass": True,
+            "direct_metric_source_pass": True,
+            "overall_pass": True,
+            "public_hf_case_count_pass": True,
+            "source_family_pass": True,
+            "stability_pass": True,
+            "stability_suite_pass": True,
+        },
+        "science_contract_pass": True,
+        "status": "classified",
+        "validation_basis": [
+            "leaf_artifact_in_default_freshness_rows",
+            "science_scorecard_overall_pass_field",
+            "benchmark_contract_and_kpi_fields",
+            "public_hf_and_source_family_checks",
+            "stability_suite_pass_field",
+        ],
+    }
 
     ai = rows["product_production_ai_checkpoint_readiness"]
     assert ai["classification"] == "fix"
@@ -92,6 +171,9 @@ def test_source_of_truth_gap_classification_materializes_live_scan() -> None:
         assert row["freshness_label"] == ""
         assert row["live_checks"]["freshness_leaf_presence_matches"] is True
         assert row["live_checks"]["aggregator_source_tracking_present"] is True
+        assert payload["classification_index"][candidate]["operator_action"] == (
+            f"review_{candidate}_upstream_source_tracking"
+        )
 
 
 def test_source_of_truth_gap_classification_cli_writes_artifact(tmp_path: Path) -> None:
@@ -104,6 +186,10 @@ def test_source_of_truth_gap_classification_cli_writes_artifact(tmp_path: Path) 
     assert payload["summary"]["candidate_count"] == 5
     assert payload["classification_by_bucket"]["fix"]["count"] == 2
     assert payload["classification_by_bucket"]["aggregator-review"]["count"] == 3
+    assert payload["classification_index"]["accuracy_parity_scorecard"][
+        "science_scorecard_priority_review"
+    ] is True
+    assert payload["operator_actions"][0]["candidate"] == "accuracy_parity_scorecard"
     assert payload["input_checksums"][
         "scripts/build_source_of_truth_gap_classification.py"
     ].startswith("sha256:")
