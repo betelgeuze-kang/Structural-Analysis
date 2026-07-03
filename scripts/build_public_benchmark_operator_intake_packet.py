@@ -70,6 +70,7 @@ from validate_public_benchmark_external_receipts import (  # noqa: E402
 from build_public_benchmark_phase2_source_acquisition_plan import (  # noqa: E402
     DEFAULT_OUT as SOURCE_ACQUISITION_PLAN_DEFAULT_OUT,
     DEFAULT_OUT_MD as SOURCE_ACQUISITION_PLAN_DEFAULT_OUT_MD,
+    DEFAULT_VINA_GNINA_EXECUTION_PLAN as SOURCE_ACQUISITION_VINA_GNINA_EXECUTION_PLAN,
     SCHEMA_VERSION as SOURCE_ACQUISITION_PLAN_SCHEMA_VERSION,
     build_public_benchmark_phase2_source_acquisition_plan,
 )
@@ -106,6 +107,7 @@ DEFAULT_OUT = PRODUCTIZATION / "public_benchmark_operator_intake_packet.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_SOURCE_ACQUISITION_PLAN = SOURCE_ACQUISITION_PLAN_DEFAULT_OUT
 DEFAULT_SOURCE_ACQUISITION_PLAN_MD = SOURCE_ACQUISITION_PLAN_DEFAULT_OUT_MD
+DEFAULT_VINA_GNINA_EXECUTION_PLAN = SOURCE_ACQUISITION_VINA_GNINA_EXECUTION_PLAN
 DEFAULT_OPERATOR_TEMPLATE_DIR = PRODUCTIZATION
 DEFAULT_CASF_PDBBIND_OPERATOR_TEMPLATE = (
     DEFAULT_OPERATOR_TEMPLATE_DIR / "public_benchmark_casf_pdbbind_operator_template.json"
@@ -305,6 +307,9 @@ def _source_acquisition_plan_summary(
         ),
         "phase2_row_audit": _as_dict(
             source_acquisition_plan.get("phase2_row_audit")
+        ),
+        "vina_gnina_execution_plan": _as_dict(
+            source_acquisition_plan.get("vina_gnina_execution_plan")
         ),
         "official_source_receipt_plan": {
             "plan_id": str(official_source_receipt_plan.get("plan_id") or ""),
@@ -1645,6 +1650,7 @@ def build_public_benchmark_operator_intake_packet(
                 "vina_gnina_comparison_adapter": str(
                     DEFAULT_VINA_GNINA_COMPARISON_ADAPTER
                 ),
+                "vina_gnina_execution_plan": str(DEFAULT_VINA_GNINA_EXECUTION_PLAN),
                 "external_receipts_validation": str(
                     DEFAULT_EXTERNAL_RECEIPTS_VALIDATION
                 ),
@@ -1693,6 +1699,7 @@ def build_public_benchmark_operator_intake_packet(
             "pose_success_harness": str(DEFAULT_POSE_SUCCESS_HARNESS),
             "enrichment_scorecard": str(DEFAULT_ENRICHMENT_SCORECARD),
             "vina_gnina_comparison_adapter": str(DEFAULT_VINA_GNINA_COMPARISON_ADAPTER),
+            "vina_gnina_execution_plan": str(DEFAULT_VINA_GNINA_EXECUTION_PLAN),
             "external_receipts_validation": str(DEFAULT_EXTERNAL_RECEIPTS_VALIDATION),
             "harness_bundle": str(DEFAULT_HARNESS_BUNDLE),
             "harness_bundle_report": str(DEFAULT_HARNESS_BUNDLE_REPORT),
@@ -1709,6 +1716,7 @@ def build_public_benchmark_operator_intake_packet(
             "run_public_benchmark_rmsd_scorecard_materializer",
             "materialize_public_benchmark_pose_success_harness",
             "run_public_benchmark_enrichment_materializer",
+            "build_public_benchmark_vina_gnina_execution_plan",
             "run_public_benchmark_vina_gnina_comparison_materializer",
             "validate_public_benchmark_external_receipts",
             "refresh_public_benchmark_source_of_truth",

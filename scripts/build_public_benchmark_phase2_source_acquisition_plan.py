@@ -59,6 +59,9 @@ DEFAULT_SOURCE_OF_TRUTH = PRODUCTIZATION / "public_benchmark_source_of_truth.jso
 DEFAULT_PHASE2_ROW_AUDIT = PRODUCTIZATION / "public_benchmark_phase2_row_audit.json"
 DEFAULT_PHASE2_ROW_AUDIT_MD = DEFAULT_PHASE2_ROW_AUDIT.with_suffix(".md")
 DEFAULT_HARNESS_BUNDLE = PRODUCTIZATION / "public_benchmark_harness_bundle.json"
+DEFAULT_VINA_GNINA_EXECUTION_PLAN = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_execution_plan.json"
+)
 
 SCHEMA_VERSION = "public-benchmark-phase2-source-acquisition-plan.v1"
 TIER_BETA_MINIMUM_SUBSET_CASE_COUNT = 12
@@ -298,6 +301,42 @@ def _phase2_row_audit_summary(audit: dict[str, Any]) -> dict[str, Any]:
         "command": (
             "python3 scripts/materialize_public_benchmark_phase2_from_rows.py "
             f"--out {DEFAULT_PHASE2_ROW_AUDIT} --out-md {DEFAULT_PHASE2_ROW_AUDIT_MD}"
+        ),
+    }
+
+
+def _vina_gnina_execution_plan_summary(payload: dict[str, Any]) -> dict[str, Any]:
+    summary = payload.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+    return {
+        "artifact": str(DEFAULT_VINA_GNINA_EXECUTION_PLAN),
+        "status": str(payload.get("status") or "missing"),
+        "contract_pass": payload.get("contract_pass"),
+        "execution_plan_ready": bool(payload.get("execution_plan_ready")),
+        "operator_execution_ready": bool(payload.get("operator_execution_ready")),
+        "adapter_rows_ready": bool(payload.get("adapter_rows_ready")),
+        "case_count": int(summary.get("case_count") or payload.get("case_count") or 0),
+        "required_engine_run_count": int(
+            summary.get("required_engine_run_count")
+            or payload.get("required_engine_run_count")
+            or 0
+        ),
+        "available_engine_count": int(summary.get("available_engine_count") or 0),
+        "missing_engine_count": int(summary.get("missing_engine_count") or 0),
+        "missing_engine_ids": [
+            str(row)
+            for row in payload.get("missing_engine_ids", [])
+            if str(row)
+        ]
+        if isinstance(payload.get("missing_engine_ids"), list)
+        else [],
+        "blocker_count": len(payload.get("blockers", []))
+        if isinstance(payload.get("blockers"), list)
+        else 0,
+        "command": (
+            "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
+            f"--out {DEFAULT_VINA_GNINA_EXECUTION_PLAN}"
         ),
     }
 
@@ -650,6 +689,10 @@ def build_public_benchmark_phase2_source_acquisition_plan(
     )
     phase2_row_audit = _load_json(repo_root, DEFAULT_PHASE2_ROW_AUDIT)
     phase2_row_audit_summary = _phase2_row_audit_summary(phase2_row_audit)
+    vina_gnina_execution_plan = _load_json(repo_root, DEFAULT_VINA_GNINA_EXECUTION_PLAN)
+    vina_gnina_execution_plan_summary = _vina_gnina_execution_plan_summary(
+        vina_gnina_execution_plan
+    )
     blockers = _source_acquisition_blockers(phase2_row_audit_summary)
     return {
         "schema_version": SCHEMA_VERSION,
@@ -667,6 +710,8 @@ def build_public_benchmark_phase2_source_acquisition_plan(
                 Path("scripts/materialize_public_benchmark_pose_success_harness.py"),
                 Path("scripts/materialize_public_benchmark_enrichment_scorecard.py"),
                 Path("scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"),
+                Path("scripts/build_public_benchmark_vina_gnina_execution_plan.py"),
+                DEFAULT_VINA_GNINA_EXECUTION_PLAN,
                 Path("scripts/validate_public_benchmark_external_receipts.py"),
             ],
             reused_evidence=False,
@@ -685,11 +730,13 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         "official_source_receipt_plan": official_source_receipt_plan,
         "receipt_promotion_policy": dict(RECEIPT_PROMOTION_POLICY),
         "phase2_row_audit": phase2_row_audit_summary,
+        "vina_gnina_execution_plan": vina_gnina_execution_plan_summary,
         "operator_acquisition_checklist": [
             "review_official_source_receipt_plan",
             "attach_casf_pdbbind_subset_rows_with_local_file_checksums",
             "attach_pose_coordinate_rows_with_symmetry_contracts",
             "attach_dud_e_or_lit_pcba_scored_molecule_rows",
+            "build_vina_gnina_execution_plan_from_materialized_cases",
             "attach_vina_gnina_engine_run_rows",
             "attach_external_source_receipts_and_license_or_accession_refs",
             "run_public_benchmark_operator_bundle_from_rows",
@@ -713,6 +760,10 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "phase2_row_audit": (
                 "python3 scripts/materialize_public_benchmark_phase2_from_rows.py "
                 "--fail-blocked"
+            ),
+            "build_vina_gnina_execution_plan": (
+                "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
+                f"--out {DEFAULT_VINA_GNINA_EXECUTION_PLAN}"
             ),
             "materialize_harness_bundle": (
                 "python3 scripts/materialize_public_benchmark_harness_bundle.py "
@@ -754,6 +805,18 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "phase2_row_audit_failed_criteria": phase2_row_audit_summary[
                 "phase2_failed_criteria"
             ],
+            "vina_gnina_execution_plan_status": vina_gnina_execution_plan_summary[
+                "status"
+            ],
+            "vina_gnina_execution_plan_ready": vina_gnina_execution_plan_summary[
+                "execution_plan_ready"
+            ],
+            "vina_gnina_required_engine_run_count": vina_gnina_execution_plan_summary[
+                "required_engine_run_count"
+            ],
+            "vina_gnina_missing_engine_count": vina_gnina_execution_plan_summary[
+                "missing_engine_count"
+            ],
             "phase2_ready": False,
             "actual_closure_ready": False,
             "blocker_count": len(blockers),
@@ -785,6 +848,9 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `phase2_row_audit`: `{payload['phase2_row_audit']['artifact']}`",
         f"- `phase2_row_audit_status`: `{payload['phase2_row_audit']['status']}`",
         f"- `phase2_row_audit_missing_row_inputs`: `{', '.join(payload['phase2_row_audit']['missing_row_inputs'])}`",
+        f"- `vina_gnina_execution_plan`: `{payload['vina_gnina_execution_plan']['artifact']}`",
+        f"- `vina_gnina_execution_plan_status`: `{payload['vina_gnina_execution_plan']['status']}`",
+        f"- `vina_gnina_required_engine_run_count`: `{payload['vina_gnina_execution_plan']['required_engine_run_count']}`",
         "",
         "| Row Input | Source Family | Status | Unblocks |",
         "|---|---|---|---|",

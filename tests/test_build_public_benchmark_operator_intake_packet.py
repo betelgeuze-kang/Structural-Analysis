@@ -88,6 +88,18 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     ] == [
         "vina_gnina_rows",
     ]
+    assert packet["source_acquisition_plan"]["vina_gnina_execution_plan"][
+        "artifact"
+    ] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_execution_plan.json"
+    )
+    assert packet["source_acquisition_plan"]["vina_gnina_execution_plan"][
+        "execution_plan_ready"
+    ] is True
+    assert packet["source_acquisition_plan"]["vina_gnina_execution_plan"][
+        "required_engine_run_count"
+    ] == 24
     receipt_plan = packet["source_acquisition_plan"][
         "official_source_receipt_plan"
     ]
@@ -629,6 +641,10 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
     assert packet["linked_artifacts"]["phase2_row_audit"] == (
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_phase2_row_audit.json"
+    )
+    assert packet["linked_artifacts"]["vina_gnina_execution_plan"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_execution_plan.json"
     )
     assert packet["next_actions"][:3] == [
         "complete_public_benchmark_phase2_source_acquisition_plan",

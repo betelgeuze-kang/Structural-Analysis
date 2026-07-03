@@ -7,6 +7,7 @@
   ],
   "claim_boundary": "This plan records the operator source acquisition contract for Public Benchmark Phase 2. It does not download, redistribute, license, or synthesize CASF/PDBBind, DUD-E, LIT-PCBA, Vina, or GNINA evidence, and it does not close external beta until real rows and receipts pass the materializers.",
   "commands": {
+    "build_vina_gnina_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
     "import_operator_bundle": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
     "materialize_harness_bundle": "python3 scripts/materialize_public_benchmark_harness_bundle.py --bundle implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json --out-dir implementation/phase1/release_evidence/productization --fail-blocked",
     "phase2_row_audit": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
@@ -15,10 +16,12 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T18:33:15.337917+00:00",
+  "generated_at": "2026-07-03T19:01:05.312128+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:9a920ac246d72dea6fdb7cd95241663741f3980042677d9db1bf60b5ced30e58",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:b07d6de8afc6b8f42cdc6aea3d2a3eebe2d9c5cca8eba066aa4b0d259200f748",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:a3a4ab061122e8b4a7e10f6604df55f75cbb962fe30d45517bccbb592a331b43",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:9db651e55962124023ead678d1cfd266d59924c2506328c08df0f34feda20fc8",
+    "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:92990af281941bbaf971636d83f1ac0c5ba26c5079b9e8b512a58a42664dfebe",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
@@ -361,6 +364,7 @@
     "attach_casf_pdbbind_subset_rows_with_local_file_checksums",
     "attach_pose_coordinate_rows_with_symmetry_contracts",
     "attach_dud_e_or_lit_pcba_scored_molecule_rows",
+    "build_vina_gnina_execution_plan_from_materialized_cases",
     "attach_vina_gnina_engine_run_rows",
     "attach_external_source_receipts_and_license_or_accession_refs",
     "run_public_benchmark_operator_bundle_from_rows",
@@ -743,7 +747,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "4fe43d3cb7bab09fbe23a9c8901a4c8ddced4d66",
+  "source_commit_sha": "fae44042100a11ea48dc481b212f6f10ef80de49",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
@@ -765,6 +769,28 @@
     ],
     "phase2_row_audit_status": "operator_evidence_required",
     "required_component_count": 5,
-    "required_row_input_count": 4
+    "required_row_input_count": 4,
+    "vina_gnina_execution_plan_ready": true,
+    "vina_gnina_execution_plan_status": "engine_execution_required",
+    "vina_gnina_missing_engine_count": 2,
+    "vina_gnina_required_engine_run_count": 24
+  },
+  "vina_gnina_execution_plan": {
+    "adapter_rows_ready": false,
+    "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+    "available_engine_count": 0,
+    "blocker_count": 2,
+    "case_count": 12,
+    "command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+    "contract_pass": true,
+    "execution_plan_ready": true,
+    "missing_engine_count": 2,
+    "missing_engine_ids": [
+      "vina",
+      "gnina"
+    ],
+    "operator_execution_ready": false,
+    "required_engine_run_count": 24,
+    "status": "engine_execution_required"
   }
 }

@@ -34,10 +34,10 @@
           "public_benchmark_external_receipts_not_attached"
         ],
         "contract_pass": true,
-        "generated_at": "2026-07-03T18:33:15.337917+00:00",
+        "generated_at": "2026-07-03T19:01:05.312128+00:00",
         "ready_values": {},
         "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-        "source_commit_sha": "4fe43d3cb7bab09fbe23a9c8901a4c8ddced4d66",
+        "source_commit_sha": "fae44042100a11ea48dc481b212f6f10ef80de49",
         "status": "operator_acquisition_required"
       },
       "current_ready": true,
@@ -1187,12 +1187,12 @@
     }
   ],
   "gate_unblock_plan_count": 4,
-  "generated_at": "2026-07-03T18:33:15.438315+00:00",
+  "generated_at": "2026-07-03T19:02:36.913907+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:9a920ac246d72dea6fdb7cd95241663741f3980042677d9db1bf60b5ced30e58",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:a02e0f8d2ec8ff40b696fac003e92b82ef7a7296fb3517bf1f869e97f57c640f",
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:a2f8dde118e607325074a1ca5aea075228426295eedc9cdb10553184a324f2b2",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:b07d6de8afc6b8f42cdc6aea3d2a3eebe2d9c5cca8eba066aa4b0d259200f748",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:38d04af5e6f87c1d872e01a8aa11b83d681ee709be6d18c7985579657562c908",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:9db651e55962124023ead678d1cfd266d59924c2506328c08df0f34feda20fc8",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
@@ -2052,7 +2052,8 @@
     "source_acquisition_plan_markdown": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.md",
     "source_of_truth": "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
     "subset_manifest": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
-    "vina_gnina_comparison_adapter": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json"
+    "vina_gnina_comparison_adapter": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json",
+    "vina_gnina_execution_plan": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json"
   },
   "manifest_contract_count": 1,
   "manifest_contracts": [
@@ -2233,6 +2234,7 @@
     "run_public_benchmark_rmsd_scorecard_materializer",
     "materialize_public_benchmark_pose_success_harness",
     "run_public_benchmark_enrichment_materializer",
+    "build_public_benchmark_vina_gnina_execution_plan",
     "run_public_benchmark_vina_gnina_comparison_materializer",
     "validate_public_benchmark_external_receipts",
     "refresh_public_benchmark_source_of_truth",
@@ -2254,7 +2256,8 @@
       "rmsd_scorecard": "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
       "source_of_truth": "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
       "subset_manifest": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
-      "vina_gnina_comparison_adapter": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json"
+      "vina_gnina_comparison_adapter": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json",
+      "vina_gnina_execution_plan": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json"
     },
     "row_bundle_import": {
       "accepted_row_formats": [
@@ -3488,7 +3491,25 @@
         "enrichment_rows",
         "vina_gnina_rows"
       ],
-      "status": "operator_acquisition_required"
+      "status": "operator_acquisition_required",
+      "vina_gnina_execution_plan": {
+        "adapter_rows_ready": false,
+        "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+        "available_engine_count": 0,
+        "blocker_count": 2,
+        "case_count": 12,
+        "command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+        "contract_pass": true,
+        "execution_plan_ready": true,
+        "missing_engine_count": 2,
+        "missing_engine_ids": [
+          "vina",
+          "gnina"
+        ],
+        "operator_execution_ready": false,
+        "required_engine_run_count": 24,
+        "status": "engine_execution_required"
+      }
     },
     "status": "ready_for_operator_rows"
   },
@@ -3905,9 +3926,27 @@
       "enrichment_rows",
       "vina_gnina_rows"
     ],
-    "status": "operator_acquisition_required"
+    "status": "operator_acquisition_required",
+    "vina_gnina_execution_plan": {
+      "adapter_rows_ready": false,
+      "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+      "available_engine_count": 0,
+      "blocker_count": 2,
+      "case_count": 12,
+      "command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+      "contract_pass": true,
+      "execution_plan_ready": true,
+      "missing_engine_count": 2,
+      "missing_engine_ids": [
+        "vina",
+        "gnina"
+      ],
+      "operator_execution_ready": false,
+      "required_engine_run_count": 24,
+      "status": "engine_execution_required"
+    }
   },
-  "source_commit_sha": "4fe43d3cb7bab09fbe23a9c8901a4c8ddced4d66",
+  "source_commit_sha": "fae44042100a11ea48dc481b212f6f10ef80de49",
   "source_of_truth_blocker_detail_count": 4,
   "source_of_truth_blocker_detail_register": [
     {
