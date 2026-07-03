@@ -20,11 +20,14 @@
     "operator_template": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "readonly_api": "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
     "science_product_surface": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+    "source_acquisition_plan": "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json",
+    "source_acquisition_plan_markdown": "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.md",
     "topk_survival_report": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
   },
-  "generated_at": "2026-07-01T14:05:37.542023+00:00",
+  "generated_at": "2026-07-03T16:02:32.607524+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:358f44d5d391f61f0b4ee15639636a3c195c413c23582c1d69313d743ad740ef",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:70ec7c7e2c686de9fe607ce537e8c91af22f8be516597ac2c4a05dfa47d77191",
+    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:0fbf80bad00d53653d47d1d53a6a3f5fe3a813b760f92aac7c68166143496e1c",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:985edb154d586829d3ec221ee54d820e8b45b880bcfd99a348f1c7037958d6e0",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:161673d8ff036a7a31d657fb972764eeb4b62f6d55cc0840e26f398565707c6f"
   },
@@ -316,10 +319,30 @@
     },
     "required_slot_id": "top_k_refinement_rows",
     "route": "/product/pocketmd-lite/operator-intake",
+    "source_acquisition_plan": {
+      "actual_closure_ready": false,
+      "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json",
+      "blocker_count": 3,
+      "blockers": [
+        "pocketmd_lite_topk_rows_not_acquired",
+        "upstream_top_k_candidate_receipts_not_attached",
+        "lite_refinement_metric_receipts_not_attached"
+      ],
+      "command": "python3 scripts/build_pocketmd_lite_source_acquisition_plan.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.md",
+      "contract_pass": true,
+      "markdown_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.md",
+      "minimum_rows_by_case_count": 3,
+      "required_candidate_rows_per_case": 2,
+      "required_case_count": 3,
+      "required_total_candidate_rows": 6,
+      "source_scope": "bounded_top_k_lite_refinement_rows",
+      "status": "operator_acquisition_required"
+    },
     "source_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json",
     "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json"
   },
   "operator_next_actions": [
+    "complete_pocketmd_lite_source_acquisition_plan",
     "materialize_pocketmd_lite_operator_intake_from_rows",
     "fill_pocketmd_lite_operator_intake_packet",
     "attach_top_k_candidate_refinement_rows",
@@ -496,6 +519,25 @@
   "reused_evidence": false,
   "route": "/product/pocketmd-lite/handoff",
   "schema_version": "pocketmd-lite-delivery-handoff.v1",
-  "source_commit_sha": "866f14d3d00de35e0a15b0672e8a46b11e092bd1",
+  "source_acquisition_plan": {
+    "actual_closure_ready": false,
+    "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json",
+    "blocker_count": 3,
+    "blockers": [
+      "pocketmd_lite_topk_rows_not_acquired",
+      "upstream_top_k_candidate_receipts_not_attached",
+      "lite_refinement_metric_receipts_not_attached"
+    ],
+    "command": "python3 scripts/build_pocketmd_lite_source_acquisition_plan.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.md",
+    "contract_pass": true,
+    "markdown_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.md",
+    "minimum_rows_by_case_count": 3,
+    "required_candidate_rows_per_case": 2,
+    "required_case_count": 3,
+    "required_total_candidate_rows": 6,
+    "source_scope": "bounded_top_k_lite_refinement_rows",
+    "status": "operator_acquisition_required"
+  },
+  "source_commit_sha": "889e563bc8db1e3d715a7d6b4effa85be202cd11",
   "status": "handoff_ready_operator_evidence_required"
 }

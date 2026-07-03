@@ -457,6 +457,9 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert "get_pocketmd_lite_operator_template" in {
         row["endpoint_id"] for row in api["endpoints"]
     }
+    assert "get_pocketmd_lite_source_acquisition_plan" in {
+        row["endpoint_id"] for row in api["endpoints"]
+    }
 
     assert handoff["schema_version"] == "pocketmd-lite-delivery-handoff.v1"
     assert handoff["contract_pass"] is True
@@ -478,6 +481,14 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert handoff["evidence_artifacts"]["operator_intake_packet"].endswith(
         "pocketmd_lite_operator_intake_packet.json"
     )
+    assert handoff["evidence_artifacts"]["source_acquisition_plan"].endswith(
+        "pocketmd_lite_source_acquisition_plan.json"
+    )
+    assert handoff["source_acquisition_plan"]["status"] == (
+        "operator_acquisition_required"
+    )
+    assert handoff["source_acquisition_plan"]["actual_closure_ready"] is False
+    assert handoff["source_acquisition_plan"]["required_total_candidate_rows"] == 6
     assert handoff["phase4_exit_gate_reference"] == {
         "source_artifact": (
             "implementation/phase1/release_evidence/productization/"
@@ -551,6 +562,21 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
             "pocketmd_lite_topk_rows_template.csv"
         )
     }
+    assert operator["source_acquisition_plan"]["artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_source_acquisition_plan.json"
+    )
+    assert operator["source_acquisition_plan"]["status"] == (
+        "operator_acquisition_required"
+    )
+    assert operator["source_acquisition_plan"]["actual_closure_ready"] is False
+    assert operator["source_acquisition_plan"]["required_case_count"] == 3
+    assert operator["source_acquisition_plan"]["required_total_candidate_rows"] == 6
+    assert operator["source_acquisition_plan"]["blockers"] == [
+        "pocketmd_lite_topk_rows_not_acquired",
+        "upstream_top_k_candidate_receipts_not_attached",
+        "lite_refinement_metric_receipts_not_attached",
+    ]
     assert operator["raw_row_dropzone"] == {
         "auto_detection_policy": (
             "Place real PocketMD Lite top-k row files at the default paths, "
@@ -577,6 +603,7 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
                 "pocketmd_lite_topk_rows_template.csv"
             )
         },
+        "source_acquisition_plan": operator["source_acquisition_plan"],
         "status": "ready_for_operator_rows",
     }
     assert operator["input_slots"][0]["template_artifact"].endswith(
@@ -640,12 +667,16 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "top_k_refinement_operator_intake"
     )
     assert operator["materialization_sequence"][0]["step_id"] == (
-        "materialize_pocketmd_lite_operator_intake_from_rows"
+        "build_pocketmd_lite_source_acquisition_plan"
     )
     assert operator["materialization_sequence"][1]["step_id"] == (
+        "materialize_pocketmd_lite_operator_intake_from_rows"
+    )
+    assert operator["materialization_sequence"][2]["step_id"] == (
         "fill_pocketmd_lite_operator_intake_packet"
     )
-    assert operator["next_actions"][:2] == [
+    assert operator["next_actions"][:3] == [
+        "complete_pocketmd_lite_source_acquisition_plan",
         "materialize_pocketmd_lite_operator_intake_from_rows",
         "fill_pocketmd_lite_operator_intake_packet",
     ]
@@ -864,6 +895,8 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
 
 
 def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
+    source_plan_out = tmp_path / "pocketmd_lite_source_acquisition_plan.json"
+    source_plan_md_out = tmp_path / "pocketmd_lite_source_acquisition_plan.md"
     contract_out = tmp_path / "pocketmd_lite_contract.json"
     survival_out = tmp_path / "pocketmd_lite_topk_survival_report.json"
     survival_md_out = tmp_path / "pocketmd_lite_topk_survival_report.md"
@@ -881,6 +914,10 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
             [
                 "--repo-root",
                 str(REPO_ROOT),
+                "--source-acquisition-plan-out",
+                str(source_plan_out),
+                "--source-acquisition-plan-md-out",
+                str(source_plan_md_out),
                 "--contract-out",
                 str(contract_out),
                 "--survival-report-out",
@@ -907,6 +944,8 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
     )
 
     for path in (
+        source_plan_out,
+        source_plan_md_out,
         contract_out,
         survival_out,
         api_out,
@@ -932,11 +971,22 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
             "scripts/build_pocketmd_lite_product_surface.py"
         ].startswith("sha256:")
         assert payload["input_checksums"][
+            "scripts/build_pocketmd_lite_source_acquisition_plan.py"
+        ].startswith("sha256:")
+        assert payload["input_checksums"][
             "scripts/materialize_pocketmd_lite_topk_survival_report.py"
         ].startswith("sha256:")
         assert payload["input_checksums"][
             "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py"
         ].startswith("sha256:")
+    source_plan_payload = json.loads(source_plan_out.read_text(encoding="utf-8"))
+    assert source_plan_payload["summary"]["required_total_candidate_rows"] == 6
+    assert source_plan_payload["input_checksums"][
+        "scripts/build_pocketmd_lite_source_acquisition_plan.py"
+    ].startswith("sha256:")
+    assert "# PocketMD Lite Source Acquisition Plan" in source_plan_md_out.read_text(
+        encoding="utf-8"
+    )
     assert "# PocketMD Lite Operator Intake Packet" in operator_md_out.read_text(
         encoding="utf-8"
     )

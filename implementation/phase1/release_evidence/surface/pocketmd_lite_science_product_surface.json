@@ -322,7 +322,7 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
   },
-  "generated_at": "2026-07-01T14:05:37.544089+00:00",
+  "generated_at": "2026-07-03T16:02:32.609481+00:00",
   "goal_roadmap_linkage": {
     "bottleneck": "pocketmd_lite_science_product_surface_locked",
     "next_goal_actions": [
@@ -337,7 +337,8 @@
     "roadmap_item": "PocketMD Lite science product surface"
   },
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:358f44d5d391f61f0b4ee15639636a3c195c413c23582c1d69313d743ad740ef",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:70ec7c7e2c686de9fe607ce537e8c91af22f8be516597ac2c4a05dfa47d77191",
+    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:0fbf80bad00d53653d47d1d53a6a3f5fe3a813b760f92aac7c68166143496e1c",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:985edb154d586829d3ec221ee54d820e8b45b880bcfd99a348f1c7037958d6e0",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:161673d8ff036a7a31d657fb972764eeb4b62f6d55cc0840e26f398565707c6f"
   },
@@ -1834,7 +1835,7 @@
   ],
   "schema_version": "pocketmd-lite-science-product-surface.v1",
   "science_surface_family": "pocketmd_lite",
-  "source_commit_sha": "866f14d3d00de35e0a15b0672e8a46b11e092bd1",
+  "source_commit_sha": "889e563bc8db1e3d715a7d6b4effa85be202cd11",
   "status": "locked",
   "summary_line": "PocketMD Lite science product surface: LOCKED | top-k refinement operator rows required",
   "surface_id": "pocketmd_lite_science_product_surface",

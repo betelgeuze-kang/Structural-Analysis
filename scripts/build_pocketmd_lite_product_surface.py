@@ -29,6 +29,13 @@ from materialize_pocketmd_lite_operator_intake_from_rows import (  # noqa: E402
     SOURCE_RECEIPT_REQUIREMENTS as RAW_ROW_SOURCE_RECEIPT_REQUIREMENTS,
     row_value_contract as raw_row_value_contract,
 )
+from build_pocketmd_lite_source_acquisition_plan import (  # noqa: E402
+    DEFAULT_OUT as SOURCE_ACQUISITION_PLAN_DEFAULT_OUT,
+    DEFAULT_OUT_MD as SOURCE_ACQUISITION_PLAN_DEFAULT_OUT_MD,
+    SCHEMA_VERSION as SOURCE_ACQUISITION_PLAN_SCHEMA_VERSION,
+    build_pocketmd_lite_source_acquisition_plan,
+    render_pocketmd_lite_source_acquisition_markdown,
+)
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -43,6 +50,8 @@ DEFAULT_OPERATOR_INTAKE_OUT = PRODUCTIZATION / "pocketmd_lite_operator_intake_pa
 DEFAULT_OPERATOR_INTAKE_MD_OUT = DEFAULT_OPERATOR_INTAKE_OUT.with_suffix(".md")
 DEFAULT_OPERATOR_TEMPLATE_OUT = PRODUCTIZATION / "pocketmd_lite_operator_template.json"
 DEFAULT_SURFACE_OUT = SURFACE_DIR / "pocketmd_lite_science_product_surface.json"
+DEFAULT_SOURCE_ACQUISITION_PLAN_OUT = SOURCE_ACQUISITION_PLAN_DEFAULT_OUT
+DEFAULT_SOURCE_ACQUISITION_PLAN_MD_OUT = SOURCE_ACQUISITION_PLAN_DEFAULT_OUT_MD
 RAW_ROW_IMPORTER_SCRIPT = Path("scripts/materialize_pocketmd_lite_operator_intake_from_rows.py")
 DEFAULT_ROW_TEMPLATE_DIR = PRODUCTIZATION
 DEFAULT_TOPK_ROW_TEMPLATE_FILENAME = "pocketmd_lite_topk_rows_template.csv"
@@ -210,6 +219,7 @@ def _topk_row_template_rows() -> list[dict[str, Any]]:
 def _input_paths() -> list[Path]:
     return [
         Path("scripts/build_pocketmd_lite_product_surface.py"),
+        Path("scripts/build_pocketmd_lite_source_acquisition_plan.py"),
         RAW_ROW_IMPORTER_SCRIPT,
         Path("scripts/materialize_pocketmd_lite_topk_survival_report.py"),
     ]
@@ -323,6 +333,48 @@ def _raw_row_importer_contract(
             "--source-id <source-id> --source-url <source-url> "
             "--source-license <license>"
         ),
+    }
+
+
+def _source_acquisition_plan_command() -> str:
+    return (
+        "python3 scripts/build_pocketmd_lite_source_acquisition_plan.py "
+        f"--out {DEFAULT_SOURCE_ACQUISITION_PLAN_OUT} "
+        f"--out-md {DEFAULT_SOURCE_ACQUISITION_PLAN_MD_OUT}"
+    )
+
+
+def _source_acquisition_plan_summary(
+    source_acquisition_plan: dict[str, Any],
+) -> dict[str, Any]:
+    summary = source_acquisition_plan.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+    blockers = source_acquisition_plan.get("blockers")
+    if not isinstance(blockers, list):
+        blockers = []
+    return {
+        "artifact": str(DEFAULT_SOURCE_ACQUISITION_PLAN_OUT),
+        "markdown_artifact": str(DEFAULT_SOURCE_ACQUISITION_PLAN_MD_OUT),
+        "status": str(source_acquisition_plan.get("status") or ""),
+        "contract_pass": source_acquisition_plan.get("contract_pass"),
+        "actual_closure_ready": bool(
+            source_acquisition_plan.get("actual_closure_ready")
+        ),
+        "source_scope": str(source_acquisition_plan.get("source_scope") or ""),
+        "required_case_count": int(summary.get("required_case_count") or 0),
+        "required_total_candidate_rows": int(
+            summary.get("required_total_candidate_rows") or 0
+        ),
+        "required_candidate_rows_per_case": int(
+            summary.get("required_candidate_rows_per_case") or 0
+        ),
+        "minimum_rows_by_case_count": int(
+            summary.get("minimum_rows_by_case_count") or 0
+        ),
+        "blocker_count": int(source_acquisition_plan.get("blocker_count") or 0),
+        "blockers": [str(row) for row in blockers],
+        "command": _source_acquisition_plan_command(),
     }
 
 
@@ -837,6 +889,11 @@ def build_readonly_api(*, repo_root: Path = ROOT) -> dict[str, Any]:
                 "artifact": str(DEFAULT_SURVIVAL_REPORT_OUT),
             },
             {
+                "endpoint_id": "get_pocketmd_lite_source_acquisition_plan",
+                "method": "GET",
+                "artifact": str(DEFAULT_SOURCE_ACQUISITION_PLAN_OUT),
+            },
+            {
                 "endpoint_id": "get_science_product_surface",
                 "method": "GET",
                 "artifact": str(DEFAULT_SURFACE_OUT),
@@ -881,6 +938,12 @@ def build_delivery_handoff(
     repo_root: Path = ROOT,
     row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR,
 ) -> dict[str, Any]:
+    source_acquisition_plan = build_pocketmd_lite_source_acquisition_plan(
+        repo_root=repo_root
+    )
+    source_acquisition_summary = _source_acquisition_plan_summary(
+        source_acquisition_plan
+    )
     return {
         "schema_version": HANDOFF_SCHEMA_VERSION,
         **_metadata(
@@ -906,6 +969,10 @@ def build_delivery_handoff(
         },
         "evidence_artifacts": {
             "contract": str(DEFAULT_CONTRACT_OUT),
+            "source_acquisition_plan": str(DEFAULT_SOURCE_ACQUISITION_PLAN_OUT),
+            "source_acquisition_plan_markdown": str(
+                DEFAULT_SOURCE_ACQUISITION_PLAN_MD_OUT
+            ),
             "topk_survival_report": str(DEFAULT_SURVIVAL_REPORT_OUT),
             "readonly_api": str(DEFAULT_READONLY_API_OUT),
             "operator_intake_packet": str(DEFAULT_OPERATOR_INTAKE_OUT),
@@ -937,11 +1004,13 @@ def build_delivery_handoff(
             "raw_row_importer": _raw_row_importer_contract(
                 row_template_dir=row_template_dir
             ),
+            "source_acquisition_plan": source_acquisition_summary,
             "route": POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
             "required_slot_id": "top_k_refinement_rows",
             "case_key": "cases",
         },
         "operator_next_actions": [
+            "complete_pocketmd_lite_source_acquisition_plan",
             "materialize_pocketmd_lite_operator_intake_from_rows",
             "fill_pocketmd_lite_operator_intake_packet",
             "attach_top_k_candidate_refinement_rows",
@@ -969,6 +1038,7 @@ def build_delivery_handoff(
         "raw_row_importer": _raw_row_importer_contract(
             row_template_dir=row_template_dir
         ),
+        "source_acquisition_plan": source_acquisition_summary,
         "operator_template": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
         "claim_boundary": (
             "This handoff prepares the bounded PocketMD Lite evidence path only. It is "
@@ -1047,6 +1117,12 @@ def build_operator_intake_packet(
         f"--out-surface {DEFAULT_SURFACE_OUT} --fail-blocked"
     )
     raw_row_importer = _raw_row_importer_contract(row_template_dir=row_template_dir)
+    source_acquisition_plan = build_pocketmd_lite_source_acquisition_plan(
+        repo_root=repo_root
+    )
+    source_acquisition_summary = _source_acquisition_plan_summary(
+        source_acquisition_plan
+    )
     gate_unblock_plan = _operator_gate_unblock_plan(
         required_case_fields=required_case_fields,
         materializer_command=materializer_command,
@@ -1090,6 +1166,7 @@ def build_operator_intake_packet(
         "required_case_fields": required_case_fields,
         "required_metrics": [row["metric_id"] for row in contract.get("reported_metrics", [])],
         "top_k_policy": contract.get("top_k_policy", {}),
+        "source_acquisition_plan": source_acquisition_summary,
         "raw_row_importer": raw_row_importer,
         "input_slots": [
             {
@@ -1102,8 +1179,10 @@ def build_operator_intake_packet(
                 "required_case_fields": required_case_fields,
                 "top_k_rank_prefix_policy": TOP_K_RANK_PREFIX_POLICY,
                 "raw_row_importer": raw_row_importer,
+                "source_acquisition_plan": source_acquisition_summary,
                 "template": template,
                 "owner_actions": [
+                    "complete_pocketmd_lite_source_acquisition_plan",
                     "attach already-ranked top-k candidate refinement rows",
                     "run materialize_pocketmd_lite_operator_intake_from_rows for CSV/TSV/JSON rows",
                     "fill local_min_survived as a boolean for every candidate",
@@ -1132,6 +1211,7 @@ def build_operator_intake_packet(
             ),
             "default_row_path_candidates": DEFAULT_RAW_ROW_INPUT_CANDIDATES,
             "row_template_artifacts": row_template_artifacts,
+            "source_acquisition_plan": source_acquisition_summary,
             "materialization_command": raw_row_importer["command"],
             "required_row_inputs": ["pocketmd_lite_topk_rows"],
         },
@@ -1153,6 +1233,12 @@ def build_operator_intake_packet(
             "blocker_count": len(blockers),
         },
         "materialization_sequence": [
+            {
+                "step_id": "build_pocketmd_lite_source_acquisition_plan",
+                "schema_version": SOURCE_ACQUISITION_PLAN_SCHEMA_VERSION,
+                "command": source_acquisition_summary["command"],
+                "produces": str(DEFAULT_SOURCE_ACQUISITION_PLAN_OUT),
+            },
             {
                 "step_id": "materialize_pocketmd_lite_operator_intake_from_rows",
                 "schema_version": "pocketmd-lite-operator-intake.v1",
@@ -1219,6 +1305,10 @@ def build_operator_intake_packet(
         ],
         "linked_artifacts": {
             "contract": str(DEFAULT_CONTRACT_OUT),
+            "source_acquisition_plan": str(DEFAULT_SOURCE_ACQUISITION_PLAN_OUT),
+            "source_acquisition_plan_markdown": str(
+                DEFAULT_SOURCE_ACQUISITION_PLAN_MD_OUT
+            ),
             "topk_survival_report": str(DEFAULT_SURVIVAL_REPORT_OUT),
             "readonly_api": str(DEFAULT_READONLY_API_OUT),
             "delivery_handoff": str(DEFAULT_HANDOFF_OUT),
@@ -1230,6 +1320,7 @@ def build_operator_intake_packet(
             "row_templates": row_template_artifacts,
         },
         "next_actions": [
+            "complete_pocketmd_lite_source_acquisition_plan",
             "materialize_pocketmd_lite_operator_intake_from_rows",
             "fill_pocketmd_lite_operator_intake_packet",
             "attach_top_k_candidate_refinement_rows",
@@ -1257,6 +1348,12 @@ def build_operator_intake_packet(
                 POCKETMD_LITE_MINIMUM_TOP_K_RANK_COVERAGE_PER_CASE
             ),
             "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
+            "source_acquisition_plan_status": str(
+                source_acquisition_summary.get("status") or ""
+            ),
+            "source_acquisition_plan_blocker_count": int(
+                source_acquisition_summary.get("blocker_count") or 0
+            ),
             "current_blocker_count": len(blockers),
             "first_blocked_target": first_blocked_target,
             "product_surface_ready": False,
@@ -1444,6 +1541,9 @@ def build_pocketmd_lite_artifacts(
     repo_root: Path = ROOT,
     row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR,
 ) -> dict[str, dict[str, Any]]:
+    source_acquisition_plan = build_pocketmd_lite_source_acquisition_plan(
+        repo_root=repo_root
+    )
     contract = build_contract(repo_root=repo_root, row_template_dir=row_template_dir)
     operator_template = build_operator_template(
         contract=contract,
@@ -1475,6 +1575,7 @@ def build_pocketmd_lite_artifacts(
         row_template_dir=row_template_dir,
     )
     return {
+        "source_acquisition_plan": source_acquisition_plan,
         "contract": contract,
         "operator_template": operator_template,
         "topk_survival_report": topk_survival_report,
@@ -1493,6 +1594,8 @@ def _operator_intake_markdown(payload: dict[str, Any]) -> str:
         f"- `status`: `{payload['status']}`",
         f"- `product_surface_ready`: `{payload['product_surface_ready']}`",
         f"- `first_blocked_target`: `{payload['summary']['first_blocked_target']}`",
+        f"- `source_acquisition_plan`: `{payload['source_acquisition_plan']['artifact']}`",
+        f"- `source_acquisition_plan_status`: `{payload['source_acquisition_plan']['status']}`",
         f"- `claim_boundary`: {payload['claim_boundary']}",
         "",
         "| Slot | Status | Required Fields |",
@@ -1570,6 +1673,8 @@ def write_pocketmd_lite_topk_row_template_csv(
 def write_pocketmd_lite_artifacts(
     *,
     repo_root: Path = ROOT,
+    source_acquisition_plan_out: Path = DEFAULT_SOURCE_ACQUISITION_PLAN_OUT,
+    source_acquisition_plan_md_out: Path = DEFAULT_SOURCE_ACQUISITION_PLAN_MD_OUT,
     contract_out: Path = DEFAULT_CONTRACT_OUT,
     survival_report_out: Path = DEFAULT_SURVIVAL_REPORT_OUT,
     survival_report_md_out: Path = DEFAULT_SURVIVAL_REPORT_MD_OUT,
@@ -1586,6 +1691,7 @@ def write_pocketmd_lite_artifacts(
         row_template_dir=row_template_dir,
     )
     outputs = {
+        "source_acquisition_plan": source_acquisition_plan_out,
         "contract": contract_out,
         "topk_survival_report": survival_report_out,
         "readonly_api": readonly_api_out,
@@ -1598,6 +1704,18 @@ def write_pocketmd_lite_artifacts(
         path = raw_path if raw_path.is_absolute() else repo_root / raw_path
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(_json_text(artifacts[key]), encoding="utf-8")
+    source_plan_md_path = (
+        source_acquisition_plan_md_out
+        if source_acquisition_plan_md_out.is_absolute()
+        else repo_root / source_acquisition_plan_md_out
+    )
+    source_plan_md_path.parent.mkdir(parents=True, exist_ok=True)
+    source_plan_md_path.write_text(
+        render_pocketmd_lite_source_acquisition_markdown(
+            artifacts["source_acquisition_plan"]
+        ),
+        encoding="utf-8",
+    )
     survival_md_path = (
         survival_report_md_out
         if survival_report_md_out.is_absolute()
@@ -1629,6 +1747,16 @@ def write_pocketmd_lite_artifacts(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--source-acquisition-plan-out",
+        type=Path,
+        default=DEFAULT_SOURCE_ACQUISITION_PLAN_OUT,
+    )
+    parser.add_argument(
+        "--source-acquisition-plan-md-out",
+        type=Path,
+        default=DEFAULT_SOURCE_ACQUISITION_PLAN_MD_OUT,
+    )
     parser.add_argument("--contract-out", type=Path, default=DEFAULT_CONTRACT_OUT)
     parser.add_argument("--survival-report-out", type=Path, default=DEFAULT_SURVIVAL_REPORT_OUT)
     parser.add_argument("--survival-report-md-out", type=Path, default=DEFAULT_SURVIVAL_REPORT_MD_OUT)
@@ -1648,6 +1776,8 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     artifacts = write_pocketmd_lite_artifacts(
         repo_root=args.repo_root,
+        source_acquisition_plan_out=args.source_acquisition_plan_out,
+        source_acquisition_plan_md_out=args.source_acquisition_plan_md_out,
         contract_out=args.contract_out,
         survival_report_out=args.survival_report_out,
         survival_report_md_out=args.survival_report_md_out,
