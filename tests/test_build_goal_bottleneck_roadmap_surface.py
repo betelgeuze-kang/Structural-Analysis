@@ -510,6 +510,49 @@ def test_goal_bottleneck_roadmap_surface_links_structural_release_bottleneck() -
     assert phase_3["state"] == "ready"
     assert phase_3["summary"]["actual_closure_ready"] is True
     assert phase_3["summary"]["requirement_pass_count"] == 5
+    phase3_gate = phase_3["summary"]["phase3_exit_gate"]
+    assert phase3_gate["phase3_exit_gate_status"] == "ready"
+    assert phase3_gate["phase3_failed_criteria"] == []
+    phase3_criteria = {
+        row["criterion_id"]: row
+        for row in phase3_gate["phase3_exit_gate_criteria"]
+    }
+    assert phase3_criteria["ranking_pr_auc_ci_low_min"] == {
+        "blockers": [],
+        "criterion_id": "ranking_pr_auc_ci_low_min",
+        "current_by_target": {"DRD2": 1.0, "HTR2A": 1.0, "OPRM1": 1.0},
+        "failed_targets": [],
+        "pass": True,
+        "required": ">=0.45",
+    }
+    assert phase3_criteria["top20_hit_rate_min"] == {
+        "blockers": [],
+        "criterion_id": "top20_hit_rate_min",
+        "current_by_target": {"DRD2": 0.6, "HTR2A": 0.6, "OPRM1": 0.6},
+        "failed_targets": [],
+        "pass": True,
+        "required": ">=0.2",
+    }
+    assert phase3_criteria["decoys_above_positive_count_max"] == {
+        "blockers": [],
+        "criterion_id": "decoys_above_positive_count_max",
+        "current_by_target": {"DRD2": 0, "HTR2A": 0, "OPRM1": 0},
+        "failed_targets": [],
+        "pass": True,
+        "required": "<=0",
+    }
+    assert phase3_criteria["no_positive_out_anchored_by_top_decoys"] == {
+        "blockers": [],
+        "criterion_id": "no_positive_out_anchored_by_top_decoys",
+        "current_by_target": {"DRD2": False, "HTR2A": False, "OPRM1": False},
+        "failed_targets": [],
+        "pass": True,
+        "required": False,
+    }
+    assert phase_3["summary"]["component_gate_summary"]["rows_path"].endswith(
+        "gpcr_hard_decoy_rows.json"
+    )
+    assert phase_3["summary"]["component_gate_summary"]["target_pass_count"] == 3
     phase_4 = rows["phase_4_pocketmd_lite_topk_actual_closure"]
     assert phase_4["state"] == "blocked"
     assert phase_4["bottleneck"] == "pocketmd_lite_topk_actual_rows_required"

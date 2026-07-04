@@ -388,6 +388,61 @@ def _science_actions_by_component(
     }
 
 
+def _science_row_audit_component(
+    science_row_audit: dict[str, Any],
+    component_id: str,
+) -> dict[str, Any]:
+    for row in _as_list(science_row_audit.get("components")):
+        if not isinstance(row, dict):
+            continue
+        if str(row.get("component_id") or "") == component_id:
+            return row
+    return {}
+
+
+def _science_component_gate_summary(component_audit: dict[str, Any]) -> dict[str, Any]:
+    if not component_audit:
+        return {}
+    phase3_criteria = [
+        {
+            "criterion_id": str(row.get("criterion_id") or ""),
+            "pass": _as_bool(row.get("pass")),
+            "required": row.get("required"),
+            "current_by_target": _as_dict(row.get("current_by_target")),
+            "failed_targets": [
+                str(item) for item in _as_list(row.get("failed_targets"))
+            ],
+            "blockers": [str(item) for item in _as_list(row.get("blockers"))],
+        }
+        for row in _as_list(component_audit.get("phase3_exit_gate_criteria"))
+        if isinstance(row, dict)
+    ]
+    summary = {
+        "component_status": str(component_audit.get("status") or ""),
+        "component_contract_pass": _as_bool(component_audit.get("contract_pass")),
+        "expected_rows_mode": str(component_audit.get("expected_rows_mode") or ""),
+        "materialized": _as_bool(component_audit.get("materialized")),
+        "rows_path": str(component_audit.get("rows_path") or ""),
+        "target_count": _as_int(component_audit.get("target_count")),
+        "target_pass_count": _as_int(component_audit.get("target_pass_count")),
+        "outputs": _as_dict(component_audit.get("outputs")),
+    }
+    if phase3_criteria:
+        summary.update(
+            {
+                "phase3_exit_gate_status": str(
+                    component_audit.get("phase3_exit_gate_status") or ""
+                ),
+                "phase3_exit_gate_criteria": phase3_criteria,
+                "phase3_failed_criteria": [
+                    str(item)
+                    for item in _as_list(component_audit.get("phase3_failed_criteria"))
+                ],
+            }
+        )
+    return summary
+
+
 def _science_first_blocker(
     *,
     science_handoff: dict[str, Any],
@@ -506,6 +561,11 @@ def _science_actual_closure_rows(
         if not phase:
             continue
         actual_ready = _as_bool(component.get("actual_closure_ready"))
+        component_audit = _science_row_audit_component(
+            science_row_audit,
+            component_id,
+        )
+        component_gate_summary = _science_component_gate_summary(component_audit)
         actual_audit = _science_actual_audit_for_component(science_handoff, component_id)
         action = _as_dict(actions_by_component.get(component_id))
         operator_gaps = _science_operator_gap_register(
@@ -572,6 +632,18 @@ def _science_actual_closure_rows(
                     ),
                     "actual_evidence_blocked_component_count": _as_int(
                         actual_audit.get("blocked_component_count")
+                    ),
+                    "component_gate_summary": component_gate_summary,
+                    "phase3_exit_gate": _as_dict(
+                        {
+                            key: component_gate_summary[key]
+                            for key in (
+                                "phase3_exit_gate_status",
+                                "phase3_exit_gate_criteria",
+                                "phase3_failed_criteria",
+                            )
+                            if key in component_gate_summary
+                        }
                     ),
                     "source_acquisition_blockers": source_blockers,
                     "source_acquisition_blocker_count": len(source_blockers),
