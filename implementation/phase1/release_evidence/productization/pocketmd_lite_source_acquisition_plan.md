@@ -14,6 +14,22 @@
 - `phase4_metric_closure_matrix_count`: `8`
 - `row_template_artifact`: `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv`
 
+## Operator Next Actions
+
+| Step | Action |
+|---:|---|
+| 1 | `review_phase4_refinement_receipt_plan` |
+| 2 | `build_pocketmd_lite_refinement_execution_plan` |
+| 3 | `build_pocketmd_lite_topk_rows_template_preflight` |
+| 4 | `select_upstream_ranked_top_k_candidate_sets` |
+| 5 | `attach_upstream_top_k_provenance_and_checksum_for_every_candidate` |
+| 6 | `run_bounded_lite_refinement_for_top_k_candidates_only` |
+| 7 | `write_local_min_contact_hbond_clash_uncertainty_rows` |
+| 8 | `attach_row_source_receipts_with_license_url_and_artifact_sha256` |
+| 9 | `write_pocketmd_lite_topk_rows_at_default_dropzone` |
+| 10 | `run_pocketmd_lite_raw_row_importer_and_survival_materializer` |
+| 11 | `refresh_science_actual_closure_from_rows` |
+
 | Case | Minimum Rows | Required Rank Prefix | Scope |
 |---|---:|---|---|
 | `pocketmd_lite_case_001` | 2 | `1,2` | `upstream_ranked_top_k_candidates_only` |

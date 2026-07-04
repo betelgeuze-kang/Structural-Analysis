@@ -2044,9 +2044,20 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `vina_gnina_adapter_row_preflight_status`: `{payload['vina_gnina_runtime_readiness']['adapter_row_preflight_status']}`",
         f"- `vina_gnina_runtime_missing_engine_ids`: `{', '.join(payload['vina_gnina_runtime_readiness']['missing_engine_ids'])}`",
         "",
-        "| Row Input | Source Family | Status | Unblocks |",
-        "|---|---|---|---|",
+        "## Operator Next Actions",
+        "",
+        "| Step | Action |",
+        "|---:|---|",
     ]
+    for index, action in enumerate(payload.get("operator_next_actions", []), start=1):
+        lines.append(f"| {index} | `{action}` |")
+    lines.extend(
+        [
+            "",
+            "| Row Input | Source Family | Status | Unblocks |",
+            "|---|---|---|---|",
+        ]
+    )
     for row in payload["row_input_contracts"]:
         unblocks = ", ".join(
             f"`{component}`" for component in row["unblocks_components"]

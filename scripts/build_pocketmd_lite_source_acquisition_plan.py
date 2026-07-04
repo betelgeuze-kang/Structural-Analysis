@@ -1127,9 +1127,20 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `phase4_metric_closure_matrix_count`: `{payload['phase4_metric_closure_matrix_count']}`",
         f"- `row_template_artifact`: `{payload['row_artifact_contract']['template_artifact']}`",
         "",
-        "| Case | Minimum Rows | Required Rank Prefix | Scope |",
-        "|---|---:|---|---|",
+        "## Operator Next Actions",
+        "",
+        "| Step | Action |",
+        "|---:|---|",
     ]
+    for index, action in enumerate(payload.get("operator_next_actions", []), start=1):
+        lines.append(f"| {index} | `{action}` |")
+    lines.extend(
+        [
+            "",
+            "| Case | Minimum Rows | Required Rank Prefix | Scope |",
+            "|---|---:|---|---|",
+        ]
+    )
     for row in payload["minimum_rows_by_case"]:
         ranks = ",".join(str(rank) for rank in row["required_top_k_rank_prefix"])
         lines.append(

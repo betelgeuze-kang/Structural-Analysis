@@ -1430,6 +1430,50 @@ def _markdown(payload: dict[str, Any]) -> str:
                     f"`{source_phase2_criteria}` | "
                     f"`{source_phase4_criteria}` |"
                 )
+        source_next_action_rows: list[dict[str, Any]] = []
+        for component in blocked_component_actions:
+            for action in _as_list(component.get("missing_row_input_actions")):
+                if not isinstance(action, dict):
+                    continue
+                next_actions = [
+                    str(item)
+                    for item in _as_list(
+                        action.get("source_acquisition_operator_next_actions")
+                    )
+                    if str(item)
+                ]
+                if not next_actions:
+                    continue
+                source_next_action_rows.append(
+                    {
+                        "component_id": str(component.get("component_id") or ""),
+                        "row_input_id": str(action.get("row_input_id") or ""),
+                        "source_action": str(
+                            action.get("source_acquisition_operator_action") or ""
+                        ),
+                        "first_step": next_actions[0],
+                        "last_step": next_actions[-1],
+                        "action_count": len(next_actions),
+                    }
+                )
+        if source_next_action_rows:
+            lines.extend(["", "### Source Acquisition Next Actions", ""])
+            lines.extend(
+                [
+                    "| Component | Row Input | Source Action | First Step | Last Step | Count |",
+                    "| --- | --- | --- | --- | --- | ---: |",
+                ]
+            )
+            for row in source_next_action_rows:
+                lines.append(
+                    "| "
+                    f"`{row['component_id']}` | "
+                    f"`{row['row_input_id']}` | "
+                    f"`{row['source_action']}` | "
+                    f"`{row['first_step']}` | "
+                    f"`{row['last_step']}` | "
+                    f"{row['action_count']} |"
+                )
         detailed_actions: list[dict[str, Any]] = []
         for component in blocked_component_actions:
             for action in _as_list(component.get("missing_row_input_actions")):

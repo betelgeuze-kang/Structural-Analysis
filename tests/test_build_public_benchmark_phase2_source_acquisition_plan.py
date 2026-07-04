@@ -727,6 +727,9 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "`vina_gnina_runtime_blocked_engine_run_slot_count`: `24`" in markdown
     assert "`phase2_exit_criterion_count`: `5`" in markdown
     assert "`phase2_row_closure_matrix_count`: `4`" in markdown
+    assert "## Operator Next Actions" in markdown
+    assert "| 1 | `review_official_source_receipt_plan` |" in markdown
+    assert "| 14 | `refresh_public_benchmark_source_of_truth` |" in markdown
     assert "## Phase 2 Exit Criteria" in markdown
     assert "`posebusters_style_pose_validity_ready`" in markdown
     assert "`vina_gnina_rows_not_provided`" in markdown

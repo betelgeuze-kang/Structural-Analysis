@@ -33,6 +33,25 @@
 - `vina_gnina_adapter_row_preflight_status`: `row_artifact_missing`
 - `vina_gnina_runtime_missing_engine_ids`: `vina, gnina`
 
+## Operator Next Actions
+
+| Step | Action |
+|---:|---|
+| 1 | `review_official_source_receipt_plan` |
+| 2 | `attach_casf_pdbbind_subset_rows_with_local_file_checksums` |
+| 3 | `attach_pose_coordinate_rows_with_symmetry_contracts` |
+| 4 | `attach_dud_e_or_lit_pcba_scored_molecule_rows` |
+| 5 | `build_vina_gnina_execution_plan_from_materialized_cases` |
+| 6 | `fill_public_benchmark_vina_gnina_input_manifest` |
+| 7 | `run_vina_gnina_runtime_readiness_check` |
+| 8 | `attach_vina_gnina_engine_run_rows` |
+| 9 | `build_source_access_preflight_receipt` |
+| 10 | `attach_external_source_receipts_and_license_or_accession_refs` |
+| 11 | `run_public_benchmark_operator_bundle_from_rows` |
+| 12 | `run_public_benchmark_phase2_row_audit` |
+| 13 | `run_public_benchmark_harness_bundle_materializer` |
+| 14 | `refresh_public_benchmark_source_of_truth` |
+
 | Row Input | Source Family | Status | Unblocks |
 |---|---|---|---|
 | `subset_rows` | `CASF/PDBBind` | `operator_acquisition_required` | `casf_pdbbind_pose_success_harness` |

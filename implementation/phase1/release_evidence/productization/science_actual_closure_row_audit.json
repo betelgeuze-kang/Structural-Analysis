@@ -1785,13 +1785,13 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T03:22:47.043319+00:00",
+  "generated_at": "2026-07-04T03:28:35.815798+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json": "sha256:98255bfca71cb82c3146a11e74e90cc338836518d93672950cbec5defd7d7147",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:dc1079f8b105412e7839633a1cf3ee9e277893fa1a78367cfd9da4d9ad252091",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:110b0c1904504d04405e355e250f88477cc9862ede09986316f8dbc626a071a1",
     "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
     "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json": "sha256:ebad77368627c20437a800eeb1bcfe1bea120acc064275665fab9b9494d9e967",
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:63b44850a061182564c5bf117e160273ccc2534d6c087fb308e77e01ee50ec19",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:5dc497662dd76c7470391fe88cfc4e61410fdca182086e9ccbd1163b178a8fdf",
     "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json": "sha256:c3d8772c577c40903ac1656ef8d7474695cb374c3e60de312ffe0d37985483ff",
     "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
@@ -3216,7 +3216,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "b3754b2d2a69915cf21220303409a574707306da",
+  "source_commit_sha": "c202f309b4c2f0b35926eed659af88b9c1842b86",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,

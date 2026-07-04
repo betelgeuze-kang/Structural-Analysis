@@ -756,6 +756,11 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "Required Receipts" in markdown
     assert "Source Phase 2 Criteria" in markdown
     assert "Source Phase 4 Criteria" in markdown
+    assert "### Source Acquisition Next Actions" in markdown
+    assert "review_official_source_receipt_plan" in markdown
+    assert "refresh_public_benchmark_source_of_truth" in markdown
+    assert "review_phase4_refinement_receipt_plan" in markdown
+    assert "refresh_science_actual_closure_from_rows" in markdown
     assert "attach_vina_gnina_rows_then_run_phase2_row_audit" in markdown
     assert "vina_gnina_comparison_ready" in markdown
     assert "build_public_benchmark_vina_gnina_runtime_readiness.py" in markdown

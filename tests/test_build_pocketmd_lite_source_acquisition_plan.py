@@ -623,6 +623,9 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert "pocketmd_lite_topk_rows_template.csv" in markdown
     assert "pocketmd_lite_topk_rows_template_preflight.json" in markdown
     assert "build_pocketmd_lite_topk_rows_template_preflight.py" in markdown
+    assert "## Operator Next Actions" in markdown
+    assert "| 1 | `review_phase4_refinement_receipt_plan` |" in markdown
+    assert "| 11 | `refresh_science_actual_closure_from_rows` |" in markdown
     assert "## Phase 4 Candidate Slot Matrix" in markdown
     assert "pocketmd_lite_case_001_rank_1" in markdown
     assert "## Phase 4 Metric Closure Matrix" in markdown
