@@ -172,7 +172,7 @@
   ],
   "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
   "expected_rows_detected": false,
-  "generated_at": "2026-07-04T02:25:10.985936+00:00",
+  "generated_at": "2026-07-04T04:03:40.836802+00:00",
   "header_fields": [
     "case_id",
     "source_family",
@@ -196,8 +196,8 @@
   ],
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv": "sha256:3a106d2aa9f456eee7238523bf090db13e35d98afefa3952352a660f5b5e36ae",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:c8c3ede3ae3e12b7b06c1dd51c7b6e612f81109c784d57150252a419063ec38c",
-    "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:76416a1ee29b947fd510fc0f22f38031eeb335e1ad4a18a2c6144b42cfa50453",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:5eaa0791cbcbc2b19bbd06c01fcddd636026dcf2b1316447e044d463e4cf97c2",
+    "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:69b0ce594558bad457b052be33865b0abf90e8b4779dc31ff3a987b1eea7ef72",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:8c1ce46cbd085987f2923602424b666bb63e9edb6fdb2438158d36aee890dd41"
   },
   "missing_expected_slots": [],
@@ -207,6 +207,7 @@
     "attach_real_predicted_ligand_outputs_for_each_engine_run",
     "fill_engine_version_config_checksum_rmsd_pose_success_and_score",
     "attach_engine_run_receipts",
+    "attach_case_source_and_comparison_metric_receipts",
     "copy_or_export_completed_rows_to_expected_rows_artifact",
     "materialize_public_benchmark_vina_gnina_comparison_adapter"
   ],
@@ -233,6 +234,2600 @@
   ],
   "reuse_policy": "public_benchmark_vina_gnina_rows_template_preflight",
   "reused_evidence": false,
+  "role_receipt_plan": [
+    {
+      "blockers": [],
+      "case_id": "casf2016_4llx",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4llx_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_4llx",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4llx_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_4llx",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4llx_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_4llx",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4llx_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_4llx",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4llx_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_4llx_gnina_casf2016_4llx_gnina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_4llx",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4llx_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_4llx_gnina_casf2016_4llx_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_4llx",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4llx_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_4llx_gnina_casf2016_4llx_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_4llx",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4llx_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_4llx_gnina_casf2016_4llx_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_5c28",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_5c28_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_5c28_vina_casf2016_5c28_vina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_5c28",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_5c28_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_5c28_vina_casf2016_5c28_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_5c28",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_5c28_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_5c28_vina_casf2016_5c28_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_5c28",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_5c28_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_5c28_vina_casf2016_5c28_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_5c28",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_5c28_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_5c28_gnina_casf2016_5c28_gnina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_5c28",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_5c28_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_5c28_gnina_casf2016_5c28_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_5c28",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_5c28_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_5c28_gnina_casf2016_5c28_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_5c28",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_5c28_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_5c28_gnina_casf2016_5c28_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_3uuo",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3uuo_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_3uuo_vina_casf2016_3uuo_vina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_3uuo",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3uuo_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_3uuo_vina_casf2016_3uuo_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3uuo",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3uuo_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_3uuo_vina_casf2016_3uuo_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3uuo",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3uuo_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_3uuo_vina_casf2016_3uuo_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_3uuo",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3uuo_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_3uuo_gnina_casf2016_3uuo_gnina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_3uuo",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3uuo_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_3uuo_gnina_casf2016_3uuo_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3uuo",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3uuo_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_3uuo_gnina_casf2016_3uuo_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3uuo",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3uuo_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_3uuo_gnina_casf2016_3uuo_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_3ui7",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3ui7_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_3ui7_vina_casf2016_3ui7_vina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_3ui7",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3ui7_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_3ui7_vina_casf2016_3ui7_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3ui7",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3ui7_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_3ui7_vina_casf2016_3ui7_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3ui7",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3ui7_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_3ui7_vina_casf2016_3ui7_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_3ui7",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3ui7_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_3ui7_gnina_casf2016_3ui7_gnina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_3ui7",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3ui7_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_3ui7_gnina_casf2016_3ui7_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3ui7",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3ui7_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_3ui7_gnina_casf2016_3ui7_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3ui7",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3ui7_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_3ui7_gnina_casf2016_3ui7_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_5c2h",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_5c2h_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_5c2h_vina_casf2016_5c2h_vina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_5c2h",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_5c2h_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_5c2h_vina_casf2016_5c2h_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_5c2h",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_5c2h_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_5c2h_vina_casf2016_5c2h_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_5c2h",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_5c2h_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_5c2h_vina_casf2016_5c2h_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_5c2h",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_5c2h_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_5c2h_gnina_casf2016_5c2h_gnina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_5c2h",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_5c2h_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_5c2h_gnina_casf2016_5c2h_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_5c2h",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_5c2h_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_5c2h_gnina_casf2016_5c2h_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_5c2h",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_5c2h_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_5c2h_gnina_casf2016_5c2h_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_2v00",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_2v00_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_2v00_vina_casf2016_2v00_vina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_2v00",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_2v00_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_2v00_vina_casf2016_2v00_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_2v00",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_2v00_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_2v00_vina_casf2016_2v00_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_2v00",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_2v00_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_2v00_vina_casf2016_2v00_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_2v00",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_2v00_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_2v00_gnina_casf2016_2v00_gnina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_2v00",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_2v00_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_2v00_gnina_casf2016_2v00_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_2v00",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_2v00_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_2v00_gnina_casf2016_2v00_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_2v00",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_2v00_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_2v00_gnina_casf2016_2v00_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_3wz8",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3wz8_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_3wz8_vina_casf2016_3wz8_vina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_3wz8",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3wz8_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_3wz8_vina_casf2016_3wz8_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3wz8",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3wz8_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_3wz8_vina_casf2016_3wz8_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3wz8",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3wz8_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_3wz8_vina_casf2016_3wz8_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_3wz8",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3wz8_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_3wz8_gnina_casf2016_3wz8_gnina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_3wz8",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3wz8_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_3wz8_gnina_casf2016_3wz8_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3wz8",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3wz8_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_3wz8_gnina_casf2016_3wz8_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3wz8",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3wz8_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_3wz8_gnina_casf2016_3wz8_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_3pww",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3pww_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_3pww_vina_casf2016_3pww_vina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_3pww",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3pww_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_3pww_vina_casf2016_3pww_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3pww",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3pww_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_3pww_vina_casf2016_3pww_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3pww",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3pww_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_3pww_vina_casf2016_3pww_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_3pww",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3pww_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_3pww_gnina_casf2016_3pww_gnina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_3pww",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3pww_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_3pww_gnina_casf2016_3pww_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3pww",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3pww_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_3pww_gnina_casf2016_3pww_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3pww",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3pww_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_3pww_gnina_casf2016_3pww_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_3prs",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3prs_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_3prs_vina_casf2016_3prs_vina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_3prs",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3prs_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_3prs_vina_casf2016_3prs_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3prs",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3prs_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_3prs_vina_casf2016_3prs_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3prs",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3prs_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_3prs_vina_casf2016_3prs_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_3prs",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3prs_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_3prs_gnina_casf2016_3prs_gnina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_3prs",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3prs_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_3prs_gnina_casf2016_3prs_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3prs",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3prs_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_3prs_gnina_casf2016_3prs_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3prs",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3prs_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_3prs_gnina_casf2016_3prs_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_3uri",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3uri_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_3uri_vina_casf2016_3uri_vina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_3uri",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3uri_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_3uri_vina_casf2016_3uri_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3uri",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3uri_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_3uri_vina_casf2016_3uri_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3uri",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3uri_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_3uri_vina_casf2016_3uri_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_3uri",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3uri_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_3uri_gnina_casf2016_3uri_gnina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_3uri",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3uri_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_3uri_gnina_casf2016_3uri_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3uri",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3uri_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_3uri_gnina_casf2016_3uri_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_3uri",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_3uri_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_3uri_gnina_casf2016_3uri_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_4m0z",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4m0z_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_4m0z_vina_casf2016_4m0z_vina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_4m0z",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4m0z_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_4m0z_vina_casf2016_4m0z_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_4m0z",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4m0z_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_4m0z_vina_casf2016_4m0z_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_4m0z",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4m0z_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_4m0z_vina_casf2016_4m0z_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_4m0z",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4m0z_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_4m0z_gnina_casf2016_4m0z_gnina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_4m0z",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4m0z_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_4m0z_gnina_casf2016_4m0z_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_4m0z",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4m0z_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_4m0z_gnina_casf2016_4m0z_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_4m0z",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4m0z_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_4m0z_gnina_casf2016_4m0z_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_4m0y",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4m0y_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_4m0y_vina_casf2016_4m0y_vina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_4m0y",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4m0y_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_4m0y_vina_casf2016_4m0y_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_4m0y",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4m0y_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_4m0y_vina_casf2016_4m0y_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_4m0y",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4m0y_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_4m0y_vina_casf2016_4m0y_vina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_4m0y",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4m0y_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [],
+      "operator_action": "attach_casf_pdbbind_case_source_receipt",
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "role_id": "casf_pdbbind_case_source_receipt",
+      "slot_id": "casf2016_4m0y_gnina_casf2016_4m0y_gnina_run",
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_4m0y",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4m0y_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_4m0y_gnina_casf2016_4m0y_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_4m0y",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4m0y_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "engine_config_checksum",
+        "engine_version"
+      ],
+      "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "engine_version",
+        "engine_config_checksum"
+      ],
+      "role_id": "engine_config_version_receipt",
+      "slot_id": "casf2016_4m0y_gnina_casf2016_4m0y_gnina_run",
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "required_role_fields_missing"
+      ],
+      "case_id": "casf2016_4m0y",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4m0y_gnina_run",
+      "engine_id": "gnina",
+      "invalid_fields": [],
+      "missing_fields": [
+        "pose_success",
+        "score",
+        "symmetry_aware_rmsd_angstrom"
+      ],
+      "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+      "required_fields": [
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "role_id": "comparison_metric_receipt",
+      "slot_id": "casf2016_4m0y_gnina_casf2016_4m0y_gnina_run",
+      "status": "operator_completion_required"
+    }
+  ],
   "row_preflight_count": 24,
   "row_preflight_rows": [
     {
@@ -309,6 +2904,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_4llx",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4llx_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_4llx",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4llx_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_4llx",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4llx_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_4llx",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4llx_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -391,6 +3096,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_4llx",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4llx_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_4llx_gnina_casf2016_4llx_gnina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_4llx",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4llx_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_4llx_gnina_casf2016_4llx_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_4llx",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4llx_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_4llx_gnina_casf2016_4llx_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_4llx",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4llx_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_4llx_gnina_casf2016_4llx_gnina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -473,6 +3288,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_5c28",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_5c28_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_5c28_vina_casf2016_5c28_vina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_5c28",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_5c28_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_5c28_vina_casf2016_5c28_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_5c28",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_5c28_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_5c28_vina_casf2016_5c28_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_5c28",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_5c28_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_5c28_vina_casf2016_5c28_vina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -555,6 +3480,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_5c28",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_5c28_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_5c28_gnina_casf2016_5c28_gnina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_5c28",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_5c28_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_5c28_gnina_casf2016_5c28_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_5c28",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_5c28_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_5c28_gnina_casf2016_5c28_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_5c28",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_5c28_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_5c28_gnina_casf2016_5c28_gnina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -637,6 +3672,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_3uuo",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3uuo_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_3uuo_vina_casf2016_3uuo_vina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_3uuo",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3uuo_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_3uuo_vina_casf2016_3uuo_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3uuo",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3uuo_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_3uuo_vina_casf2016_3uuo_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3uuo",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3uuo_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_3uuo_vina_casf2016_3uuo_vina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -719,6 +3864,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_3uuo",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3uuo_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_3uuo_gnina_casf2016_3uuo_gnina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_3uuo",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3uuo_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_3uuo_gnina_casf2016_3uuo_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3uuo",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3uuo_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_3uuo_gnina_casf2016_3uuo_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3uuo",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3uuo_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_3uuo_gnina_casf2016_3uuo_gnina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -801,6 +4056,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_3ui7",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3ui7_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_3ui7_vina_casf2016_3ui7_vina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_3ui7",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3ui7_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_3ui7_vina_casf2016_3ui7_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3ui7",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3ui7_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_3ui7_vina_casf2016_3ui7_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3ui7",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3ui7_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_3ui7_vina_casf2016_3ui7_vina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -883,6 +4248,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_3ui7",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3ui7_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_3ui7_gnina_casf2016_3ui7_gnina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_3ui7",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3ui7_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_3ui7_gnina_casf2016_3ui7_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3ui7",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3ui7_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_3ui7_gnina_casf2016_3ui7_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3ui7",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3ui7_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_3ui7_gnina_casf2016_3ui7_gnina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -965,6 +4440,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_5c2h",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_5c2h_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_5c2h_vina_casf2016_5c2h_vina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_5c2h",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_5c2h_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_5c2h_vina_casf2016_5c2h_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_5c2h",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_5c2h_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_5c2h_vina_casf2016_5c2h_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_5c2h",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_5c2h_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_5c2h_vina_casf2016_5c2h_vina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -1047,6 +4632,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_5c2h",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_5c2h_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_5c2h_gnina_casf2016_5c2h_gnina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_5c2h",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_5c2h_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_5c2h_gnina_casf2016_5c2h_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_5c2h",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_5c2h_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_5c2h_gnina_casf2016_5c2h_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_5c2h",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_5c2h_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_5c2h_gnina_casf2016_5c2h_gnina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -1129,6 +4824,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_2v00",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_2v00_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_2v00_vina_casf2016_2v00_vina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_2v00",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_2v00_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_2v00_vina_casf2016_2v00_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_2v00",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_2v00_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_2v00_vina_casf2016_2v00_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_2v00",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_2v00_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_2v00_vina_casf2016_2v00_vina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -1211,6 +5016,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_2v00",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_2v00_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_2v00_gnina_casf2016_2v00_gnina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_2v00",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_2v00_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_2v00_gnina_casf2016_2v00_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_2v00",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_2v00_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_2v00_gnina_casf2016_2v00_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_2v00",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_2v00_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_2v00_gnina_casf2016_2v00_gnina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -1293,6 +5208,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_3wz8",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3wz8_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_3wz8_vina_casf2016_3wz8_vina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_3wz8",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3wz8_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_3wz8_vina_casf2016_3wz8_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3wz8",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3wz8_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_3wz8_vina_casf2016_3wz8_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3wz8",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3wz8_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_3wz8_vina_casf2016_3wz8_vina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -1375,6 +5400,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_3wz8",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3wz8_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_3wz8_gnina_casf2016_3wz8_gnina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_3wz8",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3wz8_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_3wz8_gnina_casf2016_3wz8_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3wz8",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3wz8_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_3wz8_gnina_casf2016_3wz8_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3wz8",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3wz8_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_3wz8_gnina_casf2016_3wz8_gnina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -1457,6 +5592,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_3pww",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3pww_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_3pww_vina_casf2016_3pww_vina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_3pww",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3pww_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_3pww_vina_casf2016_3pww_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3pww",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3pww_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_3pww_vina_casf2016_3pww_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3pww",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3pww_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_3pww_vina_casf2016_3pww_vina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -1539,6 +5784,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_3pww",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3pww_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_3pww_gnina_casf2016_3pww_gnina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_3pww",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3pww_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_3pww_gnina_casf2016_3pww_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3pww",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3pww_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_3pww_gnina_casf2016_3pww_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3pww",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3pww_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_3pww_gnina_casf2016_3pww_gnina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -1621,6 +5976,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_3prs",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3prs_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_3prs_vina_casf2016_3prs_vina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_3prs",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3prs_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_3prs_vina_casf2016_3prs_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3prs",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3prs_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_3prs_vina_casf2016_3prs_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3prs",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3prs_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_3prs_vina_casf2016_3prs_vina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -1703,6 +6168,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_3prs",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3prs_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_3prs_gnina_casf2016_3prs_gnina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_3prs",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3prs_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_3prs_gnina_casf2016_3prs_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3prs",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3prs_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_3prs_gnina_casf2016_3prs_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3prs",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3prs_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_3prs_gnina_casf2016_3prs_gnina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -1785,6 +6360,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_3uri",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3uri_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_3uri_vina_casf2016_3uri_vina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_3uri",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3uri_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_3uri_vina_casf2016_3uri_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3uri",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3uri_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_3uri_vina_casf2016_3uri_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3uri",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3uri_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_3uri_vina_casf2016_3uri_vina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -1867,6 +6552,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_3uri",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3uri_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_3uri_gnina_casf2016_3uri_gnina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_3uri",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3uri_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_3uri_gnina_casf2016_3uri_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3uri",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3uri_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_3uri_gnina_casf2016_3uri_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_3uri",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_3uri_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_3uri_gnina_casf2016_3uri_gnina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -1949,6 +6744,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_4m0z",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4m0z_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_4m0z_vina_casf2016_4m0z_vina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_4m0z",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4m0z_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_4m0z_vina_casf2016_4m0z_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_4m0z",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4m0z_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_4m0z_vina_casf2016_4m0z_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_4m0z",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4m0z_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_4m0z_vina_casf2016_4m0z_vina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -2031,6 +6936,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_4m0z",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4m0z_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_4m0z_gnina_casf2016_4m0z_gnina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_4m0z",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4m0z_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_4m0z_gnina_casf2016_4m0z_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_4m0z",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4m0z_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_4m0z_gnina_casf2016_4m0z_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_4m0z",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4m0z_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_4m0z_gnina_casf2016_4m0z_gnina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -2113,6 +7128,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_4m0y",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4m0y_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_4m0y_vina_casf2016_4m0y_vina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_4m0y",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4m0y_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_4m0y_vina_casf2016_4m0y_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_4m0y",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4m0y_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_4m0y_vina_casf2016_4m0y_vina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_4m0y",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4m0y_vina_run",
+          "engine_id": "vina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_4m0y_vina_casf2016_4m0y_vina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -2195,6 +7320,116 @@
         "present": false,
         "valid": false
       },
+      "role_plan_rows": [
+        {
+          "blockers": [],
+          "case_id": "casf2016_4m0y",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4m0y_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [],
+          "operator_action": "attach_casf_pdbbind_case_source_receipt",
+          "required_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "role_id": "casf_pdbbind_case_source_receipt",
+          "slot_id": "casf2016_4m0y_gnina_casf2016_4m0y_gnina_run",
+          "status": "ready"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing",
+            "required_role_fields_invalid"
+          ],
+          "case_id": "casf2016_4m0y",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4m0y_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [
+            "engine_run_provenance_ref",
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "missing_fields": [
+            "predicted_ligand_checksum"
+          ],
+          "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "role_id": "engine_run_artifact_receipt",
+          "slot_id": "casf2016_4m0y_gnina_casf2016_4m0y_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_4m0y",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4m0y_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "engine_config_checksum",
+            "engine_version"
+          ],
+          "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+          "required_fields": [
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum"
+          ],
+          "role_id": "engine_config_version_receipt",
+          "slot_id": "casf2016_4m0y_gnina_casf2016_4m0y_gnina_run",
+          "status": "operator_completion_required"
+        },
+        {
+          "blockers": [
+            "required_role_fields_missing"
+          ],
+          "case_id": "casf2016_4m0y",
+          "closes_phase2_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "docking_run_id": "casf2016_4m0y_gnina_run",
+          "engine_id": "gnina",
+          "invalid_fields": [],
+          "missing_fields": [
+            "pose_success",
+            "score",
+            "symmetry_aware_rmsd_angstrom"
+          ],
+          "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+          "required_fields": [
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "role_id": "comparison_metric_receipt",
+          "slot_id": "casf2016_4m0y_gnina_casf2016_4m0y_gnina_run",
+          "status": "operator_completion_required"
+        }
+      ],
       "score_direction_status": {
         "blocker": "",
         "present": true,
@@ -2206,7 +7441,7 @@
   ],
   "runtime_readiness_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
   "schema_version": "public-benchmark-vina-gnina-rows-template-preflight.v1",
-  "source_commit_sha": "9e06b6efd0ce73499baad6bf9f93619a5cf20eaf",
+  "source_commit_sha": "17833231fa88003ad3988e3e8b624343eeb14555",
   "status": "operator_rows_completion_required",
   "summary": {
     "adapter_template_ready": false,
@@ -2223,6 +7458,8 @@
     "missing_local_ref_count": 48,
     "missing_numeric_value_count": 48,
     "missing_required_value_count": 144,
+    "role_receipt_blocked_count": 72,
+    "role_receipt_plan_count": 96,
     "template_row_count": 24,
     "template_slot_count": 24,
     "template_slot_coverage_complete": true,

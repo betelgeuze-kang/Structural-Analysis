@@ -1423,6 +1423,69 @@ def _vina_gnina_runtime_action_packet(
     }
 
 
+def _first_blocked_row(rows: list[Any]) -> dict[str, Any]:
+    for row in rows:
+        if isinstance(row, dict) and row.get("status") != "ready":
+            return row
+    return {}
+
+
+def _vina_gnina_rows_template_preflight_summary(repo_root: Path) -> dict[str, Any]:
+    payload = _load_json(repo_root, DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT)
+    if not payload:
+        return {
+            "present": False,
+            "artifact": str(DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT),
+            "markdown_artifact": str(DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT_MD),
+            "status": "missing",
+            "adapter_template_ready": False,
+            "expected_rows_detected": False,
+            "template_row_count": 0,
+            "expected_engine_run_slot_count": 0,
+            "missing_engine_run_receipt_value_count": 0,
+            "missing_local_ref_count": 0,
+            "missing_numeric_value_count": 0,
+            "invalid_pose_success_count": 0,
+            "role_receipt_plan_count": 0,
+            "role_receipt_blocked_count": 0,
+            "first_blocked_role_receipt": {},
+        }
+    role_receipt_plan = [
+        row for row in payload.get("role_receipt_plan", []) if isinstance(row, dict)
+    ]
+    summary = _as_dict(payload.get("summary"))
+    return {
+        "present": True,
+        "artifact": str(DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT),
+        "markdown_artifact": str(DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT_MD),
+        "status": str(payload.get("status") or ""),
+        "adapter_template_ready": bool(payload.get("adapter_template_ready")),
+        "expected_rows_detected": bool(payload.get("expected_rows_detected")),
+        "template_row_count": _as_int(summary.get("template_row_count")),
+        "expected_engine_run_slot_count": _as_int(
+            summary.get("expected_engine_run_slot_count")
+        ),
+        "missing_engine_run_receipt_value_count": _as_int(
+            summary.get("missing_engine_run_receipt_value_count")
+        ),
+        "missing_local_ref_count": _as_int(summary.get("missing_local_ref_count")),
+        "missing_numeric_value_count": _as_int(
+            summary.get("missing_numeric_value_count")
+        ),
+        "invalid_pose_success_count": _as_int(
+            summary.get("invalid_pose_success_count")
+        ),
+        "role_receipt_plan_count": _as_int(
+            summary.get("role_receipt_plan_count") or len(role_receipt_plan)
+        ),
+        "role_receipt_blocked_count": _as_int(
+            summary.get("role_receipt_blocked_count")
+            or sum(1 for row in role_receipt_plan if row.get("status") != "ready")
+        ),
+        "first_blocked_role_receipt": _first_blocked_row(role_receipt_plan),
+    }
+
+
 def _missing_row_input_actions(
     *,
     missing_row_inputs: list[str],
@@ -1431,6 +1494,7 @@ def _missing_row_input_actions(
     commands: dict[str, str],
     vina_gnina_execution_plan_summary: dict[str, Any],
     vina_gnina_runtime_readiness_summary: dict[str, Any],
+    vina_gnina_rows_template_preflight_summary: dict[str, Any],
 ) -> list[dict[str, Any]]:
     contracts = _row_input_contract_map(row_input_contracts)
     closure_by_row_input = {
@@ -1642,6 +1706,29 @@ def _missing_row_input_actions(
                         "row_template_preflight_markdown_artifact": str(
                             DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT_MD
                         ),
+                        "template_preflight_summary": (
+                            vina_gnina_rows_template_preflight_summary
+                        ),
+                        "role_receipt_plan_summary": {
+                            "role_receipt_plan_count": int(
+                                vina_gnina_rows_template_preflight_summary.get(
+                                    "role_receipt_plan_count"
+                                )
+                                or 0
+                            ),
+                            "role_receipt_blocked_count": int(
+                                vina_gnina_rows_template_preflight_summary.get(
+                                    "role_receipt_blocked_count"
+                                )
+                                or 0
+                            ),
+                            "first_blocked_role_receipt": dict(
+                                vina_gnina_rows_template_preflight_summary.get(
+                                    "first_blocked_role_receipt"
+                                )
+                                or {}
+                            ),
+                        },
                         "build_row_template_preflight_command": str(
                             commands.get("build_vina_gnina_rows_template_preflight")
                             or ""
@@ -1727,6 +1814,9 @@ def build_public_benchmark_phase2_source_acquisition_plan(
     vina_gnina_runtime_readiness_summary = _vina_gnina_runtime_readiness_summary(
         vina_gnina_runtime_readiness
     )
+    vina_gnina_rows_template_preflight_summary = (
+        _vina_gnina_rows_template_preflight_summary(repo_root)
+    )
     blockers = _source_acquisition_blockers(
         phase2_row_audit_summary,
         vina_gnina_execution_plan_summary,
@@ -1797,6 +1887,9 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         commands=commands,
         vina_gnina_execution_plan_summary=vina_gnina_execution_plan_summary,
         vina_gnina_runtime_readiness_summary=vina_gnina_runtime_readiness_summary,
+        vina_gnina_rows_template_preflight_summary=(
+            vina_gnina_rows_template_preflight_summary
+        ),
     )
     operator_next_actions = [
         "review_official_source_receipt_plan",
@@ -1862,6 +1955,9 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
         "vina_gnina_execution_plan": vina_gnina_execution_plan_summary,
         "vina_gnina_runtime_readiness": vina_gnina_runtime_readiness_summary,
+        "vina_gnina_rows_template_preflight_summary": (
+            vina_gnina_rows_template_preflight_summary
+        ),
         "missing_row_input_actions": missing_row_input_actions,
         "missing_row_input_action_count": len(missing_row_input_actions),
         "operator_acquisition_checklist": operator_next_actions,
@@ -1982,6 +2078,19 @@ def build_public_benchmark_phase2_source_acquisition_plan(
                     "adapter_row_preflight_status"
                 ]
             ),
+            "vina_gnina_rows_template_preflight_status": (
+                vina_gnina_rows_template_preflight_summary["status"]
+            ),
+            "vina_gnina_rows_template_role_receipt_plan_count": (
+                vina_gnina_rows_template_preflight_summary[
+                    "role_receipt_plan_count"
+                ]
+            ),
+            "vina_gnina_rows_template_role_receipt_blocked_count": (
+                vina_gnina_rows_template_preflight_summary[
+                    "role_receipt_blocked_count"
+                ]
+            ),
             "vina_gnina_runtime_missing_engine_ids": (
                 vina_gnina_runtime_readiness_summary["missing_engine_ids"]
             ),
@@ -2042,6 +2151,8 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `vina_gnina_runtime_engine_run_slot_count`: `{payload['vina_gnina_runtime_readiness']['engine_run_slot_matrix_count']}`",
         f"- `vina_gnina_runtime_blocked_engine_run_slot_count`: `{payload['vina_gnina_runtime_readiness']['blocked_engine_run_slot_count']}`",
         f"- `vina_gnina_adapter_row_preflight_status`: `{payload['vina_gnina_runtime_readiness']['adapter_row_preflight_status']}`",
+        "- `vina_gnina_rows_template_role_receipt_blocked_count`: "
+        f"`{payload['vina_gnina_rows_template_preflight_summary']['role_receipt_blocked_count']}`",
         f"- `vina_gnina_runtime_missing_engine_ids`: `{', '.join(payload['vina_gnina_runtime_readiness']['missing_engine_ids'])}`",
         "",
         "## Operator Next Actions",
@@ -2268,6 +2379,14 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                     for blocker in action.get("adapter_preflight_blockers", [])
                     if str(blocker)
                 )
+                role_receipt_summary = action.get("role_receipt_plan_summary")
+                if not isinstance(role_receipt_summary, dict):
+                    role_receipt_summary = {}
+                first_blocked_role = role_receipt_summary.get(
+                    "first_blocked_role_receipt"
+                )
+                if not isinstance(first_blocked_role, dict):
+                    first_blocked_role = {}
                 lines.extend(
                     [
                         f"- `status`: `{action.get('status')}`",
@@ -2275,6 +2394,8 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                         f"- `row_template_artifact`: `{action.get('row_template_artifact')}`",
                         f"- `row_template_preflight_artifact`: `{action.get('row_template_preflight_artifact')}`",
                         f"- `build_row_template_preflight_command`: `{action.get('build_row_template_preflight_command')}`",
+                        f"- `role_receipt_blocked_count`: `{role_receipt_summary.get('role_receipt_blocked_count')}`",
+                        f"- `first_blocked_role_receipt`: `{first_blocked_role.get('role_id', '')}` / `{first_blocked_role.get('slot_id', '')}`",
                         f"- `supported_candidate_paths`: {supported_paths}",
                         f"- `detected_row_artifact_count`: `{action.get('detected_row_artifact_count')}`",
                         f"- `selected_path`: `{action.get('selected_path')}`",

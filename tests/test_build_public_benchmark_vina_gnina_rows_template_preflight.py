@@ -78,6 +78,8 @@ def test_current_vina_gnina_rows_template_preflight_surfaces_gaps() -> None:
     assert payload["summary"]["missing_engine_run_receipt_value_count"] > 0
     assert payload["summary"]["missing_numeric_value_count"] > 0
     assert payload["summary"]["invalid_pose_success_count"] > 0
+    assert payload["summary"]["role_receipt_plan_count"] == 96
+    assert payload["summary"]["role_receipt_blocked_count"] == 72
     first_row = payload["row_preflight_rows"][0]
     assert first_row["case_id"] == "casf2016_4llx"
     assert first_row["engine_id"] == "vina"
@@ -88,6 +90,18 @@ def test_current_vina_gnina_rows_template_preflight_surfaces_gaps() -> None:
     assert payload["template_safety_policy"][
         "operator_rows_must_be_real_engine_outputs"
     ] is True
+    assert payload["role_receipt_plan"][0]["role_id"] == (
+        "casf_pdbbind_case_source_receipt"
+    )
+    assert payload["role_receipt_plan"][0]["status"] == "ready"
+    first_blocked_role = next(
+        row for row in payload["role_receipt_plan"] if row["status"] != "ready"
+    )
+    assert first_blocked_role["role_id"] == "engine_run_artifact_receipt"
+    assert first_blocked_role["slot_id"] == (
+        "casf2016_4llx_vina_casf2016_4llx_vina_run"
+    )
+    assert first_blocked_role["missing_fields"] == ["predicted_ligand_checksum"]
     assert "does not promote the template" in payload["claim_boundary"]
 
 
@@ -147,7 +161,10 @@ def test_vina_gnina_rows_template_preflight_accepts_completed_rows(
     assert payload["summary"]["missing_local_ref_count"] == 0
     assert payload["summary"]["missing_numeric_value_count"] == 0
     assert payload["summary"]["invalid_pose_success_count"] == 0
+    assert payload["summary"]["role_receipt_plan_count"] == 8
+    assert payload["summary"]["role_receipt_blocked_count"] == 0
     assert payload["row_preflight_rows"][0]["status"] == "ready"
+    assert all(row["status"] == "ready" for row in payload["role_receipt_plan"])
 
 
 def test_vina_gnina_rows_template_preflight_writer_creates_outputs(
@@ -171,3 +188,5 @@ def test_vina_gnina_rows_template_preflight_writer_creates_outputs(
     assert json.loads(out.read_text(encoding="utf-8"))["status"] == payload["status"]
     markdown = out_md.read_text(encoding="utf-8")
     assert "# Public Benchmark Vina/GNINA Rows Template Preflight" in markdown
+    assert "`role_receipt_plan_count`: `0`" in markdown
+    assert "## Receipt Role Plan" in markdown

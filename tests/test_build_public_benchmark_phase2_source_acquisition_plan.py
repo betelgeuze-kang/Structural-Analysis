@@ -502,6 +502,11 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "vina_gnina_runtime_detected_row_artifact_count": 0,
         "vina_gnina_runtime_adapter_case_count": 0,
         "vina_gnina_runtime_adapter_row_preflight_status": "row_artifact_missing",
+        "vina_gnina_rows_template_preflight_status": (
+            "operator_rows_completion_required"
+        ),
+        "vina_gnina_rows_template_role_receipt_plan_count": 96,
+        "vina_gnina_rows_template_role_receipt_blocked_count": 72,
         "vina_gnina_runtime_missing_engine_ids": ["vina", "gnina"],
         "vina_gnina_runtime_container_daemon_available": True,
         "phase2_ready": False,
@@ -540,6 +545,15 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "run_public_benchmark_harness_bundle_materializer",
         "refresh_public_benchmark_source_of_truth",
     ]
+    assert payload["vina_gnina_rows_template_preflight_summary"]["status"] == (
+        "operator_rows_completion_required"
+    )
+    assert payload["vina_gnina_rows_template_preflight_summary"][
+        "role_receipt_plan_count"
+    ] == 96
+    assert payload["vina_gnina_rows_template_preflight_summary"][
+        "role_receipt_blocked_count"
+    ] == 72
     assert payload["missing_row_input_action_count"] == 1
     missing_action = payload["missing_row_input_actions"][0]
     assert missing_action["row_input_id"] == "vina_gnina_rows"
@@ -661,6 +675,21 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert preflight_action["row_template_preflight_artifact"].endswith(
         "public_benchmark_vina_gnina_rows_template_preflight.json"
     )
+    assert preflight_action["template_preflight_summary"][
+        "role_receipt_blocked_count"
+    ] == 72
+    assert preflight_action["role_receipt_plan_summary"][
+        "role_receipt_plan_count"
+    ] == 96
+    assert preflight_action["role_receipt_plan_summary"][
+        "role_receipt_blocked_count"
+    ] == 72
+    assert preflight_action["role_receipt_plan_summary"][
+        "first_blocked_role_receipt"
+    ]["role_id"] == "engine_run_artifact_receipt"
+    assert preflight_action["role_receipt_plan_summary"][
+        "first_blocked_role_receipt"
+    ]["slot_id"] == "casf2016_4llx_vina_casf2016_4llx_vina_run"
     assert "build_public_benchmark_vina_gnina_rows_template_preflight.py" in preflight_action[
         "build_row_template_preflight_command"
     ]
@@ -725,6 +754,7 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "`vina_gnina_runtime_ready_engine_run_slot_count`: `0`" in markdown
     assert "`vina_gnina_runtime_case_input_slot_count`: `12`" in markdown
     assert "`vina_gnina_runtime_blocked_engine_run_slot_count`: `24`" in markdown
+    assert "`vina_gnina_rows_template_role_receipt_blocked_count`: `72`" in markdown
     assert "`phase2_exit_criterion_count`: `5`" in markdown
     assert "`phase2_row_closure_matrix_count`: `4`" in markdown
     assert "## Operator Next Actions" in markdown
@@ -751,6 +781,11 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "### Vina/GNINA Adapter Row Preflight Action" in markdown
     assert "public_benchmark_vina_gnina_rows_template_preflight.json" in markdown
     assert "build_public_benchmark_vina_gnina_rows_template_preflight.py" in markdown
+    assert "`role_receipt_blocked_count`: `72`" in markdown
+    assert (
+        "`first_blocked_role_receipt`: `engine_run_artifact_receipt` / "
+        "`casf2016_4llx_vina_casf2016_4llx_vina_run`"
+    ) in markdown
     assert "public_benchmark_vina_gnina_rows.ndjson" in markdown
     assert "`preflight_does_not_run_engines`: `True`" in markdown
     assert "### Vina/GNINA Input Manifest Action" in markdown

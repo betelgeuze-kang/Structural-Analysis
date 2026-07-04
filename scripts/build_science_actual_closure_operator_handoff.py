@@ -1565,6 +1565,12 @@ def _markdown(payload: dict[str, Any]) -> str:
                 )
             elif detail.get("kind") == "vina_gnina_adapter_preflight":
                 lines.extend(["", "### Vina/GNINA Adapter Row Preflight Action", ""])
+                role_receipt_summary = _as_dict(
+                    action.get("role_receipt_plan_summary")
+                )
+                first_blocked_role = _as_dict(
+                    role_receipt_summary.get("first_blocked_role_receipt")
+                )
                 lines.extend(
                     [
                         f"- `component_id`: `{detail.get('component_id')}`",
@@ -1574,6 +1580,8 @@ def _markdown(payload: dict[str, Any]) -> str:
                         f"- `row_template_artifact`: `{action.get('row_template_artifact')}`",
                         f"- `row_template_preflight_artifact`: `{action.get('row_template_preflight_artifact')}`",
                         f"- `build_row_template_preflight_command`: `{action.get('build_row_template_preflight_command')}`",
+                        f"- `role_receipt_blocked_count`: `{role_receipt_summary.get('role_receipt_blocked_count')}`",
+                        f"- `first_blocked_role_receipt`: `{first_blocked_role.get('role_id', '')}` / `{first_blocked_role.get('slot_id', '')}`",
                         f"- `supported_candidate_paths`: {_code_join(_as_list(action.get('supported_candidate_paths')))}",
                         f"- `detected_row_artifact_count`: `{action.get('detected_row_artifact_count')}`",
                         f"- `selected_path`: `{action.get('selected_path')}`",

@@ -46,6 +46,57 @@ LOCAL_REF_FIELDS = (
     "predicted_ligand_path_or_pose_ref",
     "engine_run_provenance_ref",
 )
+ROLE_PLANS = (
+    {
+        "role_id": "casf_pdbbind_case_source_receipt",
+        "required_fields": (
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref",
+        ),
+        "operator_action": "attach_casf_pdbbind_case_source_receipt",
+        "closes_phase2_criteria": ("vina_gnina_comparison_ready",),
+    },
+    {
+        "role_id": "engine_run_artifact_receipt",
+        "required_fields": (
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_run_provenance_ref",
+        ),
+        "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+        "closes_phase2_criteria": ("vina_gnina_comparison_ready",),
+    },
+    {
+        "role_id": "engine_config_version_receipt",
+        "required_fields": (
+            "engine_id",
+            "docking_run_id",
+            "engine_version",
+            "engine_config_checksum",
+        ),
+        "operator_action": "attach_vina_gnina_engine_config_version_receipt",
+        "closes_phase2_criteria": ("vina_gnina_comparison_ready",),
+    },
+    {
+        "role_id": "comparison_metric_receipt",
+        "required_fields": (
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction",
+        ),
+        "operator_action": "attach_vina_gnina_comparison_metric_receipt",
+        "closes_phase2_criteria": ("vina_gnina_comparison_ready",),
+    },
+)
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -222,6 +273,73 @@ def _score_direction_status(value: str) -> dict[str, Any]:
     }
 
 
+def _role_plan_rows(row_preflight: dict[str, Any]) -> list[dict[str, Any]]:
+    missing_sets = [
+        set(row_preflight["missing_required_fields"]),
+        set(row_preflight["missing_engine_run_receipt_fields"]),
+        set(row_preflight["missing_numeric_fields"]),
+    ]
+    invalid_sets = [
+        set(row_preflight["invalid_checksum_fields"]),
+        set(row_preflight["missing_local_ref_fields"]),
+        set(row_preflight["invalid_numeric_fields"]),
+    ]
+    if (
+        row_preflight["pose_success_status"]["present"]
+        and not row_preflight["pose_success_status"]["valid"]
+    ):
+        invalid_sets.append({"pose_success"})
+    if row_preflight["pose_success_consistency_blocker"]:
+        invalid_sets.append({"pose_success"})
+    if (
+        row_preflight["score_direction_status"]["present"]
+        and not row_preflight["score_direction_status"]["valid"]
+    ):
+        invalid_sets.append({"score_direction"})
+    if row_preflight["engine_blocker"]:
+        invalid_sets.append({"engine_id"})
+
+    role_rows = []
+    for role in ROLE_PLANS:
+        required_fields = [str(field) for field in role["required_fields"]]
+        missing_fields = sorted(
+            {
+                field
+                for field in required_fields
+                if any(field in missing_set for missing_set in missing_sets)
+            }
+        )
+        invalid_fields = sorted(
+            {
+                field
+                for field in required_fields
+                if any(field in invalid_set for invalid_set in invalid_sets)
+            }
+        )
+        blockers = []
+        if missing_fields:
+            blockers.append("required_role_fields_missing")
+        if invalid_fields:
+            blockers.append("required_role_fields_invalid")
+        role_rows.append(
+            {
+                "slot_id": row_preflight["slot_id"],
+                "case_id": row_preflight["case_id"],
+                "engine_id": row_preflight["engine_id"],
+                "docking_run_id": row_preflight["docking_run_id"],
+                "role_id": str(role["role_id"]),
+                "required_fields": required_fields,
+                "missing_fields": missing_fields,
+                "invalid_fields": invalid_fields,
+                "closes_phase2_criteria": list(role["closes_phase2_criteria"]),
+                "operator_action": str(role["operator_action"]),
+                "status": "ready" if not blockers else "operator_completion_required",
+                "blockers": blockers,
+            }
+        )
+    return role_rows
+
+
 def _row_preflight(repo_root: Path, row: dict[str, str]) -> dict[str, Any]:
     missing_required_fields = [
         field for field in FLAT_REQUIRED_FIELDS if not str(row.get(field) or "")
@@ -307,7 +425,7 @@ def _row_preflight(repo_root: Path, row: dict[str, str]) -> dict[str, Any]:
         blockers.append("adapter_pose_success_inconsistent_with_rmsd")
     if engine_blocker:
         blockers.append(engine_blocker)
-    return {
+    row_preflight = {
         "slot_id": "_".join(_slot_key(row)),
         "case_id": str(row.get("case_id") or ""),
         "engine_id": engine_id,
@@ -327,6 +445,8 @@ def _row_preflight(repo_root: Path, row: dict[str, str]) -> dict[str, Any]:
         "local_ref_statuses": local_ref_statuses,
         "blockers": blockers,
     }
+    row_preflight["role_plan_rows"] = _role_plan_rows(row_preflight)
+    return row_preflight
 
 
 def build_public_benchmark_vina_gnina_rows_template_preflight(
@@ -340,6 +460,11 @@ def build_public_benchmark_vina_gnina_rows_template_preflight(
     expected_slots = _expected_engine_run_slots(runtime_payload)
     header_fields, rows = _read_csv_rows(repo_root, template)
     row_preflights = [_row_preflight(repo_root, row) for row in rows]
+    role_receipt_plan = [
+        role_row
+        for row in row_preflights
+        for role_row in row["role_plan_rows"]
+    ]
     expected_slot_keys = [_slot_key(row) for row in expected_slots]
     template_slot_keys = [_slot_key(row) for row in rows]
     missing_expected_slots = [
@@ -412,6 +537,9 @@ def build_public_benchmark_vina_gnina_rows_template_preflight(
     else:
         status = "operator_rows_completion_required"
     expected_rows_resolved = _resolve(repo_root, expected_rows)
+    role_receipt_blocked_count = sum(
+        1 for row in role_receipt_plan if row["status"] != "ready"
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -452,6 +580,7 @@ def build_public_benchmark_vina_gnina_rows_template_preflight(
         "duplicate_slots": duplicate_slots,
         "row_preflight_rows": row_preflights,
         "row_preflight_count": len(row_preflights),
+        "role_receipt_plan": role_receipt_plan,
         "template_safety_policy": {
             "template_is_not_evidence": True,
             "operator_rows_must_be_real_engine_outputs": True,
@@ -464,6 +593,7 @@ def build_public_benchmark_vina_gnina_rows_template_preflight(
             "attach_real_predicted_ligand_outputs_for_each_engine_run",
             "fill_engine_version_config_checksum_rmsd_pose_success_and_score",
             "attach_engine_run_receipts",
+            "attach_case_source_and_comparison_metric_receipts",
             "copy_or_export_completed_rows_to_expected_rows_artifact",
             "materialize_public_benchmark_vina_gnina_comparison_adapter",
         ],
@@ -501,6 +631,8 @@ def build_public_benchmark_vina_gnina_rows_template_preflight(
             "invalid_numeric_value_count": invalid_numeric_value_count,
             "invalid_pose_success_count": invalid_pose_success_count,
             "invalid_score_direction_count": invalid_score_direction_count,
+            "role_receipt_plan_count": len(role_receipt_plan),
+            "role_receipt_blocked_count": role_receipt_blocked_count,
             "adapter_template_ready": adapter_template_ready,
             "expected_rows_detected": expected_rows_resolved.exists(),
         },
@@ -531,6 +663,8 @@ def render_public_benchmark_vina_gnina_rows_template_preflight_markdown(
         f"- `missing_local_ref_count`: `{summary['missing_local_ref_count']}`",
         f"- `missing_numeric_value_count`: `{summary['missing_numeric_value_count']}`",
         f"- `invalid_pose_success_count`: `{summary['invalid_pose_success_count']}`",
+        f"- `role_receipt_plan_count`: `{summary['role_receipt_plan_count']}`",
+        f"- `role_receipt_blocked_count`: `{summary['role_receipt_blocked_count']}`",
         f"- `expected_rows_detected`: `{summary['expected_rows_detected']}`",
         "",
         "## Engine Run Rows",
@@ -544,6 +678,27 @@ def render_public_benchmark_vina_gnina_rows_template_preflight_markdown(
             f"`{row['engine_id']}` | `{row['status']}` | "
             f"`{len(row['missing_engine_run_receipt_fields'])}` | "
             f"`{len(row['missing_required_fields'])}` |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Receipt Role Plan",
+            "",
+            "| Slot | Role | Status | Missing Fields | Invalid Fields |",
+            "|---|---|---|---|---|",
+        ]
+    )
+    for row in payload["role_receipt_plan"]:
+        missing_fields = ", ".join(
+            f"`{field}`" for field in row["missing_fields"] if str(field)
+        )
+        invalid_fields = ", ".join(
+            f"`{field}`" for field in row["invalid_fields"] if str(field)
+        )
+        lines.append(
+            f"| `{row['slot_id']}` | `{row['role_id']}` | "
+            f"`{row['status']}` | {missing_fields or '`none`'} | "
+            f"{invalid_fields or '`none`'} |"
         )
     lines.extend(["", "## Commands", ""])
     for key, command in payload["commands"].items():
