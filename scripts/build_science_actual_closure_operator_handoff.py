@@ -631,8 +631,8 @@ def _vina_gnina_engine_run_slot_detail(
         "row_candidate_status": _as_dict(
             runtime_readiness.get("row_candidate_status")
         ),
-        "operator_unblock_packet": _as_dict(
-            runtime_readiness.get("operator_unblock_packet")
+        "operator_unblock_packet": _compact_vina_gnina_operator_unblock_packet(
+            _as_dict(runtime_readiness.get("operator_unblock_packet"))
         ),
         "engine_run_status_summary": {
             "required_engine_run_count": len(engine_run_slots),
@@ -988,6 +988,44 @@ def _unblock_plan_counts(unblock: dict[str, Any]) -> dict[str, int]:
     }
 
 
+def _compact_operator_blocker_family(row: dict[str, Any]) -> dict[str, Any]:
+    if not row:
+        return {}
+    return {
+        "family_id": str(row.get("family_id") or ""),
+        "description": str(row.get("description") or ""),
+        "status": str(row.get("status") or ""),
+        "missing_item_count": _as_int(row.get("missing_item_count")),
+        "blocked_case_count": _as_int(row.get("blocked_case_count")),
+        "first_missing_item": _as_dict(row.get("first_missing_item")),
+        "operator_action": str(row.get("operator_action") or ""),
+        "command_key": str(row.get("command_key") or ""),
+    }
+
+
+def _compact_operator_blocker_family_plan(rows: list[Any]) -> list[dict[str, Any]]:
+    return [
+        _compact_operator_blocker_family(row)
+        for row in rows
+        if isinstance(row, dict)
+    ]
+
+
+def _compact_vina_gnina_operator_unblock_packet(
+    packet: dict[str, Any],
+) -> dict[str, Any]:
+    if not packet:
+        return {}
+    compact = dict(packet)
+    compact["first_operator_blocker_family"] = _compact_operator_blocker_family(
+        _as_dict(packet.get("first_operator_blocker_family"))
+    )
+    compact["operator_blocker_family_plan"] = _compact_operator_blocker_family_plan(
+        _as_list(packet.get("operator_blocker_family_plan"))
+    )
+    return compact
+
+
 def _unblock_plan_runtime_action_packet(
     slot: dict[str, Any],
     unblock: dict[str, Any],
@@ -1022,6 +1060,14 @@ def _unblock_plan_runtime_action_packet(
             source_runtime_action_packet.get("input_manifest_completion_action_plan")
             or unblock.get("input_manifest_completion_action_plan")
             or preflight_summary.get("input_manifest_completion_action_plan")
+        )
+        if isinstance(row, dict)
+    ]
+    operator_blocker_family_plan = [
+        row
+        for row in _as_list(
+            source_runtime_action_packet.get("operator_blocker_family_plan")
+            or unblock.get("operator_blocker_family_plan")
         )
         if isinstance(row, dict)
     ]
@@ -1120,6 +1166,30 @@ def _unblock_plan_runtime_action_packet(
         "selected_row_path": str(unblock.get("selected_row_path") or ""),
         "adapter_row_preflight_status": str(
             unblock.get("adapter_row_preflight_status") or ""
+        ),
+        "operator_blocker_family_count": _as_int(
+            source_runtime_action_packet.get("operator_blocker_family_count")
+            or unblock.get("operator_blocker_family_count")
+            or len(operator_blocker_family_plan)
+        ),
+        "operator_blocker_family_blocked_count": _as_int(
+            source_runtime_action_packet.get("operator_blocker_family_blocked_count")
+            or unblock.get("operator_blocker_family_blocked_count")
+        ),
+        "operator_blocker_family_missing_item_count": _as_int(
+            source_runtime_action_packet.get(
+                "operator_blocker_family_missing_item_count"
+            )
+            or unblock.get("operator_blocker_family_missing_item_count")
+        ),
+        "first_operator_blocker_family": _compact_operator_blocker_family(
+            _as_dict(
+                source_runtime_action_packet.get("first_operator_blocker_family")
+                or unblock.get("first_operator_blocker_family")
+            )
+        ),
+        "operator_blocker_family_plan": _compact_operator_blocker_family_plan(
+            operator_blocker_family_plan
         ),
         "commands": {
             **_as_dict(source_runtime_action_packet.get("commands")),

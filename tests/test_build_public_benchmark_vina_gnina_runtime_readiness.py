@@ -570,6 +570,9 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "input_manifest_template_preflight_status": "missing",
         "missing_engine_count": 2,
         "operator_execution_ready": False,
+        "operator_blocker_family_blocked_count": 3,
+        "operator_blocker_family_count": 7,
+        "operator_blocker_family_missing_item_count": 5,
         "ready_engine_run_slot_count": 0,
         "required_engine_run_count": 2,
         "rows_from_engine_run_bundle_materialized": False,
@@ -691,6 +694,19 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
     assert unblock["blocked_engine_run_slot_count"] == 2
     assert unblock["missing_engine_ids"] == ["vina", "gnina"]
     assert unblock["first_blocked_engine_run_slot"]["engine_id"] == "vina"
+    assert unblock["operator_blocker_family_count"] == 7
+    assert unblock["operator_blocker_family_blocked_count"] == 3
+    assert unblock["operator_blocker_family_missing_item_count"] == 5
+    assert unblock["first_operator_blocker_family"]["family_id"] == "engine_runtime"
+    family_plan = {
+        row["family_id"]: row for row in unblock["operator_blocker_family_plan"]
+    }
+    assert family_plan["engine_runtime"]["missing_item_count"] == 2
+    assert family_plan["engine_run_slots"]["missing_item_count"] == 2
+    assert family_plan["adapter_rows"]["missing_item_count"] == 1
+    assert payload["operator_blocker_family_count"] == 7
+    assert payload["operator_blocker_family_blocked_count"] == 3
+    assert payload["first_operator_blocker_family"]["family_id"] == "engine_runtime"
     assert unblock["engine_runtime_actions"][0] == {
         "binary_env_var": "PUBLIC_BENCHMARK_VINA_BIN",
         "container_image_env_var": "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE",
@@ -715,6 +731,116 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         unblock["operator_sequence"]
     )
     assert "does not run docking engines" in payload["claim_boundary"]
+
+
+def test_runtime_readiness_groups_manifest_operator_blocker_families() -> None:
+    manifest_summary = {
+        "input_manifest_completion_action_plan": [
+            {
+                "case_id": "casf2016_4llx",
+                "complex_id": "4llx",
+                "operator_completion_action": (
+                    "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+                ),
+                "missing_required_fields": [
+                    "prepared_receptor_checksum",
+                    "prepared_ligand_checksum",
+                    "input_preparation_provenance_ref",
+                ],
+                "missing_local_file_requirements": [
+                    {
+                        "case_id": "casf2016_4llx",
+                        "complex_id": "4llx",
+                        "field": "protein_structure_path",
+                        "file_group": "official_source_file",
+                        "operator_action": (
+                            "materialize_source_files_from_casf_archive_and_verify_checksum"
+                        ),
+                    },
+                    {
+                        "case_id": "casf2016_4llx",
+                        "complex_id": "4llx",
+                        "field": "reference_ligand_path",
+                        "file_group": "official_source_file",
+                        "operator_action": (
+                            "materialize_source_files_from_casf_archive_and_verify_checksum"
+                        ),
+                    },
+                    {
+                        "case_id": "casf2016_4llx",
+                        "complex_id": "4llx",
+                        "field": "prepared_receptor_path",
+                        "file_group": "prepared_input_file",
+                        "operator_action": (
+                            "prepare_vina_gnina_input_and_record_checksum"
+                        ),
+                    },
+                    {
+                        "case_id": "casf2016_4llx",
+                        "complex_id": "4llx",
+                        "field": "prepared_ligand_path",
+                        "file_group": "prepared_input_file",
+                        "operator_action": (
+                            "prepare_vina_gnina_input_and_record_checksum"
+                        ),
+                    },
+                ],
+                "missing_receipt_ref_requirements": [
+                    {
+                        "case_id": "casf2016_4llx",
+                        "complex_id": "4llx",
+                        "field": "vina_run_receipt_ref",
+                        "operator_action": "attach_vina_run_receipt_ref",
+                    },
+                    {
+                        "case_id": "casf2016_4llx",
+                        "complex_id": "4llx",
+                        "field": "input_preparation_provenance_ref",
+                        "operator_action": "attach_input_preparation_provenance_ref",
+                    },
+                ],
+            }
+        ],
+    }
+
+    family_plan = module._operator_blocker_family_plan(
+        case_input_slots=[
+            {"case_id": "casf2016_4llx", "status": "blocked"},
+        ],
+        blocked_engine_run_slots=[
+            {
+                "case_id": "casf2016_4llx",
+                "complex_id": "4llx",
+                "engine_id": "vina",
+                "docking_run_id": "casf2016_4llx_vina_run",
+                "blockers": ["prepared_receptor_path_missing"],
+            }
+        ],
+        current_engine_execution_statuses=[
+            {
+                "engine_id": "vina",
+                "available": False,
+                "blocker": "vina_binary_missing",
+            }
+        ],
+        row_status={
+            "status": "row_artifact_missing",
+            "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+            "detected_row_artifact_count": 0,
+        },
+        input_manifest_template_preflight_summary=manifest_summary,
+        adapter_rows_ready=False,
+    )
+
+    families = {row["family_id"]: row for row in family_plan}
+    assert families["manifest_required_values"]["missing_item_count"] == 3
+    assert families["official_source_files"]["missing_item_count"] == 2
+    assert families["official_source_files"]["blocked_case_count"] == 1
+    assert families["prepared_input_files"]["missing_item_count"] == 2
+    assert families["input_and_engine_receipt_refs"]["missing_item_count"] == 2
+    assert families["engine_runtime"]["missing_item_count"] == 1
+    assert families["engine_run_slots"]["missing_item_count"] == 1
+    assert families["adapter_rows"]["missing_item_count"] == 1
 
 
 def test_runtime_readiness_uses_container_execution_when_binaries_missing(

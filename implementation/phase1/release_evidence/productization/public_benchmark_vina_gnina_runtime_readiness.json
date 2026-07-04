@@ -1620,7 +1620,42 @@
     ],
     "status": "blocked"
   },
-  "generated_at": "2026-07-04T09:30:59.993382+00:00",
+  "first_operator_blocker_family": {
+    "blocked_case_count": 12,
+    "command_key": "build_input_manifest_template_preflight",
+    "description": "Required manifest scalar values and checksums are missing.",
+    "family_id": "manifest_required_values",
+    "first_missing_item": {
+      "case_id": "casf2016_4llx",
+      "complex_id": "4llx",
+      "field": "prepared_receptor_checksum",
+      "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+    },
+    "missing_item_count": 36,
+    "operator_action": "complete_vina_gnina_input_manifest_required_values",
+    "sample_missing_items": [
+      {
+        "case_id": "casf2016_4llx",
+        "complex_id": "4llx",
+        "field": "prepared_receptor_checksum",
+        "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+      },
+      {
+        "case_id": "casf2016_4llx",
+        "complex_id": "4llx",
+        "field": "prepared_ligand_checksum",
+        "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+      },
+      {
+        "case_id": "casf2016_4llx",
+        "complex_id": "4llx",
+        "field": "input_preparation_provenance_ref",
+        "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+      }
+    ],
+    "status": "blocked"
+  },
+  "generated_at": "2026-07-04T10:19:03.298539+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json": "sha256:c088b33bb3ce0502bf4f0cba3f845b8511c18b8115a0f61e2047ed4cb4c913c2",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:30cea0a365c966479ebe1e3b48f0b2b99ba6358c8434f9b1e64d51e4d1329aba",
@@ -1628,7 +1663,7 @@
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json": "sha256:26a80f6babe19ae18b29b8b4b6075a0df44f757ff4e791e6b337cf8d4a53259d",
     "scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py": "sha256:0aaea5d86732b33257e3a5d9f7bbf18ed732e2ca07d7aff489dc2e4173bf523a",
     "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:0258e681ddd419d9fba1bba595ffda481b77f710b5e645ac628c5f2bf1444cee",
-    "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:8adf9051950d6fcbffaffaef8e6d7d71c01ac6b515edcee3942ac0e82f98768a",
+    "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:ce71287483b22f5f77b3cfb773420a18c076181cb20e36272ee46e9f552c3dad",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:8c1ce46cbd085987f2923602424b666bb63e9edb6fdb2438158d36aee890dd41",
     "scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py": "sha256:2bbd25e704d1f5bec27c001b4c02071ca00ba503e7bb0db16a250370bdcc17f5",
     "scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py": "sha256:b254e06ca0ad71db0bcc6dd49335ef5015c221356bddb4f0810649608120c7b3",
@@ -3396,6 +3431,380 @@
     "vina",
     "gnina"
   ],
+  "operator_blocker_family_blocked_count": 7,
+  "operator_blocker_family_count": 7,
+  "operator_blocker_family_missing_item_count": 182,
+  "operator_blocker_family_plan": [
+    {
+      "blocked_case_count": 12,
+      "command_key": "build_input_manifest_template_preflight",
+      "description": "Required manifest scalar values and checksums are missing.",
+      "family_id": "manifest_required_values",
+      "first_missing_item": {
+        "case_id": "casf2016_4llx",
+        "complex_id": "4llx",
+        "field": "prepared_receptor_checksum",
+        "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+      },
+      "missing_item_count": 36,
+      "operator_action": "complete_vina_gnina_input_manifest_required_values",
+      "sample_missing_items": [
+        {
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "field": "prepared_receptor_checksum",
+          "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+        },
+        {
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "field": "prepared_ligand_checksum",
+          "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+        },
+        {
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "field": "input_preparation_provenance_ref",
+          "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+        }
+      ],
+      "status": "blocked"
+    },
+    {
+      "blocked_case_count": 12,
+      "command_key": "materialize_input_manifest_from_casf_archive",
+      "description": "Official CASF/PDBBind source protein and ligand files are missing or unverified.",
+      "family_id": "official_source_files",
+      "first_missing_item": {
+        "blocker": "path_not_found",
+        "case_id": "casf2016_4llx",
+        "complex_id": "4llx",
+        "expected_checksum": "sha256:ee6be565638c58d9b608a5cb79a98dae39566a60b4ae019ea6a23a45c2b7a834",
+        "expected_checksum_field": "protein_structure_checksum",
+        "field": "protein_structure_path",
+        "file_group": "official_source_file",
+        "file_role": "source_protein_structure",
+        "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
+        "path": "CASF-2016/coreset/4llx/4llx_protein.pdb",
+        "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+        "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+        "status": "operator_completion_required"
+      },
+      "missing_item_count": 24,
+      "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
+      "sample_missing_items": [
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "expected_checksum": "sha256:ee6be565638c58d9b608a5cb79a98dae39566a60b4ae019ea6a23a45c2b7a834",
+          "expected_checksum_field": "protein_structure_checksum",
+          "field": "protein_structure_path",
+          "file_group": "official_source_file",
+          "file_role": "source_protein_structure",
+          "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/4llx/4llx_protein.pdb",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "expected_checksum": "sha256:a6298d4cdddb5d1926ca09bcb5e1412ecd2699476f3ae1fa086d3d335efaa6f1",
+          "expected_checksum_field": "reference_ligand_checksum",
+          "field": "reference_ligand_path",
+          "file_group": "official_source_file",
+          "file_role": "source_reference_ligand",
+          "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/4llx/4llx_ligand.sdf",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_5c28",
+          "complex_id": "5c28",
+          "expected_checksum": "sha256:ac3677c62abb2e549c4e3f4a6185663da16028e7e1b1e6ef875da956e77639b0",
+          "expected_checksum_field": "protein_structure_checksum",
+          "field": "protein_structure_path",
+          "file_group": "official_source_file",
+          "file_role": "source_protein_structure",
+          "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/5c28/5c28_protein.pdb",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        }
+      ],
+      "status": "blocked"
+    },
+    {
+      "blocked_case_count": 12,
+      "command_key": "build_input_manifest_template_preflight",
+      "description": "Prepared receptor and ligand inputs for Vina/GNINA are missing or unverified.",
+      "family_id": "prepared_input_files",
+      "first_missing_item": {
+        "blocker": "path_not_found",
+        "case_id": "casf2016_4llx",
+        "complex_id": "4llx",
+        "expected_checksum": "",
+        "expected_checksum_field": "prepared_receptor_checksum",
+        "field": "prepared_receptor_path",
+        "file_group": "prepared_input_file",
+        "file_role": "prepared_receptor",
+        "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+        "path": "prepared/4llx_receptor",
+        "source_license_or_accession": "",
+        "source_url": "",
+        "status": "operator_completion_required"
+      },
+      "missing_item_count": 24,
+      "operator_action": "prepare_vina_gnina_inputs_and_record_checksums",
+      "sample_missing_items": [
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_receptor_checksum",
+          "field": "prepared_receptor_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_receptor",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/4llx_receptor",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_ligand_checksum",
+          "field": "prepared_ligand_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_ligand",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/4llx_ligand",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_5c28",
+          "complex_id": "5c28",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_receptor_checksum",
+          "field": "prepared_receptor_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_receptor",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/5c28_receptor",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        }
+      ],
+      "status": "blocked"
+    },
+    {
+      "blocked_case_count": 12,
+      "command_key": "build_input_manifest_template_preflight",
+      "description": "Input preparation, engine config, and engine run receipt refs are missing.",
+      "family_id": "input_and_engine_receipt_refs",
+      "first_missing_item": {
+        "blocker": "local_ref_not_found",
+        "case_id": "casf2016_4llx",
+        "complex_id": "4llx",
+        "field": "vina_config_ref",
+        "operator_action": "attach_vina_config_ref",
+        "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+        "status": "operator_completion_required"
+      },
+      "missing_item_count": 60,
+      "operator_action": "attach_vina_gnina_input_and_engine_receipt_refs",
+      "sample_missing_items": [
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "field": "vina_config_ref",
+          "operator_action": "attach_vina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "field": "gnina_config_ref",
+          "operator_action": "attach_gnina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "field": "vina_run_receipt_ref",
+          "operator_action": "attach_vina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+          "status": "operator_completion_required"
+        }
+      ],
+      "status": "blocked"
+    },
+    {
+      "blocked_case_count": 0,
+      "command_key": "rerun_runtime_readiness",
+      "description": "Vina/GNINA binaries or local container images are not configured.",
+      "family_id": "engine_runtime",
+      "first_missing_item": {
+        "binary_env_var": "PUBLIC_BENCHMARK_VINA_BIN",
+        "blocker": "vina_binary_missing",
+        "container_image_env_var": "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE",
+        "engine_id": "vina",
+        "execution_source": "",
+        "operator_action": "configure_vina_runtime"
+      },
+      "missing_item_count": 2,
+      "operator_action": "configure_vina_gnina_binary_or_container_runtime",
+      "sample_missing_items": [
+        {
+          "binary_env_var": "PUBLIC_BENCHMARK_VINA_BIN",
+          "blocker": "vina_binary_missing",
+          "container_image_env_var": "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE",
+          "engine_id": "vina",
+          "execution_source": "",
+          "operator_action": "configure_vina_runtime"
+        },
+        {
+          "binary_env_var": "PUBLIC_BENCHMARK_GNINA_BIN",
+          "blocker": "gnina_binary_missing",
+          "container_image_env_var": "PUBLIC_BENCHMARK_GNINA_CONTAINER_IMAGE",
+          "engine_id": "gnina",
+          "execution_source": "",
+          "operator_action": "configure_gnina_runtime"
+        }
+      ],
+      "status": "blocked"
+    },
+    {
+      "blocked_case_count": 12,
+      "command_key": "rerun_runtime_readiness",
+      "description": "Required Vina/GNINA engine run slots are not ready for execution.",
+      "family_id": "engine_run_slots",
+      "first_missing_item": {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "vina_binary_missing"
+        ],
+        "case_id": "casf2016_4llx",
+        "complex_id": "4llx",
+        "docking_run_id": "casf2016_4llx_vina_run",
+        "engine_id": "vina",
+        "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
+      },
+      "missing_item_count": 24,
+      "operator_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
+      "sample_missing_items": [
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "docking_run_id": "casf2016_4llx_vina_run",
+          "engine_id": "vina",
+          "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "gnina_binary_missing"
+          ],
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "docking_run_id": "casf2016_4llx_gnina_run",
+          "engine_id": "gnina",
+          "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
+        },
+        {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_id": "casf2016_5c28",
+          "complex_id": "5c28",
+          "docking_run_id": "casf2016_5c28_vina_run",
+          "engine_id": "vina",
+          "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
+        }
+      ],
+      "status": "blocked"
+    },
+    {
+      "blocked_case_count": 12,
+      "command_key": "materialize_rows_from_engine_run_bundle",
+      "description": "The Vina/GNINA comparison adapter rows artifact is missing or blocked.",
+      "family_id": "adapter_rows",
+      "first_missing_item": {
+        "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+        "detected_row_artifact_count": 0,
+        "expected_case_count": 12,
+        "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
+        "status": "row_artifact_missing"
+      },
+      "missing_item_count": 12,
+      "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
+      "sample_missing_items": [
+        {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+          "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+          "detected_row_artifact_count": 0,
+          "expected_case_count": 12,
+          "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
+          "status": "row_artifact_missing"
+        },
+        {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+          "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+          "detected_row_artifact_count": 0,
+          "expected_case_count": 12,
+          "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
+          "status": "row_artifact_missing"
+        },
+        {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+          "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+          "detected_row_artifact_count": 0,
+          "expected_case_count": 12,
+          "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
+          "status": "row_artifact_missing"
+        }
+      ],
+      "status": "blocked"
+    }
+  ],
   "operator_commands": {
     "build_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
     "build_input_manifest_template_preflight": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
@@ -3531,6 +3940,41 @@
         "pose_success",
         "score",
         "score_direction"
+      ],
+      "status": "blocked"
+    },
+    "first_operator_blocker_family": {
+      "blocked_case_count": 12,
+      "command_key": "build_input_manifest_template_preflight",
+      "description": "Required manifest scalar values and checksums are missing.",
+      "family_id": "manifest_required_values",
+      "first_missing_item": {
+        "case_id": "casf2016_4llx",
+        "complex_id": "4llx",
+        "field": "prepared_receptor_checksum",
+        "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+      },
+      "missing_item_count": 36,
+      "operator_action": "complete_vina_gnina_input_manifest_required_values",
+      "sample_missing_items": [
+        {
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "field": "prepared_receptor_checksum",
+          "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+        },
+        {
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "field": "prepared_ligand_checksum",
+          "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+        },
+        {
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "field": "input_preparation_provenance_ref",
+          "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+        }
       ],
       "status": "blocked"
     },
@@ -6997,6 +7441,381 @@
       "vina",
       "gnina"
     ],
+    "missing_item_count_semantics": "Family-local counts are not deduplicated across blocker families.",
+    "operator_blocker_family_blocked_count": 7,
+    "operator_blocker_family_count": 7,
+    "operator_blocker_family_missing_item_count": 182,
+    "operator_blocker_family_plan": [
+      {
+        "blocked_case_count": 12,
+        "command_key": "build_input_manifest_template_preflight",
+        "description": "Required manifest scalar values and checksums are missing.",
+        "family_id": "manifest_required_values",
+        "first_missing_item": {
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "field": "prepared_receptor_checksum",
+          "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+        },
+        "missing_item_count": 36,
+        "operator_action": "complete_vina_gnina_input_manifest_required_values",
+        "sample_missing_items": [
+          {
+            "case_id": "casf2016_4llx",
+            "complex_id": "4llx",
+            "field": "prepared_receptor_checksum",
+            "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+          },
+          {
+            "case_id": "casf2016_4llx",
+            "complex_id": "4llx",
+            "field": "prepared_ligand_checksum",
+            "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+          },
+          {
+            "case_id": "casf2016_4llx",
+            "complex_id": "4llx",
+            "field": "input_preparation_provenance_ref",
+            "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+          }
+        ],
+        "status": "blocked"
+      },
+      {
+        "blocked_case_count": 12,
+        "command_key": "materialize_input_manifest_from_casf_archive",
+        "description": "Official CASF/PDBBind source protein and ligand files are missing or unverified.",
+        "family_id": "official_source_files",
+        "first_missing_item": {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "expected_checksum": "sha256:ee6be565638c58d9b608a5cb79a98dae39566a60b4ae019ea6a23a45c2b7a834",
+          "expected_checksum_field": "protein_structure_checksum",
+          "field": "protein_structure_path",
+          "file_group": "official_source_file",
+          "file_role": "source_protein_structure",
+          "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/4llx/4llx_protein.pdb",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        "missing_item_count": 24,
+        "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
+        "sample_missing_items": [
+          {
+            "blocker": "path_not_found",
+            "case_id": "casf2016_4llx",
+            "complex_id": "4llx",
+            "expected_checksum": "sha256:ee6be565638c58d9b608a5cb79a98dae39566a60b4ae019ea6a23a45c2b7a834",
+            "expected_checksum_field": "protein_structure_checksum",
+            "field": "protein_structure_path",
+            "file_group": "official_source_file",
+            "file_role": "source_protein_structure",
+            "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
+            "path": "CASF-2016/coreset/4llx/4llx_protein.pdb",
+            "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+            "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+            "status": "operator_completion_required"
+          },
+          {
+            "blocker": "path_not_found",
+            "case_id": "casf2016_4llx",
+            "complex_id": "4llx",
+            "expected_checksum": "sha256:a6298d4cdddb5d1926ca09bcb5e1412ecd2699476f3ae1fa086d3d335efaa6f1",
+            "expected_checksum_field": "reference_ligand_checksum",
+            "field": "reference_ligand_path",
+            "file_group": "official_source_file",
+            "file_role": "source_reference_ligand",
+            "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
+            "path": "CASF-2016/coreset/4llx/4llx_ligand.sdf",
+            "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+            "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+            "status": "operator_completion_required"
+          },
+          {
+            "blocker": "path_not_found",
+            "case_id": "casf2016_5c28",
+            "complex_id": "5c28",
+            "expected_checksum": "sha256:ac3677c62abb2e549c4e3f4a6185663da16028e7e1b1e6ef875da956e77639b0",
+            "expected_checksum_field": "protein_structure_checksum",
+            "field": "protein_structure_path",
+            "file_group": "official_source_file",
+            "file_role": "source_protein_structure",
+            "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
+            "path": "CASF-2016/coreset/5c28/5c28_protein.pdb",
+            "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+            "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+            "status": "operator_completion_required"
+          }
+        ],
+        "status": "blocked"
+      },
+      {
+        "blocked_case_count": 12,
+        "command_key": "build_input_manifest_template_preflight",
+        "description": "Prepared receptor and ligand inputs for Vina/GNINA are missing or unverified.",
+        "family_id": "prepared_input_files",
+        "first_missing_item": {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_receptor_checksum",
+          "field": "prepared_receptor_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_receptor",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/4llx_receptor",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        },
+        "missing_item_count": 24,
+        "operator_action": "prepare_vina_gnina_inputs_and_record_checksums",
+        "sample_missing_items": [
+          {
+            "blocker": "path_not_found",
+            "case_id": "casf2016_4llx",
+            "complex_id": "4llx",
+            "expected_checksum": "",
+            "expected_checksum_field": "prepared_receptor_checksum",
+            "field": "prepared_receptor_path",
+            "file_group": "prepared_input_file",
+            "file_role": "prepared_receptor",
+            "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+            "path": "prepared/4llx_receptor",
+            "source_license_or_accession": "",
+            "source_url": "",
+            "status": "operator_completion_required"
+          },
+          {
+            "blocker": "path_not_found",
+            "case_id": "casf2016_4llx",
+            "complex_id": "4llx",
+            "expected_checksum": "",
+            "expected_checksum_field": "prepared_ligand_checksum",
+            "field": "prepared_ligand_path",
+            "file_group": "prepared_input_file",
+            "file_role": "prepared_ligand",
+            "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+            "path": "prepared/4llx_ligand",
+            "source_license_or_accession": "",
+            "source_url": "",
+            "status": "operator_completion_required"
+          },
+          {
+            "blocker": "path_not_found",
+            "case_id": "casf2016_5c28",
+            "complex_id": "5c28",
+            "expected_checksum": "",
+            "expected_checksum_field": "prepared_receptor_checksum",
+            "field": "prepared_receptor_path",
+            "file_group": "prepared_input_file",
+            "file_role": "prepared_receptor",
+            "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+            "path": "prepared/5c28_receptor",
+            "source_license_or_accession": "",
+            "source_url": "",
+            "status": "operator_completion_required"
+          }
+        ],
+        "status": "blocked"
+      },
+      {
+        "blocked_case_count": 12,
+        "command_key": "build_input_manifest_template_preflight",
+        "description": "Input preparation, engine config, and engine run receipt refs are missing.",
+        "family_id": "input_and_engine_receipt_refs",
+        "first_missing_item": {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "field": "vina_config_ref",
+          "operator_action": "attach_vina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+          "status": "operator_completion_required"
+        },
+        "missing_item_count": 60,
+        "operator_action": "attach_vina_gnina_input_and_engine_receipt_refs",
+        "sample_missing_items": [
+          {
+            "blocker": "local_ref_not_found",
+            "case_id": "casf2016_4llx",
+            "complex_id": "4llx",
+            "field": "vina_config_ref",
+            "operator_action": "attach_vina_config_ref",
+            "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+            "status": "operator_completion_required"
+          },
+          {
+            "blocker": "local_ref_not_found",
+            "case_id": "casf2016_4llx",
+            "complex_id": "4llx",
+            "field": "gnina_config_ref",
+            "operator_action": "attach_gnina_config_ref",
+            "ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_config.json",
+            "status": "operator_completion_required"
+          },
+          {
+            "blocker": "local_ref_not_found",
+            "case_id": "casf2016_4llx",
+            "complex_id": "4llx",
+            "field": "vina_run_receipt_ref",
+            "operator_action": "attach_vina_run_receipt_ref",
+            "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+            "status": "operator_completion_required"
+          }
+        ],
+        "status": "blocked"
+      },
+      {
+        "blocked_case_count": 0,
+        "command_key": "rerun_runtime_readiness",
+        "description": "Vina/GNINA binaries or local container images are not configured.",
+        "family_id": "engine_runtime",
+        "first_missing_item": {
+          "binary_env_var": "PUBLIC_BENCHMARK_VINA_BIN",
+          "blocker": "vina_binary_missing",
+          "container_image_env_var": "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE",
+          "engine_id": "vina",
+          "execution_source": "",
+          "operator_action": "configure_vina_runtime"
+        },
+        "missing_item_count": 2,
+        "operator_action": "configure_vina_gnina_binary_or_container_runtime",
+        "sample_missing_items": [
+          {
+            "binary_env_var": "PUBLIC_BENCHMARK_VINA_BIN",
+            "blocker": "vina_binary_missing",
+            "container_image_env_var": "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE",
+            "engine_id": "vina",
+            "execution_source": "",
+            "operator_action": "configure_vina_runtime"
+          },
+          {
+            "binary_env_var": "PUBLIC_BENCHMARK_GNINA_BIN",
+            "blocker": "gnina_binary_missing",
+            "container_image_env_var": "PUBLIC_BENCHMARK_GNINA_CONTAINER_IMAGE",
+            "engine_id": "gnina",
+            "execution_source": "",
+            "operator_action": "configure_gnina_runtime"
+          }
+        ],
+        "status": "blocked"
+      },
+      {
+        "blocked_case_count": 12,
+        "command_key": "rerun_runtime_readiness",
+        "description": "Required Vina/GNINA engine run slots are not ready for execution.",
+        "family_id": "engine_run_slots",
+        "first_missing_item": {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "docking_run_id": "casf2016_4llx_vina_run",
+          "engine_id": "vina",
+          "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
+        },
+        "missing_item_count": 24,
+        "operator_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
+        "sample_missing_items": [
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_4llx",
+            "complex_id": "4llx",
+            "docking_run_id": "casf2016_4llx_vina_run",
+            "engine_id": "vina",
+            "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "gnina_binary_missing"
+            ],
+            "case_id": "casf2016_4llx",
+            "complex_id": "4llx",
+            "docking_run_id": "casf2016_4llx_gnina_run",
+            "engine_id": "gnina",
+            "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
+          },
+          {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_id": "casf2016_5c28",
+            "complex_id": "5c28",
+            "docking_run_id": "casf2016_5c28_vina_run",
+            "engine_id": "vina",
+            "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
+          }
+        ],
+        "status": "blocked"
+      },
+      {
+        "blocked_case_count": 12,
+        "command_key": "materialize_rows_from_engine_run_bundle",
+        "description": "The Vina/GNINA comparison adapter rows artifact is missing or blocked.",
+        "family_id": "adapter_rows",
+        "first_missing_item": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+          "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+          "detected_row_artifact_count": 0,
+          "expected_case_count": 12,
+          "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
+          "status": "row_artifact_missing"
+        },
+        "missing_item_count": 12,
+        "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
+        "sample_missing_items": [
+          {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+            "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+            "detected_row_artifact_count": 0,
+            "expected_case_count": 12,
+            "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
+            "status": "row_artifact_missing"
+          },
+          {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+            "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+            "detected_row_artifact_count": 0,
+            "expected_case_count": 12,
+            "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
+            "status": "row_artifact_missing"
+          },
+          {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+            "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+            "detected_row_artifact_count": 0,
+            "expected_case_count": 12,
+            "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
+            "status": "row_artifact_missing"
+          }
+        ],
+        "status": "blocked"
+      }
+    ],
     "operator_sequence": [
       "review_public_benchmark_vina_gnina_input_manifest_template_preflight",
       "fill_public_benchmark_vina_gnina_input_manifest_from_template",
@@ -7118,7 +7937,7 @@
     "rows_artifact_required_after_engine_execution": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
   },
   "schema_version": "public-benchmark-vina-gnina-runtime-readiness.v1",
-  "source_commit_sha": "c271cced050b34f96ae74a02ef48dec0ea685fc5",
+  "source_commit_sha": "3f72b115b21366023a7b77ad53397604d4d18ef7",
   "status": "execution_plan_blocked",
   "summary": {
     "adapter_case_count": 0,
@@ -7144,6 +7963,9 @@
     "input_manifest_template_missing_receipt_ref_count": 60,
     "input_manifest_template_preflight_status": "operator_manifest_completion_required",
     "missing_engine_count": 2,
+    "operator_blocker_family_blocked_count": 7,
+    "operator_blocker_family_count": 7,
+    "operator_blocker_family_missing_item_count": 182,
     "operator_execution_ready": false,
     "ready_engine_run_slot_count": 0,
     "required_engine_run_count": 24,

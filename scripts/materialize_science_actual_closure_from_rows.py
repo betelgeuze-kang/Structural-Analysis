@@ -430,6 +430,24 @@ def _compact_vina_gnina_input_manifest_completion_action(
     }
 
 
+def _compact_operator_blocker_family(row: dict[str, Any]) -> dict[str, Any]:
+    if not row:
+        return {}
+    first_missing_item = row.get("first_missing_item")
+    if not isinstance(first_missing_item, dict):
+        first_missing_item = {}
+    return {
+        "family_id": str(row.get("family_id") or ""),
+        "description": str(row.get("description") or ""),
+        "status": str(row.get("status") or ""),
+        "missing_item_count": int(row.get("missing_item_count") or 0),
+        "blocked_case_count": int(row.get("blocked_case_count") or 0),
+        "first_missing_item": first_missing_item,
+        "operator_action": str(row.get("operator_action") or ""),
+        "command_key": str(row.get("command_key") or ""),
+    }
+
+
 def _compact_vina_gnina_unblock_packet(payload: dict[str, Any]) -> dict[str, Any]:
     if not payload:
         return {}
@@ -447,6 +465,16 @@ def _compact_vina_gnina_unblock_packet(payload: dict[str, Any]) -> dict[str, Any
     )
     if not isinstance(completion_action_plan, list):
         completion_action_plan = []
+    operator_blocker_family_plan = payload.get("operator_blocker_family_plan")
+    if not isinstance(operator_blocker_family_plan, list):
+        operator_blocker_family_plan = []
+    first_operator_blocker_family = payload.get("first_operator_blocker_family")
+    if not isinstance(first_operator_blocker_family, dict):
+        first_operator_blocker_family = {}
+    else:
+        first_operator_blocker_family = _compact_operator_blocker_family(
+            first_operator_blocker_family
+        )
     engine_run_bundle_summary = payload.get("engine_run_bundle_summary")
     if not isinstance(engine_run_bundle_summary, dict):
         engine_run_bundle_summary = {}
@@ -573,6 +601,22 @@ def _compact_vina_gnina_unblock_packet(payload: dict[str, Any]) -> dict[str, Any
         "adapter_row_preflight_status": str(
             payload.get("adapter_row_preflight_status") or ""
         ),
+        "operator_blocker_family_count": int(
+            payload.get("operator_blocker_family_count")
+            or len(operator_blocker_family_plan)
+        ),
+        "operator_blocker_family_blocked_count": int(
+            payload.get("operator_blocker_family_blocked_count") or 0
+        ),
+        "operator_blocker_family_missing_item_count": int(
+            payload.get("operator_blocker_family_missing_item_count") or 0
+        ),
+        "first_operator_blocker_family": first_operator_blocker_family,
+        "operator_blocker_family_plan": [
+            _compact_operator_blocker_family(row)
+            for row in operator_blocker_family_plan
+            if isinstance(row, dict)
+        ],
         "operator_sequence": [
             str(row) for row in payload.get("operator_sequence", []) if str(row)
         ] if isinstance(payload.get("operator_sequence"), list) else [],

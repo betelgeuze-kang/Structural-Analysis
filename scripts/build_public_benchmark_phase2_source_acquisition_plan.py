@@ -313,6 +313,38 @@ def _as_int(value: Any) -> int:
         return 0
 
 
+def _compact_operator_blocker_family(row: dict[str, Any]) -> dict[str, Any]:
+    if not row:
+        return {}
+    return {
+        "family_id": str(row.get("family_id") or ""),
+        "description": str(row.get("description") or ""),
+        "status": str(row.get("status") or ""),
+        "missing_item_count": _as_int(row.get("missing_item_count")),
+        "blocked_case_count": _as_int(row.get("blocked_case_count")),
+        "first_missing_item": _as_dict(row.get("first_missing_item")),
+        "operator_action": str(row.get("operator_action") or ""),
+        "command_key": str(row.get("command_key") or ""),
+    }
+
+
+def _compact_vina_gnina_operator_unblock_packet(
+    packet: dict[str, Any],
+) -> dict[str, Any]:
+    if not packet:
+        return {}
+    compact = dict(packet)
+    compact["first_operator_blocker_family"] = _compact_operator_blocker_family(
+        _as_dict(packet.get("first_operator_blocker_family"))
+    )
+    compact["operator_blocker_family_plan"] = [
+        _compact_operator_blocker_family(row)
+        for row in _as_list(packet.get("operator_blocker_family_plan"))
+        if isinstance(row, dict)
+    ]
+    return compact
+
+
 def _source_acquisition_blockers(
     phase2_row_audit_summary: dict[str, Any],
     vina_gnina_execution_plan_summary: dict[str, Any],
@@ -966,6 +998,9 @@ def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, 
     operator_unblock_packet = payload.get("operator_unblock_packet")
     if not isinstance(operator_unblock_packet, dict):
         operator_unblock_packet = {}
+    operator_unblock_packet = _compact_vina_gnina_operator_unblock_packet(
+        operator_unblock_packet
+    )
     engine_run_bundle_summary = _as_dict(payload.get("engine_run_bundle_summary"))
     rows_from_engine_run_bundle_report_summary = _as_dict(
         payload.get("rows_from_engine_run_bundle_report_summary")

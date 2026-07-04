@@ -715,6 +715,192 @@ def _input_manifest_completion_action_plan(rows: Any) -> list[dict[str, Any]]:
     return action_plan
 
 
+def _case_count_for_items(rows: list[dict[str, Any]]) -> int:
+    return len({str(row.get("case_id") or "") for row in rows if row.get("case_id")})
+
+
+def _operator_blocker_family_row(
+    *,
+    family_id: str,
+    description: str,
+    missing_items: list[dict[str, Any]],
+    operator_action: str,
+    command_key: str,
+    blocked_case_count: int | None = None,
+) -> dict[str, Any]:
+    missing_item_count = len(missing_items)
+    return {
+        "family_id": family_id,
+        "description": description,
+        "status": "blocked" if missing_item_count else "ready",
+        "missing_item_count": missing_item_count,
+        "blocked_case_count": (
+            _case_count_for_items(missing_items)
+            if blocked_case_count is None
+            else blocked_case_count
+        ),
+        "first_missing_item": missing_items[0] if missing_items else {},
+        "sample_missing_items": missing_items[:3],
+        "operator_action": operator_action,
+        "command_key": command_key,
+    }
+
+
+def _operator_blocker_family_plan(
+    *,
+    case_input_slots: list[dict[str, Any]],
+    blocked_engine_run_slots: list[dict[str, Any]],
+    current_engine_execution_statuses: list[dict[str, Any]],
+    row_status: dict[str, Any],
+    input_manifest_template_preflight_summary: dict[str, Any],
+    adapter_rows_ready: bool,
+) -> list[dict[str, Any]]:
+    completion_actions = [
+        row
+        for row in input_manifest_template_preflight_summary.get(
+            "input_manifest_completion_action_plan", []
+        )
+        if isinstance(row, dict)
+    ]
+    missing_required_values = [
+        {
+            "case_id": str(row.get("case_id") or ""),
+            "complex_id": str(row.get("complex_id") or ""),
+            "field": str(field),
+            "operator_action": str(row.get("operator_completion_action") or ""),
+        }
+        for row in completion_actions
+        for field in _string_list(row.get("missing_required_fields"))
+    ]
+    local_file_requirements = [
+        requirement
+        for row in completion_actions
+        for requirement in row.get("missing_local_file_requirements", [])
+        if isinstance(requirement, dict)
+    ]
+    official_source_files = [
+        row
+        for row in local_file_requirements
+        if str(row.get("file_group") or "") == "official_source_file"
+    ]
+    prepared_input_files = [
+        row
+        for row in local_file_requirements
+        if str(row.get("file_group") or "") == "prepared_input_file"
+    ]
+    receipt_refs = [
+        requirement
+        for row in completion_actions
+        for requirement in row.get("missing_receipt_ref_requirements", [])
+        if isinstance(requirement, dict)
+    ]
+    missing_engine_runtimes = [
+        {
+            "engine_id": str(row.get("engine_id") or ""),
+            "execution_source": str(row.get("execution_source") or ""),
+            "blocker": str(row.get("blocker") or ""),
+            "binary_env_var": _engine_binary_env_var(str(row.get("engine_id") or "")),
+            "container_image_env_var": _engine_container_image_env_var(
+                str(row.get("engine_id") or "")
+            ),
+            "operator_action": (
+                f"configure_{row.get('engine_id')}_runtime"
+                if str(row.get("engine_id") or "")
+                else "configure_vina_gnina_runtime"
+            ),
+        }
+        for row in current_engine_execution_statuses
+        if not bool(row.get("available")) and str(row.get("engine_id") or "")
+    ]
+    blocked_engine_runs = [
+        {
+            "case_id": str(row.get("case_id") or ""),
+            "complex_id": str(row.get("complex_id") or ""),
+            "engine_id": str(row.get("engine_id") or ""),
+            "docking_run_id": str(row.get("docking_run_id") or ""),
+            "blockers": _string_list(row.get("blockers")),
+            "operator_action": "unblock_case_inputs_and_runtime_then_run_engine",
+        }
+        for row in blocked_engine_run_slots
+    ]
+    expected_adapter_case_count = len(case_input_slots)
+    adapter_missing_count = (
+        0
+        if adapter_rows_ready
+        else max(
+            expected_adapter_case_count,
+            int(row_status.get("adapter_case_count") or 0),
+            1 if str(row_status.get("blocker") or "") else 0,
+        )
+    )
+    adapter_row_items = [
+        {
+            "artifact": str(DEFAULT_VINA_GNINA_ROWS),
+            "status": str(row_status.get("status") or ""),
+            "blocker": str(row_status.get("blocker") or ""),
+            "detected_row_artifact_count": int(
+                row_status.get("detected_row_artifact_count") or 0
+            ),
+            "expected_case_count": expected_adapter_case_count,
+            "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
+        }
+        for _ in range(adapter_missing_count)
+    ]
+    return [
+        _operator_blocker_family_row(
+            family_id="manifest_required_values",
+            description="Required manifest scalar values and checksums are missing.",
+            missing_items=missing_required_values,
+            operator_action="complete_vina_gnina_input_manifest_required_values",
+            command_key="build_input_manifest_template_preflight",
+        ),
+        _operator_blocker_family_row(
+            family_id="official_source_files",
+            description="Official CASF/PDBBind source protein and ligand files are missing or unverified.",
+            missing_items=official_source_files,
+            operator_action="materialize_source_files_from_casf_archive_and_verify_checksum",
+            command_key="materialize_input_manifest_from_casf_archive",
+        ),
+        _operator_blocker_family_row(
+            family_id="prepared_input_files",
+            description="Prepared receptor and ligand inputs for Vina/GNINA are missing or unverified.",
+            missing_items=prepared_input_files,
+            operator_action="prepare_vina_gnina_inputs_and_record_checksums",
+            command_key="build_input_manifest_template_preflight",
+        ),
+        _operator_blocker_family_row(
+            family_id="input_and_engine_receipt_refs",
+            description="Input preparation, engine config, and engine run receipt refs are missing.",
+            missing_items=receipt_refs,
+            operator_action="attach_vina_gnina_input_and_engine_receipt_refs",
+            command_key="build_input_manifest_template_preflight",
+        ),
+        _operator_blocker_family_row(
+            family_id="engine_runtime",
+            description="Vina/GNINA binaries or local container images are not configured.",
+            missing_items=missing_engine_runtimes,
+            operator_action="configure_vina_gnina_binary_or_container_runtime",
+            command_key="rerun_runtime_readiness",
+        ),
+        _operator_blocker_family_row(
+            family_id="engine_run_slots",
+            description="Required Vina/GNINA engine run slots are not ready for execution.",
+            missing_items=blocked_engine_runs,
+            operator_action="rerun_runtime_readiness_until_engine_run_slots_ready",
+            command_key="rerun_runtime_readiness",
+            blocked_case_count=_case_count_for_items(blocked_engine_runs),
+        ),
+        _operator_blocker_family_row(
+            family_id="adapter_rows",
+            description="The Vina/GNINA comparison adapter rows artifact is missing or blocked.",
+            missing_items=adapter_row_items,
+            operator_action="attach_or_materialize_public_benchmark_vina_gnina_rows",
+            command_key="materialize_rows_from_engine_run_bundle",
+            blocked_case_count=adapter_missing_count,
+        ),
+    ]
+
+
 def _input_manifest_template_preflight_summary(repo_root: Path) -> dict[str, Any]:
     payload = _load_json(repo_root, DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT)
     if not payload:
@@ -940,6 +1126,23 @@ def _operator_unblock_packet(
         for row in current_engine_execution_statuses
         if not bool(row.get("available")) and str(row.get("engine_id") or "")
     ]
+    operator_blocker_family_plan = _operator_blocker_family_plan(
+        case_input_slots=case_input_slots,
+        blocked_engine_run_slots=blocked_engine_run_slots,
+        current_engine_execution_statuses=current_engine_execution_statuses,
+        row_status=row_status,
+        input_manifest_template_preflight_summary=(
+            input_manifest_template_preflight_summary
+        ),
+        adapter_rows_ready=adapter_rows_ready,
+    )
+    blocked_operator_blocker_families = [
+        row for row in operator_blocker_family_plan if row["status"] != "ready"
+    ]
+    operator_blocker_family_missing_item_count = sum(
+        int(row.get("missing_item_count") or 0)
+        for row in blocked_operator_blocker_families
+    )
     if blocked_case_input_slots:
         status = "engine_inputs_required"
     elif missing_engine_ids:
@@ -1042,6 +1245,22 @@ def _operator_unblock_packet(
             row_status.get("detected_row_artifact_count") or 0
         ),
         "selected_row_path": str(row_status.get("selected_path") or ""),
+        "operator_blocker_family_plan": operator_blocker_family_plan,
+        "operator_blocker_family_count": len(operator_blocker_family_plan),
+        "operator_blocker_family_blocked_count": len(
+            blocked_operator_blocker_families
+        ),
+        "operator_blocker_family_missing_item_count": (
+            operator_blocker_family_missing_item_count
+        ),
+        "first_operator_blocker_family": (
+            blocked_operator_blocker_families[0]
+            if blocked_operator_blocker_families
+            else {}
+        ),
+        "missing_item_count_semantics": (
+            "Family-local counts are not deduplicated across blocker families."
+        ),
         "operator_sequence": [
             "review_public_benchmark_vina_gnina_input_manifest_template_preflight",
             "fill_public_benchmark_vina_gnina_input_manifest_from_template",
@@ -1236,6 +1455,17 @@ def build_vina_gnina_runtime_readiness(
     )
     if not isinstance(first_blocked_engine_run_slot, dict):
         first_blocked_engine_run_slot = {}
+    operator_blocker_family_plan = [
+        row
+        for row in operator_unblock_packet.get("operator_blocker_family_plan", [])
+        if isinstance(row, dict)
+    ]
+    operator_blocker_family_blocked_count = int(
+        operator_unblock_packet.get("operator_blocker_family_blocked_count") or 0
+    )
+    operator_blocker_family_missing_item_count = int(
+        operator_unblock_packet.get("operator_blocker_family_missing_item_count") or 0
+    )
     if not execution_plan_ready:
         status = "execution_plan_blocked"
     elif not all_engines_available:
@@ -1292,6 +1522,17 @@ def build_vina_gnina_runtime_readiness(
         ),
         "engine_run_slots": engine_run_slots,
         "operator_unblock_packet": operator_unblock_packet,
+        "operator_blocker_family_plan": operator_blocker_family_plan,
+        "operator_blocker_family_count": len(operator_blocker_family_plan),
+        "operator_blocker_family_blocked_count": (
+            operator_blocker_family_blocked_count
+        ),
+        "operator_blocker_family_missing_item_count": (
+            operator_blocker_family_missing_item_count
+        ),
+        "first_operator_blocker_family": _as_dict(
+            operator_unblock_packet.get("first_operator_blocker_family")
+        ),
         "required_engine_run_count": required_engine_run_count,
         "ready_engine_run_slot_count": ready_engine_run_slot_count,
         "blocked_case_input_slot_count": blocked_case_input_slot_count,
@@ -1444,6 +1685,13 @@ def build_vina_gnina_runtime_readiness(
                     "input_manifest_completion_blocked_case_count"
                 )
                 or 0
+            ),
+            "operator_blocker_family_count": len(operator_blocker_family_plan),
+            "operator_blocker_family_blocked_count": (
+                operator_blocker_family_blocked_count
+            ),
+            "operator_blocker_family_missing_item_count": (
+                operator_blocker_family_missing_item_count
             ),
             "blocker_count": len(blockers),
         },

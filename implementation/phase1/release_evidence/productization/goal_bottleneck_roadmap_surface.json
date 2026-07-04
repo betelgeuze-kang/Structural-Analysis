@@ -675,13 +675,13 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
     "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
   },
-  "generated_at": "2026-07-04T10:04:12.113720+00:00",
+  "generated_at": "2026-07-04T10:19:03.833976+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:be05411d7bb174d8612aaa5a6d3c2ffbace0c16d1310fc0b6897f9fd9038c6d1",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:50113b04a758c06b720aa91a3b64639e1d31ba94f35334cf21494462930a7d2f",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:69285c5dcf0a4bdc30c7a71d48b86dabde7af6e458925f250a4e3f9b9616e109",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json": "sha256:6b29c833268ab2a8190514d7031a7f4802f585192cc9edfa67ab5afbeeb1c859",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:28e5a5f6ccbd26eef376b1a226ed4c1851d52d37182a22724554ab38c93c5b03",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json": "sha256:bf2f1aeedb25cd134c76d26cbe0846ec16a8380f91a786de8045f0bfd211e69b",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:a0347a2a8f9f8eeaa1714662cbddfdf9cfa7f82e02029e9faf0d6f6475c67293",
     "implementation/phase1/release_evidence/productization/source_of_truth_gap_classification.json": "sha256:5fb3525b23f2e4bc7582cc16aace64fbb7cc506c28e086a21bede3de61ea1b3c",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:c1af83f1b410aca8536d5ab832c0ba6a86153436844e42152860f84ec0002328",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:8adb767e05269c4063e04ca5e5060b0e94994916ccae4e9912c897c0c7fc9703",
@@ -2807,13 +2807,13 @@
           "expected_rows_mode": "operator_attached_public_benchmark_rows",
           "materialized": false,
           "outputs": {
-            "enrichment_scorecard": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
+            "enrichment_scorecard": "/tmp/codex-public-family.du0cSV/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
             "phase2_row_audit": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
-            "pose_success_harness": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
-            "pose_validity_input": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json",
-            "pose_validity_packet": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
-            "rmsd_scorecard": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
-            "subset_manifest": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
+            "pose_success_harness": "/tmp/codex-public-family.du0cSV/implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
+            "pose_validity_input": "/tmp/codex-public-family.du0cSV/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json",
+            "pose_validity_packet": "/tmp/codex-public-family.du0cSV/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
+            "rmsd_scorecard": "/tmp/codex-public-family.du0cSV/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
+            "subset_manifest": "/tmp/codex-public-family.du0cSV/implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
           },
           "phase2_exit_gate_criteria": [
             {
@@ -3043,7 +3043,7 @@
               "operator_blockers_if_missing": [
                 "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
               ],
-              "provided_path": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+              "provided_path": "/tmp/codex-public-family.du0cSV/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
               "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
               "row_input_id": "subset_rows",
               "status": "provided"
@@ -3072,7 +3072,7 @@
                 "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
                 "posebusters_style_pose_validity::pose_rows_not_provided"
               ],
-              "provided_path": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+              "provided_path": "/tmp/codex-public-family.du0cSV/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
               "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
               "row_input_id": "pose_rows",
               "status": "provided"
@@ -3091,7 +3091,7 @@
               "operator_blockers_if_missing": [
                 "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
               ],
-              "provided_path": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+              "provided_path": "/tmp/codex-public-family.du0cSV/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
               "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
               "row_input_id": "enrichment_rows",
               "status": "provided"
@@ -6138,7 +6138,7 @@
     ],
     "status": "operator_evidence_required"
   },
-  "source_commit_sha": "9eb603c438f58e0300748b19054b09e21aef13f3",
+  "source_commit_sha": "3f72b115b21366023a7b77ad53397604d4d18ef7",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
