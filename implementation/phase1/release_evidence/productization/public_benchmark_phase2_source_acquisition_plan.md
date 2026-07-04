@@ -17,6 +17,10 @@
 - `phase2_row_audit_source_actuality_blocker_count`: `0`
 - `phase2_exit_criterion_count`: `5`
 - `phase2_row_closure_matrix_count`: `4`
+- `phase2_harness_completion_audit_status`: `ready_except_vina_gnina_actual_rows`
+- `phase2_harness_ready_requirement_count`: `4`
+- `phase2_harness_blocked_requirement_count`: `1`
+- `phase2_harness_complete_except_vina_gnina_actual_rows`: `True`
 - `missing_row_input_action_count`: `1`
 - `vina_gnina_execution_plan`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json`
 - `vina_gnina_execution_plan_status`: `engine_input_blocked`
@@ -52,6 +56,23 @@
 | 12 | `run_public_benchmark_phase2_row_audit` |
 | 13 | `run_public_benchmark_harness_bundle_materializer` |
 | 14 | `refresh_public_benchmark_source_of_truth` |
+
+## Phase 2 Harness Completion Audit
+
+- `status`: `ready_except_vina_gnina_actual_rows`
+- `harness_contract_complete_except_vina_gnina_actual_rows`: `True`
+- `remaining_row_inputs`: `vina_gnina_rows`
+- `remaining_operator_action`: `attach_vina_gnina_rows_then_run_phase2_row_audit`
+- `vina_gnina_runtime_status`: `execution_plan_blocked`
+- `vina_gnina_input_manifest_status`: `not_detected`
+
+| Requirement | Product Requirement | Status | Pass | Row Inputs | Blockers |
+|---|---|---|---|---|---|
+| `casf_pdbbind_pose_success_harness` | CASF/PDBBind pose-success harness | `ready` | `True` | `subset_rows`, `pose_rows` | `none` |
+| `symmetry_aware_ligand_rmsd` | symmetry-aware ligand RMSD | `ready` | `True` | `pose_rows` | `none` |
+| `posebusters_style_pose_validity_checks` | PoseBusters-style pose validity checks | `ready` | `True` | `pose_rows` | `none` |
+| `vina_gnina_comparison_adapter` | Vina/GNINA comparison adapter | `blocked_pending_actual_vina_gnina_rows` | `False` | `vina_gnina_rows` | `vina_gnina_rows_not_provided` |
+| `dud_e_or_lit_pcba_enrichment` | DUD-E or LIT-PCBA enrichment | `ready` | `True` | `enrichment_rows` | `none` |
 
 | Row Input | Source Family | Status | Unblocks |
 |---|---|---|---|

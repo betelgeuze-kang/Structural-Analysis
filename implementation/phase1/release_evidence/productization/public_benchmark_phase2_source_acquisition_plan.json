@@ -24,14 +24,14 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T04:22:10.658898+00:00",
+  "generated_at": "2026-07-04T04:54:44.903933+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:3f53708e67d1dd76f5f313307ce46a2971b748ef1938925bc44318b40e52709d",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:d91bbc8402c86796ce3d60d0a053610cceea2dcbbb0f5faf00adeaad7698bea4",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv": "sha256:3a106d2aa9f456eee7238523bf090db13e35d98afefa3952352a660f5b5e36ae",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json": "sha256:029bfc660060a50fe54ed88fa29dd99dd623967a80f36e772f969d82bc40428d",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:a0c748515aefbeb496ab253028a3b13b4df4b2844ae88e1ef394a0e1d12e4f1d",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:452c5481e58e928deebb82227ba646775b7ac1613debc4d2ce239ab8b3d93f85",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:cf050c45df574e17193f2dae557e2d99572bd17369daddce86cb10702529b37d",
     "scripts/build_public_benchmark_source_access_preflight_receipt.py": "sha256:47b23a61ea7eb470f8ab4b48337b4382ad3523a646b81c8bdddedf3451d1c2d1",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1",
     "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:69b0ce594558bad457b052be33865b0abf90e8b4779dc31ff3a987b1eea7ef72",
@@ -1009,6 +1009,168 @@
     }
   ],
   "phase2_exit_criterion_count": 5,
+  "phase2_harness_completion_audit": {
+    "blocked_requirement_count": 1,
+    "blocked_requirement_ids": [
+      "vina_gnina_comparison_adapter"
+    ],
+    "claim_boundary": "This audit proves the harness surface is complete only up to the explicit Vina/GNINA actual-row boundary. Full Phase 2 still requires real Vina/GNINA engine rows, input manifest receipts, runtime evidence, and refreshed row audit/source-of-truth artifacts.",
+    "harness_contract_complete_except_vina_gnina_actual_rows": true,
+    "pass": true,
+    "phase2_ready": false,
+    "ready_requirement_count": 4,
+    "remaining_blockers": [
+      "vina_gnina_rows_not_provided"
+    ],
+    "remaining_operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
+    "remaining_row_inputs": [
+      "vina_gnina_rows"
+    ],
+    "requirement_count": 5,
+    "requirements": [
+      {
+        "blockers": [],
+        "claim_boundary": "This row audits Phase 2 harness readiness from the materialized row audit. It does not replace the underlying benchmark materializers or external source receipts.",
+        "component_id": "casf_pdbbind_pose_success_harness",
+        "criterion_id": "casf_pdbbind_pose_success_harness_ready",
+        "current": {
+          "contract_pass": true,
+          "ready": true,
+          "real_benchmark_case_count": 12
+        },
+        "pass": true,
+        "product_requirement": "CASF/PDBBind pose-success harness",
+        "required": {
+          "contract_pass": true,
+          "ready": true,
+          "real_benchmark_case_count": 12
+        },
+        "requirement_id": "casf_pdbbind_pose_success_harness",
+        "row_input_status": {
+          "pose_rows": "provided",
+          "subset_rows": "provided"
+        },
+        "row_inputs": [
+          "subset_rows",
+          "pose_rows"
+        ],
+        "status": "ready"
+      },
+      {
+        "blockers": [],
+        "claim_boundary": "This row audits Phase 2 harness readiness from the materialized row audit. It does not replace the underlying benchmark materializers or external source receipts.",
+        "component_id": "symmetry_aware_ligand_rmsd",
+        "criterion_id": "symmetry_aware_ligand_rmsd_ready",
+        "current": {
+          "contract_pass": true,
+          "ready": true,
+          "real_benchmark_case_count": 12
+        },
+        "pass": true,
+        "product_requirement": "symmetry-aware ligand RMSD",
+        "required": {
+          "contract_pass": true,
+          "ready": true,
+          "real_benchmark_case_count": 12
+        },
+        "requirement_id": "symmetry_aware_ligand_rmsd",
+        "row_input_status": {
+          "pose_rows": "provided"
+        },
+        "row_inputs": [
+          "pose_rows"
+        ],
+        "status": "ready"
+      },
+      {
+        "blockers": [],
+        "claim_boundary": "This row audits Phase 2 harness readiness from the materialized row audit. It does not replace the underlying benchmark materializers or external source receipts.",
+        "component_id": "posebusters_style_pose_validity",
+        "criterion_id": "posebusters_style_pose_validity_ready",
+        "current": {
+          "contract_pass": true,
+          "ready": true,
+          "real_benchmark_case_count": 12
+        },
+        "pass": true,
+        "product_requirement": "PoseBusters-style pose validity checks",
+        "required": {
+          "contract_pass": true,
+          "ready": true,
+          "real_benchmark_case_count": 12
+        },
+        "requirement_id": "posebusters_style_pose_validity_checks",
+        "row_input_status": {
+          "pose_rows": "provided"
+        },
+        "row_inputs": [
+          "pose_rows"
+        ],
+        "status": "ready"
+      },
+      {
+        "blockers": [
+          "vina_gnina_rows_not_provided"
+        ],
+        "claim_boundary": "This row audits Phase 2 harness readiness from the materialized row audit. It does not replace the underlying benchmark materializers or external source receipts.",
+        "component_id": "vina_gnina_comparison_adapter",
+        "criterion_id": "vina_gnina_comparison_ready",
+        "current": {
+          "contract_pass": false,
+          "ready": false,
+          "real_comparison_case_count": 0
+        },
+        "pass": false,
+        "product_requirement": "Vina/GNINA comparison adapter",
+        "required": {
+          "contract_pass": true,
+          "ready": true,
+          "real_comparison_case_count": 1
+        },
+        "requirement_id": "vina_gnina_comparison_adapter",
+        "row_input_status": {
+          "vina_gnina_rows": "missing"
+        },
+        "row_inputs": [
+          "vina_gnina_rows"
+        ],
+        "status": "blocked_pending_actual_vina_gnina_rows"
+      },
+      {
+        "blockers": [],
+        "claim_boundary": "This row audits Phase 2 harness readiness from the materialized row audit. It does not replace the underlying benchmark materializers or external source receipts.",
+        "component_id": "dud_e_or_lit_pcba_enrichment",
+        "criterion_id": "dud_e_or_lit_pcba_enrichment_ready",
+        "current": {
+          "contract_pass": true,
+          "ready": true,
+          "real_enrichment_target_count": 1
+        },
+        "pass": true,
+        "product_requirement": "DUD-E or LIT-PCBA enrichment",
+        "required": {
+          "contract_pass": true,
+          "ready": true,
+          "real_enrichment_target_count": 1
+        },
+        "requirement_id": "dud_e_or_lit_pcba_enrichment",
+        "row_input_status": {
+          "enrichment_rows": "provided"
+        },
+        "row_inputs": [
+          "enrichment_rows"
+        ],
+        "status": "ready"
+      }
+    ],
+    "status": "ready_except_vina_gnina_actual_rows",
+    "vina_gnina_input_manifest_status": "not_detected",
+    "vina_gnina_runtime_missing_engine_ids": [
+      "vina",
+      "gnina"
+    ],
+    "vina_gnina_runtime_status": "execution_plan_blocked"
+  },
   "phase2_ready": false,
   "phase2_row_audit": {
     "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
@@ -1623,7 +1785,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "4d44696bedfc80038d1d4024580c0722b8d759fb",
+  "source_commit_sha": "e006758217ab0fccac1c37ca23f4cf2ffafa1cb7",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
@@ -1638,6 +1800,11 @@
     "official_source_receipt_role_count": 4,
     "phase2_blocked_exit_criterion_count": 1,
     "phase2_exit_criterion_count": 5,
+    "phase2_harness_blocked_requirement_count": 1,
+    "phase2_harness_complete_except_vina_gnina_actual_rows": true,
+    "phase2_harness_completion_audit_status": "ready_except_vina_gnina_actual_rows",
+    "phase2_harness_ready_requirement_count": 4,
+    "phase2_harness_requirement_count": 5,
     "phase2_passing_exit_criterion_count": 4,
     "phase2_ready": false,
     "phase2_row_audit_blocker_count": 1,

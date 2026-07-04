@@ -233,6 +233,38 @@ PHASE2_COMPONENTS = [
     "vina_gnina_comparison_adapter",
     "dud_e_or_lit_pcba_enrichment",
 ]
+PHASE2_HARNESS_REQUIREMENTS = [
+    {
+        "requirement_id": "casf_pdbbind_pose_success_harness",
+        "criterion_id": "casf_pdbbind_pose_success_harness_ready",
+        "component_id": "casf_pdbbind_pose_success_harness",
+        "product_requirement": "CASF/PDBBind pose-success harness",
+    },
+    {
+        "requirement_id": "symmetry_aware_ligand_rmsd",
+        "criterion_id": "symmetry_aware_ligand_rmsd_ready",
+        "component_id": "symmetry_aware_ligand_rmsd",
+        "product_requirement": "symmetry-aware ligand RMSD",
+    },
+    {
+        "requirement_id": "posebusters_style_pose_validity_checks",
+        "criterion_id": "posebusters_style_pose_validity_ready",
+        "component_id": "posebusters_style_pose_validity",
+        "product_requirement": "PoseBusters-style pose validity checks",
+    },
+    {
+        "requirement_id": "vina_gnina_comparison_adapter",
+        "criterion_id": "vina_gnina_comparison_ready",
+        "component_id": "vina_gnina_comparison_adapter",
+        "product_requirement": "Vina/GNINA comparison adapter",
+    },
+    {
+        "requirement_id": "dud_e_or_lit_pcba_enrichment",
+        "criterion_id": "dud_e_or_lit_pcba_enrichment_ready",
+        "component_id": "dud_e_or_lit_pcba_enrichment",
+        "product_requirement": "DUD-E or LIT-PCBA enrichment",
+    },
+]
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -527,6 +559,139 @@ def _phase2_exit_criteria(audit: dict[str, Any]) -> list[dict[str, Any]]:
             }
         )
     return criteria
+
+
+def _criterion_row_inputs(
+    criterion_id: str,
+    phase2_row_closure_matrix: list[dict[str, Any]],
+) -> list[str]:
+    row_inputs: list[str] = []
+    for row in phase2_row_closure_matrix:
+        closes = row.get("closes_phase2_criteria")
+        if not isinstance(closes, list) or criterion_id not in closes:
+            continue
+        row_input_id = str(row.get("row_input_id") or "")
+        if row_input_id:
+            row_inputs.append(row_input_id)
+    return row_inputs
+
+
+def _phase2_harness_completion_audit(
+    *,
+    phase2_exit_criteria: list[dict[str, Any]],
+    phase2_row_closure_matrix: list[dict[str, Any]],
+    phase2_row_audit_summary: dict[str, Any],
+    vina_gnina_execution_plan_summary: dict[str, Any],
+    vina_gnina_runtime_readiness_summary: dict[str, Any],
+) -> dict[str, Any]:
+    criteria_by_id = {
+        str(row.get("criterion_id") or ""): row
+        for row in phase2_exit_criteria
+        if isinstance(row, dict)
+    }
+    missing_row_inputs = [
+        str(row)
+        for row in phase2_row_audit_summary.get("missing_row_inputs", [])
+        if str(row)
+    ]
+    missing_row_input_set = set(missing_row_inputs)
+    requirement_rows: list[dict[str, Any]] = []
+    for requirement in PHASE2_HARNESS_REQUIREMENTS:
+        criterion_id = str(requirement["criterion_id"])
+        criterion = criteria_by_id.get(criterion_id, {})
+        row_inputs = _criterion_row_inputs(criterion_id, phase2_row_closure_matrix)
+        row_input_status = {
+            row_input: (
+                "missing" if row_input in missing_row_input_set else "provided"
+            )
+            for row_input in row_inputs
+        }
+        blockers = [
+            str(blocker)
+            for blocker in criterion.get("blockers", [])
+            if str(blocker)
+        ] if isinstance(criterion.get("blockers"), list) else []
+        status = "ready" if bool(criterion.get("pass")) else "blocked"
+        if (
+            criterion_id == "vina_gnina_comparison_ready"
+            and not bool(criterion.get("pass"))
+        ):
+            status = "blocked_pending_actual_vina_gnina_rows"
+        requirement_rows.append(
+            {
+                **requirement,
+                "status": status,
+                "pass": bool(criterion.get("pass")),
+                "row_inputs": row_inputs,
+                "row_input_status": row_input_status,
+                "current": _as_dict(criterion.get("current")),
+                "required": _as_dict(criterion.get("required")),
+                "blockers": blockers,
+                "claim_boundary": (
+                    "This row audits Phase 2 harness readiness from the "
+                    "materialized row audit. It does not replace the underlying "
+                    "benchmark materializers or external source receipts."
+                ),
+            }
+        )
+    ready_count = sum(1 for row in requirement_rows if bool(row["pass"]))
+    blocked_rows = [row for row in requirement_rows if not bool(row["pass"])]
+    only_vina_gnina_rows_blocked = (
+        ready_count == len(PHASE2_HARNESS_REQUIREMENTS) - 1
+        and [row["criterion_id"] for row in blocked_rows]
+        == ["vina_gnina_comparison_ready"]
+        and missing_row_inputs == ["vina_gnina_rows"]
+    )
+    return {
+        "status": (
+            "ready_except_vina_gnina_actual_rows"
+            if only_vina_gnina_rows_blocked
+            else "harness_inputs_blocked"
+        ),
+        "pass": only_vina_gnina_rows_blocked,
+        "phase2_ready": bool(phase2_row_audit_summary.get("phase2_ready")),
+        "harness_contract_complete_except_vina_gnina_actual_rows": (
+            only_vina_gnina_rows_blocked
+        ),
+        "requirement_count": len(requirement_rows),
+        "ready_requirement_count": ready_count,
+        "blocked_requirement_count": len(blocked_rows),
+        "blocked_requirement_ids": [
+            str(row["requirement_id"]) for row in blocked_rows
+        ],
+        "remaining_row_inputs": missing_row_inputs,
+        "remaining_blockers": [
+            str(blocker)
+            for row in blocked_rows
+            for blocker in row.get("blockers", [])
+            if str(blocker)
+        ],
+        "remaining_operator_action": (
+            "attach_vina_gnina_rows_then_run_phase2_row_audit"
+            if only_vina_gnina_rows_blocked
+            else "review_public_benchmark_phase2_row_audit_blockers"
+        ),
+        "vina_gnina_runtime_status": str(
+            vina_gnina_runtime_readiness_summary.get("status") or ""
+        ),
+        "vina_gnina_input_manifest_status": str(
+            vina_gnina_execution_plan_summary.get("input_manifest_status") or ""
+        ),
+        "vina_gnina_runtime_missing_engine_ids": [
+            str(row)
+            for row in vina_gnina_runtime_readiness_summary.get(
+                "missing_engine_ids", []
+            )
+            if str(row)
+        ],
+        "requirements": requirement_rows,
+        "claim_boundary": (
+            "This audit proves the harness surface is complete only up to the "
+            "explicit Vina/GNINA actual-row boundary. Full Phase 2 still requires "
+            "real Vina/GNINA engine rows, input manifest receipts, runtime "
+            "evidence, and refreshed row audit/source-of-truth artifacts."
+        ),
+    }
 
 
 def _vina_gnina_execution_plan_summary(payload: dict[str, Any]) -> dict[str, Any]:
@@ -1903,6 +2068,15 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             vina_gnina_rows_template_preflight_summary
         ),
     )
+    phase2_harness_completion_audit = _phase2_harness_completion_audit(
+        phase2_exit_criteria=phase2_exit_criteria,
+        phase2_row_closure_matrix=phase2_row_closure_matrix,
+        phase2_row_audit_summary=phase2_row_audit_summary,
+        vina_gnina_execution_plan_summary=vina_gnina_execution_plan_summary,
+        vina_gnina_runtime_readiness_summary=(
+            vina_gnina_runtime_readiness_summary
+        ),
+    )
     operator_next_actions = [
         "review_official_source_receipt_plan",
         "attach_casf_pdbbind_subset_rows_with_local_file_checksums",
@@ -1963,6 +2137,7 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         "phase2_row_audit": phase2_row_audit_summary,
         "phase2_exit_criteria": phase2_exit_criteria,
         "phase2_exit_criterion_count": len(phase2_exit_criteria),
+        "phase2_harness_completion_audit": phase2_harness_completion_audit,
         "phase2_row_closure_matrix": phase2_row_closure_matrix,
         "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
         "vina_gnina_execution_plan": vina_gnina_execution_plan_summary,
@@ -2002,6 +2177,23 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             ),
             "phase2_blocked_exit_criterion_count": len(
                 [row for row in phase2_exit_criteria if not row["pass"]]
+            ),
+            "phase2_harness_completion_audit_status": (
+                phase2_harness_completion_audit["status"]
+            ),
+            "phase2_harness_requirement_count": (
+                phase2_harness_completion_audit["requirement_count"]
+            ),
+            "phase2_harness_ready_requirement_count": (
+                phase2_harness_completion_audit["ready_requirement_count"]
+            ),
+            "phase2_harness_blocked_requirement_count": (
+                phase2_harness_completion_audit["blocked_requirement_count"]
+            ),
+            "phase2_harness_complete_except_vina_gnina_actual_rows": (
+                phase2_harness_completion_audit[
+                    "harness_contract_complete_except_vina_gnina_actual_rows"
+                ]
             ),
             "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
             "phase2_row_audit_blocker_count": phase2_row_audit_summary[
@@ -2149,6 +2341,16 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `phase2_row_audit_source_actuality_blocker_count`: `{payload['phase2_row_audit']['source_actuality_blocker_count']}`",
         f"- `phase2_exit_criterion_count`: `{payload['phase2_exit_criterion_count']}`",
         f"- `phase2_row_closure_matrix_count`: `{payload['phase2_row_closure_matrix_count']}`",
+        "- `phase2_harness_completion_audit_status`: "
+        f"`{payload['phase2_harness_completion_audit']['status']}`",
+        "- `phase2_harness_ready_requirement_count`: "
+        f"`{payload['phase2_harness_completion_audit']['ready_requirement_count']}`",
+        "- `phase2_harness_blocked_requirement_count`: "
+        f"`{payload['phase2_harness_completion_audit']['blocked_requirement_count']}`",
+        "- `phase2_harness_complete_except_vina_gnina_actual_rows`: "
+        "`"
+        f"{payload['phase2_harness_completion_audit']['harness_contract_complete_except_vina_gnina_actual_rows']}"
+        "`",
         f"- `missing_row_input_action_count`: `{payload['missing_row_input_action_count']}`",
         f"- `vina_gnina_execution_plan`: `{payload['vina_gnina_execution_plan']['artifact']}`",
         f"- `vina_gnina_execution_plan_status`: `{payload['vina_gnina_execution_plan']['status']}`",
@@ -2174,6 +2376,47 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
     ]
     for index, action in enumerate(payload.get("operator_next_actions", []), start=1):
         lines.append(f"| {index} | `{action}` |")
+    harness_audit = _as_dict(payload.get("phase2_harness_completion_audit"))
+    harness_requirements = [
+        row for row in harness_audit.get("requirements", []) if isinstance(row, dict)
+    ] if isinstance(harness_audit.get("requirements"), list) else []
+    if harness_audit:
+        lines.extend(
+            [
+                "",
+                "## Phase 2 Harness Completion Audit",
+                "",
+                f"- `status`: `{harness_audit.get('status')}`",
+                "- `harness_contract_complete_except_vina_gnina_actual_rows`: "
+                "`"
+                f"{harness_audit.get('harness_contract_complete_except_vina_gnina_actual_rows')}"
+                "`",
+                f"- `remaining_row_inputs`: `{', '.join(harness_audit.get('remaining_row_inputs', []))}`",
+                f"- `remaining_operator_action`: `{harness_audit.get('remaining_operator_action')}`",
+                f"- `vina_gnina_runtime_status`: `{harness_audit.get('vina_gnina_runtime_status')}`",
+                f"- `vina_gnina_input_manifest_status`: `{harness_audit.get('vina_gnina_input_manifest_status')}`",
+                "",
+                "| Requirement | Product Requirement | Status | Pass | Row Inputs | Blockers |",
+                "|---|---|---|---|---|---|",
+            ]
+        )
+        for row in harness_requirements:
+            row_inputs = ", ".join(
+                f"`{row_input}`" for row_input in row.get("row_inputs", [])
+            )
+            blockers = ", ".join(
+                f"`{blocker}`"
+                for blocker in row.get("blockers", [])
+                if str(blocker)
+            )
+            lines.append(
+                f"| `{row.get('requirement_id', '')}` | "
+                f"{row.get('product_requirement', '')} | "
+                f"`{row.get('status', '')}` | "
+                f"`{row.get('pass')}` | "
+                f"{row_inputs or '`none`'} | "
+                f"{blockers or '`none`'} |"
+            )
     lines.extend(
         [
             "",
