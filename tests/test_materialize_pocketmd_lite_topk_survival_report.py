@@ -600,6 +600,32 @@ def test_pocketmd_lite_materializer_blocks_duplicate_topk_rank(tmp_path: Path) -
     assert "top_k_integrity_required" in report["root_cause_tags"]
 
 
+def test_pocketmd_lite_materializer_blocks_duplicate_candidate_id(
+    tmp_path: Path,
+) -> None:
+    intake = _with_source_receipt(_valid_intake(), tmp_path)
+    cases = intake["cases"]
+    assert isinstance(cases, list)
+    duplicate = dict(cases[1])
+    duplicate["top_k_rank"] = 3
+    cases.append(duplicate)
+
+    report = module.materialize_pocketmd_lite_topk_survival_report(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "operator_evidence_required"
+    assert report["contract_pass"] is False
+    assert report["first_blocked_target"] == "case_a"
+    assert "case_a:candidate_id_pose_2_duplicate" in report["blockers"]
+    assert "top_k_integrity_required" in report["root_cause_tags"]
+    assert report["phase4_exit_gate"]["failed_criteria"] == [
+        "top_k_refinement_case_coverage",
+        "report_blockers_resolved",
+    ]
+
+
 def test_pocketmd_lite_materializer_blocks_non_contiguous_topk_rank_prefix(
     tmp_path: Path,
 ) -> None:

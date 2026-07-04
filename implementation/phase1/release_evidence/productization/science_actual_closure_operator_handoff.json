@@ -5433,12 +5433,12 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T06:12:01.240914+00:00",
+  "generated_at": "2026-07-04T06:48:38.507409+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:b1caa73bcb0158f8b93d0b28b80ed45d5f5df1e5c918d29041924898c18a9cc5",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:25acd0c4e672d933220769a3e34135ea65d1fac049877b818d44b3c9288618f5",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:74315d11b9be2f4e78265c1c0c867063e1e3c16671431f62e24564e59e706ddb",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:1aa07a73ba0f9770659d6317d4d813eff0660669c991dd35c5b89726f4045f20",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:e3a98f7bed334c844cbb54832b9e3e2da97325597da99654985aa3bf15398508",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:09354cd520764e9fb23e9a23e1eed17a38e73328687154c5d35c5411731af093",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:c3382754f0caec3c66af44c9542f3cf9d98c498a4577c7d4bb49fa1252c456f9",
     "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:a443d01c2c648bb1ec64396a7646c13c73dc04fc387f989a62f02ef19975092d",
     "scripts/build_science_actual_closure_operator_handoff.py": "sha256:e421130fd064b5d3372981d3c7478cac2577df9f62cd78a6a0d6467b90bb6ab8"
@@ -18503,7 +18503,7 @@
   },
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "2c92c3293bb037f2ef8f56d5399c5519b0bc862d",
+  "source_commit_sha": "c0ca3eae63cb81d0a6a8d37936166ba2ec0e5666",
   "status": "operator_rows_required",
   "summary": {
     "actual_closure_blocked_component_count": 2,

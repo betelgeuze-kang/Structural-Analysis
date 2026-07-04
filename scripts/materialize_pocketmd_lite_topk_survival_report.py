@@ -852,6 +852,21 @@ def build_phase4_exit_gate(
         claim in claims
         for claim in ("broad_all_atom_md_claim", "free_energy_perturbation_claim")
     )
+    top_k_case_coverage_blockers = _matching_blockers(
+        blockers,
+        "real_refinement_case_count",
+        "top_k_candidate_count",
+        "top_k_rank_coverage",
+        "top_k_rank_prefix_gap",
+        "top_k_rank_exceeds_max",
+        "top_k_rank_",
+        "candidate_id_",
+        "candidate_rows",
+        "topk_candidate",
+    )
+    top_k_case_coverage_current = bool(
+        _as_dict(summary.get("top_k_row_quality")).get("contract_pass")
+    ) and not top_k_case_coverage_blockers
     criteria = [
         _count_min_gate(
             criterion_id="top_k_refinement_rows_present",
@@ -861,20 +876,9 @@ def build_phase4_exit_gate(
         ),
         _boolean_gate(
             criterion_id="top_k_refinement_case_coverage",
-            current=bool(
-                _as_dict(summary.get("top_k_row_quality")).get("contract_pass")
-            ),
+            current=top_k_case_coverage_current,
             required=True,
-            blockers=_matching_blockers(
-                blockers,
-                "real_refinement_case_count",
-                "top_k_candidate_count",
-                "top_k_rank_coverage",
-                "top_k_rank_prefix_gap",
-                "top_k_rank_exceeds_max",
-                "candidate_rows",
-                "topk_candidate",
-            ),
+            blockers=top_k_case_coverage_blockers,
         ),
         _metric_present_gate(
             criterion_id="local_min_survival_materialized",

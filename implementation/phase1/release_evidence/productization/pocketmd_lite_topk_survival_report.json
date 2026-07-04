@@ -331,13 +331,13 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
   },
-  "generated_at": "2026-07-04T04:15:41.739680+00:00",
+  "generated_at": "2026-07-04T06:48:09.863256+00:00",
   "input_checksums": {
     "scripts/build_pocketmd_lite_product_surface.py": "sha256:4b31dabcd04793e8f2737651638d67e4bbbf2108619b910a7b5a60fffc5f600b",
     "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:c4e52648fc194826a082a0816d7946350a90fe1e4eae7d31e3d6f37dd1c05148",
-    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:eec4f06f8d8664a57b0510dba0a3733aea26a0f0454eef338c6f143e0140109e",
+    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:57f3773a03ec481e78cb8e7dd8caeaf4bbee2110aa9b9d6cb2f37620aa05af57",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:dad666c08fff6ec709e535de64fdc41121b7c93de5e19c42f0876d71a44a67c9",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:161673d8ff036a7a31d657fb972764eeb4b62f6d55cc0840e26f398565707c6f"
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:24aba7d75e0de5a6e62416cdbbab5980d231dee7030b2718c2f37f59d8437366"
   },
   "materialization_report": {
     "blocker_count": 6,
@@ -1894,7 +1894,7 @@
   ],
   "rows": [],
   "schema_version": "pocketmd-lite-topk-survival-report.v1",
-  "source_commit_sha": "fbb69945e6e2386ccec1980c0c089549da656e0c",
+  "source_commit_sha": "c0ca3eae63cb81d0a6a8d37936166ba2ec0e5666",
   "status": "operator_evidence_required",
   "summary": {
     "blocker_count": 6,
