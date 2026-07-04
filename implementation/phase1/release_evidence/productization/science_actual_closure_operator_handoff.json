@@ -949,6 +949,7 @@
             "uncertainty_summary_materialized",
             "report_blockers_resolved"
           ],
+          "command_key": "materialize_rows_from_receipt_bundle",
           "commands": {
             "build_row_template_preflight": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
             "import_rows": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
@@ -959,6 +960,8 @@
             "science_actual_closure": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
           },
           "default_row_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+          "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+          "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
           "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
           "operator_blockers_if_missing": [
             "pocketmd_lite_topk_rows_not_acquired"
@@ -1199,6 +1202,7 @@
             "validation_error": "",
             "verify_science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
           },
+          "science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
           "status": "missing",
           "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
           "top_k_rows_action_packet": {
@@ -3148,6 +3152,7 @@
               "uncertainty_summary_materialized",
               "report_blockers_resolved"
             ],
+            "command_key": "materialize_rows_from_receipt_bundle",
             "commands": {
               "build_row_template_preflight": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
               "import_rows": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
@@ -3158,6 +3163,8 @@
               "science_actual_closure": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
             },
             "default_row_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+            "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
             "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
             "operator_blockers_if_missing": [
               "pocketmd_lite_topk_rows_not_acquired"
@@ -3398,6 +3405,7 @@
               "validation_error": "",
               "verify_science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
             },
+            "science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
             "status": "missing",
             "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
             "top_k_rows_action_packet": {
@@ -4599,6 +4607,7 @@
             "vina_gnina_comparison_ready"
           ],
           "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+          "command_key": "build_input_manifest_template_preflight",
           "depends_on_row_inputs": [
             "subset_rows",
             "pose_rows"
@@ -4660,7 +4669,8 @@
           "engine_input_manifest_current_status": "ready",
           "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
           "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-          "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+          "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+          "next_action": "complete_vina_gnina_input_manifest_required_values",
           "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
           "phase2_materialization_chain": [
             "materialize_public_benchmark_vina_gnina_comparison_adapter"
@@ -4675,6 +4685,7 @@
               "required_minimum_count": 1
             }
           ],
+          "phase2_row_audit_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
           "receipt_fields": [
             "source_license_or_accession",
             "source_checksum",
@@ -5762,6 +5773,7 @@
               "vina_gnina_comparison_ready"
             ],
             "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+            "command_key": "build_input_manifest_template_preflight",
             "depends_on_row_inputs": [
               "subset_rows",
               "pose_rows"
@@ -5823,7 +5835,8 @@
             "engine_input_manifest_current_status": "ready",
             "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
             "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-            "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+            "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+            "next_action": "complete_vina_gnina_input_manifest_required_values",
             "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
             "phase2_materialization_chain": [
               "materialize_public_benchmark_vina_gnina_comparison_adapter"
@@ -5838,6 +5851,7 @@
                 "required_minimum_count": 1
               }
             ],
+            "phase2_row_audit_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
             "receipt_fields": [
               "source_license_or_accession",
               "source_checksum",
@@ -12680,6 +12694,7 @@
         "vina_gnina_comparison_ready"
       ],
       "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+      "command_key": "build_input_manifest_template_preflight",
       "depends_on_row_inputs": [
         "subset_rows",
         "pose_rows"
@@ -12741,7 +12756,8 @@
       "engine_input_manifest_current_status": "ready",
       "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
       "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-      "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+      "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+      "next_action": "complete_vina_gnina_input_manifest_required_values",
       "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
       "phase2_materialization_chain": [
         "materialize_public_benchmark_vina_gnina_comparison_adapter"
@@ -12756,6 +12772,7 @@
           "required_minimum_count": 1
         }
       ],
+      "phase2_row_audit_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
       "receipt_fields": [
         "source_license_or_accession",
         "source_checksum",
@@ -13383,6 +13400,7 @@
             "vina_gnina_comparison_ready"
           ],
           "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+          "command_key": "build_input_manifest_template_preflight",
           "depends_on_row_inputs": [
             "subset_rows",
             "pose_rows"
@@ -13444,7 +13462,8 @@
           "engine_input_manifest_current_status": "ready",
           "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
           "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-          "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+          "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+          "next_action": "complete_vina_gnina_input_manifest_required_values",
           "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
           "phase2_materialization_chain": [
             "materialize_public_benchmark_vina_gnina_comparison_adapter"
@@ -13459,6 +13478,7 @@
               "required_minimum_count": 1
             }
           ],
+          "phase2_row_audit_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
           "receipt_fields": [
             "source_license_or_accession",
             "source_checksum",
@@ -15024,14 +15044,14 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T11:35:02.561028+00:00",
+  "generated_at": "2026-07-04T11:49:44.136199+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:31132ede1a9d42bd1eab0194ca04e24e9a4c80ac2ace134baef6e7fa48a636ef",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:7129fb0c9124199c4da34ccbde8213d145c7915ab62b18e17ffe3f73d33c115e",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:a6fa0328fbbdc35c1ff47f966c085b5ae0fc5e6dfa2f1aba17e647681cdc246a",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:dc39006a0ed93c7141d4421294cb9d47e1af8a3c6fc2fe3531aeae754de53c89",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:09354cd520764e9fb23e9a23e1eed17a38e73328687154c5d35c5411731af093",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:5fbce29a20367f43cae86964e322074cc9618fe67488dd9372a78d91aa2823bf",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:1df6d58049c6be92ca67d8339de3e8c1b89679db76dc5227546f557fc7c2dbee",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:0133ae94e4cb6de0accb979f269e3cf4da247be4eb658b1b17164de03e7b9b5a",
     "scripts/build_science_actual_closure_operator_handoff.py": "sha256:daa177e55dc519e195d99a6ca1dae22fbbaa1ab7f09184cd7265e49839b393c0"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
@@ -19669,6 +19689,7 @@
               "vina_gnina_comparison_ready"
             ],
             "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+            "command_key": "build_input_manifest_template_preflight",
             "depends_on_row_inputs": [
               "subset_rows",
               "pose_rows"
@@ -19730,7 +19751,8 @@
             "engine_input_manifest_current_status": "ready",
             "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
             "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-            "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+            "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+            "next_action": "complete_vina_gnina_input_manifest_required_values",
             "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
             "phase2_materialization_chain": [
               "materialize_public_benchmark_vina_gnina_comparison_adapter"
@@ -19745,6 +19767,7 @@
                 "required_minimum_count": 1
               }
             ],
+            "phase2_row_audit_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
             "receipt_fields": [
               "source_license_or_accession",
               "source_checksum",
@@ -21608,6 +21631,7 @@
               "vina_gnina_comparison_ready"
             ],
             "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+            "command_key": "build_input_manifest_template_preflight",
             "depends_on_row_inputs": [
               "subset_rows",
               "pose_rows"
@@ -21669,7 +21693,8 @@
             "engine_input_manifest_current_status": "ready",
             "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
             "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-            "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+            "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+            "next_action": "complete_vina_gnina_input_manifest_required_values",
             "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
             "phase2_materialization_chain": [
               "materialize_public_benchmark_vina_gnina_comparison_adapter"
@@ -21684,6 +21709,7 @@
                 "required_minimum_count": 1
               }
             ],
+            "phase2_row_audit_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
             "receipt_fields": [
               "source_license_or_accession",
               "source_checksum",
@@ -23599,6 +23625,7 @@
               "vina_gnina_comparison_ready"
             ],
             "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+            "command_key": "build_input_manifest_template_preflight",
             "depends_on_row_inputs": [
               "subset_rows",
               "pose_rows"
@@ -23660,7 +23687,8 @@
             "engine_input_manifest_current_status": "ready",
             "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
             "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-            "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+            "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+            "next_action": "complete_vina_gnina_input_manifest_required_values",
             "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
             "phase2_materialization_chain": [
               "materialize_public_benchmark_vina_gnina_comparison_adapter"
@@ -23675,6 +23703,7 @@
                 "required_minimum_count": 1
               }
             ],
+            "phase2_row_audit_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
             "receipt_fields": [
               "source_license_or_accession",
               "source_checksum",
@@ -27040,6 +27069,7 @@
           "vina_gnina_comparison_ready"
         ],
         "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+        "command_key": "build_input_manifest_template_preflight",
         "depends_on_row_inputs": [
           "subset_rows",
           "pose_rows"
@@ -27101,7 +27131,8 @@
         "engine_input_manifest_current_status": "ready",
         "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
         "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-        "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+        "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+        "next_action": "complete_vina_gnina_input_manifest_required_values",
         "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
         "phase2_materialization_chain": [
           "materialize_public_benchmark_vina_gnina_comparison_adapter"
@@ -27116,6 +27147,7 @@
             "required_minimum_count": 1
           }
         ],
+        "phase2_row_audit_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
         "receipt_fields": [
           "source_license_or_accession",
           "source_checksum",
@@ -27743,6 +27775,7 @@
               "vina_gnina_comparison_ready"
             ],
             "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+            "command_key": "build_input_manifest_template_preflight",
             "depends_on_row_inputs": [
               "subset_rows",
               "pose_rows"
@@ -27804,7 +27837,8 @@
             "engine_input_manifest_current_status": "ready",
             "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
             "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-            "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+            "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+            "next_action": "complete_vina_gnina_input_manifest_required_values",
             "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
             "phase2_materialization_chain": [
               "materialize_public_benchmark_vina_gnina_comparison_adapter"
@@ -27819,6 +27853,7 @@
                 "required_minimum_count": 1
               }
             ],
+            "phase2_row_audit_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
             "receipt_fields": [
               "source_license_or_accession",
               "source_checksum",
@@ -30207,6 +30242,7 @@
           "uncertainty_summary_materialized",
           "report_blockers_resolved"
         ],
+        "command_key": "materialize_rows_from_receipt_bundle",
         "commands": {
           "build_row_template_preflight": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
           "import_rows": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
@@ -30217,6 +30253,8 @@
           "science_actual_closure": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
         },
         "default_row_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+        "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
         "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
         "operator_blockers_if_missing": [
           "pocketmd_lite_topk_rows_not_acquired"
@@ -30457,6 +30495,7 @@
           "validation_error": "",
           "verify_science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
         },
+        "science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
         "status": "missing",
         "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
         "top_k_rows_action_packet": {
@@ -31496,6 +31535,7 @@
               "uncertainty_summary_materialized",
               "report_blockers_resolved"
             ],
+            "command_key": "materialize_rows_from_receipt_bundle",
             "commands": {
               "build_row_template_preflight": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
               "import_rows": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
@@ -31506,6 +31546,8 @@
               "science_actual_closure": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
             },
             "default_row_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+            "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
             "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
             "operator_blockers_if_missing": [
               "pocketmd_lite_topk_rows_not_acquired"
@@ -31746,6 +31788,7 @@
               "validation_error": "",
               "verify_science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
             },
+            "science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
             "status": "missing",
             "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
             "top_k_rows_action_packet": {
@@ -33838,7 +33881,7 @@
   },
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "920e29188d26ff464e849cc9c33d61581224ff89",
+  "source_commit_sha": "9cda4cf76483b376bb618db20e33d0c35487d3ef",
   "status": "operator_rows_required",
   "summary": {
     "actual_closure_blocked_component_count": 2,
@@ -33895,6 +33938,7 @@
             "uncertainty_summary_materialized",
             "report_blockers_resolved"
           ],
+          "command_key": "materialize_rows_from_receipt_bundle",
           "commands": {
             "build_row_template_preflight": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
             "import_rows": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
@@ -33905,6 +33949,8 @@
             "science_actual_closure": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
           },
           "default_row_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+          "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+          "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
           "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
           "operator_blockers_if_missing": [
             "pocketmd_lite_topk_rows_not_acquired"
@@ -34145,6 +34191,7 @@
             "validation_error": "",
             "verify_science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
           },
+          "science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
           "status": "missing",
           "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
           "top_k_rows_action_packet": {
@@ -36725,6 +36772,7 @@
             "vina_gnina_comparison_ready"
           ],
           "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+          "command_key": "build_input_manifest_template_preflight",
           "depends_on_row_inputs": [
             "subset_rows",
             "pose_rows"
@@ -36786,7 +36834,8 @@
           "engine_input_manifest_current_status": "ready",
           "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
           "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-          "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+          "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+          "next_action": "complete_vina_gnina_input_manifest_required_values",
           "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
           "phase2_materialization_chain": [
             "materialize_public_benchmark_vina_gnina_comparison_adapter"
@@ -36801,6 +36850,7 @@
               "required_minimum_count": 1
             }
           ],
+          "phase2_row_audit_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
           "receipt_fields": [
             "source_license_or_accession",
             "source_checksum",
