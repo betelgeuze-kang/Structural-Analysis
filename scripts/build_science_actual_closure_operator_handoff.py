@@ -1139,6 +1139,69 @@ def _blocked_component_operator_actions(
     return rows
 
 
+def _science_completion_progress(audit: dict[str, Any]) -> dict[str, Any]:
+    completion = _as_dict(audit.get("completion_audit"))
+    summary = _as_dict(audit.get("summary"))
+    component_progress = [
+        {
+            "component_id": str(row.get("component_id") or ""),
+            "status": str(row.get("status") or ""),
+            "actual_closure_ready": bool(row.get("actual_closure_ready")),
+            "requirement_count": _as_int(row.get("requirement_count")),
+            "requirement_pass_count": _as_int(row.get("requirement_pass_count")),
+            "failed_criteria": [
+                str(item) for item in _as_list(row.get("failed_criteria"))
+            ],
+            "missing_row_inputs": [
+                str(item) for item in _as_list(row.get("missing_row_inputs"))
+            ],
+        }
+        for row in _as_list(completion.get("component_audits"))
+        if isinstance(row, dict)
+    ]
+    requirement_count = _as_int(
+        completion.get("requirement_count") or summary.get("requirement_count")
+    )
+    requirement_pass_count = _as_int(
+        completion.get("requirement_pass_count")
+        or summary.get("passing_requirement_count")
+    )
+    blocked_requirement_count = _as_int(summary.get("blocked_requirement_count"))
+    if not blocked_requirement_count and requirement_count >= requirement_pass_count:
+        blocked_requirement_count = requirement_count - requirement_pass_count
+    complete_component_ids = [
+        str(item) for item in _as_list(completion.get("complete_component_ids"))
+    ]
+    blocked_component_ids = [
+        str(item) for item in _as_list(completion.get("blocked_component_ids"))
+    ]
+    missing_row_inputs = [
+        str(item) for item in _as_list(completion.get("missing_row_inputs"))
+    ]
+    return {
+        "status": str(completion.get("status") or audit.get("status") or ""),
+        "actual_closure_ready": bool(completion.get("actual_closure_ready")),
+        "requirement_count": requirement_count,
+        "requirement_pass_count": requirement_pass_count,
+        "blocked_requirement_count": blocked_requirement_count,
+        "required_component_count": _as_int(
+            completion.get("required_component_count")
+            or summary.get("required_component_count")
+        ),
+        "complete_component_count": len(complete_component_ids),
+        "blocked_component_count": len(blocked_component_ids),
+        "complete_component_ids": complete_component_ids,
+        "blocked_component_ids": blocked_component_ids,
+        "missing_row_input_count": len(missing_row_inputs),
+        "missing_row_inputs": missing_row_inputs,
+        "first_blocked_component_id": (
+            blocked_component_ids[0] if blocked_component_ids else ""
+        ),
+        "component_progress": component_progress,
+        "claim_boundary": str(completion.get("claim_boundary") or ""),
+    }
+
+
 def build_science_actual_closure_operator_handoff(
     *,
     repo_root: Path = ROOT,
@@ -1243,6 +1306,7 @@ def build_science_actual_closure_operator_handoff(
     operator_rows_packet = _operator_rows_packet(missing_slots)
     blocking_input_unblock_plan = _blocking_input_unblock_plan(missing_slots)
     blocked_component_operator_actions = _blocked_component_operator_actions(slots)
+    completion_progress = _science_completion_progress(audit)
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -1291,6 +1355,21 @@ def build_science_actual_closure_operator_handoff(
             "blocked_component_operator_action_count": len(
                 blocked_component_operator_actions
             ),
+            "actual_closure_requirement_count": completion_progress[
+                "requirement_count"
+            ],
+            "actual_closure_requirement_pass_count": completion_progress[
+                "requirement_pass_count"
+            ],
+            "actual_closure_blocked_requirement_count": completion_progress[
+                "blocked_requirement_count"
+            ],
+            "actual_closure_complete_component_count": completion_progress[
+                "complete_component_count"
+            ],
+            "actual_closure_blocked_component_count": completion_progress[
+                "blocked_component_count"
+            ],
             "blocker_count": len(blockers),
         },
         "blockers": blockers,
@@ -1305,6 +1384,7 @@ def build_science_actual_closure_operator_handoff(
         ],
         "row_input_materialization_contracts": row_input_materialization_contracts,
         "operator_rows_packet": operator_rows_packet,
+        "science_actual_closure_completion_progress": completion_progress,
         "blocking_input_unblock_plan": blocking_input_unblock_plan,
         "blocking_input_unblock_plan_count": len(blocking_input_unblock_plan),
         "blocked_component_operator_actions": blocked_component_operator_actions,
@@ -1332,6 +1412,9 @@ def build_science_actual_closure_operator_handoff(
 
 def _markdown(payload: dict[str, Any]) -> str:
     summary = _as_dict(payload.get("summary"))
+    completion_progress = _as_dict(
+        payload.get("science_actual_closure_completion_progress")
+    )
     lines = [
         "# Science Actual Closure Operator Handoff",
         "",
@@ -1343,9 +1426,49 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `slot_count`: `{summary.get('slot_count')}`",
         f"- `blocker_count`: `{payload.get('blocker_count')}`",
         "",
+        "## Actual Closure Progress",
+        "",
+        f"- `status`: `{completion_progress.get('status')}`",
+        f"- `actual_closure_ready`: `{completion_progress.get('actual_closure_ready')}`",
+        "- `requirements`: "
+        f"`{completion_progress.get('requirement_pass_count')}/"
+        f"{completion_progress.get('requirement_count')}`",
+        "- `blocked_requirement_count`: "
+        f"`{completion_progress.get('blocked_requirement_count')}`",
+        "- `complete_components`: "
+        f"`{completion_progress.get('complete_component_count')}/"
+        f"{completion_progress.get('required_component_count')}`",
+        "- `blocked_components`: "
+        f"{_code_join(_as_list(completion_progress.get('blocked_component_ids')))}",
+        "- `missing_row_inputs`: "
+        f"{_code_join(_as_list(completion_progress.get('missing_row_inputs')))}",
+        "",
         "| Row Input | Status | Preferred Path | CSV Starter | Closes Criteria | Action |",
         "| --- | --- | --- | --- | --- | --- |",
     ]
+    component_progress = [
+        row
+        for row in _as_list(completion_progress.get("component_progress"))
+        if isinstance(row, dict)
+    ]
+    if component_progress:
+        lines.extend(
+            [
+                "",
+                "| Component | Status | Requirements | Missing Rows | Failed Criteria |",
+                "| --- | --- | --- | --- | --- |",
+            ]
+        )
+        for component in component_progress:
+            lines.append(
+                "| "
+                f"`{component.get('component_id')}` | "
+                f"`{component.get('status')}` | "
+                f"`{component.get('requirement_pass_count')}/"
+                f"{component.get('requirement_count')}` | "
+                f"{_code_join(_as_list(component.get('missing_row_inputs')))} | "
+                f"{_code_join(_as_list(component.get('failed_criteria')))} |"
+            )
     for slot in _as_list(payload.get("row_slot_handoffs")):
         if not isinstance(slot, dict):
             continue

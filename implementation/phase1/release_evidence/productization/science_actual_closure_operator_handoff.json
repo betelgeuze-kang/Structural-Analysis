@@ -3849,14 +3849,14 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T04:32:23.198728+00:00",
+  "generated_at": "2026-07-04T04:39:15.129796+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:9dd7c97c8a2b978436c07f11bfb088a2cef94f1fd1f33bc651ba8a4c09440b2b",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:25acd0c4e672d933220769a3e34135ea65d1fac049877b818d44b3c9288618f5",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:1aa07a73ba0f9770659d6317d4d813eff0660669c991dd35c5b89726f4045f20",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:a0c748515aefbeb496ab253028a3b13b4df4b2844ae88e1ef394a0e1d12e4f1d",
     "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:6bc96d57bc678dc7b8fb2305b6ef7ec965cda22e3ef683fd8b0ca1bc36edbde4",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:b92c1b1ed724db24826331e368fff7a4f09fe81c90c1ee3e89eef5723815df15"
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:2a875647bf9a51d2a9b004cf5735b424d3e565202f97fa8f43578766b76a47a3"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -14442,11 +14442,84 @@
     "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
     "pocketmd_lite_topk_actual_closure::pocketmd_lite_topk_rows_not_provided"
   ],
+  "science_actual_closure_completion_progress": {
+    "actual_closure_ready": false,
+    "blocked_component_count": 2,
+    "blocked_component_ids": [
+      "public_benchmark_phase2_actual_closure",
+      "pocketmd_lite_topk_actual_closure"
+    ],
+    "blocked_requirement_count": 9,
+    "claim_boundary": "This completion audit summarizes already-materialized requirement rows and row-input resolution only; it does not promote missing operator rows, proxy rows, or source-acquisition plans into actual closure.",
+    "complete_component_count": 1,
+    "complete_component_ids": [
+      "gpcr_hard_decoy_actual_closure"
+    ],
+    "component_progress": [
+      {
+        "actual_closure_ready": false,
+        "component_id": "public_benchmark_phase2_actual_closure",
+        "failed_criteria": [
+          "vina_gnina_comparison_ready"
+        ],
+        "missing_row_inputs": [
+          "vina_gnina_rows"
+        ],
+        "requirement_count": 5,
+        "requirement_pass_count": 4,
+        "status": "operator_rows_required"
+      },
+      {
+        "actual_closure_ready": true,
+        "component_id": "gpcr_hard_decoy_actual_closure",
+        "failed_criteria": [],
+        "missing_row_inputs": [],
+        "requirement_count": 5,
+        "requirement_pass_count": 5,
+        "status": "complete"
+      },
+      {
+        "actual_closure_ready": false,
+        "component_id": "pocketmd_lite_topk_actual_closure",
+        "failed_criteria": [
+          "top_k_refinement_rows_present",
+          "top_k_refinement_case_coverage",
+          "local_min_survival_materialized",
+          "contact_persistence_materialized",
+          "h_bond_persistence_materialized",
+          "clash_relief_materialized",
+          "uncertainty_summary_materialized",
+          "report_blockers_resolved"
+        ],
+        "missing_row_inputs": [
+          "pocketmd_rows"
+        ],
+        "requirement_count": 9,
+        "requirement_pass_count": 1,
+        "status": "operator_rows_required"
+      }
+    ],
+    "first_blocked_component_id": "public_benchmark_phase2_actual_closure",
+    "missing_row_input_count": 2,
+    "missing_row_inputs": [
+      "vina_gnina_rows",
+      "pocketmd_rows"
+    ],
+    "required_component_count": 3,
+    "requirement_count": 19,
+    "requirement_pass_count": 10,
+    "status": "operator_evidence_required"
+  },
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "c15e6bd423d50ef512b5ce041d24a44e0e91c799",
+  "source_commit_sha": "1a5d6a7925d1b93d41183fc1d0a41c6226971625",
   "status": "operator_rows_required",
   "summary": {
+    "actual_closure_blocked_component_count": 2,
+    "actual_closure_blocked_requirement_count": 9,
+    "actual_closure_complete_component_count": 1,
+    "actual_closure_requirement_count": 19,
+    "actual_closure_requirement_pass_count": 10,
     "blocked_component_operator_action_count": 2,
     "blocker_count": 10,
     "closes_actual_closure_criteria_count": 19,

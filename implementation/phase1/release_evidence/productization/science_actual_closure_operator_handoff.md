@@ -7,8 +7,24 @@
 - `slot_count`: `6`
 - `blocker_count`: `10`
 
+## Actual Closure Progress
+
+- `status`: `operator_evidence_required`
+- `actual_closure_ready`: `False`
+- `requirements`: `10/19`
+- `blocked_requirement_count`: `9`
+- `complete_components`: `1/3`
+- `blocked_components`: `public_benchmark_phase2_actual_closure`, `pocketmd_lite_topk_actual_closure`
+- `missing_row_inputs`: `vina_gnina_rows`, `pocketmd_rows`
+
 | Row Input | Status | Preferred Path | CSV Starter | Closes Criteria | Action |
 | --- | --- | --- | --- | --- | --- |
+
+| Component | Status | Requirements | Missing Rows | Failed Criteria |
+| --- | --- | --- | --- | --- |
+| `public_benchmark_phase2_actual_closure` | `operator_rows_required` | `4/5` | `vina_gnina_rows` | `vina_gnina_comparison_ready` |
+| `gpcr_hard_decoy_actual_closure` | `complete` | `5/5` | `none` | `none` |
+| `pocketmd_lite_topk_actual_closure` | `operator_rows_required` | `1/9` | `pocketmd_rows` | `top_k_refinement_rows_present`, `top_k_refinement_case_coverage`, `local_min_survival_materialized`, `contact_persistence_materialized`, `h_bond_persistence_materialized`, `clash_relief_materialized`, `uncertainty_summary_materialized`, `report_blockers_resolved` |
 | `subset_rows` | `provided` | `implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json` | `implementation/phase1/release_evidence/productization/public_benchmark_subset_rows_template.csv` | `casf_pdbbind_pose_success_harness_ready` | `review_subset_rows_materialization` |
 | `pose_rows` | `provided` | `implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json` | `implementation/phase1/release_evidence/productization/public_benchmark_pose_rows_template.csv` | `casf_pdbbind_pose_success_harness_ready, symmetry_aware_ligand_rmsd_ready, posebusters_style_pose_validity_ready` | `review_pose_rows_materialization` |
 | `enrichment_rows` | `provided` | `implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json` | `implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows_template.csv` | `dud_e_or_lit_pcba_enrichment_ready` | `review_enrichment_rows_materialization` |

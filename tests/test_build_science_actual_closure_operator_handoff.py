@@ -41,6 +41,11 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert payload["contract_pass"] is True
     assert payload["science_actual_closure_contract_pass"] is False
     assert payload["summary"] == {
+        "actual_closure_blocked_component_count": 2,
+        "actual_closure_blocked_requirement_count": 9,
+        "actual_closure_complete_component_count": 1,
+        "actual_closure_requirement_count": 19,
+        "actual_closure_requirement_pass_count": 10,
         "blocker_count": 10,
         "blocked_component_operator_action_count": 2,
         "closes_actual_closure_criteria_count": 19,
@@ -96,6 +101,39 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert payload["operator_rows_packet"]["first_missing_row_input"] == (
         "vina_gnina_rows"
     )
+    completion_progress = payload["science_actual_closure_completion_progress"]
+    assert completion_progress["status"] == "operator_evidence_required"
+    assert completion_progress["actual_closure_ready"] is False
+    assert completion_progress["requirement_count"] == 19
+    assert completion_progress["requirement_pass_count"] == 10
+    assert completion_progress["blocked_requirement_count"] == 9
+    assert completion_progress["required_component_count"] == 3
+    assert completion_progress["complete_component_ids"] == [
+        "gpcr_hard_decoy_actual_closure"
+    ]
+    assert completion_progress["blocked_component_ids"] == [
+        "public_benchmark_phase2_actual_closure",
+        "pocketmd_lite_topk_actual_closure",
+    ]
+    assert completion_progress["missing_row_inputs"] == [
+        "vina_gnina_rows",
+        "pocketmd_rows",
+    ]
+    component_progress = {
+        row["component_id"]: row for row in completion_progress["component_progress"]
+    }
+    assert component_progress["gpcr_hard_decoy_actual_closure"]["status"] == (
+        "complete"
+    )
+    assert component_progress["gpcr_hard_decoy_actual_closure"][
+        "requirement_pass_count"
+    ] == 5
+    assert component_progress["public_benchmark_phase2_actual_closure"][
+        "failed_criteria"
+    ] == ["vina_gnina_comparison_ready"]
+    assert component_progress["pocketmd_lite_topk_actual_closure"][
+        "missing_row_inputs"
+    ] == ["pocketmd_rows"]
     unblock_plan = {
         row["row_input_id"]: row for row in payload["blocking_input_unblock_plan"]
     }
@@ -825,6 +863,18 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "| `vina_gnina_rows` | `operator_input_required` |" in markdown
     assert "| `pocketmd_rows` | `operator_input_required` |" in markdown
     assert "- `blocker_count`: `10`" in markdown
+    assert "## Actual Closure Progress" in markdown
+    assert "- `requirements`: `10/19`" in markdown
+    assert "- `blocked_requirement_count`: `9`" in markdown
+    assert "- `complete_components`: `1/3`" in markdown
+    assert (
+        "| `public_benchmark_phase2_actual_closure` | `operator_rows_required` | "
+        "`4/5` | `vina_gnina_rows` | `vina_gnina_comparison_ready` |"
+    ) in markdown
+    assert (
+        "| `gpcr_hard_decoy_actual_closure` | `complete` | `5/5` | `none` | "
+        "`none` |"
+    ) in markdown
     assert "## Missing Row Packet" in markdown
     assert "First Blocked Slot" in markdown
     assert (
