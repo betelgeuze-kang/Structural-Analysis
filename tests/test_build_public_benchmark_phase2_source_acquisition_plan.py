@@ -499,6 +499,40 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert manifest_action["expected_manifest_artifact"].endswith(
         "public_benchmark_vina_gnina_input_manifest.csv"
     )
+    assert manifest_action["default_execution_plan_manifest_path"].endswith(
+        "public_benchmark_vina_gnina_input_manifest.json"
+    )
+    assert manifest_action["recommended_template_dropzone"].endswith(
+        "public_benchmark_vina_gnina_input_manifest.csv"
+    )
+    assert (
+        manifest_action["recommended_template_dropzone_is_supported_candidate_path"]
+        is True
+    )
+    assert manifest_action["accepted_manifest_formats"] == [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv",
+        "tsv",
+    ]
+    assert manifest_action["supported_manifest_candidate_paths"] == [
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_input_manifest.json",
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_input_manifest.jsonl",
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_input_manifest.ndjson",
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_input_manifest.csv",
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_input_manifest.tsv",
+    ]
+    assert manifest_action["detected_manifest_artifact_count"] == 0
+    assert manifest_action["selected_manifest_path"] == ""
+    assert manifest_action["selected_manifest_format"] == ""
+    assert manifest_action["input_manifest_row_count"] == 0
+    assert manifest_action["input_manifest_load_errors"] == []
     assert manifest_action["template_to_manifest_command"].startswith(
         "cp implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_input_manifest_template.csv"
@@ -606,7 +640,11 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "`preflight_does_not_run_engines`: `True`" in markdown
     assert "### Vina/GNINA Input Manifest Action" in markdown
     assert "public_benchmark_vina_gnina_input_manifest_template.csv" in markdown
+    assert "public_benchmark_vina_gnina_input_manifest.json" in markdown
     assert "public_benchmark_vina_gnina_input_manifest.csv" in markdown
+    assert "`recommended_template_dropzone_is_supported_candidate_path`: `True`" in markdown
+    assert "`accepted_manifest_formats`: `json`, `jsonl`, `ndjson`, `csv`, `tsv`" in markdown
+    assert "`input_manifest_load_errors`: `none`" in markdown
     assert "`template_is_not_evidence`: `True`" in markdown
     assert "prepared_receptor_checksum" in markdown
     assert "## Vina/GNINA Runtime" in markdown

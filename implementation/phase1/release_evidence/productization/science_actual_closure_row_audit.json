@@ -1440,12 +1440,12 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T01:07:06.607472+00:00",
+  "generated_at": "2026-07-04T01:13:39.868110+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json": "sha256:98255bfca71cb82c3146a11e74e90cc338836518d93672950cbec5defd7d7147",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:f44469aa18f3d3b8df2424fd638ec7ecc5c8e769215eb65f1904b82a6ab6f89e",
     "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:552f40021397d7156e0b7f72a520c2f0b7a99990e32d64ad543c6fcdc579c2d3",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:97fc2556660b816c702f14140b697701dfc3147eab0c4dc95bcbb417fbb8f5a1",
     "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
     "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261",
@@ -2869,7 +2869,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "80a12dbebe9d61d107af43da352590c335833963",
+  "source_commit_sha": "f7ff2620e06326480012217b60600cdf98f32960",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,
@@ -3719,8 +3719,19 @@
           ],
           "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
           "engine_input_manifest_action_packet": {
+            "accepted_manifest_formats": [
+              "json",
+              "jsonl",
+              "ndjson",
+              "csv",
+              "tsv"
+            ],
             "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
+            "default_execution_plan_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
+            "detected_manifest_artifact_count": 0,
             "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+            "input_manifest_load_errors": [],
+            "input_manifest_row_count": 0,
             "operator_must_fill_or_verify": [
               "prepared_receptor_path",
               "prepared_receptor_checksum",
@@ -3732,8 +3743,19 @@
               "gnina_run_receipt_ref",
               "input_preparation_provenance_ref"
             ],
+            "recommended_template_dropzone": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+            "recommended_template_dropzone_is_supported_candidate_path": true,
             "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+            "selected_manifest_format": "",
+            "selected_manifest_path": "",
             "status": "operator_manifest_required",
+            "supported_manifest_candidate_paths": [
+              "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
+              "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.jsonl",
+              "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.ndjson",
+              "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+              "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.tsv"
+            ],
             "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
             "template_safety_policy": {
               "do_not_treat_blank_prepared_checksums_as_ready": true,

@@ -499,6 +499,38 @@ def _vina_gnina_execution_plan_summary(payload: dict[str, Any]) -> dict[str, Any
     input_manifest_status = payload.get("input_manifest_status")
     if not isinstance(input_manifest_status, dict):
         input_manifest_status = {}
+    manifest_candidate_rows = (
+        [
+            row
+            for row in input_manifest_status.get("candidate_paths", [])
+            if isinstance(row, dict)
+        ]
+        if isinstance(input_manifest_status.get("candidate_paths"), list)
+        else []
+    )
+    manifest_candidate_paths = [
+        str(row.get("path") or "")
+        for row in manifest_candidate_rows
+        if str(row.get("path") or "")
+    ]
+    manifest_load_errors = [
+        {
+            "path": str(row.get("path") or ""),
+            "format": str(row.get("format") or ""),
+            "load_error": str(row.get("load_error") or ""),
+        }
+        for row in manifest_candidate_rows
+        if str(row.get("load_error") or "")
+    ]
+    accepted_manifest_formats = (
+        [
+            str(row)
+            for row in input_manifest_status.get("accepted_formats", [])
+            if str(row)
+        ]
+        if isinstance(input_manifest_status.get("accepted_formats"), list)
+        else []
+    )
     manifest_status = str(
         summary.get("input_manifest_status")
         or input_manifest_status.get("status")
@@ -551,6 +583,18 @@ def _vina_gnina_execution_plan_summary(payload: dict[str, Any]) -> dict[str, Any
         "input_manifest_selected_path": str(
             input_manifest_status.get("selected_manifest_path") or ""
         ),
+        "input_manifest_selected_format": str(
+            input_manifest_status.get("selected_manifest_format") or ""
+        ),
+        "input_manifest_default_manifest_path": str(
+            input_manifest_status.get("default_manifest_path") or ""
+        ),
+        "input_manifest_detected_manifest_artifact_count": int(
+            input_manifest_status.get("detected_manifest_artifact_count") or 0
+        ),
+        "input_manifest_accepted_formats": accepted_manifest_formats,
+        "input_manifest_candidate_paths": manifest_candidate_paths,
+        "input_manifest_load_errors": manifest_load_errors,
         "input_manifest_blockers": manifest_blockers,
         "engine_input_manifest_template": str(
             DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE
@@ -1254,6 +1298,13 @@ def _missing_row_input_actions(
             adapter_preflight = row_candidate_status.get("adapter_preflight")
             if not isinstance(adapter_preflight, dict):
                 adapter_preflight = {}
+            manifest_candidate_paths = [
+                str(path)
+                for path in vina_gnina_execution_plan_summary.get(
+                    "input_manifest_candidate_paths", []
+                )
+                if str(path)
+            ]
             action.update(
                 {
                     "engine_input_manifest_template": str(
@@ -1281,6 +1332,56 @@ def _missing_row_input_actions(
                         ),
                         "expected_manifest_artifact": str(
                             DEFAULT_VINA_GNINA_INPUT_MANIFEST
+                        ),
+                        "default_execution_plan_manifest_path": str(
+                            vina_gnina_execution_plan_summary.get(
+                                "input_manifest_default_manifest_path"
+                            )
+                            or ""
+                        ),
+                        "recommended_template_dropzone": str(
+                            DEFAULT_VINA_GNINA_INPUT_MANIFEST
+                        ),
+                        "recommended_template_dropzone_is_supported_candidate_path": (
+                            str(DEFAULT_VINA_GNINA_INPUT_MANIFEST)
+                            in manifest_candidate_paths
+                        ),
+                        "accepted_manifest_formats": list(
+                            vina_gnina_execution_plan_summary.get(
+                                "input_manifest_accepted_formats"
+                            )
+                            or []
+                        ),
+                        "supported_manifest_candidate_paths": manifest_candidate_paths,
+                        "detected_manifest_artifact_count": int(
+                            vina_gnina_execution_plan_summary.get(
+                                "input_manifest_detected_manifest_artifact_count"
+                            )
+                            or 0
+                        ),
+                        "selected_manifest_path": str(
+                            vina_gnina_execution_plan_summary.get(
+                                "input_manifest_selected_path"
+                            )
+                            or ""
+                        ),
+                        "selected_manifest_format": str(
+                            vina_gnina_execution_plan_summary.get(
+                                "input_manifest_selected_format"
+                            )
+                            or ""
+                        ),
+                        "input_manifest_row_count": int(
+                            vina_gnina_execution_plan_summary.get(
+                                "input_manifest_row_count"
+                            )
+                            or 0
+                        ),
+                        "input_manifest_load_errors": list(
+                            vina_gnina_execution_plan_summary.get(
+                                "input_manifest_load_errors"
+                            )
+                            or []
                         ),
                         "template_to_manifest_command": (
                             "cp "
@@ -1836,11 +1937,38 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                     f"`{field}`"
                     for field in action.get("operator_must_fill_or_verify", [])
                 )
+                accepted_manifest_formats = ", ".join(
+                    f"`{manifest_format}`"
+                    for manifest_format in action.get(
+                        "accepted_manifest_formats", []
+                    )
+                    if str(manifest_format)
+                )
+                supported_manifest_paths = ", ".join(
+                    f"`{path}`"
+                    for path in action.get("supported_manifest_candidate_paths", [])
+                    if str(path)
+                )
+                manifest_load_errors = ", ".join(
+                    f"`{row.get('path')}: {row.get('load_error')}`"
+                    for row in action.get("input_manifest_load_errors", [])
+                    if isinstance(row, dict) and str(row.get("load_error") or "")
+                )
                 lines.extend(
                     [
                         f"- `status`: `{action.get('status')}`",
                         f"- `template_artifact`: `{action.get('template_artifact')}`",
                         f"- `expected_manifest_artifact`: `{action.get('expected_manifest_artifact')}`",
+                        f"- `default_execution_plan_manifest_path`: `{action.get('default_execution_plan_manifest_path')}`",
+                        f"- `recommended_template_dropzone`: `{action.get('recommended_template_dropzone')}`",
+                        f"- `recommended_template_dropzone_is_supported_candidate_path`: `{action.get('recommended_template_dropzone_is_supported_candidate_path')}`",
+                        f"- `accepted_manifest_formats`: {accepted_manifest_formats or '`none`'}",
+                        f"- `supported_manifest_candidate_paths`: {supported_manifest_paths or '`none`'}",
+                        f"- `detected_manifest_artifact_count`: `{action.get('detected_manifest_artifact_count')}`",
+                        f"- `selected_manifest_path`: `{action.get('selected_manifest_path')}`",
+                        f"- `selected_manifest_format`: `{action.get('selected_manifest_format')}`",
+                        f"- `input_manifest_row_count`: `{action.get('input_manifest_row_count')}`",
+                        f"- `input_manifest_load_errors`: {manifest_load_errors or '`none`'}",
                         f"- `template_to_manifest_command`: `{action.get('template_to_manifest_command')}`",
                         f"- `verify_execution_plan_command`: `{action.get('verify_execution_plan_command')}`",
                         f"- `verify_runtime_readiness_command`: `{action.get('verify_runtime_readiness_command')}`",

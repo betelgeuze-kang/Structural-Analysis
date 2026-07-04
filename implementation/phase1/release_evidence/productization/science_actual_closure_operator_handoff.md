@@ -118,6 +118,16 @@
 - `status`: `operator_manifest_required`
 - `template_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv`
 - `expected_manifest_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv`
+- `default_execution_plan_manifest_path`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json`
+- `recommended_template_dropzone`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv`
+- `recommended_template_dropzone_is_supported_candidate_path`: `True`
+- `accepted_manifest_formats`: `json`, `jsonl`, `ndjson`, `csv`, `tsv`
+- `supported_manifest_candidate_paths`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.jsonl`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.ndjson`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.tsv`
+- `detected_manifest_artifact_count`: `0`
+- `selected_manifest_path`: ``
+- `selected_manifest_format`: ``
+- `input_manifest_row_count`: `0`
+- `input_manifest_load_errors`: `none`
 - `template_to_manifest_command`: `cp implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv`
 - `verify_execution_plan_command`: `python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json`
 - `verify_runtime_readiness_command`: `python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json`

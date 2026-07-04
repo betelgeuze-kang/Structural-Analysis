@@ -1240,6 +1240,11 @@ def _markdown(payload: dict[str, Any]) -> str:
             safety_policy = _as_dict(action.get("template_safety_policy"))
             if detail.get("kind") == "vina_gnina_manifest":
                 lines.extend(["", "### Vina/GNINA Input Manifest Action", ""])
+                manifest_load_errors = [
+                    f"{row.get('path')}: {row.get('load_error')}"
+                    for row in _as_list(action.get("input_manifest_load_errors"))
+                    if isinstance(row, dict) and str(row.get("load_error") or "")
+                ]
                 lines.extend(
                     [
                         f"- `component_id`: `{detail.get('component_id')}`",
@@ -1247,6 +1252,16 @@ def _markdown(payload: dict[str, Any]) -> str:
                         f"- `status`: `{action.get('status')}`",
                         f"- `template_artifact`: `{action.get('template_artifact')}`",
                         f"- `expected_manifest_artifact`: `{action.get('expected_manifest_artifact')}`",
+                        f"- `default_execution_plan_manifest_path`: `{action.get('default_execution_plan_manifest_path')}`",
+                        f"- `recommended_template_dropzone`: `{action.get('recommended_template_dropzone')}`",
+                        f"- `recommended_template_dropzone_is_supported_candidate_path`: `{action.get('recommended_template_dropzone_is_supported_candidate_path')}`",
+                        f"- `accepted_manifest_formats`: {_code_join(_as_list(action.get('accepted_manifest_formats')))}",
+                        f"- `supported_manifest_candidate_paths`: {_code_join(_as_list(action.get('supported_manifest_candidate_paths')))}",
+                        f"- `detected_manifest_artifact_count`: `{action.get('detected_manifest_artifact_count')}`",
+                        f"- `selected_manifest_path`: `{action.get('selected_manifest_path')}`",
+                        f"- `selected_manifest_format`: `{action.get('selected_manifest_format')}`",
+                        f"- `input_manifest_row_count`: `{action.get('input_manifest_row_count')}`",
+                        f"- `input_manifest_load_errors`: {_code_join(manifest_load_errors)}",
                         f"- `template_to_manifest_command`: `{action.get('template_to_manifest_command')}`",
                         f"- `verify_execution_plan_command`: `{action.get('verify_execution_plan_command')}`",
                         f"- `verify_runtime_readiness_command`: `{action.get('verify_runtime_readiness_command')}`",

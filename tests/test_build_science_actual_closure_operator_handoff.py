@@ -175,6 +175,23 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert public_manifest_action["expected_manifest_artifact"].endswith(
         "public_benchmark_vina_gnina_input_manifest.csv"
     )
+    assert public_manifest_action["default_execution_plan_manifest_path"].endswith(
+        "public_benchmark_vina_gnina_input_manifest.json"
+    )
+    assert public_manifest_action["recommended_template_dropzone"].endswith(
+        "public_benchmark_vina_gnina_input_manifest.csv"
+    )
+    assert (
+        public_manifest_action[
+            "recommended_template_dropzone_is_supported_candidate_path"
+        ]
+        is True
+    )
+    assert public_manifest_action["supported_manifest_candidate_paths"][3].endswith(
+        "public_benchmark_vina_gnina_input_manifest.csv"
+    )
+    assert public_manifest_action["detected_manifest_artifact_count"] == 0
+    assert public_manifest_action["input_manifest_load_errors"] == []
     assert public_manifest_action["template_safety_policy"][
         "template_is_not_evidence"
     ] is True
@@ -611,7 +628,10 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "uncertainty_summary_materialized" in markdown
     assert "uncertainty_interval_receipt" in markdown
     assert "### Vina/GNINA Input Manifest Action" in markdown
+    assert "public_benchmark_vina_gnina_input_manifest.json" in markdown
     assert "public_benchmark_vina_gnina_input_manifest.csv" in markdown
+    assert "`recommended_template_dropzone_is_supported_candidate_path`: `True`" in markdown
+    assert "`input_manifest_load_errors`: `none`" in markdown
     assert "`do_not_treat_blank_prepared_checksums_as_ready`: `True`" in markdown
     assert "### Vina/GNINA Adapter Row Preflight Action" in markdown
     assert "public_benchmark_vina_gnina_rows.csv" in markdown
