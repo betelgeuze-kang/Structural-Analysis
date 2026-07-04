@@ -250,6 +250,47 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert pocketmd_refinement_action[
         "first_blocked_operator_input_source_receipt"
     ]["field"] == "source_id"
+    assert pocketmd_refinement_action["rows_from_receipt_bundle_status"] == (
+        "operator_receipts_completion_required"
+    )
+    assert pocketmd_refinement_action[
+        "rows_from_receipt_bundle_receipt_count"
+    ] == 6
+    assert pocketmd_refinement_action[
+        "rows_from_receipt_bundle_ready_receipt_count"
+    ] == 0
+    assert pocketmd_refinement_action[
+        "rows_from_receipt_bundle_missing_required_field_count"
+    ] == 18
+    receipt_bundle_report = pocketmd_refinement_action[
+        "rows_from_receipt_bundle_report"
+    ]
+    assert receipt_bundle_report["artifact"].endswith(
+        "pocketmd_lite_topk_rows_from_receipt_bundle_report.json"
+    )
+    assert receipt_bundle_report["ready_receipt_count"] == 0
+    assert receipt_bundle_report["receipt_count"] == 6
+    first_incomplete_receipt = pocketmd_refinement_action[
+        "first_incomplete_receipt"
+    ]
+    assert first_incomplete_receipt["receipt_ref"].endswith(
+        "pocketmd_lite_case_001/rank_01_refinement_receipt.json"
+    )
+    assert first_incomplete_receipt[
+        "completion_missing_required_field_count"
+    ] == 18
+    assert first_incomplete_receipt["operator_completion_action"] == (
+        "fill_completion_missing_required_fields_and_set_status_complete"
+    )
+    assert "upstream_top_k_provenance_ref" in first_incomplete_receipt[
+        "completion_missing_required_fields"
+    ]
+    assert unblock_plan["pocketmd_rows"][
+        "rows_from_receipt_bundle_report"
+    ] == receipt_bundle_report
+    assert unblock_plan["pocketmd_rows"][
+        "first_incomplete_receipt"
+    ] == first_incomplete_receipt
     survival_report = pocketmd_refinement_action["survival_report"]
     assert survival_report["status"] == "operator_evidence_required"
     assert survival_report["contract_pass"] is False

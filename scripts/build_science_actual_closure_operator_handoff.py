@@ -1048,6 +1048,12 @@ def _unblock_plan_refinement_action_packet(
     source_action = _as_dict(slot.get("source_acquisition_row_action"))
     top_k_action = _as_dict(source_action.get("top_k_rows_action_packet"))
     row_preflight_action = _as_dict(source_action.get("row_preflight_action_packet"))
+    rows_from_receipt_bundle_report = _as_dict(
+        top_k_action.get("rows_from_receipt_bundle_report")
+    )
+    first_incomplete_receipt = _as_dict(
+        rows_from_receipt_bundle_report.get("first_incomplete_receipt")
+    )
     detail = _as_dict(slot.get("row_input_slot_detail"))
     top_k_summary = _as_dict(detail.get("top_k_slot_status_summary"))
     first_missing_candidate_slot = _as_dict(
@@ -1110,6 +1116,20 @@ def _unblock_plan_refinement_action_packet(
         "first_blocked_operator_input_source_receipt": (
             first_blocked_source_receipt
         ),
+        "rows_from_receipt_bundle_report": rows_from_receipt_bundle_report,
+        "rows_from_receipt_bundle_status": str(
+            rows_from_receipt_bundle_report.get("status") or ""
+        ),
+        "rows_from_receipt_bundle_receipt_count": _as_int(
+            rows_from_receipt_bundle_report.get("receipt_count")
+        ),
+        "rows_from_receipt_bundle_ready_receipt_count": _as_int(
+            rows_from_receipt_bundle_report.get("ready_receipt_count")
+        ),
+        "rows_from_receipt_bundle_missing_required_field_count": _as_int(
+            first_incomplete_receipt.get("completion_missing_required_field_count")
+        ),
+        "first_incomplete_receipt": first_incomplete_receipt,
         "survival_report": survival_report,
         "commands": _as_dict(unblock.get("commands")),
         "claim_boundary": str(
@@ -1188,6 +1208,12 @@ def _blocking_input_unblock_plan(
                     "first_blocked_operator_input_source_receipt"
                 )
             )
+            rows_from_receipt_bundle_report = _as_dict(
+                refinement_action_packet.get("rows_from_receipt_bundle_report")
+            )
+            first_incomplete_receipt = _as_dict(
+                refinement_action_packet.get("first_incomplete_receipt")
+            )
             if first_candidate_slot:
                 row_payload["first_missing_candidate_slot"] = first_candidate_slot
             if first_role_receipt:
@@ -1196,6 +1222,12 @@ def _blocking_input_unblock_plan(
                 row_payload["first_blocked_operator_input_source_receipt"] = (
                     first_source_receipt
                 )
+            if rows_from_receipt_bundle_report:
+                row_payload["rows_from_receipt_bundle_report"] = (
+                    rows_from_receipt_bundle_report
+                )
+            if first_incomplete_receipt:
+                row_payload["first_incomplete_receipt"] = first_incomplete_receipt
             survival_report = _as_dict(
                 refinement_action_packet.get("survival_report")
             )
@@ -1743,6 +1775,9 @@ def _markdown(payload: dict[str, Any]) -> str:
                     "first_blocked_operator_input_source_receipt"
                 )
             )
+            first_incomplete_receipt = _as_dict(
+                refinement_action.get("first_incomplete_receipt")
+            )
             survival_report = _as_dict(refinement_action.get("survival_report"))
             first_blocked_slot_refs = []
             if first_case_slot:
@@ -1775,6 +1810,13 @@ def _markdown(payload: dict[str, Any]) -> str:
                     "source:"
                     f"{first_source_receipt.get('field', '')}/"
                     f"{first_source_receipt.get('operator_action', '')}"
+                )
+            if first_incomplete_receipt:
+                first_blocked_slot_refs.append(
+                    "receipt:"
+                    f"{first_incomplete_receipt.get('receipt_ref', '')}/"
+                    "missing_fields="
+                    f"{first_incomplete_receipt.get('completion_missing_required_field_count', '')}"
                 )
             if survival_report and str(
                 survival_report.get("first_blocked_target") or ""
