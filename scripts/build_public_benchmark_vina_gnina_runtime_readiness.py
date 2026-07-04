@@ -36,6 +36,12 @@ DEFAULT_VINA_GNINA_ROWS = PRODUCTIZATION / "public_benchmark_vina_gnina_rows.jso
 DEFAULT_INPUT_MANIFEST_TEMPLATE = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest_template.csv"
 )
+DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest_template_preflight.json"
+)
+DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT_MD = (
+    DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT.with_suffix(".md")
+)
 DEFAULT_OUT = PRODUCTIZATION / "public_benchmark_vina_gnina_runtime_readiness.json"
 SCHEMA_VERSION = "public-benchmark-vina-gnina-runtime-readiness.v1"
 DOCKER_BIN_ENV = "PUBLIC_BENCHMARK_DOCKER_BIN"
@@ -570,6 +576,12 @@ def _operator_unblock_packet(
     return {
         "status": status,
         "input_manifest_template_artifact": str(DEFAULT_INPUT_MANIFEST_TEMPLATE),
+        "input_manifest_template_preflight_artifact": str(
+            DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT
+        ),
+        "input_manifest_template_preflight_markdown_artifact": str(
+            DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT_MD
+        ),
         "expected_rows_artifact": str(DEFAULT_VINA_GNINA_ROWS),
         "case_input_slot_count": len(case_input_slots),
         "blocked_case_input_slot_count": len(blocked_case_input_slots),
@@ -598,6 +610,7 @@ def _operator_unblock_packet(
         ),
         "selected_row_path": str(row_status.get("selected_path") or ""),
         "operator_sequence": [
+            "review_public_benchmark_vina_gnina_input_manifest_template_preflight",
             "fill_public_benchmark_vina_gnina_input_manifest_from_template",
             "rerun_public_benchmark_vina_gnina_execution_plan",
             "configure_vina_gnina_binary_or_container_runtime",
@@ -606,6 +619,11 @@ def _operator_unblock_packet(
             "materialize_public_benchmark_vina_gnina_comparison_adapter",
         ],
         "commands": {
+            "build_input_manifest_template_preflight": (
+                "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py "
+                f"--out {DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT} "
+                f"--out-md {DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT_MD}"
+            ),
             "rerun_execution_plan": (
                 "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
                 f"--out {DEFAULT_EXECUTION_PLAN}"
@@ -741,6 +759,7 @@ def build_vina_gnina_runtime_readiness(
             input_paths=[
                 Path("scripts/build_public_benchmark_vina_gnina_runtime_readiness.py"),
                 execution_plan_path,
+                Path("scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py"),
                 Path("scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"),
             ],
             reused_evidence=False,
@@ -774,6 +793,11 @@ def build_vina_gnina_runtime_readiness(
             "build_execution_plan": (
                 "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
                 f"--out {DEFAULT_EXECUTION_PLAN}"
+            ),
+            "build_input_manifest_template_preflight": (
+                "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py "
+                f"--out {DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT} "
+                f"--out-md {DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT_MD}"
             ),
             "set_binary_overrides": (
                 "export PUBLIC_BENCHMARK_VINA_BIN=<path-to-vina> "

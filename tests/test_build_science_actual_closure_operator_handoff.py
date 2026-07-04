@@ -430,6 +430,12 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "input_manifest_template_artifact"
     ].endswith("public_benchmark_vina_gnina_input_manifest_template.csv")
     assert vina_detail["operator_unblock_packet"][
+        "input_manifest_template_preflight_artifact"
+    ].endswith("public_benchmark_vina_gnina_input_manifest_template_preflight.json")
+    assert vina_detail["operator_unblock_packet"]["operator_sequence"][0] == (
+        "review_public_benchmark_vina_gnina_input_manifest_template_preflight"
+    )
+    assert vina_detail["operator_unblock_packet"][
         "blocked_engine_run_slot_count"
     ] == 24
     assert vina_detail["engine_run_slots"][0]["required_adapter_engine_run_fields"] == [
@@ -661,6 +667,7 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "### Vina/GNINA Input Manifest Action" in markdown
     assert "public_benchmark_vina_gnina_input_manifest.json" in markdown
     assert "public_benchmark_vina_gnina_input_manifest.csv" in markdown
+    assert "public_benchmark_vina_gnina_input_manifest_template_preflight" in markdown
     assert "`recommended_template_dropzone_is_supported_candidate_path`: `True`" in markdown
     assert "`input_manifest_load_errors`: `none`" in markdown
     assert "`do_not_treat_blank_prepared_checksums_as_ready`: `True`" in markdown

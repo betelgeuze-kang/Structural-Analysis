@@ -1,0 +1,496 @@
+#!/usr/bin/env python3
+"""Preflight the Vina/GNINA input manifest template without promoting it."""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import hashlib
+import json
+from pathlib import Path
+import sys
+from typing import Any
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[1]
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from build_public_benchmark_vina_gnina_execution_plan import (  # noqa: E402
+    DEFAULT_INPUT_MANIFEST,
+    DEFAULT_OUT as DEFAULT_EXECUTION_PLAN,
+    INPUT_MANIFEST_CASE_FIELDS,
+)
+from release_evidence_metadata import release_evidence_metadata  # noqa: E402
+
+
+PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
+DEFAULT_TEMPLATE = PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest_template.csv"
+DEFAULT_OUT = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest_template_preflight.json"
+)
+DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+SCHEMA_VERSION = "public-benchmark-vina-gnina-input-manifest-template-preflight.v1"
+CASE_ID_FIELD = "case_id"
+MANIFEST_REQUIRED_FIELDS = (CASE_ID_FIELD, *INPUT_MANIFEST_CASE_FIELDS)
+LOCAL_FILE_FIELDS = (
+    "protein_structure_path",
+    "reference_ligand_path",
+    "prepared_receptor_path",
+    "prepared_ligand_path",
+)
+CHECKSUM_FIELDS = (
+    "source_checksum",
+    "protein_structure_checksum",
+    "reference_ligand_checksum",
+    "prepared_receptor_checksum",
+    "prepared_ligand_checksum",
+)
+RECEIPT_REF_FIELDS = (
+    "vina_config_ref",
+    "gnina_config_ref",
+    "vina_run_receipt_ref",
+    "gnina_run_receipt_ref",
+    "input_preparation_provenance_ref",
+)
+
+
+def _json_text(payload: dict[str, Any]) -> str:
+    return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+
+
+def _resolve(repo_root: Path, path: Path) -> Path:
+    return path if path.is_absolute() else repo_root / path
+
+
+def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
+    resolved = _resolve(repo_root, path)
+    if not resolved.exists():
+        return {}
+    try:
+        payload = json.loads(resolved.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _read_csv_rows(repo_root: Path, path: Path) -> tuple[list[str], list[dict[str, str]]]:
+    resolved = _resolve(repo_root, path)
+    if not resolved.is_file():
+        return [], []
+    with resolved.open("r", encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        rows = [
+            {
+                str(key).strip(): str(value or "").strip()
+                for key, value in row.items()
+                if key is not None
+            }
+            for row in reader
+        ]
+    return [str(field) for field in reader.fieldnames or []], rows
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _checksum_status(value: str) -> dict[str, Any]:
+    if not value:
+        return {
+            "present": False,
+            "valid_sha256": False,
+            "blocker": "checksum_missing",
+        }
+    if not value.lower().startswith("sha256:") or len(value.split(":", 1)[-1]) != 64:
+        return {
+            "present": True,
+            "valid_sha256": False,
+            "blocker": "checksum_invalid",
+        }
+    return {"present": True, "valid_sha256": True, "blocker": ""}
+
+
+def _local_file_status(repo_root: Path, path_value: str, checksum_value: str) -> dict[str, Any]:
+    if not path_value:
+        return {
+            "path": "",
+            "exists": False,
+            "is_file": False,
+            "actual_checksum": "",
+            "checksum_verified": False,
+            "blocker": "path_missing",
+        }
+    path = Path(path_value)
+    resolved = path if path.is_absolute() else repo_root / path
+    exists = resolved.exists()
+    is_file = resolved.is_file()
+    actual_checksum = ""
+    checksum_verified = False
+    blocker = ""
+    if not exists:
+        blocker = "path_not_found"
+    elif not is_file:
+        blocker = "path_not_file"
+    else:
+        try:
+            actual_checksum = _sha256_file(resolved)
+        except OSError:
+            blocker = "checksum_read_error"
+        else:
+            checksum_status = _checksum_status(checksum_value)
+            if checksum_status["blocker"]:
+                blocker = str(checksum_status["blocker"])
+            elif actual_checksum.lower() != checksum_value.lower():
+                blocker = "checksum_mismatch"
+            else:
+                checksum_verified = True
+    return {
+        "path": path_value,
+        "exists": exists,
+        "is_file": is_file,
+        "actual_checksum": actual_checksum,
+        "checksum_verified": checksum_verified,
+        "blocker": blocker,
+    }
+
+
+def _ref_status(repo_root: Path, value: str) -> dict[str, Any]:
+    if not value:
+        return {
+            "ref": "",
+            "present": False,
+            "local_path_exists": False,
+            "status": "missing",
+            "blocker": "ref_missing",
+        }
+    if value.startswith(("http://", "https://")):
+        return {
+            "ref": value,
+            "present": True,
+            "local_path_exists": False,
+            "status": "external_ref",
+            "blocker": "",
+        }
+    resolved = _resolve(repo_root, Path(value))
+    local_path_exists = resolved.exists()
+    return {
+        "ref": value,
+        "present": True,
+        "local_path_exists": local_path_exists,
+        "status": "ready" if local_path_exists else "local_ref_not_found",
+        "blocker": "" if local_path_exists else "local_ref_not_found",
+    }
+
+
+def _expected_case_ids(execution_plan: dict[str, Any]) -> list[str]:
+    case_plans = execution_plan.get("case_execution_plans")
+    if not isinstance(case_plans, list):
+        return []
+    return [
+        str(row.get("case_id") or "")
+        for row in case_plans
+        if isinstance(row, dict) and str(row.get("case_id") or "")
+    ]
+
+
+def _filled_manifest_status(execution_plan: dict[str, Any]) -> dict[str, Any]:
+    status = execution_plan.get("input_manifest_status")
+    return status if isinstance(status, dict) else {}
+
+
+def _row_preflight(repo_root: Path, row: dict[str, str]) -> dict[str, Any]:
+    missing_required_fields = [
+        field for field in MANIFEST_REQUIRED_FIELDS if not str(row.get(field) or "")
+    ]
+    checksum_statuses = {
+        field: _checksum_status(str(row.get(field) or ""))
+        for field in CHECKSUM_FIELDS
+    }
+    invalid_checksum_fields = [
+        field
+        for field, status in checksum_statuses.items()
+        if status["present"] and not status["valid_sha256"]
+    ]
+    local_file_statuses = {
+        field: _local_file_status(
+            repo_root,
+            str(row.get(field) or ""),
+            str(row.get(field.replace("_path", "_checksum")) or ""),
+        )
+        for field in LOCAL_FILE_FIELDS
+    }
+    missing_local_file_fields = [
+        field
+        for field, status in local_file_statuses.items()
+        if str(status.get("blocker") or "")
+    ]
+    receipt_ref_statuses = {
+        field: _ref_status(repo_root, str(row.get(field) or ""))
+        for field in RECEIPT_REF_FIELDS
+    }
+    missing_receipt_ref_fields = [
+        field
+        for field, status in receipt_ref_statuses.items()
+        if str(status.get("blocker") or "")
+    ]
+    blockers = []
+    if missing_required_fields:
+        blockers.append("manifest_required_fields_missing")
+    if invalid_checksum_fields:
+        blockers.append("manifest_checksum_fields_invalid")
+    if missing_local_file_fields:
+        blockers.append("manifest_local_files_missing_or_unverified")
+    if missing_receipt_ref_fields:
+        blockers.append("manifest_receipt_refs_missing")
+    return {
+        "case_id": str(row.get(CASE_ID_FIELD) or ""),
+        "complex_id": str(row.get("complex_id") or ""),
+        "status": "operator_completion_required" if blockers else "ready",
+        "missing_required_fields": missing_required_fields,
+        "invalid_checksum_fields": invalid_checksum_fields,
+        "missing_local_file_fields": missing_local_file_fields,
+        "missing_receipt_ref_fields": missing_receipt_ref_fields,
+        "checksum_statuses": checksum_statuses,
+        "local_file_statuses": local_file_statuses,
+        "receipt_ref_statuses": receipt_ref_statuses,
+        "blockers": blockers,
+    }
+
+
+def build_public_benchmark_vina_gnina_input_manifest_template_preflight(
+    *,
+    repo_root: Path = ROOT,
+    execution_plan: Path = DEFAULT_EXECUTION_PLAN,
+    template: Path = DEFAULT_TEMPLATE,
+    expected_manifest: Path = DEFAULT_INPUT_MANIFEST,
+) -> dict[str, Any]:
+    execution_plan_payload = _load_json(repo_root, execution_plan)
+    header_fields, rows = _read_csv_rows(repo_root, template)
+    row_preflights = [_row_preflight(repo_root, row) for row in rows]
+    expected_case_ids = _expected_case_ids(execution_plan_payload)
+    template_case_ids = [row["case_id"] for row in row_preflights if row["case_id"]]
+    missing_expected_case_ids = [
+        case_id for case_id in expected_case_ids if case_id not in template_case_ids
+    ]
+    unexpected_template_case_ids = [
+        case_id for case_id in template_case_ids if expected_case_ids and case_id not in expected_case_ids
+    ]
+    duplicate_case_ids = sorted(
+        {
+            case_id
+            for case_id in template_case_ids
+            if case_id and template_case_ids.count(case_id) > 1
+        }
+    )
+    missing_required_value_count = sum(
+        len(row["missing_required_fields"]) for row in row_preflights
+    )
+    invalid_checksum_count = sum(
+        len(row["invalid_checksum_fields"]) for row in row_preflights
+    )
+    missing_local_file_count = sum(
+        len(row["missing_local_file_fields"]) for row in row_preflights
+    )
+    missing_receipt_ref_count = sum(
+        len(row["missing_receipt_ref_fields"]) for row in row_preflights
+    )
+    template_case_coverage_complete = bool(rows) and not (
+        missing_expected_case_ids or unexpected_template_case_ids or duplicate_case_ids
+    )
+    manifest_ready = bool(rows) and template_case_coverage_complete and not (
+        missing_required_value_count
+        or invalid_checksum_count
+        or missing_local_file_count
+        or missing_receipt_ref_count
+    )
+    if not rows:
+        status = "template_missing_or_empty"
+    elif not template_case_coverage_complete:
+        status = "template_case_coverage_blocked"
+    elif manifest_ready:
+        status = "operator_manifest_complete"
+    else:
+        status = "operator_manifest_completion_required"
+    filled_manifest = _filled_manifest_status(execution_plan_payload)
+    return {
+        "schema_version": SCHEMA_VERSION,
+        **release_evidence_metadata(
+            input_paths=[
+                Path("scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py"),
+                Path("scripts/build_public_benchmark_vina_gnina_execution_plan.py"),
+                execution_plan,
+                template,
+            ],
+            reused_evidence=False,
+            reuse_policy="public_benchmark_vina_gnina_input_manifest_template_preflight",
+            repo_root=repo_root,
+        ),
+        "status": status,
+        "contract_pass": bool(rows) and template_case_coverage_complete,
+        "manifest_ready": manifest_ready,
+        "template_artifact": str(template),
+        "expected_manifest_artifact": str(expected_manifest),
+        "filled_manifest_detected": bool(
+            filled_manifest.get("selected_manifest_path")
+            or int(filled_manifest.get("detected_manifest_artifact_count") or 0) > 0
+        ),
+        "filled_manifest_status": filled_manifest,
+        "required_fields": list(MANIFEST_REQUIRED_FIELDS),
+        "local_file_fields": list(LOCAL_FILE_FIELDS),
+        "checksum_fields": list(CHECKSUM_FIELDS),
+        "receipt_ref_fields": list(RECEIPT_REF_FIELDS),
+        "header_fields": header_fields,
+        "expected_case_ids": expected_case_ids,
+        "template_case_ids": template_case_ids,
+        "missing_expected_case_ids": missing_expected_case_ids,
+        "unexpected_template_case_ids": unexpected_template_case_ids,
+        "duplicate_case_ids": duplicate_case_ids,
+        "case_preflight_rows": row_preflights,
+        "case_preflight_row_count": len(row_preflights),
+        "operator_actions": [
+            "do_not_commit_template_as_actual_manifest_evidence",
+            "copy_template_to_expected_manifest_only_after_operator_completion",
+            "attach_local_source_and_prepared_input_files",
+            "fill_missing_prepared_input_checksums_and_preparation_receipts",
+            "rerun_vina_gnina_execution_plan_after_manifest_completion",
+        ],
+        "commands": {
+            "write_preflight": (
+                "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py "
+                f"--out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}"
+            ),
+            "rerun_execution_plan": (
+                "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
+                f"--out {DEFAULT_EXECUTION_PLAN}"
+            ),
+            "rerun_runtime_readiness": (
+                "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py "
+                f"--out {PRODUCTIZATION / 'public_benchmark_vina_gnina_runtime_readiness.json'}"
+            ),
+        },
+        "summary": {
+            "expected_case_count": len(expected_case_ids),
+            "template_row_count": len(rows),
+            "template_case_count": len(template_case_ids),
+            "template_case_coverage_complete": template_case_coverage_complete,
+            "missing_expected_case_count": len(missing_expected_case_ids),
+            "unexpected_template_case_count": len(unexpected_template_case_ids),
+            "duplicate_case_id_count": len(duplicate_case_ids),
+            "missing_required_value_count": missing_required_value_count,
+            "invalid_checksum_count": invalid_checksum_count,
+            "missing_local_file_count": missing_local_file_count,
+            "missing_receipt_ref_count": missing_receipt_ref_count,
+            "manifest_ready": manifest_ready,
+        },
+        "claim_boundary": (
+            "This preflight audits the operator input-manifest template only. It "
+            "does not promote the template to an actual manifest, verify license "
+            "rights, run Vina/GNINA, create adapter rows, or close Public Benchmark "
+            "Phase 2."
+        ),
+    }
+
+
+def render_public_benchmark_vina_gnina_input_manifest_template_preflight_markdown(
+    payload: dict[str, Any],
+) -> str:
+    summary = payload["summary"]
+    lines = [
+        "# Public Benchmark Vina/GNINA Input Manifest Template Preflight",
+        "",
+        f"- `status`: `{payload['status']}`",
+        f"- `contract_pass`: `{payload['contract_pass']}`",
+        f"- `manifest_ready`: `{payload['manifest_ready']}`",
+        f"- `template_row_count`: `{summary['template_row_count']}`",
+        f"- `missing_required_value_count`: `{summary['missing_required_value_count']}`",
+        f"- `missing_local_file_count`: `{summary['missing_local_file_count']}`",
+        f"- `missing_receipt_ref_count`: `{summary['missing_receipt_ref_count']}`",
+        "",
+        "## Case Rows",
+        "",
+        "| Case | Status | Missing Fields | Missing Files | Missing Refs |",
+        "|---|---|---|---|---|",
+    ]
+    for row in payload["case_preflight_rows"]:
+        lines.append(
+            f"| `{row['case_id']}` | `{row['status']}` | "
+            f"`{len(row['missing_required_fields'])}` | "
+            f"`{len(row['missing_local_file_fields'])}` | "
+            f"`{len(row['missing_receipt_ref_fields'])}` |"
+        )
+    lines.extend(["", "## Commands", ""])
+    for key, command in payload["commands"].items():
+        lines.append(f"- `{key}`: `{command}`")
+    lines.extend(["", str(payload["claim_boundary"]), ""])
+    return "\n".join(lines)
+
+
+def write_public_benchmark_vina_gnina_input_manifest_template_preflight(
+    *,
+    repo_root: Path = ROOT,
+    execution_plan: Path = DEFAULT_EXECUTION_PLAN,
+    template: Path = DEFAULT_TEMPLATE,
+    expected_manifest: Path = DEFAULT_INPUT_MANIFEST,
+    out: Path = DEFAULT_OUT,
+    out_md: Path = DEFAULT_OUT_MD,
+) -> dict[str, Any]:
+    payload = build_public_benchmark_vina_gnina_input_manifest_template_preflight(
+        repo_root=repo_root,
+        execution_plan=execution_plan,
+        template=template,
+        expected_manifest=expected_manifest,
+    )
+    resolved_out = _resolve(repo_root, out)
+    resolved_out.parent.mkdir(parents=True, exist_ok=True)
+    resolved_out.write_text(_json_text(payload), encoding="utf-8")
+    resolved_md = _resolve(repo_root, out_md)
+    resolved_md.parent.mkdir(parents=True, exist_ok=True)
+    resolved_md.write_text(
+        render_public_benchmark_vina_gnina_input_manifest_template_preflight_markdown(
+            payload
+        ),
+        encoding="utf-8",
+    )
+    return payload
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repo-root", type=Path, default=ROOT)
+    parser.add_argument("--execution-plan", type=Path, default=DEFAULT_EXECUTION_PLAN)
+    parser.add_argument("--template", type=Path, default=DEFAULT_TEMPLATE)
+    parser.add_argument("--expected-manifest", type=Path, default=DEFAULT_INPUT_MANIFEST)
+    parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
+    parser.add_argument("--json", action="store_true")
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    payload = write_public_benchmark_vina_gnina_input_manifest_template_preflight(
+        repo_root=args.repo_root,
+        execution_plan=args.execution_plan,
+        template=args.template,
+        expected_manifest=args.expected_manifest,
+        out=args.out,
+        out_md=args.out_md,
+    )
+    if args.json:
+        print(_json_text(payload), end="")
+    else:
+        print(
+            "public-benchmark-vina-gnina-input-manifest-template-preflight: "
+            f"{payload['status']} | rows={payload['case_preflight_row_count']} | "
+            f"manifest_ready={payload['manifest_ready']}"
+        )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

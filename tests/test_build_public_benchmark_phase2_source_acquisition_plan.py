@@ -354,6 +354,16 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_input_manifest_template.csv"
     )
+    assert runtime_unblock["input_manifest_template_preflight_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_input_manifest_template_preflight.json"
+    )
+    assert runtime_unblock["commands"][
+        "build_input_manifest_template_preflight"
+    ].endswith("public_benchmark_vina_gnina_input_manifest_template_preflight.md")
+    assert runtime_unblock["operator_sequence"][0] == (
+        "review_public_benchmark_vina_gnina_input_manifest_template_preflight"
+    )
     assert runtime_unblock["blocked_case_input_slot_count"] == 12
     assert runtime_unblock["blocked_engine_run_slot_count"] == 24
     assert runtime_unblock["adapter_row_preflight_status"] == "row_artifact_missing"

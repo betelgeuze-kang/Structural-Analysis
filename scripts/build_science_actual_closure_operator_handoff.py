@@ -1133,6 +1133,10 @@ def _markdown(payload: dict[str, Any]) -> str:
                         [
                             f"- `operator_unblock_status`: `{operator_unblock.get('status')}`",
                             f"- `input_manifest_template_artifact`: `{operator_unblock.get('input_manifest_template_artifact')}`",
+                            "- `input_manifest_template_preflight_artifact`: "
+                            f"`{operator_unblock.get('input_manifest_template_preflight_artifact')}`",
+                            "- `input_manifest_template_preflight_command`: "
+                            f"`{_as_dict(operator_unblock.get('commands')).get('build_input_manifest_template_preflight', '')}`",
                         ]
                     )
                 lines.extend(

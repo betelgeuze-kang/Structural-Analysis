@@ -354,6 +354,18 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_input_manifest_template.csv"
     )
+    assert unblock["input_manifest_template_preflight_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_input_manifest_template_preflight.json"
+    )
+    assert unblock["commands"]["build_input_manifest_template_preflight"] == (
+        "python3 scripts/"
+        "build_public_benchmark_vina_gnina_input_manifest_template_preflight.py "
+        "--out implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_input_manifest_template_preflight.json "
+        "--out-md implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_input_manifest_template_preflight.md"
+    )
     assert unblock["case_input_slot_count"] == 1
     assert unblock["blocked_case_input_slot_count"] == 0
     assert unblock["required_engine_run_count"] == 2
@@ -367,7 +379,8 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "engine_id": "vina",
         "operator_action": "configure_vina_runtime",
     }
-    assert unblock["operator_sequence"][:2] == [
+    assert unblock["operator_sequence"][:3] == [
+        "review_public_benchmark_vina_gnina_input_manifest_template_preflight",
         "fill_public_benchmark_vina_gnina_input_manifest_from_template",
         "rerun_public_benchmark_vina_gnina_execution_plan",
     ]

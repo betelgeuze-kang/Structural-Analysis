@@ -1,0 +1,1743 @@
+{
+  "case_preflight_row_count": 12,
+  "case_preflight_rows": [
+    {
+      "blockers": [
+        "manifest_required_fields_missing",
+        "manifest_local_files_missing_or_unverified",
+        "manifest_receipt_refs_missing"
+      ],
+      "case_id": "casf2016_4llx",
+      "checksum_statuses": {
+        "prepared_ligand_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "prepared_receptor_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "protein_structure_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "reference_ligand_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "source_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        }
+      },
+      "complex_id": "4llx",
+      "invalid_checksum_fields": [],
+      "local_file_statuses": {
+        "prepared_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/4llx_ligand"
+        },
+        "prepared_receptor_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/4llx_receptor"
+        },
+        "protein_structure_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/4llx/4llx_protein.pdb"
+        },
+        "reference_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/4llx/4llx_ligand.sdf"
+        }
+      },
+      "missing_local_file_fields": [
+        "protein_structure_path",
+        "reference_ligand_path",
+        "prepared_receptor_path",
+        "prepared_ligand_path"
+      ],
+      "missing_receipt_ref_fields": [
+        "vina_config_ref",
+        "gnina_config_ref",
+        "vina_run_receipt_ref",
+        "gnina_run_receipt_ref",
+        "input_preparation_provenance_ref"
+      ],
+      "missing_required_fields": [
+        "prepared_receptor_checksum",
+        "prepared_ligand_checksum",
+        "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_statuses": {
+        "gnina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "gnina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_run_receipt.json",
+          "status": "local_ref_not_found"
+        },
+        "input_preparation_provenance_ref": {
+          "blocker": "ref_missing",
+          "local_path_exists": false,
+          "present": false,
+          "ref": "",
+          "status": "missing"
+        },
+        "vina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "vina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+          "status": "local_ref_not_found"
+        }
+      },
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "manifest_required_fields_missing",
+        "manifest_local_files_missing_or_unverified",
+        "manifest_receipt_refs_missing"
+      ],
+      "case_id": "casf2016_5c28",
+      "checksum_statuses": {
+        "prepared_ligand_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "prepared_receptor_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "protein_structure_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "reference_ligand_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "source_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        }
+      },
+      "complex_id": "5c28",
+      "invalid_checksum_fields": [],
+      "local_file_statuses": {
+        "prepared_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/5c28_ligand"
+        },
+        "prepared_receptor_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/5c28_receptor"
+        },
+        "protein_structure_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/5c28/5c28_protein.pdb"
+        },
+        "reference_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/5c28/5c28_ligand.sdf"
+        }
+      },
+      "missing_local_file_fields": [
+        "protein_structure_path",
+        "reference_ligand_path",
+        "prepared_receptor_path",
+        "prepared_ligand_path"
+      ],
+      "missing_receipt_ref_fields": [
+        "vina_config_ref",
+        "gnina_config_ref",
+        "vina_run_receipt_ref",
+        "gnina_run_receipt_ref",
+        "input_preparation_provenance_ref"
+      ],
+      "missing_required_fields": [
+        "prepared_receptor_checksum",
+        "prepared_ligand_checksum",
+        "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_statuses": {
+        "gnina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "gnina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_run_receipt.json",
+          "status": "local_ref_not_found"
+        },
+        "input_preparation_provenance_ref": {
+          "blocker": "ref_missing",
+          "local_path_exists": false,
+          "present": false,
+          "ref": "",
+          "status": "missing"
+        },
+        "vina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_5c28/vina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "vina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_5c28/vina_run_receipt.json",
+          "status": "local_ref_not_found"
+        }
+      },
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "manifest_required_fields_missing",
+        "manifest_local_files_missing_or_unverified",
+        "manifest_receipt_refs_missing"
+      ],
+      "case_id": "casf2016_3uuo",
+      "checksum_statuses": {
+        "prepared_ligand_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "prepared_receptor_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "protein_structure_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "reference_ligand_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "source_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        }
+      },
+      "complex_id": "3uuo",
+      "invalid_checksum_fields": [],
+      "local_file_statuses": {
+        "prepared_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/3uuo_ligand"
+        },
+        "prepared_receptor_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/3uuo_receptor"
+        },
+        "protein_structure_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/3uuo/3uuo_protein.pdb"
+        },
+        "reference_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/3uuo/3uuo_ligand.sdf"
+        }
+      },
+      "missing_local_file_fields": [
+        "protein_structure_path",
+        "reference_ligand_path",
+        "prepared_receptor_path",
+        "prepared_ligand_path"
+      ],
+      "missing_receipt_ref_fields": [
+        "vina_config_ref",
+        "gnina_config_ref",
+        "vina_run_receipt_ref",
+        "gnina_run_receipt_ref",
+        "input_preparation_provenance_ref"
+      ],
+      "missing_required_fields": [
+        "prepared_receptor_checksum",
+        "prepared_ligand_checksum",
+        "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_statuses": {
+        "gnina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "gnina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_run_receipt.json",
+          "status": "local_ref_not_found"
+        },
+        "input_preparation_provenance_ref": {
+          "blocker": "ref_missing",
+          "local_path_exists": false,
+          "present": false,
+          "ref": "",
+          "status": "missing"
+        },
+        "vina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "vina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_run_receipt.json",
+          "status": "local_ref_not_found"
+        }
+      },
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "manifest_required_fields_missing",
+        "manifest_local_files_missing_or_unverified",
+        "manifest_receipt_refs_missing"
+      ],
+      "case_id": "casf2016_3ui7",
+      "checksum_statuses": {
+        "prepared_ligand_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "prepared_receptor_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "protein_structure_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "reference_ligand_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "source_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        }
+      },
+      "complex_id": "3ui7",
+      "invalid_checksum_fields": [],
+      "local_file_statuses": {
+        "prepared_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/3ui7_ligand"
+        },
+        "prepared_receptor_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/3ui7_receptor"
+        },
+        "protein_structure_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/3ui7/3ui7_protein.pdb"
+        },
+        "reference_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/3ui7/3ui7_ligand.sdf"
+        }
+      },
+      "missing_local_file_fields": [
+        "protein_structure_path",
+        "reference_ligand_path",
+        "prepared_receptor_path",
+        "prepared_ligand_path"
+      ],
+      "missing_receipt_ref_fields": [
+        "vina_config_ref",
+        "gnina_config_ref",
+        "vina_run_receipt_ref",
+        "gnina_run_receipt_ref",
+        "input_preparation_provenance_ref"
+      ],
+      "missing_required_fields": [
+        "prepared_receptor_checksum",
+        "prepared_ligand_checksum",
+        "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_statuses": {
+        "gnina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "gnina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_run_receipt.json",
+          "status": "local_ref_not_found"
+        },
+        "input_preparation_provenance_ref": {
+          "blocker": "ref_missing",
+          "local_path_exists": false,
+          "present": false,
+          "ref": "",
+          "status": "missing"
+        },
+        "vina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "vina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_run_receipt.json",
+          "status": "local_ref_not_found"
+        }
+      },
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "manifest_required_fields_missing",
+        "manifest_local_files_missing_or_unverified",
+        "manifest_receipt_refs_missing"
+      ],
+      "case_id": "casf2016_5c2h",
+      "checksum_statuses": {
+        "prepared_ligand_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "prepared_receptor_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "protein_structure_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "reference_ligand_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "source_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        }
+      },
+      "complex_id": "5c2h",
+      "invalid_checksum_fields": [],
+      "local_file_statuses": {
+        "prepared_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/5c2h_ligand"
+        },
+        "prepared_receptor_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/5c2h_receptor"
+        },
+        "protein_structure_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/5c2h/5c2h_protein.pdb"
+        },
+        "reference_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/5c2h/5c2h_ligand.sdf"
+        }
+      },
+      "missing_local_file_fields": [
+        "protein_structure_path",
+        "reference_ligand_path",
+        "prepared_receptor_path",
+        "prepared_ligand_path"
+      ],
+      "missing_receipt_ref_fields": [
+        "vina_config_ref",
+        "gnina_config_ref",
+        "vina_run_receipt_ref",
+        "gnina_run_receipt_ref",
+        "input_preparation_provenance_ref"
+      ],
+      "missing_required_fields": [
+        "prepared_receptor_checksum",
+        "prepared_ligand_checksum",
+        "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_statuses": {
+        "gnina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "gnina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_run_receipt.json",
+          "status": "local_ref_not_found"
+        },
+        "input_preparation_provenance_ref": {
+          "blocker": "ref_missing",
+          "local_path_exists": false,
+          "present": false,
+          "ref": "",
+          "status": "missing"
+        },
+        "vina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "vina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_run_receipt.json",
+          "status": "local_ref_not_found"
+        }
+      },
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "manifest_required_fields_missing",
+        "manifest_local_files_missing_or_unverified",
+        "manifest_receipt_refs_missing"
+      ],
+      "case_id": "casf2016_2v00",
+      "checksum_statuses": {
+        "prepared_ligand_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "prepared_receptor_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "protein_structure_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "reference_ligand_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "source_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        }
+      },
+      "complex_id": "2v00",
+      "invalid_checksum_fields": [],
+      "local_file_statuses": {
+        "prepared_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/2v00_ligand"
+        },
+        "prepared_receptor_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/2v00_receptor"
+        },
+        "protein_structure_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/2v00/2v00_protein.pdb"
+        },
+        "reference_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/2v00/2v00_ligand.sdf"
+        }
+      },
+      "missing_local_file_fields": [
+        "protein_structure_path",
+        "reference_ligand_path",
+        "prepared_receptor_path",
+        "prepared_ligand_path"
+      ],
+      "missing_receipt_ref_fields": [
+        "vina_config_ref",
+        "gnina_config_ref",
+        "vina_run_receipt_ref",
+        "gnina_run_receipt_ref",
+        "input_preparation_provenance_ref"
+      ],
+      "missing_required_fields": [
+        "prepared_receptor_checksum",
+        "prepared_ligand_checksum",
+        "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_statuses": {
+        "gnina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "gnina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_run_receipt.json",
+          "status": "local_ref_not_found"
+        },
+        "input_preparation_provenance_ref": {
+          "blocker": "ref_missing",
+          "local_path_exists": false,
+          "present": false,
+          "ref": "",
+          "status": "missing"
+        },
+        "vina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_2v00/vina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "vina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_2v00/vina_run_receipt.json",
+          "status": "local_ref_not_found"
+        }
+      },
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "manifest_required_fields_missing",
+        "manifest_local_files_missing_or_unverified",
+        "manifest_receipt_refs_missing"
+      ],
+      "case_id": "casf2016_3wz8",
+      "checksum_statuses": {
+        "prepared_ligand_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "prepared_receptor_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "protein_structure_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "reference_ligand_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "source_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        }
+      },
+      "complex_id": "3wz8",
+      "invalid_checksum_fields": [],
+      "local_file_statuses": {
+        "prepared_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/3wz8_ligand"
+        },
+        "prepared_receptor_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/3wz8_receptor"
+        },
+        "protein_structure_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/3wz8/3wz8_protein.pdb"
+        },
+        "reference_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/3wz8/3wz8_ligand.sdf"
+        }
+      },
+      "missing_local_file_fields": [
+        "protein_structure_path",
+        "reference_ligand_path",
+        "prepared_receptor_path",
+        "prepared_ligand_path"
+      ],
+      "missing_receipt_ref_fields": [
+        "vina_config_ref",
+        "gnina_config_ref",
+        "vina_run_receipt_ref",
+        "gnina_run_receipt_ref",
+        "input_preparation_provenance_ref"
+      ],
+      "missing_required_fields": [
+        "prepared_receptor_checksum",
+        "prepared_ligand_checksum",
+        "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_statuses": {
+        "gnina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "gnina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_run_receipt.json",
+          "status": "local_ref_not_found"
+        },
+        "input_preparation_provenance_ref": {
+          "blocker": "ref_missing",
+          "local_path_exists": false,
+          "present": false,
+          "ref": "",
+          "status": "missing"
+        },
+        "vina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "vina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_run_receipt.json",
+          "status": "local_ref_not_found"
+        }
+      },
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "manifest_required_fields_missing",
+        "manifest_local_files_missing_or_unverified",
+        "manifest_receipt_refs_missing"
+      ],
+      "case_id": "casf2016_3pww",
+      "checksum_statuses": {
+        "prepared_ligand_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "prepared_receptor_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "protein_structure_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "reference_ligand_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "source_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        }
+      },
+      "complex_id": "3pww",
+      "invalid_checksum_fields": [],
+      "local_file_statuses": {
+        "prepared_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/3pww_ligand"
+        },
+        "prepared_receptor_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/3pww_receptor"
+        },
+        "protein_structure_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/3pww/3pww_protein.pdb"
+        },
+        "reference_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/3pww/3pww_ligand.sdf"
+        }
+      },
+      "missing_local_file_fields": [
+        "protein_structure_path",
+        "reference_ligand_path",
+        "prepared_receptor_path",
+        "prepared_ligand_path"
+      ],
+      "missing_receipt_ref_fields": [
+        "vina_config_ref",
+        "gnina_config_ref",
+        "vina_run_receipt_ref",
+        "gnina_run_receipt_ref",
+        "input_preparation_provenance_ref"
+      ],
+      "missing_required_fields": [
+        "prepared_receptor_checksum",
+        "prepared_ligand_checksum",
+        "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_statuses": {
+        "gnina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "gnina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_run_receipt.json",
+          "status": "local_ref_not_found"
+        },
+        "input_preparation_provenance_ref": {
+          "blocker": "ref_missing",
+          "local_path_exists": false,
+          "present": false,
+          "ref": "",
+          "status": "missing"
+        },
+        "vina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3pww/vina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "vina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3pww/vina_run_receipt.json",
+          "status": "local_ref_not_found"
+        }
+      },
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "manifest_required_fields_missing",
+        "manifest_local_files_missing_or_unverified",
+        "manifest_receipt_refs_missing"
+      ],
+      "case_id": "casf2016_3prs",
+      "checksum_statuses": {
+        "prepared_ligand_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "prepared_receptor_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "protein_structure_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "reference_ligand_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "source_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        }
+      },
+      "complex_id": "3prs",
+      "invalid_checksum_fields": [],
+      "local_file_statuses": {
+        "prepared_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/3prs_ligand"
+        },
+        "prepared_receptor_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/3prs_receptor"
+        },
+        "protein_structure_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/3prs/3prs_protein.pdb"
+        },
+        "reference_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/3prs/3prs_ligand.sdf"
+        }
+      },
+      "missing_local_file_fields": [
+        "protein_structure_path",
+        "reference_ligand_path",
+        "prepared_receptor_path",
+        "prepared_ligand_path"
+      ],
+      "missing_receipt_ref_fields": [
+        "vina_config_ref",
+        "gnina_config_ref",
+        "vina_run_receipt_ref",
+        "gnina_run_receipt_ref",
+        "input_preparation_provenance_ref"
+      ],
+      "missing_required_fields": [
+        "prepared_receptor_checksum",
+        "prepared_ligand_checksum",
+        "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_statuses": {
+        "gnina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "gnina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_run_receipt.json",
+          "status": "local_ref_not_found"
+        },
+        "input_preparation_provenance_ref": {
+          "blocker": "ref_missing",
+          "local_path_exists": false,
+          "present": false,
+          "ref": "",
+          "status": "missing"
+        },
+        "vina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3prs/vina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "vina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3prs/vina_run_receipt.json",
+          "status": "local_ref_not_found"
+        }
+      },
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "manifest_required_fields_missing",
+        "manifest_local_files_missing_or_unverified",
+        "manifest_receipt_refs_missing"
+      ],
+      "case_id": "casf2016_3uri",
+      "checksum_statuses": {
+        "prepared_ligand_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "prepared_receptor_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "protein_structure_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "reference_ligand_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "source_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        }
+      },
+      "complex_id": "3uri",
+      "invalid_checksum_fields": [],
+      "local_file_statuses": {
+        "prepared_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/3uri_ligand"
+        },
+        "prepared_receptor_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/3uri_receptor"
+        },
+        "protein_structure_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/3uri/3uri_protein.pdb"
+        },
+        "reference_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/3uri/3uri_ligand.sdf"
+        }
+      },
+      "missing_local_file_fields": [
+        "protein_structure_path",
+        "reference_ligand_path",
+        "prepared_receptor_path",
+        "prepared_ligand_path"
+      ],
+      "missing_receipt_ref_fields": [
+        "vina_config_ref",
+        "gnina_config_ref",
+        "vina_run_receipt_ref",
+        "gnina_run_receipt_ref",
+        "input_preparation_provenance_ref"
+      ],
+      "missing_required_fields": [
+        "prepared_receptor_checksum",
+        "prepared_ligand_checksum",
+        "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_statuses": {
+        "gnina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "gnina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_run_receipt.json",
+          "status": "local_ref_not_found"
+        },
+        "input_preparation_provenance_ref": {
+          "blocker": "ref_missing",
+          "local_path_exists": false,
+          "present": false,
+          "ref": "",
+          "status": "missing"
+        },
+        "vina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3uri/vina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "vina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_3uri/vina_run_receipt.json",
+          "status": "local_ref_not_found"
+        }
+      },
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "manifest_required_fields_missing",
+        "manifest_local_files_missing_or_unverified",
+        "manifest_receipt_refs_missing"
+      ],
+      "case_id": "casf2016_4m0z",
+      "checksum_statuses": {
+        "prepared_ligand_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "prepared_receptor_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "protein_structure_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "reference_ligand_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "source_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        }
+      },
+      "complex_id": "4m0z",
+      "invalid_checksum_fields": [],
+      "local_file_statuses": {
+        "prepared_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/4m0z_ligand"
+        },
+        "prepared_receptor_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/4m0z_receptor"
+        },
+        "protein_structure_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/4m0z/4m0z_protein.pdb"
+        },
+        "reference_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/4m0z/4m0z_ligand.sdf"
+        }
+      },
+      "missing_local_file_fields": [
+        "protein_structure_path",
+        "reference_ligand_path",
+        "prepared_receptor_path",
+        "prepared_ligand_path"
+      ],
+      "missing_receipt_ref_fields": [
+        "vina_config_ref",
+        "gnina_config_ref",
+        "vina_run_receipt_ref",
+        "gnina_run_receipt_ref",
+        "input_preparation_provenance_ref"
+      ],
+      "missing_required_fields": [
+        "prepared_receptor_checksum",
+        "prepared_ligand_checksum",
+        "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_statuses": {
+        "gnina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "gnina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_run_receipt.json",
+          "status": "local_ref_not_found"
+        },
+        "input_preparation_provenance_ref": {
+          "blocker": "ref_missing",
+          "local_path_exists": false,
+          "present": false,
+          "ref": "",
+          "status": "missing"
+        },
+        "vina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "vina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_run_receipt.json",
+          "status": "local_ref_not_found"
+        }
+      },
+      "status": "operator_completion_required"
+    },
+    {
+      "blockers": [
+        "manifest_required_fields_missing",
+        "manifest_local_files_missing_or_unverified",
+        "manifest_receipt_refs_missing"
+      ],
+      "case_id": "casf2016_4m0y",
+      "checksum_statuses": {
+        "prepared_ligand_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "prepared_receptor_checksum": {
+          "blocker": "checksum_missing",
+          "present": false,
+          "valid_sha256": false
+        },
+        "protein_structure_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "reference_ligand_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        },
+        "source_checksum": {
+          "blocker": "",
+          "present": true,
+          "valid_sha256": true
+        }
+      },
+      "complex_id": "4m0y",
+      "invalid_checksum_fields": [],
+      "local_file_statuses": {
+        "prepared_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/4m0y_ligand"
+        },
+        "prepared_receptor_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "prepared/4m0y_receptor"
+        },
+        "protein_structure_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/4m0y/4m0y_protein.pdb"
+        },
+        "reference_ligand_path": {
+          "actual_checksum": "",
+          "blocker": "path_not_found",
+          "checksum_verified": false,
+          "exists": false,
+          "is_file": false,
+          "path": "CASF-2016/coreset/4m0y/4m0y_ligand.sdf"
+        }
+      },
+      "missing_local_file_fields": [
+        "protein_structure_path",
+        "reference_ligand_path",
+        "prepared_receptor_path",
+        "prepared_ligand_path"
+      ],
+      "missing_receipt_ref_fields": [
+        "vina_config_ref",
+        "gnina_config_ref",
+        "vina_run_receipt_ref",
+        "gnina_run_receipt_ref",
+        "input_preparation_provenance_ref"
+      ],
+      "missing_required_fields": [
+        "prepared_receptor_checksum",
+        "prepared_ligand_checksum",
+        "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_statuses": {
+        "gnina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "gnina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_run_receipt.json",
+          "status": "local_ref_not_found"
+        },
+        "input_preparation_provenance_ref": {
+          "blocker": "ref_missing",
+          "local_path_exists": false,
+          "present": false,
+          "ref": "",
+          "status": "missing"
+        },
+        "vina_config_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_config.json",
+          "status": "local_ref_not_found"
+        },
+        "vina_run_receipt_ref": {
+          "blocker": "local_ref_not_found",
+          "local_path_exists": false,
+          "present": true,
+          "ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_run_receipt.json",
+          "status": "local_ref_not_found"
+        }
+      },
+      "status": "operator_completion_required"
+    }
+  ],
+  "checksum_fields": [
+    "source_checksum",
+    "protein_structure_checksum",
+    "reference_ligand_checksum",
+    "prepared_receptor_checksum",
+    "prepared_ligand_checksum"
+  ],
+  "claim_boundary": "This preflight audits the operator input-manifest template only. It does not promote the template to an actual manifest, verify license rights, run Vina/GNINA, create adapter rows, or close Public Benchmark Phase 2.",
+  "commands": {
+    "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+    "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
+    "write_preflight": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md"
+  },
+  "contract_pass": true,
+  "duplicate_case_ids": [],
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "expected_case_ids": [
+    "casf2016_4llx",
+    "casf2016_5c28",
+    "casf2016_3uuo",
+    "casf2016_3ui7",
+    "casf2016_5c2h",
+    "casf2016_2v00",
+    "casf2016_3wz8",
+    "casf2016_3pww",
+    "casf2016_3prs",
+    "casf2016_3uri",
+    "casf2016_4m0z",
+    "casf2016_4m0y"
+  ],
+  "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
+  "filled_manifest_detected": false,
+  "filled_manifest_status": {
+    "accepted_formats": [
+      "json",
+      "jsonl",
+      "ndjson",
+      "csv",
+      "tsv"
+    ],
+    "blockers": [
+      "public_benchmark_vina_gnina_input_manifest_not_detected"
+    ],
+    "candidate_paths": [
+      {
+        "exists": false,
+        "format": "json",
+        "is_file": false,
+        "load_error": "",
+        "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
+        "row_count": 0
+      },
+      {
+        "exists": false,
+        "format": "jsonl",
+        "is_file": false,
+        "load_error": "",
+        "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.jsonl",
+        "row_count": 0
+      },
+      {
+        "exists": false,
+        "format": "ndjson",
+        "is_file": false,
+        "load_error": "",
+        "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.ndjson",
+        "row_count": 0
+      },
+      {
+        "exists": false,
+        "format": "csv",
+        "is_file": false,
+        "load_error": "",
+        "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+        "row_count": 0
+      },
+      {
+        "exists": false,
+        "format": "tsv",
+        "is_file": false,
+        "load_error": "",
+        "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.tsv",
+        "row_count": 0
+      }
+    ],
+    "case_count": 0,
+    "default_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
+    "detected_manifest_artifact_count": 0,
+    "duplicate_case_ids": [],
+    "row_count": 0,
+    "selected_manifest_format": "",
+    "selected_manifest_path": "",
+    "status": "not_detected"
+  },
+  "generated_at": "2026-07-04T01:48:54.576036+00:00",
+  "header_fields": [
+    "case_id",
+    "complex_id",
+    "benchmark_split",
+    "source_family",
+    "source_license_or_accession",
+    "source_checksum",
+    "provenance_ref",
+    "protein_structure_path",
+    "protein_structure_checksum",
+    "reference_ligand_path",
+    "reference_ligand_checksum",
+    "prepared_receptor_path",
+    "prepared_receptor_checksum",
+    "prepared_ligand_path",
+    "prepared_ligand_checksum",
+    "docking_box_center_x",
+    "docking_box_center_y",
+    "docking_box_center_z",
+    "docking_box_size_x",
+    "docking_box_size_y",
+    "docking_box_size_z",
+    "vina_config_ref",
+    "gnina_config_ref",
+    "vina_run_receipt_ref",
+    "gnina_run_receipt_ref",
+    "input_preparation_provenance_ref"
+  ],
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:d91bbc8402c86796ce3d60d0a053610cceea2dcbbb0f5faf00adeaad7698bea4",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv": "sha256:ff3afa49ab7c79ed82a78f1755272ecc13ca7f6b6e01ef2b35ea5d58b12d3611",
+    "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1",
+    "scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py": "sha256:ea021989e3cea039375694db3b721f719b6baf687b4c99a1f3e9953fb98ac7ba"
+  },
+  "local_file_fields": [
+    "protein_structure_path",
+    "reference_ligand_path",
+    "prepared_receptor_path",
+    "prepared_ligand_path"
+  ],
+  "manifest_ready": false,
+  "missing_expected_case_ids": [],
+  "operator_actions": [
+    "do_not_commit_template_as_actual_manifest_evidence",
+    "copy_template_to_expected_manifest_only_after_operator_completion",
+    "attach_local_source_and_prepared_input_files",
+    "fill_missing_prepared_input_checksums_and_preparation_receipts",
+    "rerun_vina_gnina_execution_plan_after_manifest_completion"
+  ],
+  "receipt_ref_fields": [
+    "vina_config_ref",
+    "gnina_config_ref",
+    "vina_run_receipt_ref",
+    "gnina_run_receipt_ref",
+    "input_preparation_provenance_ref"
+  ],
+  "required_fields": [
+    "case_id",
+    "complex_id",
+    "benchmark_split",
+    "source_family",
+    "source_license_or_accession",
+    "source_checksum",
+    "provenance_ref",
+    "protein_structure_path",
+    "protein_structure_checksum",
+    "reference_ligand_path",
+    "reference_ligand_checksum",
+    "prepared_receptor_path",
+    "prepared_receptor_checksum",
+    "prepared_ligand_path",
+    "prepared_ligand_checksum",
+    "docking_box_center_x",
+    "docking_box_center_y",
+    "docking_box_center_z",
+    "docking_box_size_x",
+    "docking_box_size_y",
+    "docking_box_size_z",
+    "vina_config_ref",
+    "gnina_config_ref",
+    "vina_run_receipt_ref",
+    "gnina_run_receipt_ref",
+    "input_preparation_provenance_ref"
+  ],
+  "reuse_policy": "public_benchmark_vina_gnina_input_manifest_template_preflight",
+  "reused_evidence": false,
+  "schema_version": "public-benchmark-vina-gnina-input-manifest-template-preflight.v1",
+  "source_commit_sha": "c52803fa473f323c2029660eb441e778329c2efa",
+  "status": "operator_manifest_completion_required",
+  "summary": {
+    "duplicate_case_id_count": 0,
+    "expected_case_count": 12,
+    "invalid_checksum_count": 0,
+    "manifest_ready": false,
+    "missing_expected_case_count": 0,
+    "missing_local_file_count": 48,
+    "missing_receipt_ref_count": 60,
+    "missing_required_value_count": 36,
+    "template_case_count": 12,
+    "template_case_coverage_complete": true,
+    "template_row_count": 12,
+    "unexpected_template_case_count": 0
+  },
+  "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+  "template_case_ids": [
+    "casf2016_4llx",
+    "casf2016_5c28",
+    "casf2016_3uuo",
+    "casf2016_3ui7",
+    "casf2016_5c2h",
+    "casf2016_2v00",
+    "casf2016_3wz8",
+    "casf2016_3pww",
+    "casf2016_3prs",
+    "casf2016_3uri",
+    "casf2016_4m0z",
+    "casf2016_4m0y"
+  ],
+  "unexpected_template_case_ids": []
+}
