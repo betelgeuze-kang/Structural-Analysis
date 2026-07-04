@@ -152,6 +152,55 @@ def _assembly_contract_seed_payload() -> dict:
     }
 
 
+def _true_newton_load_sweep_payload() -> dict:
+    return {
+        "schema_version": "g1-true-newton-load-sweep-status.v1",
+        "status": "partial",
+        "contract_pass": True,
+        "evidence_closure_pass": False,
+        "promotes_g1_closure": False,
+        "required_load_scale": 1.0,
+        "max_attempted_load_scale": 1.0,
+        "max_newton_steps": 4,
+        "residual_gate_n": 5.0e-4,
+        "full_load_attempted": True,
+        "full_load_true_newton_residual_descent_observed": True,
+        "full_load_true_newton_residual_gate_passed": False,
+        "full_load_true_newton_final_residual_n": 716.2398790963002,
+        "full_load_true_newton_total_reduction_ratio": 0.95,
+        "rows": [
+            {
+                "load_scale": 0.75,
+                "status": "ready",
+                "uses_real_mgt_model": True,
+                "true_newton_steps": 4,
+                "true_newton_initial_residual_n": 15000.0,
+                "true_newton_final_residual_n": 537.1799036113136,
+                "true_newton_total_reduction_ratio": 0.96,
+                "true_newton_residual_descent_observed": True,
+                "true_newton_residual_gate_passed": False,
+            },
+            {
+                "load_scale": 1.0,
+                "status": "ready",
+                "uses_real_mgt_model": True,
+                "true_newton_steps": 4,
+                "true_newton_initial_residual_n": 20000.0,
+                "true_newton_final_residual_n": 716.2398790963002,
+                "true_newton_total_reduction_ratio": 0.95,
+                "true_newton_residual_descent_observed": True,
+                "true_newton_residual_gate_passed": False,
+            },
+        ],
+        "blockers": [
+            "full_load_true_newton_residual_gate_not_passed",
+            "full_load_checkpoint_not_created_by_true_newton_sweep",
+            "production_rocm_hip_not_executed_by_true_newton_sweep",
+        ],
+        "claim_boundary": "non-promoting fixture",
+    }
+
+
 def _global_connectivity_payload() -> dict:
     return {
         "schema_version": "g1-global-connectivity-load-path-audit.v1",
@@ -170,12 +219,14 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
         "hip": tmp_path / "mgt_residual_jacobian_consistency_hip_required_probe.json",
         "global": tmp_path / "g1_global_connectivity_load_path_audit.json",
         "assembly": tmp_path / "g1_assembly_contract_seed_report.json",
+        "sweep": tmp_path / "g1_true_newton_load_sweep_status.json",
     }
     _write_json(paths["g1_lane"], _g1_lane_payload(action_id=action_id))
     _write_json(paths["cause"], _cause_narrowing_payload())
     _write_json(paths["hip"], _hip_probe_payload())
     _write_json(paths["global"], _global_connectivity_payload())
     _write_json(paths["assembly"], _assembly_contract_seed_payload())
+    _write_json(paths["sweep"], _true_newton_load_sweep_payload())
     return paths
 
 
@@ -191,6 +242,7 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
         hip_probe_path=paths["hip"],
         global_connectivity_path=paths["global"],
         assembly_contract_seed_path=paths["assembly"],
+        true_newton_load_sweep_path=paths["sweep"],
     )
 
     assert payload["status"] == "ready_for_runner_implementation"
@@ -219,6 +271,17 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     assert payload["routing_evidence"]["row_only_correction_loop_stopped"] is True
     assert payload["routing_evidence"]["support_or_link_row_gap_disfavored"] is True
     assert payload["checkpoint_gap"]["highest_observed_load_scale"] == 0.656
+    assert payload["summary"]["true_newton_load_sweep_present"] is True
+    assert payload["summary"]["full_load_true_newton_attempted"] is True
+    assert payload["summary"]["full_load_true_newton_residual_descent_observed"] is True
+    assert payload["summary"]["full_load_true_newton_residual_gate_passed"] is False
+    assert payload["summary"]["full_load_true_newton_final_residual_n"] == (
+        716.2398790963002
+    )
+    assert payload["true_newton_load_sweep"]["path"] == paths["sweep"].as_posix()
+    assert payload["true_newton_load_sweep"]["present"] is True
+    assert payload["true_newton_load_sweep"]["promotes_g1_closure"] is False
+    assert payload["true_newton_load_sweep"]["full_load_row"]["load_scale"] == 1.0
     assert payload["assembly_contract_seed"] == {
         "path": paths["assembly"].as_posix(),
         "status": "ready",
@@ -318,6 +381,7 @@ def test_runner_packet_classifies_blocked_worker_path_repair_plan(tmp_path: Path
         hip_probe_path=paths["hip"],
         global_connectivity_path=paths["global"],
         assembly_contract_seed_path=paths["assembly"],
+        true_newton_load_sweep_path=paths["sweep"],
     )
 
     assert payload["status"] == "blocked_runner_contract"
@@ -366,6 +430,7 @@ def test_runner_packet_blocks_when_lane_does_not_route_to_runner(tmp_path: Path)
         hip_probe_path=paths["hip"],
         global_connectivity_path=paths["global"],
         assembly_contract_seed_path=paths["assembly"],
+        true_newton_load_sweep_path=paths["sweep"],
     )
 
     assert payload["status"] == "blocked_runner_contract"
@@ -385,6 +450,7 @@ def test_runner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
         hip_probe_path=paths["hip"],
         global_connectivity_path=paths["global"],
         assembly_contract_seed_path=paths["assembly"],
+        true_newton_load_sweep_path=paths["sweep"],
         out=out,
         out_md=out_md,
     )
@@ -400,4 +466,6 @@ def test_runner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
     assert "generate_full_load_1p0_checkpoint_candidate" in markdown
     assert "## Worker Path Operator Sequence" in markdown
     assert "run_hip_required_direct_probe" in markdown
+    assert "## True-Newton Load Sweep" in markdown
+    assert "full_load_true_newton_residual_descent_observed" in markdown
     assert payload["status"] == "ready_for_runner_implementation"

@@ -1,0 +1,92 @@
+{
+  "blockers": [
+    "full_load_true_newton_residual_gate_not_passed",
+    "full_load_checkpoint_not_created_by_true_newton_sweep",
+    "production_rocm_hip_not_executed_by_true_newton_sweep",
+    "full_mesh_nonlinear_equilibrium_not_proven_by_true_newton_sweep"
+  ],
+  "claim_boundary": "This receipt records a non-promoting true-Newton load sweep. A full-load residual descent observation is not a G1 closure, not a full-load checkpoint, not full-mesh nonlinear equilibrium, and not production ROCm/HIP residual/JVP proof.",
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "evidence_closure_pass": false,
+  "full_load_attempted": true,
+  "full_load_true_newton_final_residual_n": 716.2398790963002,
+  "full_load_true_newton_residual_descent_observed": true,
+  "full_load_true_newton_residual_gate_passed": false,
+  "full_load_true_newton_total_reduction_ratio": 0.967914847246854,
+  "generated_at": "2026-07-04T09:14:34.160013+00:00",
+  "input_checksums": {
+    "implementation/phase1/g1_assembled_tangent_solve.py": "sha256:28f5e98f06df9fa14b78dc1bfc7963c2408dd64ea7068e7a58a1b7e6d8071fb2",
+    "implementation/phase1/g1_regularized_direction.py": "sha256:233f392c815eacd7b7eacb0de34218267feeffea41a66c07c2b1ba4c5dbc2c4e",
+    "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py": "sha256:f5bd11a079effef34796359a0cf81dd902f8a8085dab4ba5695eacdc4b60567c",
+    "implementation/phase1/run_g1_regularized_reference_newton_candidate.py": "sha256:f8b5166c84c9e655b81061a6d4f8c4d52b5d2ec5c0a4c7643395c172b0d977d7",
+    "implementation/phase1/run_g1_true_newton_reference_candidate.py": "sha256:124afbc90a928f023033fa8a0a3f96c76b2822a6aa5bdaeeb66ef41fbc6c3171",
+    "scripts/build_g1_true_newton_load_sweep_status.py": "sha256:6447d1ac2123fb2546e98191e1278d32c373e54be9bbc1c472ffdd438e1ccf16"
+  },
+  "max_attempted_load_scale": 1.0,
+  "max_newton_steps": 4,
+  "next_actions": [
+    "turn_true_newton_full_load_descent_into_loadable_checkpoint_candidate",
+    "connect_live_g1_runner_to_same_residual_jacobian_contract",
+    "rerun_full_load_hip_newton_lane_with_checkpoint"
+  ],
+  "promotes_g1_closure": false,
+  "required_load_scale": 1.0,
+  "residual_gate_n": 0.0005,
+  "reuse_policy": "executes_non_promoting_true_newton_load_sweep_on_real_mgt_residual",
+  "reused_evidence": false,
+  "rows": [
+    {
+      "load_scale": 0.656,
+      "modified_newton_final_residual_n": 469.85336199623,
+      "reason_code": "max_steps",
+      "status": "ready",
+      "true_newton_faster_than_modified": true,
+      "true_newton_final_residual_n": 469.8533538138471,
+      "true_newton_initial_residual_n": 14643.949626859854,
+      "true_newton_monotonic_residual_decrease": true,
+      "true_newton_residual_descent_observed": true,
+      "true_newton_residual_gate_passed": false,
+      "true_newton_steps": 4,
+      "true_newton_stop_reason": "max_steps",
+      "true_newton_total_reduction_ratio": 0.9679148477162169,
+      "uses_real_mgt_model": true
+    },
+    {
+      "load_scale": 0.75,
+      "modified_newton_final_residual_n": 537.179914306723,
+      "reason_code": "max_steps",
+      "status": "ready",
+      "true_newton_faster_than_modified": true,
+      "true_newton_final_residual_n": 537.1799036113136,
+      "true_newton_initial_residual_n": 16742.320457537942,
+      "true_newton_monotonic_residual_decrease": true,
+      "true_newton_residual_descent_observed": true,
+      "true_newton_residual_gate_passed": false,
+      "true_newton_steps": 4,
+      "true_newton_stop_reason": "max_steps",
+      "true_newton_total_reduction_ratio": 0.9679148475879604,
+      "uses_real_mgt_model": true
+    },
+    {
+      "load_scale": 1.0,
+      "modified_newton_final_residual_n": 716.2398981106664,
+      "reason_code": "max_steps",
+      "status": "ready",
+      "true_newton_faster_than_modified": true,
+      "true_newton_final_residual_n": 716.2398790963002,
+      "true_newton_initial_residual_n": 22323.093943383923,
+      "true_newton_monotonic_residual_decrease": true,
+      "true_newton_residual_descent_observed": true,
+      "true_newton_residual_gate_passed": false,
+      "true_newton_steps": 4,
+      "true_newton_stop_reason": "max_steps",
+      "true_newton_total_reduction_ratio": 0.967914847246854,
+      "uses_real_mgt_model": true
+    }
+  ],
+  "schema_version": "g1-true-newton-load-sweep-status.v1",
+  "source_commit_sha": "228cf18db07cfa6564a1e510ff37d623d1edf418",
+  "status": "partial",
+  "summary_line": "G1 true-Newton load sweep: PARTIAL | max_load=1.0 | full_load_descent=True | full_load_gate=False"
+}

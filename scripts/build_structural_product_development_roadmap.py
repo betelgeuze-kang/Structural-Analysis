@@ -436,6 +436,9 @@ def build_structural_product_development_roadmap(
     g1_worker_repair_plan = _as_dict(
         g1_consistent_newton_runner.get("worker_path_repair_plan")
     )
+    g1_true_newton_load_sweep = _as_dict(
+        g1_consistent_newton_runner.get("true_newton_load_sweep")
+    )
     g1_global_summary = _as_dict(g1_global_connectivity.get("summary"))
     g1_global_decision = _as_dict(g1_global_connectivity.get("decision_record"))
     g1_cause_signals = _as_dict(g1_cause_narrowing.get("evidence_signals"))
@@ -663,6 +666,24 @@ def build_structural_product_development_roadmap(
                 ),
                 "consistent_newton_full_load_runner_required_load_scale": (
                     g1_runner_checkpoint_gap.get("required_load_scale")
+                ),
+                "true_newton_full_load_attempted": _as_bool(
+                    g1_true_newton_load_sweep.get("full_load_attempted")
+                ),
+                "true_newton_full_load_residual_descent_observed": _as_bool(
+                    g1_true_newton_load_sweep.get(
+                        "full_load_true_newton_residual_descent_observed"
+                    )
+                ),
+                "true_newton_full_load_residual_gate_passed": _as_bool(
+                    g1_true_newton_load_sweep.get(
+                        "full_load_true_newton_residual_gate_passed"
+                    )
+                ),
+                "true_newton_full_load_final_residual_n": (
+                    g1_true_newton_load_sweep.get(
+                        "full_load_true_newton_final_residual_n"
+                    )
                 ),
                 "rocm_worker_path_repair_status": str(
                     g1_worker_repair_plan.get("status") or "missing"
@@ -909,6 +930,21 @@ def build_structural_product_development_roadmap(
                 ),
                 "consistent_newton_full_load_runner_id": str(
                     g1_runner_contract.get("runner_id") or ""
+                ),
+                "true_newton_full_load_residual_descent_observed": _as_bool(
+                    g1_true_newton_load_sweep.get(
+                        "full_load_true_newton_residual_descent_observed"
+                    )
+                ),
+                "true_newton_full_load_residual_gate_passed": _as_bool(
+                    g1_true_newton_load_sweep.get(
+                        "full_load_true_newton_residual_gate_passed"
+                    )
+                ),
+                "true_newton_full_load_final_residual_n": (
+                    g1_true_newton_load_sweep.get(
+                        "full_load_true_newton_final_residual_n"
+                    )
                 ),
                 "rocm_worker_path_repair_status": str(
                     g1_worker_repair_plan.get("status") or "missing"

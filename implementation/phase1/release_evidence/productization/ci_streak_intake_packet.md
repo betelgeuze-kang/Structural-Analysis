@@ -32,7 +32,7 @@
 
 | Workflow | Event | Counted Lane | Queued Minutes | Run | Owner Action |
 |---|---|---|---:|---|---|
-| `Nightly Full Quality` | `schedule` | `nightly` | `774.4` | `28680698586` | Bring the required self-hosted runner online, let queued Nightly Full Quality runs start, then refresh github_actions_ci_streak_evidence.json before collecting release streak credit. |
+| `Nightly Full Quality` | `schedule` | `nightly` | `790.4` | `28680698586` | Bring the required self-hosted runner online, let queued Nightly Full Quality runs start, then refresh github_actions_ci_streak_evidence.json before collecting release streak credit. |
 
 ## Validation Commands
 
@@ -81,7 +81,7 @@
 | Field | Current | Required | Pass |
 |---|---|---|---:|
 | `github_actions_ci_streak_evidence.schema_version` | `github-actions-ci-streak-evidence.v1` | `github-actions-ci-streak-evidence.v1` | `True` |
-| `github_actions_ci_streak_evidence.generated_at` | `2026-07-04T08:46:11.228076+00:00` | `timezone-aware timestamp no older than 168 hours` | `True` |
+| `github_actions_ci_streak_evidence.generated_at` | `2026-07-04T09:02:06.092465+00:00` | `timezone-aware timestamp no older than 168 hours` | `True` |
 | `github_actions_ci_streak_evidence.threshold` | `30` | `30` | `True` |
 | `lanes.pr.consecutive_pass_count` | `0` | `>= 30` | `False` |
 | `lanes.pr.threshold_pass` | `False` | `true` | `False` |
@@ -99,7 +99,7 @@
 | Check | Current | Required | Pass |
 |---|---|---|---:|
 | `source_manifest_threshold_consistency` | `source=30; required=30` | `source threshold equals release threshold` | `True` |
-| `source_evidence_freshness` | `age_hours=0.005` | `freshness_pass=true` | `True` |
+| `source_evidence_freshness` | `age_hours=0.002` | `freshness_pass=true` | `True` |
 | `pr_trigger_and_source` | `triggers=['pull_request', 'push', 'workflow_dispatch']; pull_request_source=False` | `pull_request trigger and pull_request source runs present` | `False` |
 | `nightly_trigger_source` | `triggers=['schedule', 'workflow_dispatch']` | `schedule or workflow_dispatch trigger present` | `True` |
 | `self_hosted_runner_precondition` | `evaluated=True; online=0; ready=0` | `at least one required self-hosted runner online when evaluated` | `False` |
@@ -130,4 +130,4 @@
 
 | Path | Schema | Fresh | Age Hours | Pass |
 |---|---|---:|---:|---:|
-| `implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json` | `github-actions-ci-streak-evidence.v1` | `True` | `0.005` | `False` |
+| `implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json` | `github-actions-ci-streak-evidence.v1` | `True` | `0.002` | `False` |

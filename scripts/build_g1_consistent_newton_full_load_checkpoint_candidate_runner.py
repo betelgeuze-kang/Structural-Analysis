@@ -24,6 +24,7 @@ DEFAULT_CAUSE_NARROWING = PRODUCTIZATION / "g1_f2g_f2h_cause_narrowing_status.js
 DEFAULT_HIP_PROBE = PRODUCTIZATION / "mgt_residual_jacobian_consistency_hip_required_probe.json"
 DEFAULT_GLOBAL_CONNECTIVITY = PRODUCTIZATION / "g1_global_connectivity_load_path_audit.json"
 DEFAULT_ASSEMBLY_CONTRACT_SEED = PRODUCTIZATION / "g1_assembly_contract_seed_report.json"
+DEFAULT_TRUE_NEWTON_LOAD_SWEEP = PRODUCTIZATION / "g1_true_newton_load_sweep_status.json"
 DEFAULT_OUT = PRODUCTIZATION / "g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_SOLVER_HIP_E2E = Path(
@@ -440,6 +441,50 @@ def _closure_blockers(
     return unique
 
 
+def _true_newton_load_sweep_summary(
+    *,
+    payload: dict[str, Any],
+    path: Path,
+    required_load_scale: float,
+) -> dict[str, Any]:
+    rows = [
+        row for row in _as_list(payload.get("rows")) if isinstance(row, dict)
+    ]
+    full_load_row: dict[str, Any] = {}
+    for row in rows:
+        load_scale = _as_float(row.get("load_scale"), -1.0)
+        if abs(load_scale - required_load_scale) <= 1.0e-12:
+            full_load_row = row
+            break
+    return {
+        "path": path.as_posix(),
+        "present": bool(payload),
+        "status": str(payload.get("status") or "missing"),
+        "contract_pass": payload.get("contract_pass") is True,
+        "promotes_g1_closure": payload.get("promotes_g1_closure") is True,
+        "max_attempted_load_scale": _as_float(
+            payload.get("max_attempted_load_scale")
+        ),
+        "full_load_attempted": bool(payload.get("full_load_attempted") is True),
+        "full_load_true_newton_residual_descent_observed": bool(
+            payload.get("full_load_true_newton_residual_descent_observed") is True
+        ),
+        "full_load_true_newton_residual_gate_passed": bool(
+            payload.get("full_load_true_newton_residual_gate_passed") is True
+        ),
+        "full_load_true_newton_final_residual_n": _as_float(
+            payload.get("full_load_true_newton_final_residual_n")
+        ),
+        "full_load_true_newton_total_reduction_ratio": _as_float(
+            payload.get("full_load_true_newton_total_reduction_ratio")
+        ),
+        "row_count": len(rows),
+        "full_load_row": full_load_row,
+        "blockers": _strings(payload.get("blockers")),
+        "claim_boundary": str(payload.get("claim_boundary") or ""),
+    }
+
+
 def _next_actions(
     *,
     required_load_scale: float,
@@ -524,6 +569,7 @@ def build_runner_packet(
     hip_probe_path: Path = DEFAULT_HIP_PROBE,
     global_connectivity_path: Path = DEFAULT_GLOBAL_CONNECTIVITY,
     assembly_contract_seed_path: Path = DEFAULT_ASSEMBLY_CONTRACT_SEED,
+    true_newton_load_sweep_path: Path = DEFAULT_TRUE_NEWTON_LOAD_SWEEP,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     g1_lane = _load_json(repo_root, g1_lane_path)
@@ -531,6 +577,7 @@ def build_runner_packet(
     hip_probe = _load_json(repo_root, hip_probe_path)
     global_connectivity = _load_json(repo_root, global_connectivity_path)
     assembly_contract_seed = _load_json(repo_root, assembly_contract_seed_path)
+    true_newton_load_sweep = _load_json(repo_root, true_newton_load_sweep_path)
     action = _find_runner_action(g1_lane)
     checkpoint_gate = _as_dict(g1_lane.get("checkpoint_resolution_gate"))
     worker = _as_dict(hip_probe.get("production_rocm_hip_residual_jvp_worker"))
@@ -594,6 +641,11 @@ def build_runner_packet(
         hip_probe_path=hip_probe_path,
         assembly_contract_seed_path=assembly_contract_seed_path,
     )
+    true_newton_load_sweep_summary = _true_newton_load_sweep_summary(
+        payload=true_newton_load_sweep,
+        path=true_newton_load_sweep_path,
+        required_load_scale=required_load_scale,
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -604,6 +656,7 @@ def build_runner_packet(
                 cause_narrowing_path,
                 hip_probe_path,
                 global_connectivity_path,
+                true_newton_load_sweep_path,
             ],
             reused_evidence=True,
             reuse_policy=(
@@ -636,6 +689,25 @@ def build_runner_packet(
             "full_load_candidate_count": _as_int(
                 checkpoint_gate.get("full_load_candidate_count")
                 or action.get("workspace_full_load_candidate_count")
+            ),
+            "true_newton_load_sweep_present": bool(true_newton_load_sweep),
+            "full_load_true_newton_attempted": true_newton_load_sweep_summary[
+                "full_load_attempted"
+            ],
+            "full_load_true_newton_residual_descent_observed": (
+                true_newton_load_sweep_summary[
+                    "full_load_true_newton_residual_descent_observed"
+                ]
+            ),
+            "full_load_true_newton_residual_gate_passed": (
+                true_newton_load_sweep_summary[
+                    "full_load_true_newton_residual_gate_passed"
+                ]
+            ),
+            "full_load_true_newton_final_residual_n": (
+                true_newton_load_sweep_summary[
+                    "full_load_true_newton_final_residual_n"
+                ]
             ),
             "assembly_contract_seed_ready": assembly_contract_seed.get("contract_pass")
             is True,
@@ -687,6 +759,7 @@ def build_runner_packet(
                 hip_probe_path.as_posix(),
                 global_connectivity_path.as_posix(),
                 assembly_contract_seed_path.as_posix(),
+                true_newton_load_sweep_path.as_posix(),
             ],
             "acceptance_criteria": [
                 "g1_assembly_contract_seed_report_contract_passes",
@@ -753,6 +826,7 @@ def build_runner_packet(
             "workspace_candidate_count": _as_int(action.get("workspace_candidate_count")),
             "workspace_scan_root": str(action.get("workspace_scan_root") or ""),
         },
+        "true_newton_load_sweep": true_newton_load_sweep_summary,
         "hip_worker_contract": {
             "worker_id": str(worker.get("worker_id") or ""),
             "residual_jvp_worker_path_ready": worker.get(
@@ -830,6 +904,7 @@ def build_runner_packet(
             "mgt_residual_jacobian_consistency_hip_required_probe": hip_probe_path.as_posix(),
             "g1_global_connectivity_load_path_audit": global_connectivity_path.as_posix(),
             "g1_assembly_contract_seed_report": assembly_contract_seed_path.as_posix(),
+            "g1_true_newton_load_sweep_status": true_newton_load_sweep_path.as_posix(),
         },
         "claim_boundary": (
             "This packet defines the next G1 runner contract for generating a "
@@ -844,6 +919,7 @@ def build_runner_packet(
 def _markdown(payload: dict[str, Any]) -> str:
     contract = _as_dict(payload.get("runner_contract"))
     checkpoint = _as_dict(payload.get("checkpoint_gap"))
+    true_newton = _as_dict(payload.get("true_newton_load_sweep"))
     hip = _as_dict(payload.get("hip_worker_contract"))
     assembly = _as_dict(payload.get("assembly_contract_seed"))
     lines = [
@@ -856,6 +932,9 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `preferred_candidate_generator`: `{contract.get('preferred_candidate_generator')}`",
         f"- `observed_load`: `{checkpoint.get('highest_observed_load_scale')}`",
         f"- `required_load_scale`: `{checkpoint.get('required_load_scale')}`",
+        f"- `true_newton_full_load_descent`: `{true_newton.get('full_load_true_newton_residual_descent_observed')}`",
+        f"- `true_newton_full_load_gate`: `{true_newton.get('full_load_true_newton_residual_gate_passed')}`",
+        f"- `true_newton_full_load_final_residual_n`: `{true_newton.get('full_load_true_newton_final_residual_n')}`",
         f"- `worker_path_ready`: `{hip.get('residual_jvp_worker_path_ready')}`",
         f"- `worker_g1_closure_gate_ready`: `{hip.get('g1_closure_gate_ready')}`",
         f"- `assembly_contract_seed_ready`: `{assembly.get('contract_pass')}`",
@@ -866,6 +945,21 @@ def _markdown(payload: dict[str, Any]) -> str:
     ]
     for item in _as_list(contract.get("acceptance_criteria")):
         lines.append(f"- `{item}`")
+    if true_newton:
+        lines.extend(["", "## True-Newton Load Sweep", ""])
+        lines.append(f"- `present`: `{true_newton.get('present')}`")
+        lines.append(f"- `status`: `{true_newton.get('status')}`")
+        lines.append(
+            f"- `max_attempted_load_scale`: `{true_newton.get('max_attempted_load_scale')}`"
+        )
+        lines.append(
+            "- `full_load_true_newton_residual_descent_observed`: "
+            f"`{true_newton.get('full_load_true_newton_residual_descent_observed')}`"
+        )
+        lines.append(
+            "- `full_load_true_newton_residual_gate_passed`: "
+            f"`{true_newton.get('full_load_true_newton_residual_gate_passed')}`"
+        )
     if payload.get("next_actions"):
         lines.extend(["", "## Next Actions", ""])
         for item in _as_list(payload.get("next_actions")):
@@ -913,6 +1007,7 @@ def write_runner_packet(
     hip_probe_path: Path = DEFAULT_HIP_PROBE,
     global_connectivity_path: Path = DEFAULT_GLOBAL_CONNECTIVITY,
     assembly_contract_seed_path: Path = DEFAULT_ASSEMBLY_CONTRACT_SEED,
+    true_newton_load_sweep_path: Path = DEFAULT_TRUE_NEWTON_LOAD_SWEEP,
     out: Path = DEFAULT_OUT,
     out_md: Path = DEFAULT_OUT_MD,
 ) -> dict[str, Any]:
@@ -923,6 +1018,7 @@ def write_runner_packet(
         hip_probe_path=hip_probe_path,
         global_connectivity_path=global_connectivity_path,
         assembly_contract_seed_path=assembly_contract_seed_path,
+        true_newton_load_sweep_path=true_newton_load_sweep_path,
     )
     resolved_out = _resolve(repo_root, out)
     resolved_out_md = _resolve(repo_root, out_md)
@@ -945,6 +1041,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_ASSEMBLY_CONTRACT_SEED,
     )
+    parser.add_argument(
+        "--true-newton-load-sweep",
+        type=Path,
+        default=DEFAULT_TRUE_NEWTON_LOAD_SWEEP,
+    )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
     parser.add_argument("--json", action="store_true")
@@ -961,6 +1062,7 @@ def main(argv: list[str] | None = None) -> int:
         hip_probe_path=args.hip_probe,
         global_connectivity_path=args.global_connectivity,
         assembly_contract_seed_path=args.assembly_contract_seed,
+        true_newton_load_sweep_path=args.true_newton_load_sweep,
         out=args.out,
         out_md=args.out_md,
     )

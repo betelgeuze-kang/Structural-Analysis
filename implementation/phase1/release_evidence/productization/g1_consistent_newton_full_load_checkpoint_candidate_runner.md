@@ -7,6 +7,9 @@
 - `preferred_candidate_generator`: `consistent_residual_jacobian_newton_rocm_full_load_candidate`
 - `observed_load`: `0.656`
 - `required_load_scale`: `1.0`
+- `true_newton_full_load_descent`: `True`
+- `true_newton_full_load_gate`: `False`
+- `true_newton_full_load_final_residual_n`: `716.2398790963002`
 - `worker_path_ready`: `True`
 - `worker_g1_closure_gate_ready`: `False`
 - `assembly_contract_seed_ready`: `True`
@@ -25,6 +28,14 @@
 - `production_rocm_hip_residual_jvp_worker_has_no_cpu_fallback`
 - `device_resident_residual_jvp_rows_retained`
 - `g1_full_load_hip_newton_lane_report_contract_passes_after_rerun`
+
+## True-Newton Load Sweep
+
+- `present`: `True`
+- `status`: `partial`
+- `max_attempted_load_scale`: `1.0`
+- `full_load_true_newton_residual_descent_observed`: `True`
+- `full_load_true_newton_residual_gate_passed`: `False`
 
 ## Next Actions
 
