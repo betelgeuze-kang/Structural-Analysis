@@ -1429,6 +1429,42 @@ def _unblock_plan_refinement_action_packet(
     }
 
 
+def _first_runtime_blocker_action(
+    runtime_action_packet: dict[str, Any],
+) -> dict[str, Any]:
+    first_family = _as_dict(runtime_action_packet.get("first_operator_blocker_family"))
+    if not first_family:
+        family_plan = [
+            row
+            for row in _as_list(runtime_action_packet.get("operator_blocker_family_plan"))
+            if isinstance(row, dict)
+        ]
+        first_family = _as_dict(family_plan[0] if family_plan else {})
+    if not first_family:
+        return {}
+    commands = _as_dict(runtime_action_packet.get("commands"))
+    next_action = str(
+        first_family.get("next_action")
+        or first_family.get("operator_action")
+        or ""
+    )
+    command_key = str(first_family.get("command_key") or "")
+    materialization_command = str(
+        first_family.get("materialization_command")
+        or commands.get(command_key)
+        or ""
+    )
+    if not (next_action or command_key or materialization_command):
+        return {}
+    return {
+        "action_source": "first_operator_blocker_family",
+        "family_id": str(first_family.get("family_id") or ""),
+        "next_action": next_action,
+        "command_key": command_key,
+        "materialization_command": materialization_command,
+    }
+
+
 def _first_refinement_receipt_action(
     refinement_action_packet: dict[str, Any],
 ) -> dict[str, Any]:
@@ -1518,6 +1554,23 @@ def _blocking_input_unblock_plan(
         }
         if runtime_action_packet:
             row_payload["runtime_action_packet"] = runtime_action_packet
+            first_runtime_action = _first_runtime_blocker_action(
+                runtime_action_packet
+            )
+            if first_runtime_action:
+                row_payload["first_runtime_action"] = first_runtime_action
+                row_payload.setdefault(
+                    "next_action",
+                    first_runtime_action["next_action"],
+                )
+                row_payload.setdefault(
+                    "command_key",
+                    first_runtime_action["command_key"],
+                )
+                row_payload.setdefault(
+                    "materialization_command",
+                    first_runtime_action["materialization_command"],
+                )
             first_case_slot = _as_dict(
                 runtime_action_packet.get("first_blocked_case_input_slot")
             )

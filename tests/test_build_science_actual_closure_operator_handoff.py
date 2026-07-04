@@ -237,6 +237,36 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert unblock_plan["vina_gnina_rows"]["commands"][
         "build_rows_template_preflight"
     ].startswith("python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py")
+    first_runtime_family = vina_runtime_action["first_operator_blocker_family"]
+    assert first_runtime_family["family_id"] == "manifest_required_values"
+    assert first_runtime_family["next_action"] == (
+        "complete_vina_gnina_input_manifest_required_values"
+    )
+    assert first_runtime_family["command_key"] == (
+        "build_input_manifest_template_preflight"
+    )
+    assert (
+        "build_public_benchmark_vina_gnina_input_manifest_template_preflight.py"
+        in first_runtime_family["materialization_command"]
+    )
+    assert unblock_plan["vina_gnina_rows"]["first_runtime_action"] == {
+        "action_source": "first_operator_blocker_family",
+        "family_id": "manifest_required_values",
+        "next_action": "complete_vina_gnina_input_manifest_required_values",
+        "command_key": "build_input_manifest_template_preflight",
+        "materialization_command": first_runtime_family[
+            "materialization_command"
+        ],
+    }
+    assert unblock_plan["vina_gnina_rows"]["next_action"] == (
+        "complete_vina_gnina_input_manifest_required_values"
+    )
+    assert unblock_plan["vina_gnina_rows"]["command_key"] == (
+        "build_input_manifest_template_preflight"
+    )
+    assert unblock_plan["vina_gnina_rows"]["materialization_command"] == (
+        first_runtime_family["materialization_command"]
+    )
     assert unblock_plan["pocketmd_rows"]["status"] == (
         "operator_refinement_rows_required"
     )

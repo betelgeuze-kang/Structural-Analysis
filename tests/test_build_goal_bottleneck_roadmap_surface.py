@@ -338,6 +338,19 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert handoffs["vina_gnina_rows"]["template_artifact"].endswith(
         "public_benchmark_vina_gnina_rows_template.csv"
     )
+    assert handoffs["vina_gnina_rows"]["first_next_action"] == (
+        "complete_vina_gnina_input_manifest_required_values"
+    )
+    assert handoffs["vina_gnina_rows"]["command_key"] == (
+        "build_input_manifest_template_preflight"
+    )
+    assert (
+        "build_public_benchmark_vina_gnina_input_manifest_template_preflight.py"
+        in handoffs["vina_gnina_rows"]["materialization_command"]
+    )
+    assert handoffs["vina_gnina_rows"]["first_unblock_action"][
+        "action_source"
+    ] == "first_operator_blocker_family"
     assert handoffs["vina_gnina_rows"][
         "actual_evidence_audit_status"
     ] == "engine_input_manifest_required"
@@ -374,6 +387,12 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         row["slot_id"]: row for row in surface["operator_evidence_handoff_slot_queue"]
     }
     assert sorted(slots) == ["pocketmd_rows", "vina_gnina_rows"]
+    assert slots["vina_gnina_rows"]["first_next_action"] == (
+        "complete_vina_gnina_input_manifest_required_values"
+    )
+    assert slots["vina_gnina_rows"]["command_key"] == (
+        "build_input_manifest_template_preflight"
+    )
     assert slots["pocketmd_rows"]["first_next_action"] == (
         "fill_completion_missing_required_fields_and_set_status_complete"
     )

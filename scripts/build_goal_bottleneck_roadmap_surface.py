@@ -870,6 +870,7 @@ def _science_operator_gap_register(
         unblock_plan = _as_dict(unblock_plans_by_row_input.get(row_input_id))
         first_unblock_action = _as_dict(
             unblock_plan.get("first_refinement_receipt_action")
+            or unblock_plan.get("first_runtime_action")
         )
         materialization_command = str(
             unblock_plan.get("materialization_command")

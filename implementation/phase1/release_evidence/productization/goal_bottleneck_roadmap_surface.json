@@ -86,7 +86,7 @@
           "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json"
         ],
         "name": "Public benchmark Phase 2 actual closure",
-        "operator_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "operator_next_action": "complete_vina_gnina_input_manifest_required_values",
         "pass": false,
         "phase_id": "phase_2_public_benchmark_actual_closure",
         "priority": 2,
@@ -269,7 +269,7 @@
     "blocked_criteria": [],
     "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
     "capability_id": "",
-    "command_key": "",
+    "command_key": "build_input_manifest_template_preflight",
     "evidence_artifacts": [
       "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
       "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
@@ -277,14 +277,20 @@
     ],
     "first_blocked_target": "public_benchmark_phase2_actual_closure",
     "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
-    "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
-    "first_unblock_action": {},
+    "first_next_action": "complete_vina_gnina_input_manifest_required_values",
+    "first_unblock_action": {
+      "action_source": "first_operator_blocker_family",
+      "command_key": "build_input_manifest_template_preflight",
+      "family_id": "manifest_required_values",
+      "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+      "next_action": "complete_vina_gnina_input_manifest_required_values"
+    },
     "handoff_id": "science_actual_closure::vina_gnina_rows",
     "linked_routes": [
       "/goal/bottleneck",
       "/goal/roadmap"
     ],
-    "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+    "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
     "materialization_steps": [
       "materialize_public_benchmark_vina_gnina_comparison_adapter"
     ],
@@ -464,7 +470,7 @@
     "status": "operator_rows_required",
     "target_id": "public_benchmark_phase2_actual_closure",
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
-    "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+    "validation_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md"
   },
   "first_operator_evidence_handoff_slot": {
     "actual_closure_component_id": "",
@@ -483,7 +489,7 @@
     ],
     "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
     "capability_id": "",
-    "command_key": "",
+    "command_key": "build_input_manifest_template_preflight",
     "evidence_artifacts": [
       "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
       "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
@@ -491,14 +497,20 @@
     ],
     "first_blocked_target": "public_benchmark_phase2_actual_closure",
     "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
-    "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
-    "first_unblock_action": {},
+    "first_next_action": "complete_vina_gnina_input_manifest_required_values",
+    "first_unblock_action": {
+      "action_source": "first_operator_blocker_family",
+      "command_key": "build_input_manifest_template_preflight",
+      "family_id": "manifest_required_values",
+      "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+      "next_action": "complete_vina_gnina_input_manifest_required_values"
+    },
     "handoff_id": "science_actual_closure::vina_gnina_rows",
     "linked_routes": [
       "/goal/bottleneck",
       "/goal/roadmap"
     ],
-    "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+    "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
     "materialization_steps": [
       "materialize_public_benchmark_vina_gnina_comparison_adapter"
     ],
@@ -680,20 +692,20 @@
     "status": "operator_rows_required",
     "target_id": "public_benchmark_phase2_actual_closure",
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
-    "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+    "validation_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md"
   },
-  "generated_at": "2026-07-04T12:17:12.189341+00:00",
+  "generated_at": "2026-07-04T12:23:37.518192+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:be05411d7bb174d8612aaa5a6d3c2ffbace0c16d1310fc0b6897f9fd9038c6d1",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:50113b04a758c06b720aa91a3b64639e1d31ba94f35334cf21494462930a7d2f",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:69285c5dcf0a4bdc30c7a71d48b86dabde7af6e458925f250a4e3f9b9616e109",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json": "sha256:e4828ad37353907c77e58171e0927f6165fc997a1e1eb503c82c924c5514aa37",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:90d0a620b5563300a667e7caef373db68ce79b954464ee17d024dd1d2b1fd072",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json": "sha256:31afb60f2bcfb4e7526f9f84e318ce790b344173bd3c818af06e052c37a01721",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:499b507708268b7bf1be76574dd0663604d46945297fdea44067f98a85d2de23",
     "implementation/phase1/release_evidence/productization/source_of_truth_gap_classification.json": "sha256:5fb3525b23f2e4bc7582cc16aace64fbb7cc506c28e086a21bede3de61ea1b3c",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:c1af83f1b410aca8536d5ab832c0ba6a86153436844e42152860f84ec0002328",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:8adb767e05269c4063e04ca5e5060b0e94994916ccae4e9912c897c0c7fc9703",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:e8a6b5e0b8d86ef1b629c1a6d4e8caab6132dd4a3a311c64bc520c2e4e13954f",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:4fd672967c386a21837d4eaa792df5c1e4361a5b7813ba600c87211b71fc36d5"
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:a55c40e6ad6815aa639d155fbf47b0d23a913cfda3708f053ede7c17e76ea937"
   },
   "mutation_allowed": false,
   "next_actions": [
@@ -738,7 +750,7 @@
       "blocked_criteria": [],
       "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
       "capability_id": "",
-      "command_key": "",
+      "command_key": "build_input_manifest_template_preflight",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
         "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
@@ -746,14 +758,20 @@
       ],
       "first_blocked_target": "public_benchmark_phase2_actual_closure",
       "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
-      "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
-      "first_unblock_action": {},
+      "first_next_action": "complete_vina_gnina_input_manifest_required_values",
+      "first_unblock_action": {
+        "action_source": "first_operator_blocker_family",
+        "command_key": "build_input_manifest_template_preflight",
+        "family_id": "manifest_required_values",
+        "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+        "next_action": "complete_vina_gnina_input_manifest_required_values"
+      },
       "handoff_id": "science_actual_closure::vina_gnina_rows",
       "linked_routes": [
         "/goal/bottleneck",
         "/goal/roadmap"
       ],
-      "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+      "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
       "materialization_steps": [
         "materialize_public_benchmark_vina_gnina_comparison_adapter"
       ],
@@ -933,7 +951,7 @@
       "status": "operator_rows_required",
       "target_id": "public_benchmark_phase2_actual_closure",
       "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
-      "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+      "validation_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md"
     },
     "first_operator_handoff_slot": {
       "actual_closure_component_id": "",
@@ -952,7 +970,7 @@
       ],
       "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
       "capability_id": "",
-      "command_key": "",
+      "command_key": "build_input_manifest_template_preflight",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
         "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
@@ -960,14 +978,20 @@
       ],
       "first_blocked_target": "public_benchmark_phase2_actual_closure",
       "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
-      "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
-      "first_unblock_action": {},
+      "first_next_action": "complete_vina_gnina_input_manifest_required_values",
+      "first_unblock_action": {
+        "action_source": "first_operator_blocker_family",
+        "command_key": "build_input_manifest_template_preflight",
+        "family_id": "manifest_required_values",
+        "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+        "next_action": "complete_vina_gnina_input_manifest_required_values"
+      },
       "handoff_id": "science_actual_closure::vina_gnina_rows",
       "linked_routes": [
         "/goal/bottleneck",
         "/goal/roadmap"
       ],
-      "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+      "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
       "materialization_steps": [
         "materialize_public_benchmark_vina_gnina_comparison_adapter"
       ],
@@ -1149,7 +1173,7 @@
       "status": "operator_rows_required",
       "target_id": "public_benchmark_phase2_actual_closure",
       "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
-      "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+      "validation_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md"
     },
     "human_ux_blockers": [
       "ux::human_new_user_observation_missing_or_failed",
@@ -1552,7 +1576,7 @@
       "blocked_criteria": [],
       "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
       "capability_id": "",
-      "command_key": "",
+      "command_key": "build_input_manifest_template_preflight",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
         "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
@@ -1560,14 +1584,20 @@
       ],
       "first_blocked_target": "public_benchmark_phase2_actual_closure",
       "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
-      "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
-      "first_unblock_action": {},
+      "first_next_action": "complete_vina_gnina_input_manifest_required_values",
+      "first_unblock_action": {
+        "action_source": "first_operator_blocker_family",
+        "command_key": "build_input_manifest_template_preflight",
+        "family_id": "manifest_required_values",
+        "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+        "next_action": "complete_vina_gnina_input_manifest_required_values"
+      },
       "handoff_id": "science_actual_closure::vina_gnina_rows",
       "linked_routes": [
         "/goal/bottleneck",
         "/goal/roadmap"
       ],
-      "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+      "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
       "materialization_steps": [
         "materialize_public_benchmark_vina_gnina_comparison_adapter"
       ],
@@ -1747,7 +1777,7 @@
       "status": "operator_rows_required",
       "target_id": "public_benchmark_phase2_actual_closure",
       "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
-      "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+      "validation_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md"
     },
     {
       "actual_closure_component_id": "",
@@ -1956,7 +1986,7 @@
       ],
       "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
       "capability_id": "",
-      "command_key": "",
+      "command_key": "build_input_manifest_template_preflight",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
         "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
@@ -1964,14 +1994,20 @@
       ],
       "first_blocked_target": "public_benchmark_phase2_actual_closure",
       "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
-      "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
-      "first_unblock_action": {},
+      "first_next_action": "complete_vina_gnina_input_manifest_required_values",
+      "first_unblock_action": {
+        "action_source": "first_operator_blocker_family",
+        "command_key": "build_input_manifest_template_preflight",
+        "family_id": "manifest_required_values",
+        "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+        "next_action": "complete_vina_gnina_input_manifest_required_values"
+      },
       "handoff_id": "science_actual_closure::vina_gnina_rows",
       "linked_routes": [
         "/goal/bottleneck",
         "/goal/roadmap"
       ],
-      "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+      "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
       "materialization_steps": [
         "materialize_public_benchmark_vina_gnina_comparison_adapter"
       ],
@@ -2153,7 +2189,7 @@
       "status": "operator_rows_required",
       "target_id": "public_benchmark_phase2_actual_closure",
       "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
-      "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+      "validation_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md"
     },
     {
       "actual_closure_component_id": "",
@@ -2525,7 +2561,7 @@
         "/goal/roadmap"
       ],
       "next_actions": [
-        "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "complete_vina_gnina_input_manifest_required_values",
         "attach_vina_gnina_rows",
         "attach_pocketmd_rows",
         "resolve_public_benchmark_phase2_source_acquisition_blockers",
@@ -3341,11 +3377,17 @@
           "blocked_criteria": [
             "vina_gnina_comparison_ready"
           ],
-          "command_key": "",
-          "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
-          "first_unblock_action": {},
+          "command_key": "build_input_manifest_template_preflight",
+          "first_next_action": "complete_vina_gnina_input_manifest_required_values",
+          "first_unblock_action": {
+            "action_source": "first_operator_blocker_family",
+            "command_key": "build_input_manifest_template_preflight",
+            "family_id": "manifest_required_values",
+            "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+            "next_action": "complete_vina_gnina_input_manifest_required_values"
+          },
           "handoff_id": "science_actual_closure::vina_gnina_rows",
-          "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+          "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
           "materialization_steps": [
             "materialize_public_benchmark_vina_gnina_comparison_adapter"
           ],
@@ -3516,7 +3558,7 @@
           "status": "operator_rows_required",
           "target_id": "public_benchmark_phase2_actual_closure",
           "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
-          "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+          "validation_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md"
         },
         "missing_row_inputs": [
           "vina_gnina_rows"
@@ -3537,11 +3579,17 @@
             "blocked_criteria": [
               "vina_gnina_comparison_ready"
             ],
-            "command_key": "",
-            "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
-            "first_unblock_action": {},
+            "command_key": "build_input_manifest_template_preflight",
+            "first_next_action": "complete_vina_gnina_input_manifest_required_values",
+            "first_unblock_action": {
+              "action_source": "first_operator_blocker_family",
+              "command_key": "build_input_manifest_template_preflight",
+              "family_id": "manifest_required_values",
+              "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+              "next_action": "complete_vina_gnina_input_manifest_required_values"
+            },
             "handoff_id": "science_actual_closure::vina_gnina_rows",
-            "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+            "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
             "materialization_steps": [
               "materialize_public_benchmark_vina_gnina_comparison_adapter"
             ],
@@ -3712,7 +3760,7 @@
             "status": "operator_rows_required",
             "target_id": "public_benchmark_phase2_actual_closure",
             "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
-            "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+            "validation_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md"
           }
         ],
         "phase3_exit_gate": {},
@@ -6559,7 +6607,7 @@
     ],
     "status": "operator_evidence_required"
   },
-  "source_commit_sha": "777bb41aef03e1a4f93c03a043100cee5fb6ef30",
+  "source_commit_sha": "298947647ba434916cedeb774e35079459ccce38",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

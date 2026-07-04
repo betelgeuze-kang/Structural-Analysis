@@ -6923,6 +6923,7 @@
         "rows_template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md"
       },
       "claim_boundary": "This packet only enumerates the operator steps needed to unblock Vina/GNINA execution and adapter row materialization. It does not run engines or synthesize comparison rows.",
+      "command_key": "build_input_manifest_template_preflight",
       "commands": {
         "build_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
         "build_input_manifest_template_preflight": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
@@ -7019,6 +7020,15 @@
         "status": "blocked"
       },
       "first_operator_sequence_step": "review_public_benchmark_vina_gnina_input_manifest_template_preflight",
+      "first_runtime_action": {
+        "action_source": "first_operator_blocker_family",
+        "command_key": "build_input_manifest_template_preflight",
+        "family_id": "manifest_required_values",
+        "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+        "next_action": "complete_vina_gnina_input_manifest_required_values"
+      },
+      "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+      "next_action": "complete_vina_gnina_input_manifest_required_values",
       "operator_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
       "operator_sequence": [
         "review_public_benchmark_vina_gnina_input_manifest_template_preflight",
@@ -15279,15 +15289,15 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T12:17:12.088947+00:00",
+  "generated_at": "2026-07-04T12:23:37.419200+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:05b4cba4c9227561b8683ec2fa57ebd09b0392b95afe93840e611c961c23c39a",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:dc7421cdd9d0bc4a91d6524bc52b7b4eab39c720cd6a2df15adf67f21eda978a",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:a6fa0328fbbdc35c1ff47f966c085b5ae0fc5e6dfa2f1aba17e647681cdc246a",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:dc39006a0ed93c7141d4421294cb9d47e1af8a3c6fc2fe3531aeae754de53c89",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:09354cd520764e9fb23e9a23e1eed17a38e73328687154c5d35c5411731af093",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:36113742bcdbca3379501deb49c14f0d86f2ff9d48e59f2e8cef20795e2856bf",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:90d0a620b5563300a667e7caef373db68ce79b954464ee17d024dd1d2b1fd072",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:92fea5a5248496a9584c0152d11c05c81e80cbc8c1e467f80ffc1dbcbb2dfd78"
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:499b507708268b7bf1be76574dd0663604d46945297fdea44067f98a85d2de23",
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:b5c3db45605c4a2d82d677b4d9f5cb069316b7c93652e0837a0ae437b4bd2154"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -34274,7 +34284,7 @@
   },
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "777bb41aef03e1a4f93c03a043100cee5fb6ef30",
+  "source_commit_sha": "298947647ba434916cedeb774e35079459ccce38",
   "status": "operator_rows_required",
   "summary": {
     "actual_closure_blocked_component_count": 2,
