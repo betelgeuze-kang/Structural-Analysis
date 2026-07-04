@@ -1132,6 +1132,18 @@ def _markdown(payload: dict[str, Any]) -> str:
                 top_k_action = _as_dict(
                     source_action.get("top_k_rows_action_packet")
                 )
+                pocketmd_row_preflight_action = _as_dict(
+                    source_action.get("row_preflight_action_packet")
+                )
+                if pocketmd_row_preflight_action:
+                    detailed_actions.append(
+                        {
+                            "kind": "pocketmd_row_preflight",
+                            "component_id": str(component.get("component_id") or ""),
+                            "row_input_id": str(action.get("row_input_id") or ""),
+                            "action": pocketmd_row_preflight_action,
+                        }
+                    )
                 if top_k_action:
                     detailed_actions.append(
                         {
@@ -1177,6 +1189,28 @@ def _markdown(payload: dict[str, Any]) -> str:
                         f"- `direct_adapter_materialization_command`: `{action.get('direct_adapter_materialization_command')}`",
                         f"- `operator_rows_must_be_real_engine_outputs`: `{safety_policy.get('operator_rows_must_be_real_engine_outputs')}`",
                         f"- `preflight_does_not_run_engines`: `{safety_policy.get('preflight_does_not_run_engines')}`",
+                    ]
+                )
+            elif detail.get("kind") == "pocketmd_row_preflight":
+                lines.extend(["", "### PocketMD Row Preflight Action", ""])
+                lines.extend(
+                    [
+                        f"- `component_id`: `{detail.get('component_id')}`",
+                        f"- `row_input_id`: `{detail.get('row_input_id')}`",
+                        f"- `status`: `{action.get('status')}`",
+                        f"- `expected_rows_artifact`: `{action.get('expected_rows_artifact')}`",
+                        f"- `supported_candidate_paths`: {_code_join(_as_list(action.get('supported_candidate_paths')))}",
+                        f"- `detected_row_artifact_count`: `{action.get('detected_row_artifact_count')}`",
+                        f"- `selected_path`: `{action.get('selected_path')}`",
+                        f"- `validated_row_count`: `{action.get('validated_row_count')}`",
+                        f"- `covered_required_slot_count`: `{action.get('covered_required_slot_count')}/{action.get('required_candidate_slot_count')}`",
+                        f"- `missing_required_slot_count`: `{len(_as_list(action.get('missing_required_slots')))}`",
+                        f"- `validation_error`: `{action.get('validation_error')}`",
+                        f"- `blocker`: `{action.get('blocker')}`",
+                        f"- `import_rows_command`: `{action.get('import_rows_command')}`",
+                        f"- `verify_science_actual_closure_command`: `{action.get('verify_science_actual_closure_command')}`",
+                        f"- `operator_rows_must_be_real_top_k_refinement_outputs`: `{safety_policy.get('operator_rows_must_be_real_top_k_refinement_outputs')}`",
+                        f"- `preflight_does_not_run_refinement`: `{safety_policy.get('preflight_does_not_run_refinement')}`",
                     ]
                 )
             elif detail.get("kind") == "pocketmd_top_k_rows":

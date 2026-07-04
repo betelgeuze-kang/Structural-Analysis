@@ -281,6 +281,36 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "interaction_persistence_receipt",
         "uncertainty_interval_receipt",
     ]
+    preflight_action = row_action["row_preflight_action_packet"]
+    assert preflight_action["status"] == "row_artifact_missing"
+    assert preflight_action["expected_rows_artifact"].endswith(
+        "pocketmd_lite_topk_rows.json"
+    )
+    assert preflight_action["supported_candidate_paths"] == [
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows.json",
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows.csv",
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows.tsv",
+    ]
+    assert preflight_action["detected_row_artifact_count"] == 0
+    assert preflight_action["validated_row_count"] == 0
+    assert preflight_action["covered_required_slot_count"] == 0
+    assert preflight_action["required_candidate_slot_count"] == 6
+    assert len(preflight_action["missing_required_slots"]) == 6
+    assert preflight_action["blocker"] == "pocketmd_lite_topk_rows_not_acquired"
+    assert preflight_action["template_safety_policy"] == {
+        "broad_all_atom_or_fep_claims_remain_locked": True,
+        "operator_rows_must_be_real_top_k_refinement_outputs": True,
+        "placeholder_or_fixture_rows_do_not_promote": True,
+        "preflight_does_not_run_refinement": True,
+        "template_is_not_evidence": True,
+    }
     top_k_action = row_action["top_k_rows_action_packet"]
     assert top_k_action["status"] == "operator_rows_required"
     assert top_k_action["template_artifact"].endswith(
@@ -493,6 +523,9 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert "pocketmd_lite_topk_rows_template.csv" in markdown
     assert "## Missing Row Input Actions" in markdown
     assert "attach_pocketmd_rows_at_" in markdown
+    assert "### PocketMD Row Preflight Action" in markdown
+    assert "pocketmd_lite_topk_rows.tsv" in markdown
+    assert "`preflight_does_not_run_refinement`: `True`" in markdown
     assert "### PocketMD Top-k Rows Action" in markdown
     assert "`template_is_not_evidence`: `True`" in markdown
     assert "`placeholder_or_fixture_rows_do_not_promote`: `True`" in markdown

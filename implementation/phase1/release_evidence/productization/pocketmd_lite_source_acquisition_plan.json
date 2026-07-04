@@ -17,11 +17,11 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T00:20:45.880109+00:00",
+  "generated_at": "2026-07-04T00:39:32.433121+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv": "sha256:4fac3161714e8bf0444ee3e085a3c34d2f9841acaf9b4427bd8de2224294e196",
     "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:a5c8d17febfce4158f853c733658c8fb093e9661039288f0327565e9b9a63459",
-    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:1a5b38ac10cc1d8677b1419532eb691fef51054cc76552a60f1078fdd93b5981",
+    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:c11a6fc4d49b4870993b4a09d706a2893816608a2d3dd6dbae2f8d02b38926c0",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:dad666c08fff6ec709e535de64fdc41121b7c93de5e19c42f0876d71a44a67c9",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:161673d8ff036a7a31d657fb972764eeb4b62f6d55cc0840e26f398565707c6f"
   },
@@ -256,6 +256,62 @@
       "required_top_k_rank_coverage_per_case": 2,
       "required_total_candidate_rows": 6,
       "row_input_id": "pocketmd_rows",
+      "row_preflight_action_packet": {
+        "blocker": "pocketmd_lite_topk_rows_not_acquired",
+        "covered_required_slot_count": 0,
+        "detected_row_artifact_count": 0,
+        "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+        "import_rows_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
+        "missing_required_slots": [
+          {
+            "case_id": "pocketmd_lite_case_001",
+            "top_k_rank": 1
+          },
+          {
+            "case_id": "pocketmd_lite_case_001",
+            "top_k_rank": 2
+          },
+          {
+            "case_id": "pocketmd_lite_case_002",
+            "top_k_rank": 1
+          },
+          {
+            "case_id": "pocketmd_lite_case_002",
+            "top_k_rank": 2
+          },
+          {
+            "case_id": "pocketmd_lite_case_003",
+            "top_k_rank": 1
+          },
+          {
+            "case_id": "pocketmd_lite_case_003",
+            "top_k_rank": 2
+          }
+        ],
+        "required_candidate_slot_count": 6,
+        "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+        "selected_path": "",
+        "selected_row_count": 0,
+        "status": "row_artifact_missing",
+        "supported_candidate_paths": [
+          "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+          "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl",
+          "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson",
+          "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv",
+          "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+        ],
+        "template_safety_policy": {
+          "broad_all_atom_or_fep_claims_remain_locked": true,
+          "operator_rows_must_be_real_top_k_refinement_outputs": true,
+          "placeholder_or_fixture_rows_do_not_promote": true,
+          "preflight_does_not_run_refinement": true,
+          "template_is_not_evidence": true
+        },
+        "validated_case_count": 0,
+        "validated_row_count": 0,
+        "validation_error": "",
+        "verify_science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
+      },
       "status": "missing",
       "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
       "top_k_rows_action_packet": {
@@ -655,6 +711,62 @@
     "required_top_k_rank_coverage_per_case": 2,
     "required_total_candidate_rows": 6,
     "row_input_id": "pocketmd_rows",
+    "row_preflight_action_packet": {
+      "blocker": "pocketmd_lite_topk_rows_not_acquired",
+      "covered_required_slot_count": 0,
+      "detected_row_artifact_count": 0,
+      "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+      "import_rows_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
+      "missing_required_slots": [
+        {
+          "case_id": "pocketmd_lite_case_001",
+          "top_k_rank": 1
+        },
+        {
+          "case_id": "pocketmd_lite_case_001",
+          "top_k_rank": 2
+        },
+        {
+          "case_id": "pocketmd_lite_case_002",
+          "top_k_rank": 1
+        },
+        {
+          "case_id": "pocketmd_lite_case_002",
+          "top_k_rank": 2
+        },
+        {
+          "case_id": "pocketmd_lite_case_003",
+          "top_k_rank": 1
+        },
+        {
+          "case_id": "pocketmd_lite_case_003",
+          "top_k_rank": 2
+        }
+      ],
+      "required_candidate_slot_count": 6,
+      "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+      "selected_path": "",
+      "selected_row_count": 0,
+      "status": "row_artifact_missing",
+      "supported_candidate_paths": [
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+      ],
+      "template_safety_policy": {
+        "broad_all_atom_or_fep_claims_remain_locked": true,
+        "operator_rows_must_be_real_top_k_refinement_outputs": true,
+        "placeholder_or_fixture_rows_do_not_promote": true,
+        "preflight_does_not_run_refinement": true,
+        "template_is_not_evidence": true
+      },
+      "validated_case_count": 0,
+      "validated_row_count": 0,
+      "validation_error": "",
+      "verify_science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
+    },
     "status": "missing",
     "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
     "top_k_rows_action_packet": {
@@ -1011,7 +1123,7 @@
     "template_usage_policy": "The template enumerates required columns and minimum case/rank slots only. Operators must replace placeholder blanks with real top-k refinement rows and receipts before writing rows to the default output."
   },
   "schema_version": "pocketmd-lite-source-acquisition-plan.v1",
-  "source_commit_sha": "8aff0a9f188b786275f877423b26c4ee282337ec",
+  "source_commit_sha": "d4b459730e6fd853c6a9a416110ec31c1d7432cc",
   "source_scope": "bounded_top_k_lite_refinement_rows",
   "status": "operator_acquisition_required",
   "summary": {

@@ -467,6 +467,57 @@ def _pocketmd_rows_operator_action(
         "required_flat_row_fields": list(required_flat_row_fields),
         "required_minimum_rows_by_case": minimum_rows_by_case,
         "raw_row_candidate_status": raw_row_candidate_status,
+        "row_preflight_action_packet": {
+            "status": str(
+                raw_row_candidate_status.get("status") or "row_artifact_missing"
+            ),
+            "expected_rows_artifact": str(DEFAULT_ROWS_OUT),
+            "supported_candidate_paths": [
+                str(row.get("path") or "")
+                for row in raw_row_candidate_status.get("candidate_paths", [])
+                if isinstance(row, dict)
+            ],
+            "detected_row_artifact_count": int(
+                raw_row_candidate_status.get("detected_row_artifact_count") or 0
+            ),
+            "selected_path": str(raw_row_candidate_status.get("selected_path") or ""),
+            "selected_row_count": int(
+                raw_row_candidate_status.get("selected_row_count") or 0
+            ),
+            "validated_row_count": int(
+                raw_row_candidate_status.get("validated_row_count") or 0
+            ),
+            "validated_case_count": int(
+                raw_row_candidate_status.get("validated_case_count") or 0
+            ),
+            "covered_required_slot_count": int(
+                raw_row_candidate_status.get("covered_required_slot_count") or 0
+            ),
+            "required_candidate_slot_count": int(
+                raw_row_candidate_status.get("required_candidate_slot_count") or 0
+            ),
+            "missing_required_slots": [
+                row
+                for row in raw_row_candidate_status.get("missing_required_slots", [])
+                if isinstance(row, dict)
+            ],
+            "validation_error": str(
+                raw_row_candidate_status.get("validation_error") or ""
+            ),
+            "blocker": row_blocker,
+            "review_template_command": commands["review_row_template"],
+            "import_rows_command": commands["import_rows"],
+            "verify_science_actual_closure_command": (
+                commands["science_actual_closure"]
+            ),
+            "template_safety_policy": {
+                "template_is_not_evidence": True,
+                "operator_rows_must_be_real_top_k_refinement_outputs": True,
+                "placeholder_or_fixture_rows_do_not_promote": True,
+                "preflight_does_not_run_refinement": True,
+                "broad_all_atom_or_fep_claims_remain_locked": True,
+            },
+        },
         "top_k_rows_action_packet": {
             "status": (
                 "operator_rows_ready"
@@ -822,6 +873,42 @@ def _markdown(payload: dict[str, Any]) -> str:
                 f"`{row.get('default_row_artifact', '')}` | "
                 f"{row.get('required_candidate_slot_count', 0)} |"
             )
+        row_preflight_packets = [
+            row.get("row_preflight_action_packet")
+            for row in missing_actions
+            if isinstance(row.get("row_preflight_action_packet"), dict)
+        ]
+        if row_preflight_packets:
+            lines.extend(["", "### PocketMD Row Preflight Action", ""])
+            for action in row_preflight_packets:
+                if not isinstance(action, dict):
+                    continue
+                safety_policy = action.get("template_safety_policy")
+                if not isinstance(safety_policy, dict):
+                    safety_policy = {}
+                supported_paths = ", ".join(
+                    f"`{path}`"
+                    for path in action.get("supported_candidate_paths", [])
+                    if str(path)
+                )
+                lines.extend(
+                    [
+                        f"- `status`: `{action.get('status')}`",
+                        f"- `expected_rows_artifact`: `{action.get('expected_rows_artifact')}`",
+                        f"- `supported_candidate_paths`: {supported_paths}",
+                        f"- `detected_row_artifact_count`: `{action.get('detected_row_artifact_count')}`",
+                        f"- `selected_path`: `{action.get('selected_path')}`",
+                        f"- `validated_row_count`: `{action.get('validated_row_count')}`",
+                        f"- `covered_required_slot_count`: `{action.get('covered_required_slot_count')}/{action.get('required_candidate_slot_count')}`",
+                        f"- `missing_required_slot_count`: `{len(action.get('missing_required_slots', []))}`",
+                        f"- `validation_error`: `{action.get('validation_error')}`",
+                        f"- `blocker`: `{action.get('blocker')}`",
+                        f"- `import_rows_command`: `{action.get('import_rows_command')}`",
+                        f"- `verify_science_actual_closure_command`: `{action.get('verify_science_actual_closure_command')}`",
+                        f"- `operator_rows_must_be_real_top_k_refinement_outputs`: `{safety_policy.get('operator_rows_must_be_real_top_k_refinement_outputs')}`",
+                        f"- `preflight_does_not_run_refinement`: `{safety_policy.get('preflight_does_not_run_refinement')}`",
+                    ]
+                )
         row_action_packets = [
             row.get("top_k_rows_action_packet")
             for row in missing_actions

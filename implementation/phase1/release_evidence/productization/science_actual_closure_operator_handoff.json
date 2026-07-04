@@ -186,6 +186,62 @@
             "required_top_k_rank_coverage_per_case": 2,
             "required_total_candidate_rows": 6,
             "row_input_id": "pocketmd_rows",
+            "row_preflight_action_packet": {
+              "blocker": "pocketmd_lite_topk_rows_not_acquired",
+              "covered_required_slot_count": 0,
+              "detected_row_artifact_count": 0,
+              "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "import_rows_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
+              "missing_required_slots": [
+                {
+                  "case_id": "pocketmd_lite_case_001",
+                  "top_k_rank": 1
+                },
+                {
+                  "case_id": "pocketmd_lite_case_001",
+                  "top_k_rank": 2
+                },
+                {
+                  "case_id": "pocketmd_lite_case_002",
+                  "top_k_rank": 1
+                },
+                {
+                  "case_id": "pocketmd_lite_case_002",
+                  "top_k_rank": 2
+                },
+                {
+                  "case_id": "pocketmd_lite_case_003",
+                  "top_k_rank": 1
+                },
+                {
+                  "case_id": "pocketmd_lite_case_003",
+                  "top_k_rank": 2
+                }
+              ],
+              "required_candidate_slot_count": 6,
+              "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+              "selected_path": "",
+              "selected_row_count": 0,
+              "status": "row_artifact_missing",
+              "supported_candidate_paths": [
+                "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+                "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl",
+                "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson",
+                "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv",
+                "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+              ],
+              "template_safety_policy": {
+                "broad_all_atom_or_fep_claims_remain_locked": true,
+                "operator_rows_must_be_real_top_k_refinement_outputs": true,
+                "placeholder_or_fixture_rows_do_not_promote": true,
+                "preflight_does_not_run_refinement": true,
+                "template_is_not_evidence": true
+              },
+              "validated_case_count": 0,
+              "validated_row_count": 0,
+              "validation_error": "",
+              "verify_science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
+            },
             "status": "missing",
             "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
             "top_k_rows_action_packet": {
@@ -2186,13 +2242,13 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T00:34:29.105818+00:00",
+  "generated_at": "2026-07-04T00:39:56.983204+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:9dd7c97c8a2b978436c07f11bfb088a2cef94f1fd1f33bc651ba8a4c09440b2b",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:bc734b71fe231cae6b4c1ab875507644db77164038387495a3ce904f75b43960",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:6e75a02c6b13b518bf6087e44db30b84c243e4935d2b50611e2fd0411e476118",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:ad97fbc9bbca6bd8861c8a0f1659aff10c50a51dfd0be1c7c7e66ed8be0705b7",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:06f1bc24e8920dcd8919bd5f10180841de02a9e8089d7784191e8fe04a3e27ea"
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:2a6df18856c121de62043e57c087bc4480750b178d3ccd9340d26a2d99146272",
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:d48acc97c4159138697766f1f764a80e0d21507c3efa9cda539071cef66b9a22"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -9361,6 +9417,62 @@
         "required_top_k_rank_coverage_per_case": 2,
         "required_total_candidate_rows": 6,
         "row_input_id": "pocketmd_rows",
+        "row_preflight_action_packet": {
+          "blocker": "pocketmd_lite_topk_rows_not_acquired",
+          "covered_required_slot_count": 0,
+          "detected_row_artifact_count": 0,
+          "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+          "import_rows_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
+          "missing_required_slots": [
+            {
+              "case_id": "pocketmd_lite_case_001",
+              "top_k_rank": 1
+            },
+            {
+              "case_id": "pocketmd_lite_case_001",
+              "top_k_rank": 2
+            },
+            {
+              "case_id": "pocketmd_lite_case_002",
+              "top_k_rank": 1
+            },
+            {
+              "case_id": "pocketmd_lite_case_002",
+              "top_k_rank": 2
+            },
+            {
+              "case_id": "pocketmd_lite_case_003",
+              "top_k_rank": 1
+            },
+            {
+              "case_id": "pocketmd_lite_case_003",
+              "top_k_rank": 2
+            }
+          ],
+          "required_candidate_slot_count": 6,
+          "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+          "selected_path": "",
+          "selected_row_count": 0,
+          "status": "row_artifact_missing",
+          "supported_candidate_paths": [
+            "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl",
+            "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson",
+            "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv",
+            "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+          ],
+          "template_safety_policy": {
+            "broad_all_atom_or_fep_claims_remain_locked": true,
+            "operator_rows_must_be_real_top_k_refinement_outputs": true,
+            "placeholder_or_fixture_rows_do_not_promote": true,
+            "preflight_does_not_run_refinement": true,
+            "template_is_not_evidence": true
+          },
+          "validated_case_count": 0,
+          "validated_row_count": 0,
+          "validation_error": "",
+          "verify_science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
+        },
         "status": "missing",
         "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
         "top_k_rows_action_packet": {
@@ -9591,6 +9703,62 @@
             "required_top_k_rank_coverage_per_case": 2,
             "required_total_candidate_rows": 6,
             "row_input_id": "pocketmd_rows",
+            "row_preflight_action_packet": {
+              "blocker": "pocketmd_lite_topk_rows_not_acquired",
+              "covered_required_slot_count": 0,
+              "detected_row_artifact_count": 0,
+              "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "import_rows_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
+              "missing_required_slots": [
+                {
+                  "case_id": "pocketmd_lite_case_001",
+                  "top_k_rank": 1
+                },
+                {
+                  "case_id": "pocketmd_lite_case_001",
+                  "top_k_rank": 2
+                },
+                {
+                  "case_id": "pocketmd_lite_case_002",
+                  "top_k_rank": 1
+                },
+                {
+                  "case_id": "pocketmd_lite_case_002",
+                  "top_k_rank": 2
+                },
+                {
+                  "case_id": "pocketmd_lite_case_003",
+                  "top_k_rank": 1
+                },
+                {
+                  "case_id": "pocketmd_lite_case_003",
+                  "top_k_rank": 2
+                }
+              ],
+              "required_candidate_slot_count": 6,
+              "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+              "selected_path": "",
+              "selected_row_count": 0,
+              "status": "row_artifact_missing",
+              "supported_candidate_paths": [
+                "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+                "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl",
+                "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson",
+                "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv",
+                "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+              ],
+              "template_safety_policy": {
+                "broad_all_atom_or_fep_claims_remain_locked": true,
+                "operator_rows_must_be_real_top_k_refinement_outputs": true,
+                "placeholder_or_fixture_rows_do_not_promote": true,
+                "preflight_does_not_run_refinement": true,
+                "template_is_not_evidence": true
+              },
+              "validated_case_count": 0,
+              "validated_row_count": 0,
+              "validation_error": "",
+              "verify_science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
+            },
             "status": "missing",
             "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
             "top_k_rows_action_packet": {
@@ -9699,7 +9867,7 @@
   ],
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "45dcb3a51cd4dffa7803648aab06535b298fe4c6",
+  "source_commit_sha": "d4b459730e6fd853c6a9a416110ec31c1d7432cc",
   "status": "operator_rows_required",
   "summary": {
     "blocked_component_operator_action_count": 2,
@@ -9889,6 +10057,62 @@
           "required_top_k_rank_coverage_per_case": 2,
           "required_total_candidate_rows": 6,
           "row_input_id": "pocketmd_rows",
+          "row_preflight_action_packet": {
+            "blocker": "pocketmd_lite_topk_rows_not_acquired",
+            "covered_required_slot_count": 0,
+            "detected_row_artifact_count": 0,
+            "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "import_rows_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
+            "missing_required_slots": [
+              {
+                "case_id": "pocketmd_lite_case_001",
+                "top_k_rank": 1
+              },
+              {
+                "case_id": "pocketmd_lite_case_001",
+                "top_k_rank": 2
+              },
+              {
+                "case_id": "pocketmd_lite_case_002",
+                "top_k_rank": 1
+              },
+              {
+                "case_id": "pocketmd_lite_case_002",
+                "top_k_rank": 2
+              },
+              {
+                "case_id": "pocketmd_lite_case_003",
+                "top_k_rank": 1
+              },
+              {
+                "case_id": "pocketmd_lite_case_003",
+                "top_k_rank": 2
+              }
+            ],
+            "required_candidate_slot_count": 6,
+            "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+            "selected_path": "",
+            "selected_row_count": 0,
+            "status": "row_artifact_missing",
+            "supported_candidate_paths": [
+              "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl",
+              "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson",
+              "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv",
+              "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+            ],
+            "template_safety_policy": {
+              "broad_all_atom_or_fep_claims_remain_locked": true,
+              "operator_rows_must_be_real_top_k_refinement_outputs": true,
+              "placeholder_or_fixture_rows_do_not_promote": true,
+              "preflight_does_not_run_refinement": true,
+              "template_is_not_evidence": true
+            },
+            "validated_case_count": 0,
+            "validated_row_count": 0,
+            "validation_error": "",
+            "verify_science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
+          },
           "status": "missing",
           "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
           "top_k_rows_action_packet": {

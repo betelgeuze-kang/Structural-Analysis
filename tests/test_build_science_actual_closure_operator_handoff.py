@@ -221,6 +221,17 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert "uncertainty_interval_receipt" in pocketmd_action[
         "source_acquisition_row_action"
     ]["required_receipt_roles"]
+    pocketmd_preflight_action = pocketmd_action["source_acquisition_row_action"][
+        "row_preflight_action_packet"
+    ]
+    assert pocketmd_preflight_action["status"] == "row_artifact_missing"
+    assert pocketmd_preflight_action["supported_candidate_paths"][4].endswith(
+        "pocketmd_lite_topk_rows.tsv"
+    )
+    assert len(pocketmd_preflight_action["missing_required_slots"]) == 6
+    assert pocketmd_preflight_action["template_safety_policy"][
+        "preflight_does_not_run_refinement"
+    ] is True
     pocketmd_topk_action = pocketmd_action["source_acquisition_row_action"][
         "top_k_rows_action_packet"
     ]
@@ -569,6 +580,9 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "public_benchmark_vina_gnina_rows.csv" in markdown
     assert "`operator_rows_must_be_real_engine_outputs`: `True`" in markdown
     assert "### PocketMD Top-k Rows Action" in markdown
+    assert "### PocketMD Row Preflight Action" in markdown
+    assert "pocketmd_lite_topk_rows.tsv" in markdown
+    assert "`operator_rows_must_be_real_top_k_refinement_outputs`: `True`" in markdown
     assert "operator_input_source.source_artifact_sha256" in markdown
     assert "`placeholder_or_fixture_rows_do_not_promote`: `True`" in markdown
     assert "attach_pocketmd_rows_at_" in markdown
