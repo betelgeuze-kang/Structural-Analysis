@@ -1531,10 +1531,10 @@
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
   "execution_plan_ready": false,
-  "generated_at": "2026-07-04T02:28:49.960355+00:00",
+  "generated_at": "2026-07-04T03:37:46.904287+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:d91bbc8402c86796ce3d60d0a053610cceea2dcbbb0f5faf00adeaad7698bea4",
-    "scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py": "sha256:ea021989e3cea039375694db3b721f719b6baf687b4c99a1f3e9953fb98ac7ba",
+    "scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py": "sha256:1dea68964703a11a1eb28a9b1d29031577718d3053ea0a47f69703833fe42470",
     "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:76416a1ee29b947fd510fc0f22f38031eeb335e1ad4a18a2c6144b42cfa50453",
     "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:45bc0cb054326cc00c62fb6ac269c7319120f4d8aaebc6a5685821e42a4e658f",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:8c1ce46cbd085987f2923602424b666bb63e9edb6fdb2438158d36aee890dd41"
@@ -1746,7 +1746,7 @@
     "rows_artifact_required_after_engine_execution": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
   },
   "schema_version": "public-benchmark-vina-gnina-runtime-readiness.v1",
-  "source_commit_sha": "a75428f1c24179517d16ee7ed360069d733d8820",
+  "source_commit_sha": "ee98c55c82d83b224e239a01f8355cc9422f8b08",
   "status": "execution_plan_blocked",
   "summary": {
     "adapter_case_count": 0,

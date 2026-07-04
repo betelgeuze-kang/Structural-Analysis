@@ -62,12 +62,38 @@ def test_current_vina_gnina_input_manifest_template_preflight_surfaces_gaps() ->
     assert payload["summary"]["missing_required_value_count"] > 0
     assert payload["summary"]["missing_local_file_count"] > 0
     assert payload["summary"]["missing_receipt_ref_count"] > 0
+    assert payload["summary"]["source_file_requirement_count"] == 24
+    assert payload["summary"]["source_file_missing_count"] == 24
+    assert payload["summary"]["prepared_input_requirement_count"] == 24
+    assert payload["summary"]["prepared_input_missing_count"] == 24
+    assert payload["summary"]["receipt_ref_requirement_count"] == 60
+    assert payload["summary"]["receipt_ref_missing_count"] == 60
     first_row = payload["case_preflight_rows"][0]
     assert first_row["case_id"] == "casf2016_4llx"
     assert "prepared_receptor_checksum" in first_row["missing_required_fields"]
     assert "prepared_ligand_checksum" in first_row["missing_required_fields"]
     assert "protein_structure_path" in first_row["missing_local_file_fields"]
     assert "vina_config_ref" in first_row["missing_receipt_ref_fields"]
+    first_source_file = payload["source_file_acquisition_plan"][0]
+    assert first_source_file["case_id"] == "casf2016_4llx"
+    assert first_source_file["file_role"] == "source_protein_structure"
+    assert first_source_file["path"] == "CASF-2016/coreset/4llx/4llx_protein.pdb"
+    assert first_source_file["operator_action"] == (
+        "acquire_from_official_casf_archive_and_verify_checksum"
+    )
+    first_prepared_file = payload["prepared_input_plan"][0]
+    assert first_prepared_file["file_role"] == "prepared_receptor"
+    assert first_prepared_file["operator_action"] == (
+        "prepare_vina_gnina_input_and_record_checksum"
+    )
+    assert payload["receipt_ref_plan"][0]["operator_action"] == "attach_vina_config_ref"
+    markdown = module.render_public_benchmark_vina_gnina_input_manifest_template_preflight_markdown(
+        payload
+    )
+    assert "## Source File Acquisition Plan" in markdown
+    assert "CASF-2016/coreset/4llx/4llx_protein.pdb" in markdown
+    assert "## Prepared Input Plan" in markdown
+    assert "## Receipt Ref Plan" in markdown
     assert "does not promote the template" in payload["claim_boundary"]
 
 
@@ -165,7 +191,13 @@ def test_vina_gnina_input_manifest_template_preflight_accepts_completed_rows(
     assert payload["summary"]["missing_required_value_count"] == 0
     assert payload["summary"]["missing_local_file_count"] == 0
     assert payload["summary"]["missing_receipt_ref_count"] == 0
+    assert payload["summary"]["source_file_missing_count"] == 0
+    assert payload["summary"]["prepared_input_missing_count"] == 0
+    assert payload["summary"]["receipt_ref_missing_count"] == 0
     assert payload["case_preflight_rows"][0]["status"] == "ready"
+    assert payload["source_file_acquisition_plan"][0]["status"] == "ready"
+    assert payload["prepared_input_plan"][0]["status"] == "ready"
+    assert payload["receipt_ref_plan"][0]["status"] == "ready"
 
 
 def test_vina_gnina_input_manifest_template_preflight_writer_creates_outputs(

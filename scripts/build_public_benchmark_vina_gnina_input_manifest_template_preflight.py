@@ -39,6 +39,8 @@ LOCAL_FILE_FIELDS = (
     "prepared_receptor_path",
     "prepared_ligand_path",
 )
+SOURCE_LOCAL_FILE_FIELDS = ("protein_structure_path", "reference_ligand_path")
+PREPARED_LOCAL_FILE_FIELDS = ("prepared_receptor_path", "prepared_ligand_path")
 CHECKSUM_FIELDS = (
     "source_checksum",
     "protein_structure_checksum",
@@ -53,6 +55,12 @@ RECEIPT_REF_FIELDS = (
     "gnina_run_receipt_ref",
     "input_preparation_provenance_ref",
 )
+LOCAL_FILE_LABELS = {
+    "protein_structure_path": "source_protein_structure",
+    "reference_ligand_path": "source_reference_ligand",
+    "prepared_receptor_path": "prepared_receptor",
+    "prepared_ligand_path": "prepared_ligand",
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -151,6 +159,7 @@ def _local_file_status(repo_root: Path, path_value: str, checksum_value: str) ->
                 checksum_verified = True
     return {
         "path": path_value,
+        "expected_checksum": checksum_value,
         "exists": exists,
         "is_file": is_file,
         "actual_checksum": actual_checksum,
@@ -247,6 +256,60 @@ def _row_preflight(repo_root: Path, row: dict[str, str]) -> dict[str, Any]:
         blockers.append("manifest_local_files_missing_or_unverified")
     if missing_receipt_ref_fields:
         blockers.append("manifest_receipt_refs_missing")
+    local_file_requirements = []
+    for field in LOCAL_FILE_FIELDS:
+        status = local_file_statuses[field]
+        checksum_field = field.replace("_path", "_checksum")
+        is_source_file = field in SOURCE_LOCAL_FILE_FIELDS
+        blocker = str(status.get("blocker") or "")
+        local_file_requirements.append(
+            {
+                "case_id": str(row.get(CASE_ID_FIELD) or ""),
+                "complex_id": str(row.get("complex_id") or ""),
+                "field": field,
+                "file_role": LOCAL_FILE_LABELS[field],
+                "file_group": "official_source_file" if is_source_file else "prepared_input_file",
+                "path": str(row.get(field) or ""),
+                "expected_checksum_field": checksum_field,
+                "expected_checksum": str(row.get(checksum_field) or ""),
+                "source_url": str(row.get("provenance_ref") or "") if is_source_file else "",
+                "source_license_or_accession": (
+                    str(row.get("source_license_or_accession") or "")
+                    if is_source_file
+                    else ""
+                ),
+                "status": "ready" if not blocker else "operator_completion_required",
+                "blocker": blocker,
+                "operator_action": (
+                    "verify_local_source_file_checksum"
+                    if is_source_file and not blocker
+                    else "acquire_from_official_casf_archive_and_verify_checksum"
+                    if is_source_file
+                    else "verify_prepared_input_file_checksum"
+                    if not blocker
+                    else "prepare_vina_gnina_input_and_record_checksum"
+                ),
+            }
+        )
+    receipt_ref_requirements = []
+    for field in RECEIPT_REF_FIELDS:
+        status = receipt_ref_statuses[field]
+        blocker = str(status.get("blocker") or "")
+        receipt_ref_requirements.append(
+            {
+                "case_id": str(row.get(CASE_ID_FIELD) or ""),
+                "complex_id": str(row.get("complex_id") or ""),
+                "field": field,
+                "ref": str(row.get(field) or ""),
+                "status": "ready" if not blocker else "operator_completion_required",
+                "blocker": blocker,
+                "operator_action": (
+                    "verify_manifest_receipt_ref"
+                    if not blocker
+                    else f"attach_{field}"
+                ),
+            }
+        )
     return {
         "case_id": str(row.get(CASE_ID_FIELD) or ""),
         "complex_id": str(row.get("complex_id") or ""),
@@ -258,6 +321,8 @@ def _row_preflight(repo_root: Path, row: dict[str, str]) -> dict[str, Any]:
         "checksum_statuses": checksum_statuses,
         "local_file_statuses": local_file_statuses,
         "receipt_ref_statuses": receipt_ref_statuses,
+        "local_file_requirements": local_file_requirements,
+        "receipt_ref_requirements": receipt_ref_requirements,
         "blockers": blockers,
     }
 
@@ -272,6 +337,26 @@ def build_public_benchmark_vina_gnina_input_manifest_template_preflight(
     execution_plan_payload = _load_json(repo_root, execution_plan)
     header_fields, rows = _read_csv_rows(repo_root, template)
     row_preflights = [_row_preflight(repo_root, row) for row in rows]
+    local_file_requirements = [
+        requirement
+        for row in row_preflights
+        for requirement in row["local_file_requirements"]
+    ]
+    source_file_acquisition_plan = [
+        row
+        for row in local_file_requirements
+        if row["field"] in SOURCE_LOCAL_FILE_FIELDS
+    ]
+    prepared_input_plan = [
+        row
+        for row in local_file_requirements
+        if row["field"] in PREPARED_LOCAL_FILE_FIELDS
+    ]
+    receipt_ref_plan = [
+        requirement
+        for row in row_preflights
+        for requirement in row["receipt_ref_requirements"]
+    ]
     expected_case_ids = _expected_case_ids(execution_plan_payload)
     template_case_ids = [row["case_id"] for row in row_preflights if row["case_id"]]
     missing_expected_case_ids = [
@@ -298,6 +383,15 @@ def build_public_benchmark_vina_gnina_input_manifest_template_preflight(
     )
     missing_receipt_ref_count = sum(
         len(row["missing_receipt_ref_fields"]) for row in row_preflights
+    )
+    missing_source_file_count = sum(
+        1 for row in source_file_acquisition_plan if row["blocker"]
+    )
+    missing_prepared_input_count = sum(
+        1 for row in prepared_input_plan if row["blocker"]
+    )
+    missing_receipt_requirement_count = sum(
+        1 for row in receipt_ref_plan if row["blocker"]
     )
     template_case_coverage_complete = bool(rows) and not (
         missing_expected_case_ids or unexpected_template_case_ids or duplicate_case_ids
@@ -352,8 +446,14 @@ def build_public_benchmark_vina_gnina_input_manifest_template_preflight(
         "duplicate_case_ids": duplicate_case_ids,
         "case_preflight_rows": row_preflights,
         "case_preflight_row_count": len(row_preflights),
+        "source_file_acquisition_plan": source_file_acquisition_plan,
+        "prepared_input_plan": prepared_input_plan,
+        "receipt_ref_plan": receipt_ref_plan,
         "operator_actions": [
             "do_not_commit_template_as_actual_manifest_evidence",
+            "review_source_file_acquisition_plan",
+            "review_prepared_input_plan",
+            "review_receipt_ref_plan",
             "copy_template_to_expected_manifest_only_after_operator_completion",
             "attach_local_source_and_prepared_input_files",
             "fill_missing_prepared_input_checksums_and_preparation_receipts",
@@ -385,6 +485,12 @@ def build_public_benchmark_vina_gnina_input_manifest_template_preflight(
             "invalid_checksum_count": invalid_checksum_count,
             "missing_local_file_count": missing_local_file_count,
             "missing_receipt_ref_count": missing_receipt_ref_count,
+            "source_file_requirement_count": len(source_file_acquisition_plan),
+            "source_file_missing_count": missing_source_file_count,
+            "prepared_input_requirement_count": len(prepared_input_plan),
+            "prepared_input_missing_count": missing_prepared_input_count,
+            "receipt_ref_requirement_count": len(receipt_ref_plan),
+            "receipt_ref_missing_count": missing_receipt_requirement_count,
             "manifest_ready": manifest_ready,
         },
         "claim_boundary": (
@@ -410,6 +516,9 @@ def render_public_benchmark_vina_gnina_input_manifest_template_preflight_markdow
         f"- `missing_required_value_count`: `{summary['missing_required_value_count']}`",
         f"- `missing_local_file_count`: `{summary['missing_local_file_count']}`",
         f"- `missing_receipt_ref_count`: `{summary['missing_receipt_ref_count']}`",
+        f"- `source_file_missing_count`: `{summary['source_file_missing_count']}`",
+        f"- `prepared_input_missing_count`: `{summary['prepared_input_missing_count']}`",
+        f"- `receipt_ref_missing_count`: `{summary['receipt_ref_missing_count']}`",
         "",
         "## Case Rows",
         "",
@@ -423,6 +532,67 @@ def render_public_benchmark_vina_gnina_input_manifest_template_preflight_markdow
             f"`{len(row['missing_local_file_fields'])}` | "
             f"`{len(row['missing_receipt_ref_fields'])}` |"
         )
+    source_plan = [
+        row
+        for row in payload.get("source_file_acquisition_plan", [])
+        if isinstance(row, dict)
+    ]
+    if source_plan:
+        lines.extend(
+            [
+                "",
+                "## Source File Acquisition Plan",
+                "",
+                "| Case | Role | Path | Expected Checksum | Status | Action |",
+                "|---|---|---|---|---|---|",
+            ]
+        )
+        for row in source_plan:
+            lines.append(
+                f"| `{row.get('case_id', '')}` | `{row.get('file_role', '')}` | "
+                f"`{row.get('path', '')}` | `{row.get('expected_checksum', '')}` | "
+                f"`{row.get('status', '')}` | `{row.get('operator_action', '')}` |"
+            )
+    prepared_plan = [
+        row
+        for row in payload.get("prepared_input_plan", [])
+        if isinstance(row, dict)
+    ]
+    if prepared_plan:
+        lines.extend(
+            [
+                "",
+                "## Prepared Input Plan",
+                "",
+                "| Case | Role | Path | Expected Checksum | Status | Action |",
+                "|---|---|---|---|---|---|",
+            ]
+        )
+        for row in prepared_plan:
+            lines.append(
+                f"| `{row.get('case_id', '')}` | `{row.get('file_role', '')}` | "
+                f"`{row.get('path', '')}` | `{row.get('expected_checksum', '')}` | "
+                f"`{row.get('status', '')}` | `{row.get('operator_action', '')}` |"
+            )
+    receipt_plan = [
+        row for row in payload.get("receipt_ref_plan", []) if isinstance(row, dict)
+    ]
+    if receipt_plan:
+        lines.extend(
+            [
+                "",
+                "## Receipt Ref Plan",
+                "",
+                "| Case | Field | Ref | Status | Action |",
+                "|---|---|---|---|---|",
+            ]
+        )
+        for row in receipt_plan:
+            lines.append(
+                f"| `{row.get('case_id', '')}` | `{row.get('field', '')}` | "
+                f"`{row.get('ref', '')}` | `{row.get('status', '')}` | "
+                f"`{row.get('operator_action', '')}` |"
+            )
     lines.extend(["", "## Commands", ""])
     for key, command in payload["commands"].items():
         lines.append(f"- `{key}`: `{command}`")

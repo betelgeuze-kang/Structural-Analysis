@@ -37,12 +37,75 @@
       },
       "complex_id": "4llx",
       "invalid_checksum_fields": [],
+      "local_file_requirements": [
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "expected_checksum": "sha256:ee6be565638c58d9b608a5cb79a98dae39566a60b4ae019ea6a23a45c2b7a834",
+          "expected_checksum_field": "protein_structure_checksum",
+          "field": "protein_structure_path",
+          "file_group": "official_source_file",
+          "file_role": "source_protein_structure",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/4llx/4llx_protein.pdb",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "expected_checksum": "sha256:a6298d4cdddb5d1926ca09bcb5e1412ecd2699476f3ae1fa086d3d335efaa6f1",
+          "expected_checksum_field": "reference_ligand_checksum",
+          "field": "reference_ligand_path",
+          "file_group": "official_source_file",
+          "file_role": "source_reference_ligand",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/4llx/4llx_ligand.sdf",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_receptor_checksum",
+          "field": "prepared_receptor_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_receptor",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/4llx_receptor",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_ligand_checksum",
+          "field": "prepared_ligand_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_ligand",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/4llx_ligand",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        }
+      ],
       "local_file_statuses": {
         "prepared_ligand_path": {
           "actual_checksum": "",
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/4llx_ligand"
         },
@@ -51,6 +114,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/4llx_receptor"
         },
@@ -59,6 +123,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:ee6be565638c58d9b608a5cb79a98dae39566a60b4ae019ea6a23a45c2b7a834",
           "is_file": false,
           "path": "CASF-2016/coreset/4llx/4llx_protein.pdb"
         },
@@ -67,6 +132,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:a6298d4cdddb5d1926ca09bcb5e1412ecd2699476f3ae1fa086d3d335efaa6f1",
           "is_file": false,
           "path": "CASF-2016/coreset/4llx/4llx_ligand.sdf"
         }
@@ -88,6 +154,53 @@
         "prepared_receptor_checksum",
         "prepared_ligand_checksum",
         "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_requirements": [
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "field": "vina_config_ref",
+          "operator_action": "attach_vina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "field": "gnina_config_ref",
+          "operator_action": "attach_gnina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "field": "vina_run_receipt_ref",
+          "operator_action": "attach_vina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "field": "gnina_run_receipt_ref",
+          "operator_action": "attach_gnina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "ref_missing",
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "field": "input_preparation_provenance_ref",
+          "operator_action": "attach_input_preparation_provenance_ref",
+          "ref": "",
+          "status": "operator_completion_required"
+        }
       ],
       "receipt_ref_statuses": {
         "gnina_config_ref": {
@@ -164,12 +277,75 @@
       },
       "complex_id": "5c28",
       "invalid_checksum_fields": [],
+      "local_file_requirements": [
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_5c28",
+          "complex_id": "5c28",
+          "expected_checksum": "sha256:ac3677c62abb2e549c4e3f4a6185663da16028e7e1b1e6ef875da956e77639b0",
+          "expected_checksum_field": "protein_structure_checksum",
+          "field": "protein_structure_path",
+          "file_group": "official_source_file",
+          "file_role": "source_protein_structure",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/5c28/5c28_protein.pdb",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_5c28",
+          "complex_id": "5c28",
+          "expected_checksum": "sha256:7df337dcb033a69f6db8d229749489e45ba9695a4a2e9bdf5593a51ae66eaf87",
+          "expected_checksum_field": "reference_ligand_checksum",
+          "field": "reference_ligand_path",
+          "file_group": "official_source_file",
+          "file_role": "source_reference_ligand",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/5c28/5c28_ligand.sdf",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_5c28",
+          "complex_id": "5c28",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_receptor_checksum",
+          "field": "prepared_receptor_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_receptor",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/5c28_receptor",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_5c28",
+          "complex_id": "5c28",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_ligand_checksum",
+          "field": "prepared_ligand_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_ligand",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/5c28_ligand",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        }
+      ],
       "local_file_statuses": {
         "prepared_ligand_path": {
           "actual_checksum": "",
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/5c28_ligand"
         },
@@ -178,6 +354,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/5c28_receptor"
         },
@@ -186,6 +363,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:ac3677c62abb2e549c4e3f4a6185663da16028e7e1b1e6ef875da956e77639b0",
           "is_file": false,
           "path": "CASF-2016/coreset/5c28/5c28_protein.pdb"
         },
@@ -194,6 +372,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:7df337dcb033a69f6db8d229749489e45ba9695a4a2e9bdf5593a51ae66eaf87",
           "is_file": false,
           "path": "CASF-2016/coreset/5c28/5c28_ligand.sdf"
         }
@@ -215,6 +394,53 @@
         "prepared_receptor_checksum",
         "prepared_ligand_checksum",
         "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_requirements": [
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_5c28",
+          "complex_id": "5c28",
+          "field": "vina_config_ref",
+          "operator_action": "attach_vina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_5c28/vina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_5c28",
+          "complex_id": "5c28",
+          "field": "gnina_config_ref",
+          "operator_action": "attach_gnina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_5c28",
+          "complex_id": "5c28",
+          "field": "vina_run_receipt_ref",
+          "operator_action": "attach_vina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_5c28/vina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_5c28",
+          "complex_id": "5c28",
+          "field": "gnina_run_receipt_ref",
+          "operator_action": "attach_gnina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "ref_missing",
+          "case_id": "casf2016_5c28",
+          "complex_id": "5c28",
+          "field": "input_preparation_provenance_ref",
+          "operator_action": "attach_input_preparation_provenance_ref",
+          "ref": "",
+          "status": "operator_completion_required"
+        }
       ],
       "receipt_ref_statuses": {
         "gnina_config_ref": {
@@ -291,12 +517,75 @@
       },
       "complex_id": "3uuo",
       "invalid_checksum_fields": [],
+      "local_file_requirements": [
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3uuo",
+          "complex_id": "3uuo",
+          "expected_checksum": "sha256:80b28a058a5a2da46bc2e3e91e26c1e14c4f2fd7514c051559b017ab0e93dcf9",
+          "expected_checksum_field": "protein_structure_checksum",
+          "field": "protein_structure_path",
+          "file_group": "official_source_file",
+          "file_role": "source_protein_structure",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/3uuo/3uuo_protein.pdb",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3uuo",
+          "complex_id": "3uuo",
+          "expected_checksum": "sha256:7eedba7f908c0ba267dbe8af02294fcd148064d25cde772d62dded9737258ce5",
+          "expected_checksum_field": "reference_ligand_checksum",
+          "field": "reference_ligand_path",
+          "file_group": "official_source_file",
+          "file_role": "source_reference_ligand",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/3uuo/3uuo_ligand.sdf",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3uuo",
+          "complex_id": "3uuo",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_receptor_checksum",
+          "field": "prepared_receptor_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_receptor",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/3uuo_receptor",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3uuo",
+          "complex_id": "3uuo",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_ligand_checksum",
+          "field": "prepared_ligand_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_ligand",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/3uuo_ligand",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        }
+      ],
       "local_file_statuses": {
         "prepared_ligand_path": {
           "actual_checksum": "",
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/3uuo_ligand"
         },
@@ -305,6 +594,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/3uuo_receptor"
         },
@@ -313,6 +603,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:80b28a058a5a2da46bc2e3e91e26c1e14c4f2fd7514c051559b017ab0e93dcf9",
           "is_file": false,
           "path": "CASF-2016/coreset/3uuo/3uuo_protein.pdb"
         },
@@ -321,6 +612,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:7eedba7f908c0ba267dbe8af02294fcd148064d25cde772d62dded9737258ce5",
           "is_file": false,
           "path": "CASF-2016/coreset/3uuo/3uuo_ligand.sdf"
         }
@@ -342,6 +634,53 @@
         "prepared_receptor_checksum",
         "prepared_ligand_checksum",
         "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_requirements": [
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3uuo",
+          "complex_id": "3uuo",
+          "field": "vina_config_ref",
+          "operator_action": "attach_vina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3uuo",
+          "complex_id": "3uuo",
+          "field": "gnina_config_ref",
+          "operator_action": "attach_gnina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3uuo",
+          "complex_id": "3uuo",
+          "field": "vina_run_receipt_ref",
+          "operator_action": "attach_vina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3uuo",
+          "complex_id": "3uuo",
+          "field": "gnina_run_receipt_ref",
+          "operator_action": "attach_gnina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "ref_missing",
+          "case_id": "casf2016_3uuo",
+          "complex_id": "3uuo",
+          "field": "input_preparation_provenance_ref",
+          "operator_action": "attach_input_preparation_provenance_ref",
+          "ref": "",
+          "status": "operator_completion_required"
+        }
       ],
       "receipt_ref_statuses": {
         "gnina_config_ref": {
@@ -418,12 +757,75 @@
       },
       "complex_id": "3ui7",
       "invalid_checksum_fields": [],
+      "local_file_requirements": [
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3ui7",
+          "complex_id": "3ui7",
+          "expected_checksum": "sha256:62a51c4d5a96b8b2b0388e1e9f9dc55763d39996935f1ed30c1bdfd2ef282e0e",
+          "expected_checksum_field": "protein_structure_checksum",
+          "field": "protein_structure_path",
+          "file_group": "official_source_file",
+          "file_role": "source_protein_structure",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/3ui7/3ui7_protein.pdb",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3ui7",
+          "complex_id": "3ui7",
+          "expected_checksum": "sha256:bc6913724d6339af7844e5dedb93010e6e7e706c8da629d1e54a73c2fd2eafa2",
+          "expected_checksum_field": "reference_ligand_checksum",
+          "field": "reference_ligand_path",
+          "file_group": "official_source_file",
+          "file_role": "source_reference_ligand",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/3ui7/3ui7_ligand.sdf",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3ui7",
+          "complex_id": "3ui7",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_receptor_checksum",
+          "field": "prepared_receptor_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_receptor",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/3ui7_receptor",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3ui7",
+          "complex_id": "3ui7",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_ligand_checksum",
+          "field": "prepared_ligand_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_ligand",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/3ui7_ligand",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        }
+      ],
       "local_file_statuses": {
         "prepared_ligand_path": {
           "actual_checksum": "",
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/3ui7_ligand"
         },
@@ -432,6 +834,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/3ui7_receptor"
         },
@@ -440,6 +843,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:62a51c4d5a96b8b2b0388e1e9f9dc55763d39996935f1ed30c1bdfd2ef282e0e",
           "is_file": false,
           "path": "CASF-2016/coreset/3ui7/3ui7_protein.pdb"
         },
@@ -448,6 +852,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:bc6913724d6339af7844e5dedb93010e6e7e706c8da629d1e54a73c2fd2eafa2",
           "is_file": false,
           "path": "CASF-2016/coreset/3ui7/3ui7_ligand.sdf"
         }
@@ -469,6 +874,53 @@
         "prepared_receptor_checksum",
         "prepared_ligand_checksum",
         "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_requirements": [
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3ui7",
+          "complex_id": "3ui7",
+          "field": "vina_config_ref",
+          "operator_action": "attach_vina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3ui7",
+          "complex_id": "3ui7",
+          "field": "gnina_config_ref",
+          "operator_action": "attach_gnina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3ui7",
+          "complex_id": "3ui7",
+          "field": "vina_run_receipt_ref",
+          "operator_action": "attach_vina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3ui7",
+          "complex_id": "3ui7",
+          "field": "gnina_run_receipt_ref",
+          "operator_action": "attach_gnina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "ref_missing",
+          "case_id": "casf2016_3ui7",
+          "complex_id": "3ui7",
+          "field": "input_preparation_provenance_ref",
+          "operator_action": "attach_input_preparation_provenance_ref",
+          "ref": "",
+          "status": "operator_completion_required"
+        }
       ],
       "receipt_ref_statuses": {
         "gnina_config_ref": {
@@ -545,12 +997,75 @@
       },
       "complex_id": "5c2h",
       "invalid_checksum_fields": [],
+      "local_file_requirements": [
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_5c2h",
+          "complex_id": "5c2h",
+          "expected_checksum": "sha256:59718184b6c4de964136707cca00f1eb1361fff3d24020e28878dbec60e67917",
+          "expected_checksum_field": "protein_structure_checksum",
+          "field": "protein_structure_path",
+          "file_group": "official_source_file",
+          "file_role": "source_protein_structure",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/5c2h/5c2h_protein.pdb",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_5c2h",
+          "complex_id": "5c2h",
+          "expected_checksum": "sha256:7c512908ac4e7157027219b8f09bcede70f8d0621606303a5ff2eceb89033420",
+          "expected_checksum_field": "reference_ligand_checksum",
+          "field": "reference_ligand_path",
+          "file_group": "official_source_file",
+          "file_role": "source_reference_ligand",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/5c2h/5c2h_ligand.sdf",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_5c2h",
+          "complex_id": "5c2h",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_receptor_checksum",
+          "field": "prepared_receptor_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_receptor",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/5c2h_receptor",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_5c2h",
+          "complex_id": "5c2h",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_ligand_checksum",
+          "field": "prepared_ligand_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_ligand",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/5c2h_ligand",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        }
+      ],
       "local_file_statuses": {
         "prepared_ligand_path": {
           "actual_checksum": "",
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/5c2h_ligand"
         },
@@ -559,6 +1074,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/5c2h_receptor"
         },
@@ -567,6 +1083,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:59718184b6c4de964136707cca00f1eb1361fff3d24020e28878dbec60e67917",
           "is_file": false,
           "path": "CASF-2016/coreset/5c2h/5c2h_protein.pdb"
         },
@@ -575,6 +1092,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:7c512908ac4e7157027219b8f09bcede70f8d0621606303a5ff2eceb89033420",
           "is_file": false,
           "path": "CASF-2016/coreset/5c2h/5c2h_ligand.sdf"
         }
@@ -596,6 +1114,53 @@
         "prepared_receptor_checksum",
         "prepared_ligand_checksum",
         "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_requirements": [
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_5c2h",
+          "complex_id": "5c2h",
+          "field": "vina_config_ref",
+          "operator_action": "attach_vina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_5c2h",
+          "complex_id": "5c2h",
+          "field": "gnina_config_ref",
+          "operator_action": "attach_gnina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_5c2h",
+          "complex_id": "5c2h",
+          "field": "vina_run_receipt_ref",
+          "operator_action": "attach_vina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_5c2h",
+          "complex_id": "5c2h",
+          "field": "gnina_run_receipt_ref",
+          "operator_action": "attach_gnina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "ref_missing",
+          "case_id": "casf2016_5c2h",
+          "complex_id": "5c2h",
+          "field": "input_preparation_provenance_ref",
+          "operator_action": "attach_input_preparation_provenance_ref",
+          "ref": "",
+          "status": "operator_completion_required"
+        }
       ],
       "receipt_ref_statuses": {
         "gnina_config_ref": {
@@ -672,12 +1237,75 @@
       },
       "complex_id": "2v00",
       "invalid_checksum_fields": [],
+      "local_file_requirements": [
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_2v00",
+          "complex_id": "2v00",
+          "expected_checksum": "sha256:ce00145b46da36a51792628b6322437c7acb30cbc6c165c47443a1ed3d2256fa",
+          "expected_checksum_field": "protein_structure_checksum",
+          "field": "protein_structure_path",
+          "file_group": "official_source_file",
+          "file_role": "source_protein_structure",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/2v00/2v00_protein.pdb",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_2v00",
+          "complex_id": "2v00",
+          "expected_checksum": "sha256:cc87334e0ed4d4d66929e57998fae43785bbe399772967f8a660dfbc106c9b16",
+          "expected_checksum_field": "reference_ligand_checksum",
+          "field": "reference_ligand_path",
+          "file_group": "official_source_file",
+          "file_role": "source_reference_ligand",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/2v00/2v00_ligand.sdf",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_2v00",
+          "complex_id": "2v00",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_receptor_checksum",
+          "field": "prepared_receptor_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_receptor",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/2v00_receptor",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_2v00",
+          "complex_id": "2v00",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_ligand_checksum",
+          "field": "prepared_ligand_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_ligand",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/2v00_ligand",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        }
+      ],
       "local_file_statuses": {
         "prepared_ligand_path": {
           "actual_checksum": "",
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/2v00_ligand"
         },
@@ -686,6 +1314,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/2v00_receptor"
         },
@@ -694,6 +1323,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:ce00145b46da36a51792628b6322437c7acb30cbc6c165c47443a1ed3d2256fa",
           "is_file": false,
           "path": "CASF-2016/coreset/2v00/2v00_protein.pdb"
         },
@@ -702,6 +1332,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:cc87334e0ed4d4d66929e57998fae43785bbe399772967f8a660dfbc106c9b16",
           "is_file": false,
           "path": "CASF-2016/coreset/2v00/2v00_ligand.sdf"
         }
@@ -723,6 +1354,53 @@
         "prepared_receptor_checksum",
         "prepared_ligand_checksum",
         "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_requirements": [
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_2v00",
+          "complex_id": "2v00",
+          "field": "vina_config_ref",
+          "operator_action": "attach_vina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_2v00/vina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_2v00",
+          "complex_id": "2v00",
+          "field": "gnina_config_ref",
+          "operator_action": "attach_gnina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_2v00",
+          "complex_id": "2v00",
+          "field": "vina_run_receipt_ref",
+          "operator_action": "attach_vina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_2v00/vina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_2v00",
+          "complex_id": "2v00",
+          "field": "gnina_run_receipt_ref",
+          "operator_action": "attach_gnina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "ref_missing",
+          "case_id": "casf2016_2v00",
+          "complex_id": "2v00",
+          "field": "input_preparation_provenance_ref",
+          "operator_action": "attach_input_preparation_provenance_ref",
+          "ref": "",
+          "status": "operator_completion_required"
+        }
       ],
       "receipt_ref_statuses": {
         "gnina_config_ref": {
@@ -799,12 +1477,75 @@
       },
       "complex_id": "3wz8",
       "invalid_checksum_fields": [],
+      "local_file_requirements": [
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3wz8",
+          "complex_id": "3wz8",
+          "expected_checksum": "sha256:9de2f60abeea752abc06f866597255ca08fe75bf09cc749f76951adc30b0b45f",
+          "expected_checksum_field": "protein_structure_checksum",
+          "field": "protein_structure_path",
+          "file_group": "official_source_file",
+          "file_role": "source_protein_structure",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/3wz8/3wz8_protein.pdb",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3wz8",
+          "complex_id": "3wz8",
+          "expected_checksum": "sha256:33a3b8306ae40623d38a5af2a883037a17472f18ba58141456f7bdf8abedb03a",
+          "expected_checksum_field": "reference_ligand_checksum",
+          "field": "reference_ligand_path",
+          "file_group": "official_source_file",
+          "file_role": "source_reference_ligand",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/3wz8/3wz8_ligand.sdf",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3wz8",
+          "complex_id": "3wz8",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_receptor_checksum",
+          "field": "prepared_receptor_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_receptor",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/3wz8_receptor",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3wz8",
+          "complex_id": "3wz8",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_ligand_checksum",
+          "field": "prepared_ligand_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_ligand",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/3wz8_ligand",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        }
+      ],
       "local_file_statuses": {
         "prepared_ligand_path": {
           "actual_checksum": "",
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/3wz8_ligand"
         },
@@ -813,6 +1554,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/3wz8_receptor"
         },
@@ -821,6 +1563,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:9de2f60abeea752abc06f866597255ca08fe75bf09cc749f76951adc30b0b45f",
           "is_file": false,
           "path": "CASF-2016/coreset/3wz8/3wz8_protein.pdb"
         },
@@ -829,6 +1572,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:33a3b8306ae40623d38a5af2a883037a17472f18ba58141456f7bdf8abedb03a",
           "is_file": false,
           "path": "CASF-2016/coreset/3wz8/3wz8_ligand.sdf"
         }
@@ -850,6 +1594,53 @@
         "prepared_receptor_checksum",
         "prepared_ligand_checksum",
         "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_requirements": [
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3wz8",
+          "complex_id": "3wz8",
+          "field": "vina_config_ref",
+          "operator_action": "attach_vina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3wz8",
+          "complex_id": "3wz8",
+          "field": "gnina_config_ref",
+          "operator_action": "attach_gnina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3wz8",
+          "complex_id": "3wz8",
+          "field": "vina_run_receipt_ref",
+          "operator_action": "attach_vina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3wz8",
+          "complex_id": "3wz8",
+          "field": "gnina_run_receipt_ref",
+          "operator_action": "attach_gnina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "ref_missing",
+          "case_id": "casf2016_3wz8",
+          "complex_id": "3wz8",
+          "field": "input_preparation_provenance_ref",
+          "operator_action": "attach_input_preparation_provenance_ref",
+          "ref": "",
+          "status": "operator_completion_required"
+        }
       ],
       "receipt_ref_statuses": {
         "gnina_config_ref": {
@@ -926,12 +1717,75 @@
       },
       "complex_id": "3pww",
       "invalid_checksum_fields": [],
+      "local_file_requirements": [
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3pww",
+          "complex_id": "3pww",
+          "expected_checksum": "sha256:351db504aee7d52f588e720c0f9d88ceb65fa738aa9a3d393ec5cbed4af96efb",
+          "expected_checksum_field": "protein_structure_checksum",
+          "field": "protein_structure_path",
+          "file_group": "official_source_file",
+          "file_role": "source_protein_structure",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/3pww/3pww_protein.pdb",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3pww",
+          "complex_id": "3pww",
+          "expected_checksum": "sha256:e4cc5a4f6f900a00cd2ce5976a3603d38204f0c288774f5650e35ab7e6324d0b",
+          "expected_checksum_field": "reference_ligand_checksum",
+          "field": "reference_ligand_path",
+          "file_group": "official_source_file",
+          "file_role": "source_reference_ligand",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/3pww/3pww_ligand.sdf",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3pww",
+          "complex_id": "3pww",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_receptor_checksum",
+          "field": "prepared_receptor_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_receptor",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/3pww_receptor",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3pww",
+          "complex_id": "3pww",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_ligand_checksum",
+          "field": "prepared_ligand_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_ligand",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/3pww_ligand",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        }
+      ],
       "local_file_statuses": {
         "prepared_ligand_path": {
           "actual_checksum": "",
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/3pww_ligand"
         },
@@ -940,6 +1794,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/3pww_receptor"
         },
@@ -948,6 +1803,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:351db504aee7d52f588e720c0f9d88ceb65fa738aa9a3d393ec5cbed4af96efb",
           "is_file": false,
           "path": "CASF-2016/coreset/3pww/3pww_protein.pdb"
         },
@@ -956,6 +1812,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:e4cc5a4f6f900a00cd2ce5976a3603d38204f0c288774f5650e35ab7e6324d0b",
           "is_file": false,
           "path": "CASF-2016/coreset/3pww/3pww_ligand.sdf"
         }
@@ -977,6 +1834,53 @@
         "prepared_receptor_checksum",
         "prepared_ligand_checksum",
         "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_requirements": [
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3pww",
+          "complex_id": "3pww",
+          "field": "vina_config_ref",
+          "operator_action": "attach_vina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3pww/vina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3pww",
+          "complex_id": "3pww",
+          "field": "gnina_config_ref",
+          "operator_action": "attach_gnina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3pww",
+          "complex_id": "3pww",
+          "field": "vina_run_receipt_ref",
+          "operator_action": "attach_vina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3pww/vina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3pww",
+          "complex_id": "3pww",
+          "field": "gnina_run_receipt_ref",
+          "operator_action": "attach_gnina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "ref_missing",
+          "case_id": "casf2016_3pww",
+          "complex_id": "3pww",
+          "field": "input_preparation_provenance_ref",
+          "operator_action": "attach_input_preparation_provenance_ref",
+          "ref": "",
+          "status": "operator_completion_required"
+        }
       ],
       "receipt_ref_statuses": {
         "gnina_config_ref": {
@@ -1053,12 +1957,75 @@
       },
       "complex_id": "3prs",
       "invalid_checksum_fields": [],
+      "local_file_requirements": [
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3prs",
+          "complex_id": "3prs",
+          "expected_checksum": "sha256:6a294ddeb8eaaf9a876ac9ad7a3e2715da586fdb7877d4cac306d4348932e34b",
+          "expected_checksum_field": "protein_structure_checksum",
+          "field": "protein_structure_path",
+          "file_group": "official_source_file",
+          "file_role": "source_protein_structure",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/3prs/3prs_protein.pdb",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3prs",
+          "complex_id": "3prs",
+          "expected_checksum": "sha256:4625a72478cc0940022b39b2059e0d7115a20eaf6b845ecde8b17a195fba0911",
+          "expected_checksum_field": "reference_ligand_checksum",
+          "field": "reference_ligand_path",
+          "file_group": "official_source_file",
+          "file_role": "source_reference_ligand",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/3prs/3prs_ligand.sdf",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3prs",
+          "complex_id": "3prs",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_receptor_checksum",
+          "field": "prepared_receptor_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_receptor",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/3prs_receptor",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3prs",
+          "complex_id": "3prs",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_ligand_checksum",
+          "field": "prepared_ligand_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_ligand",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/3prs_ligand",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        }
+      ],
       "local_file_statuses": {
         "prepared_ligand_path": {
           "actual_checksum": "",
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/3prs_ligand"
         },
@@ -1067,6 +2034,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/3prs_receptor"
         },
@@ -1075,6 +2043,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:6a294ddeb8eaaf9a876ac9ad7a3e2715da586fdb7877d4cac306d4348932e34b",
           "is_file": false,
           "path": "CASF-2016/coreset/3prs/3prs_protein.pdb"
         },
@@ -1083,6 +2052,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:4625a72478cc0940022b39b2059e0d7115a20eaf6b845ecde8b17a195fba0911",
           "is_file": false,
           "path": "CASF-2016/coreset/3prs/3prs_ligand.sdf"
         }
@@ -1104,6 +2074,53 @@
         "prepared_receptor_checksum",
         "prepared_ligand_checksum",
         "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_requirements": [
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3prs",
+          "complex_id": "3prs",
+          "field": "vina_config_ref",
+          "operator_action": "attach_vina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3prs/vina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3prs",
+          "complex_id": "3prs",
+          "field": "gnina_config_ref",
+          "operator_action": "attach_gnina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3prs",
+          "complex_id": "3prs",
+          "field": "vina_run_receipt_ref",
+          "operator_action": "attach_vina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3prs/vina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3prs",
+          "complex_id": "3prs",
+          "field": "gnina_run_receipt_ref",
+          "operator_action": "attach_gnina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "ref_missing",
+          "case_id": "casf2016_3prs",
+          "complex_id": "3prs",
+          "field": "input_preparation_provenance_ref",
+          "operator_action": "attach_input_preparation_provenance_ref",
+          "ref": "",
+          "status": "operator_completion_required"
+        }
       ],
       "receipt_ref_statuses": {
         "gnina_config_ref": {
@@ -1180,12 +2197,75 @@
       },
       "complex_id": "3uri",
       "invalid_checksum_fields": [],
+      "local_file_requirements": [
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3uri",
+          "complex_id": "3uri",
+          "expected_checksum": "sha256:03b1b8c59bd72520faca258f2a1c4a5677e161bf3ace4a9df3ae7003d585f8b1",
+          "expected_checksum_field": "protein_structure_checksum",
+          "field": "protein_structure_path",
+          "file_group": "official_source_file",
+          "file_role": "source_protein_structure",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/3uri/3uri_protein.pdb",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3uri",
+          "complex_id": "3uri",
+          "expected_checksum": "sha256:9091e3949535eeae0afa1e80484ece0e71e6809c44d81072130b54f81f440a85",
+          "expected_checksum_field": "reference_ligand_checksum",
+          "field": "reference_ligand_path",
+          "file_group": "official_source_file",
+          "file_role": "source_reference_ligand",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/3uri/3uri_ligand.sdf",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3uri",
+          "complex_id": "3uri",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_receptor_checksum",
+          "field": "prepared_receptor_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_receptor",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/3uri_receptor",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_3uri",
+          "complex_id": "3uri",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_ligand_checksum",
+          "field": "prepared_ligand_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_ligand",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/3uri_ligand",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        }
+      ],
       "local_file_statuses": {
         "prepared_ligand_path": {
           "actual_checksum": "",
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/3uri_ligand"
         },
@@ -1194,6 +2274,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/3uri_receptor"
         },
@@ -1202,6 +2283,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:03b1b8c59bd72520faca258f2a1c4a5677e161bf3ace4a9df3ae7003d585f8b1",
           "is_file": false,
           "path": "CASF-2016/coreset/3uri/3uri_protein.pdb"
         },
@@ -1210,6 +2292,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:9091e3949535eeae0afa1e80484ece0e71e6809c44d81072130b54f81f440a85",
           "is_file": false,
           "path": "CASF-2016/coreset/3uri/3uri_ligand.sdf"
         }
@@ -1231,6 +2314,53 @@
         "prepared_receptor_checksum",
         "prepared_ligand_checksum",
         "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_requirements": [
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3uri",
+          "complex_id": "3uri",
+          "field": "vina_config_ref",
+          "operator_action": "attach_vina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3uri/vina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3uri",
+          "complex_id": "3uri",
+          "field": "gnina_config_ref",
+          "operator_action": "attach_gnina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3uri",
+          "complex_id": "3uri",
+          "field": "vina_run_receipt_ref",
+          "operator_action": "attach_vina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3uri/vina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_3uri",
+          "complex_id": "3uri",
+          "field": "gnina_run_receipt_ref",
+          "operator_action": "attach_gnina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "ref_missing",
+          "case_id": "casf2016_3uri",
+          "complex_id": "3uri",
+          "field": "input_preparation_provenance_ref",
+          "operator_action": "attach_input_preparation_provenance_ref",
+          "ref": "",
+          "status": "operator_completion_required"
+        }
       ],
       "receipt_ref_statuses": {
         "gnina_config_ref": {
@@ -1307,12 +2437,75 @@
       },
       "complex_id": "4m0z",
       "invalid_checksum_fields": [],
+      "local_file_requirements": [
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_4m0z",
+          "complex_id": "4m0z",
+          "expected_checksum": "sha256:8eb56910faa3eb78ca1b8c244b01bf6094f2838a4db08a0b5198b68e6a96242d",
+          "expected_checksum_field": "protein_structure_checksum",
+          "field": "protein_structure_path",
+          "file_group": "official_source_file",
+          "file_role": "source_protein_structure",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/4m0z/4m0z_protein.pdb",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_4m0z",
+          "complex_id": "4m0z",
+          "expected_checksum": "sha256:533af481c8fe734256312a30791bfbb12eb5796e26409942c66581fb8ef60f07",
+          "expected_checksum_field": "reference_ligand_checksum",
+          "field": "reference_ligand_path",
+          "file_group": "official_source_file",
+          "file_role": "source_reference_ligand",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/4m0z/4m0z_ligand.sdf",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_4m0z",
+          "complex_id": "4m0z",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_receptor_checksum",
+          "field": "prepared_receptor_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_receptor",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/4m0z_receptor",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_4m0z",
+          "complex_id": "4m0z",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_ligand_checksum",
+          "field": "prepared_ligand_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_ligand",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/4m0z_ligand",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        }
+      ],
       "local_file_statuses": {
         "prepared_ligand_path": {
           "actual_checksum": "",
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/4m0z_ligand"
         },
@@ -1321,6 +2514,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/4m0z_receptor"
         },
@@ -1329,6 +2523,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:8eb56910faa3eb78ca1b8c244b01bf6094f2838a4db08a0b5198b68e6a96242d",
           "is_file": false,
           "path": "CASF-2016/coreset/4m0z/4m0z_protein.pdb"
         },
@@ -1337,6 +2532,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:533af481c8fe734256312a30791bfbb12eb5796e26409942c66581fb8ef60f07",
           "is_file": false,
           "path": "CASF-2016/coreset/4m0z/4m0z_ligand.sdf"
         }
@@ -1358,6 +2554,53 @@
         "prepared_receptor_checksum",
         "prepared_ligand_checksum",
         "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_requirements": [
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_4m0z",
+          "complex_id": "4m0z",
+          "field": "vina_config_ref",
+          "operator_action": "attach_vina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_4m0z",
+          "complex_id": "4m0z",
+          "field": "gnina_config_ref",
+          "operator_action": "attach_gnina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_4m0z",
+          "complex_id": "4m0z",
+          "field": "vina_run_receipt_ref",
+          "operator_action": "attach_vina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_4m0z",
+          "complex_id": "4m0z",
+          "field": "gnina_run_receipt_ref",
+          "operator_action": "attach_gnina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "ref_missing",
+          "case_id": "casf2016_4m0z",
+          "complex_id": "4m0z",
+          "field": "input_preparation_provenance_ref",
+          "operator_action": "attach_input_preparation_provenance_ref",
+          "ref": "",
+          "status": "operator_completion_required"
+        }
       ],
       "receipt_ref_statuses": {
         "gnina_config_ref": {
@@ -1434,12 +2677,75 @@
       },
       "complex_id": "4m0y",
       "invalid_checksum_fields": [],
+      "local_file_requirements": [
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_4m0y",
+          "complex_id": "4m0y",
+          "expected_checksum": "sha256:f2b1040546ed7c6d01e4ef39996afcc283be189a42df7bde3773db0d2ecbe7bc",
+          "expected_checksum_field": "protein_structure_checksum",
+          "field": "protein_structure_path",
+          "file_group": "official_source_file",
+          "file_role": "source_protein_structure",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/4m0y/4m0y_protein.pdb",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_4m0y",
+          "complex_id": "4m0y",
+          "expected_checksum": "sha256:65f2c98b8958e739f98b243924513e3ff3068d536665a7b0e27fefa81a0e0dfc",
+          "expected_checksum_field": "reference_ligand_checksum",
+          "field": "reference_ligand_path",
+          "file_group": "official_source_file",
+          "file_role": "source_reference_ligand",
+          "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+          "path": "CASF-2016/coreset/4m0y/4m0y_ligand.sdf",
+          "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+          "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_4m0y",
+          "complex_id": "4m0y",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_receptor_checksum",
+          "field": "prepared_receptor_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_receptor",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/4m0y_receptor",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "path_not_found",
+          "case_id": "casf2016_4m0y",
+          "complex_id": "4m0y",
+          "expected_checksum": "",
+          "expected_checksum_field": "prepared_ligand_checksum",
+          "field": "prepared_ligand_path",
+          "file_group": "prepared_input_file",
+          "file_role": "prepared_ligand",
+          "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+          "path": "prepared/4m0y_ligand",
+          "source_license_or_accession": "",
+          "source_url": "",
+          "status": "operator_completion_required"
+        }
+      ],
       "local_file_statuses": {
         "prepared_ligand_path": {
           "actual_checksum": "",
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/4m0y_ligand"
         },
@@ -1448,6 +2754,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "",
           "is_file": false,
           "path": "prepared/4m0y_receptor"
         },
@@ -1456,6 +2763,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:f2b1040546ed7c6d01e4ef39996afcc283be189a42df7bde3773db0d2ecbe7bc",
           "is_file": false,
           "path": "CASF-2016/coreset/4m0y/4m0y_protein.pdb"
         },
@@ -1464,6 +2772,7 @@
           "blocker": "path_not_found",
           "checksum_verified": false,
           "exists": false,
+          "expected_checksum": "sha256:65f2c98b8958e739f98b243924513e3ff3068d536665a7b0e27fefa81a0e0dfc",
           "is_file": false,
           "path": "CASF-2016/coreset/4m0y/4m0y_ligand.sdf"
         }
@@ -1485,6 +2794,53 @@
         "prepared_receptor_checksum",
         "prepared_ligand_checksum",
         "input_preparation_provenance_ref"
+      ],
+      "receipt_ref_requirements": [
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_4m0y",
+          "complex_id": "4m0y",
+          "field": "vina_config_ref",
+          "operator_action": "attach_vina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_4m0y",
+          "complex_id": "4m0y",
+          "field": "gnina_config_ref",
+          "operator_action": "attach_gnina_config_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_config.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_4m0y",
+          "complex_id": "4m0y",
+          "field": "vina_run_receipt_ref",
+          "operator_action": "attach_vina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "local_ref_not_found",
+          "case_id": "casf2016_4m0y",
+          "complex_id": "4m0y",
+          "field": "gnina_run_receipt_ref",
+          "operator_action": "attach_gnina_run_receipt_ref",
+          "ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_run_receipt.json",
+          "status": "operator_completion_required"
+        },
+        {
+          "blocker": "ref_missing",
+          "case_id": "casf2016_4m0y",
+          "complex_id": "4m0y",
+          "field": "input_preparation_provenance_ref",
+          "operator_action": "attach_input_preparation_provenance_ref",
+          "ref": "",
+          "status": "operator_completion_required"
+        }
       ],
       "receipt_ref_statuses": {
         "gnina_config_ref": {
@@ -1620,7 +2976,7 @@
     "selected_manifest_path": "",
     "status": "not_detected"
   },
-  "generated_at": "2026-07-04T01:48:54.576036+00:00",
+  "generated_at": "2026-07-04T03:37:46.834120+00:00",
   "header_fields": [
     "case_id",
     "complex_id",
@@ -1653,7 +3009,7 @@
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:d91bbc8402c86796ce3d60d0a053610cceea2dcbbb0f5faf00adeaad7698bea4",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv": "sha256:ff3afa49ab7c79ed82a78f1755272ecc13ca7f6b6e01ef2b35ea5d58b12d3611",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1",
-    "scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py": "sha256:ea021989e3cea039375694db3b721f719b6baf687b4c99a1f3e9953fb98ac7ba"
+    "scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py": "sha256:1dea68964703a11a1eb28a9b1d29031577718d3053ea0a47f69703833fe42470"
   },
   "local_file_fields": [
     "protein_structure_path",
@@ -1665,10 +3021,375 @@
   "missing_expected_case_ids": [],
   "operator_actions": [
     "do_not_commit_template_as_actual_manifest_evidence",
+    "review_source_file_acquisition_plan",
+    "review_prepared_input_plan",
+    "review_receipt_ref_plan",
     "copy_template_to_expected_manifest_only_after_operator_completion",
     "attach_local_source_and_prepared_input_files",
     "fill_missing_prepared_input_checksums_and_preparation_receipts",
     "rerun_vina_gnina_execution_plan_after_manifest_completion"
+  ],
+  "prepared_input_plan": [
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_4llx",
+      "complex_id": "4llx",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_receptor_checksum",
+      "field": "prepared_receptor_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_receptor",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/4llx_receptor",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_4llx",
+      "complex_id": "4llx",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_ligand_checksum",
+      "field": "prepared_ligand_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_ligand",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/4llx_ligand",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_5c28",
+      "complex_id": "5c28",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_receptor_checksum",
+      "field": "prepared_receptor_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_receptor",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/5c28_receptor",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_5c28",
+      "complex_id": "5c28",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_ligand_checksum",
+      "field": "prepared_ligand_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_ligand",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/5c28_ligand",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3uuo",
+      "complex_id": "3uuo",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_receptor_checksum",
+      "field": "prepared_receptor_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_receptor",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/3uuo_receptor",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3uuo",
+      "complex_id": "3uuo",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_ligand_checksum",
+      "field": "prepared_ligand_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_ligand",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/3uuo_ligand",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3ui7",
+      "complex_id": "3ui7",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_receptor_checksum",
+      "field": "prepared_receptor_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_receptor",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/3ui7_receptor",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3ui7",
+      "complex_id": "3ui7",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_ligand_checksum",
+      "field": "prepared_ligand_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_ligand",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/3ui7_ligand",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_5c2h",
+      "complex_id": "5c2h",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_receptor_checksum",
+      "field": "prepared_receptor_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_receptor",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/5c2h_receptor",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_5c2h",
+      "complex_id": "5c2h",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_ligand_checksum",
+      "field": "prepared_ligand_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_ligand",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/5c2h_ligand",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_2v00",
+      "complex_id": "2v00",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_receptor_checksum",
+      "field": "prepared_receptor_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_receptor",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/2v00_receptor",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_2v00",
+      "complex_id": "2v00",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_ligand_checksum",
+      "field": "prepared_ligand_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_ligand",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/2v00_ligand",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3wz8",
+      "complex_id": "3wz8",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_receptor_checksum",
+      "field": "prepared_receptor_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_receptor",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/3wz8_receptor",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3wz8",
+      "complex_id": "3wz8",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_ligand_checksum",
+      "field": "prepared_ligand_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_ligand",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/3wz8_ligand",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3pww",
+      "complex_id": "3pww",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_receptor_checksum",
+      "field": "prepared_receptor_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_receptor",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/3pww_receptor",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3pww",
+      "complex_id": "3pww",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_ligand_checksum",
+      "field": "prepared_ligand_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_ligand",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/3pww_ligand",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3prs",
+      "complex_id": "3prs",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_receptor_checksum",
+      "field": "prepared_receptor_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_receptor",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/3prs_receptor",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3prs",
+      "complex_id": "3prs",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_ligand_checksum",
+      "field": "prepared_ligand_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_ligand",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/3prs_ligand",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3uri",
+      "complex_id": "3uri",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_receptor_checksum",
+      "field": "prepared_receptor_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_receptor",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/3uri_receptor",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3uri",
+      "complex_id": "3uri",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_ligand_checksum",
+      "field": "prepared_ligand_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_ligand",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/3uri_ligand",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_4m0z",
+      "complex_id": "4m0z",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_receptor_checksum",
+      "field": "prepared_receptor_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_receptor",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/4m0z_receptor",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_4m0z",
+      "complex_id": "4m0z",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_ligand_checksum",
+      "field": "prepared_ligand_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_ligand",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/4m0z_ligand",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_4m0y",
+      "complex_id": "4m0y",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_receptor_checksum",
+      "field": "prepared_receptor_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_receptor",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/4m0y_receptor",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_4m0y",
+      "complex_id": "4m0y",
+      "expected_checksum": "",
+      "expected_checksum_field": "prepared_ligand_checksum",
+      "field": "prepared_ligand_path",
+      "file_group": "prepared_input_file",
+      "file_role": "prepared_ligand",
+      "operator_action": "prepare_vina_gnina_input_and_record_checksum",
+      "path": "prepared/4m0y_ligand",
+      "source_license_or_accession": "",
+      "source_url": "",
+      "status": "operator_completion_required"
+    }
   ],
   "receipt_ref_fields": [
     "vina_config_ref",
@@ -1676,6 +3397,548 @@
     "vina_run_receipt_ref",
     "gnina_run_receipt_ref",
     "input_preparation_provenance_ref"
+  ],
+  "receipt_ref_plan": [
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_4llx",
+      "complex_id": "4llx",
+      "field": "vina_config_ref",
+      "operator_action": "attach_vina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_4llx",
+      "complex_id": "4llx",
+      "field": "gnina_config_ref",
+      "operator_action": "attach_gnina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_4llx",
+      "complex_id": "4llx",
+      "field": "vina_run_receipt_ref",
+      "operator_action": "attach_vina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_4llx",
+      "complex_id": "4llx",
+      "field": "gnina_run_receipt_ref",
+      "operator_action": "attach_gnina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "ref_missing",
+      "case_id": "casf2016_4llx",
+      "complex_id": "4llx",
+      "field": "input_preparation_provenance_ref",
+      "operator_action": "attach_input_preparation_provenance_ref",
+      "ref": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_5c28",
+      "complex_id": "5c28",
+      "field": "vina_config_ref",
+      "operator_action": "attach_vina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_5c28/vina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_5c28",
+      "complex_id": "5c28",
+      "field": "gnina_config_ref",
+      "operator_action": "attach_gnina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_5c28",
+      "complex_id": "5c28",
+      "field": "vina_run_receipt_ref",
+      "operator_action": "attach_vina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_5c28/vina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_5c28",
+      "complex_id": "5c28",
+      "field": "gnina_run_receipt_ref",
+      "operator_action": "attach_gnina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "ref_missing",
+      "case_id": "casf2016_5c28",
+      "complex_id": "5c28",
+      "field": "input_preparation_provenance_ref",
+      "operator_action": "attach_input_preparation_provenance_ref",
+      "ref": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3uuo",
+      "complex_id": "3uuo",
+      "field": "vina_config_ref",
+      "operator_action": "attach_vina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3uuo",
+      "complex_id": "3uuo",
+      "field": "gnina_config_ref",
+      "operator_action": "attach_gnina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3uuo",
+      "complex_id": "3uuo",
+      "field": "vina_run_receipt_ref",
+      "operator_action": "attach_vina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3uuo",
+      "complex_id": "3uuo",
+      "field": "gnina_run_receipt_ref",
+      "operator_action": "attach_gnina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "ref_missing",
+      "case_id": "casf2016_3uuo",
+      "complex_id": "3uuo",
+      "field": "input_preparation_provenance_ref",
+      "operator_action": "attach_input_preparation_provenance_ref",
+      "ref": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3ui7",
+      "complex_id": "3ui7",
+      "field": "vina_config_ref",
+      "operator_action": "attach_vina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3ui7",
+      "complex_id": "3ui7",
+      "field": "gnina_config_ref",
+      "operator_action": "attach_gnina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3ui7",
+      "complex_id": "3ui7",
+      "field": "vina_run_receipt_ref",
+      "operator_action": "attach_vina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3ui7",
+      "complex_id": "3ui7",
+      "field": "gnina_run_receipt_ref",
+      "operator_action": "attach_gnina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "ref_missing",
+      "case_id": "casf2016_3ui7",
+      "complex_id": "3ui7",
+      "field": "input_preparation_provenance_ref",
+      "operator_action": "attach_input_preparation_provenance_ref",
+      "ref": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_5c2h",
+      "complex_id": "5c2h",
+      "field": "vina_config_ref",
+      "operator_action": "attach_vina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_5c2h",
+      "complex_id": "5c2h",
+      "field": "gnina_config_ref",
+      "operator_action": "attach_gnina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_5c2h",
+      "complex_id": "5c2h",
+      "field": "vina_run_receipt_ref",
+      "operator_action": "attach_vina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_5c2h",
+      "complex_id": "5c2h",
+      "field": "gnina_run_receipt_ref",
+      "operator_action": "attach_gnina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "ref_missing",
+      "case_id": "casf2016_5c2h",
+      "complex_id": "5c2h",
+      "field": "input_preparation_provenance_ref",
+      "operator_action": "attach_input_preparation_provenance_ref",
+      "ref": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_2v00",
+      "complex_id": "2v00",
+      "field": "vina_config_ref",
+      "operator_action": "attach_vina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_2v00/vina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_2v00",
+      "complex_id": "2v00",
+      "field": "gnina_config_ref",
+      "operator_action": "attach_gnina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_2v00",
+      "complex_id": "2v00",
+      "field": "vina_run_receipt_ref",
+      "operator_action": "attach_vina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_2v00/vina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_2v00",
+      "complex_id": "2v00",
+      "field": "gnina_run_receipt_ref",
+      "operator_action": "attach_gnina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "ref_missing",
+      "case_id": "casf2016_2v00",
+      "complex_id": "2v00",
+      "field": "input_preparation_provenance_ref",
+      "operator_action": "attach_input_preparation_provenance_ref",
+      "ref": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3wz8",
+      "complex_id": "3wz8",
+      "field": "vina_config_ref",
+      "operator_action": "attach_vina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3wz8",
+      "complex_id": "3wz8",
+      "field": "gnina_config_ref",
+      "operator_action": "attach_gnina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3wz8",
+      "complex_id": "3wz8",
+      "field": "vina_run_receipt_ref",
+      "operator_action": "attach_vina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3wz8",
+      "complex_id": "3wz8",
+      "field": "gnina_run_receipt_ref",
+      "operator_action": "attach_gnina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "ref_missing",
+      "case_id": "casf2016_3wz8",
+      "complex_id": "3wz8",
+      "field": "input_preparation_provenance_ref",
+      "operator_action": "attach_input_preparation_provenance_ref",
+      "ref": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3pww",
+      "complex_id": "3pww",
+      "field": "vina_config_ref",
+      "operator_action": "attach_vina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3pww/vina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3pww",
+      "complex_id": "3pww",
+      "field": "gnina_config_ref",
+      "operator_action": "attach_gnina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3pww",
+      "complex_id": "3pww",
+      "field": "vina_run_receipt_ref",
+      "operator_action": "attach_vina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3pww/vina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3pww",
+      "complex_id": "3pww",
+      "field": "gnina_run_receipt_ref",
+      "operator_action": "attach_gnina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "ref_missing",
+      "case_id": "casf2016_3pww",
+      "complex_id": "3pww",
+      "field": "input_preparation_provenance_ref",
+      "operator_action": "attach_input_preparation_provenance_ref",
+      "ref": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3prs",
+      "complex_id": "3prs",
+      "field": "vina_config_ref",
+      "operator_action": "attach_vina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3prs/vina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3prs",
+      "complex_id": "3prs",
+      "field": "gnina_config_ref",
+      "operator_action": "attach_gnina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3prs",
+      "complex_id": "3prs",
+      "field": "vina_run_receipt_ref",
+      "operator_action": "attach_vina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3prs/vina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3prs",
+      "complex_id": "3prs",
+      "field": "gnina_run_receipt_ref",
+      "operator_action": "attach_gnina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "ref_missing",
+      "case_id": "casf2016_3prs",
+      "complex_id": "3prs",
+      "field": "input_preparation_provenance_ref",
+      "operator_action": "attach_input_preparation_provenance_ref",
+      "ref": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3uri",
+      "complex_id": "3uri",
+      "field": "vina_config_ref",
+      "operator_action": "attach_vina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3uri/vina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3uri",
+      "complex_id": "3uri",
+      "field": "gnina_config_ref",
+      "operator_action": "attach_gnina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3uri",
+      "complex_id": "3uri",
+      "field": "vina_run_receipt_ref",
+      "operator_action": "attach_vina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3uri/vina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_3uri",
+      "complex_id": "3uri",
+      "field": "gnina_run_receipt_ref",
+      "operator_action": "attach_gnina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "ref_missing",
+      "case_id": "casf2016_3uri",
+      "complex_id": "3uri",
+      "field": "input_preparation_provenance_ref",
+      "operator_action": "attach_input_preparation_provenance_ref",
+      "ref": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_4m0z",
+      "complex_id": "4m0z",
+      "field": "vina_config_ref",
+      "operator_action": "attach_vina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_4m0z",
+      "complex_id": "4m0z",
+      "field": "gnina_config_ref",
+      "operator_action": "attach_gnina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_4m0z",
+      "complex_id": "4m0z",
+      "field": "vina_run_receipt_ref",
+      "operator_action": "attach_vina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_4m0z",
+      "complex_id": "4m0z",
+      "field": "gnina_run_receipt_ref",
+      "operator_action": "attach_gnina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "ref_missing",
+      "case_id": "casf2016_4m0z",
+      "complex_id": "4m0z",
+      "field": "input_preparation_provenance_ref",
+      "operator_action": "attach_input_preparation_provenance_ref",
+      "ref": "",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_4m0y",
+      "complex_id": "4m0y",
+      "field": "vina_config_ref",
+      "operator_action": "attach_vina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_4m0y",
+      "complex_id": "4m0y",
+      "field": "gnina_config_ref",
+      "operator_action": "attach_gnina_config_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_config.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_4m0y",
+      "complex_id": "4m0y",
+      "field": "vina_run_receipt_ref",
+      "operator_action": "attach_vina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "local_ref_not_found",
+      "case_id": "casf2016_4m0y",
+      "complex_id": "4m0y",
+      "field": "gnina_run_receipt_ref",
+      "operator_action": "attach_gnina_run_receipt_ref",
+      "ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_run_receipt.json",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "ref_missing",
+      "case_id": "casf2016_4m0y",
+      "complex_id": "4m0y",
+      "field": "input_preparation_provenance_ref",
+      "operator_action": "attach_input_preparation_provenance_ref",
+      "ref": "",
+      "status": "operator_completion_required"
+    }
   ],
   "required_fields": [
     "case_id",
@@ -1708,7 +3971,369 @@
   "reuse_policy": "public_benchmark_vina_gnina_input_manifest_template_preflight",
   "reused_evidence": false,
   "schema_version": "public-benchmark-vina-gnina-input-manifest-template-preflight.v1",
-  "source_commit_sha": "c52803fa473f323c2029660eb441e778329c2efa",
+  "source_commit_sha": "ee98c55c82d83b224e239a01f8355cc9422f8b08",
+  "source_file_acquisition_plan": [
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_4llx",
+      "complex_id": "4llx",
+      "expected_checksum": "sha256:ee6be565638c58d9b608a5cb79a98dae39566a60b4ae019ea6a23a45c2b7a834",
+      "expected_checksum_field": "protein_structure_checksum",
+      "field": "protein_structure_path",
+      "file_group": "official_source_file",
+      "file_role": "source_protein_structure",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/4llx/4llx_protein.pdb",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_4llx",
+      "complex_id": "4llx",
+      "expected_checksum": "sha256:a6298d4cdddb5d1926ca09bcb5e1412ecd2699476f3ae1fa086d3d335efaa6f1",
+      "expected_checksum_field": "reference_ligand_checksum",
+      "field": "reference_ligand_path",
+      "file_group": "official_source_file",
+      "file_role": "source_reference_ligand",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/4llx/4llx_ligand.sdf",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_5c28",
+      "complex_id": "5c28",
+      "expected_checksum": "sha256:ac3677c62abb2e549c4e3f4a6185663da16028e7e1b1e6ef875da956e77639b0",
+      "expected_checksum_field": "protein_structure_checksum",
+      "field": "protein_structure_path",
+      "file_group": "official_source_file",
+      "file_role": "source_protein_structure",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/5c28/5c28_protein.pdb",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_5c28",
+      "complex_id": "5c28",
+      "expected_checksum": "sha256:7df337dcb033a69f6db8d229749489e45ba9695a4a2e9bdf5593a51ae66eaf87",
+      "expected_checksum_field": "reference_ligand_checksum",
+      "field": "reference_ligand_path",
+      "file_group": "official_source_file",
+      "file_role": "source_reference_ligand",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/5c28/5c28_ligand.sdf",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3uuo",
+      "complex_id": "3uuo",
+      "expected_checksum": "sha256:80b28a058a5a2da46bc2e3e91e26c1e14c4f2fd7514c051559b017ab0e93dcf9",
+      "expected_checksum_field": "protein_structure_checksum",
+      "field": "protein_structure_path",
+      "file_group": "official_source_file",
+      "file_role": "source_protein_structure",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/3uuo/3uuo_protein.pdb",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3uuo",
+      "complex_id": "3uuo",
+      "expected_checksum": "sha256:7eedba7f908c0ba267dbe8af02294fcd148064d25cde772d62dded9737258ce5",
+      "expected_checksum_field": "reference_ligand_checksum",
+      "field": "reference_ligand_path",
+      "file_group": "official_source_file",
+      "file_role": "source_reference_ligand",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/3uuo/3uuo_ligand.sdf",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3ui7",
+      "complex_id": "3ui7",
+      "expected_checksum": "sha256:62a51c4d5a96b8b2b0388e1e9f9dc55763d39996935f1ed30c1bdfd2ef282e0e",
+      "expected_checksum_field": "protein_structure_checksum",
+      "field": "protein_structure_path",
+      "file_group": "official_source_file",
+      "file_role": "source_protein_structure",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/3ui7/3ui7_protein.pdb",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3ui7",
+      "complex_id": "3ui7",
+      "expected_checksum": "sha256:bc6913724d6339af7844e5dedb93010e6e7e706c8da629d1e54a73c2fd2eafa2",
+      "expected_checksum_field": "reference_ligand_checksum",
+      "field": "reference_ligand_path",
+      "file_group": "official_source_file",
+      "file_role": "source_reference_ligand",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/3ui7/3ui7_ligand.sdf",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_5c2h",
+      "complex_id": "5c2h",
+      "expected_checksum": "sha256:59718184b6c4de964136707cca00f1eb1361fff3d24020e28878dbec60e67917",
+      "expected_checksum_field": "protein_structure_checksum",
+      "field": "protein_structure_path",
+      "file_group": "official_source_file",
+      "file_role": "source_protein_structure",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/5c2h/5c2h_protein.pdb",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_5c2h",
+      "complex_id": "5c2h",
+      "expected_checksum": "sha256:7c512908ac4e7157027219b8f09bcede70f8d0621606303a5ff2eceb89033420",
+      "expected_checksum_field": "reference_ligand_checksum",
+      "field": "reference_ligand_path",
+      "file_group": "official_source_file",
+      "file_role": "source_reference_ligand",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/5c2h/5c2h_ligand.sdf",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_2v00",
+      "complex_id": "2v00",
+      "expected_checksum": "sha256:ce00145b46da36a51792628b6322437c7acb30cbc6c165c47443a1ed3d2256fa",
+      "expected_checksum_field": "protein_structure_checksum",
+      "field": "protein_structure_path",
+      "file_group": "official_source_file",
+      "file_role": "source_protein_structure",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/2v00/2v00_protein.pdb",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_2v00",
+      "complex_id": "2v00",
+      "expected_checksum": "sha256:cc87334e0ed4d4d66929e57998fae43785bbe399772967f8a660dfbc106c9b16",
+      "expected_checksum_field": "reference_ligand_checksum",
+      "field": "reference_ligand_path",
+      "file_group": "official_source_file",
+      "file_role": "source_reference_ligand",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/2v00/2v00_ligand.sdf",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3wz8",
+      "complex_id": "3wz8",
+      "expected_checksum": "sha256:9de2f60abeea752abc06f866597255ca08fe75bf09cc749f76951adc30b0b45f",
+      "expected_checksum_field": "protein_structure_checksum",
+      "field": "protein_structure_path",
+      "file_group": "official_source_file",
+      "file_role": "source_protein_structure",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/3wz8/3wz8_protein.pdb",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3wz8",
+      "complex_id": "3wz8",
+      "expected_checksum": "sha256:33a3b8306ae40623d38a5af2a883037a17472f18ba58141456f7bdf8abedb03a",
+      "expected_checksum_field": "reference_ligand_checksum",
+      "field": "reference_ligand_path",
+      "file_group": "official_source_file",
+      "file_role": "source_reference_ligand",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/3wz8/3wz8_ligand.sdf",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3pww",
+      "complex_id": "3pww",
+      "expected_checksum": "sha256:351db504aee7d52f588e720c0f9d88ceb65fa738aa9a3d393ec5cbed4af96efb",
+      "expected_checksum_field": "protein_structure_checksum",
+      "field": "protein_structure_path",
+      "file_group": "official_source_file",
+      "file_role": "source_protein_structure",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/3pww/3pww_protein.pdb",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3pww",
+      "complex_id": "3pww",
+      "expected_checksum": "sha256:e4cc5a4f6f900a00cd2ce5976a3603d38204f0c288774f5650e35ab7e6324d0b",
+      "expected_checksum_field": "reference_ligand_checksum",
+      "field": "reference_ligand_path",
+      "file_group": "official_source_file",
+      "file_role": "source_reference_ligand",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/3pww/3pww_ligand.sdf",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3prs",
+      "complex_id": "3prs",
+      "expected_checksum": "sha256:6a294ddeb8eaaf9a876ac9ad7a3e2715da586fdb7877d4cac306d4348932e34b",
+      "expected_checksum_field": "protein_structure_checksum",
+      "field": "protein_structure_path",
+      "file_group": "official_source_file",
+      "file_role": "source_protein_structure",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/3prs/3prs_protein.pdb",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3prs",
+      "complex_id": "3prs",
+      "expected_checksum": "sha256:4625a72478cc0940022b39b2059e0d7115a20eaf6b845ecde8b17a195fba0911",
+      "expected_checksum_field": "reference_ligand_checksum",
+      "field": "reference_ligand_path",
+      "file_group": "official_source_file",
+      "file_role": "source_reference_ligand",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/3prs/3prs_ligand.sdf",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3uri",
+      "complex_id": "3uri",
+      "expected_checksum": "sha256:03b1b8c59bd72520faca258f2a1c4a5677e161bf3ace4a9df3ae7003d585f8b1",
+      "expected_checksum_field": "protein_structure_checksum",
+      "field": "protein_structure_path",
+      "file_group": "official_source_file",
+      "file_role": "source_protein_structure",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/3uri/3uri_protein.pdb",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_3uri",
+      "complex_id": "3uri",
+      "expected_checksum": "sha256:9091e3949535eeae0afa1e80484ece0e71e6809c44d81072130b54f81f440a85",
+      "expected_checksum_field": "reference_ligand_checksum",
+      "field": "reference_ligand_path",
+      "file_group": "official_source_file",
+      "file_role": "source_reference_ligand",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/3uri/3uri_ligand.sdf",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_4m0z",
+      "complex_id": "4m0z",
+      "expected_checksum": "sha256:8eb56910faa3eb78ca1b8c244b01bf6094f2838a4db08a0b5198b68e6a96242d",
+      "expected_checksum_field": "protein_structure_checksum",
+      "field": "protein_structure_path",
+      "file_group": "official_source_file",
+      "file_role": "source_protein_structure",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/4m0z/4m0z_protein.pdb",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_4m0z",
+      "complex_id": "4m0z",
+      "expected_checksum": "sha256:533af481c8fe734256312a30791bfbb12eb5796e26409942c66581fb8ef60f07",
+      "expected_checksum_field": "reference_ligand_checksum",
+      "field": "reference_ligand_path",
+      "file_group": "official_source_file",
+      "file_role": "source_reference_ligand",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/4m0z/4m0z_ligand.sdf",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_4m0y",
+      "complex_id": "4m0y",
+      "expected_checksum": "sha256:f2b1040546ed7c6d01e4ef39996afcc283be189a42df7bde3773db0d2ecbe7bc",
+      "expected_checksum_field": "protein_structure_checksum",
+      "field": "protein_structure_path",
+      "file_group": "official_source_file",
+      "file_role": "source_protein_structure",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/4m0y/4m0y_protein.pdb",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    },
+    {
+      "blocker": "path_not_found",
+      "case_id": "casf2016_4m0y",
+      "complex_id": "4m0y",
+      "expected_checksum": "sha256:65f2c98b8958e739f98b243924513e3ff3068d536665a7b0e27fefa81a0e0dfc",
+      "expected_checksum_field": "reference_ligand_checksum",
+      "field": "reference_ligand_path",
+      "file_group": "official_source_file",
+      "file_role": "source_reference_ligand",
+      "operator_action": "acquire_from_official_casf_archive_and_verify_checksum",
+      "path": "CASF-2016/coreset/4m0y/4m0y_ligand.sdf",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "status": "operator_completion_required"
+    }
+  ],
   "status": "operator_manifest_completion_required",
   "summary": {
     "duplicate_case_id_count": 0,
@@ -1719,6 +4344,12 @@
     "missing_local_file_count": 48,
     "missing_receipt_ref_count": 60,
     "missing_required_value_count": 36,
+    "prepared_input_missing_count": 24,
+    "prepared_input_requirement_count": 24,
+    "receipt_ref_missing_count": 60,
+    "receipt_ref_requirement_count": 60,
+    "source_file_missing_count": 24,
+    "source_file_requirement_count": 24,
     "template_case_count": 12,
     "template_case_coverage_complete": true,
     "template_row_count": 12,
