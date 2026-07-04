@@ -27,6 +27,9 @@ DEFAULT_POCKETMD_REFINEMENT_PLAN = (
 DEFAULT_POCKETMD_TOPK_ROWS_TEMPLATE_PREFLIGHT = (
     PRODUCTIZATION / "pocketmd_lite_topk_rows_template_preflight.json"
 )
+DEFAULT_POCKETMD_TOPK_SURVIVAL_REPORT = (
+    PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json"
+)
 DEFAULT_VINA_GNINA_RUNTIME_READINESS = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_runtime_readiness.json"
 )
@@ -344,6 +347,8 @@ def _pocketmd_top_k_slot_detail(
     artifact: Path,
     template_preflight: dict[str, Any],
     template_preflight_artifact: Path,
+    survival_report: dict[str, Any],
+    survival_report_artifact: Path,
 ) -> dict[str, Any]:
     if not refinement_plan:
         return {}
@@ -354,6 +359,7 @@ def _pocketmd_top_k_slot_detail(
     ]
     summary = _as_dict(refinement_plan.get("top_k_slot_status_summary"))
     template_preflight_summary = _as_dict(template_preflight.get("summary"))
+    survival_summary = _as_dict(survival_report.get("summary"))
     return {
         "artifact": str(artifact),
         "status": str(refinement_plan.get("status") or ""),
@@ -402,6 +408,41 @@ def _pocketmd_top_k_slot_detail(
             ),
             "commands": _as_dict(template_preflight.get("commands")),
             "claim_boundary": str(template_preflight.get("claim_boundary") or ""),
+        },
+        "survival_report": {
+            "artifact": str(survival_report_artifact),
+            "status": str(survival_report.get("status") or ""),
+            "contract_pass": bool(survival_report.get("contract_pass")),
+            "product_surface_ready": bool(
+                survival_report.get("product_surface_ready")
+            ),
+            "first_blocked_target": str(
+                survival_report.get("first_blocked_target") or ""
+            ),
+            "blocker_count": len(_as_list(survival_report.get("blockers"))),
+            "blockers": [
+                str(item) for item in _as_list(survival_report.get("blockers"))
+            ],
+            "real_refinement_case_count": _as_int(
+                survival_summary.get("real_refinement_case_count")
+            ),
+            "top_k_candidate_count": _as_int(
+                survival_summary.get("top_k_candidate_count")
+            ),
+            "local_min_survival_rate": survival_summary.get(
+                "local_min_survival_rate"
+            ),
+            "contact_persistence_rate_median": survival_summary.get(
+                "contact_persistence_rate_median"
+            ),
+            "h_bond_persistence_rate_median": survival_summary.get(
+                "h_bond_persistence_rate_median"
+            ),
+            "clash_relief_rate": survival_summary.get("clash_relief_rate"),
+            "uncertainty_width_median": survival_summary.get(
+                "uncertainty_width_median"
+            ),
+            "claim_boundary": str(survival_report.get("claim_boundary") or ""),
         },
         "first_missing_candidate_slot": _as_dict(
             summary.get("first_missing_candidate_slot")
@@ -930,12 +971,14 @@ def _unblock_plan_refinement_action_packet(
     first_blocked_source_receipt = _as_dict(
         input_source_receipt_summary.get("first_blocked_receipt")
     )
+    survival_report = _as_dict(detail.get("survival_report"))
     if (
         not first_missing_candidate_slot
         and not first_blocked_role_receipt
         and not first_blocked_source_receipt
         and not top_k_action
         and not row_preflight_action
+        and not survival_report
     ):
         return {}
 
@@ -973,6 +1016,7 @@ def _unblock_plan_refinement_action_packet(
         "first_blocked_operator_input_source_receipt": (
             first_blocked_source_receipt
         ),
+        "survival_report": survival_report,
         "commands": _as_dict(unblock.get("commands")),
         "claim_boundary": str(
             top_k_action.get("claim_boundary") or unblock.get("claim_boundary") or ""
@@ -1058,6 +1102,11 @@ def _blocking_input_unblock_plan(
                 row_payload["first_blocked_operator_input_source_receipt"] = (
                     first_source_receipt
                 )
+            survival_report = _as_dict(
+                refinement_action_packet.get("survival_report")
+            )
+            if survival_report:
+                row_payload["survival_report"] = survival_report
         rows.append(row_payload)
     return rows
 
@@ -1238,6 +1287,10 @@ def build_science_actual_closure_operator_handoff(
         repo_root,
         DEFAULT_POCKETMD_TOPK_ROWS_TEMPLATE_PREFLIGHT,
     )
+    pocketmd_survival_report = _load_json(
+        repo_root,
+        DEFAULT_POCKETMD_TOPK_SURVIVAL_REPORT,
+    )
     vina_gnina_runtime_readiness = _load_json(
         repo_root,
         DEFAULT_VINA_GNINA_RUNTIME_READINESS,
@@ -1253,6 +1306,8 @@ def build_science_actual_closure_operator_handoff(
             artifact=DEFAULT_POCKETMD_REFINEMENT_PLAN,
             template_preflight=pocketmd_template_preflight,
             template_preflight_artifact=DEFAULT_POCKETMD_TOPK_ROWS_TEMPLATE_PREFLIGHT,
+            survival_report=pocketmd_survival_report,
+            survival_report_artifact=DEFAULT_POCKETMD_TOPK_SURVIVAL_REPORT,
         ),
         "vina_gnina_rows": _vina_gnina_engine_run_slot_detail(
             vina_gnina_runtime_readiness,
@@ -1315,6 +1370,7 @@ def build_science_actual_closure_operator_handoff(
                 audit_path,
                 DEFAULT_POCKETMD_REFINEMENT_PLAN,
                 DEFAULT_POCKETMD_TOPK_ROWS_TEMPLATE_PREFLIGHT,
+                DEFAULT_POCKETMD_TOPK_SURVIVAL_REPORT,
                 DEFAULT_VINA_GNINA_RUNTIME_READINESS,
                 DEFAULT_GPCR_SUITE_REPORT,
             ],
@@ -1533,6 +1589,7 @@ def _markdown(payload: dict[str, Any]) -> str:
                     "first_blocked_operator_input_source_receipt"
                 )
             )
+            survival_report = _as_dict(refinement_action.get("survival_report"))
             first_blocked_slot_refs = []
             if first_case_slot:
                 first_blocked_slot_refs.append(
@@ -1564,6 +1621,13 @@ def _markdown(payload: dict[str, Any]) -> str:
                     "source:"
                     f"{first_source_receipt.get('field', '')}/"
                     f"{first_source_receipt.get('operator_action', '')}"
+                )
+            if survival_report and str(
+                survival_report.get("first_blocked_target") or ""
+            ):
+                first_blocked_slot_refs.append(
+                    "report:"
+                    f"{survival_report.get('first_blocked_target', '')}"
                 )
             preflight_refs = [
                 artifacts[key] for key in preflight_keys if str(artifacts.get(key) or "")
@@ -1625,6 +1689,9 @@ def _markdown(payload: dict[str, Any]) -> str:
                 template_preflight_commands = _as_dict(
                     template_preflight.get("commands")
                 )
+                survival_report = _as_dict(
+                    row_input_detail.get("survival_report")
+                )
                 lines.extend(["", "### PocketMD Top-k Candidate Slots", ""])
                 if operator_unblock:
                     lines.extend(
@@ -1648,6 +1715,20 @@ def _markdown(payload: dict[str, Any]) -> str:
                             f"`{template_preflight.get('missing_receipt_value_count')}`",
                             "- `row_template_preflight_write_command`: "
                             f"`{template_preflight_commands.get('write_preflight', '')}`",
+                        ]
+                    )
+                if survival_report:
+                    lines.extend(
+                        [
+                            f"- `survival_report_status`: `{survival_report.get('status')}`",
+                            "- `survival_report_contract_pass`: "
+                            f"`{survival_report.get('contract_pass')}`",
+                            "- `survival_report_first_blocked_target`: "
+                            f"`{survival_report.get('first_blocked_target')}`",
+                            "- `survival_report_blocker_count`: "
+                            f"`{survival_report.get('blocker_count')}`",
+                            "- `survival_report_blockers`: "
+                            f"{_code_join(_as_list(survival_report.get('blockers')))}",
                         ]
                     )
                 lines.extend(

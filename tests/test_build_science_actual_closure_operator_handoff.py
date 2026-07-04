@@ -218,12 +218,33 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert pocketmd_refinement_action[
         "first_blocked_operator_input_source_receipt"
     ]["field"] == "source_id"
+    survival_report = pocketmd_refinement_action["survival_report"]
+    assert survival_report["status"] == "operator_evidence_required"
+    assert survival_report["contract_pass"] is False
+    assert survival_report["product_surface_ready"] is False
+    assert survival_report["first_blocked_target"] == (
+        "top_k_refinement_operator_intake"
+    )
+    assert survival_report["blocker_count"] == 6
+    assert survival_report["blockers"] == [
+        "pocketmd_lite_topk_candidate_rows_missing",
+        "pocketmd_lite_local_min_survival_rows_missing",
+        "pocketmd_lite_contact_persistence_rows_missing",
+        "pocketmd_lite_h_bond_persistence_rows_missing",
+        "pocketmd_lite_clash_relief_rows_missing",
+        "pocketmd_lite_uncertainty_rows_missing",
+    ]
+    assert survival_report["real_refinement_case_count"] == 0
+    assert survival_report["top_k_candidate_count"] == 0
     assert unblock_plan["pocketmd_rows"][
         "first_missing_candidate_slot"
     ] == pocketmd_refinement_action["first_missing_candidate_slot"]
     assert unblock_plan["pocketmd_rows"][
         "first_blocked_role_receipt"
     ] == pocketmd_refinement_action["first_blocked_role_receipt"]
+    assert unblock_plan["pocketmd_rows"][
+        "survival_report"
+    ] == pocketmd_refinement_action["survival_report"]
     assert unblock_plan["pocketmd_rows"]["commands"][
         "materialize_survival_report"
     ].startswith("python3 scripts/materialize_pocketmd_lite_topk_survival_report.py")
@@ -853,6 +874,10 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     ].startswith("sha256:")
     assert payload["input_checksums"][
         "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_survival_report.json"
+    ].startswith("sha256:")
+    assert payload["input_checksums"][
+        "implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_runtime_readiness.json"
     ].startswith("sha256:")
     assert payload["input_checksums"][
@@ -891,6 +916,7 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
         "pocketmd_lite_case_001_rank_01"
     ) in markdown
     assert "source:source_id/attach_operator_input_source_source_id" in markdown
+    assert "report:top_k_refinement_operator_intake" in markdown
     assert "## Blocked Component Actions" in markdown
     assert "public_benchmark_phase2_actual_closure" in markdown
     assert "pocketmd_lite_topk_actual_closure" in markdown
@@ -978,6 +1004,10 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "`operator_unblock_status`: `operator_refinement_rows_required`" in markdown
     assert "pocketmd_lite_topk_rows_template_preflight.json" in markdown
     assert "build_pocketmd_lite_topk_rows_template_preflight.py" in markdown
+    assert "`survival_report_status`: `operator_evidence_required`" in markdown
+    assert "`survival_report_first_blocked_target`: `top_k_refinement_operator_intake`" in markdown
+    assert "`survival_report_blocker_count`: `6`" in markdown
+    assert "pocketmd_lite_uncertainty_rows_missing" in markdown
     assert "`row_template_preflight_status`: `operator_rows_completion_required`" in markdown
     assert "`row_template_preflight_ready`: `False`" in markdown
     assert "pocketmd_lite_case_001_rank_01" in markdown

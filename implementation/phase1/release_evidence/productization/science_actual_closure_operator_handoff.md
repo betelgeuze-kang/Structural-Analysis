@@ -37,7 +37,7 @@
 | Row Input | Status | Expected Rows | First Step | First Blocked Slot | Preflight Artifacts | Primary Command |
 | --- | --- | --- | --- | --- | --- | --- |
 | `vina_gnina_rows` | `engine_inputs_required` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `review_public_benchmark_vina_gnina_input_manifest_template_preflight` | `case:casf2016_4llx/fill_vina_gnina_input_manifest_row_for_casf2016_4llx`, `engine:casf2016_4llx/vina/casf2016_4llx_vina_run` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` |
-| `pocketmd_rows` | `operator_refinement_rows_required` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `preflight_pocketmd_lite_topk_rows_template` | `candidate:pocketmd_lite_case_001_rank_01/attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01`, `role:upstream_top_k_candidate_scope_receipt/pocketmd_lite_case_001_rank_01`, `source:source_id/attach_operator_input_source_source_id` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json` | `python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md` |
+| `pocketmd_rows` | `operator_refinement_rows_required` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `preflight_pocketmd_lite_topk_rows_template` | `candidate:pocketmd_lite_case_001_rank_01/attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01`, `role:upstream_top_k_candidate_scope_receipt/pocketmd_lite_case_001_rank_01`, `source:source_id/attach_operator_input_source_source_id`, `report:top_k_refinement_operator_intake` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json` | `python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md` |
 
 ## Missing Row Packet
 
@@ -92,6 +92,11 @@
 - `row_template_preflight_missing_metric_value_count`: `42`
 - `row_template_preflight_missing_receipt_value_count`: `24`
 - `row_template_preflight_write_command`: `python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md`
+- `survival_report_status`: `operator_evidence_required`
+- `survival_report_contract_pass`: `False`
+- `survival_report_first_blocked_target`: `top_k_refinement_operator_intake`
+- `survival_report_blocker_count`: `6`
+- `survival_report_blockers`: `pocketmd_lite_topk_candidate_rows_missing`, `pocketmd_lite_local_min_survival_rows_missing`, `pocketmd_lite_contact_persistence_rows_missing`, `pocketmd_lite_h_bond_persistence_rows_missing`, `pocketmd_lite_clash_relief_rows_missing`, `pocketmd_lite_uncertainty_rows_missing`
 | Slot | Case | Rank | Status | Action |
 | --- | --- | --- | --- | --- |
 | `pocketmd_lite_case_001_rank_01` | `pocketmd_lite_case_001` | `1` | `missing` | `attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01` |
