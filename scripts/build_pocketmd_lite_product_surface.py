@@ -161,6 +161,21 @@ def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _as_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
+def _as_int(value: Any) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
 def _csv_cell(value: Any) -> Any:
     if isinstance(value, (dict, list)):
         return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
@@ -463,6 +478,140 @@ def _refinement_execution_plan_summary(
     }
 
 
+def _compact_pocketmd_row_preflight_action(
+    action: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "status": str(action.get("status") or ""),
+        "expected_rows_artifact": str(action.get("expected_rows_artifact") or ""),
+        "template_preflight_artifact": str(
+            action.get("template_preflight_artifact") or ""
+        ),
+        "template_preflight_markdown_artifact": str(
+            action.get("template_preflight_markdown_artifact") or ""
+        ),
+        "build_template_preflight_command": str(
+            action.get("build_template_preflight_command") or ""
+        ),
+        "import_rows_command": str(action.get("import_rows_command") or ""),
+        "verify_science_actual_closure_command": str(
+            action.get("verify_science_actual_closure_command") or ""
+        ),
+        "supported_candidate_paths": [
+            str(row) for row in _as_list(action.get("supported_candidate_paths"))
+        ],
+        "detected_row_artifact_count": _as_int(
+            action.get("detected_row_artifact_count")
+        ),
+        "selected_path": str(action.get("selected_path") or ""),
+        "selected_row_count": _as_int(action.get("selected_row_count")),
+        "validated_row_count": _as_int(action.get("validated_row_count")),
+        "covered_required_slot_count": _as_int(
+            action.get("covered_required_slot_count")
+        ),
+        "required_candidate_slot_count": _as_int(
+            action.get("required_candidate_slot_count")
+        ),
+        "missing_required_slot_count": len(
+            _as_list(action.get("missing_required_slots"))
+        ),
+        "first_missing_required_slot": (
+            _as_list(action.get("missing_required_slots"))[0]
+            if _as_list(action.get("missing_required_slots"))
+            else {}
+        ),
+        "blocker": str(action.get("blocker") or ""),
+        "template_safety_policy": _as_dict(action.get("template_safety_policy")),
+    }
+
+
+def _compact_pocketmd_top_k_rows_action(
+    action: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "status": str(action.get("status") or ""),
+        "expected_rows_artifact": str(action.get("expected_rows_artifact") or ""),
+        "template_artifact": str(action.get("template_artifact") or ""),
+        "template_preflight_artifact": str(
+            action.get("template_preflight_artifact") or ""
+        ),
+        "template_preflight_markdown_artifact": str(
+            action.get("template_preflight_markdown_artifact") or ""
+        ),
+        "build_template_preflight_command": str(
+            action.get("build_template_preflight_command") or ""
+        ),
+        "review_template_command": str(action.get("review_template_command") or ""),
+        "import_rows_command": str(action.get("import_rows_command") or ""),
+        "materialize_survival_command": str(
+            action.get("materialize_survival_command") or ""
+        ),
+        "verify_science_actual_closure_command": str(
+            action.get("verify_science_actual_closure_command") or ""
+        ),
+        "required_receipt_roles": [
+            str(row) for row in _as_list(action.get("required_receipt_roles"))
+        ],
+        "phase4_metric_receipt_action_count": _as_int(
+            action.get("phase4_metric_receipt_action_count")
+        ),
+        "operator_must_fill_or_verify_count": len(
+            _as_list(action.get("operator_must_fill_or_verify"))
+        ),
+        "template_safety_policy": _as_dict(action.get("template_safety_policy")),
+    }
+
+
+def _compact_missing_row_input_actions(
+    source_acquisition_plan: dict[str, Any],
+) -> list[dict[str, Any]]:
+    actions = []
+    for action in _as_list(source_acquisition_plan.get("missing_row_input_actions")):
+        if not isinstance(action, dict):
+            continue
+        row_preflight_action = _as_dict(action.get("row_preflight_action_packet"))
+        top_k_rows_action = _as_dict(action.get("top_k_rows_action_packet"))
+        actions.append(
+            {
+                "row_input_id": str(action.get("row_input_id") or ""),
+                "status": str(action.get("status") or ""),
+                "operator_action": str(action.get("operator_action") or ""),
+                "default_row_artifact": str(action.get("default_row_artifact") or ""),
+                "accepted_formats": [
+                    str(row) for row in _as_list(action.get("accepted_formats"))
+                ],
+                "required_case_count": _as_int(action.get("required_case_count")),
+                "required_total_candidate_rows": _as_int(
+                    action.get("required_total_candidate_rows")
+                ),
+                "required_candidate_slot_count": _as_int(
+                    action.get("required_candidate_slot_count")
+                ),
+                "required_receipt_roles": [
+                    str(row)
+                    for row in _as_list(action.get("required_receipt_roles"))
+                ],
+                "closes_phase4_criteria": [
+                    str(row)
+                    for row in _as_list(action.get("closes_phase4_criteria"))
+                ],
+                "commands": _as_dict(action.get("commands")),
+                "row_preflight_action_packet": (
+                    _compact_pocketmd_row_preflight_action(row_preflight_action)
+                    if row_preflight_action
+                    else {}
+                ),
+                "top_k_rows_action_packet": (
+                    _compact_pocketmd_top_k_rows_action(top_k_rows_action)
+                    if top_k_rows_action
+                    else {}
+                ),
+                "claim_boundary": str(action.get("claim_boundary") or ""),
+            }
+        )
+    return actions
+
+
 def _source_acquisition_plan_summary(
     source_acquisition_plan: dict[str, Any],
 ) -> dict[str, Any]:
@@ -500,6 +649,9 @@ def _source_acquisition_plan_summary(
     )
     if not isinstance(raw_row_candidate_status, dict):
         raw_row_candidate_status = {}
+    missing_row_input_actions = _compact_missing_row_input_actions(
+        source_acquisition_plan
+    )
     return {
         "artifact": str(DEFAULT_SOURCE_ACQUISITION_PLAN_OUT),
         "markdown_artifact": str(DEFAULT_SOURCE_ACQUISITION_PLAN_MD_OUT),
@@ -586,6 +738,11 @@ def _source_acquisition_plan_summary(
             summary.get("detected_row_artifact_count")
             or raw_row_candidate_status.get("detected_row_artifact_count")
             or 0
+        ),
+        "missing_row_input_action_count": len(missing_row_input_actions),
+        "missing_row_input_actions": missing_row_input_actions,
+        "first_missing_row_input_action": (
+            missing_row_input_actions[0] if missing_row_input_actions else {}
         ),
         "blocker_count": int(source_acquisition_plan.get("blocker_count") or 0),
         "blockers": [str(row) for row in blockers],
@@ -1954,6 +2111,35 @@ def _operator_intake_markdown(payload: dict[str, Any]) -> str:
             f"| `{slot['slot_id']}` | `{slot['status']}` | "
             f"`{', '.join(slot['required_case_fields'])}` |"
         )
+    source_actions = [
+        row
+        for row in _as_list(
+            payload["source_acquisition_plan"].get("missing_row_input_actions")
+        )
+        if isinstance(row, dict)
+    ]
+    if source_actions:
+        lines.extend(
+            [
+                "",
+                "## Source Acquisition Actions",
+                "",
+                "| Row Input | Action | Expected Rows | Missing Slots | Template Preflight | Import | Survival |",
+                "|---|---|---|---|---|---|---|",
+            ]
+        )
+        for action in source_actions:
+            row_preflight = _as_dict(action.get("row_preflight_action_packet"))
+            top_k_action = _as_dict(action.get("top_k_rows_action_packet"))
+            lines.append(
+                f"| `{action.get('row_input_id', '')}` | "
+                f"`{action.get('operator_action', '')}` | "
+                f"`{action.get('default_row_artifact', '')}` | "
+                f"`{row_preflight.get('missing_required_slot_count', 0)}` | "
+                f"`{row_preflight.get('template_preflight_artifact', '')}` | "
+                f"`{row_preflight.get('import_rows_command', '')}` | "
+                f"`{top_k_action.get('materialize_survival_command', '')}` |"
+            )
     lines.extend(["", "## Gate Unblock Plan", "", "| Slot | Criteria | Minimum Evidence |"])
     lines.append("|---|---|---|")
     for row in payload["gate_unblock_plan"]:

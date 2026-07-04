@@ -617,6 +617,29 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert operator["source_acquisition_plan"]["actual_closure_ready"] is False
     assert operator["source_acquisition_plan"]["required_case_count"] == 3
     assert operator["source_acquisition_plan"]["required_total_candidate_rows"] == 6
+    assert operator["source_acquisition_plan"]["missing_row_input_action_count"] == 1
+    source_action = operator["source_acquisition_plan"][
+        "first_missing_row_input_action"
+    ]
+    assert source_action["row_input_id"] == "pocketmd_rows"
+    assert source_action["default_row_artifact"].endswith(
+        "pocketmd_lite_topk_rows.json"
+    )
+    assert source_action["row_preflight_action_packet"][
+        "template_preflight_artifact"
+    ].endswith("pocketmd_lite_topk_rows_template_preflight.json")
+    assert source_action["row_preflight_action_packet"][
+        "missing_required_slot_count"
+    ] == 6
+    assert source_action["row_preflight_action_packet"][
+        "import_rows_command"
+    ].startswith("python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py")
+    assert source_action["top_k_rows_action_packet"][
+        "materialize_survival_command"
+    ].startswith("python3 scripts/materialize_pocketmd_lite_topk_survival_report.py")
+    assert source_action["top_k_rows_action_packet"][
+        "phase4_metric_receipt_action_count"
+    ] == 8
     assert operator["source_acquisition_plan"]["refinement_execution_plan"][
         "required_candidate_slot_count"
     ] == 6
@@ -1159,14 +1182,19 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
     assert "# PocketMD Lite Source Acquisition Plan" in source_plan_md_out.read_text(
         encoding="utf-8"
     )
-    assert "# PocketMD Lite Operator Intake Packet" in operator_md_out.read_text(
-        encoding="utf-8"
+    operator_markdown = operator_md_out.read_text(encoding="utf-8")
+    assert "# PocketMD Lite Operator Intake Packet" in operator_markdown
+    assert "## Source Acquisition Actions" in operator_markdown
+    assert "pocketmd_lite_topk_rows_template_preflight.json" in operator_markdown
+    assert "materialize_pocketmd_lite_operator_intake_from_rows.py" in (
+        operator_markdown
     )
-    assert "## Phase 4 Top-k Row Closure Matrix" in operator_md_out.read_text(
-        encoding="utf-8"
+    assert "materialize_pocketmd_lite_topk_survival_report.py" in (
+        operator_markdown
     )
-    assert "CSV Starter" in operator_md_out.read_text(encoding="utf-8")
-    assert str(row_template) in operator_md_out.read_text(encoding="utf-8")
+    assert "## Phase 4 Top-k Row Closure Matrix" in operator_markdown
+    assert "CSV Starter" in operator_markdown
+    assert str(row_template) in operator_markdown
     rows = list(csv.DictReader(row_template.open(encoding="utf-8")))
     assert len(rows) == 6
     assert rows[0] == {

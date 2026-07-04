@@ -14,6 +14,12 @@
 |---|---|---|
 | `top_k_refinement_rows` | `operator_input_required` | `case_id, source_family, top_k_rank, candidate_id, upstream_top_k_provenance_ref, upstream_top_k_source_checksum, pre_refinement_energy_proxy, post_refinement_energy_proxy, local_min_survived, contact_persistence_rate, h_bond_persistence_rate, clash_count_before, clash_count_after, uncertainty_interval, provenance_ref, source_checksum` |
 
+## Source Acquisition Actions
+
+| Row Input | Action | Expected Rows | Missing Slots | Template Preflight | Import | Survival |
+|---|---|---|---|---|---|---|
+| `pocketmd_rows` | `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `6` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json` | `python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>` | `python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked` |
+
 ## Gate Unblock Plan
 
 | Slot | Criteria | Minimum Evidence |
