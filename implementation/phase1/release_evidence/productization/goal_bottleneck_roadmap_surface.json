@@ -62,6 +62,7 @@
           "vina_gnina_rows_not_provided"
         ],
         "current": {
+          "blocked_source_file_count": 0,
           "completion_audit_status": "blocked",
           "completion_blocked_requirement_ids": [
             "vina_gnina_comparison_ready",
@@ -88,6 +89,7 @@
           "missing_row_inputs": [
             "vina_gnina_rows"
           ],
+          "prepared_input_gap_count": 24,
           "requirement_count": 5,
           "requirement_pass_count": 4,
           "runtime_ready_for_engine_execution": false,
@@ -96,8 +98,12 @@
           ],
           "source_actuality_scope": "provided_row_inputs_only",
           "source_actuality_scope_complete": false,
+          "source_file_count": 24,
+          "source_files_ready": true,
+          "source_ready_case_count": 12,
           "template_completion_blocked_case_count": 12,
-          "verified_case_input_count": 0
+          "verified_case_input_count": 0,
+          "verified_source_file_count": 24
         },
         "evidence_artifacts": [
           "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
@@ -646,8 +652,6 @@
         "family_id": "engine_run_slots",
         "first_missing_item": {
           "blockers": [
-            "protein_structure_path_missing",
-            "reference_ligand_path_missing",
             "prepared_receptor_path_missing",
             "prepared_ligand_path_missing",
             "vina_binary_missing"
@@ -1022,8 +1026,6 @@
         "family_id": "engine_run_slots",
         "first_missing_item": {
           "blockers": [
-            "protein_structure_path_missing",
-            "reference_ligand_path_missing",
             "prepared_receptor_path_missing",
             "prepared_ligand_path_missing",
             "vina_binary_missing"
@@ -1070,20 +1072,20 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
     "validation_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md"
   },
-  "generated_at": "2026-07-04T13:35:57.019598+00:00",
+  "generated_at": "2026-07-04T14:07:59.745868+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:be05411d7bb174d8612aaa5a6d3c2ffbace0c16d1310fc0b6897f9fd9038c6d1",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:50113b04a758c06b720aa91a3b64639e1d31ba94f35334cf21494462930a7d2f",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:03fd1523adcfed47c63c7403259425bcb03d91049b4e9d39dec970989d1731aa",
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:06ffd80060d3ec29ee49953e7bbee5bc8448f2a4480ce1f301db17dbb3e89e9e",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:d8a18697cf058155102c7408dcc7a8aabdd4dfbb2363c078822f4e8f883f8c0d",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:69285c5dcf0a4bdc30c7a71d48b86dabde7af6e458925f250a4e3f9b9616e109",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json": "sha256:8552a4545a28550ac709acbc509977c0f9b05a378dc89ce3a67e0986bb62b46f",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:781a71aa4ca54ed58be70e95bf15b75f4c7771ffdbc2b0899ce913b1a3de5afb",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json": "sha256:a8481a83b85ea9209fea460451a4baab5c6af4575d0346040771b3182a2fdefb",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:e3e42beab8fc49091598dee6cc2a32f6f6b26fd290e7bd739c0f9e3263ab0164",
     "implementation/phase1/release_evidence/productization/source_of_truth_gap_classification.json": "sha256:5fb3525b23f2e4bc7582cc16aace64fbb7cc506c28e086a21bede3de61ea1b3c",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:c1af83f1b410aca8536d5ab832c0ba6a86153436844e42152860f84ec0002328",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:8adb767e05269c4063e04ca5e5060b0e94994916ccae4e9912c897c0c7fc9703",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:e8a6b5e0b8d86ef1b629c1a6d4e8caab6132dd4a3a311c64bc520c2e4e13954f",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:8cba91d42c09dfc492cf90c255caab48c1a568f97fd19686d7d7628cb287b5a3"
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:9224d7b9ebce1e3a2308c5ee0ca69b3e8e94eb94444afd2f01f6509b5947af01"
   },
   "mutation_allowed": false,
   "next_actions": [
@@ -1439,8 +1441,6 @@
           "family_id": "engine_run_slots",
           "first_missing_item": {
             "blockers": [
-              "protein_structure_path_missing",
-              "reference_ligand_path_missing",
               "prepared_receptor_path_missing",
               "prepared_ligand_path_missing",
               "vina_binary_missing"
@@ -1815,8 +1815,6 @@
           "family_id": "engine_run_slots",
           "first_missing_item": {
             "blockers": [
-              "protein_structure_path_missing",
-              "reference_ligand_path_missing",
               "prepared_receptor_path_missing",
               "prepared_ligand_path_missing",
               "vina_binary_missing"
@@ -2575,8 +2573,6 @@
           "family_id": "engine_run_slots",
           "first_missing_item": {
             "blockers": [
-              "protein_structure_path_missing",
-              "reference_ligand_path_missing",
               "prepared_receptor_path_missing",
               "prepared_ligand_path_missing",
               "vina_binary_missing"
@@ -3398,8 +3394,6 @@
           "family_id": "engine_run_slots",
           "first_missing_item": {
             "blockers": [
-              "protein_structure_path_missing",
-              "reference_ligand_path_missing",
               "prepared_receptor_path_missing",
               "prepared_ligand_path_missing",
               "vina_binary_missing"
@@ -4116,19 +4110,26 @@
               "component_id": "engine_input_manifest",
               "current": {
                 "blocked_case_input_slot_count": 12,
+                "blocked_source_file_count": 0,
                 "case_input_slot_count": 12,
                 "input_manifest_detected": true,
                 "input_manifest_row_count": 12,
                 "input_manifest_status": "ready",
                 "input_manifest_syntax_ready": true,
                 "input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
+                "prepared_input_gap_count": 24,
                 "required_case_count": 12,
+                "source_extraction_status": "source_files_verified_prepared_inputs_required",
+                "source_file_count": 24,
+                "source_files_ready": true,
+                "source_ready_case_count": 12,
                 "template_completion_blocked_case_count": 12,
                 "template_manifest_ready": false,
                 "template_missing_local_file_count": 48,
                 "template_missing_receipt_ref_count": 60,
                 "template_preflight_status": "operator_manifest_completion_required",
-                "verified_case_input_count": 0
+                "verified_case_input_count": 0,
+                "verified_source_file_count": 24
               },
               "pass": false,
               "required": {
@@ -4251,8 +4252,6 @@
           ],
           "first_blocked_case_input_slot": {
             "blockers": [
-              "protein_structure_path_missing",
-              "reference_ligand_path_missing",
               "prepared_receptor_path_missing",
               "prepared_ligand_path_missing"
             ],
@@ -4265,15 +4264,11 @@
           },
           "first_blocked_engine_run_slot": {
             "blockers": [
-              "protein_structure_path_missing",
-              "reference_ligand_path_missing",
               "prepared_receptor_path_missing",
               "prepared_ligand_path_missing",
               "vina_binary_missing"
             ],
             "case_blockers": [
-              "protein_structure_path_missing",
-              "reference_ligand_path_missing",
               "prepared_receptor_path_missing",
               "prepared_ligand_path_missing"
             ],
@@ -4366,9 +4361,9 @@
             "status": "blocked"
           },
           "minimum_comparison_case_count": 1,
-          "operator_blocker_family_blocked_count": 7,
+          "operator_blocker_family_blocked_count": 6,
           "operator_blocker_family_count": 7,
-          "operator_blocker_family_missing_item_count": 182,
+          "operator_blocker_family_missing_item_count": 158,
           "operator_blocker_family_plan": [
             {
               "blocked_case_count": 12,
@@ -4388,30 +4383,16 @@
               "status": "blocked"
             },
             {
-              "blocked_case_count": 12,
+              "blocked_case_count": 0,
               "command_key": "materialize_input_manifest_from_casf_archive",
-              "description": "Official CASF/PDBBind source protein and ligand files are missing or unverified.",
+              "description": "Official CASF/PDBBind source protein and ligand files were verified from the CASF archive receipt; prepared engine inputs remain required.",
               "family_id": "official_source_files",
-              "first_missing_item": {
-                "blocker": "path_not_found",
-                "case_id": "casf2016_4llx",
-                "complex_id": "4llx",
-                "expected_checksum": "sha256:ee6be565638c58d9b608a5cb79a98dae39566a60b4ae019ea6a23a45c2b7a834",
-                "expected_checksum_field": "protein_structure_checksum",
-                "field": "protein_structure_path",
-                "file_group": "official_source_file",
-                "file_role": "source_protein_structure",
-                "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
-                "path": "CASF-2016/coreset/4llx/4llx_protein.pdb",
-                "source_license_or_accession": "PDBbind+ CASF-2016 official package",
-                "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-                "status": "operator_completion_required"
-              },
+              "first_missing_item": {},
               "materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked",
-              "missing_item_count": 24,
-              "next_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
-              "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
-              "status": "blocked"
+              "missing_item_count": 0,
+              "next_action": "review_verified_casf_source_file_receipt",
+              "operator_action": "review_verified_casf_source_file_receipt",
+              "status": "ready"
             },
             {
               "blocked_case_count": 12,
@@ -4485,8 +4466,6 @@
               "family_id": "engine_run_slots",
               "first_missing_item": {
                 "blockers": [
-                  "protein_structure_path_missing",
-                  "reference_ligand_path_missing",
                   "prepared_receptor_path_missing",
                   "prepared_ligand_path_missing",
                   "vina_binary_missing"
@@ -5180,8 +5159,6 @@
               "family_id": "engine_run_slots",
               "first_missing_item": {
                 "blockers": [
-                  "protein_structure_path_missing",
-                  "reference_ligand_path_missing",
                   "prepared_receptor_path_missing",
                   "prepared_ligand_path_missing",
                   "vina_binary_missing"
@@ -5536,8 +5513,6 @@
                 "family_id": "engine_run_slots",
                 "first_missing_item": {
                   "blockers": [
-                    "protein_structure_path_missing",
-                    "reference_ligand_path_missing",
                     "prepared_receptor_path_missing",
                     "prepared_ligand_path_missing",
                     "vina_binary_missing"
@@ -8941,7 +8916,7 @@
     ],
     "status": "operator_evidence_required"
   },
-  "source_commit_sha": "926df3a8e8ca502c9f5d68a654b6fb1a1deb314b",
+  "source_commit_sha": "0071f6818cb8531d8a8a980f67156f28f914cbe5",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

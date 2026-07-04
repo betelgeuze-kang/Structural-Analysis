@@ -1,0 +1,1007 @@
+{
+  "archive_artifact": "tmp/public_benchmark_vina_gnina/CASF-2016.tar.gz",
+  "archive_index_summary": {
+    "duplicate_safe_name_count": 0,
+    "file_member_count": 30271,
+    "indexed_file_member_count": 30271,
+    "member_count": 30693,
+    "unsafe_member_count": 0
+  },
+  "archive_present": true,
+  "archive_size_bytes": 1572660769,
+  "case_rows": [
+    {
+      "blockers": [
+        "prepared_input_checksum_missing",
+        "prepared_input_checksum_missing"
+      ],
+      "case_id": "casf2016_4llx",
+      "complex_id": "4llx",
+      "prepared_input_gaps": [
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_receptor_checksum",
+          "checksum_present": false,
+          "field": "prepared_receptor_path",
+          "path": "prepared/4llx_receptor"
+        },
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_ligand_checksum",
+          "checksum_present": false,
+          "field": "prepared_ligand_path",
+          "path": "prepared/4llx_ligand"
+        }
+      ],
+      "source_files": [
+        {
+          "actual_checksum": "sha256:ee6be565638c58d9b608a5cb79a98dae39566a60b4ae019ea6a23a45c2b7a834",
+          "archive_member": "CASF-2016/coreset/4llx/4llx_protein.pdb",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:ee6be565638c58d9b608a5cb79a98dae39566a60b4ae019ea6a23a45c2b7a834",
+          "field": "protein_structure_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4llx/4llx_protein.pdb",
+          "safe_required_path": "CASF-2016/coreset/4llx/4llx_protein.pdb",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/4llx/4llx_protein.pdb"
+        },
+        {
+          "actual_checksum": "sha256:a6298d4cdddb5d1926ca09bcb5e1412ecd2699476f3ae1fa086d3d335efaa6f1",
+          "archive_member": "CASF-2016/coreset/4llx/4llx_ligand.sdf",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:a6298d4cdddb5d1926ca09bcb5e1412ecd2699476f3ae1fa086d3d335efaa6f1",
+          "field": "reference_ligand_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4llx/4llx_ligand.sdf",
+          "safe_required_path": "CASF-2016/coreset/4llx/4llx_ligand.sdf",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/4llx/4llx_ligand.sdf"
+        }
+      ],
+      "status": "source_files_ready"
+    },
+    {
+      "blockers": [
+        "prepared_input_checksum_missing",
+        "prepared_input_checksum_missing"
+      ],
+      "case_id": "casf2016_5c28",
+      "complex_id": "5c28",
+      "prepared_input_gaps": [
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_receptor_checksum",
+          "checksum_present": false,
+          "field": "prepared_receptor_path",
+          "path": "prepared/5c28_receptor"
+        },
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_ligand_checksum",
+          "checksum_present": false,
+          "field": "prepared_ligand_path",
+          "path": "prepared/5c28_ligand"
+        }
+      ],
+      "source_files": [
+        {
+          "actual_checksum": "sha256:ac3677c62abb2e549c4e3f4a6185663da16028e7e1b1e6ef875da956e77639b0",
+          "archive_member": "CASF-2016/coreset/5c28/5c28_protein.pdb",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:ac3677c62abb2e549c4e3f4a6185663da16028e7e1b1e6ef875da956e77639b0",
+          "field": "protein_structure_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c28/5c28_protein.pdb",
+          "safe_required_path": "CASF-2016/coreset/5c28/5c28_protein.pdb",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/5c28/5c28_protein.pdb"
+        },
+        {
+          "actual_checksum": "sha256:7df337dcb033a69f6db8d229749489e45ba9695a4a2e9bdf5593a51ae66eaf87",
+          "archive_member": "CASF-2016/coreset/5c28/5c28_ligand.sdf",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:7df337dcb033a69f6db8d229749489e45ba9695a4a2e9bdf5593a51ae66eaf87",
+          "field": "reference_ligand_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c28/5c28_ligand.sdf",
+          "safe_required_path": "CASF-2016/coreset/5c28/5c28_ligand.sdf",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/5c28/5c28_ligand.sdf"
+        }
+      ],
+      "status": "source_files_ready"
+    },
+    {
+      "blockers": [
+        "prepared_input_checksum_missing",
+        "prepared_input_checksum_missing"
+      ],
+      "case_id": "casf2016_3uuo",
+      "complex_id": "3uuo",
+      "prepared_input_gaps": [
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_receptor_checksum",
+          "checksum_present": false,
+          "field": "prepared_receptor_path",
+          "path": "prepared/3uuo_receptor"
+        },
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_ligand_checksum",
+          "checksum_present": false,
+          "field": "prepared_ligand_path",
+          "path": "prepared/3uuo_ligand"
+        }
+      ],
+      "source_files": [
+        {
+          "actual_checksum": "sha256:80b28a058a5a2da46bc2e3e91e26c1e14c4f2fd7514c051559b017ab0e93dcf9",
+          "archive_member": "CASF-2016/coreset/3uuo/3uuo_protein.pdb",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:80b28a058a5a2da46bc2e3e91e26c1e14c4f2fd7514c051559b017ab0e93dcf9",
+          "field": "protein_structure_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uuo/3uuo_protein.pdb",
+          "safe_required_path": "CASF-2016/coreset/3uuo/3uuo_protein.pdb",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/3uuo/3uuo_protein.pdb"
+        },
+        {
+          "actual_checksum": "sha256:7eedba7f908c0ba267dbe8af02294fcd148064d25cde772d62dded9737258ce5",
+          "archive_member": "CASF-2016/coreset/3uuo/3uuo_ligand.sdf",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:7eedba7f908c0ba267dbe8af02294fcd148064d25cde772d62dded9737258ce5",
+          "field": "reference_ligand_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uuo/3uuo_ligand.sdf",
+          "safe_required_path": "CASF-2016/coreset/3uuo/3uuo_ligand.sdf",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/3uuo/3uuo_ligand.sdf"
+        }
+      ],
+      "status": "source_files_ready"
+    },
+    {
+      "blockers": [
+        "prepared_input_checksum_missing",
+        "prepared_input_checksum_missing"
+      ],
+      "case_id": "casf2016_3ui7",
+      "complex_id": "3ui7",
+      "prepared_input_gaps": [
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_receptor_checksum",
+          "checksum_present": false,
+          "field": "prepared_receptor_path",
+          "path": "prepared/3ui7_receptor"
+        },
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_ligand_checksum",
+          "checksum_present": false,
+          "field": "prepared_ligand_path",
+          "path": "prepared/3ui7_ligand"
+        }
+      ],
+      "source_files": [
+        {
+          "actual_checksum": "sha256:62a51c4d5a96b8b2b0388e1e9f9dc55763d39996935f1ed30c1bdfd2ef282e0e",
+          "archive_member": "CASF-2016/coreset/3ui7/3ui7_protein.pdb",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:62a51c4d5a96b8b2b0388e1e9f9dc55763d39996935f1ed30c1bdfd2ef282e0e",
+          "field": "protein_structure_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3ui7/3ui7_protein.pdb",
+          "safe_required_path": "CASF-2016/coreset/3ui7/3ui7_protein.pdb",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/3ui7/3ui7_protein.pdb"
+        },
+        {
+          "actual_checksum": "sha256:bc6913724d6339af7844e5dedb93010e6e7e706c8da629d1e54a73c2fd2eafa2",
+          "archive_member": "CASF-2016/coreset/3ui7/3ui7_ligand.sdf",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:bc6913724d6339af7844e5dedb93010e6e7e706c8da629d1e54a73c2fd2eafa2",
+          "field": "reference_ligand_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3ui7/3ui7_ligand.sdf",
+          "safe_required_path": "CASF-2016/coreset/3ui7/3ui7_ligand.sdf",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/3ui7/3ui7_ligand.sdf"
+        }
+      ],
+      "status": "source_files_ready"
+    },
+    {
+      "blockers": [
+        "prepared_input_checksum_missing",
+        "prepared_input_checksum_missing"
+      ],
+      "case_id": "casf2016_5c2h",
+      "complex_id": "5c2h",
+      "prepared_input_gaps": [
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_receptor_checksum",
+          "checksum_present": false,
+          "field": "prepared_receptor_path",
+          "path": "prepared/5c2h_receptor"
+        },
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_ligand_checksum",
+          "checksum_present": false,
+          "field": "prepared_ligand_path",
+          "path": "prepared/5c2h_ligand"
+        }
+      ],
+      "source_files": [
+        {
+          "actual_checksum": "sha256:59718184b6c4de964136707cca00f1eb1361fff3d24020e28878dbec60e67917",
+          "archive_member": "CASF-2016/coreset/5c2h/5c2h_protein.pdb",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:59718184b6c4de964136707cca00f1eb1361fff3d24020e28878dbec60e67917",
+          "field": "protein_structure_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c2h/5c2h_protein.pdb",
+          "safe_required_path": "CASF-2016/coreset/5c2h/5c2h_protein.pdb",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/5c2h/5c2h_protein.pdb"
+        },
+        {
+          "actual_checksum": "sha256:7c512908ac4e7157027219b8f09bcede70f8d0621606303a5ff2eceb89033420",
+          "archive_member": "CASF-2016/coreset/5c2h/5c2h_ligand.sdf",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:7c512908ac4e7157027219b8f09bcede70f8d0621606303a5ff2eceb89033420",
+          "field": "reference_ligand_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c2h/5c2h_ligand.sdf",
+          "safe_required_path": "CASF-2016/coreset/5c2h/5c2h_ligand.sdf",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/5c2h/5c2h_ligand.sdf"
+        }
+      ],
+      "status": "source_files_ready"
+    },
+    {
+      "blockers": [
+        "prepared_input_checksum_missing",
+        "prepared_input_checksum_missing"
+      ],
+      "case_id": "casf2016_2v00",
+      "complex_id": "2v00",
+      "prepared_input_gaps": [
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_receptor_checksum",
+          "checksum_present": false,
+          "field": "prepared_receptor_path",
+          "path": "prepared/2v00_receptor"
+        },
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_ligand_checksum",
+          "checksum_present": false,
+          "field": "prepared_ligand_path",
+          "path": "prepared/2v00_ligand"
+        }
+      ],
+      "source_files": [
+        {
+          "actual_checksum": "sha256:ce00145b46da36a51792628b6322437c7acb30cbc6c165c47443a1ed3d2256fa",
+          "archive_member": "CASF-2016/coreset/2v00/2v00_protein.pdb",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:ce00145b46da36a51792628b6322437c7acb30cbc6c165c47443a1ed3d2256fa",
+          "field": "protein_structure_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/2v00/2v00_protein.pdb",
+          "safe_required_path": "CASF-2016/coreset/2v00/2v00_protein.pdb",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/2v00/2v00_protein.pdb"
+        },
+        {
+          "actual_checksum": "sha256:cc87334e0ed4d4d66929e57998fae43785bbe399772967f8a660dfbc106c9b16",
+          "archive_member": "CASF-2016/coreset/2v00/2v00_ligand.sdf",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:cc87334e0ed4d4d66929e57998fae43785bbe399772967f8a660dfbc106c9b16",
+          "field": "reference_ligand_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/2v00/2v00_ligand.sdf",
+          "safe_required_path": "CASF-2016/coreset/2v00/2v00_ligand.sdf",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/2v00/2v00_ligand.sdf"
+        }
+      ],
+      "status": "source_files_ready"
+    },
+    {
+      "blockers": [
+        "prepared_input_checksum_missing",
+        "prepared_input_checksum_missing"
+      ],
+      "case_id": "casf2016_3wz8",
+      "complex_id": "3wz8",
+      "prepared_input_gaps": [
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_receptor_checksum",
+          "checksum_present": false,
+          "field": "prepared_receptor_path",
+          "path": "prepared/3wz8_receptor"
+        },
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_ligand_checksum",
+          "checksum_present": false,
+          "field": "prepared_ligand_path",
+          "path": "prepared/3wz8_ligand"
+        }
+      ],
+      "source_files": [
+        {
+          "actual_checksum": "sha256:9de2f60abeea752abc06f866597255ca08fe75bf09cc749f76951adc30b0b45f",
+          "archive_member": "CASF-2016/coreset/3wz8/3wz8_protein.pdb",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:9de2f60abeea752abc06f866597255ca08fe75bf09cc749f76951adc30b0b45f",
+          "field": "protein_structure_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3wz8/3wz8_protein.pdb",
+          "safe_required_path": "CASF-2016/coreset/3wz8/3wz8_protein.pdb",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/3wz8/3wz8_protein.pdb"
+        },
+        {
+          "actual_checksum": "sha256:33a3b8306ae40623d38a5af2a883037a17472f18ba58141456f7bdf8abedb03a",
+          "archive_member": "CASF-2016/coreset/3wz8/3wz8_ligand.sdf",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:33a3b8306ae40623d38a5af2a883037a17472f18ba58141456f7bdf8abedb03a",
+          "field": "reference_ligand_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3wz8/3wz8_ligand.sdf",
+          "safe_required_path": "CASF-2016/coreset/3wz8/3wz8_ligand.sdf",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/3wz8/3wz8_ligand.sdf"
+        }
+      ],
+      "status": "source_files_ready"
+    },
+    {
+      "blockers": [
+        "prepared_input_checksum_missing",
+        "prepared_input_checksum_missing"
+      ],
+      "case_id": "casf2016_3pww",
+      "complex_id": "3pww",
+      "prepared_input_gaps": [
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_receptor_checksum",
+          "checksum_present": false,
+          "field": "prepared_receptor_path",
+          "path": "prepared/3pww_receptor"
+        },
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_ligand_checksum",
+          "checksum_present": false,
+          "field": "prepared_ligand_path",
+          "path": "prepared/3pww_ligand"
+        }
+      ],
+      "source_files": [
+        {
+          "actual_checksum": "sha256:351db504aee7d52f588e720c0f9d88ceb65fa738aa9a3d393ec5cbed4af96efb",
+          "archive_member": "CASF-2016/coreset/3pww/3pww_protein.pdb",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:351db504aee7d52f588e720c0f9d88ceb65fa738aa9a3d393ec5cbed4af96efb",
+          "field": "protein_structure_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3pww/3pww_protein.pdb",
+          "safe_required_path": "CASF-2016/coreset/3pww/3pww_protein.pdb",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/3pww/3pww_protein.pdb"
+        },
+        {
+          "actual_checksum": "sha256:e4cc5a4f6f900a00cd2ce5976a3603d38204f0c288774f5650e35ab7e6324d0b",
+          "archive_member": "CASF-2016/coreset/3pww/3pww_ligand.sdf",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:e4cc5a4f6f900a00cd2ce5976a3603d38204f0c288774f5650e35ab7e6324d0b",
+          "field": "reference_ligand_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3pww/3pww_ligand.sdf",
+          "safe_required_path": "CASF-2016/coreset/3pww/3pww_ligand.sdf",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/3pww/3pww_ligand.sdf"
+        }
+      ],
+      "status": "source_files_ready"
+    },
+    {
+      "blockers": [
+        "prepared_input_checksum_missing",
+        "prepared_input_checksum_missing"
+      ],
+      "case_id": "casf2016_3prs",
+      "complex_id": "3prs",
+      "prepared_input_gaps": [
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_receptor_checksum",
+          "checksum_present": false,
+          "field": "prepared_receptor_path",
+          "path": "prepared/3prs_receptor"
+        },
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_ligand_checksum",
+          "checksum_present": false,
+          "field": "prepared_ligand_path",
+          "path": "prepared/3prs_ligand"
+        }
+      ],
+      "source_files": [
+        {
+          "actual_checksum": "sha256:6a294ddeb8eaaf9a876ac9ad7a3e2715da586fdb7877d4cac306d4348932e34b",
+          "archive_member": "CASF-2016/coreset/3prs/3prs_protein.pdb",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:6a294ddeb8eaaf9a876ac9ad7a3e2715da586fdb7877d4cac306d4348932e34b",
+          "field": "protein_structure_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3prs/3prs_protein.pdb",
+          "safe_required_path": "CASF-2016/coreset/3prs/3prs_protein.pdb",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/3prs/3prs_protein.pdb"
+        },
+        {
+          "actual_checksum": "sha256:4625a72478cc0940022b39b2059e0d7115a20eaf6b845ecde8b17a195fba0911",
+          "archive_member": "CASF-2016/coreset/3prs/3prs_ligand.sdf",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:4625a72478cc0940022b39b2059e0d7115a20eaf6b845ecde8b17a195fba0911",
+          "field": "reference_ligand_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3prs/3prs_ligand.sdf",
+          "safe_required_path": "CASF-2016/coreset/3prs/3prs_ligand.sdf",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/3prs/3prs_ligand.sdf"
+        }
+      ],
+      "status": "source_files_ready"
+    },
+    {
+      "blockers": [
+        "prepared_input_checksum_missing",
+        "prepared_input_checksum_missing"
+      ],
+      "case_id": "casf2016_3uri",
+      "complex_id": "3uri",
+      "prepared_input_gaps": [
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_receptor_checksum",
+          "checksum_present": false,
+          "field": "prepared_receptor_path",
+          "path": "prepared/3uri_receptor"
+        },
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_ligand_checksum",
+          "checksum_present": false,
+          "field": "prepared_ligand_path",
+          "path": "prepared/3uri_ligand"
+        }
+      ],
+      "source_files": [
+        {
+          "actual_checksum": "sha256:03b1b8c59bd72520faca258f2a1c4a5677e161bf3ace4a9df3ae7003d585f8b1",
+          "archive_member": "CASF-2016/coreset/3uri/3uri_protein.pdb",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:03b1b8c59bd72520faca258f2a1c4a5677e161bf3ace4a9df3ae7003d585f8b1",
+          "field": "protein_structure_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uri/3uri_protein.pdb",
+          "safe_required_path": "CASF-2016/coreset/3uri/3uri_protein.pdb",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/3uri/3uri_protein.pdb"
+        },
+        {
+          "actual_checksum": "sha256:9091e3949535eeae0afa1e80484ece0e71e6809c44d81072130b54f81f440a85",
+          "archive_member": "CASF-2016/coreset/3uri/3uri_ligand.sdf",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:9091e3949535eeae0afa1e80484ece0e71e6809c44d81072130b54f81f440a85",
+          "field": "reference_ligand_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uri/3uri_ligand.sdf",
+          "safe_required_path": "CASF-2016/coreset/3uri/3uri_ligand.sdf",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/3uri/3uri_ligand.sdf"
+        }
+      ],
+      "status": "source_files_ready"
+    },
+    {
+      "blockers": [
+        "prepared_input_checksum_missing",
+        "prepared_input_checksum_missing"
+      ],
+      "case_id": "casf2016_4m0z",
+      "complex_id": "4m0z",
+      "prepared_input_gaps": [
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_receptor_checksum",
+          "checksum_present": false,
+          "field": "prepared_receptor_path",
+          "path": "prepared/4m0z_receptor"
+        },
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_ligand_checksum",
+          "checksum_present": false,
+          "field": "prepared_ligand_path",
+          "path": "prepared/4m0z_ligand"
+        }
+      ],
+      "source_files": [
+        {
+          "actual_checksum": "sha256:8eb56910faa3eb78ca1b8c244b01bf6094f2838a4db08a0b5198b68e6a96242d",
+          "archive_member": "CASF-2016/coreset/4m0z/4m0z_protein.pdb",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:8eb56910faa3eb78ca1b8c244b01bf6094f2838a4db08a0b5198b68e6a96242d",
+          "field": "protein_structure_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0z/4m0z_protein.pdb",
+          "safe_required_path": "CASF-2016/coreset/4m0z/4m0z_protein.pdb",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/4m0z/4m0z_protein.pdb"
+        },
+        {
+          "actual_checksum": "sha256:533af481c8fe734256312a30791bfbb12eb5796e26409942c66581fb8ef60f07",
+          "archive_member": "CASF-2016/coreset/4m0z/4m0z_ligand.sdf",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:533af481c8fe734256312a30791bfbb12eb5796e26409942c66581fb8ef60f07",
+          "field": "reference_ligand_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0z/4m0z_ligand.sdf",
+          "safe_required_path": "CASF-2016/coreset/4m0z/4m0z_ligand.sdf",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/4m0z/4m0z_ligand.sdf"
+        }
+      ],
+      "status": "source_files_ready"
+    },
+    {
+      "blockers": [
+        "prepared_input_checksum_missing",
+        "prepared_input_checksum_missing"
+      ],
+      "case_id": "casf2016_4m0y",
+      "complex_id": "4m0y",
+      "prepared_input_gaps": [
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_receptor_checksum",
+          "checksum_present": false,
+          "field": "prepared_receptor_path",
+          "path": "prepared/4m0y_receptor"
+        },
+        {
+          "blocker": "prepared_input_checksum_missing",
+          "checksum_field": "prepared_ligand_checksum",
+          "checksum_present": false,
+          "field": "prepared_ligand_path",
+          "path": "prepared/4m0y_ligand"
+        }
+      ],
+      "source_files": [
+        {
+          "actual_checksum": "sha256:f2b1040546ed7c6d01e4ef39996afcc283be189a42df7bde3773db0d2ecbe7bc",
+          "archive_member": "CASF-2016/coreset/4m0y/4m0y_protein.pdb",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:f2b1040546ed7c6d01e4ef39996afcc283be189a42df7bde3773db0d2ecbe7bc",
+          "field": "protein_structure_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0y/4m0y_protein.pdb",
+          "safe_required_path": "CASF-2016/coreset/4m0y/4m0y_protein.pdb",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/4m0y/4m0y_protein.pdb"
+        },
+        {
+          "actual_checksum": "sha256:65f2c98b8958e739f98b243924513e3ff3068d536665a7b0e27fefa81a0e0dfc",
+          "archive_member": "CASF-2016/coreset/4m0y/4m0y_ligand.sdf",
+          "blocker": "",
+          "checksum_verified": true,
+          "expected_checksum": "sha256:65f2c98b8958e739f98b243924513e3ff3068d536665a7b0e27fefa81a0e0dfc",
+          "field": "reference_ligand_path",
+          "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0y/4m0y_ligand.sdf",
+          "safe_required_path": "CASF-2016/coreset/4m0y/4m0y_ligand.sdf",
+          "status": "ready",
+          "template_path": "CASF-2016/coreset/4m0y/4m0y_ligand.sdf"
+        }
+      ],
+      "status": "source_files_ready"
+    }
+  ],
+  "claim_boundary": "This helper extracts and checksum-verifies local CASF source files from an operator-supplied archive, then drafts the Vina/GNINA input manifest. It does not download CASF payloads, prepare receptor or ligand inputs, run Vina/GNINA, create comparison rows, or close Public Benchmark Phase 2.",
+  "commands": {
+    "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --input-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+    "rerun_input_manifest_preflight": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --expected-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+    "rerun_source_extraction": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive tmp/public_benchmark_vina_gnina/CASF-2016.tar.gz --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json"
+  },
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "extract_dir": "tmp/public_benchmark_vina_gnina/casf2016_source_files",
+  "generated_at": "2026-07-04T14:07:06.520944+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv": "sha256:ff3afa49ab7c79ed82a78f1755272ecc13ca7f6b6e01ef2b35ea5d58b12d3611",
+    "scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py": "sha256:0aaea5d86732b33257e3a5d9f7bbf18ed732e2ca07d7aff489dc2e4173bf523a",
+    "scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py": "sha256:50d51969aa2581ddb267949953dbe2692aab6c619c85e3593cec701b8441358e"
+  },
+  "manifest_ready": false,
+  "operator_actions": [
+    "review_source_file_checksum_results",
+    "prepare_vina_gnina_receptor_and_ligand_inputs",
+    "fill_prepared_input_checksums_and_input_preparation_provenance_ref",
+    "rerun_public_benchmark_vina_gnina_input_manifest_template_preflight",
+    "rerun_public_benchmark_vina_gnina_execution_plan"
+  ],
+  "out_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+  "out_report_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json",
+  "output_manifest_written": true,
+  "reuse_policy": "public_benchmark_vina_gnina_source_file_extraction_from_local_casf_archive",
+  "reused_evidence": false,
+  "schema_version": "public-benchmark-vina-gnina-input-manifest-from-casf-archive.v1",
+  "source_commit_sha": "0071f6818cb8531d8a8a980f67156f28f914cbe5",
+  "source_file_rows": [
+    {
+      "actual_checksum": "sha256:ee6be565638c58d9b608a5cb79a98dae39566a60b4ae019ea6a23a45c2b7a834",
+      "archive_member": "CASF-2016/coreset/4llx/4llx_protein.pdb",
+      "blocker": "",
+      "case_id": "casf2016_4llx",
+      "checksum_verified": true,
+      "complex_id": "4llx",
+      "expected_checksum": "sha256:ee6be565638c58d9b608a5cb79a98dae39566a60b4ae019ea6a23a45c2b7a834",
+      "field": "protein_structure_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4llx/4llx_protein.pdb",
+      "safe_required_path": "CASF-2016/coreset/4llx/4llx_protein.pdb",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/4llx/4llx_protein.pdb"
+    },
+    {
+      "actual_checksum": "sha256:a6298d4cdddb5d1926ca09bcb5e1412ecd2699476f3ae1fa086d3d335efaa6f1",
+      "archive_member": "CASF-2016/coreset/4llx/4llx_ligand.sdf",
+      "blocker": "",
+      "case_id": "casf2016_4llx",
+      "checksum_verified": true,
+      "complex_id": "4llx",
+      "expected_checksum": "sha256:a6298d4cdddb5d1926ca09bcb5e1412ecd2699476f3ae1fa086d3d335efaa6f1",
+      "field": "reference_ligand_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4llx/4llx_ligand.sdf",
+      "safe_required_path": "CASF-2016/coreset/4llx/4llx_ligand.sdf",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/4llx/4llx_ligand.sdf"
+    },
+    {
+      "actual_checksum": "sha256:ac3677c62abb2e549c4e3f4a6185663da16028e7e1b1e6ef875da956e77639b0",
+      "archive_member": "CASF-2016/coreset/5c28/5c28_protein.pdb",
+      "blocker": "",
+      "case_id": "casf2016_5c28",
+      "checksum_verified": true,
+      "complex_id": "5c28",
+      "expected_checksum": "sha256:ac3677c62abb2e549c4e3f4a6185663da16028e7e1b1e6ef875da956e77639b0",
+      "field": "protein_structure_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c28/5c28_protein.pdb",
+      "safe_required_path": "CASF-2016/coreset/5c28/5c28_protein.pdb",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/5c28/5c28_protein.pdb"
+    },
+    {
+      "actual_checksum": "sha256:7df337dcb033a69f6db8d229749489e45ba9695a4a2e9bdf5593a51ae66eaf87",
+      "archive_member": "CASF-2016/coreset/5c28/5c28_ligand.sdf",
+      "blocker": "",
+      "case_id": "casf2016_5c28",
+      "checksum_verified": true,
+      "complex_id": "5c28",
+      "expected_checksum": "sha256:7df337dcb033a69f6db8d229749489e45ba9695a4a2e9bdf5593a51ae66eaf87",
+      "field": "reference_ligand_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c28/5c28_ligand.sdf",
+      "safe_required_path": "CASF-2016/coreset/5c28/5c28_ligand.sdf",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/5c28/5c28_ligand.sdf"
+    },
+    {
+      "actual_checksum": "sha256:80b28a058a5a2da46bc2e3e91e26c1e14c4f2fd7514c051559b017ab0e93dcf9",
+      "archive_member": "CASF-2016/coreset/3uuo/3uuo_protein.pdb",
+      "blocker": "",
+      "case_id": "casf2016_3uuo",
+      "checksum_verified": true,
+      "complex_id": "3uuo",
+      "expected_checksum": "sha256:80b28a058a5a2da46bc2e3e91e26c1e14c4f2fd7514c051559b017ab0e93dcf9",
+      "field": "protein_structure_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uuo/3uuo_protein.pdb",
+      "safe_required_path": "CASF-2016/coreset/3uuo/3uuo_protein.pdb",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/3uuo/3uuo_protein.pdb"
+    },
+    {
+      "actual_checksum": "sha256:7eedba7f908c0ba267dbe8af02294fcd148064d25cde772d62dded9737258ce5",
+      "archive_member": "CASF-2016/coreset/3uuo/3uuo_ligand.sdf",
+      "blocker": "",
+      "case_id": "casf2016_3uuo",
+      "checksum_verified": true,
+      "complex_id": "3uuo",
+      "expected_checksum": "sha256:7eedba7f908c0ba267dbe8af02294fcd148064d25cde772d62dded9737258ce5",
+      "field": "reference_ligand_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uuo/3uuo_ligand.sdf",
+      "safe_required_path": "CASF-2016/coreset/3uuo/3uuo_ligand.sdf",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/3uuo/3uuo_ligand.sdf"
+    },
+    {
+      "actual_checksum": "sha256:62a51c4d5a96b8b2b0388e1e9f9dc55763d39996935f1ed30c1bdfd2ef282e0e",
+      "archive_member": "CASF-2016/coreset/3ui7/3ui7_protein.pdb",
+      "blocker": "",
+      "case_id": "casf2016_3ui7",
+      "checksum_verified": true,
+      "complex_id": "3ui7",
+      "expected_checksum": "sha256:62a51c4d5a96b8b2b0388e1e9f9dc55763d39996935f1ed30c1bdfd2ef282e0e",
+      "field": "protein_structure_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3ui7/3ui7_protein.pdb",
+      "safe_required_path": "CASF-2016/coreset/3ui7/3ui7_protein.pdb",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/3ui7/3ui7_protein.pdb"
+    },
+    {
+      "actual_checksum": "sha256:bc6913724d6339af7844e5dedb93010e6e7e706c8da629d1e54a73c2fd2eafa2",
+      "archive_member": "CASF-2016/coreset/3ui7/3ui7_ligand.sdf",
+      "blocker": "",
+      "case_id": "casf2016_3ui7",
+      "checksum_verified": true,
+      "complex_id": "3ui7",
+      "expected_checksum": "sha256:bc6913724d6339af7844e5dedb93010e6e7e706c8da629d1e54a73c2fd2eafa2",
+      "field": "reference_ligand_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3ui7/3ui7_ligand.sdf",
+      "safe_required_path": "CASF-2016/coreset/3ui7/3ui7_ligand.sdf",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/3ui7/3ui7_ligand.sdf"
+    },
+    {
+      "actual_checksum": "sha256:59718184b6c4de964136707cca00f1eb1361fff3d24020e28878dbec60e67917",
+      "archive_member": "CASF-2016/coreset/5c2h/5c2h_protein.pdb",
+      "blocker": "",
+      "case_id": "casf2016_5c2h",
+      "checksum_verified": true,
+      "complex_id": "5c2h",
+      "expected_checksum": "sha256:59718184b6c4de964136707cca00f1eb1361fff3d24020e28878dbec60e67917",
+      "field": "protein_structure_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c2h/5c2h_protein.pdb",
+      "safe_required_path": "CASF-2016/coreset/5c2h/5c2h_protein.pdb",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/5c2h/5c2h_protein.pdb"
+    },
+    {
+      "actual_checksum": "sha256:7c512908ac4e7157027219b8f09bcede70f8d0621606303a5ff2eceb89033420",
+      "archive_member": "CASF-2016/coreset/5c2h/5c2h_ligand.sdf",
+      "blocker": "",
+      "case_id": "casf2016_5c2h",
+      "checksum_verified": true,
+      "complex_id": "5c2h",
+      "expected_checksum": "sha256:7c512908ac4e7157027219b8f09bcede70f8d0621606303a5ff2eceb89033420",
+      "field": "reference_ligand_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c2h/5c2h_ligand.sdf",
+      "safe_required_path": "CASF-2016/coreset/5c2h/5c2h_ligand.sdf",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/5c2h/5c2h_ligand.sdf"
+    },
+    {
+      "actual_checksum": "sha256:ce00145b46da36a51792628b6322437c7acb30cbc6c165c47443a1ed3d2256fa",
+      "archive_member": "CASF-2016/coreset/2v00/2v00_protein.pdb",
+      "blocker": "",
+      "case_id": "casf2016_2v00",
+      "checksum_verified": true,
+      "complex_id": "2v00",
+      "expected_checksum": "sha256:ce00145b46da36a51792628b6322437c7acb30cbc6c165c47443a1ed3d2256fa",
+      "field": "protein_structure_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/2v00/2v00_protein.pdb",
+      "safe_required_path": "CASF-2016/coreset/2v00/2v00_protein.pdb",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/2v00/2v00_protein.pdb"
+    },
+    {
+      "actual_checksum": "sha256:cc87334e0ed4d4d66929e57998fae43785bbe399772967f8a660dfbc106c9b16",
+      "archive_member": "CASF-2016/coreset/2v00/2v00_ligand.sdf",
+      "blocker": "",
+      "case_id": "casf2016_2v00",
+      "checksum_verified": true,
+      "complex_id": "2v00",
+      "expected_checksum": "sha256:cc87334e0ed4d4d66929e57998fae43785bbe399772967f8a660dfbc106c9b16",
+      "field": "reference_ligand_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/2v00/2v00_ligand.sdf",
+      "safe_required_path": "CASF-2016/coreset/2v00/2v00_ligand.sdf",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/2v00/2v00_ligand.sdf"
+    },
+    {
+      "actual_checksum": "sha256:9de2f60abeea752abc06f866597255ca08fe75bf09cc749f76951adc30b0b45f",
+      "archive_member": "CASF-2016/coreset/3wz8/3wz8_protein.pdb",
+      "blocker": "",
+      "case_id": "casf2016_3wz8",
+      "checksum_verified": true,
+      "complex_id": "3wz8",
+      "expected_checksum": "sha256:9de2f60abeea752abc06f866597255ca08fe75bf09cc749f76951adc30b0b45f",
+      "field": "protein_structure_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3wz8/3wz8_protein.pdb",
+      "safe_required_path": "CASF-2016/coreset/3wz8/3wz8_protein.pdb",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/3wz8/3wz8_protein.pdb"
+    },
+    {
+      "actual_checksum": "sha256:33a3b8306ae40623d38a5af2a883037a17472f18ba58141456f7bdf8abedb03a",
+      "archive_member": "CASF-2016/coreset/3wz8/3wz8_ligand.sdf",
+      "blocker": "",
+      "case_id": "casf2016_3wz8",
+      "checksum_verified": true,
+      "complex_id": "3wz8",
+      "expected_checksum": "sha256:33a3b8306ae40623d38a5af2a883037a17472f18ba58141456f7bdf8abedb03a",
+      "field": "reference_ligand_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3wz8/3wz8_ligand.sdf",
+      "safe_required_path": "CASF-2016/coreset/3wz8/3wz8_ligand.sdf",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/3wz8/3wz8_ligand.sdf"
+    },
+    {
+      "actual_checksum": "sha256:351db504aee7d52f588e720c0f9d88ceb65fa738aa9a3d393ec5cbed4af96efb",
+      "archive_member": "CASF-2016/coreset/3pww/3pww_protein.pdb",
+      "blocker": "",
+      "case_id": "casf2016_3pww",
+      "checksum_verified": true,
+      "complex_id": "3pww",
+      "expected_checksum": "sha256:351db504aee7d52f588e720c0f9d88ceb65fa738aa9a3d393ec5cbed4af96efb",
+      "field": "protein_structure_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3pww/3pww_protein.pdb",
+      "safe_required_path": "CASF-2016/coreset/3pww/3pww_protein.pdb",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/3pww/3pww_protein.pdb"
+    },
+    {
+      "actual_checksum": "sha256:e4cc5a4f6f900a00cd2ce5976a3603d38204f0c288774f5650e35ab7e6324d0b",
+      "archive_member": "CASF-2016/coreset/3pww/3pww_ligand.sdf",
+      "blocker": "",
+      "case_id": "casf2016_3pww",
+      "checksum_verified": true,
+      "complex_id": "3pww",
+      "expected_checksum": "sha256:e4cc5a4f6f900a00cd2ce5976a3603d38204f0c288774f5650e35ab7e6324d0b",
+      "field": "reference_ligand_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3pww/3pww_ligand.sdf",
+      "safe_required_path": "CASF-2016/coreset/3pww/3pww_ligand.sdf",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/3pww/3pww_ligand.sdf"
+    },
+    {
+      "actual_checksum": "sha256:6a294ddeb8eaaf9a876ac9ad7a3e2715da586fdb7877d4cac306d4348932e34b",
+      "archive_member": "CASF-2016/coreset/3prs/3prs_protein.pdb",
+      "blocker": "",
+      "case_id": "casf2016_3prs",
+      "checksum_verified": true,
+      "complex_id": "3prs",
+      "expected_checksum": "sha256:6a294ddeb8eaaf9a876ac9ad7a3e2715da586fdb7877d4cac306d4348932e34b",
+      "field": "protein_structure_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3prs/3prs_protein.pdb",
+      "safe_required_path": "CASF-2016/coreset/3prs/3prs_protein.pdb",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/3prs/3prs_protein.pdb"
+    },
+    {
+      "actual_checksum": "sha256:4625a72478cc0940022b39b2059e0d7115a20eaf6b845ecde8b17a195fba0911",
+      "archive_member": "CASF-2016/coreset/3prs/3prs_ligand.sdf",
+      "blocker": "",
+      "case_id": "casf2016_3prs",
+      "checksum_verified": true,
+      "complex_id": "3prs",
+      "expected_checksum": "sha256:4625a72478cc0940022b39b2059e0d7115a20eaf6b845ecde8b17a195fba0911",
+      "field": "reference_ligand_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3prs/3prs_ligand.sdf",
+      "safe_required_path": "CASF-2016/coreset/3prs/3prs_ligand.sdf",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/3prs/3prs_ligand.sdf"
+    },
+    {
+      "actual_checksum": "sha256:03b1b8c59bd72520faca258f2a1c4a5677e161bf3ace4a9df3ae7003d585f8b1",
+      "archive_member": "CASF-2016/coreset/3uri/3uri_protein.pdb",
+      "blocker": "",
+      "case_id": "casf2016_3uri",
+      "checksum_verified": true,
+      "complex_id": "3uri",
+      "expected_checksum": "sha256:03b1b8c59bd72520faca258f2a1c4a5677e161bf3ace4a9df3ae7003d585f8b1",
+      "field": "protein_structure_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uri/3uri_protein.pdb",
+      "safe_required_path": "CASF-2016/coreset/3uri/3uri_protein.pdb",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/3uri/3uri_protein.pdb"
+    },
+    {
+      "actual_checksum": "sha256:9091e3949535eeae0afa1e80484ece0e71e6809c44d81072130b54f81f440a85",
+      "archive_member": "CASF-2016/coreset/3uri/3uri_ligand.sdf",
+      "blocker": "",
+      "case_id": "casf2016_3uri",
+      "checksum_verified": true,
+      "complex_id": "3uri",
+      "expected_checksum": "sha256:9091e3949535eeae0afa1e80484ece0e71e6809c44d81072130b54f81f440a85",
+      "field": "reference_ligand_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uri/3uri_ligand.sdf",
+      "safe_required_path": "CASF-2016/coreset/3uri/3uri_ligand.sdf",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/3uri/3uri_ligand.sdf"
+    },
+    {
+      "actual_checksum": "sha256:8eb56910faa3eb78ca1b8c244b01bf6094f2838a4db08a0b5198b68e6a96242d",
+      "archive_member": "CASF-2016/coreset/4m0z/4m0z_protein.pdb",
+      "blocker": "",
+      "case_id": "casf2016_4m0z",
+      "checksum_verified": true,
+      "complex_id": "4m0z",
+      "expected_checksum": "sha256:8eb56910faa3eb78ca1b8c244b01bf6094f2838a4db08a0b5198b68e6a96242d",
+      "field": "protein_structure_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0z/4m0z_protein.pdb",
+      "safe_required_path": "CASF-2016/coreset/4m0z/4m0z_protein.pdb",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/4m0z/4m0z_protein.pdb"
+    },
+    {
+      "actual_checksum": "sha256:533af481c8fe734256312a30791bfbb12eb5796e26409942c66581fb8ef60f07",
+      "archive_member": "CASF-2016/coreset/4m0z/4m0z_ligand.sdf",
+      "blocker": "",
+      "case_id": "casf2016_4m0z",
+      "checksum_verified": true,
+      "complex_id": "4m0z",
+      "expected_checksum": "sha256:533af481c8fe734256312a30791bfbb12eb5796e26409942c66581fb8ef60f07",
+      "field": "reference_ligand_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0z/4m0z_ligand.sdf",
+      "safe_required_path": "CASF-2016/coreset/4m0z/4m0z_ligand.sdf",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/4m0z/4m0z_ligand.sdf"
+    },
+    {
+      "actual_checksum": "sha256:f2b1040546ed7c6d01e4ef39996afcc283be189a42df7bde3773db0d2ecbe7bc",
+      "archive_member": "CASF-2016/coreset/4m0y/4m0y_protein.pdb",
+      "blocker": "",
+      "case_id": "casf2016_4m0y",
+      "checksum_verified": true,
+      "complex_id": "4m0y",
+      "expected_checksum": "sha256:f2b1040546ed7c6d01e4ef39996afcc283be189a42df7bde3773db0d2ecbe7bc",
+      "field": "protein_structure_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0y/4m0y_protein.pdb",
+      "safe_required_path": "CASF-2016/coreset/4m0y/4m0y_protein.pdb",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/4m0y/4m0y_protein.pdb"
+    },
+    {
+      "actual_checksum": "sha256:65f2c98b8958e739f98b243924513e3ff3068d536665a7b0e27fefa81a0e0dfc",
+      "archive_member": "CASF-2016/coreset/4m0y/4m0y_ligand.sdf",
+      "blocker": "",
+      "case_id": "casf2016_4m0y",
+      "checksum_verified": true,
+      "complex_id": "4m0y",
+      "expected_checksum": "sha256:65f2c98b8958e739f98b243924513e3ff3068d536665a7b0e27fefa81a0e0dfc",
+      "field": "reference_ligand_path",
+      "output_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0y/4m0y_ligand.sdf",
+      "safe_required_path": "CASF-2016/coreset/4m0y/4m0y_ligand.sdf",
+      "status": "ready",
+      "template_path": "CASF-2016/coreset/4m0y/4m0y_ligand.sdf"
+    }
+  ],
+  "source_files_ready": true,
+  "status": "source_files_verified_prepared_inputs_required",
+  "summary": {
+    "archive_blocker": "",
+    "manifest_ready": false,
+    "prepared_input_gap_count": 24,
+    "required_source_file_count": 24,
+    "source_file_blocker_count": 0,
+    "source_file_verified_count": 24,
+    "source_files_ready": true,
+    "template_row_count": 12
+  },
+  "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv"
+}

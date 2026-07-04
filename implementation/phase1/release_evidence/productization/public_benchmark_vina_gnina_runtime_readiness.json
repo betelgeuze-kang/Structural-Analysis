@@ -7,123 +7,75 @@
     "vina_binary_missing",
     "gnina_binary_missing",
     "public_benchmark_vina_gnina_rows_not_detected",
-    "casf2016_4llx::vina::protein_structure_path_missing",
-    "casf2016_4llx::vina::reference_ligand_path_missing",
     "casf2016_4llx::vina::prepared_receptor_path_missing",
     "casf2016_4llx::vina::prepared_ligand_path_missing",
     "casf2016_4llx::vina::vina_binary_missing",
-    "casf2016_4llx::gnina::protein_structure_path_missing",
-    "casf2016_4llx::gnina::reference_ligand_path_missing",
     "casf2016_4llx::gnina::prepared_receptor_path_missing",
     "casf2016_4llx::gnina::prepared_ligand_path_missing",
     "casf2016_4llx::gnina::gnina_binary_missing",
-    "casf2016_5c28::vina::protein_structure_path_missing",
-    "casf2016_5c28::vina::reference_ligand_path_missing",
     "casf2016_5c28::vina::prepared_receptor_path_missing",
     "casf2016_5c28::vina::prepared_ligand_path_missing",
     "casf2016_5c28::vina::vina_binary_missing",
-    "casf2016_5c28::gnina::protein_structure_path_missing",
-    "casf2016_5c28::gnina::reference_ligand_path_missing",
     "casf2016_5c28::gnina::prepared_receptor_path_missing",
     "casf2016_5c28::gnina::prepared_ligand_path_missing",
     "casf2016_5c28::gnina::gnina_binary_missing",
-    "casf2016_3uuo::vina::protein_structure_path_missing",
-    "casf2016_3uuo::vina::reference_ligand_path_missing",
     "casf2016_3uuo::vina::prepared_receptor_path_missing",
     "casf2016_3uuo::vina::prepared_ligand_path_missing",
     "casf2016_3uuo::vina::vina_binary_missing",
-    "casf2016_3uuo::gnina::protein_structure_path_missing",
-    "casf2016_3uuo::gnina::reference_ligand_path_missing",
     "casf2016_3uuo::gnina::prepared_receptor_path_missing",
     "casf2016_3uuo::gnina::prepared_ligand_path_missing",
     "casf2016_3uuo::gnina::gnina_binary_missing",
-    "casf2016_3ui7::vina::protein_structure_path_missing",
-    "casf2016_3ui7::vina::reference_ligand_path_missing",
     "casf2016_3ui7::vina::prepared_receptor_path_missing",
     "casf2016_3ui7::vina::prepared_ligand_path_missing",
     "casf2016_3ui7::vina::vina_binary_missing",
-    "casf2016_3ui7::gnina::protein_structure_path_missing",
-    "casf2016_3ui7::gnina::reference_ligand_path_missing",
     "casf2016_3ui7::gnina::prepared_receptor_path_missing",
     "casf2016_3ui7::gnina::prepared_ligand_path_missing",
     "casf2016_3ui7::gnina::gnina_binary_missing",
-    "casf2016_5c2h::vina::protein_structure_path_missing",
-    "casf2016_5c2h::vina::reference_ligand_path_missing",
     "casf2016_5c2h::vina::prepared_receptor_path_missing",
     "casf2016_5c2h::vina::prepared_ligand_path_missing",
     "casf2016_5c2h::vina::vina_binary_missing",
-    "casf2016_5c2h::gnina::protein_structure_path_missing",
-    "casf2016_5c2h::gnina::reference_ligand_path_missing",
     "casf2016_5c2h::gnina::prepared_receptor_path_missing",
     "casf2016_5c2h::gnina::prepared_ligand_path_missing",
     "casf2016_5c2h::gnina::gnina_binary_missing",
-    "casf2016_2v00::vina::protein_structure_path_missing",
-    "casf2016_2v00::vina::reference_ligand_path_missing",
     "casf2016_2v00::vina::prepared_receptor_path_missing",
     "casf2016_2v00::vina::prepared_ligand_path_missing",
     "casf2016_2v00::vina::vina_binary_missing",
-    "casf2016_2v00::gnina::protein_structure_path_missing",
-    "casf2016_2v00::gnina::reference_ligand_path_missing",
     "casf2016_2v00::gnina::prepared_receptor_path_missing",
     "casf2016_2v00::gnina::prepared_ligand_path_missing",
     "casf2016_2v00::gnina::gnina_binary_missing",
-    "casf2016_3wz8::vina::protein_structure_path_missing",
-    "casf2016_3wz8::vina::reference_ligand_path_missing",
     "casf2016_3wz8::vina::prepared_receptor_path_missing",
     "casf2016_3wz8::vina::prepared_ligand_path_missing",
     "casf2016_3wz8::vina::vina_binary_missing",
-    "casf2016_3wz8::gnina::protein_structure_path_missing",
-    "casf2016_3wz8::gnina::reference_ligand_path_missing",
     "casf2016_3wz8::gnina::prepared_receptor_path_missing",
     "casf2016_3wz8::gnina::prepared_ligand_path_missing",
     "casf2016_3wz8::gnina::gnina_binary_missing",
-    "casf2016_3pww::vina::protein_structure_path_missing",
-    "casf2016_3pww::vina::reference_ligand_path_missing",
     "casf2016_3pww::vina::prepared_receptor_path_missing",
     "casf2016_3pww::vina::prepared_ligand_path_missing",
     "casf2016_3pww::vina::vina_binary_missing",
-    "casf2016_3pww::gnina::protein_structure_path_missing",
-    "casf2016_3pww::gnina::reference_ligand_path_missing",
     "casf2016_3pww::gnina::prepared_receptor_path_missing",
     "casf2016_3pww::gnina::prepared_ligand_path_missing",
     "casf2016_3pww::gnina::gnina_binary_missing",
-    "casf2016_3prs::vina::protein_structure_path_missing",
-    "casf2016_3prs::vina::reference_ligand_path_missing",
     "casf2016_3prs::vina::prepared_receptor_path_missing",
     "casf2016_3prs::vina::prepared_ligand_path_missing",
     "casf2016_3prs::vina::vina_binary_missing",
-    "casf2016_3prs::gnina::protein_structure_path_missing",
-    "casf2016_3prs::gnina::reference_ligand_path_missing",
     "casf2016_3prs::gnina::prepared_receptor_path_missing",
     "casf2016_3prs::gnina::prepared_ligand_path_missing",
     "casf2016_3prs::gnina::gnina_binary_missing",
-    "casf2016_3uri::vina::protein_structure_path_missing",
-    "casf2016_3uri::vina::reference_ligand_path_missing",
     "casf2016_3uri::vina::prepared_receptor_path_missing",
     "casf2016_3uri::vina::prepared_ligand_path_missing",
     "casf2016_3uri::vina::vina_binary_missing",
-    "casf2016_3uri::gnina::protein_structure_path_missing",
-    "casf2016_3uri::gnina::reference_ligand_path_missing",
     "casf2016_3uri::gnina::prepared_receptor_path_missing",
     "casf2016_3uri::gnina::prepared_ligand_path_missing",
     "casf2016_3uri::gnina::gnina_binary_missing",
-    "casf2016_4m0z::vina::protein_structure_path_missing",
-    "casf2016_4m0z::vina::reference_ligand_path_missing",
     "casf2016_4m0z::vina::prepared_receptor_path_missing",
     "casf2016_4m0z::vina::prepared_ligand_path_missing",
     "casf2016_4m0z::vina::vina_binary_missing",
-    "casf2016_4m0z::gnina::protein_structure_path_missing",
-    "casf2016_4m0z::gnina::reference_ligand_path_missing",
     "casf2016_4m0z::gnina::prepared_receptor_path_missing",
     "casf2016_4m0z::gnina::prepared_ligand_path_missing",
     "casf2016_4m0z::gnina::gnina_binary_missing",
-    "casf2016_4m0y::vina::protein_structure_path_missing",
-    "casf2016_4m0y::vina::reference_ligand_path_missing",
     "casf2016_4m0y::vina::prepared_receptor_path_missing",
     "casf2016_4m0y::vina::prepared_ligand_path_missing",
     "casf2016_4m0y::vina::vina_binary_missing",
-    "casf2016_4m0y::gnina::protein_structure_path_missing",
-    "casf2016_4m0y::gnina::reference_ligand_path_missing",
     "casf2016_4m0y::gnina::prepared_receptor_path_missing",
     "casf2016_4m0y::gnina::prepared_ligand_path_missing",
     "casf2016_4m0y::gnina::gnina_binary_missing"
@@ -230,15 +182,11 @@
   "engine_run_slots": [
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "vina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -285,15 +233,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "gnina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -340,15 +284,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "vina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -395,15 +335,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "gnina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -450,15 +386,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "vina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -505,15 +437,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "gnina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -560,15 +488,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "vina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -615,15 +539,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "gnina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -670,15 +590,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "vina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -725,15 +641,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "gnina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -780,15 +692,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "vina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -835,15 +743,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "gnina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -890,15 +794,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "vina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -945,15 +845,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "gnina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -1000,15 +896,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "vina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -1055,15 +947,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "gnina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -1110,15 +998,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "vina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -1165,15 +1049,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "gnina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -1220,15 +1100,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "vina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -1275,15 +1151,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "gnina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -1330,15 +1202,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "vina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -1385,15 +1253,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "gnina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -1440,15 +1304,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "vina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -1495,15 +1355,11 @@
     },
     {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "gnina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -1553,8 +1409,6 @@
   "execution_plan_ready": false,
   "first_blocked_case_input_slot": {
     "blockers": [
-      "protein_structure_path_missing",
-      "reference_ligand_path_missing",
       "prepared_receptor_path_missing",
       "prepared_ligand_path_missing"
     ],
@@ -1567,15 +1421,11 @@
   },
   "first_blocked_engine_run_slot": {
     "blockers": [
-      "protein_structure_path_missing",
-      "reference_ligand_path_missing",
       "prepared_receptor_path_missing",
       "prepared_ligand_path_missing",
       "vina_binary_missing"
     ],
     "case_blockers": [
-      "protein_structure_path_missing",
-      "reference_ligand_path_missing",
       "prepared_receptor_path_missing",
       "prepared_ligand_path_missing"
     ],
@@ -1657,12 +1507,12 @@
     ],
     "status": "blocked"
   },
-  "generated_at": "2026-07-04T11:59:11.856779+00:00",
+  "generated_at": "2026-07-04T14:07:22.410600+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json": "sha256:c088b33bb3ce0502bf4f0cba3f845b8511c18b8115a0f61e2047ed4cb4c913c2",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:30cea0a365c966479ebe1e3b48f0b2b99ba6358c8434f9b1e64d51e4d1329aba",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json": "sha256:c8eb5d67ef51eda5582f162b53843c3f65ab723bf0148c24e902785403c63eda",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json": "sha256:26a80f6babe19ae18b29b8b4b6075a0df44f757ff4e791e6b337cf8d4a53259d",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json": "sha256:9425192b59eec35a17dd3ce193595223d5e6a1880abbebff6098ad4ee7c0f42f",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:b11697727b215ac6f0a964745a1008c3e3946220b113c9442568ae6d5a13fb80",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json": "sha256:3c0d065e8aff46db7f35850345b507b4b07cd85f8bc58cebf9cf4dd561443760",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json": "sha256:e22f4672bef70868fdba131159d32f264b24503f03c1699ed69a45d07da49c51",
     "scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py": "sha256:0aaea5d86732b33257e3a5d9f7bbf18ed732e2ca07d7aff489dc2e4173bf523a",
     "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:0258e681ddd419d9fba1bba595ffda481b77f710b5e645ac628c5f2bf1444cee",
     "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:2f5a835fda8a8ccc67f44e8261732d073c3e345fdec730e216cc65784d87fc7e",
@@ -3713,8 +3563,6 @@
       "family_id": "engine_run_slots",
       "first_missing_item": {
         "blockers": [
-          "protein_structure_path_missing",
-          "reference_ligand_path_missing",
           "prepared_receptor_path_missing",
           "prepared_ligand_path_missing",
           "vina_binary_missing"
@@ -3732,8 +3580,6 @@
       "sample_missing_items": [
         {
           "blockers": [
-            "protein_structure_path_missing",
-            "reference_ligand_path_missing",
             "prepared_receptor_path_missing",
             "prepared_ligand_path_missing",
             "vina_binary_missing"
@@ -3746,8 +3592,6 @@
         },
         {
           "blockers": [
-            "protein_structure_path_missing",
-            "reference_ligand_path_missing",
             "prepared_receptor_path_missing",
             "prepared_ligand_path_missing",
             "gnina_binary_missing"
@@ -3760,8 +3604,6 @@
         },
         {
           "blockers": [
-            "protein_structure_path_missing",
-            "reference_ligand_path_missing",
             "prepared_receptor_path_missing",
             "prepared_ligand_path_missing",
             "vina_binary_missing"
@@ -3900,8 +3742,6 @@
     "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
     "first_blocked_case_input_slot": {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -3914,15 +3754,11 @@
     },
     "first_blocked_engine_run_slot": {
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing",
         "vina_binary_missing"
       ],
       "case_blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -7748,8 +7584,6 @@
         "family_id": "engine_run_slots",
         "first_missing_item": {
           "blockers": [
-            "protein_structure_path_missing",
-            "reference_ligand_path_missing",
             "prepared_receptor_path_missing",
             "prepared_ligand_path_missing",
             "vina_binary_missing"
@@ -7767,8 +7601,6 @@
         "sample_missing_items": [
           {
             "blockers": [
-              "protein_structure_path_missing",
-              "reference_ligand_path_missing",
               "prepared_receptor_path_missing",
               "prepared_ligand_path_missing",
               "vina_binary_missing"
@@ -7781,8 +7613,6 @@
           },
           {
             "blockers": [
-              "protein_structure_path_missing",
-              "reference_ligand_path_missing",
               "prepared_receptor_path_missing",
               "prepared_ligand_path_missing",
               "gnina_binary_missing"
@@ -7795,8 +7625,6 @@
           },
           {
             "blockers": [
-              "protein_structure_path_missing",
-              "reference_ligand_path_missing",
               "prepared_receptor_path_missing",
               "prepared_ligand_path_missing",
               "vina_binary_missing"
@@ -7977,7 +7805,7 @@
     "rows_artifact_required_after_engine_execution": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
   },
   "schema_version": "public-benchmark-vina-gnina-runtime-readiness.v1",
-  "source_commit_sha": "467a94b22205a90a269060e8162674c8d2337130",
+  "source_commit_sha": "0071f6818cb8531d8a8a980f67156f28f914cbe5",
   "status": "execution_plan_blocked",
   "summary": {
     "adapter_case_count": 0,
@@ -7986,7 +7814,7 @@
     "available_engine_count": 0,
     "blocked_case_input_slot_count": 12,
     "blocked_engine_run_slot_count": 24,
-    "blocker_count": 124,
+    "blocker_count": 76,
     "case_count": 12,
     "detected_row_artifact_count": 0,
     "engine_run_bundle_materialized": false,

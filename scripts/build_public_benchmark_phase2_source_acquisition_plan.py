@@ -732,6 +732,51 @@ def _phase2_row_audit_summary(audit: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _vina_gnina_source_extraction_summary(report: dict[str, Any]) -> dict[str, Any]:
+    source_file_rows = [
+        row for row in _as_list(report.get("source_file_rows")) if isinstance(row, dict)
+    ]
+    case_rows = [
+        row for row in _as_list(report.get("case_rows")) if isinstance(row, dict)
+    ]
+    verified_source_file_count = sum(
+        1 for row in source_file_rows if bool(row.get("checksum_verified"))
+    )
+    blocked_source_file_count = sum(
+        1 for row in source_file_rows if str(row.get("blocker") or "")
+    )
+    prepared_input_gap_count = sum(
+        len(_as_list(row.get("prepared_input_gaps"))) for row in case_rows
+    )
+    source_ready_case_count = sum(
+        1 for row in case_rows if str(row.get("status") or "") == "source_files_ready"
+    )
+    return {
+        "artifact": str(DEFAULT_VINA_GNINA_INPUT_MANIFEST_FROM_CASF_ARCHIVE_REPORT),
+        "status": str(report.get("status") or "missing"),
+        "contract_pass": report.get("contract_pass"),
+        "archive_artifact": str(report.get("archive_artifact") or ""),
+        "archive_present": bool(report.get("archive_present")),
+        "archive_size_bytes": _as_int(report.get("archive_size_bytes")),
+        "extract_dir": str(report.get("extract_dir") or ""),
+        "source_files_ready": bool(report.get("source_files_ready")),
+        "manifest_ready": bool(report.get("manifest_ready")),
+        "case_count": len(case_rows),
+        "source_ready_case_count": source_ready_case_count,
+        "source_file_count": len(source_file_rows),
+        "verified_source_file_count": verified_source_file_count,
+        "blocked_source_file_count": blocked_source_file_count,
+        "prepared_input_gap_count": prepared_input_gap_count,
+        "first_case": _as_dict(case_rows[0]) if case_rows else {},
+        "command": (
+            "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py "
+            "--archive <CASF-2016.tar.gz> "
+            f"--out-manifest {DEFAULT_VINA_GNINA_INPUT_MANIFEST} "
+            f"--out-report {DEFAULT_VINA_GNINA_INPUT_MANIFEST_FROM_CASF_ARCHIVE_REPORT}"
+        ),
+    }
+
+
 def _phase2_row_closure_matrix(audit: dict[str, Any]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     raw_rows = audit.get("phase2_row_closure_matrix")
@@ -2527,6 +2572,7 @@ def _vina_gnina_actual_evidence_audit(
     vina_gnina_execution_plan_summary: dict[str, Any],
     vina_gnina_runtime_readiness_summary: dict[str, Any],
     vina_gnina_rows_template_preflight_summary: dict[str, Any],
+    vina_gnina_source_extraction_summary: dict[str, Any],
     external_receipt_completion_audit: dict[str, Any],
 ) -> dict[str, Any]:
     runtime_unblock = _as_dict(
@@ -2667,6 +2713,33 @@ def _vina_gnina_actual_evidence_audit(
                 "template_completion_blocked_case_count": _as_int(
                     input_manifest_preflight.get(
                         "input_manifest_completion_blocked_case_count"
+                    )
+                ),
+                "source_extraction_status": str(
+                    vina_gnina_source_extraction_summary.get("status") or ""
+                ),
+                "source_files_ready": bool(
+                    vina_gnina_source_extraction_summary.get("source_files_ready")
+                ),
+                "source_ready_case_count": _as_int(
+                    vina_gnina_source_extraction_summary.get("source_ready_case_count")
+                ),
+                "source_file_count": _as_int(
+                    vina_gnina_source_extraction_summary.get("source_file_count")
+                ),
+                "verified_source_file_count": _as_int(
+                    vina_gnina_source_extraction_summary.get(
+                        "verified_source_file_count"
+                    )
+                ),
+                "blocked_source_file_count": _as_int(
+                    vina_gnina_source_extraction_summary.get(
+                        "blocked_source_file_count"
+                    )
+                ),
+                "prepared_input_gap_count": _as_int(
+                    vina_gnina_source_extraction_summary.get(
+                        "prepared_input_gap_count"
                     )
                 ),
             },
@@ -2940,6 +3013,58 @@ def _vina_gnina_actual_evidence_audit(
         for row in _as_list(runtime_unblock.get("operator_blocker_family_plan"))
         if isinstance(row, dict)
     ]
+    if bool(vina_gnina_source_extraction_summary.get("source_files_ready")):
+        operator_blocker_family_plan = [
+            (
+                {
+                    **row,
+                    "status": "ready",
+                    "description": (
+                        "Official CASF/PDBBind source protein and ligand files "
+                        "were verified from the CASF archive receipt; prepared "
+                        "engine inputs remain required."
+                    ),
+                    "missing_item_count": 0,
+                    "blocked_case_count": 0,
+                    "first_missing_item": {},
+                    "next_action": "review_verified_casf_source_file_receipt",
+                    "operator_action": "review_verified_casf_source_file_receipt",
+                    "source_extraction_summary": {
+                        "artifact": str(
+                            vina_gnina_source_extraction_summary.get("artifact")
+                            or ""
+                        ),
+                        "status": str(
+                            vina_gnina_source_extraction_summary.get("status")
+                            or ""
+                        ),
+                        "source_ready_case_count": _as_int(
+                            vina_gnina_source_extraction_summary.get(
+                                "source_ready_case_count"
+                            )
+                        ),
+                        "source_file_count": _as_int(
+                            vina_gnina_source_extraction_summary.get(
+                                "source_file_count"
+                            )
+                        ),
+                        "verified_source_file_count": _as_int(
+                            vina_gnina_source_extraction_summary.get(
+                                "verified_source_file_count"
+                            )
+                        ),
+                        "blocked_source_file_count": _as_int(
+                            vina_gnina_source_extraction_summary.get(
+                                "blocked_source_file_count"
+                            )
+                        ),
+                    },
+                }
+                if str(row.get("family_id") or "") == "official_source_files"
+                else row
+            )
+            for row in operator_blocker_family_plan
+        ]
     blocked_operator_blocker_families = [
         row
         for row in operator_blocker_family_plan
@@ -3369,6 +3494,13 @@ def build_public_benchmark_phase2_source_acquisition_plan(
     vina_gnina_runtime_readiness_summary = _vina_gnina_runtime_readiness_summary(
         vina_gnina_runtime_readiness
     )
+    vina_gnina_source_extraction = _load_json(
+        repo_root,
+        DEFAULT_VINA_GNINA_INPUT_MANIFEST_FROM_CASF_ARCHIVE_REPORT,
+    )
+    vina_gnina_source_extraction_summary = _vina_gnina_source_extraction_summary(
+        vina_gnina_source_extraction
+    )
     vina_gnina_rows_template_preflight_summary = (
         _vina_gnina_rows_template_preflight_summary(repo_root)
     )
@@ -3490,6 +3622,9 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         vina_gnina_rows_template_preflight_summary=(
             vina_gnina_rows_template_preflight_summary
         ),
+        vina_gnina_source_extraction_summary=(
+            vina_gnina_source_extraction_summary
+        ),
         external_receipt_completion_audit=external_receipt_completion_audit,
     )
     operator_next_actions = [
@@ -3548,6 +3683,7 @@ def build_public_benchmark_phase2_source_acquisition_plan(
                 DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT,
                 DEFAULT_VINA_GNINA_INPUT_MANIFEST,
                 DEFAULT_VINA_GNINA_INPUT_MANIFEST_FROM_TEMPLATE_REPORT,
+                DEFAULT_VINA_GNINA_INPUT_MANIFEST_FROM_CASF_ARCHIVE_REPORT,
                 Path("scripts/build_public_benchmark_source_access_preflight_receipt.py"),
                 DEFAULT_VINA_GNINA_EXECUTION_PLAN,
                 DEFAULT_VINA_GNINA_RUNTIME_READINESS,
@@ -3584,6 +3720,7 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         "vina_gnina_actual_evidence_audit": vina_gnina_actual_evidence_audit,
         "vina_gnina_execution_plan": vina_gnina_execution_plan_summary,
         "vina_gnina_runtime_readiness": vina_gnina_runtime_readiness_summary,
+        "vina_gnina_source_extraction": vina_gnina_source_extraction_summary,
         "vina_gnina_rows_template_preflight_summary": (
             vina_gnina_rows_template_preflight_summary
         ),
@@ -3798,6 +3935,31 @@ def build_public_benchmark_phase2_source_acquisition_plan(
                 vina_gnina_input_manifest_current.get(
                     "template_completion_blocked_case_count"
                 )
+            ),
+            "vina_gnina_source_extraction_status": (
+                vina_gnina_source_extraction_summary["status"]
+            ),
+            "vina_gnina_source_files_ready": (
+                vina_gnina_source_extraction_summary["source_files_ready"]
+            ),
+            "vina_gnina_source_ready_case_count": (
+                vina_gnina_source_extraction_summary["source_ready_case_count"]
+            ),
+            "vina_gnina_source_file_count": (
+                vina_gnina_source_extraction_summary["source_file_count"]
+            ),
+            "vina_gnina_verified_source_file_count": (
+                vina_gnina_source_extraction_summary[
+                    "verified_source_file_count"
+                ]
+            ),
+            "vina_gnina_blocked_source_file_count": (
+                vina_gnina_source_extraction_summary[
+                    "blocked_source_file_count"
+                ]
+            ),
+            "vina_gnina_prepared_input_gap_count": (
+                vina_gnina_source_extraction_summary["prepared_input_gap_count"]
             ),
             "vina_gnina_missing_engine_count": vina_gnina_execution_plan_summary[
                 "missing_engine_count"

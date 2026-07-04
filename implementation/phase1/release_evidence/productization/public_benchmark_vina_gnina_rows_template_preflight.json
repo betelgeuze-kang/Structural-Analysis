@@ -173,7 +173,7 @@
   ],
   "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
   "expected_rows_detected": false,
-  "generated_at": "2026-07-04T07:44:37.963425+00:00",
+  "generated_at": "2026-07-04T14:07:32.660628+00:00",
   "header_fields": [
     "case_id",
     "source_family",
@@ -197,7 +197,7 @@
   ],
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv": "sha256:3a106d2aa9f456eee7238523bf090db13e35d98afefa3952352a660f5b5e36ae",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:f57f0d5f7beeab8d1494d294ef00bad1c08e339b1a4865c7b392060da8e70da9",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:63d57ef34bb6ca3cd088077b4423b77e2da420f10f5dc1b660e56d30d525fac8",
     "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:0258e681ddd419d9fba1bba595ffda481b77f710b5e645ac628c5f2bf1444cee",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:8c1ce46cbd085987f2923602424b666bb63e9edb6fdb2438158d36aee890dd41"
   },
@@ -7442,7 +7442,7 @@
   ],
   "runtime_readiness_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
   "schema_version": "public-benchmark-vina-gnina-rows-template-preflight.v1",
-  "source_commit_sha": "a2e3fe28513166d00754d209e4ea2d01792f24b5",
+  "source_commit_sha": "0071f6818cb8531d8a8a980f67156f28f914cbe5",
   "status": "operator_rows_completion_required",
   "summary": {
     "adapter_template_ready": false,

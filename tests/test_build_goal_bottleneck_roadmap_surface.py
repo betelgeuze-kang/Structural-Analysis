@@ -522,6 +522,12 @@ def test_goal_bottleneck_surface_exposes_active_thread_goal_audit() -> None:
     )
     assert public["current"]["verified_case_input_count"] == 0
     assert public["current"]["template_completion_blocked_case_count"] == 12
+    assert public["current"]["source_files_ready"] is True
+    assert public["current"]["source_ready_case_count"] == 12
+    assert public["current"]["source_file_count"] == 24
+    assert public["current"]["verified_source_file_count"] == 24
+    assert public["current"]["blocked_source_file_count"] == 0
+    assert public["current"]["prepared_input_gap_count"] == 24
     assert public["current"]["missing_engine_ids"] == ["vina", "gnina"]
     assert "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified" in (
         public["blockers"]

@@ -156,7 +156,7 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "blocked_engine_run_slot_count"
     ] == 24
     vina_runtime_action = unblock_plan["vina_gnina_rows"]["runtime_action_packet"]
-    assert vina_runtime_action["runtime_readiness_blocker_count"] == 124
+    assert vina_runtime_action["runtime_readiness_blocker_count"] == 76
     assert vina_runtime_action["blocked_case_input_slot_count"] == 12
     assert vina_runtime_action["blocked_engine_run_slot_count"] == 24
     assert vina_runtime_action["missing_engine_ids"] == ["vina", "gnina"]
@@ -515,7 +515,7 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert vina_contract_detail["required_engine_run_count"] == 24
     assert vina_contract_detail["ready_engine_run_slot_count"] == 0
     assert vina_contract_detail["blocked_engine_run_slot_count"] == 24
-    assert vina_contract_detail["runtime_readiness_blocker_count"] == 124
+    assert vina_contract_detail["runtime_readiness_blocker_count"] == 76
     assert vina_contract_detail["missing_engine_ids"] == ["vina", "gnina"]
     assert vina_contract_detail["engine_run_status_summary"][
         "first_blocked_engine_run_slot"
@@ -606,7 +606,7 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "public_benchmark_vina_gnina_input_manifest.csv"
     )
     assert public_manifest_action["default_execution_plan_manifest_path"].endswith(
-        "public_benchmark_vina_gnina_input_manifest.json"
+        "public_benchmark_vina_gnina_input_manifest.csv"
     )
     assert public_manifest_action["recommended_template_dropzone"].endswith(
         "public_benchmark_vina_gnina_input_manifest.csv"
@@ -1425,7 +1425,7 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "### Vina/GNINA Engine Run Slots" in markdown
     assert "`operator_unblock_status`: `engine_inputs_required`" in markdown
     assert "`missing_engine_ids`: `vina`, `gnina`" in markdown
-    assert "`runtime_readiness_blocker_count`: `124`" in markdown
+    assert "`runtime_readiness_blocker_count`: `76`" in markdown
     assert "`adapter_row_preflight_status`: `row_artifact_missing`" in markdown
     assert "public_benchmark_vina_gnina_input_manifest_template.csv" in markdown
     assert "PUBLIC_BENCHMARK_VINA_BIN" in markdown

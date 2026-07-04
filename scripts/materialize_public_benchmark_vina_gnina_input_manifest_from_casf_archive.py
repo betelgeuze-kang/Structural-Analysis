@@ -106,7 +106,9 @@ def _read_template_rows(repo_root: Path, template: Path) -> tuple[list[str], lis
 def _write_csv(path: Path, header: list[str], rows: list[dict[str, str]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=header, extrasaction="ignore")
+        writer = csv.DictWriter(
+            handle, fieldnames=header, extrasaction="ignore", lineterminator="\n"
+        )
         writer.writeheader()
         writer.writerows(rows)
 

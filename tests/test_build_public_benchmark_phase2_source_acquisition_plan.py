@@ -379,6 +379,22 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert harness_requirements["vina_gnina_comparison_adapter"]["blockers"] == [
         "vina_gnina_rows_not_provided"
     ]
+    source_extraction = payload["vina_gnina_source_extraction"]
+    assert source_extraction["status"] == (
+        "source_files_verified_prepared_inputs_required"
+    )
+    assert source_extraction["source_files_ready"] is True
+    assert source_extraction["source_ready_case_count"] == 12
+    assert source_extraction["source_file_count"] == 24
+    assert source_extraction["verified_source_file_count"] == 24
+    assert source_extraction["blocked_source_file_count"] == 0
+    assert source_extraction["prepared_input_gap_count"] == 24
+    assert payload["summary"]["vina_gnina_source_files_ready"] is True
+    assert payload["summary"]["vina_gnina_source_ready_case_count"] == 12
+    assert payload["summary"]["vina_gnina_source_file_count"] == 24
+    assert payload["summary"]["vina_gnina_verified_source_file_count"] == 24
+    assert payload["summary"]["vina_gnina_blocked_source_file_count"] == 0
+    assert payload["summary"]["vina_gnina_prepared_input_gap_count"] == 24
     vina_gnina_actual_audit = payload["vina_gnina_actual_evidence_audit"]
     assert vina_gnina_actual_audit["status"] == "engine_input_manifest_required"
     assert vina_gnina_actual_audit["pass"] is False
@@ -397,10 +413,10 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert vina_gnina_actual_audit["required_case_count"] == 12
     assert vina_gnina_actual_audit["required_engine_run_count"] == 24
     assert vina_gnina_actual_audit["operator_blocker_family_count"] == 7
-    assert vina_gnina_actual_audit["operator_blocker_family_blocked_count"] == 7
+    assert vina_gnina_actual_audit["operator_blocker_family_blocked_count"] == 6
     assert (
         vina_gnina_actual_audit["operator_blocker_family_missing_item_count"]
-        == 182
+        == 158
     )
     assert vina_gnina_actual_audit["first_operator_blocker_family"][
         "family_id"
@@ -419,7 +435,24 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "build_public_benchmark_vina_gnina_input_manifest_template_preflight.py"
         in family_plan["manifest_required_values"]["materialization_command"]
     )
-    assert family_plan["official_source_files"]["missing_item_count"] == 24
+    assert family_plan["official_source_files"]["status"] == "ready"
+    assert family_plan["official_source_files"]["missing_item_count"] == 0
+    assert family_plan["official_source_files"]["blocked_case_count"] == 0
+    assert family_plan["official_source_files"]["first_missing_item"] == {}
+    assert family_plan["official_source_files"]["next_action"] == (
+        "review_verified_casf_source_file_receipt"
+    )
+    assert family_plan["official_source_files"]["source_extraction_summary"] == {
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json"
+        ),
+        "status": "source_files_verified_prepared_inputs_required",
+        "source_ready_case_count": 12,
+        "source_file_count": 24,
+        "verified_source_file_count": 24,
+        "blocked_source_file_count": 0,
+    }
     assert (
         "materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py"
         in family_plan["official_source_files"]["materialization_command"]
@@ -443,6 +476,7 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     }
     assert actual_components["engine_input_manifest"]["current"] == {
         "blocked_case_input_slot_count": 12,
+        "blocked_source_file_count": 0,
         "case_input_slot_count": 12,
         "input_manifest_detected": True,
         "input_manifest_row_count": 12,
@@ -451,13 +485,19 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "input_manifest_verification_status": (
             "syntactic_manifest_detected_but_case_inputs_unverified"
         ),
+        "prepared_input_gap_count": 24,
         "required_case_count": 12,
+        "source_extraction_status": "source_files_verified_prepared_inputs_required",
+        "source_file_count": 24,
+        "source_files_ready": True,
+        "source_ready_case_count": 12,
         "template_completion_blocked_case_count": 12,
         "template_manifest_ready": False,
         "template_missing_local_file_count": 48,
         "template_missing_receipt_ref_count": 60,
         "template_preflight_status": "operator_manifest_completion_required",
         "verified_case_input_count": 0,
+        "verified_source_file_count": 24,
     }
     assert actual_components["engine_input_manifest"]["required"] == {
         "blocked_case_input_slot_count": 0,
@@ -789,8 +829,17 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "vina_gnina_actual_evidence_blocked_component_count": 6,
         "vina_gnina_actual_evidence_required_engine_run_count": 24,
         "vina_gnina_actual_operator_blocker_family_count": 7,
-        "vina_gnina_actual_operator_blocker_family_blocked_count": 7,
-        "vina_gnina_actual_operator_blocker_family_missing_item_count": 182,
+        "vina_gnina_actual_operator_blocker_family_blocked_count": 6,
+        "vina_gnina_actual_operator_blocker_family_missing_item_count": 158,
+        "vina_gnina_source_extraction_status": (
+            "source_files_verified_prepared_inputs_required"
+        ),
+        "vina_gnina_source_files_ready": True,
+        "vina_gnina_source_ready_case_count": 12,
+        "vina_gnina_source_file_count": 24,
+        "vina_gnina_verified_source_file_count": 24,
+        "vina_gnina_blocked_source_file_count": 0,
+        "vina_gnina_prepared_input_gap_count": 24,
         "phase2_row_audit_missing_row_input_count": 1,
         "phase2_row_audit_missing_row_inputs": [
             "vina_gnina_rows",
@@ -983,7 +1032,7 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "public_benchmark_vina_gnina_input_manifest.csv"
     )
     assert manifest_action["default_execution_plan_manifest_path"].endswith(
-        "public_benchmark_vina_gnina_input_manifest.json"
+        "public_benchmark_vina_gnina_input_manifest.csv"
     )
     assert manifest_action["recommended_template_dropzone"].endswith(
         "public_benchmark_vina_gnina_input_manifest.csv"

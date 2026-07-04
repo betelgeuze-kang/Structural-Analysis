@@ -469,17 +469,17 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T13:26:43.661172+00:00",
+  "generated_at": "2026-07-04T14:07:51.383749+00:00",
   "input_checksums": {
     "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
     "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
     "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json": "sha256:c088b33bb3ce0502bf4f0cba3f845b8511c18b8115a0f61e2047ed4cb4c913c2",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:30cea0a365c966479ebe1e3b48f0b2b99ba6358c8434f9b1e64d51e4d1329aba",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json": "sha256:26a80f6babe19ae18b29b8b4b6075a0df44f757ff4e791e6b337cf8d4a53259d",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json": "sha256:2065dc792c67573e3f598bf57bb3afc83259a3ecc57a5bae2a000806ce164f43",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:b11697727b215ac6f0a964745a1008c3e3946220b113c9442568ae6d5a13fb80",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json": "sha256:324c0e95ad61928d0e2390e87e918d9c5a43bc6989363e1acef86f313b72fd16",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_template_report.json": "sha256:2f9e5b03f67fae7d03f2f285b6ab69a37409e8e94e94fa9bdc888dc99569286b",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json": "sha256:c57c0ab80322e9794f7c6f61377f3afecde7c98ff886b3a07d3e11fef008c62f",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:36113742bcdbca3379501deb49c14f0d86f2ff9d48e59f2e8cef20795e2856bf",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json": "sha256:568c1c39dfd6984a0f8bfdae239a4246c2c803951848dfe4a83fc1f55793c9ac",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:63d57ef34bb6ca3cd088077b4423b77e2da420f10f5dc1b660e56d30d525fac8",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
     "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:a0c1b573aacdf87695e82dd9b67f77ca9f06e4e4cb6789489e6402a404dfd1ff"
@@ -2332,7 +2332,7 @@
     }
   },
   "schema_version": "public-benchmark-phase2-row-audit.v1",
-  "source_commit_sha": "71a72c6b259acd72ec4f01dd3fc37040df4bd521",
+  "source_commit_sha": "0071f6818cb8531d8a8a980f67156f28f914cbe5",
   "status": "operator_evidence_required",
   "summary": {
     "blocked_component_ids": [
@@ -2393,7 +2393,7 @@
     },
     "execution_plan": {
       "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
-      "case_blocker_count": 48,
+      "case_blocker_count": 24,
       "case_count": 12,
       "contract_pass": true,
       "execution_plan_ready": false,
@@ -2516,8 +2516,6 @@
         "family_id": "engine_run_slots",
         "first_missing_item": {
           "blockers": [
-            "protein_structure_path_missing",
-            "reference_ligand_path_missing",
             "prepared_receptor_path_missing",
             "prepared_ligand_path_missing",
             "vina_binary_missing"
@@ -2615,8 +2613,6 @@
       "execution_plan_ready": false,
       "first_blocked_case_input_slot": {
         "blockers": [
-          "protein_structure_path_missing",
-          "reference_ligand_path_missing",
           "prepared_receptor_path_missing",
           "prepared_ligand_path_missing"
         ],
@@ -2632,15 +2628,11 @@
       },
       "first_blocked_engine_run_slot": {
         "blockers": [
-          "protein_structure_path_missing",
-          "reference_ligand_path_missing",
           "prepared_receptor_path_missing",
           "prepared_ligand_path_missing",
           "vina_binary_missing"
         ],
         "case_blockers": [
-          "protein_structure_path_missing",
-          "reference_ligand_path_missing",
           "prepared_receptor_path_missing",
           "prepared_ligand_path_missing"
         ],

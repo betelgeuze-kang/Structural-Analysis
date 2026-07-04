@@ -1435,6 +1435,24 @@ def _active_thread_goal_objective_audit(
                         public_source_actuality_evidence.get("missing_row_inputs")
                     )
                 ],
+                "source_files_ready": _as_bool(
+                    public_summary.get("vina_gnina_source_files_ready")
+                ),
+                "source_ready_case_count": _as_int(
+                    public_summary.get("vina_gnina_source_ready_case_count")
+                ),
+                "source_file_count": _as_int(
+                    public_summary.get("vina_gnina_source_file_count")
+                ),
+                "verified_source_file_count": _as_int(
+                    public_summary.get("vina_gnina_verified_source_file_count")
+                ),
+                "blocked_source_file_count": _as_int(
+                    public_summary.get("vina_gnina_blocked_source_file_count")
+                ),
+                "prepared_input_gap_count": _as_int(
+                    public_summary.get("vina_gnina_prepared_input_gap_count")
+                ),
                 "failed_criteria": [
                     str(item) for item in _as_list(phase2_summary.get("failed_criteria"))
                 ],

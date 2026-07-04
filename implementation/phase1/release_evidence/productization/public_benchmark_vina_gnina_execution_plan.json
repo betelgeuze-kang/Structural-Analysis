@@ -2,52 +2,28 @@
   "adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
   "adapter_rows_ready": false,
   "blockers": [
-    "casf2016_4llx::protein_structure_path_missing",
-    "casf2016_4llx::reference_ligand_path_missing",
     "casf2016_4llx::prepared_receptor_path_missing",
     "casf2016_4llx::prepared_ligand_path_missing",
-    "casf2016_5c28::protein_structure_path_missing",
-    "casf2016_5c28::reference_ligand_path_missing",
     "casf2016_5c28::prepared_receptor_path_missing",
     "casf2016_5c28::prepared_ligand_path_missing",
-    "casf2016_3uuo::protein_structure_path_missing",
-    "casf2016_3uuo::reference_ligand_path_missing",
     "casf2016_3uuo::prepared_receptor_path_missing",
     "casf2016_3uuo::prepared_ligand_path_missing",
-    "casf2016_3ui7::protein_structure_path_missing",
-    "casf2016_3ui7::reference_ligand_path_missing",
     "casf2016_3ui7::prepared_receptor_path_missing",
     "casf2016_3ui7::prepared_ligand_path_missing",
-    "casf2016_5c2h::protein_structure_path_missing",
-    "casf2016_5c2h::reference_ligand_path_missing",
     "casf2016_5c2h::prepared_receptor_path_missing",
     "casf2016_5c2h::prepared_ligand_path_missing",
-    "casf2016_2v00::protein_structure_path_missing",
-    "casf2016_2v00::reference_ligand_path_missing",
     "casf2016_2v00::prepared_receptor_path_missing",
     "casf2016_2v00::prepared_ligand_path_missing",
-    "casf2016_3wz8::protein_structure_path_missing",
-    "casf2016_3wz8::reference_ligand_path_missing",
     "casf2016_3wz8::prepared_receptor_path_missing",
     "casf2016_3wz8::prepared_ligand_path_missing",
-    "casf2016_3pww::protein_structure_path_missing",
-    "casf2016_3pww::reference_ligand_path_missing",
     "casf2016_3pww::prepared_receptor_path_missing",
     "casf2016_3pww::prepared_ligand_path_missing",
-    "casf2016_3prs::protein_structure_path_missing",
-    "casf2016_3prs::reference_ligand_path_missing",
     "casf2016_3prs::prepared_receptor_path_missing",
     "casf2016_3prs::prepared_ligand_path_missing",
-    "casf2016_3uri::protein_structure_path_missing",
-    "casf2016_3uri::reference_ligand_path_missing",
     "casf2016_3uri::prepared_receptor_path_missing",
     "casf2016_3uri::prepared_ligand_path_missing",
-    "casf2016_4m0z::protein_structure_path_missing",
-    "casf2016_4m0z::reference_ligand_path_missing",
     "casf2016_4m0z::prepared_receptor_path_missing",
     "casf2016_4m0z::prepared_ligand_path_missing",
-    "casf2016_4m0y::protein_structure_path_missing",
-    "casf2016_4m0y::reference_ligand_path_missing",
     "casf2016_4m0y::prepared_receptor_path_missing",
     "casf2016_4m0y::prepared_ligand_path_missing",
     "vina_binary_missing",
@@ -58,8 +34,6 @@
     {
       "benchmark_split": "CASF-core",
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -236,10 +210,10 @@
       "prepared_receptor_checksum": "",
       "prepared_receptor_path": "prepared/4llx_receptor",
       "protein_structure_checksum": "sha256:ee6be565638c58d9b608a5cb79a98dae39566a60b4ae019ea6a23a45c2b7a834",
-      "protein_structure_path": "CASF-2016/coreset/4llx/4llx_protein.pdb",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4llx/4llx_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
       "reference_ligand_checksum": "sha256:a6298d4cdddb5d1926ca09bcb5e1412ecd2699476f3ae1fa086d3d335efaa6f1",
-      "reference_ligand_path": "CASF-2016/coreset/4llx/4llx_ligand.sdf",
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4llx/4llx_ligand.sdf",
       "reference_pose_id": "casf2016_4llx_reference",
       "required_adapter_case_fields": [
         "case_id",
@@ -254,37 +228,34 @@
       ],
       "source_family": "CASF/PDBBind + Vina/GNINA",
       "source_file_status": {
-        "blockers": [
-          "protein_structure_path_missing",
-          "reference_ligand_path_missing"
-        ],
+        "blockers": [],
         "files": {
           "protein_structure_path": {
-            "actual_checksum": "",
-            "blocker": "protein_structure_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:ee6be565638c58d9b608a5cb79a98dae39566a60b4ae019ea6a23a45c2b7a834",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:ee6be565638c58d9b608a5cb79a98dae39566a60b4ae019ea6a23a45c2b7a834",
-            "is_file": false,
-            "path": "CASF-2016/coreset/4llx/4llx_protein.pdb",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4llx/4llx_protein.pdb",
+            "status": "ready"
           },
           "reference_ligand_path": {
-            "actual_checksum": "",
-            "blocker": "reference_ligand_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:a6298d4cdddb5d1926ca09bcb5e1412ecd2699476f3ae1fa086d3d335efaa6f1",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:a6298d4cdddb5d1926ca09bcb5e1412ecd2699476f3ae1fa086d3d335efaa6f1",
-            "is_file": false,
-            "path": "CASF-2016/coreset/4llx/4llx_ligand.sdf",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4llx/4llx_ligand.sdf",
+            "status": "ready"
           }
         },
         "required_fields": [
           "protein_structure_path",
           "reference_ligand_path"
         ],
-        "status": "blocked"
+        "status": "ready"
       },
       "source_license_or_accession": "PDBbind+ CASF-2016 official package",
       "status": "blocked",
@@ -293,8 +264,6 @@
     {
       "benchmark_split": "CASF-core",
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -471,10 +440,10 @@
       "prepared_receptor_checksum": "",
       "prepared_receptor_path": "prepared/5c28_receptor",
       "protein_structure_checksum": "sha256:ac3677c62abb2e549c4e3f4a6185663da16028e7e1b1e6ef875da956e77639b0",
-      "protein_structure_path": "CASF-2016/coreset/5c28/5c28_protein.pdb",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c28/5c28_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
       "reference_ligand_checksum": "sha256:7df337dcb033a69f6db8d229749489e45ba9695a4a2e9bdf5593a51ae66eaf87",
-      "reference_ligand_path": "CASF-2016/coreset/5c28/5c28_ligand.sdf",
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c28/5c28_ligand.sdf",
       "reference_pose_id": "casf2016_5c28_reference",
       "required_adapter_case_fields": [
         "case_id",
@@ -489,37 +458,34 @@
       ],
       "source_family": "CASF/PDBBind + Vina/GNINA",
       "source_file_status": {
-        "blockers": [
-          "protein_structure_path_missing",
-          "reference_ligand_path_missing"
-        ],
+        "blockers": [],
         "files": {
           "protein_structure_path": {
-            "actual_checksum": "",
-            "blocker": "protein_structure_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:ac3677c62abb2e549c4e3f4a6185663da16028e7e1b1e6ef875da956e77639b0",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:ac3677c62abb2e549c4e3f4a6185663da16028e7e1b1e6ef875da956e77639b0",
-            "is_file": false,
-            "path": "CASF-2016/coreset/5c28/5c28_protein.pdb",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c28/5c28_protein.pdb",
+            "status": "ready"
           },
           "reference_ligand_path": {
-            "actual_checksum": "",
-            "blocker": "reference_ligand_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:7df337dcb033a69f6db8d229749489e45ba9695a4a2e9bdf5593a51ae66eaf87",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:7df337dcb033a69f6db8d229749489e45ba9695a4a2e9bdf5593a51ae66eaf87",
-            "is_file": false,
-            "path": "CASF-2016/coreset/5c28/5c28_ligand.sdf",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c28/5c28_ligand.sdf",
+            "status": "ready"
           }
         },
         "required_fields": [
           "protein_structure_path",
           "reference_ligand_path"
         ],
-        "status": "blocked"
+        "status": "ready"
       },
       "source_license_or_accession": "PDBbind+ CASF-2016 official package",
       "status": "blocked",
@@ -528,8 +494,6 @@
     {
       "benchmark_split": "CASF-core",
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -706,10 +670,10 @@
       "prepared_receptor_checksum": "",
       "prepared_receptor_path": "prepared/3uuo_receptor",
       "protein_structure_checksum": "sha256:80b28a058a5a2da46bc2e3e91e26c1e14c4f2fd7514c051559b017ab0e93dcf9",
-      "protein_structure_path": "CASF-2016/coreset/3uuo/3uuo_protein.pdb",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uuo/3uuo_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
       "reference_ligand_checksum": "sha256:7eedba7f908c0ba267dbe8af02294fcd148064d25cde772d62dded9737258ce5",
-      "reference_ligand_path": "CASF-2016/coreset/3uuo/3uuo_ligand.sdf",
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uuo/3uuo_ligand.sdf",
       "reference_pose_id": "casf2016_3uuo_reference",
       "required_adapter_case_fields": [
         "case_id",
@@ -724,37 +688,34 @@
       ],
       "source_family": "CASF/PDBBind + Vina/GNINA",
       "source_file_status": {
-        "blockers": [
-          "protein_structure_path_missing",
-          "reference_ligand_path_missing"
-        ],
+        "blockers": [],
         "files": {
           "protein_structure_path": {
-            "actual_checksum": "",
-            "blocker": "protein_structure_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:80b28a058a5a2da46bc2e3e91e26c1e14c4f2fd7514c051559b017ab0e93dcf9",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:80b28a058a5a2da46bc2e3e91e26c1e14c4f2fd7514c051559b017ab0e93dcf9",
-            "is_file": false,
-            "path": "CASF-2016/coreset/3uuo/3uuo_protein.pdb",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uuo/3uuo_protein.pdb",
+            "status": "ready"
           },
           "reference_ligand_path": {
-            "actual_checksum": "",
-            "blocker": "reference_ligand_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:7eedba7f908c0ba267dbe8af02294fcd148064d25cde772d62dded9737258ce5",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:7eedba7f908c0ba267dbe8af02294fcd148064d25cde772d62dded9737258ce5",
-            "is_file": false,
-            "path": "CASF-2016/coreset/3uuo/3uuo_ligand.sdf",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uuo/3uuo_ligand.sdf",
+            "status": "ready"
           }
         },
         "required_fields": [
           "protein_structure_path",
           "reference_ligand_path"
         ],
-        "status": "blocked"
+        "status": "ready"
       },
       "source_license_or_accession": "PDBbind+ CASF-2016 official package",
       "status": "blocked",
@@ -763,8 +724,6 @@
     {
       "benchmark_split": "CASF-core",
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -941,10 +900,10 @@
       "prepared_receptor_checksum": "",
       "prepared_receptor_path": "prepared/3ui7_receptor",
       "protein_structure_checksum": "sha256:62a51c4d5a96b8b2b0388e1e9f9dc55763d39996935f1ed30c1bdfd2ef282e0e",
-      "protein_structure_path": "CASF-2016/coreset/3ui7/3ui7_protein.pdb",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3ui7/3ui7_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
       "reference_ligand_checksum": "sha256:bc6913724d6339af7844e5dedb93010e6e7e706c8da629d1e54a73c2fd2eafa2",
-      "reference_ligand_path": "CASF-2016/coreset/3ui7/3ui7_ligand.sdf",
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3ui7/3ui7_ligand.sdf",
       "reference_pose_id": "casf2016_3ui7_reference",
       "required_adapter_case_fields": [
         "case_id",
@@ -959,37 +918,34 @@
       ],
       "source_family": "CASF/PDBBind + Vina/GNINA",
       "source_file_status": {
-        "blockers": [
-          "protein_structure_path_missing",
-          "reference_ligand_path_missing"
-        ],
+        "blockers": [],
         "files": {
           "protein_structure_path": {
-            "actual_checksum": "",
-            "blocker": "protein_structure_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:62a51c4d5a96b8b2b0388e1e9f9dc55763d39996935f1ed30c1bdfd2ef282e0e",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:62a51c4d5a96b8b2b0388e1e9f9dc55763d39996935f1ed30c1bdfd2ef282e0e",
-            "is_file": false,
-            "path": "CASF-2016/coreset/3ui7/3ui7_protein.pdb",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3ui7/3ui7_protein.pdb",
+            "status": "ready"
           },
           "reference_ligand_path": {
-            "actual_checksum": "",
-            "blocker": "reference_ligand_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:bc6913724d6339af7844e5dedb93010e6e7e706c8da629d1e54a73c2fd2eafa2",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:bc6913724d6339af7844e5dedb93010e6e7e706c8da629d1e54a73c2fd2eafa2",
-            "is_file": false,
-            "path": "CASF-2016/coreset/3ui7/3ui7_ligand.sdf",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3ui7/3ui7_ligand.sdf",
+            "status": "ready"
           }
         },
         "required_fields": [
           "protein_structure_path",
           "reference_ligand_path"
         ],
-        "status": "blocked"
+        "status": "ready"
       },
       "source_license_or_accession": "PDBbind+ CASF-2016 official package",
       "status": "blocked",
@@ -998,8 +954,6 @@
     {
       "benchmark_split": "CASF-core",
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -1176,10 +1130,10 @@
       "prepared_receptor_checksum": "",
       "prepared_receptor_path": "prepared/5c2h_receptor",
       "protein_structure_checksum": "sha256:59718184b6c4de964136707cca00f1eb1361fff3d24020e28878dbec60e67917",
-      "protein_structure_path": "CASF-2016/coreset/5c2h/5c2h_protein.pdb",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c2h/5c2h_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
       "reference_ligand_checksum": "sha256:7c512908ac4e7157027219b8f09bcede70f8d0621606303a5ff2eceb89033420",
-      "reference_ligand_path": "CASF-2016/coreset/5c2h/5c2h_ligand.sdf",
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c2h/5c2h_ligand.sdf",
       "reference_pose_id": "casf2016_5c2h_reference",
       "required_adapter_case_fields": [
         "case_id",
@@ -1194,37 +1148,34 @@
       ],
       "source_family": "CASF/PDBBind + Vina/GNINA",
       "source_file_status": {
-        "blockers": [
-          "protein_structure_path_missing",
-          "reference_ligand_path_missing"
-        ],
+        "blockers": [],
         "files": {
           "protein_structure_path": {
-            "actual_checksum": "",
-            "blocker": "protein_structure_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:59718184b6c4de964136707cca00f1eb1361fff3d24020e28878dbec60e67917",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:59718184b6c4de964136707cca00f1eb1361fff3d24020e28878dbec60e67917",
-            "is_file": false,
-            "path": "CASF-2016/coreset/5c2h/5c2h_protein.pdb",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c2h/5c2h_protein.pdb",
+            "status": "ready"
           },
           "reference_ligand_path": {
-            "actual_checksum": "",
-            "blocker": "reference_ligand_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:7c512908ac4e7157027219b8f09bcede70f8d0621606303a5ff2eceb89033420",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:7c512908ac4e7157027219b8f09bcede70f8d0621606303a5ff2eceb89033420",
-            "is_file": false,
-            "path": "CASF-2016/coreset/5c2h/5c2h_ligand.sdf",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c2h/5c2h_ligand.sdf",
+            "status": "ready"
           }
         },
         "required_fields": [
           "protein_structure_path",
           "reference_ligand_path"
         ],
-        "status": "blocked"
+        "status": "ready"
       },
       "source_license_or_accession": "PDBbind+ CASF-2016 official package",
       "status": "blocked",
@@ -1233,8 +1184,6 @@
     {
       "benchmark_split": "CASF-core",
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -1411,10 +1360,10 @@
       "prepared_receptor_checksum": "",
       "prepared_receptor_path": "prepared/2v00_receptor",
       "protein_structure_checksum": "sha256:ce00145b46da36a51792628b6322437c7acb30cbc6c165c47443a1ed3d2256fa",
-      "protein_structure_path": "CASF-2016/coreset/2v00/2v00_protein.pdb",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/2v00/2v00_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
       "reference_ligand_checksum": "sha256:cc87334e0ed4d4d66929e57998fae43785bbe399772967f8a660dfbc106c9b16",
-      "reference_ligand_path": "CASF-2016/coreset/2v00/2v00_ligand.sdf",
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/2v00/2v00_ligand.sdf",
       "reference_pose_id": "casf2016_2v00_reference",
       "required_adapter_case_fields": [
         "case_id",
@@ -1429,37 +1378,34 @@
       ],
       "source_family": "CASF/PDBBind + Vina/GNINA",
       "source_file_status": {
-        "blockers": [
-          "protein_structure_path_missing",
-          "reference_ligand_path_missing"
-        ],
+        "blockers": [],
         "files": {
           "protein_structure_path": {
-            "actual_checksum": "",
-            "blocker": "protein_structure_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:ce00145b46da36a51792628b6322437c7acb30cbc6c165c47443a1ed3d2256fa",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:ce00145b46da36a51792628b6322437c7acb30cbc6c165c47443a1ed3d2256fa",
-            "is_file": false,
-            "path": "CASF-2016/coreset/2v00/2v00_protein.pdb",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/2v00/2v00_protein.pdb",
+            "status": "ready"
           },
           "reference_ligand_path": {
-            "actual_checksum": "",
-            "blocker": "reference_ligand_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:cc87334e0ed4d4d66929e57998fae43785bbe399772967f8a660dfbc106c9b16",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:cc87334e0ed4d4d66929e57998fae43785bbe399772967f8a660dfbc106c9b16",
-            "is_file": false,
-            "path": "CASF-2016/coreset/2v00/2v00_ligand.sdf",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/2v00/2v00_ligand.sdf",
+            "status": "ready"
           }
         },
         "required_fields": [
           "protein_structure_path",
           "reference_ligand_path"
         ],
-        "status": "blocked"
+        "status": "ready"
       },
       "source_license_or_accession": "PDBbind+ CASF-2016 official package",
       "status": "blocked",
@@ -1468,8 +1414,6 @@
     {
       "benchmark_split": "CASF-core",
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -1646,10 +1590,10 @@
       "prepared_receptor_checksum": "",
       "prepared_receptor_path": "prepared/3wz8_receptor",
       "protein_structure_checksum": "sha256:9de2f60abeea752abc06f866597255ca08fe75bf09cc749f76951adc30b0b45f",
-      "protein_structure_path": "CASF-2016/coreset/3wz8/3wz8_protein.pdb",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3wz8/3wz8_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
       "reference_ligand_checksum": "sha256:33a3b8306ae40623d38a5af2a883037a17472f18ba58141456f7bdf8abedb03a",
-      "reference_ligand_path": "CASF-2016/coreset/3wz8/3wz8_ligand.sdf",
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3wz8/3wz8_ligand.sdf",
       "reference_pose_id": "casf2016_3wz8_reference",
       "required_adapter_case_fields": [
         "case_id",
@@ -1664,37 +1608,34 @@
       ],
       "source_family": "CASF/PDBBind + Vina/GNINA",
       "source_file_status": {
-        "blockers": [
-          "protein_structure_path_missing",
-          "reference_ligand_path_missing"
-        ],
+        "blockers": [],
         "files": {
           "protein_structure_path": {
-            "actual_checksum": "",
-            "blocker": "protein_structure_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:9de2f60abeea752abc06f866597255ca08fe75bf09cc749f76951adc30b0b45f",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:9de2f60abeea752abc06f866597255ca08fe75bf09cc749f76951adc30b0b45f",
-            "is_file": false,
-            "path": "CASF-2016/coreset/3wz8/3wz8_protein.pdb",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3wz8/3wz8_protein.pdb",
+            "status": "ready"
           },
           "reference_ligand_path": {
-            "actual_checksum": "",
-            "blocker": "reference_ligand_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:33a3b8306ae40623d38a5af2a883037a17472f18ba58141456f7bdf8abedb03a",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:33a3b8306ae40623d38a5af2a883037a17472f18ba58141456f7bdf8abedb03a",
-            "is_file": false,
-            "path": "CASF-2016/coreset/3wz8/3wz8_ligand.sdf",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3wz8/3wz8_ligand.sdf",
+            "status": "ready"
           }
         },
         "required_fields": [
           "protein_structure_path",
           "reference_ligand_path"
         ],
-        "status": "blocked"
+        "status": "ready"
       },
       "source_license_or_accession": "PDBbind+ CASF-2016 official package",
       "status": "blocked",
@@ -1703,8 +1644,6 @@
     {
       "benchmark_split": "CASF-core",
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -1881,10 +1820,10 @@
       "prepared_receptor_checksum": "",
       "prepared_receptor_path": "prepared/3pww_receptor",
       "protein_structure_checksum": "sha256:351db504aee7d52f588e720c0f9d88ceb65fa738aa9a3d393ec5cbed4af96efb",
-      "protein_structure_path": "CASF-2016/coreset/3pww/3pww_protein.pdb",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3pww/3pww_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
       "reference_ligand_checksum": "sha256:e4cc5a4f6f900a00cd2ce5976a3603d38204f0c288774f5650e35ab7e6324d0b",
-      "reference_ligand_path": "CASF-2016/coreset/3pww/3pww_ligand.sdf",
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3pww/3pww_ligand.sdf",
       "reference_pose_id": "casf2016_3pww_reference",
       "required_adapter_case_fields": [
         "case_id",
@@ -1899,37 +1838,34 @@
       ],
       "source_family": "CASF/PDBBind + Vina/GNINA",
       "source_file_status": {
-        "blockers": [
-          "protein_structure_path_missing",
-          "reference_ligand_path_missing"
-        ],
+        "blockers": [],
         "files": {
           "protein_structure_path": {
-            "actual_checksum": "",
-            "blocker": "protein_structure_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:351db504aee7d52f588e720c0f9d88ceb65fa738aa9a3d393ec5cbed4af96efb",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:351db504aee7d52f588e720c0f9d88ceb65fa738aa9a3d393ec5cbed4af96efb",
-            "is_file": false,
-            "path": "CASF-2016/coreset/3pww/3pww_protein.pdb",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3pww/3pww_protein.pdb",
+            "status": "ready"
           },
           "reference_ligand_path": {
-            "actual_checksum": "",
-            "blocker": "reference_ligand_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:e4cc5a4f6f900a00cd2ce5976a3603d38204f0c288774f5650e35ab7e6324d0b",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:e4cc5a4f6f900a00cd2ce5976a3603d38204f0c288774f5650e35ab7e6324d0b",
-            "is_file": false,
-            "path": "CASF-2016/coreset/3pww/3pww_ligand.sdf",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3pww/3pww_ligand.sdf",
+            "status": "ready"
           }
         },
         "required_fields": [
           "protein_structure_path",
           "reference_ligand_path"
         ],
-        "status": "blocked"
+        "status": "ready"
       },
       "source_license_or_accession": "PDBbind+ CASF-2016 official package",
       "status": "blocked",
@@ -1938,8 +1874,6 @@
     {
       "benchmark_split": "CASF-core",
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -2116,10 +2050,10 @@
       "prepared_receptor_checksum": "",
       "prepared_receptor_path": "prepared/3prs_receptor",
       "protein_structure_checksum": "sha256:6a294ddeb8eaaf9a876ac9ad7a3e2715da586fdb7877d4cac306d4348932e34b",
-      "protein_structure_path": "CASF-2016/coreset/3prs/3prs_protein.pdb",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3prs/3prs_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
       "reference_ligand_checksum": "sha256:4625a72478cc0940022b39b2059e0d7115a20eaf6b845ecde8b17a195fba0911",
-      "reference_ligand_path": "CASF-2016/coreset/3prs/3prs_ligand.sdf",
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3prs/3prs_ligand.sdf",
       "reference_pose_id": "casf2016_3prs_reference",
       "required_adapter_case_fields": [
         "case_id",
@@ -2134,37 +2068,34 @@
       ],
       "source_family": "CASF/PDBBind + Vina/GNINA",
       "source_file_status": {
-        "blockers": [
-          "protein_structure_path_missing",
-          "reference_ligand_path_missing"
-        ],
+        "blockers": [],
         "files": {
           "protein_structure_path": {
-            "actual_checksum": "",
-            "blocker": "protein_structure_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:6a294ddeb8eaaf9a876ac9ad7a3e2715da586fdb7877d4cac306d4348932e34b",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:6a294ddeb8eaaf9a876ac9ad7a3e2715da586fdb7877d4cac306d4348932e34b",
-            "is_file": false,
-            "path": "CASF-2016/coreset/3prs/3prs_protein.pdb",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3prs/3prs_protein.pdb",
+            "status": "ready"
           },
           "reference_ligand_path": {
-            "actual_checksum": "",
-            "blocker": "reference_ligand_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:4625a72478cc0940022b39b2059e0d7115a20eaf6b845ecde8b17a195fba0911",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:4625a72478cc0940022b39b2059e0d7115a20eaf6b845ecde8b17a195fba0911",
-            "is_file": false,
-            "path": "CASF-2016/coreset/3prs/3prs_ligand.sdf",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3prs/3prs_ligand.sdf",
+            "status": "ready"
           }
         },
         "required_fields": [
           "protein_structure_path",
           "reference_ligand_path"
         ],
-        "status": "blocked"
+        "status": "ready"
       },
       "source_license_or_accession": "PDBbind+ CASF-2016 official package",
       "status": "blocked",
@@ -2173,8 +2104,6 @@
     {
       "benchmark_split": "CASF-core",
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -2351,10 +2280,10 @@
       "prepared_receptor_checksum": "",
       "prepared_receptor_path": "prepared/3uri_receptor",
       "protein_structure_checksum": "sha256:03b1b8c59bd72520faca258f2a1c4a5677e161bf3ace4a9df3ae7003d585f8b1",
-      "protein_structure_path": "CASF-2016/coreset/3uri/3uri_protein.pdb",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uri/3uri_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
       "reference_ligand_checksum": "sha256:9091e3949535eeae0afa1e80484ece0e71e6809c44d81072130b54f81f440a85",
-      "reference_ligand_path": "CASF-2016/coreset/3uri/3uri_ligand.sdf",
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uri/3uri_ligand.sdf",
       "reference_pose_id": "casf2016_3uri_reference",
       "required_adapter_case_fields": [
         "case_id",
@@ -2369,37 +2298,34 @@
       ],
       "source_family": "CASF/PDBBind + Vina/GNINA",
       "source_file_status": {
-        "blockers": [
-          "protein_structure_path_missing",
-          "reference_ligand_path_missing"
-        ],
+        "blockers": [],
         "files": {
           "protein_structure_path": {
-            "actual_checksum": "",
-            "blocker": "protein_structure_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:03b1b8c59bd72520faca258f2a1c4a5677e161bf3ace4a9df3ae7003d585f8b1",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:03b1b8c59bd72520faca258f2a1c4a5677e161bf3ace4a9df3ae7003d585f8b1",
-            "is_file": false,
-            "path": "CASF-2016/coreset/3uri/3uri_protein.pdb",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uri/3uri_protein.pdb",
+            "status": "ready"
           },
           "reference_ligand_path": {
-            "actual_checksum": "",
-            "blocker": "reference_ligand_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:9091e3949535eeae0afa1e80484ece0e71e6809c44d81072130b54f81f440a85",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:9091e3949535eeae0afa1e80484ece0e71e6809c44d81072130b54f81f440a85",
-            "is_file": false,
-            "path": "CASF-2016/coreset/3uri/3uri_ligand.sdf",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uri/3uri_ligand.sdf",
+            "status": "ready"
           }
         },
         "required_fields": [
           "protein_structure_path",
           "reference_ligand_path"
         ],
-        "status": "blocked"
+        "status": "ready"
       },
       "source_license_or_accession": "PDBbind+ CASF-2016 official package",
       "status": "blocked",
@@ -2408,8 +2334,6 @@
     {
       "benchmark_split": "CASF-core",
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -2586,10 +2510,10 @@
       "prepared_receptor_checksum": "",
       "prepared_receptor_path": "prepared/4m0z_receptor",
       "protein_structure_checksum": "sha256:8eb56910faa3eb78ca1b8c244b01bf6094f2838a4db08a0b5198b68e6a96242d",
-      "protein_structure_path": "CASF-2016/coreset/4m0z/4m0z_protein.pdb",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0z/4m0z_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
       "reference_ligand_checksum": "sha256:533af481c8fe734256312a30791bfbb12eb5796e26409942c66581fb8ef60f07",
-      "reference_ligand_path": "CASF-2016/coreset/4m0z/4m0z_ligand.sdf",
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0z/4m0z_ligand.sdf",
       "reference_pose_id": "casf2016_4m0z_reference",
       "required_adapter_case_fields": [
         "case_id",
@@ -2604,37 +2528,34 @@
       ],
       "source_family": "CASF/PDBBind + Vina/GNINA",
       "source_file_status": {
-        "blockers": [
-          "protein_structure_path_missing",
-          "reference_ligand_path_missing"
-        ],
+        "blockers": [],
         "files": {
           "protein_structure_path": {
-            "actual_checksum": "",
-            "blocker": "protein_structure_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:8eb56910faa3eb78ca1b8c244b01bf6094f2838a4db08a0b5198b68e6a96242d",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:8eb56910faa3eb78ca1b8c244b01bf6094f2838a4db08a0b5198b68e6a96242d",
-            "is_file": false,
-            "path": "CASF-2016/coreset/4m0z/4m0z_protein.pdb",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0z/4m0z_protein.pdb",
+            "status": "ready"
           },
           "reference_ligand_path": {
-            "actual_checksum": "",
-            "blocker": "reference_ligand_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:533af481c8fe734256312a30791bfbb12eb5796e26409942c66581fb8ef60f07",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:533af481c8fe734256312a30791bfbb12eb5796e26409942c66581fb8ef60f07",
-            "is_file": false,
-            "path": "CASF-2016/coreset/4m0z/4m0z_ligand.sdf",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0z/4m0z_ligand.sdf",
+            "status": "ready"
           }
         },
         "required_fields": [
           "protein_structure_path",
           "reference_ligand_path"
         ],
-        "status": "blocked"
+        "status": "ready"
       },
       "source_license_or_accession": "PDBbind+ CASF-2016 official package",
       "status": "blocked",
@@ -2643,8 +2564,6 @@
     {
       "benchmark_split": "CASF-core",
       "blockers": [
-        "protein_structure_path_missing",
-        "reference_ligand_path_missing",
         "prepared_receptor_path_missing",
         "prepared_ligand_path_missing"
       ],
@@ -2821,10 +2740,10 @@
       "prepared_receptor_checksum": "",
       "prepared_receptor_path": "prepared/4m0y_receptor",
       "protein_structure_checksum": "sha256:f2b1040546ed7c6d01e4ef39996afcc283be189a42df7bde3773db0d2ecbe7bc",
-      "protein_structure_path": "CASF-2016/coreset/4m0y/4m0y_protein.pdb",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0y/4m0y_protein.pdb",
       "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
       "reference_ligand_checksum": "sha256:65f2c98b8958e739f98b243924513e3ff3068d536665a7b0e27fefa81a0e0dfc",
-      "reference_ligand_path": "CASF-2016/coreset/4m0y/4m0y_ligand.sdf",
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0y/4m0y_ligand.sdf",
       "reference_pose_id": "casf2016_4m0y_reference",
       "required_adapter_case_fields": [
         "case_id",
@@ -2839,37 +2758,34 @@
       ],
       "source_family": "CASF/PDBBind + Vina/GNINA",
       "source_file_status": {
-        "blockers": [
-          "protein_structure_path_missing",
-          "reference_ligand_path_missing"
-        ],
+        "blockers": [],
         "files": {
           "protein_structure_path": {
-            "actual_checksum": "",
-            "blocker": "protein_structure_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:f2b1040546ed7c6d01e4ef39996afcc283be189a42df7bde3773db0d2ecbe7bc",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:f2b1040546ed7c6d01e4ef39996afcc283be189a42df7bde3773db0d2ecbe7bc",
-            "is_file": false,
-            "path": "CASF-2016/coreset/4m0y/4m0y_protein.pdb",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0y/4m0y_protein.pdb",
+            "status": "ready"
           },
           "reference_ligand_path": {
-            "actual_checksum": "",
-            "blocker": "reference_ligand_path_missing",
-            "checksum_verified": false,
-            "exists": false,
+            "actual_checksum": "sha256:65f2c98b8958e739f98b243924513e3ff3068d536665a7b0e27fefa81a0e0dfc",
+            "blocker": "",
+            "checksum_verified": true,
+            "exists": true,
             "expected_checksum": "sha256:65f2c98b8958e739f98b243924513e3ff3068d536665a7b0e27fefa81a0e0dfc",
-            "is_file": false,
-            "path": "CASF-2016/coreset/4m0y/4m0y_ligand.sdf",
-            "status": "blocked"
+            "is_file": true,
+            "path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0y/4m0y_ligand.sdf",
+            "status": "ready"
           }
         },
         "required_fields": [
           "protein_structure_path",
           "reference_ligand_path"
         ],
-        "status": "blocked"
+        "status": "ready"
       },
       "source_license_or_accession": "PDBbind+ CASF-2016 official package",
       "status": "blocked",
@@ -2971,11 +2887,11 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "execution_plan_ready": false,
   "expected_vina_gnina_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
-  "generated_at": "2026-07-04T08:36:25.579348+00:00",
+  "generated_at": "2026-07-04T14:07:12.507695+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
     "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json": "missing",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv": "sha256:392e68db8501944477c59b7a7bcc7084b5c71084eb7cc480d87179434fb2e462",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:19cb915b9e0926181b87e17f60ee010ed0fd4b3da6148843d1a077825e5d45bd"
   },
   "input_manifest_status": {
@@ -3030,7 +2946,7 @@
       }
     ],
     "case_count": 12,
-    "default_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
+    "default_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
     "detected_manifest_artifact_count": 1,
     "duplicate_case_ids": [],
     "row_count": 12,
@@ -3038,7 +2954,7 @@
     "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
     "status": "ready"
   },
-  "local_source_ready_case_count": 0,
+  "local_source_ready_case_count": 12,
   "missing_engine_ids": [
     "vina",
     "gnina"
@@ -3050,18 +2966,18 @@
   "reused_evidence": false,
   "rows_from_engine_run_bundle_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py --engine-run-bundle implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json --out-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json --fail-blocked",
   "schema_version": "public-benchmark-vina-gnina-execution-plan.v1",
-  "source_commit_sha": "78538d6ecb7096aec38e7679ded4367b401d53e0",
+  "source_commit_sha": "0071f6818cb8531d8a8a980f67156f28f914cbe5",
   "status": "engine_input_blocked",
   "summary": {
     "adapter_rows_ready": false,
     "available_engine_count": 0,
-    "case_blocker_count": 48,
+    "case_blocker_count": 24,
     "case_count": 12,
     "execution_plan_ready": false,
     "input_manifest_detected": true,
     "input_manifest_row_count": 12,
     "input_manifest_status": "ready",
-    "local_source_ready_case_count": 0,
+    "local_source_ready_case_count": 12,
     "missing_engine_count": 2,
     "operator_execution_ready": false,
     "prepared_input_ready_case_count": 0,

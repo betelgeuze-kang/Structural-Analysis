@@ -1969,9 +1969,9 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "execution_plan_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
   "execution_plan_ready": false,
-  "generated_at": "2026-07-04T08:36:34.516737+00:00",
+  "generated_at": "2026-07-04T14:07:27.081775+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:30cea0a365c966479ebe1e3b48f0b2b99ba6358c8434f9b1e64d51e4d1329aba",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:b11697727b215ac6f0a964745a1008c3e3946220b113c9442568ae6d5a13fb80",
     "scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py": "sha256:2bbd25e704d1f5bec27c001b4c02071ca00ba503e7bb0db16a250370bdcc17f5"
   },
   "operator_execution_ready": false,
@@ -1980,7 +1980,7 @@
   "reuse_policy": "public_benchmark_vina_gnina_engine_run_bundle_from_execution_plan",
   "reused_evidence": false,
   "schema_version": "public-benchmark-vina-gnina-engine-run-bundle.v1",
-  "source_commit_sha": "78538d6ecb7096aec38e7679ded4367b401d53e0",
+  "source_commit_sha": "0071f6818cb8531d8a8a980f67156f28f914cbe5",
   "status": "execution_plan_not_ready",
   "summary": {
     "blocker_count": 1,

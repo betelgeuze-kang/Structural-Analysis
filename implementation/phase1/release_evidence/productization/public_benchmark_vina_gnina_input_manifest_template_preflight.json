@@ -3251,7 +3251,7 @@
     "casf2016_4m0z",
     "casf2016_4m0y"
   ],
-  "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
+  "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
   "filled_manifest_detected": true,
   "filled_manifest_status": {
     "accepted_formats": [
@@ -3305,7 +3305,7 @@
       }
     ],
     "case_count": 12,
-    "default_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
+    "default_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
     "detected_manifest_artifact_count": 1,
     "duplicate_case_ids": [],
     "row_count": 12,
@@ -3313,7 +3313,7 @@
     "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
     "status": "ready"
   },
-  "generated_at": "2026-07-04T09:30:49.500399+00:00",
+  "generated_at": "2026-07-04T14:07:18.167532+00:00",
   "header_fields": [
     "case_id",
     "complex_id",
@@ -3343,7 +3343,7 @@
     "input_preparation_provenance_ref"
   ],
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:30cea0a365c966479ebe1e3b48f0b2b99ba6358c8434f9b1e64d51e4d1329aba",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:b11697727b215ac6f0a964745a1008c3e3946220b113c9442568ae6d5a13fb80",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv": "sha256:ff3afa49ab7c79ed82a78f1755272ecc13ca7f6b6e01ef2b35ea5d58b12d3611",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:19cb915b9e0926181b87e17f60ee010ed0fd4b3da6148843d1a077825e5d45bd",
     "scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py": "sha256:0aaea5d86732b33257e3a5d9f7bbf18ed732e2ca07d7aff489dc2e4173bf523a"
@@ -4310,7 +4310,7 @@
   "reuse_policy": "public_benchmark_vina_gnina_input_manifest_template_preflight",
   "reused_evidence": false,
   "schema_version": "public-benchmark-vina-gnina-input-manifest-template-preflight.v1",
-  "source_commit_sha": "c271cced050b34f96ae74a02ef48dec0ea685fc5",
+  "source_commit_sha": "0071f6818cb8531d8a8a980f67156f28f914cbe5",
   "source_family_policy": {
     "accepted_markers": [
       "casf",
