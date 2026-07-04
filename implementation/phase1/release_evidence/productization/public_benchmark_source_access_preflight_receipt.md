@@ -1,23 +1,23 @@
 # Public Benchmark Source Access Preflight Receipt
 
-- `status`: `network_probe_required`
+- `status`: `reachable`
 - `contract_pass`: `True`
-- `network_probe_performed`: `False`
+- `network_probe_performed`: `True`
 - `source_access_probe_row_count`: `6`
-- `reachable_count`: `0`
+- `reachable_count`: `6`
 - `blocked_count`: `0`
-- `not_run_count`: `6`
+- `not_run_count`: `0`
 
 ## Probe Rows
 
 | Source | Status | Primary Status | Fallback Status | Blockers |
 |---|---|---|---|---|
-| `pdbbind_plus_casf` | `network_probe_not_run` | `not_run` (0) | `not_run` (0) | `source_access_network_probe_not_run` |
-| `dud_e` | `network_probe_not_run` | `not_run` (0) | `not_run` (0) | `source_access_network_probe_not_run` |
-| `lit_pcba` | `network_probe_not_run` | `not_run` (0) | `not_run` (0) | `source_access_network_probe_not_run` |
-| `autodock_vina` | `network_probe_not_run` | `not_run` (0) | `not_run` (0) | `source_access_network_probe_not_run` |
-| `gnina` | `network_probe_not_run` | `not_run` (0) | `not_run` (0) | `source_access_network_probe_not_run` |
-| `posebusters` | `network_probe_not_run` | `not_run` (0) | `not_run` (0) | `source_access_network_probe_not_run` |
+| `pdbbind_plus_casf` | `primary_reachable` | `reachable` (200) | `reachable` (200) |  |
+| `dud_e` | `primary_reachable` | `reachable` (200) | `reachable` (200) |  |
+| `lit_pcba` | `primary_reachable` | `reachable` (200) | `reachable` (200) |  |
+| `autodock_vina` | `primary_reachable` | `reachable` (200) | `reachable` (200) |  |
+| `gnina` | `primary_reachable` | `reachable` (200) | `reachable` (200) |  |
+| `posebusters` | `primary_reachable` | `reachable` (200) | `reachable` (200) |  |
 
 ## Command
 
