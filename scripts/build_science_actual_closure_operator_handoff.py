@@ -854,6 +854,58 @@ def _unblock_plan_counts(unblock: dict[str, Any]) -> dict[str, int]:
     }
 
 
+def _unblock_plan_runtime_action_packet(
+    slot: dict[str, Any],
+    unblock: dict[str, Any],
+) -> dict[str, Any]:
+    source_action = _as_dict(slot.get("source_acquisition_row_action"))
+    runtime_action_packet = _as_dict(source_action.get("runtime_action_packet"))
+    if runtime_action_packet:
+        return runtime_action_packet
+
+    runtime_keys = (
+        "case_input_slot_count",
+        "blocked_case_input_slot_count",
+        "required_engine_run_count",
+        "ready_engine_run_slot_count",
+        "blocked_engine_run_slot_count",
+    )
+    first_blocked_case_input_slot = _as_dict(
+        unblock.get("first_blocked_case_input_slot")
+    )
+    first_blocked_engine_run_slot = _as_dict(
+        unblock.get("first_blocked_engine_run_slot")
+    )
+    if (
+        not first_blocked_case_input_slot
+        and not first_blocked_engine_run_slot
+        and not any(key in unblock for key in runtime_keys)
+    ):
+        return {}
+
+    return {
+        "artifact": str(unblock.get("artifact") or ""),
+        "status": str(unblock.get("status") or ""),
+        "case_input_slot_count": _as_int(unblock.get("case_input_slot_count")),
+        "blocked_case_input_slot_count": _as_int(
+            unblock.get("blocked_case_input_slot_count")
+        ),
+        "required_engine_run_count": _as_int(
+            unblock.get("required_engine_run_count")
+        ),
+        "ready_engine_run_slot_count": _as_int(
+            unblock.get("ready_engine_run_slot_count")
+        ),
+        "blocked_engine_run_slot_count": _as_int(
+            unblock.get("blocked_engine_run_slot_count")
+        ),
+        "first_blocked_case_input_slot": first_blocked_case_input_slot,
+        "first_blocked_engine_run_slot": first_blocked_engine_run_slot,
+        "commands": _as_dict(unblock.get("commands")),
+        "claim_boundary": str(unblock.get("claim_boundary") or ""),
+    }
+
+
 def _blocking_input_unblock_plan(
     missing_slots: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
@@ -867,37 +919,47 @@ def _blocking_input_unblock_plan(
             str(item) for item in _as_list(unblock.get("operator_sequence"))
         ]
         artifacts = _unblock_plan_artifacts(unblock)
-        rows.append(
-            {
-                "row_input_id": str(slot.get("row_input_id") or ""),
-                "component_id": str(
-                    slot.get("actual_closure_component_id") or ""
-                ),
-                "status": str(
-                    unblock.get("status")
-                    or detail.get("status")
-                    or slot.get("status")
-                    or ""
-                ),
-                "operator_action": str(slot.get("operator_action") or ""),
-                "source_acquisition_operator_action": str(
-                    slot.get("source_acquisition_operator_action") or ""
-                ),
-                "expected_rows_artifact": str(
-                    unblock.get("expected_rows_artifact")
-                    or slot.get("preferred_default_row_path")
-                    or ""
-                ),
-                "artifact_refs": artifacts,
-                "operator_sequence": operator_sequence,
-                "first_operator_sequence_step": (
-                    operator_sequence[0] if operator_sequence else ""
-                ),
-                "commands": _as_dict(unblock.get("commands")),
-                "counts": _unblock_plan_counts(unblock),
-                "claim_boundary": str(unblock.get("claim_boundary") or ""),
-            }
-        )
+        runtime_action_packet = _unblock_plan_runtime_action_packet(slot, unblock)
+        row_payload = {
+            "row_input_id": str(slot.get("row_input_id") or ""),
+            "component_id": str(slot.get("actual_closure_component_id") or ""),
+            "status": str(
+                unblock.get("status")
+                or detail.get("status")
+                or slot.get("status")
+                or ""
+            ),
+            "operator_action": str(slot.get("operator_action") or ""),
+            "source_acquisition_operator_action": str(
+                slot.get("source_acquisition_operator_action") or ""
+            ),
+            "expected_rows_artifact": str(
+                unblock.get("expected_rows_artifact")
+                or slot.get("preferred_default_row_path")
+                or ""
+            ),
+            "artifact_refs": artifacts,
+            "operator_sequence": operator_sequence,
+            "first_operator_sequence_step": (
+                operator_sequence[0] if operator_sequence else ""
+            ),
+            "commands": _as_dict(unblock.get("commands")),
+            "counts": _unblock_plan_counts(unblock),
+            "claim_boundary": str(unblock.get("claim_boundary") or ""),
+        }
+        if runtime_action_packet:
+            row_payload["runtime_action_packet"] = runtime_action_packet
+            first_case_slot = _as_dict(
+                runtime_action_packet.get("first_blocked_case_input_slot")
+            )
+            first_engine_slot = _as_dict(
+                runtime_action_packet.get("first_blocked_engine_run_slot")
+            )
+            if first_case_slot:
+                row_payload["first_blocked_case_input_slot"] = first_case_slot
+            if first_engine_slot:
+                row_payload["first_blocked_engine_run_slot"] = first_engine_slot
+        rows.append(row_payload)
     return rows
 
 
@@ -1209,8 +1271,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.extend(["", "## Blocking Input Unblock Plan", ""])
         lines.extend(
             [
-                "| Row Input | Status | Expected Rows | First Step | Preflight Artifacts | Primary Command |",
-                "| --- | --- | --- | --- | --- | --- |",
+                "| Row Input | Status | Expected Rows | First Step | First Blocked Slot | Preflight Artifacts | Primary Command |",
+                "| --- | --- | --- | --- | --- | --- | --- |",
             ]
         )
         command_preference = (
@@ -1230,6 +1292,27 @@ def _markdown(payload: dict[str, Any]) -> str:
         for row in unblock_plan:
             artifacts = _as_dict(row.get("artifact_refs"))
             commands = _as_dict(row.get("commands"))
+            runtime_action = _as_dict(row.get("runtime_action_packet"))
+            first_case_slot = _as_dict(
+                runtime_action.get("first_blocked_case_input_slot")
+            )
+            first_engine_slot = _as_dict(
+                runtime_action.get("first_blocked_engine_run_slot")
+            )
+            first_blocked_slot_refs = []
+            if first_case_slot:
+                first_blocked_slot_refs.append(
+                    "case:"
+                    f"{first_case_slot.get('case_id', '')}/"
+                    f"{first_case_slot.get('operator_action', '')}"
+                )
+            if first_engine_slot:
+                first_blocked_slot_refs.append(
+                    "engine:"
+                    f"{first_engine_slot.get('case_id', '')}/"
+                    f"{first_engine_slot.get('engine_id', '')}/"
+                    f"{first_engine_slot.get('docking_run_id', '')}"
+                )
             preflight_refs = [
                 artifacts[key] for key in preflight_keys if str(artifacts.get(key) or "")
             ]
@@ -1245,6 +1328,7 @@ def _markdown(payload: dict[str, Any]) -> str:
                 f"`{row.get('status')}` | "
                 f"`{row.get('expected_rows_artifact')}` | "
                 f"`{row.get('first_operator_sequence_step')}` | "
+                f"{_code_join(first_blocked_slot_refs)} | "
                 f"{_code_join(preflight_refs)} | "
                 f"`{primary_command}` |"
             )

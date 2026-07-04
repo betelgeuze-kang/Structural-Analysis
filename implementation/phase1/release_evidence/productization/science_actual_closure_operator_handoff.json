@@ -1028,6 +1028,75 @@
         "required_engine_run_count": 24
       },
       "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+      "first_blocked_case_input_slot": {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing"
+        ],
+        "case_id": "casf2016_4llx",
+        "case_inputs_ready": false,
+        "complex_id": "4llx",
+        "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_4llx",
+        "status": "blocked"
+      },
+      "first_blocked_engine_run_slot": {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "vina_binary_missing"
+        ],
+        "case_blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing"
+        ],
+        "case_id": "casf2016_4llx",
+        "case_inputs_ready": false,
+        "command_template": "<vina> --receptor <prepared/4llx_receptor> --ligand <prepared/4llx_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+        "complex_id": "4llx",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_4llx_vina_run",
+        "engine_available": false,
+        "engine_command_prefix": "",
+        "engine_container_image": "",
+        "engine_executable": "",
+        "engine_execution_source": "",
+        "engine_id": "vina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+        "required_adapter_case_fields": [
+          "case_id",
+          "source_family",
+          "benchmark_split",
+          "complex_id",
+          "reference_pose_id",
+          "engine_runs",
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "status": "blocked"
+      },
       "first_operator_sequence_step": "review_public_benchmark_vina_gnina_input_manifest_template_preflight",
       "operator_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
       "operator_sequence": [
@@ -1041,6 +1110,110 @@
         "materialize_public_benchmark_vina_gnina_comparison_adapter"
       ],
       "row_input_id": "vina_gnina_rows",
+      "runtime_action_packet": {
+        "adapter_rows_ready": false,
+        "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
+        "blocked_case_input_slot_count": 12,
+        "blocked_engine_run_slot_count": 24,
+        "case_input_slot_count": 12,
+        "claim_boundary": "This packet mirrors the Vina/GNINA runtime unblock path for the missing source-acquisition action. It does not run engines or synthesize comparison rows.",
+        "commands": {
+          "build_input_manifest_template_preflight": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+          "build_rows_template_preflight": "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md",
+          "materialize_adapter": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+          "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+          "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
+        },
+        "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "first_blocked_case_input_slot": {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing"
+          ],
+          "case_id": "casf2016_4llx",
+          "case_inputs_ready": false,
+          "complex_id": "4llx",
+          "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+          "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_4llx",
+          "status": "blocked"
+        },
+        "first_blocked_engine_run_slot": {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing"
+          ],
+          "case_id": "casf2016_4llx",
+          "case_inputs_ready": false,
+          "command_template": "<vina> --receptor <prepared/4llx_receptor> --ligand <prepared/4llx_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+          "complex_id": "4llx",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_4llx_vina_run",
+          "engine_available": false,
+          "engine_command_prefix": "",
+          "engine_container_image": "",
+          "engine_executable": "",
+          "engine_execution_source": "",
+          "engine_id": "vina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+          "required_adapter_case_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "engine_runs",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "status": "blocked"
+        },
+        "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "input_manifest_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json",
+        "operator_execution_ready": false,
+        "operator_sequence": [
+          "review_public_benchmark_vina_gnina_input_manifest_template_preflight",
+          "fill_public_benchmark_vina_gnina_input_manifest_from_template",
+          "rerun_public_benchmark_vina_gnina_execution_plan",
+          "configure_vina_gnina_binary_or_container_runtime",
+          "rerun_public_benchmark_vina_gnina_runtime_readiness",
+          "review_public_benchmark_vina_gnina_rows_template_preflight",
+          "attach_public_benchmark_vina_gnina_rows",
+          "materialize_public_benchmark_vina_gnina_comparison_adapter"
+        ],
+        "ready_engine_run_slot_count": 0,
+        "required_engine_run_count": 24,
+        "rows_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+        "rows_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
+        "runtime_ready_for_engine_execution": false,
+        "status": "engine_inputs_required"
+      },
       "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
       "status": "engine_inputs_required"
     },
@@ -3581,14 +3754,14 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T04:22:16.293670+00:00",
+  "generated_at": "2026-07-04T04:29:11.860830+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:08ad31e463873418ff5f3ebbdd4a5ce7d4f8931318cceb6dc48dd24176f2616e",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:9dd7c97c8a2b978436c07f11bfb088a2cef94f1fd1f33bc651ba8a4c09440b2b",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:25acd0c4e672d933220769a3e34135ea65d1fac049877b818d44b3c9288618f5",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:1aa07a73ba0f9770659d6317d4d813eff0660669c991dd35c5b89726f4045f20",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:a0c748515aefbeb496ab253028a3b13b4df4b2844ae88e1ef394a0e1d12e4f1d",
     "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:6bc96d57bc678dc7b8fb2305b6ef7ec965cda22e3ef683fd8b0ca1bc36edbde4",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:0af2fb1305af158356454e145eac311b77cfd66a5661c9bb927b3e42bb65582e"
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:dc400f67e4d5f601f7bfc3f3b591b9e893e1907888d96def077a1a48ad259d8f"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -14176,7 +14349,7 @@
   ],
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "4d44696bedfc80038d1d4024580c0722b8d759fb",
+  "source_commit_sha": "9ffbedbf578f62baa233762fba619ea178da89fc",
   "status": "operator_rows_required",
   "summary": {
     "blocked_component_operator_action_count": 2,

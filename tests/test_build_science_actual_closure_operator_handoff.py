@@ -117,6 +117,30 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert unblock_plan["vina_gnina_rows"]["counts"][
         "blocked_engine_run_slot_count"
     ] == 24
+    vina_runtime_action = unblock_plan["vina_gnina_rows"]["runtime_action_packet"]
+    assert vina_runtime_action["blocked_case_input_slot_count"] == 12
+    assert vina_runtime_action["blocked_engine_run_slot_count"] == 24
+    assert vina_runtime_action["first_blocked_case_input_slot"]["case_id"] == (
+        "casf2016_4llx"
+    )
+    assert vina_runtime_action["first_blocked_case_input_slot"][
+        "operator_action"
+    ] == "fill_vina_gnina_input_manifest_row_for_casf2016_4llx"
+    assert vina_runtime_action["first_blocked_engine_run_slot"]["case_id"] == (
+        "casf2016_4llx"
+    )
+    assert vina_runtime_action["first_blocked_engine_run_slot"]["engine_id"] == (
+        "vina"
+    )
+    assert vina_runtime_action["first_blocked_engine_run_slot"][
+        "docking_run_id"
+    ] == "casf2016_4llx_vina_run"
+    assert unblock_plan["vina_gnina_rows"][
+        "first_blocked_case_input_slot"
+    ] == vina_runtime_action["first_blocked_case_input_slot"]
+    assert unblock_plan["vina_gnina_rows"][
+        "first_blocked_engine_run_slot"
+    ] == vina_runtime_action["first_blocked_engine_run_slot"]
     assert unblock_plan["vina_gnina_rows"]["commands"][
         "build_rows_template_preflight"
     ].startswith("python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py")
@@ -775,6 +799,12 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "| `pocketmd_rows` | `operator_input_required` |" in markdown
     assert "- `blocker_count`: `10`" in markdown
     assert "## Missing Row Packet" in markdown
+    assert "First Blocked Slot" in markdown
+    assert (
+        "case:casf2016_4llx/"
+        "fill_vina_gnina_input_manifest_row_for_casf2016_4llx"
+    ) in markdown
+    assert "engine:casf2016_4llx/vina/casf2016_4llx_vina_run" in markdown
     assert "## Blocked Component Actions" in markdown
     assert "public_benchmark_phase2_actual_closure" in markdown
     assert "pocketmd_lite_topk_actual_closure" in markdown
