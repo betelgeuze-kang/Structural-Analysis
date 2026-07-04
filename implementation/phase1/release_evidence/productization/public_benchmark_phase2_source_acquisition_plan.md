@@ -19,6 +19,8 @@
 - `external_receipt_blocked_official_role_count`: `1`
 - `phase2_row_audit`: `implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json`
 - `phase2_row_audit_status`: `operator_evidence_required`
+- `phase2_row_audit_completion_audit_status`: `blocked`
+- `phase2_row_audit_completion_requirement_pass_count`: `4/6`
 - `phase2_row_audit_missing_row_inputs`: `vina_gnina_rows`
 - `phase2_row_audit_source_actuality_scope`: `provided_row_inputs_only`
 - `phase2_row_audit_source_actuality_contract_pass`: `True`

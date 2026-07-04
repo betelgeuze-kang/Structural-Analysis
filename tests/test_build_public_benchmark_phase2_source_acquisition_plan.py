@@ -304,6 +304,15 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert payload["phase2_row_audit"]["phase2_failed_criteria"] == [
         "vina_gnina_comparison_ready",
     ]
+    assert payload["phase2_row_audit"]["phase2_completion_audit_status"] == (
+        "blocked"
+    )
+    assert payload["phase2_row_audit"]["phase2_completion_requirement_count"] == 6
+    assert (
+        payload["phase2_row_audit"]["phase2_completion_requirement_pass_count"]
+        == 4
+    )
+    assert payload["phase2_row_audit"]["phase2_completion_blocker_count"] == 2
     assert payload["phase2_exit_criterion_count"] == 5
     exit_criteria = {
         row["criterion_id"]: row for row in payload["phase2_exit_criteria"]
@@ -787,6 +796,10 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
             "vina_gnina_rows",
         ],
         "phase2_row_audit_status": "operator_evidence_required",
+        "phase2_row_audit_completion_audit_status": "blocked",
+        "phase2_row_audit_completion_requirement_count": 6,
+        "phase2_row_audit_completion_requirement_pass_count": 4,
+        "phase2_row_audit_completion_blocker_count": 2,
         "vina_gnina_execution_plan_status": "engine_input_blocked",
         "vina_gnina_execution_plan_ready": False,
         "vina_gnina_required_engine_run_count": 24,
@@ -1190,6 +1203,8 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     )
     assert "public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter" in markdown
     assert "`phase2_exit_criterion_count`: `5`" in markdown
+    assert "`phase2_row_audit_completion_audit_status`: `blocked`" in markdown
+    assert "`phase2_row_audit_completion_requirement_pass_count`: `4/6`" in markdown
     assert "## Phase 2 Harness Completion Audit" in markdown
     assert (
         "`phase2_harness_completion_audit_status`: "

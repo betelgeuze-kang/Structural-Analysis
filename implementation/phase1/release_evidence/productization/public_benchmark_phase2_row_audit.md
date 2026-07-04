@@ -24,6 +24,21 @@
 | `vina_gnina_comparison_adapter` | `operator_evidence_required` | `vina_gnina_comparison_ready` | `1` |
 | `dud_e_or_lit_pcba_enrichment` | `ready` | `none` | `0` |
 
+## Phase 2 Completion Audit
+
+- `status`: `blocked`
+- `pass`: `False`
+- `requirement_pass_count`: `4/6`
+
+| Requirement | Status | Blockers |
+|---|---|---|
+| `casf_pdbbind_pose_success_harness_ready` | `pass` | `none` |
+| `symmetry_aware_ligand_rmsd_ready` | `pass` | `none` |
+| `posebusters_style_pose_validity_ready` | `pass` | `none` |
+| `vina_gnina_comparison_ready` | `blocked` | `vina_gnina_rows_not_provided` |
+| `dud_e_or_lit_pcba_enrichment_ready` | `pass` | `none` |
+| `public_benchmark_source_actuality_ready` | `blocked` | `source_actuality_scope_incomplete:vina_gnina_rows` |
+
 ## Vina/GNINA Unblock
 
 - `status`: `operator_runtime_or_rows_required`

@@ -889,6 +889,187 @@ def _phase2_audit_summary(
     }
 
 
+def _phase2_completion_requirement(
+    *,
+    requirement_id: str,
+    pass_value: bool,
+    evidence: dict[str, Any] | None = None,
+    blockers: list[str] | None = None,
+) -> dict[str, Any]:
+    return {
+        "requirement_id": requirement_id,
+        "status": "pass" if pass_value else "blocked",
+        "pass": bool(pass_value),
+        "evidence": evidence or {},
+        "blockers": blockers or [],
+    }
+
+
+def _criterion_by_component(
+    phase2_exit_gate: dict[str, Any],
+    component_id: str,
+) -> dict[str, Any]:
+    return next(
+        (
+            row
+            for row in _as_list(phase2_exit_gate.get("criteria"))
+            if isinstance(row, dict)
+            and str(row.get("component_id") or "") == component_id
+        ),
+        {},
+    )
+
+
+def _source_actuality_completion_requirement(
+    *,
+    source_actuality_check: dict[str, Any],
+    missing_row_inputs: list[str],
+) -> dict[str, Any]:
+    source_blockers = [
+        str(blocker)
+        for blocker in _as_list(source_actuality_check.get("blockers"))
+        if str(blocker)
+    ]
+    scope_complete = (
+        bool(source_actuality_check.get("scope_complete"))
+        if "scope_complete" in source_actuality_check
+        else not missing_row_inputs
+    )
+    contract_pass = bool(source_actuality_check.get("contract_pass"))
+    blockers = list(source_blockers)
+    if missing_row_inputs or not scope_complete:
+        blockers.append(
+            "source_actuality_scope_incomplete:"
+            f"{_comma_join([str(item) for item in missing_row_inputs])}"
+        )
+    if not source_actuality_check:
+        blockers.append("source_actuality_check_missing")
+    elif not contract_pass and not source_blockers:
+        blockers.append("source_actuality_contract_failed")
+    blockers = list(dict.fromkeys(blockers))
+    return _phase2_completion_requirement(
+        requirement_id="public_benchmark_source_actuality_ready",
+        pass_value=bool(contract_pass and scope_complete and not blockers),
+        evidence={
+            "scope": str(source_actuality_check.get("scope") or ""),
+            "scope_complete": scope_complete,
+            "contract_pass": contract_pass,
+            "provided_row_inputs": [
+                str(row)
+                for row in _as_list(source_actuality_check.get("provided_row_inputs"))
+            ],
+            "missing_row_inputs": [str(row) for row in missing_row_inputs],
+        },
+        blockers=blockers,
+    )
+
+
+def _phase2_completion_audit(
+    *,
+    phase2_ready: bool,
+    phase2_exit_gate: dict[str, Any],
+    phase2_requirements: list[dict[str, Any]],
+    components: list[dict[str, Any]],
+    source_actuality_check: dict[str, Any],
+    missing_row_inputs: list[str],
+) -> dict[str, Any]:
+    requirements_by_component = {
+        str(row.get("component_id") or ""): row
+        for row in phase2_requirements
+        if isinstance(row, dict)
+    }
+    components_by_id = {
+        str(row.get("component_id") or ""): row
+        for row in components
+        if isinstance(row, dict)
+    }
+    requirements: list[dict[str, Any]] = []
+    for required in harness_bundle.PHASE2_REQUIRED_COMPONENTS:
+        component_id = str(required.get("component_id") or "")
+        criterion_id = str(required.get("criterion_id") or component_id)
+        criterion = _criterion_by_component(phase2_exit_gate, component_id)
+        requirement_row = _as_dict(requirements_by_component.get(component_id))
+        component = _as_dict(components_by_id.get(component_id))
+        blockers = [
+            str(blocker)
+            for blocker in _as_list(criterion.get("blockers"))
+            if str(blocker)
+        ]
+        if not blockers:
+            blockers = [
+                str(blocker)
+                for blocker in _as_list(component.get("blockers"))
+                if str(blocker)
+            ]
+        requirements.append(
+            _phase2_completion_requirement(
+                requirement_id=criterion_id,
+                pass_value=bool(criterion.get("pass"))
+                if criterion
+                else bool(requirement_row.get("ready")),
+                evidence={
+                    "component_id": component_id,
+                    "artifact_role": str(required.get("artifact_role") or ""),
+                    "required_row_inputs": [
+                        str(row)
+                        for row in _as_list(
+                            requirement_row.get("required_row_inputs")
+                        )
+                    ],
+                    "missing_row_inputs": [
+                        str(row)
+                        for row in _as_list(
+                            requirement_row.get("missing_row_inputs")
+                        )
+                    ],
+                    "current": criterion.get("current"),
+                    "required": criterion.get("required"),
+                    "current_count": int(component.get("current_count") or 0),
+                    "required_minimum_count": int(
+                        component.get("required_minimum_count") or 0
+                    ),
+                    "artifact": str(component.get("artifact") or ""),
+                },
+                blockers=blockers,
+            )
+        )
+    requirements.append(
+        _source_actuality_completion_requirement(
+            source_actuality_check=source_actuality_check,
+            missing_row_inputs=missing_row_inputs,
+        )
+    )
+    pass_count = sum(1 for row in requirements if bool(row.get("pass")))
+    blockers = [
+        f"{row['requirement_id']}::{blocker}"
+        for row in requirements
+        for blocker in _as_list(row.get("blockers"))
+    ]
+    blockers.extend(
+        str(row["requirement_id"])
+        for row in requirements
+        if not bool(row.get("pass")) and not _as_list(row.get("blockers"))
+    )
+    blockers = list(dict.fromkeys(blockers))
+    return {
+        "status": (
+            "pass" if phase2_ready and pass_count == len(requirements) else "blocked"
+        ),
+        "pass": bool(phase2_ready and pass_count == len(requirements)),
+        "claim": "public_benchmark_phase2_actual_closure",
+        "requirement_count": len(requirements),
+        "requirement_pass_count": pass_count,
+        "requirements": requirements,
+        "blockers": blockers,
+        "claim_boundary": (
+            "This audit proves only Public Benchmark Phase 2 closure from "
+            "operator-attached row files and their source actuality checks. It "
+            "does not download public benchmark data, run Vina/GNINA, approve "
+            "licenses, or promote template/proxy rows as beta evidence."
+        ),
+    }
+
+
 def _component_requirement_summary(
     requirements: list[dict[str, Any]],
     *,
@@ -1425,6 +1606,7 @@ def _markdown(payload: dict[str, Any]) -> str:
     vina_gnina_first_family = _as_dict(
         vina_gnina_runtime.get("first_operator_blocker_family")
     )
+    completion_audit = _as_dict(payload.get("phase2_completion_audit"))
     lines = [
         "# Public Benchmark Phase 2 Row Audit",
         "",
@@ -1475,6 +1657,31 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"`{_comma_join(component.get('failed_criteria', []))}` | "
             f"`{requirement_summary.get('blocker_count', len(component.get('blockers', [])))}` |"
         )
+    if completion_audit:
+        lines.extend(
+            [
+                "",
+                "## Phase 2 Completion Audit",
+                "",
+                f"- `status`: `{completion_audit.get('status', '')}`",
+                f"- `pass`: `{completion_audit.get('pass', False)}`",
+                "- `requirement_pass_count`: "
+                f"`{completion_audit.get('requirement_pass_count', 0)}/"
+                f"{completion_audit.get('requirement_count', 0)}`",
+                "",
+                "| Requirement | Status | Blockers |",
+                "|---|---|---|",
+            ]
+        )
+        for requirement in _as_list(completion_audit.get("requirements")):
+            if not isinstance(requirement, dict):
+                continue
+            lines.append(
+                "| "
+                f"`{requirement.get('requirement_id', '')}` | "
+                f"`{requirement.get('status', '')}` | "
+                f"`{_comma_join(_as_list(requirement.get('blockers')))}` |"
+            )
     if vina_gnina_unblock:
         lines.extend(
             [
@@ -1627,6 +1834,14 @@ def build_public_benchmark_phase2_row_audit(
             phase2_exit_gate=phase2_exit_gate,
             blockers=blockers,
         )
+        phase2_completion_audit = _phase2_completion_audit(
+            phase2_ready=False,
+            phase2_exit_gate=phase2_exit_gate,
+            phase2_requirements=phase2_requirements,
+            components=components,
+            source_actuality_check=partial_source_actuality_check,
+            missing_row_inputs=missing_input_ids,
+        )
         return {
             "schema_version": SCHEMA_VERSION,
             **release_evidence_metadata(
@@ -1641,6 +1856,8 @@ def build_public_benchmark_phase2_row_audit(
             "missing_row_inputs": missing_input_ids,
             "row_input_resolution": row_input_resolution,
             "summary": summary,
+            "phase2_completion_audit": phase2_completion_audit,
+            "completion_audit": phase2_completion_audit,
             "row_input_contract": ROW_INPUTS,
             "row_intake_contracts": row_intake_contracts,
             "phase2_row_closure_matrix": phase2_row_closure_matrix,
@@ -1728,6 +1945,14 @@ def build_public_benchmark_phase2_row_audit(
             phase2_exit_gate=phase2_exit_gate,
             blockers=blockers,
         )
+        phase2_completion_audit = _phase2_completion_audit(
+            phase2_ready=False,
+            phase2_exit_gate=phase2_exit_gate,
+            phase2_requirements=phase2_requirements,
+            components=components,
+            source_actuality_check={},
+            missing_row_inputs=[],
+        )
         return {
             "schema_version": SCHEMA_VERSION,
             **release_evidence_metadata(
@@ -1742,6 +1967,8 @@ def build_public_benchmark_phase2_row_audit(
             "missing_row_inputs": [],
             "row_input_resolution": row_input_resolution,
             "summary": summary,
+            "phase2_completion_audit": phase2_completion_audit,
+            "completion_audit": phase2_completion_audit,
             "row_input_contract": ROW_INPUTS,
             "row_intake_contracts": row_intake_contracts,
             "phase2_row_closure_matrix": phase2_row_closure_matrix,
@@ -1833,6 +2060,14 @@ def build_public_benchmark_phase2_row_audit(
         phase2_exit_gate=phase2_exit_gate,
         blockers=blockers,
     )
+    phase2_completion_audit = _phase2_completion_audit(
+        phase2_ready=phase2_ready,
+        phase2_exit_gate=phase2_exit_gate,
+        phase2_requirements=phase2_requirements,
+        components=components,
+        source_actuality_check=source_actuality_check,
+        missing_row_inputs=[],
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -1848,6 +2083,8 @@ def build_public_benchmark_phase2_row_audit(
         "missing_row_inputs": [],
         "row_input_resolution": row_input_resolution,
         "summary": summary,
+        "phase2_completion_audit": phase2_completion_audit,
+        "completion_audit": phase2_completion_audit,
         "row_input_contract": ROW_INPUTS,
         "row_intake_contracts": row_intake_contracts,
         "phase2_row_closure_matrix": phase2_row_closure_matrix,

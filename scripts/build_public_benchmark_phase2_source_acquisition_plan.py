@@ -639,6 +639,11 @@ def _phase2_row_audit_summary(audit: dict[str, Any]) -> dict[str, Any]:
         source_actuality_check = audit.get("operator_bundle_source_actuality_check")
     if not isinstance(source_actuality_check, dict):
         source_actuality_check = {}
+    phase2_completion_audit = audit.get("phase2_completion_audit")
+    if not isinstance(phase2_completion_audit, dict):
+        phase2_completion_audit = audit.get("completion_audit")
+    if not isinstance(phase2_completion_audit, dict):
+        phase2_completion_audit = {}
     source_actuality_blockers = [
         str(row)
         for row in source_actuality_check.get("blockers", [])
@@ -672,6 +677,29 @@ def _phase2_row_audit_summary(audit: dict[str, Any]) -> dict[str, Any]:
         ),
         "phase2_row_closure_matrix_count": int(
             audit.get("phase2_row_closure_matrix_count") or 0
+        ),
+        "phase2_completion_audit_status": str(
+            phase2_completion_audit.get("status") or ""
+        ),
+        "phase2_completion_audit_pass": bool(
+            phase2_completion_audit.get("pass")
+        ),
+        "phase2_completion_requirement_count": int(
+            phase2_completion_audit.get("requirement_count") or 0
+        ),
+        "phase2_completion_requirement_pass_count": int(
+            phase2_completion_audit.get("requirement_pass_count") or 0
+        ),
+        "phase2_completion_blocker_count": len(
+            [
+                row
+                for row in (
+                    phase2_completion_audit.get("blockers")
+                    if isinstance(phase2_completion_audit.get("blockers"), list)
+                    else []
+                )
+                if str(row)
+            ]
         ),
         "source_actuality_scope": str(source_actuality_check.get("scope") or ""),
         "source_actuality_contract_pass": source_actuality_check.get("contract_pass"),
@@ -3643,6 +3671,20 @@ def build_public_benchmark_phase2_source_acquisition_plan(
                 ]
             ),
             "phase2_row_audit_status": phase2_row_audit_summary["status"],
+            "phase2_row_audit_completion_audit_status": (
+                phase2_row_audit_summary["phase2_completion_audit_status"]
+            ),
+            "phase2_row_audit_completion_requirement_count": (
+                phase2_row_audit_summary["phase2_completion_requirement_count"]
+            ),
+            "phase2_row_audit_completion_requirement_pass_count": (
+                phase2_row_audit_summary[
+                    "phase2_completion_requirement_pass_count"
+                ]
+            ),
+            "phase2_row_audit_completion_blocker_count": (
+                phase2_row_audit_summary["phase2_completion_blocker_count"]
+            ),
             "phase2_exit_criterion_count": len(phase2_exit_criteria),
             "phase2_passing_exit_criterion_count": len(
                 [row for row in phase2_exit_criteria if row["pass"]]
@@ -3898,6 +3940,11 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"`{payload['external_receipt_completion_audit']['blocked_official_receipt_role_count']}`",
         f"- `phase2_row_audit`: `{payload['phase2_row_audit']['artifact']}`",
         f"- `phase2_row_audit_status`: `{payload['phase2_row_audit']['status']}`",
+        "- `phase2_row_audit_completion_audit_status`: "
+        f"`{payload['phase2_row_audit']['phase2_completion_audit_status']}`",
+        "- `phase2_row_audit_completion_requirement_pass_count`: "
+        f"`{payload['phase2_row_audit']['phase2_completion_requirement_pass_count']}/"
+        f"{payload['phase2_row_audit']['phase2_completion_requirement_count']}`",
         f"- `phase2_row_audit_missing_row_inputs`: `{', '.join(payload['phase2_row_audit']['missing_row_inputs'])}`",
         f"- `phase2_row_audit_source_actuality_scope`: `{payload['phase2_row_audit']['source_actuality_scope']}`",
         f"- `phase2_row_audit_source_actuality_contract_pass`: `{payload['phase2_row_audit']['source_actuality_contract_pass']}`",

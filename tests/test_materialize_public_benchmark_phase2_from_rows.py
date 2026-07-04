@@ -39,6 +39,14 @@ PHASE2_FAILED_CRITERIA = [
     "vina_gnina_comparison_ready",
     "dud_e_or_lit_pcba_enrichment_ready",
 ]
+PHASE2_COMPLETION_REQUIREMENTS = [
+    "casf_pdbbind_pose_success_harness_ready",
+    "symmetry_aware_ligand_rmsd_ready",
+    "posebusters_style_pose_validity_ready",
+    "vina_gnina_comparison_ready",
+    "dud_e_or_lit_pcba_enrichment_ready",
+    "public_benchmark_source_actuality_ready",
+]
 
 
 def _checksum(seed: str) -> str:
@@ -392,6 +400,21 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
     )
     assert audit["phase2_exit_gate"]["status"] == "blocked"
     assert audit["phase2_exit_gate"]["failed_criteria"] == PHASE2_FAILED_CRITERIA
+    completion_audit = audit["phase2_completion_audit"]
+    assert audit["completion_audit"] == completion_audit
+    assert completion_audit["status"] == "blocked"
+    assert completion_audit["pass"] is False
+    assert completion_audit["requirement_count"] == 6
+    assert completion_audit["requirement_pass_count"] == 0
+    assert [
+        row["requirement_id"] for row in completion_audit["requirements"]
+    ] == PHASE2_COMPLETION_REQUIREMENTS
+    assert (
+        "public_benchmark_source_actuality_ready::"
+        "source_actuality_scope_incomplete:subset_rows, pose_rows, "
+        "enrichment_rows, vina_gnina_rows"
+        in completion_audit["blockers"]
+    )
     phase2_exit_criteria = {
         row["component_id"]: row for row in audit["phase2_exit_gate"]["criteria"]
     }
@@ -1003,6 +1026,20 @@ def test_public_benchmark_phase2_row_audit_materializes_pose_rows_without_vina_g
     assert audit["summary"]["phase2_failed_criteria"] == [
         "vina_gnina_comparison_ready"
     ]
+    completion_audit = audit["phase2_completion_audit"]
+    assert completion_audit["status"] == "blocked"
+    assert completion_audit["pass"] is False
+    assert completion_audit["requirement_count"] == 6
+    assert completion_audit["requirement_pass_count"] == 4
+    assert (
+        "vina_gnina_comparison_ready::vina_gnina_rows_not_provided"
+        in completion_audit["blockers"]
+    )
+    assert (
+        "public_benchmark_source_actuality_ready::"
+        "source_actuality_scope_incomplete:vina_gnina_rows"
+        in completion_audit["blockers"]
+    )
     assert audit["row_input_status_summary"] == {
         "first_missing_row_input": "vina_gnina_rows",
         "missing_row_input_count": 1,
@@ -1135,6 +1172,9 @@ def test_public_benchmark_phase2_row_audit_cli_writes_markdown(
     assert "posebusters_style_pose_validity_ready" in markdown
     assert "vina_gnina_comparison_ready" in markdown
     assert "dud_e_or_lit_pcba_enrichment_ready" in markdown
+    assert "## Phase 2 Completion Audit" in markdown
+    assert "`requirement_pass_count`: `0/6`" in markdown
+    assert "`public_benchmark_source_actuality_ready`" in markdown
     assert (
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_subset_rows.json"
@@ -1192,6 +1232,12 @@ def test_public_benchmark_phase2_row_audit_materializes_ready_gate(
     assert audit["summary"]["blocked_requirement_count"] == 0
     assert audit["summary"]["phase2_failed_criteria"] == []
     assert audit["summary"]["blocker_count"] == 0
+    completion_audit = audit["phase2_completion_audit"]
+    assert completion_audit["status"] == "pass"
+    assert completion_audit["pass"] is True
+    assert completion_audit["requirement_count"] == 6
+    assert completion_audit["requirement_pass_count"] == 6
+    assert completion_audit["blockers"] == []
     assert audit["row_input_status_summary"] == {
         "first_missing_row_input": "",
         "missing_row_input_count": 0,
@@ -1418,6 +1464,15 @@ def test_public_benchmark_phase2_row_audit_blocks_failed_source_actuality_contra
         "public_benchmark_source_actuality_ready"
     ]
     assert audit["summary"]["blocker_count"] == 2
+    completion_audit = audit["phase2_completion_audit"]
+    assert completion_audit["status"] == "blocked"
+    assert completion_audit["pass"] is False
+    assert completion_audit["requirement_count"] == 6
+    assert completion_audit["requirement_pass_count"] == 5
+    assert (
+        "public_benchmark_source_actuality_ready::source_actuality_contract_failed"
+        in completion_audit["blockers"]
+    )
 
 
 def test_public_benchmark_phase2_row_audit_blocks_duplicate_case_rows(
