@@ -32,6 +32,12 @@ from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_EXECUTION_PLAN = PRODUCTIZATION / "public_benchmark_vina_gnina_execution_plan.json"
+DEFAULT_ENGINE_RUN_BUNDLE = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_engine_run_bundle.json"
+)
+DEFAULT_ENGINE_RUN_COMMANDS = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_engine_run_commands.sh"
+)
 DEFAULT_VINA_GNINA_ROWS = PRODUCTIZATION / "public_benchmark_vina_gnina_rows.json"
 DEFAULT_VINA_GNINA_ROWS_TEMPLATE = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_rows_template.csv"
@@ -796,6 +802,7 @@ def _operator_unblock_packet(
             "rerun_public_benchmark_vina_gnina_execution_plan",
             "configure_vina_gnina_binary_or_container_runtime",
             "rerun_public_benchmark_vina_gnina_runtime_readiness",
+            "materialize_public_benchmark_vina_gnina_engine_run_bundle",
             "review_public_benchmark_vina_gnina_rows_template_preflight",
             "attach_public_benchmark_vina_gnina_rows",
             "materialize_public_benchmark_vina_gnina_rows_from_completed_template",
@@ -828,6 +835,12 @@ def _operator_unblock_packet(
             "rerun_execution_plan": (
                 "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
                 f"--out {DEFAULT_EXECUTION_PLAN}"
+            ),
+            "materialize_engine_run_bundle": (
+                "python3 scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py "
+                f"--execution-plan {DEFAULT_EXECUTION_PLAN} "
+                f"--out {DEFAULT_ENGINE_RUN_BUNDLE} "
+                f"--commands-out {DEFAULT_ENGINE_RUN_COMMANDS}"
             ),
             "rerun_runtime_readiness": (
                 "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py "
@@ -983,6 +996,7 @@ def build_vina_gnina_runtime_readiness(
                 Path("scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py"),
                 DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT,
                 Path("scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py"),
+                Path("scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py"),
                 Path("scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py"),
                 Path("scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"),
             ],
@@ -1061,6 +1075,12 @@ def build_vina_gnina_runtime_readiness(
             "rerun_runtime_readiness": (
                 "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py "
                 f"--out {DEFAULT_OUT}"
+            ),
+            "materialize_engine_run_bundle": (
+                "python3 scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py "
+                f"--execution-plan {execution_plan_path} "
+                f"--out {DEFAULT_ENGINE_RUN_BUNDLE} "
+                f"--commands-out {DEFAULT_ENGINE_RUN_COMMANDS}"
             ),
             "materialize_adapter_from_rows": (
                 "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py "

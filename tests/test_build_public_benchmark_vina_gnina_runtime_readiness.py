@@ -371,6 +371,9 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "--out implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_runtime_readiness.json"
     )
+    assert payload["operator_commands"]["materialize_engine_run_bundle"].startswith(
+        "python3 scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py"
+    )
     assert payload["operator_commands"]["build_rows_template_preflight"].startswith(
         "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py"
     )
@@ -494,6 +497,9 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "--out-md implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_rows_template_preflight.md"
     )
+    assert unblock["commands"]["materialize_engine_run_bundle"].startswith(
+        "python3 scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py"
+    )
     assert unblock["commands"]["materialize_rows_from_template"].startswith(
         "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py"
     )
@@ -516,6 +522,9 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "rerun_public_benchmark_vina_gnina_execution_plan",
     ]
     assert "review_public_benchmark_vina_gnina_rows_template_preflight" in unblock[
+        "operator_sequence"
+    ]
+    assert "materialize_public_benchmark_vina_gnina_engine_run_bundle" in unblock[
         "operator_sequence"
     ]
     assert "materialize_public_benchmark_vina_gnina_rows_from_completed_template" in (

@@ -33,6 +33,12 @@ DEFAULT_POSE_ROWS = PRODUCTIZATION / "public_benchmark_pose_rows.json"
 DEFAULT_OUT = PRODUCTIZATION / "public_benchmark_vina_gnina_execution_plan.json"
 DEFAULT_VINA_GNINA_ROWS_OUT = PRODUCTIZATION / "public_benchmark_vina_gnina_rows.json"
 DEFAULT_INPUT_MANIFEST = PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest.json"
+DEFAULT_ENGINE_RUN_BUNDLE = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_engine_run_bundle.json"
+)
+DEFAULT_ENGINE_RUN_COMMANDS = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_engine_run_commands.sh"
+)
 SCHEMA_VERSION = "public-benchmark-vina-gnina-execution-plan.v1"
 DEFAULT_BOX_MARGIN_ANGSTROM = 8.0
 DEFAULT_MIN_BOX_SIZE_ANGSTROM = 15.0
@@ -983,6 +989,11 @@ def build_vina_gnina_execution_plan(
         "prepared_input_ready_case_count": prepared_input_ready_case_count,
         "case_execution_plans": case_plans,
         "expected_vina_gnina_rows_artifact": str(vina_gnina_rows_out),
+        "engine_run_bundle_materialization_command": (
+            "python3 scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py "
+            f"--execution-plan {DEFAULT_OUT} --out {DEFAULT_ENGINE_RUN_BUNDLE} "
+            f"--commands-out {DEFAULT_ENGINE_RUN_COMMANDS}"
+        ),
         "adapter_materialization_command": (
             "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py "
             f"--intake {vina_gnina_rows_out} "

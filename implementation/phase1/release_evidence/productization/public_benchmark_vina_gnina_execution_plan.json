@@ -2691,15 +2691,16 @@
     "score",
     "score_direction"
   ],
+  "engine_run_bundle_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py --execution-plan implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json --commands-out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "execution_plan_ready": false,
   "expected_vina_gnina_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
-  "generated_at": "2026-07-03T23:14:02.081855+00:00",
+  "generated_at": "2026-07-04T07:53:28.248882+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
     "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json": "missing",
-    "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1"
+    "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4497f9345d9a3f60dfa0623bb85127f44366bf885f84f3c0f8f9707db2699c9e"
   },
   "input_manifest_status": {
     "accepted_formats": [
@@ -2774,7 +2775,7 @@
   "reuse_policy": "public_benchmark_vina_gnina_execution_plan_from_materialized_rows",
   "reused_evidence": false,
   "schema_version": "public-benchmark-vina-gnina-execution-plan.v1",
-  "source_commit_sha": "2375d3dc0079cac8e278d152d3d7803eb017d0e6",
+  "source_commit_sha": "171f5efcd36ebd9d094545782a3c8ca343280d3d",
   "status": "engine_input_blocked",
   "summary": {
     "adapter_rows_ready": false,
