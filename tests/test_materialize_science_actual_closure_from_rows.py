@@ -858,6 +858,22 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
                         ],
                     }
                 ],
+                "official_source_receipt_plan": {
+                    "source_access_preflight_count": 1,
+                    "source_access_preflight_rows": [
+                        {
+                            "source_id": "pdbbind_plus_casf",
+                            "access_mode": (
+                                "operator_download_and_license_or_accession_"
+                                "receipt_required"
+                            ),
+                            "primary_head_command": (
+                                "curl --head --location --max-time 20 "
+                                "'https://www.pdbbind-plus.org.cn/casf'"
+                            ),
+                        }
+                    ],
+                },
                 "vina_gnina_runtime_readiness": {
                     "case_input_slot_matrix_count": 12,
                     "blocked_case_input_slot_count": 12,
@@ -968,6 +984,12 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
     assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
         "phase2_exit_criterion_count"
     ] == 5
+    assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
+        "source_access_preflight_count"
+    ] == 1
+    assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
+        "source_access_preflight_rows"
+    ][0]["source_id"] == "pdbbind_plus_casf"
     assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
         "vina_gnina_case_input_slot_matrix_count"
     ] == 12

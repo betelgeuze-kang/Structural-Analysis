@@ -21,12 +21,12 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T01:13:36.039930+00:00",
+  "generated_at": "2026-07-04T01:25:10.000337+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:3f53708e67d1dd76f5f313307ce46a2971b748ef1938925bc44318b40e52709d",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:d91bbc8402c86796ce3d60d0a053610cceea2dcbbb0f5faf00adeaad7698bea4",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:6e75a02c6b13b518bf6087e44db30b84c243e4935d2b50611e2fd0411e476118",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:29305288cfe3c7865207c1995c95c1e6524e97d0fbaef77967ba0330918bcbe6",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:d7ee538fac6a7335490f9365ce9dd889651204dd7705e13a8a7e22e19c5d5fc4",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1",
     "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:895f52a4b9383625534767806ab373c4e33d70287a52ca65f9090b0d0e1e593a",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
@@ -527,6 +527,154 @@
         "unblocks_components": [
           "vina_gnina_comparison_adapter"
         ]
+      }
+    ],
+    "source_access_preflight_count": 6,
+    "source_access_preflight_policy": {
+      "license_or_accession_review_required_before_payload_use": true,
+      "network_probe_only": true,
+      "raw_payload_committed_by_plan": false,
+      "raw_payload_downloaded_by_plan": false,
+      "source_checksum_required_after_operator_acquisition": true
+    },
+    "source_access_preflight_rows": [
+      {
+        "access_mode": "operator_download_and_license_or_accession_receipt_required",
+        "claim_boundary": "This preflight checks source access path readiness only. It does not download benchmark payloads, grant license rights, or count as Phase 2 source evidence.",
+        "fallback_head_command": "curl --head --location --max-time 20 'https://www.pdbbind-plus.org.cn/'",
+        "fallback_url": "https://www.pdbbind-plus.org.cn/",
+        "operator_success_criteria": [
+          "primary_or_fallback_url_resolves",
+          "http_status_is_2xx_3xx_or_documented_auth_gate",
+          "license_or_accession_review_recorded_before_payload_use",
+          "source_checksum_recorded_after_operator_acquisition"
+        ],
+        "primary_head_command": "curl --head --location --max-time 20 'https://www.pdbbind-plus.org.cn/casf'",
+        "primary_url": "https://www.pdbbind-plus.org.cn/casf",
+        "source_family": "CASF/PDBBind",
+        "source_id": "pdbbind_plus_casf",
+        "source_payload_policy": {
+          "license_or_accession_review_required_before_payload_use": true,
+          "network_probe_only": true,
+          "raw_payload_committed_by_plan": false,
+          "raw_payload_downloaded_by_plan": false,
+          "source_checksum_required_after_operator_acquisition": true
+        }
+      },
+      {
+        "access_mode": "public_download_with_operator_checksum_receipt",
+        "claim_boundary": "This preflight checks source access path readiness only. It does not download benchmark payloads, grant license rights, or count as Phase 2 source evidence.",
+        "fallback_head_command": "curl --head --location --max-time 20 'https://dude.docking.org/'",
+        "fallback_url": "https://dude.docking.org/",
+        "operator_success_criteria": [
+          "primary_or_fallback_url_resolves",
+          "http_status_is_2xx_3xx_or_documented_auth_gate",
+          "license_or_accession_review_recorded_before_payload_use",
+          "source_checksum_recorded_after_operator_acquisition"
+        ],
+        "primary_head_command": "curl --head --location --max-time 20 'https://dude.docking.org/targets/'",
+        "primary_url": "https://dude.docking.org/targets/",
+        "source_family": "DUD-E",
+        "source_id": "dud_e",
+        "source_payload_policy": {
+          "license_or_accession_review_required_before_payload_use": true,
+          "network_probe_only": true,
+          "raw_payload_committed_by_plan": false,
+          "raw_payload_downloaded_by_plan": false,
+          "source_checksum_required_after_operator_acquisition": true
+        }
+      },
+      {
+        "access_mode": "public_download_with_operator_checksum_receipt",
+        "claim_boundary": "This preflight checks source access path readiness only. It does not download benchmark payloads, grant license rights, or count as Phase 2 source evidence.",
+        "fallback_head_command": "curl --head --location --max-time 20 'https://drugdesign.unistra.fr/LIT-PCBA/index.htm'",
+        "fallback_url": "https://drugdesign.unistra.fr/LIT-PCBA/index.htm",
+        "operator_success_criteria": [
+          "primary_or_fallback_url_resolves",
+          "http_status_is_2xx_3xx_or_documented_auth_gate",
+          "license_or_accession_review_recorded_before_payload_use",
+          "source_checksum_recorded_after_operator_acquisition"
+        ],
+        "primary_head_command": "curl --head --location --max-time 20 'https://drugdesign.unistra.fr/LIT-PCBA/'",
+        "primary_url": "https://drugdesign.unistra.fr/LIT-PCBA/",
+        "source_family": "LIT-PCBA",
+        "source_id": "lit_pcba",
+        "source_payload_policy": {
+          "license_or_accession_review_required_before_payload_use": true,
+          "network_probe_only": true,
+          "raw_payload_committed_by_plan": false,
+          "raw_payload_downloaded_by_plan": false,
+          "source_checksum_required_after_operator_acquisition": true
+        }
+      },
+      {
+        "access_mode": "engine_install_and_run_receipt_required",
+        "claim_boundary": "This preflight checks source access path readiness only. It does not download benchmark payloads, grant license rights, or count as Phase 2 source evidence.",
+        "fallback_head_command": "curl --head --location --max-time 20 'https://github.com/ccsb-scripps/AutoDock-Vina'",
+        "fallback_url": "https://github.com/ccsb-scripps/AutoDock-Vina",
+        "operator_success_criteria": [
+          "primary_or_fallback_url_resolves",
+          "http_status_is_2xx_3xx_or_documented_auth_gate",
+          "license_or_accession_review_recorded_before_payload_use",
+          "source_checksum_recorded_after_operator_acquisition"
+        ],
+        "primary_head_command": "curl --head --location --max-time 20 'https://vina.scripps.edu/'",
+        "primary_url": "https://vina.scripps.edu/",
+        "source_family": "Vina",
+        "source_id": "autodock_vina",
+        "source_payload_policy": {
+          "license_or_accession_review_required_before_payload_use": true,
+          "network_probe_only": true,
+          "raw_payload_committed_by_plan": false,
+          "raw_payload_downloaded_by_plan": false,
+          "source_checksum_required_after_operator_acquisition": true
+        }
+      },
+      {
+        "access_mode": "engine_install_and_run_receipt_required",
+        "claim_boundary": "This preflight checks source access path readiness only. It does not download benchmark payloads, grant license rights, or count as Phase 2 source evidence.",
+        "fallback_head_command": "curl --head --location --max-time 20 'https://gnina.github.io/gnina/rsc_workshop2021/'",
+        "fallback_url": "https://gnina.github.io/gnina/rsc_workshop2021/",
+        "operator_success_criteria": [
+          "primary_or_fallback_url_resolves",
+          "http_status_is_2xx_3xx_or_documented_auth_gate",
+          "license_or_accession_review_recorded_before_payload_use",
+          "source_checksum_recorded_after_operator_acquisition"
+        ],
+        "primary_head_command": "curl --head --location --max-time 20 'https://github.com/gnina/gnina'",
+        "primary_url": "https://github.com/gnina/gnina",
+        "source_family": "GNINA",
+        "source_id": "gnina",
+        "source_payload_policy": {
+          "license_or_accession_review_required_before_payload_use": true,
+          "network_probe_only": true,
+          "raw_payload_committed_by_plan": false,
+          "raw_payload_downloaded_by_plan": false,
+          "source_checksum_required_after_operator_acquisition": true
+        }
+      },
+      {
+        "access_mode": "reference_checklist_or_tool_run_receipt_required",
+        "claim_boundary": "This preflight checks source access path readiness only. It does not download benchmark payloads, grant license rights, or count as Phase 2 source evidence.",
+        "fallback_head_command": "curl --head --location --max-time 20 'https://zenodo.org/records/8278563'",
+        "fallback_url": "https://zenodo.org/records/8278563",
+        "operator_success_criteria": [
+          "primary_or_fallback_url_resolves",
+          "http_status_is_2xx_3xx_or_documented_auth_gate",
+          "license_or_accession_review_recorded_before_payload_use",
+          "source_checksum_recorded_after_operator_acquisition"
+        ],
+        "primary_head_command": "curl --head --location --max-time 20 'https://github.com/maabuu/posebusters'",
+        "primary_url": "https://github.com/maabuu/posebusters",
+        "source_family": "PoseBusters",
+        "source_id": "posebusters",
+        "source_payload_policy": {
+          "license_or_accession_review_required_before_payload_use": true,
+          "network_probe_only": true,
+          "raw_payload_committed_by_plan": false,
+          "raw_payload_downloaded_by_plan": false,
+          "source_checksum_required_after_operator_acquisition": true
+        }
       }
     ],
     "source_catalog_count": 6,
@@ -1259,7 +1407,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "f7ff2620e06326480012217b60600cdf98f32960",
+  "source_commit_sha": "c68ceb4647d4a5c4ca22a8f57d61f83a4aa3e978",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
@@ -1268,6 +1416,7 @@
     "minimum_subset_case_count": 12,
     "minimum_vina_gnina_comparison_case_count": 1,
     "missing_row_input_action_count": 1,
+    "official_source_access_preflight_count": 6,
     "official_source_catalog_count": 6,
     "official_source_receipt_plan_status": "operator_receipts_required",
     "official_source_receipt_role_count": 4,

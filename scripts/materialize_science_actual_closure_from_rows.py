@@ -135,6 +135,19 @@ def _source_acquisition_summary(
     vina_gnina_runtime_readiness = payload.get("vina_gnina_runtime_readiness")
     if not isinstance(vina_gnina_runtime_readiness, dict):
         vina_gnina_runtime_readiness = {}
+    official_source_receipt_plan = payload.get("official_source_receipt_plan")
+    if not isinstance(official_source_receipt_plan, dict):
+        official_source_receipt_plan = {}
+    source_access_preflight_rows = [
+        row
+        for row in official_source_receipt_plan.get(
+            "source_access_preflight_rows", []
+        )
+        if isinstance(row, dict)
+    ] if isinstance(
+        official_source_receipt_plan.get("source_access_preflight_rows"),
+        list,
+    ) else []
     vina_gnina_case_input_slot_matrix = [
         row
         for row in vina_gnina_runtime_readiness.get("case_input_slot_matrix", [])
@@ -173,6 +186,11 @@ def _source_acquisition_summary(
             or len(phase2_exit_criteria)
         ),
         "phase2_exit_criteria": phase2_exit_criteria,
+        "source_access_preflight_count": int(
+            official_source_receipt_plan.get("source_access_preflight_count")
+            or len(source_access_preflight_rows)
+        ),
+        "source_access_preflight_rows": source_access_preflight_rows,
         "phase4_candidate_slot_matrix_count": int(
             payload.get("phase4_candidate_slot_matrix_count")
             or len(phase4_candidate_slot_matrix)

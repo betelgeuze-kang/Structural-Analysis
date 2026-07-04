@@ -203,6 +203,11 @@ def _slot_source_context(
         for row in _as_list(source.get("vina_gnina_engine_run_slot_matrix"))
         if isinstance(row, dict)
     ]
+    source_access_preflight_rows = [
+        row
+        for row in _as_list(source.get("source_access_preflight_rows"))
+        if isinstance(row, dict)
+    ]
     return {
         "source_id": source_id,
         "present": bool(source.get("present")),
@@ -224,6 +229,11 @@ def _slot_source_context(
             source.get("phase2_exit_criterion_count")
             or len(phase2_exit_criteria)
         ),
+        "source_access_preflight_count": int(
+            source.get("source_access_preflight_count")
+            or len(source_access_preflight_rows)
+        ),
+        "source_access_preflight_rows": source_access_preflight_rows,
         "phase4_candidate_slot_matrix_count": int(
             source.get("phase4_candidate_slot_matrix_count")
             or len(phase4_candidate_slot_matrix)
@@ -1354,6 +1364,33 @@ def _markdown(payload: dict[str, Any]) -> str:
                             f"{_code_join(_as_list(metric_action.get('required_row_fields')))} | "
                             f"{_code_join(_as_list(metric_action.get('blockers')))} |"
                         )
+        public_source_context = _as_dict(
+            _as_dict(payload.get("upstream_source_acquisition")).get(
+                "public_benchmark_phase2"
+            )
+        )
+        source_access_preflight_rows = [
+            row
+            for row in _as_list(
+                public_source_context.get("source_access_preflight_rows")
+            )
+            if isinstance(row, dict)
+        ]
+        if source_access_preflight_rows:
+            lines.extend(["", "### Public Benchmark Source Access Preflight", ""])
+            lines.extend(
+                [
+                    "| Source | Access Mode | Primary Probe |",
+                    "| --- | --- | --- |",
+                ]
+            )
+            for row in source_access_preflight_rows:
+                lines.append(
+                    "| "
+                    f"`{row.get('source_id')}` | "
+                    f"`{row.get('access_mode')}` | "
+                    f"`{row.get('primary_head_command')}` |"
+                )
     upstream_source_blockers = [
         str(item) for item in _as_list(payload.get("upstream_source_blockers"))
     ]

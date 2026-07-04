@@ -75,7 +75,15 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert receipt_plan["status"] == "operator_receipts_required"
     assert receipt_plan["receipt_role_count"] == 4
     assert receipt_plan["source_catalog_count"] == 6
+    assert receipt_plan["source_access_preflight_count"] == 6
     assert receipt_plan["row_input_count"] == 4
+    assert receipt_plan["source_access_preflight_policy"] == {
+        "license_or_accession_review_required_before_payload_use": True,
+        "network_probe_only": True,
+        "raw_payload_committed_by_plan": False,
+        "raw_payload_downloaded_by_plan": False,
+        "source_checksum_required_after_operator_acquisition": True,
+    }
     assert receipt_plan["operator_review_order"] == [
         "casf_pdbbind_subset_source_receipt",
         "casf_pdbbind_pose_coordinate_receipt",
@@ -91,6 +99,18 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "posebusters",
     ]
     assert set(source_catalog) == set(receipt_plan["source_review_order"])
+    source_access_preflight = {
+        row["source_id"]: row for row in receipt_plan["source_access_preflight_rows"]
+    }
+    assert source_access_preflight["pdbbind_plus_casf"][
+        "primary_head_command"
+    ] == "curl --head --location --max-time 20 'https://www.pdbbind-plus.org.cn/casf'"
+    assert source_access_preflight["pdbbind_plus_casf"][
+        "source_payload_policy"
+    ]["raw_payload_downloaded_by_plan"] is False
+    assert "license_or_accession_review_recorded_before_payload_use" in (
+        source_access_preflight["pdbbind_plus_casf"]["operator_success_criteria"]
+    )
     assert source_catalog["pdbbind_plus_casf"]["primary_url"] == (
         "https://www.pdbbind-plus.org.cn/casf"
     )
@@ -418,6 +438,7 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "official_source_receipt_plan_status": "operator_receipts_required",
         "official_source_receipt_role_count": 4,
         "official_source_catalog_count": 6,
+        "official_source_access_preflight_count": 6,
         "phase2_exit_criterion_count": 5,
         "phase2_passing_exit_criterion_count": 4,
         "phase2_blocked_exit_criterion_count": 1,
@@ -605,6 +626,9 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert payload["required_row_input_count"] == 4
     assert payload["official_source_receipt_plan"]["receipt_role_count"] == 4
     assert payload["official_source_receipt_plan"]["source_catalog_count"] == 6
+    assert payload["official_source_receipt_plan"][
+        "source_access_preflight_count"
+    ] == 6
     assert payload["phase2_exit_criterion_count"] == 5
     assert payload["phase2_row_closure_matrix_count"] == 4
     assert payload["vina_gnina_execution_plan"]["required_engine_run_count"] == 24
@@ -664,4 +688,7 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "## Official Source Catalog" in markdown
     assert "pdbbind_plus_casf" in markdown
     assert "https://dude.docking.org/targets/" in markdown
+    assert "## Source Access Preflight" in markdown
+    assert "curl --head --location --max-time 20" in markdown
+    assert "https://www.pdbbind-plus.org.cn/casf" in markdown
     assert "materialize_public_benchmark_operator_bundle_from_rows.py" in markdown

@@ -164,6 +164,17 @@
 - `operator_rows_must_be_real_engine_outputs`: `True`
 - `preflight_does_not_run_engines`: `True`
 
+### Public Benchmark Source Access Preflight
+
+| Source | Access Mode | Primary Probe |
+| --- | --- | --- |
+| `pdbbind_plus_casf` | `operator_download_and_license_or_accession_receipt_required` | `curl --head --location --max-time 20 'https://www.pdbbind-plus.org.cn/casf'` |
+| `dud_e` | `public_download_with_operator_checksum_receipt` | `curl --head --location --max-time 20 'https://dude.docking.org/targets/'` |
+| `lit_pcba` | `public_download_with_operator_checksum_receipt` | `curl --head --location --max-time 20 'https://drugdesign.unistra.fr/LIT-PCBA/'` |
+| `autodock_vina` | `engine_install_and_run_receipt_required` | `curl --head --location --max-time 20 'https://vina.scripps.edu/'` |
+| `gnina` | `engine_install_and_run_receipt_required` | `curl --head --location --max-time 20 'https://github.com/gnina/gnina'` |
+| `posebusters` | `reference_checklist_or_tool_run_receipt_required` | `curl --head --location --max-time 20 'https://github.com/maabuu/posebusters'` |
+
 ## Provided Closure Evidence
 
 ### GPCR Phase 3 Gate

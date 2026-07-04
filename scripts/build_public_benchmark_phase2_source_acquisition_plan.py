@@ -90,6 +90,13 @@ RECEIPT_PROMOTION_POLICY = {
     "summary_only_metrics_promote_to_phase2": False,
     "redistribution_of_restricted_benchmark_payloads": False,
 }
+SOURCE_ACCESS_PREFLIGHT_POLICY = {
+    "network_probe_only": True,
+    "raw_payload_downloaded_by_plan": False,
+    "raw_payload_committed_by_plan": False,
+    "license_or_accession_review_required_before_payload_use": True,
+    "source_checksum_required_after_operator_acquisition": True,
+}
 OFFICIAL_SOURCE_CATALOG = [
     {
         "source_id": "pdbbind_plus_casf",
@@ -1190,17 +1197,58 @@ def _official_source_receipt_rows(
     ]
 
 
+def _source_access_preflight_rows(
+    source_catalog: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for source in source_catalog:
+        primary_url = str(source.get("primary_url") or "")
+        fallback_url = str(source.get("fallback_url") or "")
+        rows.append(
+            {
+                "source_id": str(source.get("source_id") or ""),
+                "source_family": str(source.get("source_family") or ""),
+                "access_mode": str(source.get("access_mode") or ""),
+                "primary_url": primary_url,
+                "fallback_url": fallback_url,
+                "primary_head_command": (
+                    f"curl --head --location --max-time 20 '{primary_url}'"
+                ),
+                "fallback_head_command": (
+                    f"curl --head --location --max-time 20 '{fallback_url}'"
+                ),
+                "operator_success_criteria": [
+                    "primary_or_fallback_url_resolves",
+                    "http_status_is_2xx_3xx_or_documented_auth_gate",
+                    "license_or_accession_review_recorded_before_payload_use",
+                    "source_checksum_recorded_after_operator_acquisition",
+                ],
+                "source_payload_policy": dict(SOURCE_ACCESS_PREFLIGHT_POLICY),
+                "claim_boundary": (
+                    "This preflight checks source access path readiness only. It "
+                    "does not download benchmark payloads, grant license rights, "
+                    "or count as Phase 2 source evidence."
+                ),
+            }
+        )
+    return rows
+
+
 def _official_source_receipt_plan(
     row_input_contracts: list[dict[str, Any]],
 ) -> dict[str, Any]:
     receipt_rows = _official_source_receipt_rows(row_input_contracts)
     source_catalog = [dict(row) for row in OFFICIAL_SOURCE_CATALOG]
+    source_access_preflight_rows = _source_access_preflight_rows(source_catalog)
     return {
         "plan_id": "public_benchmark_phase2_official_source_receipt_plan",
         "status": "operator_receipts_required",
         "receipt_role_count": len(receipt_rows),
         "source_catalog_count": len(source_catalog),
+        "source_access_preflight_count": len(source_access_preflight_rows),
         "official_source_catalog": source_catalog,
+        "source_access_preflight_rows": source_access_preflight_rows,
+        "source_access_preflight_policy": dict(SOURCE_ACCESS_PREFLIGHT_POLICY),
         "row_input_count": len(REQUIRED_ROW_INPUTS),
         "row_input_receipt_roles": receipt_rows,
         "receipt_promotion_policy": dict(RECEIPT_PROMOTION_POLICY),
@@ -1662,6 +1710,9 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "official_source_catalog_count": official_source_receipt_plan[
                 "source_catalog_count"
             ],
+            "official_source_access_preflight_count": official_source_receipt_plan[
+                "source_access_preflight_count"
+            ],
             "phase2_row_audit_status": phase2_row_audit_summary["status"],
             "phase2_exit_criterion_count": len(phase2_exit_criteria),
             "phase2_passing_exit_criterion_count": len(
@@ -1794,6 +1845,7 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `official_source_receipt_plan_status`: `{payload['official_source_receipt_plan']['status']}`",
         f"- `official_source_receipt_role_count`: `{payload['official_source_receipt_plan']['receipt_role_count']}`",
         f"- `official_source_catalog_count`: `{payload['official_source_receipt_plan']['source_catalog_count']}`",
+        f"- `official_source_access_preflight_count`: `{payload['official_source_receipt_plan']['source_access_preflight_count']}`",
         f"- `phase2_row_audit`: `{payload['phase2_row_audit']['artifact']}`",
         f"- `phase2_row_audit_status`: `{payload['phase2_row_audit']['status']}`",
         f"- `phase2_row_audit_missing_row_inputs`: `{', '.join(payload['phase2_row_audit']['missing_row_inputs'])}`",
@@ -2121,6 +2173,21 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         lines.append(
             f"| `{row['source_id']}` | `{row['source_family']}` | "
             f"{feeds} | {row['primary_url']} |"
+        )
+    lines.extend(["", "## Source Access Preflight", ""])
+    lines.extend(
+        [
+            "| Source | Access Mode | Primary Probe | Fallback Probe |",
+            "|---|---|---|---|",
+        ]
+    )
+    for row in payload["official_source_receipt_plan"][
+        "source_access_preflight_rows"
+    ]:
+        lines.append(
+            f"| `{row['source_id']}` | `{row['access_mode']}` | "
+            f"`{row['primary_head_command']}` | "
+            f"`{row['fallback_head_command']}` |"
         )
     lines.extend(["", "## Commands", ""])
     for key, command in payload["commands"].items():

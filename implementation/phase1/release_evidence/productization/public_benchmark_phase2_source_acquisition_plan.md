@@ -8,6 +8,7 @@
 - `official_source_receipt_plan_status`: `operator_receipts_required`
 - `official_source_receipt_role_count`: `4`
 - `official_source_catalog_count`: `6`
+- `official_source_access_preflight_count`: `6`
 - `phase2_row_audit`: `implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json`
 - `phase2_row_audit_status`: `operator_evidence_required`
 - `phase2_row_audit_missing_row_inputs`: `vina_gnina_rows`
@@ -177,6 +178,17 @@
 | `autodock_vina` | `Vina` | `vina_gnina_rows` | https://vina.scripps.edu/ |
 | `gnina` | `GNINA` | `vina_gnina_rows` | https://github.com/gnina/gnina |
 | `posebusters` | `PoseBusters` | `pose_rows` | https://github.com/maabuu/posebusters |
+
+## Source Access Preflight
+
+| Source | Access Mode | Primary Probe | Fallback Probe |
+|---|---|---|---|
+| `pdbbind_plus_casf` | `operator_download_and_license_or_accession_receipt_required` | `curl --head --location --max-time 20 'https://www.pdbbind-plus.org.cn/casf'` | `curl --head --location --max-time 20 'https://www.pdbbind-plus.org.cn/'` |
+| `dud_e` | `public_download_with_operator_checksum_receipt` | `curl --head --location --max-time 20 'https://dude.docking.org/targets/'` | `curl --head --location --max-time 20 'https://dude.docking.org/'` |
+| `lit_pcba` | `public_download_with_operator_checksum_receipt` | `curl --head --location --max-time 20 'https://drugdesign.unistra.fr/LIT-PCBA/'` | `curl --head --location --max-time 20 'https://drugdesign.unistra.fr/LIT-PCBA/index.htm'` |
+| `autodock_vina` | `engine_install_and_run_receipt_required` | `curl --head --location --max-time 20 'https://vina.scripps.edu/'` | `curl --head --location --max-time 20 'https://github.com/ccsb-scripps/AutoDock-Vina'` |
+| `gnina` | `engine_install_and_run_receipt_required` | `curl --head --location --max-time 20 'https://github.com/gnina/gnina'` | `curl --head --location --max-time 20 'https://gnina.github.io/gnina/rsc_workshop2021/'` |
+| `posebusters` | `reference_checklist_or_tool_run_receipt_required` | `curl --head --location --max-time 20 'https://github.com/maabuu/posebusters'` | `curl --head --location --max-time 20 'https://zenodo.org/records/8278563'` |
 
 ## Commands
 
