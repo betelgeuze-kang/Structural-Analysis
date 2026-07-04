@@ -1429,6 +1429,48 @@ def _unblock_plan_refinement_action_packet(
     }
 
 
+def _first_refinement_receipt_action(
+    refinement_action_packet: dict[str, Any],
+) -> dict[str, Any]:
+    report = _as_dict(refinement_action_packet.get("rows_from_receipt_bundle_report"))
+    commands = _as_dict(report.get("commands"))
+    candidates: list[tuple[str, dict[str, Any]]] = [
+        ("first_incomplete_receipt", _as_dict(report.get("first_incomplete_receipt")))
+    ]
+    family_plan = [
+        row
+        for row in _as_list(report.get("receipt_metric_family_completion_plan"))
+        if isinstance(row, dict)
+    ]
+    if family_plan:
+        candidates.append(("first_metric_family_blocker", family_plan[0]))
+    for source, row in candidates:
+        if not row:
+            continue
+        next_action = str(
+            row.get("next_action")
+            or row.get("operator_completion_action")
+            or row.get("operator_action")
+            or ""
+        )
+        command_key = str(row.get("command_key") or "")
+        if not command_key and next_action:
+            command_key = "rerun_rows_materialization"
+        materialization_command = str(
+            row.get("materialization_command")
+            or commands.get(command_key)
+            or ""
+        )
+        if next_action or command_key or materialization_command:
+            return {
+                "action_source": source,
+                "next_action": next_action,
+                "command_key": command_key,
+                "materialization_command": materialization_command,
+            }
+    return {}
+
+
 def _blocking_input_unblock_plan(
     missing_slots: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
@@ -1488,6 +1530,25 @@ def _blocking_input_unblock_plan(
                 row_payload["first_blocked_engine_run_slot"] = first_engine_slot
         if refinement_action_packet:
             row_payload["refinement_action_packet"] = refinement_action_packet
+            first_refinement_receipt_action = _first_refinement_receipt_action(
+                refinement_action_packet
+            )
+            if first_refinement_receipt_action:
+                row_payload["first_refinement_receipt_action"] = (
+                    first_refinement_receipt_action
+                )
+                row_payload.setdefault(
+                    "next_action",
+                    first_refinement_receipt_action["next_action"],
+                )
+                row_payload.setdefault(
+                    "command_key",
+                    first_refinement_receipt_action["command_key"],
+                )
+                row_payload.setdefault(
+                    "materialization_command",
+                    first_refinement_receipt_action["materialization_command"],
+                )
             first_candidate_slot = _as_dict(
                 refinement_action_packet.get("first_missing_candidate_slot")
             )

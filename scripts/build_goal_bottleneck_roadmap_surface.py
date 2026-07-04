@@ -851,6 +851,7 @@ def _science_operator_gap_register(
     contracts: list[dict[str, Any]],
     action: dict[str, Any],
     actual_audit: dict[str, Any],
+    unblock_plans_by_row_input: dict[str, dict[str, Any]],
 ) -> list[dict[str, Any]]:
     component_id = str(component.get("component_id") or "")
     failed_criteria = [str(row) for row in _as_list(component.get("failed_criteria"))]
@@ -866,7 +867,18 @@ def _science_operator_gap_register(
         materialization_chain = [
             str(row) for row in _as_list(contract.get("materialization_chain"))
         ]
-        materialization_command = str(contract.get("materialization_command") or "")
+        unblock_plan = _as_dict(unblock_plans_by_row_input.get(row_input_id))
+        first_unblock_action = _as_dict(
+            unblock_plan.get("first_refinement_receipt_action")
+        )
+        materialization_command = str(
+            unblock_plan.get("materialization_command")
+            or contract.get("materialization_command")
+            or ""
+        )
+        first_next_action = str(
+            unblock_plan.get("next_action") or contract.get("operator_action") or ""
+        )
         gaps.append(
             {
                 "handoff_id": f"science_actual_closure::{row_input_id}",
@@ -874,7 +886,9 @@ def _science_operator_gap_register(
                 "target_id": component_id,
                 "status": "operator_rows_required",
                 "blocked_criteria": failed_criteria,
-                "first_next_action": str(contract.get("operator_action") or ""),
+                "first_next_action": first_next_action,
+                "command_key": str(unblock_plan.get("command_key") or ""),
+                "first_unblock_action": first_unblock_action,
                 "template_artifact": str(contract.get("row_template_artifact") or ""),
                 "minimum_evidence": {
                     "accepted_formats": [
@@ -932,6 +946,11 @@ def _science_actual_closure_rows(
     contracts_by_component = _science_row_contracts_by_component(science_handoff)
     actions_by_component = _science_actions_by_component(science_handoff)
     audit_summary = _as_dict(science_row_audit.get("summary"))
+    unblock_plans_by_row_input = {
+        str(row.get("row_input_id") or ""): row
+        for row in _as_list(science_handoff.get("blocking_input_unblock_plan"))
+        if isinstance(row, dict) and str(row.get("row_input_id") or "")
+    }
     rows: list[dict[str, Any]] = []
     for component in component_rows:
         component_id = str(component.get("component_id") or "")
@@ -958,6 +977,7 @@ def _science_actual_closure_rows(
             contracts=contracts_by_component.get(component_id, []),
             action=action,
             actual_audit=actual_audit,
+            unblock_plans_by_row_input=unblock_plans_by_row_input,
         )
         source_blockers = _science_source_blockers_for_component(
             science_handoff,
@@ -1528,6 +1548,10 @@ def _operator_evidence_handoff_queue(roadmap_rows: list[dict[str, Any]]) -> list
                     first_gap.get("first_next_action")
                     or _first_str([str(action) for action in _as_list(row.get("next_actions"))])
                 ),
+                "command_key": str(first_gap.get("command_key") or ""),
+                "first_unblock_action": _as_dict(
+                    first_gap.get("first_unblock_action")
+                ),
                 "template_artifact": str(first_gap.get("template_artifact") or ""),
                 "minimum_evidence": _as_dict(first_gap.get("minimum_evidence")),
                 "materialization_steps": [
@@ -1618,6 +1642,10 @@ def _operator_evidence_handoff_slot_queue(
                     "status": str(slot.get("status") or ""),
                     "blocked_criteria": [str(item) for item in blocked_criteria],
                     "first_next_action": str(slot.get("first_next_action") or ""),
+                    "command_key": str(slot.get("command_key") or ""),
+                    "first_unblock_action": _as_dict(
+                        slot.get("first_unblock_action")
+                    ),
                     "template_artifact": str(slot.get("template_artifact") or ""),
                     "minimum_evidence": _as_dict(slot.get("minimum_evidence")),
                     "materialization_steps": [

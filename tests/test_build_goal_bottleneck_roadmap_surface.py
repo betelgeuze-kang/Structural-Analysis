@@ -351,6 +351,17 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert handoffs["pocketmd_rows"]["template_artifact"].endswith(
         "pocketmd_lite_topk_rows_template.csv"
     )
+    assert handoffs["pocketmd_rows"]["first_next_action"] == (
+        "fill_completion_missing_required_fields_and_set_status_complete"
+    )
+    assert handoffs["pocketmd_rows"]["command_key"] == "rerun_rows_materialization"
+    assert (
+        "materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py"
+        in handoffs["pocketmd_rows"]["materialization_command"]
+    )
+    assert handoffs["pocketmd_rows"]["first_unblock_action"][
+        "action_source"
+    ] == "first_incomplete_receipt"
     assert handoffs["pocketmd_rows"][
         "actual_evidence_audit_status"
     ] == "operator_topk_rows_required"
@@ -363,6 +374,10 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         row["slot_id"]: row for row in surface["operator_evidence_handoff_slot_queue"]
     }
     assert sorted(slots) == ["pocketmd_rows", "vina_gnina_rows"]
+    assert slots["pocketmd_rows"]["first_next_action"] == (
+        "fill_completion_missing_required_fields_and_set_status_complete"
+    )
+    assert slots["pocketmd_rows"]["command_key"] == "rerun_rows_materialization"
     assert slots["pocketmd_rows"]["blocked_criteria"] == [
         "top_k_refinement_rows_present",
         "top_k_refinement_case_coverage",

@@ -222,7 +222,7 @@
           "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json"
         ],
         "name": "PocketMD Lite top-k refinement",
-        "operator_next_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+        "operator_next_action": "fill_completion_missing_required_fields_and_set_status_complete",
         "pass": false,
         "phase_id": "phase_4_pocketmd_lite_topk_actual_closure",
         "priority": 4,
@@ -269,6 +269,7 @@
     "blocked_criteria": [],
     "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
     "capability_id": "",
+    "command_key": "",
     "evidence_artifacts": [
       "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
       "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
@@ -277,6 +278,7 @@
     "first_blocked_target": "public_benchmark_phase2_actual_closure",
     "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
     "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+    "first_unblock_action": {},
     "handoff_id": "science_actual_closure::vina_gnina_rows",
     "linked_routes": [
       "/goal/bottleneck",
@@ -481,6 +483,7 @@
     ],
     "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
     "capability_id": "",
+    "command_key": "",
     "evidence_artifacts": [
       "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
       "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
@@ -489,6 +492,7 @@
     "first_blocked_target": "public_benchmark_phase2_actual_closure",
     "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
     "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+    "first_unblock_action": {},
     "handoff_id": "science_actual_closure::vina_gnina_rows",
     "linked_routes": [
       "/goal/bottleneck",
@@ -678,18 +682,18 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
     "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
   },
-  "generated_at": "2026-07-04T11:49:51.923832+00:00",
+  "generated_at": "2026-07-04T12:17:12.189341+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:be05411d7bb174d8612aaa5a6d3c2ffbace0c16d1310fc0b6897f9fd9038c6d1",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:50113b04a758c06b720aa91a3b64639e1d31ba94f35334cf21494462930a7d2f",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:69285c5dcf0a4bdc30c7a71d48b86dabde7af6e458925f250a4e3f9b9616e109",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json": "sha256:34a36e491637c618af70a785679bb51b30f7dddb5beecb926fe1faac1e984399",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:0133ae94e4cb6de0accb979f269e3cf4da247be4eb658b1b17164de03e7b9b5a",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json": "sha256:e4828ad37353907c77e58171e0927f6165fc997a1e1eb503c82c924c5514aa37",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:90d0a620b5563300a667e7caef373db68ce79b954464ee17d024dd1d2b1fd072",
     "implementation/phase1/release_evidence/productization/source_of_truth_gap_classification.json": "sha256:5fb3525b23f2e4bc7582cc16aace64fbb7cc506c28e086a21bede3de61ea1b3c",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:c1af83f1b410aca8536d5ab832c0ba6a86153436844e42152860f84ec0002328",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:8adb767e05269c4063e04ca5e5060b0e94994916ccae4e9912c897c0c7fc9703",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:e8a6b5e0b8d86ef1b629c1a6d4e8caab6132dd4a3a311c64bc520c2e4e13954f",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:a9f196253b191821a999c6029f6210b0f6ac2a3fc66b7e29373b0377164a0cc7"
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:4fd672967c386a21837d4eaa792df5c1e4361a5b7813ba600c87211b71fc36d5"
   },
   "mutation_allowed": false,
   "next_actions": [
@@ -734,6 +738,7 @@
       "blocked_criteria": [],
       "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
       "capability_id": "",
+      "command_key": "",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
         "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
@@ -742,6 +747,7 @@
       "first_blocked_target": "public_benchmark_phase2_actual_closure",
       "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
       "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+      "first_unblock_action": {},
       "handoff_id": "science_actual_closure::vina_gnina_rows",
       "linked_routes": [
         "/goal/bottleneck",
@@ -946,6 +952,7 @@
       ],
       "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
       "capability_id": "",
+      "command_key": "",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
         "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
@@ -954,6 +961,7 @@
       "first_blocked_target": "public_benchmark_phase2_actual_closure",
       "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
       "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+      "first_unblock_action": {},
       "handoff_id": "science_actual_closure::vina_gnina_rows",
       "linked_routes": [
         "/goal/bottleneck",
@@ -1544,6 +1552,7 @@
       "blocked_criteria": [],
       "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
       "capability_id": "",
+      "command_key": "",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
         "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
@@ -1552,6 +1561,7 @@
       "first_blocked_target": "public_benchmark_phase2_actual_closure",
       "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
       "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+      "first_unblock_action": {},
       "handoff_id": "science_actual_closure::vina_gnina_rows",
       "linked_routes": [
         "/goal/bottleneck",
@@ -1752,6 +1762,7 @@
       "blocked_criteria": [],
       "bottleneck": "pocketmd_lite_topk_actual_rows_required",
       "capability_id": "",
+      "command_key": "rerun_rows_materialization",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
         "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
@@ -1759,13 +1770,19 @@
       ],
       "first_blocked_target": "pocketmd_lite_topk_actual_closure",
       "first_blocker": "pocketmd_lite_topk_actual_closure::pocketmd_rows_not_provided",
-      "first_next_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+      "first_next_action": "fill_completion_missing_required_fields_and_set_status_complete",
+      "first_unblock_action": {
+        "action_source": "first_incomplete_receipt",
+        "command_key": "rerun_rows_materialization",
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+        "next_action": "fill_completion_missing_required_fields_and_set_status_complete"
+      },
       "handoff_id": "science_actual_closure::pocketmd_rows",
       "linked_routes": [
         "/goal/bottleneck",
         "/goal/roadmap"
       ],
-      "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
+      "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
       "materialization_steps": [
         "materialize_pocketmd_lite_operator_intake_from_rows",
         "materialize_pocketmd_lite_topk_survival_report",
@@ -1916,7 +1933,7 @@
       "status": "operator_rows_required",
       "target_id": "pocketmd_lite_topk_actual_closure",
       "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-      "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
+      "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked"
     }
   ],
   "operator_evidence_handoff_scope": "first_blocked_operator_gap_per_blocked_phase",
@@ -1939,6 +1956,7 @@
       ],
       "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
       "capability_id": "",
+      "command_key": "",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
         "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
@@ -1947,6 +1965,7 @@
       "first_blocked_target": "public_benchmark_phase2_actual_closure",
       "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
       "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+      "first_unblock_action": {},
       "handoff_id": "science_actual_closure::vina_gnina_rows",
       "linked_routes": [
         "/goal/bottleneck",
@@ -2158,6 +2177,7 @@
       ],
       "bottleneck": "pocketmd_lite_topk_actual_rows_required",
       "capability_id": "",
+      "command_key": "rerun_rows_materialization",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
         "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
@@ -2165,13 +2185,19 @@
       ],
       "first_blocked_target": "pocketmd_lite_topk_actual_closure",
       "first_blocker": "pocketmd_lite_topk_actual_closure::pocketmd_rows_not_provided",
-      "first_next_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+      "first_next_action": "fill_completion_missing_required_fields_and_set_status_complete",
+      "first_unblock_action": {
+        "action_source": "first_incomplete_receipt",
+        "command_key": "rerun_rows_materialization",
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+        "next_action": "fill_completion_missing_required_fields_and_set_status_complete"
+      },
       "handoff_id": "science_actual_closure::pocketmd_rows",
       "linked_routes": [
         "/goal/bottleneck",
         "/goal/roadmap"
       ],
-      "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
+      "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
       "materialization_steps": [
         "materialize_pocketmd_lite_operator_intake_from_rows",
         "materialize_pocketmd_lite_topk_survival_report",
@@ -2324,7 +2350,7 @@
       "status": "operator_rows_required",
       "target_id": "pocketmd_lite_topk_actual_closure",
       "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-      "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
+      "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked"
     }
   ],
   "operator_evidence_handoff_slot_scope": "all_blocked_operator_slots_per_blocked_phase",
@@ -3315,7 +3341,9 @@
           "blocked_criteria": [
             "vina_gnina_comparison_ready"
           ],
+          "command_key": "",
           "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+          "first_unblock_action": {},
           "handoff_id": "science_actual_closure::vina_gnina_rows",
           "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
           "materialization_steps": [
@@ -3509,7 +3537,9 @@
             "blocked_criteria": [
               "vina_gnina_comparison_ready"
             ],
+            "command_key": "",
             "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+            "first_unblock_action": {},
             "handoff_id": "science_actual_closure::vina_gnina_rows",
             "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
             "materialization_steps": [
@@ -3980,7 +4010,7 @@
         "/goal/roadmap"
       ],
       "next_actions": [
-        "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+        "fill_completion_missing_required_fields_and_set_status_complete",
         "attach_vina_gnina_rows",
         "attach_pocketmd_rows",
         "resolve_public_benchmark_phase2_source_acquisition_blockers",
@@ -5323,9 +5353,16 @@
             "uncertainty_summary_materialized",
             "report_blockers_resolved"
           ],
-          "first_next_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+          "command_key": "rerun_rows_materialization",
+          "first_next_action": "fill_completion_missing_required_fields_and_set_status_complete",
+          "first_unblock_action": {
+            "action_source": "first_incomplete_receipt",
+            "command_key": "rerun_rows_materialization",
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+            "next_action": "fill_completion_missing_required_fields_and_set_status_complete"
+          },
           "handoff_id": "science_actual_closure::pocketmd_rows",
-          "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
+          "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
           "materialization_steps": [
             "materialize_pocketmd_lite_operator_intake_from_rows",
             "materialize_pocketmd_lite_topk_survival_report",
@@ -5467,7 +5504,7 @@
           "status": "operator_rows_required",
           "target_id": "pocketmd_lite_topk_actual_closure",
           "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-          "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
+          "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked"
         },
         "missing_row_inputs": [
           "pocketmd_rows"
@@ -5493,9 +5530,16 @@
               "uncertainty_summary_materialized",
               "report_blockers_resolved"
             ],
-            "first_next_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "command_key": "rerun_rows_materialization",
+            "first_next_action": "fill_completion_missing_required_fields_and_set_status_complete",
+            "first_unblock_action": {
+              "action_source": "first_incomplete_receipt",
+              "command_key": "rerun_rows_materialization",
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+              "next_action": "fill_completion_missing_required_fields_and_set_status_complete"
+            },
             "handoff_id": "science_actual_closure::pocketmd_rows",
-            "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
             "materialization_steps": [
               "materialize_pocketmd_lite_operator_intake_from_rows",
               "materialize_pocketmd_lite_topk_survival_report",
@@ -5637,7 +5681,7 @@
             "status": "operator_rows_required",
             "target_id": "pocketmd_lite_topk_actual_closure",
             "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-            "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
+            "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked"
           }
         ],
         "phase3_exit_gate": {},
@@ -6515,7 +6559,7 @@
     ],
     "status": "operator_evidence_required"
   },
-  "source_commit_sha": "9cda4cf76483b376bb618db20e33d0c35487d3ef",
+  "source_commit_sha": "777bb41aef03e1a4f93c03a043100cee5fb6ef30",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

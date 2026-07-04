@@ -327,9 +327,33 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert first_incomplete_receipt["operator_completion_action"] == (
         "fill_completion_missing_required_fields_and_set_status_complete"
     )
+    assert first_incomplete_receipt["next_action"] == (
+        "fill_completion_missing_required_fields_and_set_status_complete"
+    )
+    assert first_incomplete_receipt["command_key"] == "rerun_rows_materialization"
+    assert first_incomplete_receipt["materialization_command"] == (
+        receipt_bundle_report["commands"]["rerun_rows_materialization"]
+    )
     assert "upstream_top_k_provenance_ref" in first_incomplete_receipt[
         "completion_missing_required_fields"
     ]
+    assert unblock_plan["pocketmd_rows"]["first_refinement_receipt_action"] == {
+        "action_source": "first_incomplete_receipt",
+        "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
+        "command_key": "rerun_rows_materialization",
+        "materialization_command": receipt_bundle_report["commands"][
+            "rerun_rows_materialization"
+        ],
+    }
+    assert unblock_plan["pocketmd_rows"]["next_action"] == (
+        "fill_completion_missing_required_fields_and_set_status_complete"
+    )
+    assert unblock_plan["pocketmd_rows"]["command_key"] == (
+        "rerun_rows_materialization"
+    )
+    assert unblock_plan["pocketmd_rows"]["materialization_command"] == (
+        receipt_bundle_report["commands"]["rerun_rows_materialization"]
+    )
     assert unblock_plan["pocketmd_rows"][
         "rows_from_receipt_bundle_report"
     ] == receipt_bundle_report
