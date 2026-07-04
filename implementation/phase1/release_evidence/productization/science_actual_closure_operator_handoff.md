@@ -125,7 +125,7 @@
 
 | Component | Row Input | Source Action | First Step | Last Step | Count |
 | --- | --- | --- | --- | --- | ---: |
-| `pocketmd_lite_topk_actual_closure` | `pocketmd_rows` | `resolve_pocketmd_lite_source_acquisition_blockers` | `review_phase4_refinement_receipt_plan` | `refresh_science_actual_closure_from_rows` | 11 |
+| `pocketmd_lite_topk_actual_closure` | `pocketmd_rows` | `resolve_pocketmd_lite_source_acquisition_blockers` | `review_phase4_refinement_receipt_plan` | `refresh_science_actual_closure_from_rows` | 12 |
 | `public_benchmark_phase2_actual_closure` | `vina_gnina_rows` | `resolve_public_benchmark_phase2_source_acquisition_blockers` | `review_official_source_receipt_plan` | `refresh_public_benchmark_source_of_truth` | 14 |
 
 ### PocketMD Row Preflight Action

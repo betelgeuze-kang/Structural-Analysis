@@ -476,6 +476,9 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     assert "build_pocketmd_lite_topk_rows_template_preflight.py" in preflight_action[
         "build_template_preflight_command"
     ]
+    assert "materialize_pocketmd_lite_topk_rows_from_template.py" in preflight_action[
+        "materialize_rows_from_template_command"
+    ]
     assert preflight_action["supported_candidate_paths"] == [
         "implementation/phase1/release_evidence/productization/"
         "pocketmd_lite_topk_rows.json",
@@ -835,9 +838,11 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert "pocketmd_lite_topk_rows_template.csv" in markdown
     assert "pocketmd_lite_topk_rows_template_preflight.json" in markdown
     assert "build_pocketmd_lite_topk_rows_template_preflight.py" in markdown
+    assert "materialize_pocketmd_lite_topk_rows_from_template.py" in markdown
     assert "## Operator Next Actions" in markdown
     assert "| 1 | `review_phase4_refinement_receipt_plan` |" in markdown
-    assert "| 11 | `refresh_science_actual_closure_from_rows` |" in markdown
+    assert "| 10 | `materialize_completed_template_to_pocketmd_lite_topk_rows` |" in markdown
+    assert "| 12 | `refresh_science_actual_closure_from_rows` |" in markdown
     assert "## Phase 4 Completion Audit" in markdown
     assert "## Phase 4 Actual Evidence Audit" in markdown
     assert "`phase4_completion_audit_status`: `operator_topk_rows_required`" in (

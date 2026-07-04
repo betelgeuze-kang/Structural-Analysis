@@ -324,12 +324,18 @@ def test_refinement_execution_plan_enumerates_candidate_slots(
         "preflight_pocketmd_lite_topk_rows_template",
         "fill_pocketmd_lite_topk_rows_from_template",
     ]
+    assert "materialize_pocketmd_lite_topk_rows_from_template" in unblock[
+        "operator_sequence"
+    ]
     assert unblock["row_template_preflight_artifact"].endswith(
         "pocketmd_lite_topk_rows_template_preflight.json"
     )
     assert "build_pocketmd_lite_topk_rows_template_preflight.py" in unblock[
         "commands"
     ]["build_row_template_preflight"]
+    assert "materialize_pocketmd_lite_topk_rows_from_template.py" in unblock[
+        "commands"
+    ]["materialize_rows_from_template"]
     assert "materialize_pocketmd_lite_operator_intake_from_rows.py" in payload[
         "operator_commands"
     ]["import_rows"]

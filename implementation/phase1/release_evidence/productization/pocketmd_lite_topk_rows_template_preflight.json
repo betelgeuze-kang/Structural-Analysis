@@ -2,6 +2,7 @@
   "claim_boundary": "This preflight audits the PocketMD Lite top-k rows template only. It does not promote the template to actual row evidence, run bounded refinement, synthesize local-min, contact, H-bond, clash, or uncertainty metrics, or close PocketMD Lite Phase 4.",
   "commands": {
     "import_rows": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
+    "materialize_rows_from_template": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_template.py --template implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_template_report.json --fail-blocked",
     "materialize_survival_report": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
     "rerun_refinement_execution_plan": "python3 scripts/build_pocketmd_lite_refinement_execution_plan.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json",
     "rerun_science_actual_closure": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
@@ -44,7 +45,7 @@
       "top_k_rank": 2
     }
   ],
-  "generated_at": "2026-07-04T03:45:43.952080+00:00",
+  "generated_at": "2026-07-04T07:33:36.870987+00:00",
   "header_fields": [
     "case_id",
     "source_family",
@@ -66,10 +67,10 @@
     "source_checksum"
   ],
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:92f3cd4970165177df9839683acb5dabc8a4c8193a8483d5267cd68d8136bf37",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:74315d11b9be2f4e78265c1c0c867063e1e3c16671431f62e24564e59e706ddb",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv": "sha256:4fac3161714e8bf0444ee3e085a3c34d2f9841acaf9b4427bd8de2224294e196",
-    "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:c4e52648fc194826a082a0816d7946350a90fe1e4eae7d31e3d6f37dd1c05148",
-    "scripts/build_pocketmd_lite_topk_rows_template_preflight.py": "sha256:bee7f8a388bcec0cf613c291afe00fe6892667bd47c1457967e14ec30d1133af"
+    "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:6dfec99faf60973e270ceb8a9f02bfa2c576474b4b9a114c4018e7bf2b9004aa",
+    "scripts/build_pocketmd_lite_topk_rows_template_preflight.py": "sha256:15b5808c26ccc005162e3b693f88272ddb83cd696b1f54d0005872ce20294c55"
   },
   "missing_expected_slots": [],
   "missing_header_fields": [],
@@ -78,7 +79,7 @@
     "fill_blank_top_k_refinement_metric_values",
     "attach_upstream_top_k_candidate_scope_receipts",
     "attach_lite_refinement_metric_receipts",
-    "copy_or_export_completed_rows_to_expected_rows_artifact",
+    "materialize_completed_template_to_expected_rows_artifact",
     "rerun_pocketmd_lite_operator_intake_and_survival_materializer"
   ],
   "operator_input_source_receipt_plan": [
@@ -2434,7 +2435,7 @@
     "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
   },
   "schema_version": "pocketmd-lite-topk-rows-template-preflight.v1",
-  "source_commit_sha": "bd38f5f4360c26232d04232bf6159a3eb8d819d2",
+  "source_commit_sha": "7f6dcc71a427150a633c18db925a445aadbe4a9b",
   "source_receipt_requirements": {
     "mode": "raw_top_k_refinement_rows",
     "placeholder_block_policy": {

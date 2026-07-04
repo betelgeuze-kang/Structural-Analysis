@@ -135,6 +135,9 @@ def test_current_pocketmd_lite_topk_rows_template_preflight_surfaces_gaps() -> N
     assert payload["template_safety_policy"][
         "operator_rows_must_be_real_top_k_refinement_outputs"
     ] is True
+    assert payload["commands"]["materialize_rows_from_template"].startswith(
+        "python3 scripts/materialize_pocketmd_lite_topk_rows_from_template.py"
+    )
     assert "does not promote the template" in payload["claim_boundary"]
 
 

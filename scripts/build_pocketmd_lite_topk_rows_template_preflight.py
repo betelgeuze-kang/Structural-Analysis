@@ -697,13 +697,19 @@ def build_pocketmd_lite_topk_rows_template_preflight(
             "fill_blank_top_k_refinement_metric_values",
             "attach_upstream_top_k_candidate_scope_receipts",
             "attach_lite_refinement_metric_receipts",
-            "copy_or_export_completed_rows_to_expected_rows_artifact",
+            "materialize_completed_template_to_expected_rows_artifact",
             "rerun_pocketmd_lite_operator_intake_and_survival_materializer",
         ],
         "commands": {
             "write_preflight": (
                 "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py "
                 f"--out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}"
+            ),
+            "materialize_rows_from_template": (
+                "python3 scripts/materialize_pocketmd_lite_topk_rows_from_template.py "
+                f"--template {template} --out-rows {expected_rows} "
+                f"--out-report {PRODUCTIZATION / 'pocketmd_lite_topk_rows_from_template_report.json'} "
+                "--fail-blocked"
             ),
             "import_rows": (
                 "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "

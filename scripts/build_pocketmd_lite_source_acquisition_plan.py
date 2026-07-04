@@ -1442,6 +1442,9 @@ def _pocketmd_rows_operator_action(
             "build_template_preflight_command": commands[
                 "build_row_template_preflight"
             ],
+            "materialize_rows_from_template_command": commands[
+                "materialize_rows_from_template"
+            ],
             "import_rows_command": commands["import_rows"],
             "verify_science_actual_closure_command": (
                 commands["science_actual_closure"]
@@ -1506,6 +1509,9 @@ def _pocketmd_rows_operator_action(
             "build_template_preflight_command": commands[
                 "build_row_template_preflight"
             ],
+            "materialize_rows_from_template_command": commands[
+                "materialize_rows_from_template"
+            ],
             "import_rows_command": commands["import_rows"],
             "materialize_survival_command": commands["materialize_survival"],
             "verify_science_actual_closure_command": (
@@ -1564,6 +1570,9 @@ def _pocketmd_rows_operator_action(
             "review_row_template": commands["review_row_template"],
             "build_row_template_preflight": commands[
                 "build_row_template_preflight"
+            ],
+            "materialize_rows_from_template": commands[
+                "materialize_rows_from_template"
             ],
             "import_rows": commands["import_rows"],
             "materialize_survival": commands["materialize_survival"],
@@ -1673,6 +1682,12 @@ def build_pocketmd_lite_source_acquisition_plan(
             f"--out {DEFAULT_ROWS_TEMPLATE_PREFLIGHT} "
             f"--out-md {DEFAULT_ROWS_TEMPLATE_PREFLIGHT_MD}"
         ),
+        "materialize_rows_from_template": (
+            "python3 scripts/materialize_pocketmd_lite_topk_rows_from_template.py "
+            f"--template {DEFAULT_ROWS_TEMPLATE} --out-rows {DEFAULT_ROWS_OUT} "
+            f"--out-report {PRODUCTIZATION / 'pocketmd_lite_topk_rows_from_template_report.json'} "
+            "--fail-blocked"
+        ),
         "build_refinement_execution_plan": _refinement_execution_plan_command(),
         "import_rows": (
             "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
@@ -1718,6 +1733,7 @@ def build_pocketmd_lite_source_acquisition_plan(
         "write_local_min_contact_hbond_clash_uncertainty_rows",
         "attach_row_source_receipts_with_license_url_and_artifact_sha256",
         "write_pocketmd_lite_topk_rows_at_default_dropzone",
+        "materialize_completed_template_to_pocketmd_lite_topk_rows",
         "run_pocketmd_lite_raw_row_importer_and_survival_materializer",
         "refresh_science_actual_closure_from_rows",
     ]

@@ -1,0 +1,61 @@
+{
+  "blockers": [
+    "pocketmd_lite_topk_template_not_ready"
+  ],
+  "case_count": 0,
+  "claim_boundary": "This helper only materializes rows from a completed operator template. It does not run PocketMD Lite refinement, invent local-min/contact/H-bond/clash/uncertainty metrics, attach source receipts, or close Phase 4 without the downstream importer and survival materializer.",
+  "commands": {
+    "materialize_operator_intake": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
+    "materialize_survival_report": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+    "rerun_rows_materialization": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_template.py --template implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_template_report.json",
+    "rerun_template_preflight": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md"
+  },
+  "contract_pass": false,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-07-04T07:33:31.522567+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:74315d11b9be2f4e78265c1c0c867063e1e3c16671431f62e24564e59e706ddb",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv": "sha256:4fac3161714e8bf0444ee3e085a3c34d2f9841acaf9b4427bd8de2224294e196",
+    "scripts/build_pocketmd_lite_topk_rows_template_preflight.py": "sha256:15b5808c26ccc005162e3b693f88272ddb83cd696b1f54d0005872ce20294c55",
+    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:dad666c08fff6ec709e535de64fdc41121b7c93de5e19c42f0876d71a44a67c9",
+    "scripts/materialize_pocketmd_lite_topk_rows_from_template.py": "sha256:e3b363e2f0e81014dd306678aca22dba80e950c5b8be0e75d1fcdef93f24623c"
+  },
+  "max_top_k": 20,
+  "out_report_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_template_report.json",
+  "out_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+  "refinement_plan_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json",
+  "reuse_policy": "pocketmd_lite_topk_rows_from_template_materialization_report",
+  "reused_evidence": false,
+  "row_count": 0,
+  "rows_materialized": false,
+  "schema_version": "pocketmd-lite-topk-rows-from-template-materialization.v1",
+  "source_commit_sha": "7f6dcc71a427150a633c18db925a445aadbe4a9b",
+  "status": "template_not_ready",
+  "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+  "template_preflight_status": "operator_rows_completion_required",
+  "template_preflight_summary": {
+    "duplicate_slot_count": 0,
+    "expected_rows_detected": false,
+    "expected_slot_count": 6,
+    "invalid_checksum_count": 0,
+    "invalid_energy_proxy_value_count": 0,
+    "invalid_metric_value_count": 0,
+    "invalid_provenance_ref_count": 0,
+    "missing_energy_proxy_value_count": 12,
+    "missing_expected_slot_count": 0,
+    "missing_header_field_count": 0,
+    "missing_metric_value_count": 42,
+    "missing_receipt_value_count": 24,
+    "missing_required_value_count": 78,
+    "operator_input_source_receipt_blocked_count": 5,
+    "operator_input_source_receipt_requirement_count": 5,
+    "role_receipt_blocked_count": 24,
+    "role_receipt_plan_count": 24,
+    "template_row_count": 6,
+    "template_slot_count": 6,
+    "template_slot_coverage_complete": true,
+    "top_k_template_ready": false,
+    "unexpected_template_slot_count": 0
+  },
+  "template_ready": false
+}

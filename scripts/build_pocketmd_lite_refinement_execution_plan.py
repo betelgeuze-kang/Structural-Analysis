@@ -266,6 +266,7 @@ def _operator_unblock_packet(
         "operator_sequence": [
             "preflight_pocketmd_lite_topk_rows_template",
             "fill_pocketmd_lite_topk_rows_from_template",
+            "materialize_pocketmd_lite_topk_rows_from_template",
             "materialize_pocketmd_lite_operator_intake_from_rows",
             "materialize_pocketmd_lite_topk_survival_report",
             "refresh_pocketmd_lite_refinement_execution_plan",
@@ -327,6 +328,12 @@ def build_pocketmd_lite_refinement_execution_plan(
             "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py "
             f"--out {DEFAULT_ROWS_TEMPLATE_PREFLIGHT} "
             f"--out-md {DEFAULT_ROWS_TEMPLATE_PREFLIGHT_MD}"
+        ),
+        "materialize_rows_from_template": (
+            "python3 scripts/materialize_pocketmd_lite_topk_rows_from_template.py "
+            f"--template {DEFAULT_ROWS_TEMPLATE} --out-rows {rows_out} "
+            f"--out-report {PRODUCTIZATION / 'pocketmd_lite_topk_rows_from_template_report.json'} "
+            "--fail-blocked"
         ),
         "import_rows": (
             "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "

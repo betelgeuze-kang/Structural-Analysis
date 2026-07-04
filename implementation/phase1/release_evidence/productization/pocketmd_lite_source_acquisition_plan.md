@@ -37,8 +37,9 @@
 | 7 | `write_local_min_contact_hbond_clash_uncertainty_rows` |
 | 8 | `attach_row_source_receipts_with_license_url_and_artifact_sha256` |
 | 9 | `write_pocketmd_lite_topk_rows_at_default_dropzone` |
-| 10 | `run_pocketmd_lite_raw_row_importer_and_survival_materializer` |
-| 11 | `refresh_science_actual_closure_from_rows` |
+| 10 | `materialize_completed_template_to_pocketmd_lite_topk_rows` |
+| 11 | `run_pocketmd_lite_raw_row_importer_and_survival_materializer` |
+| 12 | `refresh_science_actual_closure_from_rows` |
 
 ## Phase 4 Completion Audit
 
@@ -182,6 +183,7 @@
 - `write_plan`: `python3 scripts/build_pocketmd_lite_source_acquisition_plan.py`
 - `review_row_template`: `sed -n '1,20p' implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv`
 - `build_row_template_preflight`: `python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md`
+- `materialize_rows_from_template`: `python3 scripts/materialize_pocketmd_lite_topk_rows_from_template.py --template implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_template_report.json --fail-blocked`
 - `build_refinement_execution_plan`: `python3 scripts/build_pocketmd_lite_refinement_execution_plan.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json`
 - `import_rows`: `python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>`
 - `materialize_survival`: `python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked`
