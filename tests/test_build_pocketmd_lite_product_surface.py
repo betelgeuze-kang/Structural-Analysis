@@ -517,6 +517,21 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert handoff["evidence_artifacts"]["refinement_execution_plan"].endswith(
         "pocketmd_lite_refinement_execution_plan.json"
     )
+    assert handoff["evidence_artifacts"][
+        "receipt_bundle_completion_report"
+    ].endswith("pocketmd_lite_topk_rows_from_receipt_bundle_report.json")
+    handoff_receipts = handoff["receipt_bundle_completion_report"]
+    assert handoff_receipts["status"] == "operator_receipts_completion_required"
+    assert handoff_receipts["receipt_count"] == 6
+    assert handoff_receipts["ready_receipt_count"] == 0
+    assert handoff_receipts["incomplete_receipt_count"] == 6
+    assert handoff_receipts["metric_family_completion_action_count"] == 5
+    assert handoff_receipts["metric_family_completion_actions"][0][
+        "metric_family_id"
+    ] == "local_min_survival"
+    assert handoff_receipts["first_incomplete_receipt"]["receipt_ref"].endswith(
+        "pocketmd_lite_case_001/rank_01_refinement_receipt.json"
+    )
     assert handoff["source_acquisition_plan"]["status"] == (
         "operator_acquisition_required"
     )
@@ -847,6 +862,14 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     ]
     assert operator["current_surface_status"]["first_blocked_target"] == (
         "top_k_refinement_operator_intake"
+    )
+    assert operator["receipt_bundle_completion_report"] == handoff_receipts
+    assert operator["input_slots"][0]["receipt_bundle_completion_report"] == (
+        handoff_receipts
+    )
+    assert (
+        "complete all pocketmd_lite_refinement_receipts with real metrics and provenance"
+        in operator["input_slots"][0]["owner_actions"]
     )
     assert operator["materialization_sequence"][0]["step_id"] == (
         "build_pocketmd_lite_source_acquisition_plan"

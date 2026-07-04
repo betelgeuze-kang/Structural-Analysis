@@ -29,6 +29,24 @@
 - `template_preflight_operator_input_source_receipt_blocked_count`: `5`
 - `first_blocked_operator_input_source_receipt`: `source_id`
 
+## Receipt Completion Report
+
+- `artifact`: `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json`
+- `status`: `operator_receipts_completion_required`
+- `ready_receipt_count`: `0`
+- `incomplete_receipt_count`: `6`
+- `unique_missing_required_field_count`: `18`
+- `first_incomplete_receipt`: `operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json`
+- `operator_action`: `complete_pocketmd_lite_refinement_receipts_then_rerun_rows_materialization`
+
+| Metric Family | Criterion | Blocked Receipts | Missing Fields | Next Action |
+|---|---|---|---|---|
+| `local_min_survival` | `local_min_survival_materialized` | `6` | `pre_refinement_energy_proxy`, `post_refinement_energy_proxy`, `local_min_survived` | `fill_metric_family_receipt_fields_for_local_min_survival` |
+| `contact_persistence` | `contact_persistence_materialized` | `6` | `contact_persistence_rate` | `fill_metric_family_receipt_fields_for_contact_persistence` |
+| `h_bond_persistence` | `h_bond_persistence_materialized` | `6` | `h_bond_persistence_rate` | `fill_metric_family_receipt_fields_for_h_bond_persistence` |
+| `clash_relief` | `clash_relief_materialized` | `6` | `clash_count_before`, `clash_count_after` | `fill_metric_family_receipt_fields_for_clash_relief` |
+| `uncertainty` | `uncertainty_summary_materialized` | `6` | `uncertainty_low`, `uncertainty_high` | `fill_metric_family_receipt_fields_for_uncertainty` |
+
 ## Gate Unblock Plan
 
 | Slot | Criteria | Minimum Evidence |

@@ -62,6 +62,9 @@ DEFAULT_SURFACE_OUT = SURFACE_DIR / "pocketmd_lite_science_product_surface.json"
 DEFAULT_SOURCE_ACQUISITION_PLAN_OUT = SOURCE_ACQUISITION_PLAN_DEFAULT_OUT
 DEFAULT_SOURCE_ACQUISITION_PLAN_MD_OUT = SOURCE_ACQUISITION_PLAN_DEFAULT_OUT_MD
 DEFAULT_REFINEMENT_EXECUTION_PLAN_OUT = REFINEMENT_EXECUTION_PLAN_DEFAULT_OUT
+DEFAULT_RECEIPT_BUNDLE_REPORT = (
+    PRODUCTIZATION / "pocketmd_lite_topk_rows_from_receipt_bundle_report.json"
+)
 RAW_ROW_IMPORTER_SCRIPT = Path("scripts/materialize_pocketmd_lite_operator_intake_from_rows.py")
 DEFAULT_ROW_TEMPLATE_DIR = PRODUCTIZATION
 DEFAULT_TOPK_ROW_TEMPLATE_FILENAME = "pocketmd_lite_topk_rows_template.csv"
@@ -303,6 +306,7 @@ def _input_paths() -> list[Path]:
         Path("scripts/build_pocketmd_lite_refinement_execution_plan.py"),
         RAW_ROW_IMPORTER_SCRIPT,
         Path("scripts/materialize_pocketmd_lite_topk_survival_report.py"),
+        DEFAULT_RECEIPT_BUNDLE_REPORT,
     ]
 
 
@@ -313,6 +317,111 @@ def _metadata(*, repo_root: Path, reused_evidence: bool, reuse_policy: str) -> d
         reuse_policy=reuse_policy,
         repo_root=repo_root,
     )
+
+
+def _load_json_artifact(*, repo_root: Path, path: Path) -> dict[str, Any]:
+    resolved = path if path.is_absolute() else repo_root / path
+    if not resolved.exists():
+        return {}
+    try:
+        payload = json.loads(resolved.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _receipt_completion_action(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "case_id": str(row.get("case_id") or ""),
+        "run_key": str(row.get("run_key") or ""),
+        "top_k_rank": row.get("top_k_rank"),
+        "receipt_ref": str(row.get("receipt_ref") or ""),
+        "status": str(row.get("status") or ""),
+        "receipt_status": str(row.get("receipt_status") or ""),
+        "next_action": str(row.get("next_action") or ""),
+        "command_key": str(row.get("command_key") or ""),
+        "missing_receipt_field_count": int(
+            row.get("completion_missing_required_field_count") or 0
+        ),
+    }
+
+
+def _metric_family_completion_action(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "metric_family_id": str(row.get("metric_family_id") or ""),
+        "phase4_criterion_id": str(row.get("phase4_criterion_id") or ""),
+        "product_requirement": str(row.get("product_requirement") or ""),
+        "next_action": str(row.get("next_action") or ""),
+        "command_key": str(row.get("command_key") or ""),
+        "missing_field_occurrence_count": int(
+            row.get("missing_field_occurrence_count") or 0
+        ),
+        "blocked_receipt_count": int(row.get("blocked_receipt_count") or 0),
+        "required_receipt_fields": [
+            str(item) for item in _as_list(row.get("required_receipt_fields")) if str(item)
+        ],
+        "first_blocked_receipt": _as_dict(row.get("first_blocked_receipt")),
+    }
+
+
+def _receipt_bundle_completion_summary(*, repo_root: Path) -> dict[str, Any]:
+    report = _load_json_artifact(
+        repo_root=repo_root,
+        path=DEFAULT_RECEIPT_BUNDLE_REPORT,
+    )
+    if not report:
+        return {
+            "artifact": str(DEFAULT_RECEIPT_BUNDLE_REPORT),
+            "present": False,
+            "status": "missing",
+            "operator_action": "materialize_pocketmd_lite_topk_rows_from_receipt_bundle",
+        }
+    receipt_actions = [
+        _receipt_completion_action(row)
+        for row in _as_list(report.get("receipt_completion_action_plan"))
+        if isinstance(row, dict)
+    ]
+    metric_family_actions = [
+        _metric_family_completion_action(row)
+        for row in _as_list(report.get("receipt_metric_family_completion_plan"))
+        if isinstance(row, dict)
+    ]
+    return {
+        "artifact": str(DEFAULT_RECEIPT_BUNDLE_REPORT),
+        "present": True,
+        "status": str(report.get("status") or ""),
+        "contract_pass": bool(report.get("contract_pass")),
+        "rows_materialized": bool(report.get("rows_materialized")),
+        "row_count": int(report.get("row_count") or 0),
+        "receipt_count": int(report.get("receipt_count") or 0),
+        "ready_receipt_count": int(report.get("ready_receipt_count") or 0),
+        "incomplete_receipt_count": int(report.get("incomplete_receipt_count") or 0),
+        "unique_missing_required_field_count": int(
+            report.get("unique_missing_required_field_count") or 0
+        ),
+        "total_missing_required_field_count": int(
+            report.get("total_missing_required_field_count") or 0
+        ),
+        "receipt_metric_family_count": int(
+            report.get("receipt_metric_family_count") or 0
+        ),
+        "receipt_metric_family_blocked_count": int(
+            report.get("receipt_metric_family_blocked_count") or 0
+        ),
+        "receipt_metric_family_missing_field_occurrence_count": int(
+            report.get("receipt_metric_family_missing_field_occurrence_count") or 0
+        ),
+        "blockers": [str(item) for item in _as_list(report.get("blockers"))],
+        "first_incomplete_receipt": _receipt_completion_action(
+            _as_dict(report.get("first_incomplete_receipt"))
+        ),
+        "receipt_completion_action_count": len(receipt_actions),
+        "receipt_completion_actions": receipt_actions,
+        "metric_family_completion_action_count": len(metric_family_actions),
+        "metric_family_completion_actions": metric_family_actions,
+        "commands": _as_dict(report.get("commands")),
+        "operator_action": "complete_pocketmd_lite_refinement_receipts_then_rerun_rows_materialization",
+    }
 
 
 def _metric_contracts() -> list[dict[str, Any]]:
@@ -1516,6 +1625,9 @@ def build_delivery_handoff(
     source_acquisition_summary = _source_acquisition_plan_summary(
         source_acquisition_plan
     )
+    receipt_completion_summary = _receipt_bundle_completion_summary(
+        repo_root=repo_root
+    )
     return {
         "schema_version": HANDOFF_SCHEMA_VERSION,
         **_metadata(
@@ -1552,6 +1664,7 @@ def build_delivery_handoff(
             "operator_intake_packet_markdown": str(DEFAULT_OPERATOR_INTAKE_MD_OUT),
             "operator_template": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
             "operator_raw_row_importer": str(RAW_ROW_IMPORTER_SCRIPT),
+            "receipt_bundle_completion_report": str(DEFAULT_RECEIPT_BUNDLE_REPORT),
             "science_product_surface": str(DEFAULT_SURFACE_OUT),
         },
         "phase4_exit_gate_reference": {
@@ -1578,6 +1691,7 @@ def build_delivery_handoff(
                 row_template_dir=row_template_dir
             ),
             "source_acquisition_plan": source_acquisition_summary,
+            "receipt_bundle_completion_report": receipt_completion_summary,
             "refinement_execution_plan": source_acquisition_summary[
                 "refinement_execution_plan"
             ],
@@ -1616,6 +1730,7 @@ def build_delivery_handoff(
             row_template_dir=row_template_dir
         ),
         "source_acquisition_plan": source_acquisition_summary,
+        "receipt_bundle_completion_report": receipt_completion_summary,
         "operator_template": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
         "claim_boundary": (
             "This handoff prepares the bounded PocketMD Lite evidence path only. It is "
@@ -1706,6 +1821,9 @@ def build_operator_intake_packet(
     refinement_execution_summary = _refinement_execution_plan_summary(
         refinement_execution_plan
     )
+    receipt_completion_summary = _receipt_bundle_completion_summary(
+        repo_root=repo_root
+    )
     gate_unblock_plan = _operator_gate_unblock_plan(
         required_case_fields=required_case_fields,
         materializer_command=materializer_command,
@@ -1751,6 +1869,7 @@ def build_operator_intake_packet(
         "top_k_policy": contract.get("top_k_policy", {}),
         "source_acquisition_plan": source_acquisition_summary,
         "refinement_execution_plan": refinement_execution_summary,
+        "receipt_bundle_completion_report": receipt_completion_summary,
         "raw_row_importer": raw_row_importer,
         "input_slots": [
             {
@@ -1765,10 +1884,13 @@ def build_operator_intake_packet(
                 "raw_row_importer": raw_row_importer,
                 "source_acquisition_plan": source_acquisition_summary,
                 "refinement_execution_plan": refinement_execution_summary,
+                "receipt_bundle_completion_report": receipt_completion_summary,
                 "template": template,
                 "owner_actions": [
                     "complete_pocketmd_lite_source_acquisition_plan",
                     "build_pocketmd_lite_refinement_execution_plan",
+                    "complete all pocketmd_lite_refinement_receipts with real metrics and provenance",
+                    "rerun materialize_pocketmd_lite_topk_rows_from_receipt_bundle",
                     "attach already-ranked top-k candidate refinement rows",
                     "run materialize_pocketmd_lite_operator_intake_from_rows for CSV/TSV/JSON rows",
                     "fill local_min_survived as a boolean for every candidate",
@@ -2300,6 +2422,41 @@ def _operator_intake_markdown(payload: dict[str, Any]) -> str:
                     "- `first_blocked_operator_input_source_receipt`: "
                     f"`{first_blocked_source_receipt.get('field', '')}`",
                 ]
+            )
+    receipt_completion = _as_dict(payload.get("receipt_bundle_completion_report"))
+    if receipt_completion:
+        first_receipt = _as_dict(receipt_completion.get("first_incomplete_receipt"))
+        lines.extend(
+            [
+                "",
+                "## Receipt Completion Report",
+                "",
+                f"- `artifact`: `{receipt_completion.get('artifact', '')}`",
+                f"- `status`: `{receipt_completion.get('status', '')}`",
+                f"- `ready_receipt_count`: `{receipt_completion.get('ready_receipt_count', 0)}`",
+                f"- `incomplete_receipt_count`: `{receipt_completion.get('incomplete_receipt_count', 0)}`",
+                "- `unique_missing_required_field_count`: "
+                f"`{receipt_completion.get('unique_missing_required_field_count', 0)}`",
+                f"- `first_incomplete_receipt`: `{first_receipt.get('receipt_ref', '')}`",
+                "- `operator_action`: "
+                f"`{receipt_completion.get('operator_action', '')}`",
+                "",
+                "| Metric Family | Criterion | Blocked Receipts | Missing Fields | Next Action |",
+                "|---|---|---|---|---|",
+            ]
+        )
+        for row in _as_list(receipt_completion.get("metric_family_completion_actions")):
+            if not isinstance(row, dict):
+                continue
+            fields = ", ".join(
+                f"`{field}`" for field in _as_list(row.get("required_receipt_fields"))
+            )
+            lines.append(
+                f"| `{row.get('metric_family_id', '')}` | "
+                f"`{row.get('phase4_criterion_id', '')}` | "
+                f"`{row.get('blocked_receipt_count', 0)}` | "
+                f"{fields or '`none`'} | "
+                f"`{row.get('next_action', '')}` |"
             )
     lines.extend(["", "## Gate Unblock Plan", "", "| Slot | Criteria | Minimum Evidence |"])
     lines.append("|---|---|---|")
