@@ -487,6 +487,18 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     )
     assert public_manifest_action["detected_manifest_artifact_count"] == 1
     assert public_manifest_action["input_manifest_load_errors"] == []
+    assert public_manifest_action["source_archive_operator_artifact"] == (
+        "<CASF-2016.tar.gz>"
+    )
+    assert public_manifest_action["source_archive_extraction_command"].startswith(
+        "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py "
+        "--archive <CASF-2016.tar.gz>"
+    )
+    assert public_manifest_action[
+        "source_archive_extraction_report_artifact"
+    ].endswith(
+        "public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json"
+    )
     assert public_manifest_action["template_safety_policy"][
         "template_is_not_evidence"
     ] is True
@@ -1150,6 +1162,9 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     ) in markdown
     assert "`recommended_template_dropzone_is_supported_candidate_path`: `True`" in markdown
     assert "`input_manifest_load_errors`: `none`" in markdown
+    assert "materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py" in markdown
+    assert "`source_archive_operator_artifact`: `<CASF-2016.tar.gz>`" in markdown
+    assert "public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json" in markdown
     assert "`do_not_treat_blank_prepared_checksums_as_ready`: `True`" in markdown
     assert "### Vina/GNINA Adapter Row Preflight Action" in markdown
     assert "public_benchmark_vina_gnina_rows_template_preflight.json" in markdown
