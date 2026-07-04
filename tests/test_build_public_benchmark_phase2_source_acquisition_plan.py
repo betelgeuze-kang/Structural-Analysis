@@ -778,6 +778,20 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert runtime_action["input_manifest_template_preflight_artifact"].endswith(
         "public_benchmark_vina_gnina_input_manifest_template_preflight.json"
     )
+    assert runtime_action["input_manifest_template_preflight_status"] == (
+        "operator_manifest_completion_required"
+    )
+    assert runtime_action["input_manifest_template_manifest_ready"] is False
+    manifest_preflight = runtime_action["input_manifest_template_preflight_summary"]
+    assert manifest_preflight["template_row_count"] == 12
+    assert manifest_preflight["template_case_coverage_complete"] is True
+    assert manifest_preflight["invalid_source_receipt_count"] == 0
+    assert manifest_preflight["unsupported_benchmark_field_count"] == 0
+    assert manifest_preflight["missing_local_file_count"] == 48
+    assert manifest_preflight["missing_receipt_ref_count"] == 60
+    assert manifest_preflight["first_blocked_case_preflight"]["case_id"] == (
+        "casf2016_4llx"
+    )
     assert runtime_action["rows_template_preflight_artifact"].endswith(
         "public_benchmark_vina_gnina_rows_template_preflight.json"
     )

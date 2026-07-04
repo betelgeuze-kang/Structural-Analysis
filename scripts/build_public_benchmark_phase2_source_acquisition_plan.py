@@ -2012,6 +2012,25 @@ def _vina_gnina_runtime_action_packet(
         "input_manifest_template_preflight_artifact": str(
             unblock.get("input_manifest_template_preflight_artifact") or ""
         ),
+        "input_manifest_template_preflight_status": str(
+            unblock.get("input_manifest_template_preflight_status")
+            or vina_gnina_runtime_readiness_summary.get(
+                "input_manifest_template_preflight_status"
+            )
+            or ""
+        ),
+        "input_manifest_template_manifest_ready": bool(
+            unblock.get("input_manifest_template_manifest_ready")
+            or vina_gnina_runtime_readiness_summary.get(
+                "input_manifest_template_manifest_ready"
+            )
+        ),
+        "input_manifest_template_preflight_summary": _as_dict(
+            unblock.get("input_manifest_template_preflight_summary")
+            or vina_gnina_runtime_readiness_summary.get(
+                "input_manifest_template_preflight"
+            )
+        ),
         "rows_template_artifact": str(
             unblock.get("rows_template_artifact")
             or DEFAULT_VINA_GNINA_ROWS_TEMPLATE

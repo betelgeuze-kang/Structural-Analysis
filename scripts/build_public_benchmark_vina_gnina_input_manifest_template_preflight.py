@@ -21,6 +21,12 @@ from build_public_benchmark_vina_gnina_execution_plan import (  # noqa: E402
     DEFAULT_OUT as DEFAULT_EXECUTION_PLAN,
     INPUT_MANIFEST_CASE_FIELDS,
 )
+from materialize_public_benchmark_vina_gnina_comparison_adapter import (  # noqa: E402
+    PLACEHOLDER_PROVENANCE_PREFIXES,
+    PLACEHOLDER_SOURCE_TEXT_MARKERS,
+    SOURCE_CHECKSUM_PATTERN,
+    SUPPORTED_BENCHMARK_SPLITS,
+)
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 
 
@@ -48,6 +54,7 @@ CHECKSUM_FIELDS = (
     "prepared_receptor_checksum",
     "prepared_ligand_checksum",
 )
+SOURCE_RECEIPT_FIELDS = ("source_license_or_accession", "provenance_ref")
 RECEIPT_REF_FIELDS = (
     "vina_config_ref",
     "gnina_config_ref",
@@ -60,6 +67,10 @@ LOCAL_FILE_LABELS = {
     "reference_ligand_path": "source_reference_ligand",
     "prepared_receptor_path": "prepared_receptor",
     "prepared_ligand_path": "prepared_ligand",
+}
+SOURCE_FAMILY_POLICY = {
+    "accepted_markers": ["casf", "pdbbind"],
+    "placeholder_markers_rejected": True,
 }
 
 
@@ -114,13 +125,92 @@ def _checksum_status(value: str) -> dict[str, Any]:
             "valid_sha256": False,
             "blocker": "checksum_missing",
         }
-    if not value.lower().startswith("sha256:") or len(value.split(":", 1)[-1]) != 64:
+    if not SOURCE_CHECKSUM_PATTERN.fullmatch(value):
         return {
             "present": True,
             "valid_sha256": False,
             "blocker": "checksum_invalid",
         }
+    digest = value.split(":", 1)[1].lower()
+    if len(set(digest)) == 1:
+        return {
+            "present": True,
+            "valid_sha256": False,
+            "blocker": "checksum_placeholder_digest",
+        }
     return {"present": True, "valid_sha256": True, "blocker": ""}
+
+
+def _contains_placeholder_marker(value: str) -> bool:
+    lowered = value.lower()
+    return any(marker in lowered for marker in PLACEHOLDER_SOURCE_TEXT_MARKERS)
+
+
+def _has_placeholder_provenance_prefix(value: str) -> bool:
+    lowered = value.lower()
+    return any(lowered.startswith(prefix) for prefix in PLACEHOLDER_PROVENANCE_PREFIXES)
+
+
+def _source_receipt_status(field: str, value: str) -> dict[str, Any]:
+    if not value:
+        return {
+            "field": field,
+            "present": False,
+            "status": "missing",
+            "blocker": "source_receipt_missing",
+        }
+    if _contains_placeholder_marker(value):
+        return {
+            "field": field,
+            "present": True,
+            "status": "placeholder",
+            "blocker": "source_receipt_placeholder",
+        }
+    if field == "provenance_ref" and _has_placeholder_provenance_prefix(value):
+        return {
+            "field": field,
+            "present": True,
+            "status": "placeholder",
+            "blocker": "source_receipt_placeholder",
+        }
+    return {
+        "field": field,
+        "present": True,
+        "status": "ready",
+        "blocker": "",
+    }
+
+
+def _benchmark_split_status(value: str) -> dict[str, Any]:
+    if not value:
+        return {"present": False, "valid": False, "blocker": "benchmark_split_missing"}
+    valid = value in SUPPORTED_BENCHMARK_SPLITS
+    return {
+        "present": True,
+        "valid": valid,
+        "blocker": "" if valid else "benchmark_split_unsupported",
+    }
+
+
+def _source_family_status(value: str) -> dict[str, Any]:
+    if not value:
+        return {"present": False, "valid": False, "blocker": "source_family_missing"}
+    lowered = value.lower()
+    if _contains_placeholder_marker(value):
+        return {
+            "present": True,
+            "valid": False,
+            "blocker": "source_family_placeholder",
+        }
+    accepted_markers = {
+        str(marker) for marker in SOURCE_FAMILY_POLICY["accepted_markers"]
+    }
+    valid = any(marker in lowered for marker in accepted_markers)
+    return {
+        "present": True,
+        "valid": valid,
+        "blocker": "" if valid else "source_family_unsupported",
+    }
 
 
 def _local_file_status(repo_root: Path, path_value: str, checksum_value: str) -> dict[str, Any]:
@@ -216,6 +306,26 @@ def _row_preflight(repo_root: Path, row: dict[str, str]) -> dict[str, Any]:
     missing_required_fields = [
         field for field in MANIFEST_REQUIRED_FIELDS if not str(row.get(field) or "")
     ]
+    benchmark_statuses = {
+        "benchmark_split": _benchmark_split_status(
+            str(row.get("benchmark_split") or "")
+        ),
+        "source_family": _source_family_status(str(row.get("source_family") or "")),
+    }
+    unsupported_benchmark_fields = [
+        field
+        for field, status in benchmark_statuses.items()
+        if status["present"] and str(status["blocker"] or "")
+    ]
+    source_receipt_statuses = {
+        field: _source_receipt_status(field, str(row.get(field) or ""))
+        for field in SOURCE_RECEIPT_FIELDS
+    }
+    invalid_source_receipt_fields = [
+        field
+        for field, status in source_receipt_statuses.items()
+        if status["present"] and str(status["blocker"] or "")
+    ]
     checksum_statuses = {
         field: _checksum_status(str(row.get(field) or ""))
         for field in CHECKSUM_FIELDS
@@ -250,6 +360,10 @@ def _row_preflight(repo_root: Path, row: dict[str, str]) -> dict[str, Any]:
     blockers = []
     if missing_required_fields:
         blockers.append("manifest_required_fields_missing")
+    if unsupported_benchmark_fields:
+        blockers.append("manifest_benchmark_identity_invalid")
+    if invalid_source_receipt_fields:
+        blockers.append("manifest_source_receipts_invalid")
     if invalid_checksum_fields:
         blockers.append("manifest_checksum_fields_invalid")
     if missing_local_file_fields:
@@ -315,6 +429,10 @@ def _row_preflight(repo_root: Path, row: dict[str, str]) -> dict[str, Any]:
         "complex_id": str(row.get("complex_id") or ""),
         "status": "operator_completion_required" if blockers else "ready",
         "missing_required_fields": missing_required_fields,
+        "unsupported_benchmark_fields": unsupported_benchmark_fields,
+        "invalid_source_receipt_fields": invalid_source_receipt_fields,
+        "benchmark_statuses": benchmark_statuses,
+        "source_receipt_statuses": source_receipt_statuses,
         "invalid_checksum_fields": invalid_checksum_fields,
         "missing_local_file_fields": missing_local_file_fields,
         "missing_receipt_ref_fields": missing_receipt_ref_fields,
@@ -378,6 +496,12 @@ def build_public_benchmark_vina_gnina_input_manifest_template_preflight(
     invalid_checksum_count = sum(
         len(row["invalid_checksum_fields"]) for row in row_preflights
     )
+    invalid_source_receipt_count = sum(
+        len(row["invalid_source_receipt_fields"]) for row in row_preflights
+    )
+    unsupported_benchmark_field_count = sum(
+        len(row["unsupported_benchmark_fields"]) for row in row_preflights
+    )
     missing_local_file_count = sum(
         len(row["missing_local_file_fields"]) for row in row_preflights
     )
@@ -398,6 +522,8 @@ def build_public_benchmark_vina_gnina_input_manifest_template_preflight(
     )
     manifest_ready = bool(rows) and template_case_coverage_complete and not (
         missing_required_value_count
+        or unsupported_benchmark_field_count
+        or invalid_source_receipt_count
         or invalid_checksum_count
         or missing_local_file_count
         or missing_receipt_ref_count
@@ -437,6 +563,9 @@ def build_public_benchmark_vina_gnina_input_manifest_template_preflight(
         "required_fields": list(MANIFEST_REQUIRED_FIELDS),
         "local_file_fields": list(LOCAL_FILE_FIELDS),
         "checksum_fields": list(CHECKSUM_FIELDS),
+        "source_receipt_fields": list(SOURCE_RECEIPT_FIELDS),
+        "source_family_policy": SOURCE_FAMILY_POLICY,
+        "supported_benchmark_splits": list(SUPPORTED_BENCHMARK_SPLITS),
         "receipt_ref_fields": list(RECEIPT_REF_FIELDS),
         "header_fields": header_fields,
         "expected_case_ids": expected_case_ids,
@@ -482,6 +611,8 @@ def build_public_benchmark_vina_gnina_input_manifest_template_preflight(
             "unexpected_template_case_count": len(unexpected_template_case_ids),
             "duplicate_case_id_count": len(duplicate_case_ids),
             "missing_required_value_count": missing_required_value_count,
+            "unsupported_benchmark_field_count": unsupported_benchmark_field_count,
+            "invalid_source_receipt_count": invalid_source_receipt_count,
             "invalid_checksum_count": invalid_checksum_count,
             "missing_local_file_count": missing_local_file_count,
             "missing_receipt_ref_count": missing_receipt_ref_count,
@@ -514,6 +645,8 @@ def render_public_benchmark_vina_gnina_input_manifest_template_preflight_markdow
         f"- `manifest_ready`: `{payload['manifest_ready']}`",
         f"- `template_row_count`: `{summary['template_row_count']}`",
         f"- `missing_required_value_count`: `{summary['missing_required_value_count']}`",
+        f"- `unsupported_benchmark_field_count`: `{summary['unsupported_benchmark_field_count']}`",
+        f"- `invalid_source_receipt_count`: `{summary['invalid_source_receipt_count']}`",
         f"- `missing_local_file_count`: `{summary['missing_local_file_count']}`",
         f"- `missing_receipt_ref_count`: `{summary['missing_receipt_ref_count']}`",
         f"- `source_file_missing_count`: `{summary['source_file_missing_count']}`",

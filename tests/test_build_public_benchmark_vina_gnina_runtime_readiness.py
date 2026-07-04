@@ -334,6 +334,9 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "first_blocked_case_input_case_id": "",
         "first_blocked_engine_run_case_id": "casf2016_1abc",
         "first_blocked_engine_run_engine_id": "vina",
+        "input_manifest_template_invalid_source_receipt_count": 0,
+        "input_manifest_template_manifest_ready": False,
+        "input_manifest_template_preflight_status": "missing",
         "missing_engine_count": 2,
         "operator_execution_ready": False,
         "ready_engine_run_slot_count": 0,
@@ -371,6 +374,30 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_input_manifest_template_preflight.json"
     )
+    assert unblock["input_manifest_template_preflight_status"] == "missing"
+    assert unblock["input_manifest_template_manifest_ready"] is False
+    assert unblock["input_manifest_template_preflight_summary"] == {
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_vina_gnina_input_manifest_template_preflight.json"
+        ),
+        "first_blocked_case_preflight": {},
+        "invalid_checksum_count": 0,
+        "invalid_source_receipt_count": 0,
+        "manifest_ready": False,
+        "markdown_artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_vina_gnina_input_manifest_template_preflight.md"
+        ),
+        "missing_local_file_count": 0,
+        "missing_receipt_ref_count": 0,
+        "missing_required_value_count": 0,
+        "present": False,
+        "status": "missing",
+        "template_case_coverage_complete": False,
+        "template_row_count": 0,
+        "unsupported_benchmark_field_count": 0,
+    }
     assert unblock["rows_template_artifact"] == (
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_rows_template.csv"

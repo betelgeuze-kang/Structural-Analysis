@@ -548,11 +548,119 @@ def _case_input_unblock_slots(
     return list(slots_by_case.values())
 
 
+def _first_blocked_preflight_row(rows: Any) -> dict[str, Any]:
+    if not isinstance(rows, list):
+        return {}
+    for row in rows:
+        if isinstance(row, dict) and row.get("status") != "ready":
+            return {
+                "case_id": str(row.get("case_id") or ""),
+                "complex_id": str(row.get("complex_id") or ""),
+                "status": str(row.get("status") or ""),
+                "missing_required_fields": [
+                    str(item)
+                    for item in row.get("missing_required_fields", [])
+                    if str(item)
+                ]
+                if isinstance(row.get("missing_required_fields"), list)
+                else [],
+                "unsupported_benchmark_fields": [
+                    str(item)
+                    for item in row.get("unsupported_benchmark_fields", [])
+                    if str(item)
+                ]
+                if isinstance(row.get("unsupported_benchmark_fields"), list)
+                else [],
+                "invalid_source_receipt_fields": [
+                    str(item)
+                    for item in row.get("invalid_source_receipt_fields", [])
+                    if str(item)
+                ]
+                if isinstance(row.get("invalid_source_receipt_fields"), list)
+                else [],
+                "missing_local_file_fields": [
+                    str(item)
+                    for item in row.get("missing_local_file_fields", [])
+                    if str(item)
+                ]
+                if isinstance(row.get("missing_local_file_fields"), list)
+                else [],
+                "missing_receipt_ref_fields": [
+                    str(item)
+                    for item in row.get("missing_receipt_ref_fields", [])
+                    if str(item)
+                ]
+                if isinstance(row.get("missing_receipt_ref_fields"), list)
+                else [],
+                "blockers": [
+                    str(item) for item in row.get("blockers", []) if str(item)
+                ]
+                if isinstance(row.get("blockers"), list)
+                else [],
+            }
+    return {}
+
+
+def _input_manifest_template_preflight_summary(repo_root: Path) -> dict[str, Any]:
+    payload = _load_json(repo_root, DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT)
+    if not payload:
+        return {
+            "present": False,
+            "artifact": str(DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT),
+            "markdown_artifact": str(DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT_MD),
+            "status": "missing",
+            "manifest_ready": False,
+            "template_row_count": 0,
+            "template_case_coverage_complete": False,
+            "missing_required_value_count": 0,
+            "unsupported_benchmark_field_count": 0,
+            "invalid_source_receipt_count": 0,
+            "invalid_checksum_count": 0,
+            "missing_local_file_count": 0,
+            "missing_receipt_ref_count": 0,
+            "first_blocked_case_preflight": {},
+        }
+    summary = payload.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+    return {
+        "present": True,
+        "artifact": str(DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT),
+        "markdown_artifact": str(DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT_MD),
+        "status": str(payload.get("status") or ""),
+        "manifest_ready": bool(payload.get("manifest_ready")),
+        "template_row_count": int(summary.get("template_row_count") or 0),
+        "template_case_coverage_complete": bool(
+            summary.get("template_case_coverage_complete")
+        ),
+        "missing_required_value_count": int(
+            summary.get("missing_required_value_count") or 0
+        ),
+        "unsupported_benchmark_field_count": int(
+            summary.get("unsupported_benchmark_field_count") or 0
+        ),
+        "invalid_source_receipt_count": int(
+            summary.get("invalid_source_receipt_count") or 0
+        ),
+        "invalid_checksum_count": int(summary.get("invalid_checksum_count") or 0),
+        "missing_local_file_count": int(
+            summary.get("missing_local_file_count") or 0
+        ),
+        "missing_receipt_ref_count": int(
+            summary.get("missing_receipt_ref_count") or 0
+        ),
+        "first_blocked_case_preflight": _first_blocked_preflight_row(
+            payload.get("case_preflight_rows")
+        ),
+    }
+
+
 def _operator_unblock_packet(
     *,
     engine_run_slots: list[dict[str, Any]],
     current_engine_execution_statuses: list[dict[str, Any]],
     row_status: dict[str, Any],
+    input_manifest_template_preflight_summary: dict[str, Any],
     ready_engine_run_slot_count: int,
     required_engine_run_count: int,
     runtime_ready: bool,
@@ -590,6 +698,15 @@ def _operator_unblock_packet(
         ),
         "input_manifest_template_preflight_markdown_artifact": str(
             DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT_MD
+        ),
+        "input_manifest_template_preflight_status": str(
+            input_manifest_template_preflight_summary.get("status") or ""
+        ),
+        "input_manifest_template_manifest_ready": bool(
+            input_manifest_template_preflight_summary.get("manifest_ready")
+        ),
+        "input_manifest_template_preflight_summary": (
+            input_manifest_template_preflight_summary
         ),
         "expected_rows_artifact": str(DEFAULT_VINA_GNINA_ROWS),
         "rows_template_artifact": str(DEFAULT_VINA_GNINA_ROWS_TEMPLATE),
@@ -706,6 +823,9 @@ def build_vina_gnina_runtime_readiness(
     }
     row_status = _row_candidate_status(repo_root, vina_gnina_rows_path)
     engine_run_slots = _engine_run_slots(execution_plan, engine_status_by_id)
+    input_manifest_template_preflight = _input_manifest_template_preflight_summary(
+        repo_root
+    )
     execution_plan_ready = bool(execution_plan.get("execution_plan_ready"))
     all_engines_available = all(
         bool(row.get("available")) for row in current_engine_execution_statuses
@@ -760,6 +880,7 @@ def build_vina_gnina_runtime_readiness(
         engine_run_slots=engine_run_slots,
         current_engine_execution_statuses=current_engine_execution_statuses,
         row_status=row_status,
+        input_manifest_template_preflight_summary=input_manifest_template_preflight,
         ready_engine_run_slot_count=ready_engine_run_slot_count,
         required_engine_run_count=required_engine_run_count,
         runtime_ready=runtime_ready,
@@ -798,6 +919,7 @@ def build_vina_gnina_runtime_readiness(
                 Path("scripts/build_public_benchmark_vina_gnina_runtime_readiness.py"),
                 execution_plan_path,
                 Path("scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py"),
+                DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT,
                 Path("scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py"),
                 Path("scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"),
             ],
@@ -824,6 +946,7 @@ def build_vina_gnina_runtime_readiness(
             if not row.get("available")
         ],
         "row_candidate_status": row_status,
+        "input_manifest_template_preflight": input_manifest_template_preflight,
         "engine_run_slots": engine_run_slots,
         "operator_unblock_packet": operator_unblock_packet,
         "required_engine_run_count": required_engine_run_count,
@@ -914,6 +1037,18 @@ def build_vina_gnina_runtime_readiness(
             "selected_row_count": int(row_status.get("selected_row_count") or 0),
             "adapter_case_count": int(row_status.get("adapter_case_count") or 0),
             "adapter_row_preflight_status": str(row_status.get("status") or ""),
+            "input_manifest_template_preflight_status": str(
+                input_manifest_template_preflight.get("status") or ""
+            ),
+            "input_manifest_template_manifest_ready": bool(
+                input_manifest_template_preflight.get("manifest_ready")
+            ),
+            "input_manifest_template_invalid_source_receipt_count": int(
+                input_manifest_template_preflight.get(
+                    "invalid_source_receipt_count"
+                )
+                or 0
+            ),
             "blocker_count": len(blockers),
         },
         "claim_boundary": (

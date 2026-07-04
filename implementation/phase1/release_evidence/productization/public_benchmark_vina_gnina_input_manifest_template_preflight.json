@@ -2,6 +2,18 @@
   "case_preflight_row_count": 12,
   "case_preflight_rows": [
     {
+      "benchmark_statuses": {
+        "benchmark_split": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        },
+        "source_family": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        }
+      },
       "blockers": [
         "manifest_required_fields_missing",
         "manifest_local_files_missing_or_unverified",
@@ -37,6 +49,7 @@
       },
       "complex_id": "4llx",
       "invalid_checksum_fields": [],
+      "invalid_source_receipt_fields": [],
       "local_file_requirements": [
         {
           "blocker": "path_not_found",
@@ -239,9 +252,36 @@
           "status": "local_ref_not_found"
         }
       },
-      "status": "operator_completion_required"
+      "source_receipt_statuses": {
+        "provenance_ref": {
+          "blocker": "",
+          "field": "provenance_ref",
+          "present": true,
+          "status": "ready"
+        },
+        "source_license_or_accession": {
+          "blocker": "",
+          "field": "source_license_or_accession",
+          "present": true,
+          "status": "ready"
+        }
+      },
+      "status": "operator_completion_required",
+      "unsupported_benchmark_fields": []
     },
     {
+      "benchmark_statuses": {
+        "benchmark_split": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        },
+        "source_family": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        }
+      },
       "blockers": [
         "manifest_required_fields_missing",
         "manifest_local_files_missing_or_unverified",
@@ -277,6 +317,7 @@
       },
       "complex_id": "5c28",
       "invalid_checksum_fields": [],
+      "invalid_source_receipt_fields": [],
       "local_file_requirements": [
         {
           "blocker": "path_not_found",
@@ -479,9 +520,36 @@
           "status": "local_ref_not_found"
         }
       },
-      "status": "operator_completion_required"
+      "source_receipt_statuses": {
+        "provenance_ref": {
+          "blocker": "",
+          "field": "provenance_ref",
+          "present": true,
+          "status": "ready"
+        },
+        "source_license_or_accession": {
+          "blocker": "",
+          "field": "source_license_or_accession",
+          "present": true,
+          "status": "ready"
+        }
+      },
+      "status": "operator_completion_required",
+      "unsupported_benchmark_fields": []
     },
     {
+      "benchmark_statuses": {
+        "benchmark_split": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        },
+        "source_family": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        }
+      },
       "blockers": [
         "manifest_required_fields_missing",
         "manifest_local_files_missing_or_unverified",
@@ -517,6 +585,7 @@
       },
       "complex_id": "3uuo",
       "invalid_checksum_fields": [],
+      "invalid_source_receipt_fields": [],
       "local_file_requirements": [
         {
           "blocker": "path_not_found",
@@ -719,9 +788,36 @@
           "status": "local_ref_not_found"
         }
       },
-      "status": "operator_completion_required"
+      "source_receipt_statuses": {
+        "provenance_ref": {
+          "blocker": "",
+          "field": "provenance_ref",
+          "present": true,
+          "status": "ready"
+        },
+        "source_license_or_accession": {
+          "blocker": "",
+          "field": "source_license_or_accession",
+          "present": true,
+          "status": "ready"
+        }
+      },
+      "status": "operator_completion_required",
+      "unsupported_benchmark_fields": []
     },
     {
+      "benchmark_statuses": {
+        "benchmark_split": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        },
+        "source_family": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        }
+      },
       "blockers": [
         "manifest_required_fields_missing",
         "manifest_local_files_missing_or_unverified",
@@ -757,6 +853,7 @@
       },
       "complex_id": "3ui7",
       "invalid_checksum_fields": [],
+      "invalid_source_receipt_fields": [],
       "local_file_requirements": [
         {
           "blocker": "path_not_found",
@@ -959,9 +1056,36 @@
           "status": "local_ref_not_found"
         }
       },
-      "status": "operator_completion_required"
+      "source_receipt_statuses": {
+        "provenance_ref": {
+          "blocker": "",
+          "field": "provenance_ref",
+          "present": true,
+          "status": "ready"
+        },
+        "source_license_or_accession": {
+          "blocker": "",
+          "field": "source_license_or_accession",
+          "present": true,
+          "status": "ready"
+        }
+      },
+      "status": "operator_completion_required",
+      "unsupported_benchmark_fields": []
     },
     {
+      "benchmark_statuses": {
+        "benchmark_split": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        },
+        "source_family": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        }
+      },
       "blockers": [
         "manifest_required_fields_missing",
         "manifest_local_files_missing_or_unverified",
@@ -997,6 +1121,7 @@
       },
       "complex_id": "5c2h",
       "invalid_checksum_fields": [],
+      "invalid_source_receipt_fields": [],
       "local_file_requirements": [
         {
           "blocker": "path_not_found",
@@ -1199,9 +1324,36 @@
           "status": "local_ref_not_found"
         }
       },
-      "status": "operator_completion_required"
+      "source_receipt_statuses": {
+        "provenance_ref": {
+          "blocker": "",
+          "field": "provenance_ref",
+          "present": true,
+          "status": "ready"
+        },
+        "source_license_or_accession": {
+          "blocker": "",
+          "field": "source_license_or_accession",
+          "present": true,
+          "status": "ready"
+        }
+      },
+      "status": "operator_completion_required",
+      "unsupported_benchmark_fields": []
     },
     {
+      "benchmark_statuses": {
+        "benchmark_split": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        },
+        "source_family": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        }
+      },
       "blockers": [
         "manifest_required_fields_missing",
         "manifest_local_files_missing_or_unverified",
@@ -1237,6 +1389,7 @@
       },
       "complex_id": "2v00",
       "invalid_checksum_fields": [],
+      "invalid_source_receipt_fields": [],
       "local_file_requirements": [
         {
           "blocker": "path_not_found",
@@ -1439,9 +1592,36 @@
           "status": "local_ref_not_found"
         }
       },
-      "status": "operator_completion_required"
+      "source_receipt_statuses": {
+        "provenance_ref": {
+          "blocker": "",
+          "field": "provenance_ref",
+          "present": true,
+          "status": "ready"
+        },
+        "source_license_or_accession": {
+          "blocker": "",
+          "field": "source_license_or_accession",
+          "present": true,
+          "status": "ready"
+        }
+      },
+      "status": "operator_completion_required",
+      "unsupported_benchmark_fields": []
     },
     {
+      "benchmark_statuses": {
+        "benchmark_split": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        },
+        "source_family": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        }
+      },
       "blockers": [
         "manifest_required_fields_missing",
         "manifest_local_files_missing_or_unverified",
@@ -1477,6 +1657,7 @@
       },
       "complex_id": "3wz8",
       "invalid_checksum_fields": [],
+      "invalid_source_receipt_fields": [],
       "local_file_requirements": [
         {
           "blocker": "path_not_found",
@@ -1679,9 +1860,36 @@
           "status": "local_ref_not_found"
         }
       },
-      "status": "operator_completion_required"
+      "source_receipt_statuses": {
+        "provenance_ref": {
+          "blocker": "",
+          "field": "provenance_ref",
+          "present": true,
+          "status": "ready"
+        },
+        "source_license_or_accession": {
+          "blocker": "",
+          "field": "source_license_or_accession",
+          "present": true,
+          "status": "ready"
+        }
+      },
+      "status": "operator_completion_required",
+      "unsupported_benchmark_fields": []
     },
     {
+      "benchmark_statuses": {
+        "benchmark_split": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        },
+        "source_family": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        }
+      },
       "blockers": [
         "manifest_required_fields_missing",
         "manifest_local_files_missing_or_unverified",
@@ -1717,6 +1925,7 @@
       },
       "complex_id": "3pww",
       "invalid_checksum_fields": [],
+      "invalid_source_receipt_fields": [],
       "local_file_requirements": [
         {
           "blocker": "path_not_found",
@@ -1919,9 +2128,36 @@
           "status": "local_ref_not_found"
         }
       },
-      "status": "operator_completion_required"
+      "source_receipt_statuses": {
+        "provenance_ref": {
+          "blocker": "",
+          "field": "provenance_ref",
+          "present": true,
+          "status": "ready"
+        },
+        "source_license_or_accession": {
+          "blocker": "",
+          "field": "source_license_or_accession",
+          "present": true,
+          "status": "ready"
+        }
+      },
+      "status": "operator_completion_required",
+      "unsupported_benchmark_fields": []
     },
     {
+      "benchmark_statuses": {
+        "benchmark_split": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        },
+        "source_family": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        }
+      },
       "blockers": [
         "manifest_required_fields_missing",
         "manifest_local_files_missing_or_unverified",
@@ -1957,6 +2193,7 @@
       },
       "complex_id": "3prs",
       "invalid_checksum_fields": [],
+      "invalid_source_receipt_fields": [],
       "local_file_requirements": [
         {
           "blocker": "path_not_found",
@@ -2159,9 +2396,36 @@
           "status": "local_ref_not_found"
         }
       },
-      "status": "operator_completion_required"
+      "source_receipt_statuses": {
+        "provenance_ref": {
+          "blocker": "",
+          "field": "provenance_ref",
+          "present": true,
+          "status": "ready"
+        },
+        "source_license_or_accession": {
+          "blocker": "",
+          "field": "source_license_or_accession",
+          "present": true,
+          "status": "ready"
+        }
+      },
+      "status": "operator_completion_required",
+      "unsupported_benchmark_fields": []
     },
     {
+      "benchmark_statuses": {
+        "benchmark_split": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        },
+        "source_family": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        }
+      },
       "blockers": [
         "manifest_required_fields_missing",
         "manifest_local_files_missing_or_unverified",
@@ -2197,6 +2461,7 @@
       },
       "complex_id": "3uri",
       "invalid_checksum_fields": [],
+      "invalid_source_receipt_fields": [],
       "local_file_requirements": [
         {
           "blocker": "path_not_found",
@@ -2399,9 +2664,36 @@
           "status": "local_ref_not_found"
         }
       },
-      "status": "operator_completion_required"
+      "source_receipt_statuses": {
+        "provenance_ref": {
+          "blocker": "",
+          "field": "provenance_ref",
+          "present": true,
+          "status": "ready"
+        },
+        "source_license_or_accession": {
+          "blocker": "",
+          "field": "source_license_or_accession",
+          "present": true,
+          "status": "ready"
+        }
+      },
+      "status": "operator_completion_required",
+      "unsupported_benchmark_fields": []
     },
     {
+      "benchmark_statuses": {
+        "benchmark_split": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        },
+        "source_family": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        }
+      },
       "blockers": [
         "manifest_required_fields_missing",
         "manifest_local_files_missing_or_unverified",
@@ -2437,6 +2729,7 @@
       },
       "complex_id": "4m0z",
       "invalid_checksum_fields": [],
+      "invalid_source_receipt_fields": [],
       "local_file_requirements": [
         {
           "blocker": "path_not_found",
@@ -2639,9 +2932,36 @@
           "status": "local_ref_not_found"
         }
       },
-      "status": "operator_completion_required"
+      "source_receipt_statuses": {
+        "provenance_ref": {
+          "blocker": "",
+          "field": "provenance_ref",
+          "present": true,
+          "status": "ready"
+        },
+        "source_license_or_accession": {
+          "blocker": "",
+          "field": "source_license_or_accession",
+          "present": true,
+          "status": "ready"
+        }
+      },
+      "status": "operator_completion_required",
+      "unsupported_benchmark_fields": []
     },
     {
+      "benchmark_statuses": {
+        "benchmark_split": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        },
+        "source_family": {
+          "blocker": "",
+          "present": true,
+          "valid": true
+        }
+      },
       "blockers": [
         "manifest_required_fields_missing",
         "manifest_local_files_missing_or_unverified",
@@ -2677,6 +2997,7 @@
       },
       "complex_id": "4m0y",
       "invalid_checksum_fields": [],
+      "invalid_source_receipt_fields": [],
       "local_file_requirements": [
         {
           "blocker": "path_not_found",
@@ -2879,7 +3200,22 @@
           "status": "local_ref_not_found"
         }
       },
-      "status": "operator_completion_required"
+      "source_receipt_statuses": {
+        "provenance_ref": {
+          "blocker": "",
+          "field": "provenance_ref",
+          "present": true,
+          "status": "ready"
+        },
+        "source_license_or_accession": {
+          "blocker": "",
+          "field": "source_license_or_accession",
+          "present": true,
+          "status": "ready"
+        }
+      },
+      "status": "operator_completion_required",
+      "unsupported_benchmark_fields": []
     }
   ],
   "checksum_fields": [
@@ -2976,7 +3312,7 @@
     "selected_manifest_path": "",
     "status": "not_detected"
   },
-  "generated_at": "2026-07-04T03:37:46.834120+00:00",
+  "generated_at": "2026-07-04T05:40:35.474069+00:00",
   "header_fields": [
     "case_id",
     "complex_id",
@@ -3009,7 +3345,7 @@
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:d91bbc8402c86796ce3d60d0a053610cceea2dcbbb0f5faf00adeaad7698bea4",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv": "sha256:ff3afa49ab7c79ed82a78f1755272ecc13ca7f6b6e01ef2b35ea5d58b12d3611",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1",
-    "scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py": "sha256:1dea68964703a11a1eb28a9b1d29031577718d3053ea0a47f69703833fe42470"
+    "scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py": "sha256:c63b21207a47e36d1da5d662382bbd2e5ec58c8ec9f5dde018248da66fe012d5"
   },
   "local_file_fields": [
     "protein_structure_path",
@@ -3971,7 +4307,14 @@
   "reuse_policy": "public_benchmark_vina_gnina_input_manifest_template_preflight",
   "reused_evidence": false,
   "schema_version": "public-benchmark-vina-gnina-input-manifest-template-preflight.v1",
-  "source_commit_sha": "ee98c55c82d83b224e239a01f8355cc9422f8b08",
+  "source_commit_sha": "f120648bc76e8380b38532b7baa1ea74ac444f98",
+  "source_family_policy": {
+    "accepted_markers": [
+      "casf",
+      "pdbbind"
+    ],
+    "placeholder_markers_rejected": true
+  },
   "source_file_acquisition_plan": [
     {
       "blocker": "path_not_found",
@@ -4334,11 +4677,16 @@
       "status": "operator_completion_required"
     }
   ],
+  "source_receipt_fields": [
+    "source_license_or_accession",
+    "provenance_ref"
+  ],
   "status": "operator_manifest_completion_required",
   "summary": {
     "duplicate_case_id_count": 0,
     "expected_case_count": 12,
     "invalid_checksum_count": 0,
+    "invalid_source_receipt_count": 0,
     "manifest_ready": false,
     "missing_expected_case_count": 0,
     "missing_local_file_count": 48,
@@ -4353,8 +4701,15 @@
     "template_case_count": 12,
     "template_case_coverage_complete": true,
     "template_row_count": 12,
-    "unexpected_template_case_count": 0
+    "unexpected_template_case_count": 0,
+    "unsupported_benchmark_field_count": 0
   },
+  "supported_benchmark_splits": [
+    "CASF-core",
+    "PDBBind-core",
+    "PDBBind-refined",
+    "PDBBind-general"
+  ],
   "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
   "template_case_ids": [
     "casf2016_4llx",

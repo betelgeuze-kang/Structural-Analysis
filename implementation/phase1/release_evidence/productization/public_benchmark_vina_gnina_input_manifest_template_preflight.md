@@ -5,6 +5,8 @@
 - `manifest_ready`: `False`
 - `template_row_count`: `12`
 - `missing_required_value_count`: `36`
+- `unsupported_benchmark_field_count`: `0`
+- `invalid_source_receipt_count`: `0`
 - `missing_local_file_count`: `48`
 - `missing_receipt_ref_count`: `60`
 - `source_file_missing_count`: `24`

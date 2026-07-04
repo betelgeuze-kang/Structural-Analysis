@@ -163,6 +163,19 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert vina_runtime_action["adapter_row_preflight_status"] == (
         "row_artifact_missing"
     )
+    assert vina_runtime_action["input_manifest_template_preflight_status"] == (
+        "operator_manifest_completion_required"
+    )
+    assert vina_runtime_action["input_manifest_template_manifest_ready"] is False
+    manifest_preflight = vina_runtime_action[
+        "input_manifest_template_preflight_summary"
+    ]
+    assert manifest_preflight["template_row_count"] == 12
+    assert manifest_preflight["template_case_coverage_complete"] is True
+    assert manifest_preflight["invalid_source_receipt_count"] == 0
+    assert manifest_preflight["unsupported_benchmark_field_count"] == 0
+    assert manifest_preflight["missing_local_file_count"] == 48
+    assert manifest_preflight["missing_receipt_ref_count"] == 60
     assert vina_runtime_action["engine_runtime_actions"] == [
         {
             "binary_env_var": "PUBLIC_BENCHMARK_VINA_BIN",
