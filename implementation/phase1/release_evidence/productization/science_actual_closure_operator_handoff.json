@@ -9284,6 +9284,34 @@
         "top_k_rank": 1
       },
       "first_operator_sequence_step": "preflight_pocketmd_lite_topk_rows_template",
+      "first_refinement_metric_family_action": {
+        "action_source": "first_metric_family_blocker",
+        "blocked_receipt_count": 6,
+        "command_key": "rerun_rows_materialization",
+        "first_blocked_receipt": {
+          "case_id": "pocketmd_lite_case_001",
+          "missing_receipt_fields": [
+            "pre_refinement_energy_proxy",
+            "post_refinement_energy_proxy",
+            "local_min_survived"
+          ],
+          "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
+          "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
+          "run_key": "pocketmd_lite_case_001::rank_1",
+          "top_k_rank": 1
+        },
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+        "metric_family_id": "local_min_survival",
+        "missing_field_occurrence_count": 18,
+        "next_action": "fill_metric_family_receipt_fields_for_local_min_survival",
+        "phase4_criterion_id": "local_min_survival_materialized",
+        "product_requirement": "local-min survival and energy proxy movement are recorded",
+        "required_receipt_fields": [
+          "pre_refinement_energy_proxy",
+          "post_refinement_energy_proxy",
+          "local_min_survived"
+        ]
+      },
       "first_refinement_receipt_action": {
         "action_source": "first_incomplete_receipt",
         "case_id": "pocketmd_lite_case_001",
@@ -15323,7 +15351,7 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T12:28:28.382894+00:00",
+  "generated_at": "2026-07-04T12:38:09.942913+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:31132ede1a9d42bd1eab0194ca04e24e9a4c80ac2ace134baef6e7fa48a636ef",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:a6fa0328fbbdc35c1ff47f966c085b5ae0fc5e6dfa2f1aba17e647681cdc246a",
@@ -15331,7 +15359,7 @@
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:09354cd520764e9fb23e9a23e1eed17a38e73328687154c5d35c5411731af093",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:36113742bcdbca3379501deb49c14f0d86f2ff9d48e59f2e8cef20795e2856bf",
     "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:781a71aa4ca54ed58be70e95bf15b75f4c7771ffdbc2b0899ce913b1a3de5afb",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:c5f0767add2847b4a14bd0e6f601b3beca92d14b1de6708558bcb1363c4f64c0"
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:c4e5e95ae08fb0b22eecbe785ec7c924d802b387617220bf06f9a485c535e5c3"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -34318,7 +34346,7 @@
   },
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "b623e72245d6617468baa742d5d92e927819d619",
+  "source_commit_sha": "4756ad566f79655565dc1cd2abaee328b6f94871",
   "status": "operator_rows_required",
   "summary": {
     "actual_closure_blocked_component_count": 2,

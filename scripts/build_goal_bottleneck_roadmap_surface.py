@@ -872,6 +872,9 @@ def _science_operator_gap_register(
             unblock_plan.get("first_refinement_receipt_action")
             or unblock_plan.get("first_runtime_action")
         )
+        first_metric_family_action = _as_dict(
+            unblock_plan.get("first_refinement_metric_family_action")
+        )
         materialization_command = str(
             unblock_plan.get("materialization_command")
             or contract.get("materialization_command")
@@ -890,6 +893,7 @@ def _science_operator_gap_register(
                 "first_next_action": first_next_action,
                 "command_key": str(unblock_plan.get("command_key") or ""),
                 "first_unblock_action": first_unblock_action,
+                "first_metric_family_action": first_metric_family_action,
                 "template_artifact": str(contract.get("row_template_artifact") or ""),
                 "minimum_evidence": {
                     "accepted_formats": [
@@ -1553,6 +1557,9 @@ def _operator_evidence_handoff_queue(roadmap_rows: list[dict[str, Any]]) -> list
                 "first_unblock_action": _as_dict(
                     first_gap.get("first_unblock_action")
                 ),
+                "first_metric_family_action": _as_dict(
+                    first_gap.get("first_metric_family_action")
+                ),
                 "template_artifact": str(first_gap.get("template_artifact") or ""),
                 "minimum_evidence": _as_dict(first_gap.get("minimum_evidence")),
                 "materialization_steps": [
@@ -1646,6 +1653,9 @@ def _operator_evidence_handoff_slot_queue(
                     "command_key": str(slot.get("command_key") or ""),
                     "first_unblock_action": _as_dict(
                         slot.get("first_unblock_action")
+                    ),
+                    "first_metric_family_action": _as_dict(
+                        slot.get("first_metric_family_action")
                     ),
                     "template_artifact": str(slot.get("template_artifact") or ""),
                     "minimum_evidence": _as_dict(slot.get("minimum_evidence")),

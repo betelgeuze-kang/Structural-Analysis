@@ -390,6 +390,28 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         ],
         "missing_receipt_field_count": 18,
     }
+    first_metric_family = receipt_bundle_report[
+        "receipt_metric_family_completion_plan"
+    ][0]
+    assert unblock_plan["pocketmd_rows"][
+        "first_refinement_metric_family_action"
+    ] == {
+        "action_source": "first_metric_family_blocker",
+        "metric_family_id": "local_min_survival",
+        "phase4_criterion_id": "local_min_survival_materialized",
+        "product_requirement": (
+            "local-min survival and energy proxy movement are recorded"
+        ),
+        "next_action": "fill_metric_family_receipt_fields_for_local_min_survival",
+        "command_key": "rerun_rows_materialization",
+        "materialization_command": receipt_bundle_report["commands"][
+            "rerun_rows_materialization"
+        ],
+        "required_receipt_fields": first_metric_family["required_receipt_fields"],
+        "missing_field_occurrence_count": 18,
+        "blocked_receipt_count": 6,
+        "first_blocked_receipt": first_metric_family["first_blocked_receipt"],
+    }
     assert unblock_plan["pocketmd_rows"]["next_action"] == (
         "fill_completion_missing_required_fields_and_set_status_complete"
     )

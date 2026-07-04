@@ -1527,6 +1527,54 @@ def _first_refinement_receipt_action(
     return {}
 
 
+def _first_refinement_metric_family_action(
+    refinement_action_packet: dict[str, Any],
+) -> dict[str, Any]:
+    report = _as_dict(refinement_action_packet.get("rows_from_receipt_bundle_report"))
+    commands = _as_dict(report.get("commands"))
+    family_plan = [
+        row
+        for row in _as_list(report.get("receipt_metric_family_completion_plan"))
+        if isinstance(row, dict)
+    ]
+    if not family_plan:
+        return {}
+    row = family_plan[0]
+    next_action = str(
+        row.get("next_action")
+        or row.get("operator_completion_action")
+        or row.get("operator_action")
+        or ""
+    )
+    command_key = str(row.get("command_key") or "")
+    if not command_key and next_action:
+        command_key = "rerun_rows_materialization"
+    materialization_command = str(
+        row.get("materialization_command")
+        or commands.get(command_key)
+        or ""
+    )
+    if not (next_action or command_key or materialization_command):
+        return {}
+    return {
+        "action_source": "first_metric_family_blocker",
+        "metric_family_id": str(row.get("metric_family_id") or ""),
+        "phase4_criterion_id": str(row.get("phase4_criterion_id") or ""),
+        "product_requirement": str(row.get("product_requirement") or ""),
+        "next_action": next_action,
+        "command_key": command_key,
+        "materialization_command": materialization_command,
+        "required_receipt_fields": [
+            str(item) for item in _as_list(row.get("required_receipt_fields")) if str(item)
+        ],
+        "missing_field_occurrence_count": _as_int(
+            row.get("missing_field_occurrence_count")
+        ),
+        "blocked_receipt_count": _as_int(row.get("blocked_receipt_count")),
+        "first_blocked_receipt": _as_dict(row.get("first_blocked_receipt")),
+    }
+
+
 def _blocking_input_unblock_plan(
     missing_slots: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
@@ -1621,6 +1669,13 @@ def _blocking_input_unblock_plan(
                 row_payload.setdefault(
                     "materialization_command",
                     first_refinement_receipt_action["materialization_command"],
+                )
+            first_refinement_metric_family_action = (
+                _first_refinement_metric_family_action(refinement_action_packet)
+            )
+            if first_refinement_metric_family_action:
+                row_payload["first_refinement_metric_family_action"] = (
+                    first_refinement_metric_family_action
                 )
             first_candidate_slot = _as_dict(
                 refinement_action_packet.get("first_missing_candidate_slot")

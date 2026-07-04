@@ -277,6 +277,7 @@
     ],
     "first_blocked_target": "public_benchmark_phase2_actual_closure",
     "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
+    "first_metric_family_action": {},
     "first_next_action": "complete_vina_gnina_input_manifest_required_values",
     "first_unblock_action": {
       "action_source": "first_operator_blocker_family",
@@ -505,6 +506,7 @@
     ],
     "first_blocked_target": "public_benchmark_phase2_actual_closure",
     "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
+    "first_metric_family_action": {},
     "first_next_action": "complete_vina_gnina_input_manifest_required_values",
     "first_unblock_action": {
       "action_source": "first_operator_blocker_family",
@@ -710,18 +712,18 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
     "validation_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md"
   },
-  "generated_at": "2026-07-04T12:28:28.482232+00:00",
+  "generated_at": "2026-07-04T12:38:10.043085+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:be05411d7bb174d8612aaa5a6d3c2ffbace0c16d1310fc0b6897f9fd9038c6d1",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:50113b04a758c06b720aa91a3b64639e1d31ba94f35334cf21494462930a7d2f",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:69285c5dcf0a4bdc30c7a71d48b86dabde7af6e458925f250a4e3f9b9616e109",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json": "sha256:9aeb275f739200366785b0285be8ac53c97fbb344bd632e9dc65977d1f01c45f",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json": "sha256:4f2a68e24a386a8ac7b9f8d4109c8248250bee8ac45ccd47457d801135d22951",
     "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:781a71aa4ca54ed58be70e95bf15b75f4c7771ffdbc2b0899ce913b1a3de5afb",
     "implementation/phase1/release_evidence/productization/source_of_truth_gap_classification.json": "sha256:5fb3525b23f2e4bc7582cc16aace64fbb7cc506c28e086a21bede3de61ea1b3c",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:c1af83f1b410aca8536d5ab832c0ba6a86153436844e42152860f84ec0002328",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:8adb767e05269c4063e04ca5e5060b0e94994916ccae4e9912c897c0c7fc9703",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:e8a6b5e0b8d86ef1b629c1a6d4e8caab6132dd4a3a311c64bc520c2e4e13954f",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:a55c40e6ad6815aa639d155fbf47b0d23a913cfda3708f053ede7c17e76ea937"
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:c7a8e0734537f400941f5abe644cbe5b1e25f6e3c66e8048c4081e34cda6cfac"
   },
   "mutation_allowed": false,
   "next_actions": [
@@ -774,6 +776,7 @@
       ],
       "first_blocked_target": "public_benchmark_phase2_actual_closure",
       "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
+      "first_metric_family_action": {},
       "first_next_action": "complete_vina_gnina_input_manifest_required_values",
       "first_unblock_action": {
         "action_source": "first_operator_blocker_family",
@@ -1002,6 +1005,7 @@
       ],
       "first_blocked_target": "public_benchmark_phase2_actual_closure",
       "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
+      "first_metric_family_action": {},
       "first_next_action": "complete_vina_gnina_input_manifest_required_values",
       "first_unblock_action": {
         "action_source": "first_operator_blocker_family",
@@ -1616,6 +1620,7 @@
       ],
       "first_blocked_target": "public_benchmark_phase2_actual_closure",
       "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
+      "first_metric_family_action": {},
       "first_next_action": "complete_vina_gnina_input_manifest_required_values",
       "first_unblock_action": {
         "action_source": "first_operator_blocker_family",
@@ -1840,6 +1845,34 @@
       ],
       "first_blocked_target": "pocketmd_lite_topk_actual_closure",
       "first_blocker": "pocketmd_lite_topk_actual_closure::pocketmd_rows_not_provided",
+      "first_metric_family_action": {
+        "action_source": "first_metric_family_blocker",
+        "blocked_receipt_count": 6,
+        "command_key": "rerun_rows_materialization",
+        "first_blocked_receipt": {
+          "case_id": "pocketmd_lite_case_001",
+          "missing_receipt_fields": [
+            "pre_refinement_energy_proxy",
+            "post_refinement_energy_proxy",
+            "local_min_survived"
+          ],
+          "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
+          "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
+          "run_key": "pocketmd_lite_case_001::rank_1",
+          "top_k_rank": 1
+        },
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+        "metric_family_id": "local_min_survival",
+        "missing_field_occurrence_count": 18,
+        "next_action": "fill_metric_family_receipt_fields_for_local_min_survival",
+        "phase4_criterion_id": "local_min_survival_materialized",
+        "product_requirement": "local-min survival and energy proxy movement are recorded",
+        "required_receipt_fields": [
+          "pre_refinement_energy_proxy",
+          "post_refinement_energy_proxy",
+          "local_min_survived"
+        ]
+      },
       "first_next_action": "fill_completion_missing_required_fields_and_set_status_complete",
       "first_unblock_action": {
         "action_source": "first_incomplete_receipt",
@@ -2060,6 +2093,7 @@
       ],
       "first_blocked_target": "public_benchmark_phase2_actual_closure",
       "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
+      "first_metric_family_action": {},
       "first_next_action": "complete_vina_gnina_input_manifest_required_values",
       "first_unblock_action": {
         "action_source": "first_operator_blocker_family",
@@ -2295,6 +2329,34 @@
       ],
       "first_blocked_target": "pocketmd_lite_topk_actual_closure",
       "first_blocker": "pocketmd_lite_topk_actual_closure::pocketmd_rows_not_provided",
+      "first_metric_family_action": {
+        "action_source": "first_metric_family_blocker",
+        "blocked_receipt_count": 6,
+        "command_key": "rerun_rows_materialization",
+        "first_blocked_receipt": {
+          "case_id": "pocketmd_lite_case_001",
+          "missing_receipt_fields": [
+            "pre_refinement_energy_proxy",
+            "post_refinement_energy_proxy",
+            "local_min_survived"
+          ],
+          "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
+          "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
+          "run_key": "pocketmd_lite_case_001::rank_1",
+          "top_k_rank": 1
+        },
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+        "metric_family_id": "local_min_survival",
+        "missing_field_occurrence_count": 18,
+        "next_action": "fill_metric_family_receipt_fields_for_local_min_survival",
+        "phase4_criterion_id": "local_min_survival_materialized",
+        "product_requirement": "local-min survival and energy proxy movement are recorded",
+        "required_receipt_fields": [
+          "pre_refinement_energy_proxy",
+          "post_refinement_energy_proxy",
+          "local_min_survived"
+        ]
+      },
       "first_next_action": "fill_completion_missing_required_fields_and_set_status_complete",
       "first_unblock_action": {
         "action_source": "first_incomplete_receipt",
@@ -3478,6 +3540,7 @@
             "vina_gnina_comparison_ready"
           ],
           "command_key": "build_input_manifest_template_preflight",
+          "first_metric_family_action": {},
           "first_next_action": "complete_vina_gnina_input_manifest_required_values",
           "first_unblock_action": {
             "action_source": "first_operator_blocker_family",
@@ -3688,6 +3751,7 @@
               "vina_gnina_comparison_ready"
             ],
             "command_key": "build_input_manifest_template_preflight",
+            "first_metric_family_action": {},
             "first_next_action": "complete_vina_gnina_input_manifest_required_values",
             "first_unblock_action": {
               "action_source": "first_operator_blocker_family",
@@ -5518,6 +5582,34 @@
             "report_blockers_resolved"
           ],
           "command_key": "rerun_rows_materialization",
+          "first_metric_family_action": {
+            "action_source": "first_metric_family_blocker",
+            "blocked_receipt_count": 6,
+            "command_key": "rerun_rows_materialization",
+            "first_blocked_receipt": {
+              "case_id": "pocketmd_lite_case_001",
+              "missing_receipt_fields": [
+                "pre_refinement_energy_proxy",
+                "post_refinement_energy_proxy",
+                "local_min_survived"
+              ],
+              "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
+              "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
+              "run_key": "pocketmd_lite_case_001::rank_1",
+              "top_k_rank": 1
+            },
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+            "metric_family_id": "local_min_survival",
+            "missing_field_occurrence_count": 18,
+            "next_action": "fill_metric_family_receipt_fields_for_local_min_survival",
+            "phase4_criterion_id": "local_min_survival_materialized",
+            "product_requirement": "local-min survival and energy proxy movement are recorded",
+            "required_receipt_fields": [
+              "pre_refinement_energy_proxy",
+              "post_refinement_energy_proxy",
+              "local_min_survived"
+            ]
+          },
           "first_next_action": "fill_completion_missing_required_fields_and_set_status_complete",
           "first_unblock_action": {
             "action_source": "first_incomplete_receipt",
@@ -5721,6 +5813,34 @@
               "report_blockers_resolved"
             ],
             "command_key": "rerun_rows_materialization",
+            "first_metric_family_action": {
+              "action_source": "first_metric_family_blocker",
+              "blocked_receipt_count": 6,
+              "command_key": "rerun_rows_materialization",
+              "first_blocked_receipt": {
+                "case_id": "pocketmd_lite_case_001",
+                "missing_receipt_fields": [
+                  "pre_refinement_energy_proxy",
+                  "post_refinement_energy_proxy",
+                  "local_min_survived"
+                ],
+                "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
+                "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
+                "run_key": "pocketmd_lite_case_001::rank_1",
+                "top_k_rank": 1
+              },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+              "metric_family_id": "local_min_survival",
+              "missing_field_occurrence_count": 18,
+              "next_action": "fill_metric_family_receipt_fields_for_local_min_survival",
+              "phase4_criterion_id": "local_min_survival_materialized",
+              "product_requirement": "local-min survival and energy proxy movement are recorded",
+              "required_receipt_fields": [
+                "pre_refinement_energy_proxy",
+                "post_refinement_energy_proxy",
+                "local_min_survived"
+              ]
+            },
             "first_next_action": "fill_completion_missing_required_fields_and_set_status_complete",
             "first_unblock_action": {
               "action_source": "first_incomplete_receipt",
@@ -6775,7 +6895,7 @@
     ],
     "status": "operator_evidence_required"
   },
-  "source_commit_sha": "b623e72245d6617468baa742d5d92e927819d619",
+  "source_commit_sha": "4756ad566f79655565dc1cd2abaee328b6f94871",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
