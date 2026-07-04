@@ -163,6 +163,20 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert vina_runtime_action["adapter_row_preflight_status"] == (
         "row_artifact_missing"
     )
+    assert vina_runtime_action["engine_run_bundle_status"] == (
+        "execution_plan_not_ready"
+    )
+    assert vina_runtime_action["engine_run_bundle_materialized"] is False
+    assert vina_runtime_action["rows_from_engine_run_bundle_status"] == (
+        "engine_run_bundle_not_ready"
+    )
+    assert vina_runtime_action["rows_from_engine_run_bundle_materialized"] is False
+    assert vina_runtime_action["engine_run_bundle_summary"]["artifact"].endswith(
+        "public_benchmark_vina_gnina_engine_run_bundle.json"
+    )
+    assert vina_runtime_action["rows_from_engine_run_bundle_report_summary"][
+        "artifact"
+    ].endswith("public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json")
     assert vina_runtime_action["input_manifest_template_preflight_status"] == (
         "operator_manifest_completion_required"
     )
@@ -1031,6 +1045,8 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
         "fill_vina_gnina_input_manifest_row_for_casf2016_4llx"
     ) in markdown
     assert "engine:casf2016_4llx/vina/casf2016_4llx_vina_run" in markdown
+    assert "bundle:execution_plan_not_ready" in markdown
+    assert "rows_bundle:engine_run_bundle_not_ready" in markdown
     assert (
         "candidate:pocketmd_lite_case_001_rank_01/"
         "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01"

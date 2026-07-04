@@ -1793,6 +1793,20 @@ def _markdown(payload: dict[str, Any]) -> str:
                     f"{first_engine_slot.get('engine_id', '')}/"
                     f"{first_engine_slot.get('docking_run_id', '')}"
                 )
+            engine_run_bundle_status = str(
+                runtime_action.get("engine_run_bundle_status") or ""
+            )
+            if engine_run_bundle_status:
+                first_blocked_slot_refs.append(
+                    f"bundle:{engine_run_bundle_status}"
+                )
+            rows_from_engine_run_bundle_status = str(
+                runtime_action.get("rows_from_engine_run_bundle_status") or ""
+            )
+            if rows_from_engine_run_bundle_status:
+                first_blocked_slot_refs.append(
+                    f"rows_bundle:{rows_from_engine_run_bundle_status}"
+                )
             if first_candidate_slot:
                 first_blocked_slot_refs.append(
                     "candidate:"

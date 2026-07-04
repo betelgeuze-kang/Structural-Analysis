@@ -328,6 +328,14 @@ def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, 
     operator_unblock_packet = payload.get("operator_unblock_packet")
     if not isinstance(operator_unblock_packet, dict):
         operator_unblock_packet = {}
+    engine_run_bundle_summary = payload.get("engine_run_bundle_summary")
+    if not isinstance(engine_run_bundle_summary, dict):
+        engine_run_bundle_summary = {}
+    rows_from_engine_run_bundle_report_summary = payload.get(
+        "rows_from_engine_run_bundle_report_summary"
+    )
+    if not isinstance(rows_from_engine_run_bundle_report_summary, dict):
+        rows_from_engine_run_bundle_report_summary = {}
     return {
         "artifact": str(payload.get("artifact") or ""),
         "status": str(payload.get("status") or ""),
@@ -364,6 +372,10 @@ def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, 
         "operator_unblock_packet": _compact_vina_gnina_unblock_packet(
             operator_unblock_packet
         ),
+        "engine_run_bundle_summary": engine_run_bundle_summary,
+        "rows_from_engine_run_bundle_report_summary": (
+            rows_from_engine_run_bundle_report_summary
+        ),
         "command": str(payload.get("command") or ""),
     }
 
@@ -380,6 +392,14 @@ def _compact_vina_gnina_unblock_packet(payload: dict[str, Any]) -> dict[str, Any
     source_url_probe_plan = preflight_summary.get("source_url_probe_plan")
     if not isinstance(source_url_probe_plan, list):
         source_url_probe_plan = []
+    engine_run_bundle_summary = payload.get("engine_run_bundle_summary")
+    if not isinstance(engine_run_bundle_summary, dict):
+        engine_run_bundle_summary = {}
+    rows_from_engine_run_bundle_report_summary = payload.get(
+        "rows_from_engine_run_bundle_report_summary"
+    )
+    if not isinstance(rows_from_engine_run_bundle_report_summary, dict):
+        rows_from_engine_run_bundle_report_summary = {}
     return {
         "status": str(payload.get("status") or ""),
         "input_manifest_template_artifact": str(
@@ -426,6 +446,28 @@ def _compact_vina_gnina_unblock_packet(payload: dict[str, Any]) -> dict[str, Any
             ],
         },
         "expected_rows_artifact": str(payload.get("expected_rows_artifact") or ""),
+        "engine_run_bundle_summary": engine_run_bundle_summary,
+        "engine_run_bundle_status": str(
+            payload.get("engine_run_bundle_status")
+            or engine_run_bundle_summary.get("status")
+            or ""
+        ),
+        "engine_run_bundle_materialized": bool(
+            payload.get("engine_run_bundle_materialized")
+            or engine_run_bundle_summary.get("bundle_materialized")
+        ),
+        "rows_from_engine_run_bundle_report_summary": (
+            rows_from_engine_run_bundle_report_summary
+        ),
+        "rows_from_engine_run_bundle_status": str(
+            payload.get("rows_from_engine_run_bundle_status")
+            or rows_from_engine_run_bundle_report_summary.get("status")
+            or ""
+        ),
+        "rows_from_engine_run_bundle_materialized": bool(
+            payload.get("rows_from_engine_run_bundle_materialized")
+            or rows_from_engine_run_bundle_report_summary.get("rows_materialized")
+        ),
         "case_input_slot_count": int(payload.get("case_input_slot_count") or 0),
         "blocked_case_input_slot_count": int(
             payload.get("blocked_case_input_slot_count") or 0

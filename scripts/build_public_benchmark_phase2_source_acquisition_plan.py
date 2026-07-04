@@ -966,6 +966,10 @@ def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, 
     operator_unblock_packet = payload.get("operator_unblock_packet")
     if not isinstance(operator_unblock_packet, dict):
         operator_unblock_packet = {}
+    engine_run_bundle_summary = _as_dict(payload.get("engine_run_bundle_summary"))
+    rows_from_engine_run_bundle_report_summary = _as_dict(
+        payload.get("rows_from_engine_run_bundle_report_summary")
+    )
     engine_run_slots = payload.get("engine_run_slots")
     if not isinstance(engine_run_slots, list):
         engine_run_slots = []
@@ -1080,6 +1084,10 @@ def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, 
             if isinstance(row, dict)
         ],
         "operator_unblock_packet": operator_unblock_packet,
+        "engine_run_bundle_summary": engine_run_bundle_summary,
+        "rows_from_engine_run_bundle_report_summary": (
+            rows_from_engine_run_bundle_report_summary
+        ),
         "case_input_slot_matrix": case_input_slot_matrix,
         "case_input_slot_matrix_count": len(case_input_slot_matrix),
         "blocked_case_input_slot_count": blocked_case_input_slot_count,
@@ -2007,6 +2015,46 @@ def _vina_gnina_runtime_action_packet(
         ),
         "expected_rows_artifact": str(
             unblock.get("expected_rows_artifact") or DEFAULT_VINA_GNINA_ROWS
+        ),
+        "engine_run_bundle_summary": _as_dict(
+            unblock.get("engine_run_bundle_summary")
+            or vina_gnina_runtime_readiness_summary.get("engine_run_bundle_summary")
+        ),
+        "engine_run_bundle_status": str(
+            unblock.get("engine_run_bundle_status")
+            or _as_dict(
+                vina_gnina_runtime_readiness_summary.get("engine_run_bundle_summary")
+            ).get("status")
+            or ""
+        ),
+        "engine_run_bundle_materialized": bool(
+            unblock.get("engine_run_bundle_materialized")
+            or _as_dict(
+                vina_gnina_runtime_readiness_summary.get("engine_run_bundle_summary")
+            ).get("bundle_materialized")
+        ),
+        "rows_from_engine_run_bundle_report_summary": _as_dict(
+            unblock.get("rows_from_engine_run_bundle_report_summary")
+            or vina_gnina_runtime_readiness_summary.get(
+                "rows_from_engine_run_bundle_report_summary"
+            )
+        ),
+        "rows_from_engine_run_bundle_status": str(
+            unblock.get("rows_from_engine_run_bundle_status")
+            or _as_dict(
+                vina_gnina_runtime_readiness_summary.get(
+                    "rows_from_engine_run_bundle_report_summary"
+                )
+            ).get("status")
+            or ""
+        ),
+        "rows_from_engine_run_bundle_materialized": bool(
+            unblock.get("rows_from_engine_run_bundle_materialized")
+            or _as_dict(
+                vina_gnina_runtime_readiness_summary.get(
+                    "rows_from_engine_run_bundle_report_summary"
+                )
+            ).get("rows_materialized")
         ),
         "input_manifest_template_artifact": str(
             unblock.get("input_manifest_template_artifact")
@@ -3271,6 +3319,34 @@ def build_public_benchmark_phase2_source_acquisition_plan(
                     "adapter_row_preflight_status"
                 ]
             ),
+            "vina_gnina_engine_run_bundle_status": (
+                _as_dict(
+                    vina_gnina_runtime_readiness_summary.get(
+                        "engine_run_bundle_summary"
+                    )
+                ).get("status")
+            ),
+            "vina_gnina_engine_run_bundle_materialized": (
+                _as_dict(
+                    vina_gnina_runtime_readiness_summary.get(
+                        "engine_run_bundle_summary"
+                    )
+                ).get("bundle_materialized")
+            ),
+            "vina_gnina_rows_from_engine_run_bundle_status": (
+                _as_dict(
+                    vina_gnina_runtime_readiness_summary.get(
+                        "rows_from_engine_run_bundle_report_summary"
+                    )
+                ).get("status")
+            ),
+            "vina_gnina_rows_from_engine_run_bundle_materialized": (
+                _as_dict(
+                    vina_gnina_runtime_readiness_summary.get(
+                        "rows_from_engine_run_bundle_report_summary"
+                    )
+                ).get("rows_materialized")
+            ),
             "vina_gnina_rows_template_preflight_status": (
                 vina_gnina_rows_template_preflight_summary["status"]
             ),
@@ -3375,6 +3451,14 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `vina_gnina_runtime_engine_run_slot_count`: `{payload['vina_gnina_runtime_readiness']['engine_run_slot_matrix_count']}`",
         f"- `vina_gnina_runtime_blocked_engine_run_slot_count`: `{payload['vina_gnina_runtime_readiness']['blocked_engine_run_slot_count']}`",
         f"- `vina_gnina_adapter_row_preflight_status`: `{payload['vina_gnina_runtime_readiness']['adapter_row_preflight_status']}`",
+        "- `vina_gnina_engine_run_bundle_status`: "
+        f"`{_as_dict(payload['vina_gnina_runtime_readiness'].get('engine_run_bundle_summary')).get('status')}`",
+        "- `vina_gnina_engine_run_bundle_materialized`: "
+        f"`{_as_dict(payload['vina_gnina_runtime_readiness'].get('engine_run_bundle_summary')).get('bundle_materialized')}`",
+        "- `vina_gnina_rows_from_engine_run_bundle_status`: "
+        f"`{_as_dict(payload['vina_gnina_runtime_readiness'].get('rows_from_engine_run_bundle_report_summary')).get('status')}`",
+        "- `vina_gnina_rows_from_engine_run_bundle_materialized`: "
+        f"`{_as_dict(payload['vina_gnina_runtime_readiness'].get('rows_from_engine_run_bundle_report_summary')).get('rows_materialized')}`",
         "- `vina_gnina_rows_template_role_receipt_blocked_count`: "
         f"`{payload['vina_gnina_rows_template_preflight_summary']['role_receipt_blocked_count']}`",
         f"- `vina_gnina_runtime_missing_engine_ids`: `{', '.join(payload['vina_gnina_runtime_readiness']['missing_engine_ids'])}`",

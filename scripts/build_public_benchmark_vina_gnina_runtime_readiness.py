@@ -713,12 +713,106 @@ def _input_manifest_template_preflight_summary(repo_root: Path) -> dict[str, Any
     }
 
 
+def _engine_run_bundle_summary(repo_root: Path) -> dict[str, Any]:
+    payload = _load_json(repo_root, DEFAULT_ENGINE_RUN_BUNDLE)
+    if not payload:
+        return {
+            "present": False,
+            "artifact": str(DEFAULT_ENGINE_RUN_BUNDLE),
+            "commands_artifact": str(DEFAULT_ENGINE_RUN_COMMANDS),
+            "status": "missing",
+            "contract_pass": False,
+            "bundle_materialized": False,
+            "case_count": 0,
+            "engine_run_count": 0,
+            "config_count": 0,
+            "receipt_template_count": 0,
+            "engine_runtime_ready": False,
+            "operator_execution_ready": False,
+            "blocker_count": 0,
+            "blockers": [],
+        }
+    summary = payload.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+    blockers = payload.get("blockers")
+    if not isinstance(blockers, list):
+        blockers = []
+    return {
+        "present": True,
+        "artifact": str(DEFAULT_ENGINE_RUN_BUNDLE),
+        "commands_artifact": str(DEFAULT_ENGINE_RUN_COMMANDS),
+        "status": str(payload.get("status") or ""),
+        "contract_pass": bool(payload.get("contract_pass")),
+        "bundle_materialized": bool(
+            payload.get("bundle_materialized")
+            or summary.get("bundle_materialized")
+        ),
+        "case_count": int(payload.get("case_count") or summary.get("case_count") or 0),
+        "engine_run_count": int(
+            payload.get("engine_run_count") or summary.get("engine_run_count") or 0
+        ),
+        "config_count": int(payload.get("config_count") or 0),
+        "receipt_template_count": int(payload.get("receipt_template_count") or 0),
+        "engine_runtime_ready": bool(
+            payload.get("engine_runtime_ready") or summary.get("engine_runtime_ready")
+        ),
+        "operator_execution_ready": bool(
+            payload.get("operator_execution_ready")
+            or summary.get("operator_execution_ready")
+        ),
+        "blocker_count": int(summary.get("blocker_count") or len(blockers)),
+        "blockers": [str(item) for item in blockers if str(item)],
+    }
+
+
+def _rows_from_engine_run_bundle_report_summary(repo_root: Path) -> dict[str, Any]:
+    payload = _load_json(repo_root, DEFAULT_VINA_GNINA_ROWS_FROM_ENGINE_RUN_BUNDLE_REPORT)
+    if not payload:
+        return {
+            "present": False,
+            "artifact": str(DEFAULT_VINA_GNINA_ROWS_FROM_ENGINE_RUN_BUNDLE_REPORT),
+            "status": "missing",
+            "contract_pass": False,
+            "rows_materialized": False,
+            "bundle_ready": False,
+            "case_count": 0,
+            "engine_run_count": 0,
+            "ready_engine_run_count": 0,
+            "blocker_count": 0,
+            "blockers": [],
+        }
+    summary = payload.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+    blockers = payload.get("blockers")
+    if not isinstance(blockers, list):
+        blockers = []
+    return {
+        "present": True,
+        "artifact": str(DEFAULT_VINA_GNINA_ROWS_FROM_ENGINE_RUN_BUNDLE_REPORT),
+        "status": str(payload.get("status") or ""),
+        "contract_pass": bool(payload.get("contract_pass")),
+        "rows_materialized": bool(
+            payload.get("rows_materialized") or summary.get("rows_materialized")
+        ),
+        "bundle_ready": bool(summary.get("bundle_ready")),
+        "case_count": int(summary.get("case_count") or 0),
+        "engine_run_count": int(summary.get("engine_run_count") or 0),
+        "ready_engine_run_count": int(summary.get("ready_engine_run_count") or 0),
+        "blocker_count": int(summary.get("blocker_count") or len(blockers)),
+        "blockers": [str(item) for item in blockers if str(item)],
+    }
+
+
 def _operator_unblock_packet(
     *,
     engine_run_slots: list[dict[str, Any]],
     current_engine_execution_statuses: list[dict[str, Any]],
     row_status: dict[str, Any],
     input_manifest_template_preflight_summary: dict[str, Any],
+    engine_run_bundle_summary: dict[str, Any],
+    rows_from_engine_run_bundle_report_summary: dict[str, Any],
     ready_engine_run_slot_count: int,
     required_engine_run_count: int,
     runtime_ready: bool,
@@ -767,6 +861,20 @@ def _operator_unblock_packet(
             input_manifest_template_preflight_summary
         ),
         "expected_rows_artifact": str(DEFAULT_VINA_GNINA_ROWS),
+        "engine_run_bundle_summary": engine_run_bundle_summary,
+        "engine_run_bundle_status": str(engine_run_bundle_summary.get("status") or ""),
+        "engine_run_bundle_materialized": bool(
+            engine_run_bundle_summary.get("bundle_materialized")
+        ),
+        "rows_from_engine_run_bundle_report_summary": (
+            rows_from_engine_run_bundle_report_summary
+        ),
+        "rows_from_engine_run_bundle_status": str(
+            rows_from_engine_run_bundle_report_summary.get("status") or ""
+        ),
+        "rows_from_engine_run_bundle_materialized": bool(
+            rows_from_engine_run_bundle_report_summary.get("rows_materialized")
+        ),
         "rows_template_artifact": str(DEFAULT_VINA_GNINA_ROWS_TEMPLATE),
         "rows_template_preflight_artifact": str(
             DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT
@@ -912,6 +1020,10 @@ def build_vina_gnina_runtime_readiness(
     input_manifest_template_preflight = _input_manifest_template_preflight_summary(
         repo_root
     )
+    engine_run_bundle = _engine_run_bundle_summary(repo_root)
+    rows_from_engine_run_bundle_report = (
+        _rows_from_engine_run_bundle_report_summary(repo_root)
+    )
     execution_plan_ready = bool(execution_plan.get("execution_plan_ready"))
     all_engines_available = all(
         bool(row.get("available")) for row in current_engine_execution_statuses
@@ -967,6 +1079,8 @@ def build_vina_gnina_runtime_readiness(
         current_engine_execution_statuses=current_engine_execution_statuses,
         row_status=row_status,
         input_manifest_template_preflight_summary=input_manifest_template_preflight,
+        engine_run_bundle_summary=engine_run_bundle,
+        rows_from_engine_run_bundle_report_summary=rows_from_engine_run_bundle_report,
         ready_engine_run_slot_count=ready_engine_run_slot_count,
         required_engine_run_count=required_engine_run_count,
         runtime_ready=runtime_ready,
@@ -1011,6 +1125,8 @@ def build_vina_gnina_runtime_readiness(
                 Path("scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py"),
                 Path("scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py"),
                 Path("scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"),
+                DEFAULT_ENGINE_RUN_BUNDLE,
+                DEFAULT_VINA_GNINA_ROWS_FROM_ENGINE_RUN_BUNDLE_REPORT,
             ],
             reused_evidence=False,
             reuse_policy="public_benchmark_vina_gnina_runtime_readiness_from_current_environment",
@@ -1036,6 +1152,10 @@ def build_vina_gnina_runtime_readiness(
         ],
         "row_candidate_status": row_status,
         "input_manifest_template_preflight": input_manifest_template_preflight,
+        "engine_run_bundle_summary": engine_run_bundle,
+        "rows_from_engine_run_bundle_report_summary": (
+            rows_from_engine_run_bundle_report
+        ),
         "engine_run_slots": engine_run_slots,
         "operator_unblock_packet": operator_unblock_packet,
         "required_engine_run_count": required_engine_run_count,
@@ -1151,6 +1271,16 @@ def build_vina_gnina_runtime_readiness(
             "selected_row_count": int(row_status.get("selected_row_count") or 0),
             "adapter_case_count": int(row_status.get("adapter_case_count") or 0),
             "adapter_row_preflight_status": str(row_status.get("status") or ""),
+            "engine_run_bundle_status": str(engine_run_bundle.get("status") or ""),
+            "engine_run_bundle_materialized": bool(
+                engine_run_bundle.get("bundle_materialized")
+            ),
+            "rows_from_engine_run_bundle_report_status": str(
+                rows_from_engine_run_bundle_report.get("status") or ""
+            ),
+            "rows_from_engine_run_bundle_materialized": bool(
+                rows_from_engine_run_bundle_report.get("rows_materialized")
+            ),
             "input_manifest_template_preflight_status": str(
                 input_manifest_template_preflight.get("status") or ""
             ),

@@ -740,6 +740,12 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "vina_gnina_runtime_detected_row_artifact_count": 0,
         "vina_gnina_runtime_adapter_case_count": 0,
         "vina_gnina_runtime_adapter_row_preflight_status": "row_artifact_missing",
+        "vina_gnina_engine_run_bundle_status": "execution_plan_not_ready",
+        "vina_gnina_engine_run_bundle_materialized": False,
+        "vina_gnina_rows_from_engine_run_bundle_status": (
+            "engine_run_bundle_not_ready"
+        ),
+        "vina_gnina_rows_from_engine_run_bundle_materialized": False,
         "vina_gnina_rows_template_preflight_status": (
             "operator_rows_completion_required"
         ),

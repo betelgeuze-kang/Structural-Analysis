@@ -947,8 +947,30 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
                     "required_engine_run_count": 24,
                     "ready_engine_run_slot_count": 0,
                     "missing_engine_ids": ["vina", "gnina"],
+                    "engine_run_bundle_summary": {
+                        "status": "execution_plan_not_ready",
+                        "bundle_materialized": False,
+                    },
+                    "rows_from_engine_run_bundle_report_summary": {
+                        "status": "engine_run_bundle_not_ready",
+                        "rows_materialized": False,
+                    },
                     "operator_unblock_packet": {
                         "status": "engine_inputs_required",
+                        "engine_run_bundle_status": "execution_plan_not_ready",
+                        "engine_run_bundle_materialized": False,
+                        "rows_from_engine_run_bundle_status": (
+                            "engine_run_bundle_not_ready"
+                        ),
+                        "rows_from_engine_run_bundle_materialized": False,
+                        "engine_run_bundle_summary": {
+                            "status": "execution_plan_not_ready",
+                            "bundle_materialized": False,
+                        },
+                        "rows_from_engine_run_bundle_report_summary": {
+                            "status": "engine_run_bundle_not_ready",
+                            "rows_materialized": False,
+                        },
                         "input_manifest_template_preflight_artifact": (
                             "implementation/phase1/release_evidence/productization/"
                             "public_benchmark_vina_gnina_input_manifest_template_preflight.json"
@@ -1265,6 +1287,18 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
     assert runtime_summary["operator_unblock_packet"]["status"] == (
         "engine_inputs_required"
     )
+    assert runtime_summary["engine_run_bundle_summary"]["status"] == (
+        "execution_plan_not_ready"
+    )
+    assert runtime_summary["rows_from_engine_run_bundle_report_summary"][
+        "status"
+    ] == "engine_run_bundle_not_ready"
+    assert runtime_summary["operator_unblock_packet"][
+        "engine_run_bundle_status"
+    ] == "execution_plan_not_ready"
+    assert runtime_summary["operator_unblock_packet"][
+        "rows_from_engine_run_bundle_status"
+    ] == "engine_run_bundle_not_ready"
     assert runtime_summary["operator_unblock_packet"][
         "input_manifest_template_preflight_artifact"
     ].endswith("public_benchmark_vina_gnina_input_manifest_template_preflight.json")

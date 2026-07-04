@@ -1655,6 +1655,26 @@
                 "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
                 "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
               },
+              "engine_run_bundle_materialized": false,
+              "engine_run_bundle_status": "execution_plan_not_ready",
+              "engine_run_bundle_summary": {
+                "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+                "blocker_count": 1,
+                "blockers": [
+                  "public_benchmark_vina_gnina_execution_plan_not_ready"
+                ],
+                "bundle_materialized": false,
+                "case_count": 12,
+                "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+                "config_count": 0,
+                "contract_pass": false,
+                "engine_run_count": 24,
+                "engine_runtime_ready": false,
+                "operator_execution_ready": false,
+                "present": true,
+                "receipt_template_count": 0,
+                "status": "execution_plan_not_ready"
+              },
               "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
               "first_blocked_case_input_slot": {
                 "blockers": [
@@ -1763,8 +1783,8 @@
                 },
                 "invalid_checksum_count": 0,
                 "invalid_source_receipt_count": 0,
-                "known_source_url_content_length_bytes": 1572660769,
-                "known_source_url_content_length_gib": 1.465,
+                "known_source_url_content_length_bytes": 0,
+                "known_source_url_content_length_gib": 0.0,
                 "manifest_ready": false,
                 "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
                 "missing_local_file_count": 48,
@@ -1772,20 +1792,20 @@
                 "missing_required_value_count": 36,
                 "present": true,
                 "source_url_blocked_count": 0,
-                "source_url_not_run_count": 0,
+                "source_url_not_run_count": 1,
                 "source_url_probe_count": 1,
-                "source_url_probe_network_performed": true,
+                "source_url_probe_network_performed": false,
                 "source_url_probe_plan": [
                   {
                     "case_count": 12,
-                    "content_length_bytes": 1572660769,
+                    "content_length_bytes": 0,
                     "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-                    "http_status": 200,
+                    "http_status": 0,
                     "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-                    "status": "reachable"
+                    "status": "not_run"
                   }
                 ],
-                "source_url_reachable_count": 1,
+                "source_url_reachable_count": 0,
                 "status": "operator_manifest_completion_required",
                 "template_case_coverage_complete": true,
                 "template_row_count": 12,
@@ -1807,6 +1827,23 @@
               ],
               "ready_engine_run_slot_count": 0,
               "required_engine_run_count": 24,
+              "rows_from_engine_run_bundle_materialized": false,
+              "rows_from_engine_run_bundle_report_summary": {
+                "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+                "blocker_count": 1,
+                "blockers": [
+                  "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+                ],
+                "bundle_ready": false,
+                "case_count": 0,
+                "contract_pass": false,
+                "engine_run_count": 24,
+                "present": true,
+                "ready_engine_run_count": 0,
+                "rows_materialized": false,
+                "status": "engine_run_bundle_not_ready"
+              },
+              "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
               "rows_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
               "rows_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
               "runtime_ready_for_engine_execution": false,
@@ -2263,6 +2300,26 @@
           "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
         },
         "detected_row_artifact_count": 0,
+        "engine_run_bundle_materialized": false,
+        "engine_run_bundle_status": "execution_plan_not_ready",
+        "engine_run_bundle_summary": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+          "blocker_count": 1,
+          "blockers": [
+            "public_benchmark_vina_gnina_execution_plan_not_ready"
+          ],
+          "bundle_materialized": false,
+          "case_count": 12,
+          "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+          "config_count": 0,
+          "contract_pass": false,
+          "engine_run_count": 24,
+          "engine_runtime_ready": false,
+          "operator_execution_ready": false,
+          "present": true,
+          "receipt_template_count": 0,
+          "status": "execution_plan_not_ready"
+        },
         "engine_runtime_actions": [
           {
             "binary_env_var": "PUBLIC_BENCHMARK_VINA_BIN",
@@ -2385,8 +2442,8 @@
           },
           "invalid_checksum_count": 0,
           "invalid_source_receipt_count": 0,
-          "known_source_url_content_length_bytes": 1572660769,
-          "known_source_url_content_length_gib": 1.465,
+          "known_source_url_content_length_bytes": 0,
+          "known_source_url_content_length_gib": 0.0,
           "manifest_ready": false,
           "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
           "missing_local_file_count": 48,
@@ -2394,20 +2451,20 @@
           "missing_required_value_count": 36,
           "present": true,
           "source_url_blocked_count": 0,
-          "source_url_not_run_count": 0,
+          "source_url_not_run_count": 1,
           "source_url_probe_count": 1,
-          "source_url_probe_network_performed": true,
+          "source_url_probe_network_performed": false,
           "source_url_probe_plan": [
             {
               "case_count": 12,
-              "content_length_bytes": 1572660769,
+              "content_length_bytes": 0,
               "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-              "http_status": 200,
+              "http_status": 0,
               "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-              "status": "reachable"
+              "status": "not_run"
             }
           ],
-          "source_url_reachable_count": 1,
+          "source_url_reachable_count": 0,
           "status": "operator_manifest_completion_required",
           "template_case_coverage_complete": true,
           "template_row_count": 12,
@@ -2433,6 +2490,23 @@
         ],
         "ready_engine_run_slot_count": 0,
         "required_engine_run_count": 24,
+        "rows_from_engine_run_bundle_materialized": false,
+        "rows_from_engine_run_bundle_report_summary": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+          "blocker_count": 1,
+          "blockers": [
+            "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+          ],
+          "bundle_ready": false,
+          "case_count": 0,
+          "contract_pass": false,
+          "engine_run_count": 24,
+          "present": true,
+          "ready_engine_run_count": 0,
+          "rows_materialized": false,
+          "status": "engine_run_bundle_not_ready"
+        },
+        "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
         "rows_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
         "rows_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
         "runtime_readiness_blocker_count": 124,
@@ -4215,6 +4289,26 @@
           "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
         },
         "detected_row_artifact_count": 0,
+        "engine_run_bundle_materialized": false,
+        "engine_run_bundle_status": "execution_plan_not_ready",
+        "engine_run_bundle_summary": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+          "blocker_count": 1,
+          "blockers": [
+            "public_benchmark_vina_gnina_execution_plan_not_ready"
+          ],
+          "bundle_materialized": false,
+          "case_count": 12,
+          "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+          "config_count": 0,
+          "contract_pass": false,
+          "engine_run_count": 24,
+          "engine_runtime_ready": false,
+          "operator_execution_ready": false,
+          "present": true,
+          "receipt_template_count": 0,
+          "status": "execution_plan_not_ready"
+        },
         "engine_runtime_actions": [
           {
             "binary_env_var": "PUBLIC_BENCHMARK_VINA_BIN",
@@ -4338,8 +4432,8 @@
           },
           "invalid_checksum_count": 0,
           "invalid_source_receipt_count": 0,
-          "known_source_url_content_length_bytes": 1572660769,
-          "known_source_url_content_length_gib": 1.465,
+          "known_source_url_content_length_bytes": 0,
+          "known_source_url_content_length_gib": 0.0,
           "manifest_ready": false,
           "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
           "missing_local_file_count": 48,
@@ -4347,20 +4441,20 @@
           "missing_required_value_count": 36,
           "present": true,
           "source_url_blocked_count": 0,
-          "source_url_not_run_count": 0,
+          "source_url_not_run_count": 1,
           "source_url_probe_count": 1,
-          "source_url_probe_network_performed": true,
+          "source_url_probe_network_performed": false,
           "source_url_probe_plan": [
             {
               "case_count": 12,
-              "content_length_bytes": 1572660769,
+              "content_length_bytes": 0,
               "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-              "http_status": 200,
+              "http_status": 0,
               "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-              "status": "reachable"
+              "status": "not_run"
             }
           ],
-          "source_url_reachable_count": 1,
+          "source_url_reachable_count": 0,
           "status": "operator_manifest_completion_required",
           "template_case_coverage_complete": true,
           "template_row_count": 12,
@@ -4385,6 +4479,23 @@
         ],
         "ready_engine_run_slot_count": 0,
         "required_engine_run_count": 24,
+        "rows_from_engine_run_bundle_materialized": false,
+        "rows_from_engine_run_bundle_report_summary": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+          "blocker_count": 1,
+          "blockers": [
+            "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+          ],
+          "bundle_ready": false,
+          "case_count": 0,
+          "contract_pass": false,
+          "engine_run_count": 24,
+          "present": true,
+          "ready_engine_run_count": 0,
+          "rows_materialized": false,
+          "status": "engine_run_bundle_not_ready"
+        },
+        "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
         "rows_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
         "rows_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
         "rows_template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md",
@@ -4719,6 +4830,26 @@
           "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
           "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
         },
+        "engine_run_bundle_materialized": false,
+        "engine_run_bundle_status": "execution_plan_not_ready",
+        "engine_run_bundle_summary": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+          "blocker_count": 1,
+          "blockers": [
+            "public_benchmark_vina_gnina_execution_plan_not_ready"
+          ],
+          "bundle_materialized": false,
+          "case_count": 12,
+          "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+          "config_count": 0,
+          "contract_pass": false,
+          "engine_run_count": 24,
+          "engine_runtime_ready": false,
+          "operator_execution_ready": false,
+          "present": true,
+          "receipt_template_count": 0,
+          "status": "execution_plan_not_ready"
+        },
         "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
         "first_blocked_case_input_slot": {
           "blockers": [
@@ -4827,8 +4958,8 @@
           },
           "invalid_checksum_count": 0,
           "invalid_source_receipt_count": 0,
-          "known_source_url_content_length_bytes": 1572660769,
-          "known_source_url_content_length_gib": 1.465,
+          "known_source_url_content_length_bytes": 0,
+          "known_source_url_content_length_gib": 0.0,
           "manifest_ready": false,
           "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
           "missing_local_file_count": 48,
@@ -4836,20 +4967,20 @@
           "missing_required_value_count": 36,
           "present": true,
           "source_url_blocked_count": 0,
-          "source_url_not_run_count": 0,
+          "source_url_not_run_count": 1,
           "source_url_probe_count": 1,
-          "source_url_probe_network_performed": true,
+          "source_url_probe_network_performed": false,
           "source_url_probe_plan": [
             {
               "case_count": 12,
-              "content_length_bytes": 1572660769,
+              "content_length_bytes": 0,
               "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-              "http_status": 200,
+              "http_status": 0,
               "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-              "status": "reachable"
+              "status": "not_run"
             }
           ],
-          "source_url_reachable_count": 1,
+          "source_url_reachable_count": 0,
           "status": "operator_manifest_completion_required",
           "template_case_coverage_complete": true,
           "template_row_count": 12,
@@ -4871,6 +5002,23 @@
         ],
         "ready_engine_run_slot_count": 0,
         "required_engine_run_count": 24,
+        "rows_from_engine_run_bundle_materialized": false,
+        "rows_from_engine_run_bundle_report_summary": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+          "blocker_count": 1,
+          "blockers": [
+            "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+          ],
+          "bundle_ready": false,
+          "case_count": 0,
+          "contract_pass": false,
+          "engine_run_count": 24,
+          "present": true,
+          "ready_engine_run_count": 0,
+          "rows_materialized": false,
+          "status": "engine_run_bundle_not_ready"
+        },
+        "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
         "rows_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
         "rows_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
         "runtime_ready_for_engine_execution": false,
@@ -5182,6 +5330,26 @@
               "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
               "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
             },
+            "engine_run_bundle_materialized": false,
+            "engine_run_bundle_status": "execution_plan_not_ready",
+            "engine_run_bundle_summary": {
+              "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+              "blocker_count": 1,
+              "blockers": [
+                "public_benchmark_vina_gnina_execution_plan_not_ready"
+              ],
+              "bundle_materialized": false,
+              "case_count": 12,
+              "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+              "config_count": 0,
+              "contract_pass": false,
+              "engine_run_count": 24,
+              "engine_runtime_ready": false,
+              "operator_execution_ready": false,
+              "present": true,
+              "receipt_template_count": 0,
+              "status": "execution_plan_not_ready"
+            },
             "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
             "first_blocked_case_input_slot": {
               "blockers": [
@@ -5290,8 +5458,8 @@
               },
               "invalid_checksum_count": 0,
               "invalid_source_receipt_count": 0,
-              "known_source_url_content_length_bytes": 1572660769,
-              "known_source_url_content_length_gib": 1.465,
+              "known_source_url_content_length_bytes": 0,
+              "known_source_url_content_length_gib": 0.0,
               "manifest_ready": false,
               "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
               "missing_local_file_count": 48,
@@ -5299,20 +5467,20 @@
               "missing_required_value_count": 36,
               "present": true,
               "source_url_blocked_count": 0,
-              "source_url_not_run_count": 0,
+              "source_url_not_run_count": 1,
               "source_url_probe_count": 1,
-              "source_url_probe_network_performed": true,
+              "source_url_probe_network_performed": false,
               "source_url_probe_plan": [
                 {
                   "case_count": 12,
-                  "content_length_bytes": 1572660769,
+                  "content_length_bytes": 0,
                   "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-                  "http_status": 200,
+                  "http_status": 0,
                   "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-                  "status": "reachable"
+                  "status": "not_run"
                 }
               ],
-              "source_url_reachable_count": 1,
+              "source_url_reachable_count": 0,
               "status": "operator_manifest_completion_required",
               "template_case_coverage_complete": true,
               "template_row_count": 12,
@@ -5334,6 +5502,23 @@
             ],
             "ready_engine_run_slot_count": 0,
             "required_engine_run_count": 24,
+            "rows_from_engine_run_bundle_materialized": false,
+            "rows_from_engine_run_bundle_report_summary": {
+              "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+              "blocker_count": 1,
+              "blockers": [
+                "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+              ],
+              "bundle_ready": false,
+              "case_count": 0,
+              "contract_pass": false,
+              "engine_run_count": 24,
+              "present": true,
+              "ready_engine_run_count": 0,
+              "rows_materialized": false,
+              "status": "engine_run_bundle_not_ready"
+            },
+            "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
             "rows_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
             "rows_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
             "runtime_ready_for_engine_execution": false,
@@ -5613,6 +5798,8 @@
         "vina_gnina_actual_evidence_blocked_component_count": 6,
         "vina_gnina_actual_evidence_ready_component_count": 0,
         "vina_gnina_actual_evidence_required_engine_run_count": 24,
+        "vina_gnina_engine_run_bundle_materialized": false,
+        "vina_gnina_engine_run_bundle_status": "execution_plan_not_ready",
         "vina_gnina_execution_plan_ready": false,
         "vina_gnina_execution_plan_status": "engine_input_blocked",
         "vina_gnina_input_manifest_detected": true,
@@ -5620,6 +5807,8 @@
         "vina_gnina_input_manifest_status": "ready",
         "vina_gnina_missing_engine_count": 2,
         "vina_gnina_required_engine_run_count": 24,
+        "vina_gnina_rows_from_engine_run_bundle_materialized": false,
+        "vina_gnina_rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
         "vina_gnina_rows_template_preflight_status": "operator_rows_completion_required",
         "vina_gnina_rows_template_role_receipt_blocked_count": 72,
         "vina_gnina_rows_template_role_receipt_plan_count": 96,
@@ -5927,6 +6116,24 @@
         "case_input_slot_matrix_count": 12,
         "command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
         "contract_pass": true,
+        "engine_run_bundle_summary": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+          "blocker_count": 1,
+          "blockers": [
+            "public_benchmark_vina_gnina_execution_plan_not_ready"
+          ],
+          "bundle_materialized": false,
+          "case_count": 12,
+          "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+          "config_count": 0,
+          "contract_pass": false,
+          "engine_run_count": 24,
+          "engine_runtime_ready": false,
+          "operator_execution_ready": false,
+          "present": true,
+          "receipt_template_count": 0,
+          "status": "execution_plan_not_ready"
+        },
         "engine_run_slot_matrix_count": 24,
         "execution_plan_ready": false,
         "missing_engine_ids": [
@@ -5950,27 +6157,47 @@
             "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
             "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
           },
+          "engine_run_bundle_materialized": false,
+          "engine_run_bundle_status": "execution_plan_not_ready",
+          "engine_run_bundle_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+            "blocker_count": 1,
+            "blockers": [
+              "public_benchmark_vina_gnina_execution_plan_not_ready"
+            ],
+            "bundle_materialized": false,
+            "case_count": 12,
+            "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+            "config_count": 0,
+            "contract_pass": false,
+            "engine_run_count": 24,
+            "engine_runtime_ready": false,
+            "operator_execution_ready": false,
+            "present": true,
+            "receipt_template_count": 0,
+            "status": "execution_plan_not_ready"
+          },
           "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
           "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
           "input_manifest_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json",
           "input_manifest_template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
           "input_manifest_template_preflight_summary": {
-            "known_source_url_content_length_bytes": 1572660769,
-            "known_source_url_content_length_gib": 1.465,
+            "known_source_url_content_length_bytes": 0,
+            "known_source_url_content_length_gib": 0.0,
             "manifest_ready": false,
             "source_url_probe_count": 1,
-            "source_url_probe_network_performed": true,
+            "source_url_probe_network_performed": false,
             "source_url_probe_plan": [
               {
                 "case_count": 12,
-                "content_length_bytes": 1572660769,
+                "content_length_bytes": 0,
                 "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-                "http_status": 200,
+                "http_status": 0,
                 "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-                "status": "reachable"
+                "status": "not_run"
               }
             ],
-            "source_url_reachable_count": 1,
+            "source_url_reachable_count": 0,
             "status": "operator_manifest_completion_required",
             "template_row_count": 12
           },
@@ -5993,10 +6220,42 @@
           ],
           "ready_engine_run_slot_count": 0,
           "required_engine_run_count": 24,
+          "rows_from_engine_run_bundle_materialized": false,
+          "rows_from_engine_run_bundle_report_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+            "blocker_count": 1,
+            "blockers": [
+              "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+            ],
+            "bundle_ready": false,
+            "case_count": 0,
+            "contract_pass": false,
+            "engine_run_count": 24,
+            "present": true,
+            "ready_engine_run_count": 0,
+            "rows_materialized": false,
+            "status": "engine_run_bundle_not_ready"
+          },
+          "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
           "status": "engine_inputs_required"
         },
         "ready_engine_run_slot_count": 0,
         "required_engine_run_count": 24,
+        "rows_from_engine_run_bundle_report_summary": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+          "blocker_count": 1,
+          "blockers": [
+            "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+          ],
+          "bundle_ready": false,
+          "case_count": 0,
+          "contract_pass": false,
+          "engine_run_count": 24,
+          "present": true,
+          "ready_engine_run_count": 0,
+          "rows_materialized": false,
+          "status": "engine_run_bundle_not_ready"
+        },
         "runtime_ready_for_engine_execution": false,
         "status": "execution_plan_blocked"
       }
@@ -6009,15 +6268,15 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T09:00:00.558436+00:00",
+  "generated_at": "2026-07-04T09:07:43.214850+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:d2cf680888f69f254dd786b3735710cc32e947e3707cc703eb1932952d0b80e2",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:b1d8b8f4765175c73a9070bee934fc6d1bc2f4f572b630b978202ab39e7f009d",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:a6fa0328fbbdc35c1ff47f966c085b5ae0fc5e6dfa2f1aba17e647681cdc246a",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:dc39006a0ed93c7141d4421294cb9d47e1af8a3c6fc2fe3531aeae754de53c89",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:09354cd520764e9fb23e9a23e1eed17a38e73328687154c5d35c5411731af093",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:ab6c8e6620229a2eaaeec0eaec6a69f1878343bc58dc14732851c077b5d2d2a7",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:7f91716e8bc7db9be619dee2528e1552187c754e6d7702e6ff4ac4ace295933b",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:2ecec04fd65880903fb20f10f7a5c5e46c7cec23f2bdad2b3e2ccf5878763eca"
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:38536c6bc0843872329ad534404d6cac47da683719d707edc6b9edf16e0dcd12",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:c65efa81048810120885b99fad70430b7c0dc958d4afd720d0353641fafeed74",
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:d398d3e9c09ac4b88d6306d3016896ab0fbcdc120993603dacf1512ca43695dd"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -7708,6 +7967,26 @@
               "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
             },
             "detected_row_artifact_count": 0,
+            "engine_run_bundle_materialized": false,
+            "engine_run_bundle_status": "execution_plan_not_ready",
+            "engine_run_bundle_summary": {
+              "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+              "blocker_count": 1,
+              "blockers": [
+                "public_benchmark_vina_gnina_execution_plan_not_ready"
+              ],
+              "bundle_materialized": false,
+              "case_count": 12,
+              "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+              "config_count": 0,
+              "contract_pass": false,
+              "engine_run_count": 24,
+              "engine_runtime_ready": false,
+              "operator_execution_ready": false,
+              "present": true,
+              "receipt_template_count": 0,
+              "status": "execution_plan_not_ready"
+            },
             "engine_runtime_actions": [
               {
                 "binary_env_var": "PUBLIC_BENCHMARK_VINA_BIN",
@@ -7831,8 +8110,8 @@
               },
               "invalid_checksum_count": 0,
               "invalid_source_receipt_count": 0,
-              "known_source_url_content_length_bytes": 1572660769,
-              "known_source_url_content_length_gib": 1.465,
+              "known_source_url_content_length_bytes": 0,
+              "known_source_url_content_length_gib": 0.0,
               "manifest_ready": false,
               "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
               "missing_local_file_count": 48,
@@ -7840,20 +8119,20 @@
               "missing_required_value_count": 36,
               "present": true,
               "source_url_blocked_count": 0,
-              "source_url_not_run_count": 0,
+              "source_url_not_run_count": 1,
               "source_url_probe_count": 1,
-              "source_url_probe_network_performed": true,
+              "source_url_probe_network_performed": false,
               "source_url_probe_plan": [
                 {
                   "case_count": 12,
-                  "content_length_bytes": 1572660769,
+                  "content_length_bytes": 0,
                   "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-                  "http_status": 200,
+                  "http_status": 0,
                   "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-                  "status": "reachable"
+                  "status": "not_run"
                 }
               ],
-              "source_url_reachable_count": 1,
+              "source_url_reachable_count": 0,
               "status": "operator_manifest_completion_required",
               "template_case_coverage_complete": true,
               "template_row_count": 12,
@@ -7878,6 +8157,23 @@
             ],
             "ready_engine_run_slot_count": 0,
             "required_engine_run_count": 24,
+            "rows_from_engine_run_bundle_materialized": false,
+            "rows_from_engine_run_bundle_report_summary": {
+              "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+              "blocker_count": 1,
+              "blockers": [
+                "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+              ],
+              "bundle_ready": false,
+              "case_count": 0,
+              "contract_pass": false,
+              "engine_run_count": 24,
+              "present": true,
+              "ready_engine_run_count": 0,
+              "rows_materialized": false,
+              "status": "engine_run_bundle_not_ready"
+            },
+            "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
             "rows_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
             "rows_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
             "rows_template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md",
@@ -9620,6 +9916,26 @@
             "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
           },
           "detected_row_artifact_count": 0,
+          "engine_run_bundle_materialized": false,
+          "engine_run_bundle_status": "execution_plan_not_ready",
+          "engine_run_bundle_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+            "blocker_count": 1,
+            "blockers": [
+              "public_benchmark_vina_gnina_execution_plan_not_ready"
+            ],
+            "bundle_materialized": false,
+            "case_count": 12,
+            "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+            "config_count": 0,
+            "contract_pass": false,
+            "engine_run_count": 24,
+            "engine_runtime_ready": false,
+            "operator_execution_ready": false,
+            "present": true,
+            "receipt_template_count": 0,
+            "status": "execution_plan_not_ready"
+          },
           "engine_runtime_actions": [
             {
               "binary_env_var": "PUBLIC_BENCHMARK_VINA_BIN",
@@ -9743,8 +10059,8 @@
             },
             "invalid_checksum_count": 0,
             "invalid_source_receipt_count": 0,
-            "known_source_url_content_length_bytes": 1572660769,
-            "known_source_url_content_length_gib": 1.465,
+            "known_source_url_content_length_bytes": 0,
+            "known_source_url_content_length_gib": 0.0,
             "manifest_ready": false,
             "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
             "missing_local_file_count": 48,
@@ -9752,20 +10068,20 @@
             "missing_required_value_count": 36,
             "present": true,
             "source_url_blocked_count": 0,
-            "source_url_not_run_count": 0,
+            "source_url_not_run_count": 1,
             "source_url_probe_count": 1,
-            "source_url_probe_network_performed": true,
+            "source_url_probe_network_performed": false,
             "source_url_probe_plan": [
               {
                 "case_count": 12,
-                "content_length_bytes": 1572660769,
+                "content_length_bytes": 0,
                 "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-                "http_status": 200,
+                "http_status": 0,
                 "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-                "status": "reachable"
+                "status": "not_run"
               }
             ],
-            "source_url_reachable_count": 1,
+            "source_url_reachable_count": 0,
             "status": "operator_manifest_completion_required",
             "template_case_coverage_complete": true,
             "template_row_count": 12,
@@ -9790,6 +10106,23 @@
           ],
           "ready_engine_run_slot_count": 0,
           "required_engine_run_count": 24,
+          "rows_from_engine_run_bundle_materialized": false,
+          "rows_from_engine_run_bundle_report_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+            "blocker_count": 1,
+            "blockers": [
+              "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+            ],
+            "bundle_ready": false,
+            "case_count": 0,
+            "contract_pass": false,
+            "engine_run_count": 24,
+            "present": true,
+            "ready_engine_run_count": 0,
+            "rows_materialized": false,
+            "status": "engine_run_bundle_not_ready"
+          },
+          "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
           "rows_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
           "rows_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
           "rows_template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md",
@@ -10307,6 +10640,26 @@
                 "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
                 "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
               },
+              "engine_run_bundle_materialized": false,
+              "engine_run_bundle_status": "execution_plan_not_ready",
+              "engine_run_bundle_summary": {
+                "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+                "blocker_count": 1,
+                "blockers": [
+                  "public_benchmark_vina_gnina_execution_plan_not_ready"
+                ],
+                "bundle_materialized": false,
+                "case_count": 12,
+                "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+                "config_count": 0,
+                "contract_pass": false,
+                "engine_run_count": 24,
+                "engine_runtime_ready": false,
+                "operator_execution_ready": false,
+                "present": true,
+                "receipt_template_count": 0,
+                "status": "execution_plan_not_ready"
+              },
               "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
               "first_blocked_case_input_slot": {
                 "blockers": [
@@ -10415,8 +10768,8 @@
                 },
                 "invalid_checksum_count": 0,
                 "invalid_source_receipt_count": 0,
-                "known_source_url_content_length_bytes": 1572660769,
-                "known_source_url_content_length_gib": 1.465,
+                "known_source_url_content_length_bytes": 0,
+                "known_source_url_content_length_gib": 0.0,
                 "manifest_ready": false,
                 "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
                 "missing_local_file_count": 48,
@@ -10424,20 +10777,20 @@
                 "missing_required_value_count": 36,
                 "present": true,
                 "source_url_blocked_count": 0,
-                "source_url_not_run_count": 0,
+                "source_url_not_run_count": 1,
                 "source_url_probe_count": 1,
-                "source_url_probe_network_performed": true,
+                "source_url_probe_network_performed": false,
                 "source_url_probe_plan": [
                   {
                     "case_count": 12,
-                    "content_length_bytes": 1572660769,
+                    "content_length_bytes": 0,
                     "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-                    "http_status": 200,
+                    "http_status": 0,
                     "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-                    "status": "reachable"
+                    "status": "not_run"
                   }
                 ],
-                "source_url_reachable_count": 1,
+                "source_url_reachable_count": 0,
                 "status": "operator_manifest_completion_required",
                 "template_case_coverage_complete": true,
                 "template_row_count": 12,
@@ -10459,6 +10812,23 @@
               ],
               "ready_engine_run_slot_count": 0,
               "required_engine_run_count": 24,
+              "rows_from_engine_run_bundle_materialized": false,
+              "rows_from_engine_run_bundle_report_summary": {
+                "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+                "blocker_count": 1,
+                "blockers": [
+                  "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+                ],
+                "bundle_ready": false,
+                "case_count": 0,
+                "contract_pass": false,
+                "engine_run_count": 24,
+                "present": true,
+                "ready_engine_run_count": 0,
+                "rows_materialized": false,
+                "status": "engine_run_bundle_not_ready"
+              },
+              "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
               "rows_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
               "rows_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
               "runtime_ready_for_engine_execution": false,
@@ -10738,6 +11108,8 @@
           "vina_gnina_actual_evidence_blocked_component_count": 6,
           "vina_gnina_actual_evidence_ready_component_count": 0,
           "vina_gnina_actual_evidence_required_engine_run_count": 24,
+          "vina_gnina_engine_run_bundle_materialized": false,
+          "vina_gnina_engine_run_bundle_status": "execution_plan_not_ready",
           "vina_gnina_execution_plan_ready": false,
           "vina_gnina_execution_plan_status": "engine_input_blocked",
           "vina_gnina_input_manifest_detected": true,
@@ -10745,6 +11117,8 @@
           "vina_gnina_input_manifest_status": "ready",
           "vina_gnina_missing_engine_count": 2,
           "vina_gnina_required_engine_run_count": 24,
+          "vina_gnina_rows_from_engine_run_bundle_materialized": false,
+          "vina_gnina_rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
           "vina_gnina_rows_template_preflight_status": "operator_rows_completion_required",
           "vina_gnina_rows_template_role_receipt_blocked_count": 72,
           "vina_gnina_rows_template_role_receipt_plan_count": 96,
@@ -11052,6 +11426,24 @@
           "case_input_slot_matrix_count": 12,
           "command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
           "contract_pass": true,
+          "engine_run_bundle_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+            "blocker_count": 1,
+            "blockers": [
+              "public_benchmark_vina_gnina_execution_plan_not_ready"
+            ],
+            "bundle_materialized": false,
+            "case_count": 12,
+            "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+            "config_count": 0,
+            "contract_pass": false,
+            "engine_run_count": 24,
+            "engine_runtime_ready": false,
+            "operator_execution_ready": false,
+            "present": true,
+            "receipt_template_count": 0,
+            "status": "execution_plan_not_ready"
+          },
           "engine_run_slot_matrix_count": 24,
           "execution_plan_ready": false,
           "missing_engine_ids": [
@@ -11075,27 +11467,47 @@
               "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
               "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
             },
+            "engine_run_bundle_materialized": false,
+            "engine_run_bundle_status": "execution_plan_not_ready",
+            "engine_run_bundle_summary": {
+              "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+              "blocker_count": 1,
+              "blockers": [
+                "public_benchmark_vina_gnina_execution_plan_not_ready"
+              ],
+              "bundle_materialized": false,
+              "case_count": 12,
+              "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+              "config_count": 0,
+              "contract_pass": false,
+              "engine_run_count": 24,
+              "engine_runtime_ready": false,
+              "operator_execution_ready": false,
+              "present": true,
+              "receipt_template_count": 0,
+              "status": "execution_plan_not_ready"
+            },
             "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
             "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
             "input_manifest_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json",
             "input_manifest_template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
             "input_manifest_template_preflight_summary": {
-              "known_source_url_content_length_bytes": 1572660769,
-              "known_source_url_content_length_gib": 1.465,
+              "known_source_url_content_length_bytes": 0,
+              "known_source_url_content_length_gib": 0.0,
               "manifest_ready": false,
               "source_url_probe_count": 1,
-              "source_url_probe_network_performed": true,
+              "source_url_probe_network_performed": false,
               "source_url_probe_plan": [
                 {
                   "case_count": 12,
-                  "content_length_bytes": 1572660769,
+                  "content_length_bytes": 0,
                   "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-                  "http_status": 200,
+                  "http_status": 0,
                   "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-                  "status": "reachable"
+                  "status": "not_run"
                 }
               ],
-              "source_url_reachable_count": 1,
+              "source_url_reachable_count": 0,
               "status": "operator_manifest_completion_required",
               "template_row_count": 12
             },
@@ -11118,10 +11530,42 @@
             ],
             "ready_engine_run_slot_count": 0,
             "required_engine_run_count": 24,
+            "rows_from_engine_run_bundle_materialized": false,
+            "rows_from_engine_run_bundle_report_summary": {
+              "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+              "blocker_count": 1,
+              "blockers": [
+                "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+              ],
+              "bundle_ready": false,
+              "case_count": 0,
+              "contract_pass": false,
+              "engine_run_count": 24,
+              "present": true,
+              "ready_engine_run_count": 0,
+              "rows_materialized": false,
+              "status": "engine_run_bundle_not_ready"
+            },
+            "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
             "status": "engine_inputs_required"
           },
           "ready_engine_run_slot_count": 0,
           "required_engine_run_count": 24,
+          "rows_from_engine_run_bundle_report_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+            "blocker_count": 1,
+            "blockers": [
+              "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+            ],
+            "bundle_ready": false,
+            "case_count": 0,
+            "contract_pass": false,
+            "engine_run_count": 24,
+            "present": true,
+            "ready_engine_run_count": 0,
+            "rows_materialized": false,
+            "status": "engine_run_bundle_not_ready"
+          },
           "runtime_ready_for_engine_execution": false,
           "status": "execution_plan_blocked"
         }
@@ -11561,6 +12005,26 @@
                 "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
                 "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
               },
+              "engine_run_bundle_materialized": false,
+              "engine_run_bundle_status": "execution_plan_not_ready",
+              "engine_run_bundle_summary": {
+                "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+                "blocker_count": 1,
+                "blockers": [
+                  "public_benchmark_vina_gnina_execution_plan_not_ready"
+                ],
+                "bundle_materialized": false,
+                "case_count": 12,
+                "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+                "config_count": 0,
+                "contract_pass": false,
+                "engine_run_count": 24,
+                "engine_runtime_ready": false,
+                "operator_execution_ready": false,
+                "present": true,
+                "receipt_template_count": 0,
+                "status": "execution_plan_not_ready"
+              },
               "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
               "first_blocked_case_input_slot": {
                 "blockers": [
@@ -11669,8 +12133,8 @@
                 },
                 "invalid_checksum_count": 0,
                 "invalid_source_receipt_count": 0,
-                "known_source_url_content_length_bytes": 1572660769,
-                "known_source_url_content_length_gib": 1.465,
+                "known_source_url_content_length_bytes": 0,
+                "known_source_url_content_length_gib": 0.0,
                 "manifest_ready": false,
                 "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
                 "missing_local_file_count": 48,
@@ -11678,20 +12142,20 @@
                 "missing_required_value_count": 36,
                 "present": true,
                 "source_url_blocked_count": 0,
-                "source_url_not_run_count": 0,
+                "source_url_not_run_count": 1,
                 "source_url_probe_count": 1,
-                "source_url_probe_network_performed": true,
+                "source_url_probe_network_performed": false,
                 "source_url_probe_plan": [
                   {
                     "case_count": 12,
-                    "content_length_bytes": 1572660769,
+                    "content_length_bytes": 0,
                     "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-                    "http_status": 200,
+                    "http_status": 0,
                     "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-                    "status": "reachable"
+                    "status": "not_run"
                   }
                 ],
-                "source_url_reachable_count": 1,
+                "source_url_reachable_count": 0,
                 "status": "operator_manifest_completion_required",
                 "template_case_coverage_complete": true,
                 "template_row_count": 12,
@@ -11713,6 +12177,23 @@
               ],
               "ready_engine_run_slot_count": 0,
               "required_engine_run_count": 24,
+              "rows_from_engine_run_bundle_materialized": false,
+              "rows_from_engine_run_bundle_report_summary": {
+                "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+                "blocker_count": 1,
+                "blockers": [
+                  "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+                ],
+                "bundle_ready": false,
+                "case_count": 0,
+                "contract_pass": false,
+                "engine_run_count": 24,
+                "present": true,
+                "ready_engine_run_count": 0,
+                "rows_materialized": false,
+                "status": "engine_run_bundle_not_ready"
+              },
+              "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
               "rows_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
               "rows_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
               "runtime_ready_for_engine_execution": false,
@@ -11992,6 +12473,8 @@
           "vina_gnina_actual_evidence_blocked_component_count": 6,
           "vina_gnina_actual_evidence_ready_component_count": 0,
           "vina_gnina_actual_evidence_required_engine_run_count": 24,
+          "vina_gnina_engine_run_bundle_materialized": false,
+          "vina_gnina_engine_run_bundle_status": "execution_plan_not_ready",
           "vina_gnina_execution_plan_ready": false,
           "vina_gnina_execution_plan_status": "engine_input_blocked",
           "vina_gnina_input_manifest_detected": true,
@@ -11999,6 +12482,8 @@
           "vina_gnina_input_manifest_status": "ready",
           "vina_gnina_missing_engine_count": 2,
           "vina_gnina_required_engine_run_count": 24,
+          "vina_gnina_rows_from_engine_run_bundle_materialized": false,
+          "vina_gnina_rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
           "vina_gnina_rows_template_preflight_status": "operator_rows_completion_required",
           "vina_gnina_rows_template_role_receipt_blocked_count": 72,
           "vina_gnina_rows_template_role_receipt_plan_count": 96,
@@ -12306,6 +12791,24 @@
           "case_input_slot_matrix_count": 12,
           "command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
           "contract_pass": true,
+          "engine_run_bundle_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+            "blocker_count": 1,
+            "blockers": [
+              "public_benchmark_vina_gnina_execution_plan_not_ready"
+            ],
+            "bundle_materialized": false,
+            "case_count": 12,
+            "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+            "config_count": 0,
+            "contract_pass": false,
+            "engine_run_count": 24,
+            "engine_runtime_ready": false,
+            "operator_execution_ready": false,
+            "present": true,
+            "receipt_template_count": 0,
+            "status": "execution_plan_not_ready"
+          },
           "engine_run_slot_matrix_count": 24,
           "execution_plan_ready": false,
           "missing_engine_ids": [
@@ -12329,27 +12832,47 @@
               "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
               "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
             },
+            "engine_run_bundle_materialized": false,
+            "engine_run_bundle_status": "execution_plan_not_ready",
+            "engine_run_bundle_summary": {
+              "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+              "blocker_count": 1,
+              "blockers": [
+                "public_benchmark_vina_gnina_execution_plan_not_ready"
+              ],
+              "bundle_materialized": false,
+              "case_count": 12,
+              "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+              "config_count": 0,
+              "contract_pass": false,
+              "engine_run_count": 24,
+              "engine_runtime_ready": false,
+              "operator_execution_ready": false,
+              "present": true,
+              "receipt_template_count": 0,
+              "status": "execution_plan_not_ready"
+            },
             "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
             "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
             "input_manifest_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json",
             "input_manifest_template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
             "input_manifest_template_preflight_summary": {
-              "known_source_url_content_length_bytes": 1572660769,
-              "known_source_url_content_length_gib": 1.465,
+              "known_source_url_content_length_bytes": 0,
+              "known_source_url_content_length_gib": 0.0,
               "manifest_ready": false,
               "source_url_probe_count": 1,
-              "source_url_probe_network_performed": true,
+              "source_url_probe_network_performed": false,
               "source_url_probe_plan": [
                 {
                   "case_count": 12,
-                  "content_length_bytes": 1572660769,
+                  "content_length_bytes": 0,
                   "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-                  "http_status": 200,
+                  "http_status": 0,
                   "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-                  "status": "reachable"
+                  "status": "not_run"
                 }
               ],
-              "source_url_reachable_count": 1,
+              "source_url_reachable_count": 0,
               "status": "operator_manifest_completion_required",
               "template_row_count": 12
             },
@@ -12372,10 +12895,42 @@
             ],
             "ready_engine_run_slot_count": 0,
             "required_engine_run_count": 24,
+            "rows_from_engine_run_bundle_materialized": false,
+            "rows_from_engine_run_bundle_report_summary": {
+              "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+              "blocker_count": 1,
+              "blockers": [
+                "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+              ],
+              "bundle_ready": false,
+              "case_count": 0,
+              "contract_pass": false,
+              "engine_run_count": 24,
+              "present": true,
+              "ready_engine_run_count": 0,
+              "rows_materialized": false,
+              "status": "engine_run_bundle_not_ready"
+            },
+            "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
             "status": "engine_inputs_required"
           },
           "ready_engine_run_slot_count": 0,
           "required_engine_run_count": 24,
+          "rows_from_engine_run_bundle_report_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+            "blocker_count": 1,
+            "blockers": [
+              "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+            ],
+            "bundle_ready": false,
+            "case_count": 0,
+            "contract_pass": false,
+            "engine_run_count": 24,
+            "present": true,
+            "ready_engine_run_count": 0,
+            "rows_materialized": false,
+            "status": "engine_run_bundle_not_ready"
+          },
           "runtime_ready_for_engine_execution": false,
           "status": "execution_plan_blocked"
         }
@@ -12867,6 +13422,26 @@
                 "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
                 "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
               },
+              "engine_run_bundle_materialized": false,
+              "engine_run_bundle_status": "execution_plan_not_ready",
+              "engine_run_bundle_summary": {
+                "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+                "blocker_count": 1,
+                "blockers": [
+                  "public_benchmark_vina_gnina_execution_plan_not_ready"
+                ],
+                "bundle_materialized": false,
+                "case_count": 12,
+                "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+                "config_count": 0,
+                "contract_pass": false,
+                "engine_run_count": 24,
+                "engine_runtime_ready": false,
+                "operator_execution_ready": false,
+                "present": true,
+                "receipt_template_count": 0,
+                "status": "execution_plan_not_ready"
+              },
               "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
               "first_blocked_case_input_slot": {
                 "blockers": [
@@ -12975,8 +13550,8 @@
                 },
                 "invalid_checksum_count": 0,
                 "invalid_source_receipt_count": 0,
-                "known_source_url_content_length_bytes": 1572660769,
-                "known_source_url_content_length_gib": 1.465,
+                "known_source_url_content_length_bytes": 0,
+                "known_source_url_content_length_gib": 0.0,
                 "manifest_ready": false,
                 "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
                 "missing_local_file_count": 48,
@@ -12984,20 +13559,20 @@
                 "missing_required_value_count": 36,
                 "present": true,
                 "source_url_blocked_count": 0,
-                "source_url_not_run_count": 0,
+                "source_url_not_run_count": 1,
                 "source_url_probe_count": 1,
-                "source_url_probe_network_performed": true,
+                "source_url_probe_network_performed": false,
                 "source_url_probe_plan": [
                   {
                     "case_count": 12,
-                    "content_length_bytes": 1572660769,
+                    "content_length_bytes": 0,
                     "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-                    "http_status": 200,
+                    "http_status": 0,
                     "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-                    "status": "reachable"
+                    "status": "not_run"
                   }
                 ],
-                "source_url_reachable_count": 1,
+                "source_url_reachable_count": 0,
                 "status": "operator_manifest_completion_required",
                 "template_case_coverage_complete": true,
                 "template_row_count": 12,
@@ -13019,6 +13594,23 @@
               ],
               "ready_engine_run_slot_count": 0,
               "required_engine_run_count": 24,
+              "rows_from_engine_run_bundle_materialized": false,
+              "rows_from_engine_run_bundle_report_summary": {
+                "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+                "blocker_count": 1,
+                "blockers": [
+                  "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+                ],
+                "bundle_ready": false,
+                "case_count": 0,
+                "contract_pass": false,
+                "engine_run_count": 24,
+                "present": true,
+                "ready_engine_run_count": 0,
+                "rows_materialized": false,
+                "status": "engine_run_bundle_not_ready"
+              },
+              "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
               "rows_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
               "rows_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
               "runtime_ready_for_engine_execution": false,
@@ -13298,6 +13890,8 @@
           "vina_gnina_actual_evidence_blocked_component_count": 6,
           "vina_gnina_actual_evidence_ready_component_count": 0,
           "vina_gnina_actual_evidence_required_engine_run_count": 24,
+          "vina_gnina_engine_run_bundle_materialized": false,
+          "vina_gnina_engine_run_bundle_status": "execution_plan_not_ready",
           "vina_gnina_execution_plan_ready": false,
           "vina_gnina_execution_plan_status": "engine_input_blocked",
           "vina_gnina_input_manifest_detected": true,
@@ -13305,6 +13899,8 @@
           "vina_gnina_input_manifest_status": "ready",
           "vina_gnina_missing_engine_count": 2,
           "vina_gnina_required_engine_run_count": 24,
+          "vina_gnina_rows_from_engine_run_bundle_materialized": false,
+          "vina_gnina_rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
           "vina_gnina_rows_template_preflight_status": "operator_rows_completion_required",
           "vina_gnina_rows_template_role_receipt_blocked_count": 72,
           "vina_gnina_rows_template_role_receipt_plan_count": 96,
@@ -13612,6 +14208,24 @@
           "case_input_slot_matrix_count": 12,
           "command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
           "contract_pass": true,
+          "engine_run_bundle_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+            "blocker_count": 1,
+            "blockers": [
+              "public_benchmark_vina_gnina_execution_plan_not_ready"
+            ],
+            "bundle_materialized": false,
+            "case_count": 12,
+            "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+            "config_count": 0,
+            "contract_pass": false,
+            "engine_run_count": 24,
+            "engine_runtime_ready": false,
+            "operator_execution_ready": false,
+            "present": true,
+            "receipt_template_count": 0,
+            "status": "execution_plan_not_ready"
+          },
           "engine_run_slot_matrix_count": 24,
           "execution_plan_ready": false,
           "missing_engine_ids": [
@@ -13635,27 +14249,47 @@
               "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
               "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
             },
+            "engine_run_bundle_materialized": false,
+            "engine_run_bundle_status": "execution_plan_not_ready",
+            "engine_run_bundle_summary": {
+              "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+              "blocker_count": 1,
+              "blockers": [
+                "public_benchmark_vina_gnina_execution_plan_not_ready"
+              ],
+              "bundle_materialized": false,
+              "case_count": 12,
+              "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+              "config_count": 0,
+              "contract_pass": false,
+              "engine_run_count": 24,
+              "engine_runtime_ready": false,
+              "operator_execution_ready": false,
+              "present": true,
+              "receipt_template_count": 0,
+              "status": "execution_plan_not_ready"
+            },
             "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
             "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
             "input_manifest_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json",
             "input_manifest_template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
             "input_manifest_template_preflight_summary": {
-              "known_source_url_content_length_bytes": 1572660769,
-              "known_source_url_content_length_gib": 1.465,
+              "known_source_url_content_length_bytes": 0,
+              "known_source_url_content_length_gib": 0.0,
               "manifest_ready": false,
               "source_url_probe_count": 1,
-              "source_url_probe_network_performed": true,
+              "source_url_probe_network_performed": false,
               "source_url_probe_plan": [
                 {
                   "case_count": 12,
-                  "content_length_bytes": 1572660769,
+                  "content_length_bytes": 0,
                   "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-                  "http_status": 200,
+                  "http_status": 0,
                   "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-                  "status": "reachable"
+                  "status": "not_run"
                 }
               ],
-              "source_url_reachable_count": 1,
+              "source_url_reachable_count": 0,
               "status": "operator_manifest_completion_required",
               "template_row_count": 12
             },
@@ -13678,10 +14312,42 @@
             ],
             "ready_engine_run_slot_count": 0,
             "required_engine_run_count": 24,
+            "rows_from_engine_run_bundle_materialized": false,
+            "rows_from_engine_run_bundle_report_summary": {
+              "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+              "blocker_count": 1,
+              "blockers": [
+                "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+              ],
+              "bundle_ready": false,
+              "case_count": 0,
+              "contract_pass": false,
+              "engine_run_count": 24,
+              "present": true,
+              "ready_engine_run_count": 0,
+              "rows_materialized": false,
+              "status": "engine_run_bundle_not_ready"
+            },
+            "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
             "status": "engine_inputs_required"
           },
           "ready_engine_run_slot_count": 0,
           "required_engine_run_count": 24,
+          "rows_from_engine_run_bundle_report_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+            "blocker_count": 1,
+            "blockers": [
+              "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+            ],
+            "bundle_ready": false,
+            "case_count": 0,
+            "contract_pass": false,
+            "engine_run_count": 24,
+            "present": true,
+            "ready_engine_run_count": 0,
+            "rows_materialized": false,
+            "status": "engine_run_bundle_not_ready"
+          },
           "runtime_ready_for_engine_execution": false,
           "status": "execution_plan_blocked"
         }
@@ -14881,6 +15547,26 @@
             "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
           },
           "detected_row_artifact_count": 0,
+          "engine_run_bundle_materialized": false,
+          "engine_run_bundle_status": "execution_plan_not_ready",
+          "engine_run_bundle_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+            "blocker_count": 1,
+            "blockers": [
+              "public_benchmark_vina_gnina_execution_plan_not_ready"
+            ],
+            "bundle_materialized": false,
+            "case_count": 12,
+            "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+            "config_count": 0,
+            "contract_pass": false,
+            "engine_run_count": 24,
+            "engine_runtime_ready": false,
+            "operator_execution_ready": false,
+            "present": true,
+            "receipt_template_count": 0,
+            "status": "execution_plan_not_ready"
+          },
           "engine_runtime_actions": [
             {
               "binary_env_var": "PUBLIC_BENCHMARK_VINA_BIN",
@@ -15004,8 +15690,8 @@
             },
             "invalid_checksum_count": 0,
             "invalid_source_receipt_count": 0,
-            "known_source_url_content_length_bytes": 1572660769,
-            "known_source_url_content_length_gib": 1.465,
+            "known_source_url_content_length_bytes": 0,
+            "known_source_url_content_length_gib": 0.0,
             "manifest_ready": false,
             "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
             "missing_local_file_count": 48,
@@ -15013,20 +15699,20 @@
             "missing_required_value_count": 36,
             "present": true,
             "source_url_blocked_count": 0,
-            "source_url_not_run_count": 0,
+            "source_url_not_run_count": 1,
             "source_url_probe_count": 1,
-            "source_url_probe_network_performed": true,
+            "source_url_probe_network_performed": false,
             "source_url_probe_plan": [
               {
                 "case_count": 12,
-                "content_length_bytes": 1572660769,
+                "content_length_bytes": 0,
                 "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-                "http_status": 200,
+                "http_status": 0,
                 "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-                "status": "reachable"
+                "status": "not_run"
               }
             ],
-            "source_url_reachable_count": 1,
+            "source_url_reachable_count": 0,
             "status": "operator_manifest_completion_required",
             "template_case_coverage_complete": true,
             "template_row_count": 12,
@@ -15051,6 +15737,23 @@
           ],
           "ready_engine_run_slot_count": 0,
           "required_engine_run_count": 24,
+          "rows_from_engine_run_bundle_materialized": false,
+          "rows_from_engine_run_bundle_report_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+            "blocker_count": 1,
+            "blockers": [
+              "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+            ],
+            "bundle_ready": false,
+            "case_count": 0,
+            "contract_pass": false,
+            "engine_run_count": 24,
+            "present": true,
+            "ready_engine_run_count": 0,
+            "rows_materialized": false,
+            "status": "engine_run_bundle_not_ready"
+          },
+          "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
           "rows_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
           "rows_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
           "rows_template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md",
@@ -15385,6 +16088,26 @@
             "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
             "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
           },
+          "engine_run_bundle_materialized": false,
+          "engine_run_bundle_status": "execution_plan_not_ready",
+          "engine_run_bundle_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+            "blocker_count": 1,
+            "blockers": [
+              "public_benchmark_vina_gnina_execution_plan_not_ready"
+            ],
+            "bundle_materialized": false,
+            "case_count": 12,
+            "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+            "config_count": 0,
+            "contract_pass": false,
+            "engine_run_count": 24,
+            "engine_runtime_ready": false,
+            "operator_execution_ready": false,
+            "present": true,
+            "receipt_template_count": 0,
+            "status": "execution_plan_not_ready"
+          },
           "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
           "first_blocked_case_input_slot": {
             "blockers": [
@@ -15493,8 +16216,8 @@
             },
             "invalid_checksum_count": 0,
             "invalid_source_receipt_count": 0,
-            "known_source_url_content_length_bytes": 1572660769,
-            "known_source_url_content_length_gib": 1.465,
+            "known_source_url_content_length_bytes": 0,
+            "known_source_url_content_length_gib": 0.0,
             "manifest_ready": false,
             "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
             "missing_local_file_count": 48,
@@ -15502,20 +16225,20 @@
             "missing_required_value_count": 36,
             "present": true,
             "source_url_blocked_count": 0,
-            "source_url_not_run_count": 0,
+            "source_url_not_run_count": 1,
             "source_url_probe_count": 1,
-            "source_url_probe_network_performed": true,
+            "source_url_probe_network_performed": false,
             "source_url_probe_plan": [
               {
                 "case_count": 12,
-                "content_length_bytes": 1572660769,
+                "content_length_bytes": 0,
                 "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-                "http_status": 200,
+                "http_status": 0,
                 "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-                "status": "reachable"
+                "status": "not_run"
               }
             ],
-            "source_url_reachable_count": 1,
+            "source_url_reachable_count": 0,
             "status": "operator_manifest_completion_required",
             "template_case_coverage_complete": true,
             "template_row_count": 12,
@@ -15537,6 +16260,23 @@
           ],
           "ready_engine_run_slot_count": 0,
           "required_engine_run_count": 24,
+          "rows_from_engine_run_bundle_materialized": false,
+          "rows_from_engine_run_bundle_report_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+            "blocker_count": 1,
+            "blockers": [
+              "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+            ],
+            "bundle_ready": false,
+            "case_count": 0,
+            "contract_pass": false,
+            "engine_run_count": 24,
+            "present": true,
+            "ready_engine_run_count": 0,
+            "rows_materialized": false,
+            "status": "engine_run_bundle_not_ready"
+          },
+          "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
           "rows_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
           "rows_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
           "runtime_ready_for_engine_execution": false,
@@ -15848,6 +16588,26 @@
                 "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
                 "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
               },
+              "engine_run_bundle_materialized": false,
+              "engine_run_bundle_status": "execution_plan_not_ready",
+              "engine_run_bundle_summary": {
+                "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+                "blocker_count": 1,
+                "blockers": [
+                  "public_benchmark_vina_gnina_execution_plan_not_ready"
+                ],
+                "bundle_materialized": false,
+                "case_count": 12,
+                "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+                "config_count": 0,
+                "contract_pass": false,
+                "engine_run_count": 24,
+                "engine_runtime_ready": false,
+                "operator_execution_ready": false,
+                "present": true,
+                "receipt_template_count": 0,
+                "status": "execution_plan_not_ready"
+              },
               "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
               "first_blocked_case_input_slot": {
                 "blockers": [
@@ -15956,8 +16716,8 @@
                 },
                 "invalid_checksum_count": 0,
                 "invalid_source_receipt_count": 0,
-                "known_source_url_content_length_bytes": 1572660769,
-                "known_source_url_content_length_gib": 1.465,
+                "known_source_url_content_length_bytes": 0,
+                "known_source_url_content_length_gib": 0.0,
                 "manifest_ready": false,
                 "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
                 "missing_local_file_count": 48,
@@ -15965,20 +16725,20 @@
                 "missing_required_value_count": 36,
                 "present": true,
                 "source_url_blocked_count": 0,
-                "source_url_not_run_count": 0,
+                "source_url_not_run_count": 1,
                 "source_url_probe_count": 1,
-                "source_url_probe_network_performed": true,
+                "source_url_probe_network_performed": false,
                 "source_url_probe_plan": [
                   {
                     "case_count": 12,
-                    "content_length_bytes": 1572660769,
+                    "content_length_bytes": 0,
                     "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-                    "http_status": 200,
+                    "http_status": 0,
                     "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-                    "status": "reachable"
+                    "status": "not_run"
                   }
                 ],
-                "source_url_reachable_count": 1,
+                "source_url_reachable_count": 0,
                 "status": "operator_manifest_completion_required",
                 "template_case_coverage_complete": true,
                 "template_row_count": 12,
@@ -16000,6 +16760,23 @@
               ],
               "ready_engine_run_slot_count": 0,
               "required_engine_run_count": 24,
+              "rows_from_engine_run_bundle_materialized": false,
+              "rows_from_engine_run_bundle_report_summary": {
+                "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+                "blocker_count": 1,
+                "blockers": [
+                  "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+                ],
+                "bundle_ready": false,
+                "case_count": 0,
+                "contract_pass": false,
+                "engine_run_count": 24,
+                "present": true,
+                "ready_engine_run_count": 0,
+                "rows_materialized": false,
+                "status": "engine_run_bundle_not_ready"
+              },
+              "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
               "rows_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
               "rows_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
               "runtime_ready_for_engine_execution": false,
@@ -16279,6 +17056,8 @@
           "vina_gnina_actual_evidence_blocked_component_count": 6,
           "vina_gnina_actual_evidence_ready_component_count": 0,
           "vina_gnina_actual_evidence_required_engine_run_count": 24,
+          "vina_gnina_engine_run_bundle_materialized": false,
+          "vina_gnina_engine_run_bundle_status": "execution_plan_not_ready",
           "vina_gnina_execution_plan_ready": false,
           "vina_gnina_execution_plan_status": "engine_input_blocked",
           "vina_gnina_input_manifest_detected": true,
@@ -16286,6 +17065,8 @@
           "vina_gnina_input_manifest_status": "ready",
           "vina_gnina_missing_engine_count": 2,
           "vina_gnina_required_engine_run_count": 24,
+          "vina_gnina_rows_from_engine_run_bundle_materialized": false,
+          "vina_gnina_rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
           "vina_gnina_rows_template_preflight_status": "operator_rows_completion_required",
           "vina_gnina_rows_template_role_receipt_blocked_count": 72,
           "vina_gnina_rows_template_role_receipt_plan_count": 96,
@@ -16593,6 +17374,24 @@
           "case_input_slot_matrix_count": 12,
           "command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
           "contract_pass": true,
+          "engine_run_bundle_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+            "blocker_count": 1,
+            "blockers": [
+              "public_benchmark_vina_gnina_execution_plan_not_ready"
+            ],
+            "bundle_materialized": false,
+            "case_count": 12,
+            "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+            "config_count": 0,
+            "contract_pass": false,
+            "engine_run_count": 24,
+            "engine_runtime_ready": false,
+            "operator_execution_ready": false,
+            "present": true,
+            "receipt_template_count": 0,
+            "status": "execution_plan_not_ready"
+          },
           "engine_run_slot_matrix_count": 24,
           "execution_plan_ready": false,
           "missing_engine_ids": [
@@ -16616,27 +17415,47 @@
               "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
               "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
             },
+            "engine_run_bundle_materialized": false,
+            "engine_run_bundle_status": "execution_plan_not_ready",
+            "engine_run_bundle_summary": {
+              "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+              "blocker_count": 1,
+              "blockers": [
+                "public_benchmark_vina_gnina_execution_plan_not_ready"
+              ],
+              "bundle_materialized": false,
+              "case_count": 12,
+              "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+              "config_count": 0,
+              "contract_pass": false,
+              "engine_run_count": 24,
+              "engine_runtime_ready": false,
+              "operator_execution_ready": false,
+              "present": true,
+              "receipt_template_count": 0,
+              "status": "execution_plan_not_ready"
+            },
             "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
             "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
             "input_manifest_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json",
             "input_manifest_template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
             "input_manifest_template_preflight_summary": {
-              "known_source_url_content_length_bytes": 1572660769,
-              "known_source_url_content_length_gib": 1.465,
+              "known_source_url_content_length_bytes": 0,
+              "known_source_url_content_length_gib": 0.0,
               "manifest_ready": false,
               "source_url_probe_count": 1,
-              "source_url_probe_network_performed": true,
+              "source_url_probe_network_performed": false,
               "source_url_probe_plan": [
                 {
                   "case_count": 12,
-                  "content_length_bytes": 1572660769,
+                  "content_length_bytes": 0,
                   "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-                  "http_status": 200,
+                  "http_status": 0,
                   "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-                  "status": "reachable"
+                  "status": "not_run"
                 }
               ],
-              "source_url_reachable_count": 1,
+              "source_url_reachable_count": 0,
               "status": "operator_manifest_completion_required",
               "template_row_count": 12
             },
@@ -16659,10 +17478,42 @@
             ],
             "ready_engine_run_slot_count": 0,
             "required_engine_run_count": 24,
+            "rows_from_engine_run_bundle_materialized": false,
+            "rows_from_engine_run_bundle_report_summary": {
+              "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+              "blocker_count": 1,
+              "blockers": [
+                "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+              ],
+              "bundle_ready": false,
+              "case_count": 0,
+              "contract_pass": false,
+              "engine_run_count": 24,
+              "present": true,
+              "ready_engine_run_count": 0,
+              "rows_materialized": false,
+              "status": "engine_run_bundle_not_ready"
+            },
+            "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
             "status": "engine_inputs_required"
           },
           "ready_engine_run_slot_count": 0,
           "required_engine_run_count": 24,
+          "rows_from_engine_run_bundle_report_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+            "blocker_count": 1,
+            "blockers": [
+              "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+            ],
+            "bundle_ready": false,
+            "case_count": 0,
+            "contract_pass": false,
+            "engine_run_count": 24,
+            "present": true,
+            "ready_engine_run_count": 0,
+            "rows_materialized": false,
+            "status": "engine_run_bundle_not_ready"
+          },
           "runtime_ready_for_engine_execution": false,
           "status": "execution_plan_blocked"
         }
@@ -19584,7 +20435,7 @@
   },
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "cff3e681d862fea131bc00ecb07612120e0cc028",
+  "source_commit_sha": "20c62f437c0fd135f7d87e5f2e20749f7c0b2381",
   "status": "operator_rows_required",
   "summary": {
     "actual_closure_blocked_component_count": 2,
@@ -21723,6 +22574,26 @@
               "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
               "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
             },
+            "engine_run_bundle_materialized": false,
+            "engine_run_bundle_status": "execution_plan_not_ready",
+            "engine_run_bundle_summary": {
+              "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+              "blocker_count": 1,
+              "blockers": [
+                "public_benchmark_vina_gnina_execution_plan_not_ready"
+              ],
+              "bundle_materialized": false,
+              "case_count": 12,
+              "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+              "config_count": 0,
+              "contract_pass": false,
+              "engine_run_count": 24,
+              "engine_runtime_ready": false,
+              "operator_execution_ready": false,
+              "present": true,
+              "receipt_template_count": 0,
+              "status": "execution_plan_not_ready"
+            },
             "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
             "first_blocked_case_input_slot": {
               "blockers": [
@@ -21831,8 +22702,8 @@
               },
               "invalid_checksum_count": 0,
               "invalid_source_receipt_count": 0,
-              "known_source_url_content_length_bytes": 1572660769,
-              "known_source_url_content_length_gib": 1.465,
+              "known_source_url_content_length_bytes": 0,
+              "known_source_url_content_length_gib": 0.0,
               "manifest_ready": false,
               "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
               "missing_local_file_count": 48,
@@ -21840,20 +22711,20 @@
               "missing_required_value_count": 36,
               "present": true,
               "source_url_blocked_count": 0,
-              "source_url_not_run_count": 0,
+              "source_url_not_run_count": 1,
               "source_url_probe_count": 1,
-              "source_url_probe_network_performed": true,
+              "source_url_probe_network_performed": false,
               "source_url_probe_plan": [
                 {
                   "case_count": 12,
-                  "content_length_bytes": 1572660769,
+                  "content_length_bytes": 0,
                   "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-                  "http_status": 200,
+                  "http_status": 0,
                   "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-                  "status": "reachable"
+                  "status": "not_run"
                 }
               ],
-              "source_url_reachable_count": 1,
+              "source_url_reachable_count": 0,
               "status": "operator_manifest_completion_required",
               "template_case_coverage_complete": true,
               "template_row_count": 12,
@@ -21875,6 +22746,23 @@
             ],
             "ready_engine_run_slot_count": 0,
             "required_engine_run_count": 24,
+            "rows_from_engine_run_bundle_materialized": false,
+            "rows_from_engine_run_bundle_report_summary": {
+              "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+              "blocker_count": 1,
+              "blockers": [
+                "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+              ],
+              "bundle_ready": false,
+              "case_count": 0,
+              "contract_pass": false,
+              "engine_run_count": 24,
+              "present": true,
+              "ready_engine_run_count": 0,
+              "rows_materialized": false,
+              "status": "engine_run_bundle_not_ready"
+            },
+            "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
             "rows_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
             "rows_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
             "runtime_ready_for_engine_execution": false,
@@ -22449,6 +23337,8 @@
         "vina_gnina_actual_evidence_blocked_component_count": 6,
         "vina_gnina_actual_evidence_ready_component_count": 0,
         "vina_gnina_actual_evidence_required_engine_run_count": 24,
+        "vina_gnina_engine_run_bundle_materialized": false,
+        "vina_gnina_engine_run_bundle_status": "execution_plan_not_ready",
         "vina_gnina_execution_plan_ready": false,
         "vina_gnina_execution_plan_status": "engine_input_blocked",
         "vina_gnina_input_manifest_detected": true,
@@ -22456,6 +23346,8 @@
         "vina_gnina_input_manifest_status": "ready",
         "vina_gnina_missing_engine_count": 2,
         "vina_gnina_required_engine_run_count": 24,
+        "vina_gnina_rows_from_engine_run_bundle_materialized": false,
+        "vina_gnina_rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
         "vina_gnina_rows_template_preflight_status": "operator_rows_completion_required",
         "vina_gnina_rows_template_role_receipt_blocked_count": 72,
         "vina_gnina_rows_template_role_receipt_plan_count": 96,
@@ -24061,6 +24953,24 @@
         "case_input_slot_matrix_count": 12,
         "command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
         "contract_pass": true,
+        "engine_run_bundle_summary": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+          "blocker_count": 1,
+          "blockers": [
+            "public_benchmark_vina_gnina_execution_plan_not_ready"
+          ],
+          "bundle_materialized": false,
+          "case_count": 12,
+          "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+          "config_count": 0,
+          "contract_pass": false,
+          "engine_run_count": 24,
+          "engine_runtime_ready": false,
+          "operator_execution_ready": false,
+          "present": true,
+          "receipt_template_count": 0,
+          "status": "execution_plan_not_ready"
+        },
         "engine_run_slot_matrix_count": 24,
         "execution_plan_ready": false,
         "missing_engine_ids": [
@@ -24084,27 +24994,47 @@
             "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
             "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
           },
+          "engine_run_bundle_materialized": false,
+          "engine_run_bundle_status": "execution_plan_not_ready",
+          "engine_run_bundle_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+            "blocker_count": 1,
+            "blockers": [
+              "public_benchmark_vina_gnina_execution_plan_not_ready"
+            ],
+            "bundle_materialized": false,
+            "case_count": 12,
+            "commands_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+            "config_count": 0,
+            "contract_pass": false,
+            "engine_run_count": 24,
+            "engine_runtime_ready": false,
+            "operator_execution_ready": false,
+            "present": true,
+            "receipt_template_count": 0,
+            "status": "execution_plan_not_ready"
+          },
           "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
           "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
           "input_manifest_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json",
           "input_manifest_template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
           "input_manifest_template_preflight_summary": {
-            "known_source_url_content_length_bytes": 1572660769,
-            "known_source_url_content_length_gib": 1.465,
+            "known_source_url_content_length_bytes": 0,
+            "known_source_url_content_length_gib": 0.0,
             "manifest_ready": false,
             "source_url_probe_count": 1,
-            "source_url_probe_network_performed": true,
+            "source_url_probe_network_performed": false,
             "source_url_probe_plan": [
               {
                 "case_count": 12,
-                "content_length_bytes": 1572660769,
+                "content_length_bytes": 0,
                 "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-                "http_status": 200,
+                "http_status": 0,
                 "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-                "status": "reachable"
+                "status": "not_run"
               }
             ],
-            "source_url_reachable_count": 1,
+            "source_url_reachable_count": 0,
             "status": "operator_manifest_completion_required",
             "template_row_count": 12
           },
@@ -24127,10 +25057,42 @@
           ],
           "ready_engine_run_slot_count": 0,
           "required_engine_run_count": 24,
+          "rows_from_engine_run_bundle_materialized": false,
+          "rows_from_engine_run_bundle_report_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+            "blocker_count": 1,
+            "blockers": [
+              "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+            ],
+            "bundle_ready": false,
+            "case_count": 0,
+            "contract_pass": false,
+            "engine_run_count": 24,
+            "present": true,
+            "ready_engine_run_count": 0,
+            "rows_materialized": false,
+            "status": "engine_run_bundle_not_ready"
+          },
+          "rows_from_engine_run_bundle_status": "engine_run_bundle_not_ready",
           "status": "engine_inputs_required"
         },
         "ready_engine_run_slot_count": 0,
         "required_engine_run_count": 24,
+        "rows_from_engine_run_bundle_report_summary": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+          "blocker_count": 1,
+          "blockers": [
+            "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+          ],
+          "bundle_ready": false,
+          "case_count": 0,
+          "contract_pass": false,
+          "engine_run_count": 24,
+          "present": true,
+          "ready_engine_run_count": 0,
+          "rows_materialized": false,
+          "status": "engine_run_bundle_not_ready"
+        },
         "runtime_ready_for_engine_execution": false,
         "status": "execution_plan_blocked"
       }

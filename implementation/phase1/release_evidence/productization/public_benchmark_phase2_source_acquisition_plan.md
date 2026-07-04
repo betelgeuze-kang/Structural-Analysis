@@ -45,6 +45,10 @@
 - `vina_gnina_runtime_engine_run_slot_count`: `24`
 - `vina_gnina_runtime_blocked_engine_run_slot_count`: `24`
 - `vina_gnina_adapter_row_preflight_status`: `row_artifact_missing`
+- `vina_gnina_engine_run_bundle_status`: `execution_plan_not_ready`
+- `vina_gnina_engine_run_bundle_materialized`: `False`
+- `vina_gnina_rows_from_engine_run_bundle_status`: `engine_run_bundle_not_ready`
+- `vina_gnina_rows_from_engine_run_bundle_materialized`: `False`
 - `vina_gnina_rows_template_role_receipt_blocked_count`: `72`
 - `vina_gnina_runtime_missing_engine_ids`: `vina, gnina`
 

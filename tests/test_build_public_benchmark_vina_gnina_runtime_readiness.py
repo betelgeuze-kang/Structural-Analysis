@@ -402,6 +402,8 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "blocker_count": 5,
         "case_count": 1,
         "detected_row_artifact_count": 0,
+        "engine_run_bundle_materialized": False,
+        "engine_run_bundle_status": "missing",
         "execution_plan_ready": True,
         "first_blocked_case_input_case_id": "",
         "first_blocked_engine_run_case_id": "casf2016_1abc",
@@ -413,6 +415,8 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "operator_execution_ready": False,
         "ready_engine_run_slot_count": 0,
         "required_engine_run_count": 2,
+        "rows_from_engine_run_bundle_materialized": False,
+        "rows_from_engine_run_bundle_report_status": "missing",
         "runtime_ready_for_engine_execution": False,
         "selected_row_count": 0,
     }
@@ -486,6 +490,12 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_rows_template_preflight.json"
     )
+    assert unblock["engine_run_bundle_status"] == "missing"
+    assert unblock["engine_run_bundle_materialized"] is False
+    assert unblock["rows_from_engine_run_bundle_status"] == "missing"
+    assert unblock["rows_from_engine_run_bundle_materialized"] is False
+    assert unblock["engine_run_bundle_summary"]["present"] is False
+    assert unblock["rows_from_engine_run_bundle_report_summary"]["present"] is False
     assert unblock["commands"]["build_input_manifest_template_preflight"] == (
         "python3 scripts/"
         "build_public_benchmark_vina_gnina_input_manifest_template_preflight.py "
