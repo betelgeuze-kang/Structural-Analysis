@@ -149,15 +149,15 @@
 
 ### Vina/GNINA Operator Blocker Families
 
-| Family | Status | Missing Items | Blocked Cases | Operator Action |
-|---|---|---:|---:|---|
-| `manifest_required_values` | `blocked` | 36 | 12 | `complete_vina_gnina_input_manifest_required_values` |
-| `official_source_files` | `blocked` | 24 | 12 | `materialize_source_files_from_casf_archive_and_verify_checksum` |
-| `prepared_input_files` | `blocked` | 24 | 12 | `prepare_vina_gnina_inputs_and_record_checksums` |
-| `input_and_engine_receipt_refs` | `blocked` | 60 | 12 | `attach_vina_gnina_input_and_engine_receipt_refs` |
-| `engine_runtime` | `blocked` | 2 | 0 | `configure_vina_gnina_binary_or_container_runtime` |
-| `engine_run_slots` | `blocked` | 24 | 12 | `rerun_runtime_readiness_until_engine_run_slots_ready` |
-| `adapter_rows` | `blocked` | 12 | 12 | `attach_or_materialize_public_benchmark_vina_gnina_rows` |
+| Family | Status | Missing Items | Blocked Cases | Operator Action | Command Key | Materialization Command |
+|---|---|---:|---:|---|---|---|
+| `manifest_required_values` | `blocked` | 36 | 12 | `complete_vina_gnina_input_manifest_required_values` | `build_input_manifest_template_preflight` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` |
+| `official_source_files` | `blocked` | 24 | 12 | `materialize_source_files_from_casf_archive_and_verify_checksum` | `materialize_input_manifest_from_casf_archive` | `python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked` |
+| `prepared_input_files` | `blocked` | 24 | 12 | `prepare_vina_gnina_inputs_and_record_checksums` | `build_input_manifest_template_preflight` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` |
+| `input_and_engine_receipt_refs` | `blocked` | 60 | 12 | `attach_vina_gnina_input_and_engine_receipt_refs` | `build_input_manifest_template_preflight` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` |
+| `engine_runtime` | `blocked` | 2 | 0 | `configure_vina_gnina_binary_or_container_runtime` | `rerun_runtime_readiness` | `python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json` |
+| `engine_run_slots` | `blocked` | 24 | 12 | `rerun_runtime_readiness_until_engine_run_slots_ready` | `rerun_runtime_readiness` | `python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json` |
+| `adapter_rows` | `blocked` | 12 | 12 | `attach_or_materialize_public_benchmark_vina_gnina_rows` | `materialize_rows_from_engine_run_bundle` | `python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py --engine-run-bundle implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json --out-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json` |
 
 | Row Input | Source Family | Status | Unblocks |
 |---|---|---|---|
@@ -215,15 +215,15 @@
 
 #### Vina/GNINA Runtime Blocker Families
 
-| Family | Status | Missing Items | Blocked Cases | Command Key |
-|---|---|---:|---:|---|
-| `manifest_required_values` | `blocked` | 36 | 12 | `build_input_manifest_template_preflight` |
-| `official_source_files` | `blocked` | 24 | 12 | `materialize_input_manifest_from_casf_archive` |
-| `prepared_input_files` | `blocked` | 24 | 12 | `build_input_manifest_template_preflight` |
-| `input_and_engine_receipt_refs` | `blocked` | 60 | 12 | `build_input_manifest_template_preflight` |
-| `engine_runtime` | `blocked` | 2 | 0 | `rerun_runtime_readiness` |
-| `engine_run_slots` | `blocked` | 24 | 12 | `rerun_runtime_readiness` |
-| `adapter_rows` | `blocked` | 12 | 12 | `materialize_rows_from_engine_run_bundle` |
+| Family | Status | Missing Items | Blocked Cases | Command Key | Materialization Command |
+|---|---|---:|---:|---|---|
+| `manifest_required_values` | `blocked` | 36 | 12 | `build_input_manifest_template_preflight` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` |
+| `official_source_files` | `blocked` | 24 | 12 | `materialize_input_manifest_from_casf_archive` | `python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked` |
+| `prepared_input_files` | `blocked` | 24 | 12 | `build_input_manifest_template_preflight` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` |
+| `input_and_engine_receipt_refs` | `blocked` | 60 | 12 | `build_input_manifest_template_preflight` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` |
+| `engine_runtime` | `blocked` | 2 | 0 | `rerun_runtime_readiness` | `python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json` |
+| `engine_run_slots` | `blocked` | 24 | 12 | `rerun_runtime_readiness` | `python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json` |
+| `adapter_rows` | `blocked` | 12 | 12 | `materialize_rows_from_engine_run_bundle` | `python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py --engine-run-bundle implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json --out-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json` |
 
 ### Vina/GNINA Input Manifest Action
 

@@ -317,9 +317,14 @@ def _as_int(value: Any) -> int:
         return 0
 
 
-def _compact_operator_blocker_family(row: dict[str, Any]) -> dict[str, Any]:
+def _compact_operator_blocker_family(
+    row: dict[str, Any],
+    *,
+    commands: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     if not row:
         return {}
+    command_key = str(row.get("command_key") or "")
     return {
         "family_id": str(row.get("family_id") or ""),
         "description": str(row.get("description") or ""),
@@ -328,7 +333,15 @@ def _compact_operator_blocker_family(row: dict[str, Any]) -> dict[str, Any]:
         "blocked_case_count": _as_int(row.get("blocked_case_count")),
         "first_missing_item": _as_dict(row.get("first_missing_item")),
         "operator_action": str(row.get("operator_action") or ""),
-        "command_key": str(row.get("command_key") or ""),
+        "next_action": str(
+            row.get("next_action") or row.get("operator_action") or ""
+        ),
+        "command_key": command_key,
+        "materialization_command": str(
+            row.get("materialization_command")
+            or _as_dict(commands or {}).get(command_key)
+            or ""
+        ),
     }
 
 
@@ -341,7 +354,9 @@ def _operator_blocker_family_row(
     first_missing_item: dict[str, Any],
     operator_action: str,
     command_key: str,
+    commands: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    materialization_command = str(_as_dict(commands or {}).get(command_key) or "")
     return {
         "family_id": family_id,
         "description": description,
@@ -350,7 +365,9 @@ def _operator_blocker_family_row(
         "blocked_case_count": blocked_case_count,
         "first_missing_item": first_missing_item if missing_item_count else {},
         "operator_action": operator_action,
+        "next_action": operator_action,
         "command_key": command_key,
+        "materialization_command": materialization_command,
     }
 
 
@@ -361,6 +378,7 @@ def _case_count(rows: list[dict[str, Any]]) -> int:
 def _fallback_vina_gnina_operator_blocker_family_plan(
     packet: dict[str, Any],
 ) -> list[dict[str, Any]]:
+    commands = _as_dict(packet.get("commands"))
     preflight_summary = _as_dict(packet.get("input_manifest_template_preflight_summary"))
     completion_actions = [
         row
@@ -435,6 +453,7 @@ def _fallback_vina_gnina_operator_blocker_family_plan(
             else {},
             operator_action="complete_vina_gnina_input_manifest_required_values",
             command_key="build_input_manifest_template_preflight",
+            commands=commands,
         ),
         _operator_blocker_family_row(
             family_id="official_source_files",
@@ -444,6 +463,7 @@ def _fallback_vina_gnina_operator_blocker_family_plan(
             first_missing_item=official_source_files[0] if official_source_files else {},
             operator_action="materialize_source_files_from_casf_archive_and_verify_checksum",
             command_key="materialize_input_manifest_from_casf_archive",
+            commands=commands,
         ),
         _operator_blocker_family_row(
             family_id="prepared_input_files",
@@ -453,6 +473,7 @@ def _fallback_vina_gnina_operator_blocker_family_plan(
             first_missing_item=prepared_input_files[0] if prepared_input_files else {},
             operator_action="prepare_vina_gnina_inputs_and_record_checksums",
             command_key="build_input_manifest_template_preflight",
+            commands=commands,
         ),
         _operator_blocker_family_row(
             family_id="input_and_engine_receipt_refs",
@@ -462,6 +483,7 @@ def _fallback_vina_gnina_operator_blocker_family_plan(
             first_missing_item=receipt_refs[0] if receipt_refs else {},
             operator_action="attach_vina_gnina_input_and_engine_receipt_refs",
             command_key="build_input_manifest_template_preflight",
+            commands=commands,
         ),
         _operator_blocker_family_row(
             family_id="engine_runtime",
@@ -471,6 +493,7 @@ def _fallback_vina_gnina_operator_blocker_family_plan(
             first_missing_item=engine_runtime_items[0] if engine_runtime_items else {},
             operator_action="configure_vina_gnina_binary_or_container_runtime",
             command_key="rerun_runtime_readiness",
+            commands=commands,
         ),
         _operator_blocker_family_row(
             family_id="engine_run_slots",
@@ -480,6 +503,7 @@ def _fallback_vina_gnina_operator_blocker_family_plan(
             first_missing_item=first_blocked_engine_run_slot,
             operator_action="rerun_runtime_readiness_until_engine_run_slots_ready",
             command_key="rerun_runtime_readiness",
+            commands=commands,
         ),
         _operator_blocker_family_row(
             family_id="adapter_rows",
@@ -489,6 +513,7 @@ def _fallback_vina_gnina_operator_blocker_family_plan(
             first_missing_item=adapter_first_item,
             operator_action="attach_or_materialize_public_benchmark_vina_gnina_rows",
             command_key="materialize_rows_from_engine_run_bundle",
+            commands=commands,
         ),
     ]
 
@@ -499,11 +524,13 @@ def _compact_vina_gnina_operator_unblock_packet(
     if not packet:
         return {}
     compact = dict(packet)
+    commands = _as_dict(packet.get("commands"))
     compact["first_operator_blocker_family"] = _compact_operator_blocker_family(
-        _as_dict(packet.get("first_operator_blocker_family"))
+        _as_dict(packet.get("first_operator_blocker_family")),
+        commands=commands,
     )
     family_plan = [
-        _compact_operator_blocker_family(row)
+        _compact_operator_blocker_family(row, commands=commands)
         for row in _as_list(packet.get("operator_blocker_family_plan"))
         if isinstance(row, dict)
     ]
@@ -2180,7 +2207,7 @@ def _vina_gnina_runtime_action_packet(
         if isinstance(row, dict)
     ]
     operator_blocker_family_plan = [
-        _compact_operator_blocker_family(row)
+        _compact_operator_blocker_family(row, commands=commands)
         for row in _as_list(
             unblock.get("operator_blocker_family_plan")
             or vina_gnina_runtime_readiness_summary.get(
@@ -2219,7 +2246,8 @@ def _vina_gnina_runtime_action_packet(
             or vina_gnina_runtime_readiness_summary.get(
                 "first_operator_blocker_family"
             )
-        )
+        ),
+        commands=commands,
     )
     if not first_operator_blocker_family and operator_blocker_family_plan:
         first_operator_blocker_family = next(
@@ -4112,8 +4140,8 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                     "",
                     "### Vina/GNINA Operator Blocker Families",
                     "",
-                    "| Family | Status | Missing Items | Blocked Cases | Operator Action |",
-                    "|---|---|---:|---:|---|",
+                    "| Family | Status | Missing Items | Blocked Cases | Operator Action | Command Key | Materialization Command |",
+                    "|---|---|---:|---:|---|---|---|",
                 ]
             )
             for row in vina_gnina_operator_blocker_families:
@@ -4122,7 +4150,9 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                     f"`{row.get('status', '')}` | "
                     f"{_as_int(row.get('missing_item_count'))} | "
                     f"{_as_int(row.get('blocked_case_count'))} | "
-                    f"`{row.get('operator_action', '')}` |"
+                    f"`{row.get('operator_action', '')}` | "
+                    f"`{row.get('command_key', '')}` | "
+                    f"`{row.get('materialization_command', '')}` |"
                 )
     lines.extend(
         [
@@ -4301,8 +4331,8 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                             "",
                             "#### Vina/GNINA Runtime Blocker Families",
                             "",
-                            "| Family | Status | Missing Items | Blocked Cases | Command Key |",
-                            "|---|---|---:|---:|---|",
+                            "| Family | Status | Missing Items | Blocked Cases | Command Key | Materialization Command |",
+                            "|---|---|---:|---:|---|---|",
                         ]
                     )
                     for row in operator_blocker_families:
@@ -4311,7 +4341,8 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                             f"`{row.get('status', '')}` | "
                             f"{_as_int(row.get('missing_item_count'))} | "
                             f"{_as_int(row.get('blocked_case_count'))} | "
-                            f"`{row.get('command_key', '')}` |"
+                            f"`{row.get('command_key', '')}` | "
+                            f"`{row.get('materialization_command', '')}` |"
                         )
         manifest_actions = [
             row.get("engine_input_manifest_action_packet")

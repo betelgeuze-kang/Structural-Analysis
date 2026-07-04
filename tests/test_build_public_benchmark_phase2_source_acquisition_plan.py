@@ -400,12 +400,34 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         row["family_id"]: row
         for row in vina_gnina_actual_audit["operator_blocker_family_plan"]
     }
+    assert family_plan["manifest_required_values"]["next_action"] == (
+        "complete_vina_gnina_input_manifest_required_values"
+    )
+    assert family_plan["manifest_required_values"]["command_key"] == (
+        "build_input_manifest_template_preflight"
+    )
+    assert (
+        "build_public_benchmark_vina_gnina_input_manifest_template_preflight.py"
+        in family_plan["manifest_required_values"]["materialization_command"]
+    )
     assert family_plan["official_source_files"]["missing_item_count"] == 24
+    assert (
+        "materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py"
+        in family_plan["official_source_files"]["materialization_command"]
+    )
     assert family_plan["prepared_input_files"]["missing_item_count"] == 24
     assert family_plan["input_and_engine_receipt_refs"]["missing_item_count"] == 60
     assert family_plan["engine_runtime"]["missing_item_count"] == 2
+    assert (
+        "build_public_benchmark_vina_gnina_runtime_readiness.py"
+        in family_plan["engine_runtime"]["materialization_command"]
+    )
     assert family_plan["engine_run_slots"]["missing_item_count"] == 24
     assert family_plan["adapter_rows"]["missing_item_count"] == 12
+    assert (
+        "materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py"
+        in family_plan["adapter_rows"]["materialization_command"]
+    )
     actual_components = {
         row["component_id"]: row
         for row in vina_gnina_actual_audit["components"]
@@ -1185,9 +1207,19 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "`operator_blocker_family_missing_item_count`: `182`" in markdown
     assert "### Vina/GNINA Operator Blocker Families" in markdown
     assert (
+        "| Family | Status | Missing Items | Blocked Cases | Operator Action | "
+        "Command Key | Materialization Command |"
+    ) in markdown
+    assert (
         "| `manifest_required_values` | `blocked` | 36 | 12 | "
         "`complete_vina_gnina_input_manifest_required_values` |"
     ) in markdown
+    assert "build_public_benchmark_vina_gnina_input_manifest_template_preflight.py" in (
+        markdown
+    )
+    assert "materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py" in (
+        markdown
+    )
     assert "`public_benchmark_vina_gnina_case_inputs_incomplete`" in markdown
     assert "`public_benchmark_vina_gnina_engine_run_receipts_incomplete`" in (
         markdown
@@ -1228,6 +1260,10 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
         markdown
     )
     assert "#### Vina/GNINA Runtime Blocker Families" in markdown
+    assert (
+        "| Family | Status | Missing Items | Blocked Cases | Command Key | "
+        "Materialization Command |"
+    ) in markdown
     assert "| `engine_runtime` | `blocked` | 2 | 0 | `rerun_runtime_readiness` |" in (
         markdown
     )

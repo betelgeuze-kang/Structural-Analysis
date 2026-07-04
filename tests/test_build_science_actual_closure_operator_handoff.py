@@ -801,6 +801,28 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert vina_gnina_actual["components"][0]["component_id"] == (
         "engine_input_manifest"
     )
+    vina_gnina_blocker_families = {
+        row["family_id"]: row
+        for row in vina_gnina_actual["operator_blocker_family_plan"]
+    }
+    assert vina_gnina_blocker_families["manifest_required_values"][
+        "next_action"
+    ] == "complete_vina_gnina_input_manifest_required_values"
+    assert vina_gnina_blocker_families["manifest_required_values"][
+        "command_key"
+    ] == "build_input_manifest_template_preflight"
+    assert (
+        "build_public_benchmark_vina_gnina_input_manifest_template_preflight.py"
+        in vina_gnina_blocker_families["manifest_required_values"][
+            "materialization_command"
+        ]
+    )
+    assert (
+        "materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py"
+        in vina_gnina_blocker_families["adapter_rows"][
+            "materialization_command"
+        ]
+    )
     assert vina_gnina["source_acquisition_operator_action"] == (
         "resolve_public_benchmark_phase2_source_acquisition_blockers"
     )
@@ -1210,10 +1232,19 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "materialize_rows_from_receipt_bundle_command" in markdown
     assert "materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py" in markdown
     assert "### PocketMD Actual Evidence Audit" in markdown
-    assert "| Family | Status | Missing Items | Blocked Cases | Operator Action | Command Key |" in markdown
+    assert (
+        "| Family | Status | Missing Items | Blocked Cases | Operator Action | "
+        "Command Key | Materialization Command |"
+    ) in markdown
     assert "`operator_blocker_family_count`" in markdown
     assert "`bounded_top_k_row_slots`" in markdown
     assert "`materialize_rows_from_receipt_bundle`" in markdown
+    assert "build_public_benchmark_vina_gnina_input_manifest_template_preflight.py" in (
+        markdown
+    )
+    assert "materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py" in (
+        markdown
+    )
     assert "`survival_metric_summary`" in markdown
     assert "`pocketmd_lite_operator_input_source_receipt_incomplete`" in markdown
     assert "`role_receipt_blocked_count`: `24`" in markdown

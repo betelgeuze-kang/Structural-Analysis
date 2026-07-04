@@ -1043,12 +1043,20 @@ def _source_command_lookup(
     for action in missing_row_input_actions:
         packets = [
             action,
+            _as_dict(action.get("runtime_action_packet")),
             _as_dict(action.get("top_k_rows_action_packet")),
             _as_dict(action.get("row_preflight_action_packet")),
             _as_dict(action.get("adapter_row_preflight_action_packet")),
             _as_dict(action.get("engine_input_manifest_action_packet")),
         ]
         for packet in packets:
+            commands.update(
+                {
+                    str(key): str(value)
+                    for key, value in _as_dict(packet.get("commands")).items()
+                    if str(key) and str(value)
+                }
+            )
             for key, value in packet.items():
                 key_text = str(key)
                 value_text = str(value)
@@ -1085,6 +1093,34 @@ def _compact_actual_evidence_audit(
         commands=commands,
     )
     return compact
+
+
+def _compact_upstream_source_acquisition(
+    upstream_source_acquisition: dict[str, Any],
+) -> dict[str, Any]:
+    compact_sources: dict[str, Any] = {}
+    for source_id, source_value in upstream_source_acquisition.items():
+        source = dict(_as_dict(source_value))
+        missing_actions = [
+            row
+            for row in _as_list(source.get("missing_row_input_actions"))
+            if isinstance(row, dict)
+        ]
+        commands = _source_command_lookup(source, missing_actions)
+        if "phase4_actual_evidence_audit" in source:
+            source["phase4_actual_evidence_audit"] = _compact_actual_evidence_audit(
+                _as_dict(source.get("phase4_actual_evidence_audit")),
+                commands=commands,
+            )
+        if "vina_gnina_actual_evidence_audit" in source:
+            source["vina_gnina_actual_evidence_audit"] = (
+                _compact_actual_evidence_audit(
+                    _as_dict(source.get("vina_gnina_actual_evidence_audit")),
+                    commands=commands,
+                )
+            )
+        compact_sources[str(source_id)] = source
+    return compact_sources
 
 
 def _compact_vina_gnina_operator_unblock_packet(
@@ -1150,6 +1186,10 @@ def _unblock_plan_runtime_action_packet(
         )
         if isinstance(row, dict)
     ]
+    runtime_commands = {
+        **_as_dict(source_runtime_action_packet.get("commands")),
+        **_as_dict(unblock.get("commands")),
+    }
     if (
         not first_blocked_case_input_slot
         and not first_blocked_engine_run_slot
@@ -1265,15 +1305,14 @@ def _unblock_plan_runtime_action_packet(
             _as_dict(
                 source_runtime_action_packet.get("first_operator_blocker_family")
                 or unblock.get("first_operator_blocker_family")
-            )
+            ),
+            commands=runtime_commands,
         ),
         "operator_blocker_family_plan": _compact_operator_blocker_family_plan(
-            operator_blocker_family_plan
+            operator_blocker_family_plan,
+            commands=runtime_commands,
         ),
-        "commands": {
-            **_as_dict(source_runtime_action_packet.get("commands")),
-            **_as_dict(unblock.get("commands")),
-        },
+        "commands": runtime_commands,
         "claim_boundary": str(
             source_runtime_action_packet.get("claim_boundary")
             or unblock.get("claim_boundary")
@@ -1727,8 +1766,8 @@ def _actual_evidence_audit_lines(title: str, audit: dict[str, Any]) -> list[str]
                 "",
                 "#### Operator Blocker Families",
                 "",
-                "| Family | Status | Missing Items | Blocked Cases | Operator Action | Command Key |",
-                "|---|---|---:|---:|---|---|",
+                "| Family | Status | Missing Items | Blocked Cases | Operator Action | Command Key | Materialization Command |",
+                "|---|---|---:|---:|---|---|---|",
             ]
         )
         for row in operator_blocker_families:
@@ -1739,7 +1778,8 @@ def _actual_evidence_audit_lines(title: str, audit: dict[str, Any]) -> list[str]
                 f"{_as_int(row.get('missing_item_count'))} | "
                 f"{_as_int(row.get('blocked_case_count'))} | "
                 f"`{row.get('operator_action', '')}` | "
-                f"`{row.get('command_key', '')}` |"
+                f"`{row.get('command_key', '')}` | "
+                f"`{row.get('materialization_command', '')}` |"
             )
     return lines
 
@@ -1856,7 +1896,9 @@ def build_science_actual_closure_operator_handoff(
     blocked_component_operator_actions = _blocked_component_operator_actions(slots)
     completion_progress = _science_completion_progress(audit)
     handoff_upstream_source_acquisition = (
-        _omit_repeated_input_manifest_completion_plans(upstream_source_acquisition)
+        _omit_repeated_input_manifest_completion_plans(
+            _compact_upstream_source_acquisition(upstream_source_acquisition)
+        )
     )
     handoff_row_input_materialization_contracts = (
         _omit_repeated_input_manifest_completion_plans(
