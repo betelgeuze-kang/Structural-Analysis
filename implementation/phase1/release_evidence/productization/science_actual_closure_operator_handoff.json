@@ -494,7 +494,9 @@
               "case_id": "pocketmd_lite_case_001",
               "top_k_rank": 1
             },
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
             "missing_item_count": 6,
+            "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
             "operator_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
             "status": "blocked"
           },
@@ -511,7 +513,9 @@
                 "case_id": "pocketmd_lite_case_001",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 6,
+              "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
               "operator_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
               "status": "blocked"
             },
@@ -547,7 +551,9 @@
                 "status": "operator_completion_required",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
               "missing_item_count": 24,
+              "next_action": "complete_pocketmd_per_candidate_role_receipts",
               "operator_action": "complete_pocketmd_per_candidate_role_receipts",
               "status": "blocked"
             },
@@ -563,7 +569,9 @@
                 "operator_action": "attach_operator_input_source_source_id",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
               "missing_item_count": 5,
+              "next_action": "complete_pocketmd_operator_input_source_receipt",
               "operator_action": "complete_pocketmd_operator_input_source_receipt",
               "status": "blocked"
             },
@@ -584,7 +592,9 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 18,
+              "next_action": "fill_metric_family_receipt_fields_for_local_min_survival",
               "operator_action": "fill_metric_family_receipt_fields_for_local_min_survival",
               "status": "blocked"
             },
@@ -603,7 +613,9 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 6,
+              "next_action": "fill_metric_family_receipt_fields_for_contact_persistence",
               "operator_action": "fill_metric_family_receipt_fields_for_contact_persistence",
               "status": "blocked"
             },
@@ -622,7 +634,9 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 6,
+              "next_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
               "operator_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
               "status": "blocked"
             },
@@ -642,7 +656,9 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 12,
+              "next_action": "fill_metric_family_receipt_fields_for_clash_relief",
               "operator_action": "fill_metric_family_receipt_fields_for_clash_relief",
               "status": "blocked"
             },
@@ -662,7 +678,9 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 12,
+              "next_action": "fill_metric_family_receipt_fields_for_uncertainty",
               "operator_action": "fill_metric_family_receipt_fields_for_uncertainty",
               "status": "blocked"
             }
@@ -2675,7 +2693,9 @@
                 "case_id": "pocketmd_lite_case_001",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 6,
+              "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
               "operator_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
               "status": "blocked"
             },
@@ -2692,7 +2712,9 @@
                   "case_id": "pocketmd_lite_case_001",
                   "top_k_rank": 1
                 },
+                "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
                 "missing_item_count": 6,
+                "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
                 "operator_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
                 "status": "blocked"
               },
@@ -2728,7 +2750,9 @@
                   "status": "operator_completion_required",
                   "top_k_rank": 1
                 },
+                "materialization_command": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
                 "missing_item_count": 24,
+                "next_action": "complete_pocketmd_per_candidate_role_receipts",
                 "operator_action": "complete_pocketmd_per_candidate_role_receipts",
                 "status": "blocked"
               },
@@ -2744,7 +2768,9 @@
                   "operator_action": "attach_operator_input_source_source_id",
                   "status": "operator_completion_required"
                 },
+                "materialization_command": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
                 "missing_item_count": 5,
+                "next_action": "complete_pocketmd_operator_input_source_receipt",
                 "operator_action": "complete_pocketmd_operator_input_source_receipt",
                 "status": "blocked"
               },
@@ -2765,7 +2791,9 @@
                   "run_key": "pocketmd_lite_case_001::rank_1",
                   "top_k_rank": 1
                 },
+                "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
                 "missing_item_count": 18,
+                "next_action": "fill_metric_family_receipt_fields_for_local_min_survival",
                 "operator_action": "fill_metric_family_receipt_fields_for_local_min_survival",
                 "status": "blocked"
               },
@@ -2784,7 +2812,9 @@
                   "run_key": "pocketmd_lite_case_001::rank_1",
                   "top_k_rank": 1
                 },
+                "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
                 "missing_item_count": 6,
+                "next_action": "fill_metric_family_receipt_fields_for_contact_persistence",
                 "operator_action": "fill_metric_family_receipt_fields_for_contact_persistence",
                 "status": "blocked"
               },
@@ -2803,7 +2833,9 @@
                   "run_key": "pocketmd_lite_case_001::rank_1",
                   "top_k_rank": 1
                 },
+                "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
                 "missing_item_count": 6,
+                "next_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
                 "operator_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
                 "status": "blocked"
               },
@@ -2823,7 +2855,9 @@
                   "run_key": "pocketmd_lite_case_001::rank_1",
                   "top_k_rank": 1
                 },
+                "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
                 "missing_item_count": 12,
+                "next_action": "fill_metric_family_receipt_fields_for_clash_relief",
                 "operator_action": "fill_metric_family_receipt_fields_for_clash_relief",
                 "status": "blocked"
               },
@@ -2843,7 +2877,9 @@
                   "run_key": "pocketmd_lite_case_001::rank_1",
                   "top_k_rank": 1
                 },
+                "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
                 "missing_item_count": 12,
+                "next_action": "fill_metric_family_receipt_fields_for_uncertainty",
                 "operator_action": "fill_metric_family_receipt_fields_for_uncertainty",
                 "status": "blocked"
               }
@@ -5350,7 +5386,9 @@
               "field": "prepared_receptor_checksum",
               "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
             },
+            "materialization_command": "",
             "missing_item_count": 36,
+            "next_action": "complete_vina_gnina_input_manifest_required_values",
             "operator_action": "complete_vina_gnina_input_manifest_required_values",
             "status": "blocked"
           },
@@ -5370,7 +5408,9 @@
                 "field": "prepared_receptor_checksum",
                 "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
               },
+              "materialization_command": "",
               "missing_item_count": 36,
+              "next_action": "complete_vina_gnina_input_manifest_required_values",
               "operator_action": "complete_vina_gnina_input_manifest_required_values",
               "status": "blocked"
             },
@@ -5394,7 +5434,9 @@
                 "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "",
               "missing_item_count": 24,
+              "next_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
               "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
               "status": "blocked"
             },
@@ -5418,7 +5460,9 @@
                 "source_url": "",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "",
               "missing_item_count": 24,
+              "next_action": "prepare_vina_gnina_inputs_and_record_checksums",
               "operator_action": "prepare_vina_gnina_inputs_and_record_checksums",
               "status": "blocked"
             },
@@ -5436,7 +5480,9 @@
                 "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "",
               "missing_item_count": 60,
+              "next_action": "attach_vina_gnina_input_and_engine_receipt_refs",
               "operator_action": "attach_vina_gnina_input_and_engine_receipt_refs",
               "status": "blocked"
             },
@@ -5453,7 +5499,9 @@
                 "execution_source": "",
                 "operator_action": "configure_vina_runtime"
               },
+              "materialization_command": "",
               "missing_item_count": 2,
+              "next_action": "configure_vina_gnina_binary_or_container_runtime",
               "operator_action": "configure_vina_gnina_binary_or_container_runtime",
               "status": "blocked"
             },
@@ -5476,7 +5524,9 @@
                 "engine_id": "vina",
                 "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
               },
+              "materialization_command": "",
               "missing_item_count": 24,
+              "next_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
               "operator_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
               "status": "blocked"
             },
@@ -5493,7 +5543,9 @@
                 "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
                 "status": "row_artifact_missing"
               },
+              "materialization_command": "",
               "missing_item_count": 12,
+              "next_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
               "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
               "status": "blocked"
             }
@@ -6481,7 +6533,9 @@
                 "field": "prepared_receptor_checksum",
                 "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
               },
+              "materialization_command": "",
               "missing_item_count": 36,
+              "next_action": "complete_vina_gnina_input_manifest_required_values",
               "operator_action": "complete_vina_gnina_input_manifest_required_values",
               "status": "blocked"
             },
@@ -6501,7 +6555,9 @@
                   "field": "prepared_receptor_checksum",
                   "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
                 },
+                "materialization_command": "",
                 "missing_item_count": 36,
+                "next_action": "complete_vina_gnina_input_manifest_required_values",
                 "operator_action": "complete_vina_gnina_input_manifest_required_values",
                 "status": "blocked"
               },
@@ -6525,7 +6581,9 @@
                   "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
                   "status": "operator_completion_required"
                 },
+                "materialization_command": "",
                 "missing_item_count": 24,
+                "next_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
                 "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
                 "status": "blocked"
               },
@@ -6549,7 +6607,9 @@
                   "source_url": "",
                   "status": "operator_completion_required"
                 },
+                "materialization_command": "",
                 "missing_item_count": 24,
+                "next_action": "prepare_vina_gnina_inputs_and_record_checksums",
                 "operator_action": "prepare_vina_gnina_inputs_and_record_checksums",
                 "status": "blocked"
               },
@@ -6567,7 +6627,9 @@
                   "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
                   "status": "operator_completion_required"
                 },
+                "materialization_command": "",
                 "missing_item_count": 60,
+                "next_action": "attach_vina_gnina_input_and_engine_receipt_refs",
                 "operator_action": "attach_vina_gnina_input_and_engine_receipt_refs",
                 "status": "blocked"
               },
@@ -6584,7 +6646,9 @@
                   "execution_source": "",
                   "operator_action": "configure_vina_runtime"
                 },
+                "materialization_command": "",
                 "missing_item_count": 2,
+                "next_action": "configure_vina_gnina_binary_or_container_runtime",
                 "operator_action": "configure_vina_gnina_binary_or_container_runtime",
                 "status": "blocked"
               },
@@ -6607,7 +6671,9 @@
                   "engine_id": "vina",
                   "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
                 },
+                "materialization_command": "",
                 "missing_item_count": 24,
+                "next_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
                 "operator_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
                 "status": "blocked"
               },
@@ -6624,7 +6690,9 @@
                   "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
                   "status": "row_artifact_missing"
                 },
+                "materialization_command": "",
                 "missing_item_count": 12,
+                "next_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
                 "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
                 "status": "blocked"
               }
@@ -6951,7 +7019,9 @@
             "field": "prepared_receptor_checksum",
             "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
           },
+          "materialization_command": "",
           "missing_item_count": 36,
+          "next_action": "complete_vina_gnina_input_manifest_required_values",
           "operator_action": "complete_vina_gnina_input_manifest_required_values",
           "status": "blocked"
         },
@@ -8749,7 +8819,9 @@
               "field": "prepared_receptor_checksum",
               "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
             },
+            "materialization_command": "",
             "missing_item_count": 36,
+            "next_action": "complete_vina_gnina_input_manifest_required_values",
             "operator_action": "complete_vina_gnina_input_manifest_required_values",
             "status": "blocked"
           },
@@ -8773,7 +8845,9 @@
               "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
               "status": "operator_completion_required"
             },
+            "materialization_command": "",
             "missing_item_count": 24,
+            "next_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
             "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
             "status": "blocked"
           },
@@ -8797,7 +8871,9 @@
               "source_url": "",
               "status": "operator_completion_required"
             },
+            "materialization_command": "",
             "missing_item_count": 24,
+            "next_action": "prepare_vina_gnina_inputs_and_record_checksums",
             "operator_action": "prepare_vina_gnina_inputs_and_record_checksums",
             "status": "blocked"
           },
@@ -8815,7 +8891,9 @@
               "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
               "status": "operator_completion_required"
             },
+            "materialization_command": "",
             "missing_item_count": 60,
+            "next_action": "attach_vina_gnina_input_and_engine_receipt_refs",
             "operator_action": "attach_vina_gnina_input_and_engine_receipt_refs",
             "status": "blocked"
           },
@@ -8832,7 +8910,9 @@
               "execution_source": "",
               "operator_action": "configure_vina_runtime"
             },
+            "materialization_command": "",
             "missing_item_count": 2,
+            "next_action": "configure_vina_gnina_binary_or_container_runtime",
             "operator_action": "configure_vina_gnina_binary_or_container_runtime",
             "status": "blocked"
           },
@@ -8855,7 +8935,9 @@
               "engine_id": "vina",
               "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
             },
+            "materialization_command": "",
             "missing_item_count": 24,
+            "next_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
             "operator_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
             "status": "blocked"
           },
@@ -8872,7 +8954,9 @@
               "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
               "status": "row_artifact_missing"
             },
+            "materialization_command": "",
             "missing_item_count": 12,
+            "next_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
             "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
             "status": "blocked"
           }
@@ -12075,7 +12159,9 @@
             "field": "prepared_receptor_checksum",
             "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
           },
+          "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
           "missing_item_count": 36,
+          "next_action": "complete_vina_gnina_input_manifest_required_values",
           "operator_action": "complete_vina_gnina_input_manifest_required_values",
           "status": "blocked"
         },
@@ -12183,7 +12269,9 @@
               "field": "prepared_receptor_checksum",
               "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
             },
+            "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
             "missing_item_count": 36,
+            "next_action": "complete_vina_gnina_input_manifest_required_values",
             "operator_action": "complete_vina_gnina_input_manifest_required_values",
             "status": "blocked"
           },
@@ -12207,7 +12295,9 @@
               "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
               "status": "operator_completion_required"
             },
+            "materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked",
             "missing_item_count": 24,
+            "next_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
             "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
             "status": "blocked"
           },
@@ -12231,7 +12321,9 @@
               "source_url": "",
               "status": "operator_completion_required"
             },
+            "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
             "missing_item_count": 24,
+            "next_action": "prepare_vina_gnina_inputs_and_record_checksums",
             "operator_action": "prepare_vina_gnina_inputs_and_record_checksums",
             "status": "blocked"
           },
@@ -12249,7 +12341,9 @@
               "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
               "status": "operator_completion_required"
             },
+            "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
             "missing_item_count": 60,
+            "next_action": "attach_vina_gnina_input_and_engine_receipt_refs",
             "operator_action": "attach_vina_gnina_input_and_engine_receipt_refs",
             "status": "blocked"
           },
@@ -12266,7 +12360,9 @@
               "execution_source": "",
               "operator_action": "configure_vina_runtime"
             },
+            "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
             "missing_item_count": 2,
+            "next_action": "configure_vina_gnina_binary_or_container_runtime",
             "operator_action": "configure_vina_gnina_binary_or_container_runtime",
             "status": "blocked"
           },
@@ -12289,7 +12385,9 @@
               "engine_id": "vina",
               "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
             },
+            "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
             "missing_item_count": 24,
+            "next_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
             "operator_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
             "status": "blocked"
           },
@@ -12306,7 +12404,9 @@
               "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
               "status": "row_artifact_missing"
             },
+            "materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py --engine-run-bundle implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json --out-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
             "missing_item_count": 12,
+            "next_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
             "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
             "status": "blocked"
           }
@@ -14323,7 +14423,9 @@
             "field": "prepared_receptor_checksum",
             "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
           },
+          "materialization_command": "",
           "missing_item_count": 36,
+          "next_action": "complete_vina_gnina_input_manifest_required_values",
           "operator_action": "complete_vina_gnina_input_manifest_required_values",
           "status": "blocked"
         },
@@ -14343,7 +14445,9 @@
               "field": "prepared_receptor_checksum",
               "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
             },
+            "materialization_command": "",
             "missing_item_count": 36,
+            "next_action": "complete_vina_gnina_input_manifest_required_values",
             "operator_action": "complete_vina_gnina_input_manifest_required_values",
             "status": "blocked"
           },
@@ -14367,7 +14471,9 @@
               "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
               "status": "operator_completion_required"
             },
+            "materialization_command": "",
             "missing_item_count": 24,
+            "next_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
             "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
             "status": "blocked"
           },
@@ -14391,7 +14497,9 @@
               "source_url": "",
               "status": "operator_completion_required"
             },
+            "materialization_command": "",
             "missing_item_count": 24,
+            "next_action": "prepare_vina_gnina_inputs_and_record_checksums",
             "operator_action": "prepare_vina_gnina_inputs_and_record_checksums",
             "status": "blocked"
           },
@@ -14409,7 +14517,9 @@
               "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
               "status": "operator_completion_required"
             },
+            "materialization_command": "",
             "missing_item_count": 60,
+            "next_action": "attach_vina_gnina_input_and_engine_receipt_refs",
             "operator_action": "attach_vina_gnina_input_and_engine_receipt_refs",
             "status": "blocked"
           },
@@ -14426,7 +14536,9 @@
               "execution_source": "",
               "operator_action": "configure_vina_runtime"
             },
+            "materialization_command": "",
             "missing_item_count": 2,
+            "next_action": "configure_vina_gnina_binary_or_container_runtime",
             "operator_action": "configure_vina_gnina_binary_or_container_runtime",
             "status": "blocked"
           },
@@ -14449,7 +14561,9 @@
               "engine_id": "vina",
               "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
             },
+            "materialization_command": "",
             "missing_item_count": 24,
+            "next_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
             "operator_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
             "status": "blocked"
           },
@@ -14466,7 +14580,9 @@
               "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
               "status": "row_artifact_missing"
             },
+            "materialization_command": "",
             "missing_item_count": 12,
+            "next_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
             "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
             "status": "blocked"
           }
@@ -14844,15 +14960,15 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T11:12:45.999381+00:00",
+  "generated_at": "2026-07-04T11:24:11.903583+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:31132ede1a9d42bd1eab0194ca04e24e9a4c80ac2ace134baef6e7fa48a636ef",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:a6fa0328fbbdc35c1ff47f966c085b5ae0fc5e6dfa2f1aba17e647681cdc246a",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:dc39006a0ed93c7141d4421294cb9d47e1af8a3c6fc2fe3531aeae754de53c89",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:09354cd520764e9fb23e9a23e1eed17a38e73328687154c5d35c5411731af093",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:5fbce29a20367f43cae86964e322074cc9618fe67488dd9372a78d91aa2823bf",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:3244df4787a512a51a8761b050081846ece299a08a5f61e1ff6e8f0e1032a97a",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:1d2e0113376e1df6870322fc6014b05ba04c16c91776d5677c0dd297994321b7"
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:a1b33af7810bdac1d2d52a7907da872b30f35cbe817d5f45934263d1bdeb9e6f",
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:a3e7c521e9433ff1733543c0eeb9e0099e7dd72f4f059aed6b3020be48425a8e"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -16667,7 +16783,9 @@
                 "field": "prepared_receptor_checksum",
                 "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
               },
+              "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
               "missing_item_count": 36,
+              "next_action": "complete_vina_gnina_input_manifest_required_values",
               "operator_action": "complete_vina_gnina_input_manifest_required_values",
               "status": "blocked"
             },
@@ -16775,7 +16893,9 @@
                   "field": "prepared_receptor_checksum",
                   "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
                 },
+                "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
                 "missing_item_count": 36,
+                "next_action": "complete_vina_gnina_input_manifest_required_values",
                 "operator_action": "complete_vina_gnina_input_manifest_required_values",
                 "status": "blocked"
               },
@@ -16799,7 +16919,9 @@
                   "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
                   "status": "operator_completion_required"
                 },
+                "materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked",
                 "missing_item_count": 24,
+                "next_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
                 "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
                 "status": "blocked"
               },
@@ -16823,7 +16945,9 @@
                   "source_url": "",
                   "status": "operator_completion_required"
                 },
+                "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
                 "missing_item_count": 24,
+                "next_action": "prepare_vina_gnina_inputs_and_record_checksums",
                 "operator_action": "prepare_vina_gnina_inputs_and_record_checksums",
                 "status": "blocked"
               },
@@ -16841,7 +16965,9 @@
                   "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
                   "status": "operator_completion_required"
                 },
+                "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
                 "missing_item_count": 60,
+                "next_action": "attach_vina_gnina_input_and_engine_receipt_refs",
                 "operator_action": "attach_vina_gnina_input_and_engine_receipt_refs",
                 "status": "blocked"
               },
@@ -16858,7 +16984,9 @@
                   "execution_source": "",
                   "operator_action": "configure_vina_runtime"
                 },
+                "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
                 "missing_item_count": 2,
+                "next_action": "configure_vina_gnina_binary_or_container_runtime",
                 "operator_action": "configure_vina_gnina_binary_or_container_runtime",
                 "status": "blocked"
               },
@@ -16881,7 +17009,9 @@
                   "engine_id": "vina",
                   "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
                 },
+                "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
                 "missing_item_count": 24,
+                "next_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
                 "operator_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
                 "status": "blocked"
               },
@@ -16898,7 +17028,9 @@
                   "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
                   "status": "row_artifact_missing"
                 },
+                "materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py --engine-run-bundle implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json --out-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
                 "missing_item_count": 12,
+                "next_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
                 "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
                 "status": "blocked"
               }
@@ -18801,7 +18933,9 @@
               "field": "prepared_receptor_checksum",
               "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
             },
+            "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
             "missing_item_count": 36,
+            "next_action": "complete_vina_gnina_input_manifest_required_values",
             "operator_action": "complete_vina_gnina_input_manifest_required_values",
             "status": "blocked"
           },
@@ -18909,7 +19043,9 @@
                 "field": "prepared_receptor_checksum",
                 "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
               },
+              "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
               "missing_item_count": 36,
+              "next_action": "complete_vina_gnina_input_manifest_required_values",
               "operator_action": "complete_vina_gnina_input_manifest_required_values",
               "status": "blocked"
             },
@@ -18933,7 +19069,9 @@
                 "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked",
               "missing_item_count": 24,
+              "next_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
               "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
               "status": "blocked"
             },
@@ -18957,7 +19095,9 @@
                 "source_url": "",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
               "missing_item_count": 24,
+              "next_action": "prepare_vina_gnina_inputs_and_record_checksums",
               "operator_action": "prepare_vina_gnina_inputs_and_record_checksums",
               "status": "blocked"
             },
@@ -18975,7 +19115,9 @@
                 "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
               "missing_item_count": 60,
+              "next_action": "attach_vina_gnina_input_and_engine_receipt_refs",
               "operator_action": "attach_vina_gnina_input_and_engine_receipt_refs",
               "status": "blocked"
             },
@@ -18992,7 +19134,9 @@
                 "execution_source": "",
                 "operator_action": "configure_vina_runtime"
               },
+              "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
               "missing_item_count": 2,
+              "next_action": "configure_vina_gnina_binary_or_container_runtime",
               "operator_action": "configure_vina_gnina_binary_or_container_runtime",
               "status": "blocked"
             },
@@ -19015,7 +19159,9 @@
                 "engine_id": "vina",
                 "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
               },
+              "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
               "missing_item_count": 24,
+              "next_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
               "operator_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
               "status": "blocked"
             },
@@ -19032,7 +19178,9 @@
                 "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
                 "status": "row_artifact_missing"
               },
+              "materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py --engine-run-bundle implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json --out-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
               "missing_item_count": 12,
+              "next_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
               "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
               "status": "blocked"
             }
@@ -19266,7 +19414,7 @@
         "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
       ],
       "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
-      "provided_path": "/tmp/public-source-plan-worktree.pxzxTF/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+      "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
       "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
       "row_contract_ref": "row_intake_contracts.subset_rows",
       "row_input_id": "subset_rows",
@@ -20545,7 +20693,9 @@
               "field": "prepared_receptor_checksum",
               "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
             },
+            "materialization_command": "",
             "missing_item_count": 36,
+            "next_action": "complete_vina_gnina_input_manifest_required_values",
             "operator_action": "complete_vina_gnina_input_manifest_required_values",
             "status": "blocked"
           },
@@ -20565,7 +20715,9 @@
                 "field": "prepared_receptor_checksum",
                 "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
               },
+              "materialization_command": "",
               "missing_item_count": 36,
+              "next_action": "complete_vina_gnina_input_manifest_required_values",
               "operator_action": "complete_vina_gnina_input_manifest_required_values",
               "status": "blocked"
             },
@@ -20589,7 +20741,9 @@
                 "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "",
               "missing_item_count": 24,
+              "next_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
               "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
               "status": "blocked"
             },
@@ -20613,7 +20767,9 @@
                 "source_url": "",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "",
               "missing_item_count": 24,
+              "next_action": "prepare_vina_gnina_inputs_and_record_checksums",
               "operator_action": "prepare_vina_gnina_inputs_and_record_checksums",
               "status": "blocked"
             },
@@ -20631,7 +20787,9 @@
                 "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "",
               "missing_item_count": 60,
+              "next_action": "attach_vina_gnina_input_and_engine_receipt_refs",
               "operator_action": "attach_vina_gnina_input_and_engine_receipt_refs",
               "status": "blocked"
             },
@@ -20648,7 +20806,9 @@
                 "execution_source": "",
                 "operator_action": "configure_vina_runtime"
               },
+              "materialization_command": "",
               "missing_item_count": 2,
+              "next_action": "configure_vina_gnina_binary_or_container_runtime",
               "operator_action": "configure_vina_gnina_binary_or_container_runtime",
               "status": "blocked"
             },
@@ -20671,7 +20831,9 @@
                 "engine_id": "vina",
                 "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
               },
+              "materialization_command": "",
               "missing_item_count": 24,
+              "next_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
               "operator_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
               "status": "blocked"
             },
@@ -20688,7 +20850,9 @@
                 "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
                 "status": "row_artifact_missing"
               },
+              "materialization_command": "",
               "missing_item_count": 12,
+              "next_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
               "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
               "status": "blocked"
             }
@@ -21173,7 +21337,7 @@
         "posebusters_style_pose_validity::pose_rows_not_provided"
       ],
       "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
-      "provided_path": "/tmp/public-source-plan-worktree.pxzxTF/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+      "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
       "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
       "row_contract_ref": "row_intake_contracts.pose_rows",
       "row_input_id": "pose_rows",
@@ -22452,7 +22616,9 @@
               "field": "prepared_receptor_checksum",
               "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
             },
+            "materialization_command": "",
             "missing_item_count": 36,
+            "next_action": "complete_vina_gnina_input_manifest_required_values",
             "operator_action": "complete_vina_gnina_input_manifest_required_values",
             "status": "blocked"
           },
@@ -22472,7 +22638,9 @@
                 "field": "prepared_receptor_checksum",
                 "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
               },
+              "materialization_command": "",
               "missing_item_count": 36,
+              "next_action": "complete_vina_gnina_input_manifest_required_values",
               "operator_action": "complete_vina_gnina_input_manifest_required_values",
               "status": "blocked"
             },
@@ -22496,7 +22664,9 @@
                 "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "",
               "missing_item_count": 24,
+              "next_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
               "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
               "status": "blocked"
             },
@@ -22520,7 +22690,9 @@
                 "source_url": "",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "",
               "missing_item_count": 24,
+              "next_action": "prepare_vina_gnina_inputs_and_record_checksums",
               "operator_action": "prepare_vina_gnina_inputs_and_record_checksums",
               "status": "blocked"
             },
@@ -22538,7 +22710,9 @@
                 "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "",
               "missing_item_count": 60,
+              "next_action": "attach_vina_gnina_input_and_engine_receipt_refs",
               "operator_action": "attach_vina_gnina_input_and_engine_receipt_refs",
               "status": "blocked"
             },
@@ -22555,7 +22729,9 @@
                 "execution_source": "",
                 "operator_action": "configure_vina_runtime"
               },
+              "materialization_command": "",
               "missing_item_count": 2,
+              "next_action": "configure_vina_gnina_binary_or_container_runtime",
               "operator_action": "configure_vina_gnina_binary_or_container_runtime",
               "status": "blocked"
             },
@@ -22578,7 +22754,9 @@
                 "engine_id": "vina",
                 "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
               },
+              "materialization_command": "",
               "missing_item_count": 24,
+              "next_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
               "operator_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
               "status": "blocked"
             },
@@ -22595,7 +22773,9 @@
                 "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
                 "status": "row_artifact_missing"
               },
+              "materialization_command": "",
               "missing_item_count": 12,
+              "next_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
               "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
               "status": "blocked"
             }
@@ -23132,7 +23312,7 @@
         "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
       ],
       "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
-      "provided_path": "/tmp/public-source-plan-worktree.pxzxTF/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+      "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
       "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
       "row_contract_ref": "row_intake_contracts.enrichment_rows",
       "row_input_id": "enrichment_rows",
@@ -24411,7 +24591,9 @@
               "field": "prepared_receptor_checksum",
               "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
             },
+            "materialization_command": "",
             "missing_item_count": 36,
+            "next_action": "complete_vina_gnina_input_manifest_required_values",
             "operator_action": "complete_vina_gnina_input_manifest_required_values",
             "status": "blocked"
           },
@@ -24431,7 +24613,9 @@
                 "field": "prepared_receptor_checksum",
                 "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
               },
+              "materialization_command": "",
               "missing_item_count": 36,
+              "next_action": "complete_vina_gnina_input_manifest_required_values",
               "operator_action": "complete_vina_gnina_input_manifest_required_values",
               "status": "blocked"
             },
@@ -24455,7 +24639,9 @@
                 "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "",
               "missing_item_count": 24,
+              "next_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
               "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
               "status": "blocked"
             },
@@ -24479,7 +24665,9 @@
                 "source_url": "",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "",
               "missing_item_count": 24,
+              "next_action": "prepare_vina_gnina_inputs_and_record_checksums",
               "operator_action": "prepare_vina_gnina_inputs_and_record_checksums",
               "status": "blocked"
             },
@@ -24497,7 +24685,9 @@
                 "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "",
               "missing_item_count": 60,
+              "next_action": "attach_vina_gnina_input_and_engine_receipt_refs",
               "operator_action": "attach_vina_gnina_input_and_engine_receipt_refs",
               "status": "blocked"
             },
@@ -24514,7 +24704,9 @@
                 "execution_source": "",
                 "operator_action": "configure_vina_runtime"
               },
+              "materialization_command": "",
               "missing_item_count": 2,
+              "next_action": "configure_vina_gnina_binary_or_container_runtime",
               "operator_action": "configure_vina_gnina_binary_or_container_runtime",
               "status": "blocked"
             },
@@ -24537,7 +24729,9 @@
                 "engine_id": "vina",
                 "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
               },
+              "materialization_command": "",
               "missing_item_count": 24,
+              "next_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
               "operator_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
               "status": "blocked"
             },
@@ -24554,7 +24748,9 @@
                 "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
                 "status": "row_artifact_missing"
               },
+              "materialization_command": "",
               "missing_item_count": 12,
+              "next_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
               "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
               "status": "blocked"
             }
@@ -26243,7 +26439,9 @@
               "field": "prepared_receptor_checksum",
               "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
             },
+            "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
             "missing_item_count": 36,
+            "next_action": "complete_vina_gnina_input_manifest_required_values",
             "operator_action": "complete_vina_gnina_input_manifest_required_values",
             "status": "blocked"
           },
@@ -26351,7 +26549,9 @@
                 "field": "prepared_receptor_checksum",
                 "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
               },
+              "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
               "missing_item_count": 36,
+              "next_action": "complete_vina_gnina_input_manifest_required_values",
               "operator_action": "complete_vina_gnina_input_manifest_required_values",
               "status": "blocked"
             },
@@ -26375,7 +26575,9 @@
                 "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked",
               "missing_item_count": 24,
+              "next_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
               "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
               "status": "blocked"
             },
@@ -26399,7 +26601,9 @@
                 "source_url": "",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
               "missing_item_count": 24,
+              "next_action": "prepare_vina_gnina_inputs_and_record_checksums",
               "operator_action": "prepare_vina_gnina_inputs_and_record_checksums",
               "status": "blocked"
             },
@@ -26417,7 +26621,9 @@
                 "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
               "missing_item_count": 60,
+              "next_action": "attach_vina_gnina_input_and_engine_receipt_refs",
               "operator_action": "attach_vina_gnina_input_and_engine_receipt_refs",
               "status": "blocked"
             },
@@ -26434,7 +26640,9 @@
                 "execution_source": "",
                 "operator_action": "configure_vina_runtime"
               },
+              "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
               "missing_item_count": 2,
+              "next_action": "configure_vina_gnina_binary_or_container_runtime",
               "operator_action": "configure_vina_gnina_binary_or_container_runtime",
               "status": "blocked"
             },
@@ -26457,7 +26665,9 @@
                 "engine_id": "vina",
                 "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
               },
+              "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
               "missing_item_count": 24,
+              "next_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
               "operator_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
               "status": "blocked"
             },
@@ -26474,7 +26684,9 @@
                 "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
                 "status": "row_artifact_missing"
               },
+              "materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py --engine-run-bundle implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json --out-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
               "missing_item_count": 12,
+              "next_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
               "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
               "status": "blocked"
             }
@@ -28491,7 +28703,9 @@
               "field": "prepared_receptor_checksum",
               "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
             },
+            "materialization_command": "",
             "missing_item_count": 36,
+            "next_action": "complete_vina_gnina_input_manifest_required_values",
             "operator_action": "complete_vina_gnina_input_manifest_required_values",
             "status": "blocked"
           },
@@ -28511,7 +28725,9 @@
                 "field": "prepared_receptor_checksum",
                 "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
               },
+              "materialization_command": "",
               "missing_item_count": 36,
+              "next_action": "complete_vina_gnina_input_manifest_required_values",
               "operator_action": "complete_vina_gnina_input_manifest_required_values",
               "status": "blocked"
             },
@@ -28535,7 +28751,9 @@
                 "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "",
               "missing_item_count": 24,
+              "next_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
               "operator_action": "materialize_source_files_from_casf_archive_and_verify_checksum",
               "status": "blocked"
             },
@@ -28559,7 +28777,9 @@
                 "source_url": "",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "",
               "missing_item_count": 24,
+              "next_action": "prepare_vina_gnina_inputs_and_record_checksums",
               "operator_action": "prepare_vina_gnina_inputs_and_record_checksums",
               "status": "blocked"
             },
@@ -28577,7 +28797,9 @@
                 "ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "",
               "missing_item_count": 60,
+              "next_action": "attach_vina_gnina_input_and_engine_receipt_refs",
               "operator_action": "attach_vina_gnina_input_and_engine_receipt_refs",
               "status": "blocked"
             },
@@ -28594,7 +28816,9 @@
                 "execution_source": "",
                 "operator_action": "configure_vina_runtime"
               },
+              "materialization_command": "",
               "missing_item_count": 2,
+              "next_action": "configure_vina_gnina_binary_or_container_runtime",
               "operator_action": "configure_vina_gnina_binary_or_container_runtime",
               "status": "blocked"
             },
@@ -28617,7 +28841,9 @@
                 "engine_id": "vina",
                 "operator_action": "unblock_case_inputs_and_runtime_then_run_engine"
               },
+              "materialization_command": "",
               "missing_item_count": 24,
+              "next_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
               "operator_action": "rerun_runtime_readiness_until_engine_run_slots_ready",
               "status": "blocked"
             },
@@ -28634,7 +28860,9 @@
                 "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
                 "status": "row_artifact_missing"
               },
+              "materialization_command": "",
               "missing_item_count": 12,
+              "next_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
               "operator_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
               "status": "blocked"
             }
@@ -32499,7 +32727,9 @@
               "case_id": "pocketmd_lite_case_001",
               "top_k_rank": 1
             },
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
             "missing_item_count": 6,
+            "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
             "operator_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
             "status": "blocked"
           },
@@ -32516,7 +32746,9 @@
                 "case_id": "pocketmd_lite_case_001",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 6,
+              "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
               "operator_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
               "status": "blocked"
             },
@@ -32552,7 +32784,9 @@
                 "status": "operator_completion_required",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
               "missing_item_count": 24,
+              "next_action": "complete_pocketmd_per_candidate_role_receipts",
               "operator_action": "complete_pocketmd_per_candidate_role_receipts",
               "status": "blocked"
             },
@@ -32568,7 +32802,9 @@
                 "operator_action": "attach_operator_input_source_source_id",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
               "missing_item_count": 5,
+              "next_action": "complete_pocketmd_operator_input_source_receipt",
               "operator_action": "complete_pocketmd_operator_input_source_receipt",
               "status": "blocked"
             },
@@ -32589,7 +32825,9 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 18,
+              "next_action": "fill_metric_family_receipt_fields_for_local_min_survival",
               "operator_action": "fill_metric_family_receipt_fields_for_local_min_survival",
               "status": "blocked"
             },
@@ -32608,7 +32846,9 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 6,
+              "next_action": "fill_metric_family_receipt_fields_for_contact_persistence",
               "operator_action": "fill_metric_family_receipt_fields_for_contact_persistence",
               "status": "blocked"
             },
@@ -32627,7 +32867,9 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 6,
+              "next_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
               "operator_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
               "status": "blocked"
             },
@@ -32647,7 +32889,9 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 12,
+              "next_action": "fill_metric_family_receipt_fields_for_clash_relief",
               "operator_action": "fill_metric_family_receipt_fields_for_clash_relief",
               "status": "blocked"
             },
@@ -32667,7 +32911,9 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 12,
+              "next_action": "fill_metric_family_receipt_fields_for_uncertainty",
               "operator_action": "fill_metric_family_receipt_fields_for_uncertainty",
               "status": "blocked"
             }
@@ -33448,7 +33694,7 @@
   },
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "d20c0ced6b8327ff0eb5aa858a7e7f49faa0981a",
+  "source_commit_sha": "1056e2e2f52e8609c768f62d440792b25d45f2ad",
   "status": "operator_rows_required",
   "summary": {
     "actual_closure_blocked_component_count": 2,
@@ -34881,7 +35127,9 @@
             "case_id": "pocketmd_lite_case_001",
             "top_k_rank": 1
           },
+          "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
           "missing_item_count": 6,
+          "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
           "operator_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
           "status": "blocked"
         },
@@ -34898,7 +35146,9 @@
               "case_id": "pocketmd_lite_case_001",
               "top_k_rank": 1
             },
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
             "missing_item_count": 6,
+            "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
             "operator_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
             "status": "blocked"
           },
@@ -34934,7 +35184,9 @@
               "status": "operator_completion_required",
               "top_k_rank": 1
             },
+            "materialization_command": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
             "missing_item_count": 24,
+            "next_action": "complete_pocketmd_per_candidate_role_receipts",
             "operator_action": "complete_pocketmd_per_candidate_role_receipts",
             "status": "blocked"
           },
@@ -34950,7 +35202,9 @@
               "operator_action": "attach_operator_input_source_source_id",
               "status": "operator_completion_required"
             },
+            "materialization_command": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
             "missing_item_count": 5,
+            "next_action": "complete_pocketmd_operator_input_source_receipt",
             "operator_action": "complete_pocketmd_operator_input_source_receipt",
             "status": "blocked"
           },
@@ -34971,7 +35225,9 @@
               "run_key": "pocketmd_lite_case_001::rank_1",
               "top_k_rank": 1
             },
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
             "missing_item_count": 18,
+            "next_action": "fill_metric_family_receipt_fields_for_local_min_survival",
             "operator_action": "fill_metric_family_receipt_fields_for_local_min_survival",
             "status": "blocked"
           },
@@ -34990,7 +35246,9 @@
               "run_key": "pocketmd_lite_case_001::rank_1",
               "top_k_rank": 1
             },
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
             "missing_item_count": 6,
+            "next_action": "fill_metric_family_receipt_fields_for_contact_persistence",
             "operator_action": "fill_metric_family_receipt_fields_for_contact_persistence",
             "status": "blocked"
           },
@@ -35009,7 +35267,9 @@
               "run_key": "pocketmd_lite_case_001::rank_1",
               "top_k_rank": 1
             },
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
             "missing_item_count": 6,
+            "next_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
             "operator_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
             "status": "blocked"
           },
@@ -35029,7 +35289,9 @@
               "run_key": "pocketmd_lite_case_001::rank_1",
               "top_k_rank": 1
             },
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
             "missing_item_count": 12,
+            "next_action": "fill_metric_family_receipt_fields_for_clash_relief",
             "operator_action": "fill_metric_family_receipt_fields_for_clash_relief",
             "status": "blocked"
           },
@@ -35049,7 +35311,9 @@
               "run_key": "pocketmd_lite_case_001::rank_1",
               "top_k_rank": 1
             },
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
             "missing_item_count": 12,
+            "next_action": "fill_metric_family_receipt_fields_for_uncertainty",
             "operator_action": "fill_metric_family_receipt_fields_for_uncertainty",
             "status": "blocked"
           }

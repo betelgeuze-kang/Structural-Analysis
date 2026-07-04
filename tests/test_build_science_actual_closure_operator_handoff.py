@@ -967,6 +967,22 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert pocketmd_actual["components"][0]["component_id"] == (
         "bounded_top_k_row_slots"
     )
+    pocketmd_blocker_families = {
+        row["family_id"]: row
+        for row in pocketmd_actual["operator_blocker_family_plan"]
+    }
+    assert pocketmd_blocker_families["top_k_candidate_rows"]["next_action"] == (
+        "attach_pocketmd_lite_topk_rows_at_default_dropzone"
+    )
+    assert pocketmd_blocker_families["top_k_candidate_rows"]["command_key"] == (
+        "materialize_rows_from_receipt_bundle"
+    )
+    assert (
+        "materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py"
+        in pocketmd_blocker_families["top_k_candidate_rows"][
+            "materialization_command"
+        ]
+    )
     assert "pocketmd_lite_topk_rows_not_acquired" in pocketmd[
         "upstream_source_blockers"
     ]
@@ -1194,8 +1210,10 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "materialize_rows_from_receipt_bundle_command" in markdown
     assert "materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py" in markdown
     assert "### PocketMD Actual Evidence Audit" in markdown
+    assert "| Family | Status | Missing Items | Blocked Cases | Operator Action | Command Key |" in markdown
     assert "`operator_blocker_family_count`" in markdown
     assert "`bounded_top_k_row_slots`" in markdown
+    assert "`materialize_rows_from_receipt_bundle`" in markdown
     assert "`survival_metric_summary`" in markdown
     assert "`pocketmd_lite_operator_input_source_receipt_incomplete`" in markdown
     assert "`role_receipt_blocked_count`: `24`" in markdown

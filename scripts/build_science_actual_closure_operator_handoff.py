@@ -214,11 +214,14 @@ def _slot_source_context(
         if isinstance(row, dict)
     ]
     phase4_completion_audit = _as_dict(source.get("phase4_completion_audit"))
-    phase4_actual_evidence_audit = _as_dict(
-        source.get("phase4_actual_evidence_audit")
+    source_commands = _source_command_lookup(source, missing_row_input_actions)
+    phase4_actual_evidence_audit = _compact_actual_evidence_audit(
+        _as_dict(source.get("phase4_actual_evidence_audit")),
+        commands=source_commands,
     )
-    vina_gnina_actual_evidence_audit = _as_dict(
-        source.get("vina_gnina_actual_evidence_audit")
+    vina_gnina_actual_evidence_audit = _compact_actual_evidence_audit(
+        _as_dict(source.get("vina_gnina_actual_evidence_audit")),
+        commands=source_commands,
     )
     vina_gnina_case_input_slot_matrix = [
         row
@@ -988,9 +991,14 @@ def _unblock_plan_counts(unblock: dict[str, Any]) -> dict[str, int]:
     }
 
 
-def _compact_operator_blocker_family(row: dict[str, Any]) -> dict[str, Any]:
+def _compact_operator_blocker_family(
+    row: dict[str, Any],
+    *,
+    commands: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     if not row:
         return {}
+    command_key = str(row.get("command_key") or "")
     return {
         "family_id": str(row.get("family_id") or ""),
         "description": str(row.get("description") or ""),
@@ -999,16 +1007,84 @@ def _compact_operator_blocker_family(row: dict[str, Any]) -> dict[str, Any]:
         "blocked_case_count": _as_int(row.get("blocked_case_count")),
         "first_missing_item": _as_dict(row.get("first_missing_item")),
         "operator_action": str(row.get("operator_action") or ""),
-        "command_key": str(row.get("command_key") or ""),
+        "next_action": str(
+            row.get("next_action") or row.get("operator_action") or ""
+        ),
+        "command_key": command_key,
+        "materialization_command": str(
+            row.get("materialization_command")
+            or _as_dict(commands or {}).get(command_key)
+            or ""
+        ),
     }
 
 
-def _compact_operator_blocker_family_plan(rows: list[Any]) -> list[dict[str, Any]]:
+def _compact_operator_blocker_family_plan(
+    rows: list[Any],
+    *,
+    commands: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
     return [
-        _compact_operator_blocker_family(row)
+        _compact_operator_blocker_family(row, commands=commands)
         for row in rows
         if isinstance(row, dict)
     ]
+
+
+def _source_command_lookup(
+    source: dict[str, Any],
+    missing_row_input_actions: list[dict[str, Any]],
+) -> dict[str, str]:
+    commands = {
+        str(key): str(value)
+        for key, value in _as_dict(source.get("commands")).items()
+        if str(key) and str(value)
+    }
+    for action in missing_row_input_actions:
+        packets = [
+            action,
+            _as_dict(action.get("top_k_rows_action_packet")),
+            _as_dict(action.get("row_preflight_action_packet")),
+            _as_dict(action.get("adapter_row_preflight_action_packet")),
+            _as_dict(action.get("engine_input_manifest_action_packet")),
+        ]
+        for packet in packets:
+            for key, value in packet.items():
+                key_text = str(key)
+                value_text = str(value)
+                if not key_text.endswith("_command") or not value_text:
+                    continue
+                commands.setdefault(
+                    key_text.removesuffix("_command"),
+                    value_text,
+                )
+    if (
+        "build_row_template_preflight" not in commands
+        and "build_template_preflight" in commands
+    ):
+        commands["build_row_template_preflight"] = commands[
+            "build_template_preflight"
+        ]
+    return commands
+
+
+def _compact_actual_evidence_audit(
+    packet: dict[str, Any],
+    *,
+    commands: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    if not packet:
+        return {}
+    compact = dict(packet)
+    compact["first_operator_blocker_family"] = _compact_operator_blocker_family(
+        _as_dict(packet.get("first_operator_blocker_family")),
+        commands=commands,
+    )
+    compact["operator_blocker_family_plan"] = _compact_operator_blocker_family_plan(
+        _as_list(packet.get("operator_blocker_family_plan")),
+        commands=commands,
+    )
+    return compact
 
 
 def _compact_vina_gnina_operator_unblock_packet(
@@ -1017,11 +1093,14 @@ def _compact_vina_gnina_operator_unblock_packet(
     if not packet:
         return {}
     compact = dict(packet)
+    commands = _as_dict(packet.get("commands"))
     compact["first_operator_blocker_family"] = _compact_operator_blocker_family(
-        _as_dict(packet.get("first_operator_blocker_family"))
+        _as_dict(packet.get("first_operator_blocker_family")),
+        commands=commands,
     )
     compact["operator_blocker_family_plan"] = _compact_operator_blocker_family_plan(
-        _as_list(packet.get("operator_blocker_family_plan"))
+        _as_list(packet.get("operator_blocker_family_plan")),
+        commands=commands,
     )
     return compact
 
@@ -1648,8 +1727,8 @@ def _actual_evidence_audit_lines(title: str, audit: dict[str, Any]) -> list[str]
                 "",
                 "#### Operator Blocker Families",
                 "",
-                "| Family | Status | Missing Items | Blocked Cases | Operator Action |",
-                "|---|---|---:|---:|---|",
+                "| Family | Status | Missing Items | Blocked Cases | Operator Action | Command Key |",
+                "|---|---|---:|---:|---|---|",
             ]
         )
         for row in operator_blocker_families:
@@ -1659,7 +1738,8 @@ def _actual_evidence_audit_lines(title: str, audit: dict[str, Any]) -> list[str]
                 f"`{row.get('status', '')}` | "
                 f"{_as_int(row.get('missing_item_count'))} | "
                 f"{_as_int(row.get('blocked_case_count'))} | "
-                f"`{row.get('operator_action', '')}` |"
+                f"`{row.get('operator_action', '')}` | "
+                f"`{row.get('command_key', '')}` |"
             )
     return lines
 

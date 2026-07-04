@@ -274,16 +274,16 @@
 
 #### Operator Blocker Families
 
-| Family | Status | Missing Items | Blocked Cases | Operator Action |
-|---|---|---:|---:|---|
-| `top_k_candidate_rows` | `blocked` | 6 | 3 | `attach_pocketmd_lite_topk_rows_at_default_dropzone` |
-| `per_candidate_role_receipts` | `blocked` | 24 | 3 | `complete_pocketmd_per_candidate_role_receipts` |
-| `operator_input_source_receipt` | `blocked` | 5 | 0 | `complete_pocketmd_operator_input_source_receipt` |
-| `local_min_survival` | `blocked` | 18 | 3 | `fill_metric_family_receipt_fields_for_local_min_survival` |
-| `contact_persistence` | `blocked` | 6 | 3 | `fill_metric_family_receipt_fields_for_contact_persistence` |
-| `h_bond_persistence` | `blocked` | 6 | 3 | `fill_metric_family_receipt_fields_for_h_bond_persistence` |
-| `clash_relief` | `blocked` | 12 | 3 | `fill_metric_family_receipt_fields_for_clash_relief` |
-| `uncertainty` | `blocked` | 12 | 3 | `fill_metric_family_receipt_fields_for_uncertainty` |
+| Family | Status | Missing Items | Blocked Cases | Operator Action | Command Key |
+|---|---|---:|---:|---|---|
+| `top_k_candidate_rows` | `blocked` | 6 | 3 | `attach_pocketmd_lite_topk_rows_at_default_dropzone` | `materialize_rows_from_receipt_bundle` |
+| `per_candidate_role_receipts` | `blocked` | 24 | 3 | `complete_pocketmd_per_candidate_role_receipts` | `build_row_template_preflight` |
+| `operator_input_source_receipt` | `blocked` | 5 | 0 | `complete_pocketmd_operator_input_source_receipt` | `build_row_template_preflight` |
+| `local_min_survival` | `blocked` | 18 | 3 | `fill_metric_family_receipt_fields_for_local_min_survival` | `materialize_rows_from_receipt_bundle` |
+| `contact_persistence` | `blocked` | 6 | 3 | `fill_metric_family_receipt_fields_for_contact_persistence` | `materialize_rows_from_receipt_bundle` |
+| `h_bond_persistence` | `blocked` | 6 | 3 | `fill_metric_family_receipt_fields_for_h_bond_persistence` | `materialize_rows_from_receipt_bundle` |
+| `clash_relief` | `blocked` | 12 | 3 | `fill_metric_family_receipt_fields_for_clash_relief` | `materialize_rows_from_receipt_bundle` |
+| `uncertainty` | `blocked` | 12 | 3 | `fill_metric_family_receipt_fields_for_uncertainty` | `materialize_rows_from_receipt_bundle` |
 
 ### Public Benchmark Vina/GNINA Actual Evidence Audit
 
@@ -306,15 +306,15 @@
 
 #### Operator Blocker Families
 
-| Family | Status | Missing Items | Blocked Cases | Operator Action |
-|---|---|---:|---:|---|
-| `manifest_required_values` | `blocked` | 36 | 12 | `complete_vina_gnina_input_manifest_required_values` |
-| `official_source_files` | `blocked` | 24 | 12 | `materialize_source_files_from_casf_archive_and_verify_checksum` |
-| `prepared_input_files` | `blocked` | 24 | 12 | `prepare_vina_gnina_inputs_and_record_checksums` |
-| `input_and_engine_receipt_refs` | `blocked` | 60 | 12 | `attach_vina_gnina_input_and_engine_receipt_refs` |
-| `engine_runtime` | `blocked` | 2 | 0 | `configure_vina_gnina_binary_or_container_runtime` |
-| `engine_run_slots` | `blocked` | 24 | 12 | `rerun_runtime_readiness_until_engine_run_slots_ready` |
-| `adapter_rows` | `blocked` | 12 | 12 | `attach_or_materialize_public_benchmark_vina_gnina_rows` |
+| Family | Status | Missing Items | Blocked Cases | Operator Action | Command Key |
+|---|---|---:|---:|---|---|
+| `manifest_required_values` | `blocked` | 36 | 12 | `complete_vina_gnina_input_manifest_required_values` | `build_input_manifest_template_preflight` |
+| `official_source_files` | `blocked` | 24 | 12 | `materialize_source_files_from_casf_archive_and_verify_checksum` | `materialize_input_manifest_from_casf_archive` |
+| `prepared_input_files` | `blocked` | 24 | 12 | `prepare_vina_gnina_inputs_and_record_checksums` | `build_input_manifest_template_preflight` |
+| `input_and_engine_receipt_refs` | `blocked` | 60 | 12 | `attach_vina_gnina_input_and_engine_receipt_refs` | `build_input_manifest_template_preflight` |
+| `engine_runtime` | `blocked` | 2 | 0 | `configure_vina_gnina_binary_or_container_runtime` | `rerun_runtime_readiness` |
+| `engine_run_slots` | `blocked` | 24 | 12 | `rerun_runtime_readiness_until_engine_run_slots_ready` | `rerun_runtime_readiness` |
+| `adapter_rows` | `blocked` | 12 | 12 | `attach_or_materialize_public_benchmark_vina_gnina_rows` | `materialize_rows_from_engine_run_bundle` |
 
 ### Public Benchmark Source Access Preflight
 

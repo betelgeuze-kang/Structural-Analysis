@@ -452,9 +452,28 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     assert operator_family_plan["top_k_candidate_rows"][
         "missing_item_count"
     ] == 6
+    assert operator_family_plan["top_k_candidate_rows"]["next_action"] == (
+        "attach_pocketmd_lite_topk_rows_at_default_dropzone"
+    )
+    assert operator_family_plan["top_k_candidate_rows"]["command_key"] == (
+        "materialize_rows_from_receipt_bundle"
+    )
+    assert (
+        "materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py"
+        in operator_family_plan["top_k_candidate_rows"]["materialization_command"]
+    )
     assert operator_family_plan["per_candidate_role_receipts"][
         "missing_item_count"
     ] == 24
+    assert operator_family_plan["per_candidate_role_receipts"]["command_key"] == (
+        "build_row_template_preflight"
+    )
+    assert (
+        "build_pocketmd_lite_topk_rows_template_preflight.py"
+        in operator_family_plan["per_candidate_role_receipts"][
+            "materialization_command"
+        ]
+    )
     assert operator_family_plan["operator_input_source_receipt"][
         "missing_item_count"
     ] == 5
@@ -977,9 +996,11 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert "`pocketmd_lite_uncertainty_rows_missing`" in markdown
     assert "## Phase 4 Candidate Slot Matrix" in markdown
     assert "### Operator Blocker Families" in markdown
+    assert "| Family | Status | Missing Items | Blocked Cases | Operator Action | Command Key |" in markdown
     assert "`phase4_actual_operator_blocker_family_count`: `8`" in markdown
     assert "`operator_blocker_family_missing_item_count`: `89`" in markdown
     assert "`top_k_candidate_rows`" in markdown
+    assert "`materialize_rows_from_receipt_bundle`" in markdown
     assert "pocketmd_lite_case_001_rank_1" in markdown
     assert "## Phase 4 Metric Closure Matrix" in markdown
     assert "local_min_survival_materialized" in markdown

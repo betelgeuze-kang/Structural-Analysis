@@ -678,13 +678,13 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
     "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
   },
-  "generated_at": "2026-07-04T11:12:49.077991+00:00",
+  "generated_at": "2026-07-04T11:24:15.789295+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:be05411d7bb174d8612aaa5a6d3c2ffbace0c16d1310fc0b6897f9fd9038c6d1",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:50113b04a758c06b720aa91a3b64639e1d31ba94f35334cf21494462930a7d2f",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:69285c5dcf0a4bdc30c7a71d48b86dabde7af6e458925f250a4e3f9b9616e109",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json": "sha256:a69703dac5693f4fc6f42ad16e106a1d14b0990ee003ba7a661583a8b8e855fe",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:3244df4787a512a51a8761b050081846ece299a08a5f61e1ff6e8f0e1032a97a",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json": "sha256:7c3ca80306e188e297c49fec82a6f2cd61c6afcb201b36a73f5f4d29dddac31e",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:a1b33af7810bdac1d2d52a7907da872b30f35cbe817d5f45934263d1bdeb9e6f",
     "implementation/phase1/release_evidence/productization/source_of_truth_gap_classification.json": "sha256:5fb3525b23f2e4bc7582cc16aace64fbb7cc506c28e086a21bede3de61ea1b3c",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:c1af83f1b410aca8536d5ab832c0ba6a86153436844e42152860f84ec0002328",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:8adb767e05269c4063e04ca5e5060b0e94994916ccae4e9912c897c0c7fc9703",
@@ -2968,13 +2968,13 @@
           "expected_rows_mode": "operator_attached_public_benchmark_rows",
           "materialized": false,
           "outputs": {
-            "enrichment_scorecard": "/tmp/public-source-plan-worktree.pxzxTF/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
+            "enrichment_scorecard": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
             "phase2_row_audit": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
-            "pose_success_harness": "/tmp/public-source-plan-worktree.pxzxTF/implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
-            "pose_validity_input": "/tmp/public-source-plan-worktree.pxzxTF/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json",
-            "pose_validity_packet": "/tmp/public-source-plan-worktree.pxzxTF/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
-            "rmsd_scorecard": "/tmp/public-source-plan-worktree.pxzxTF/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
-            "subset_manifest": "/tmp/public-source-plan-worktree.pxzxTF/implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
+            "pose_success_harness": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
+            "pose_validity_input": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json",
+            "pose_validity_packet": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
+            "rmsd_scorecard": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
+            "subset_manifest": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
           },
           "phase2_exit_gate_criteria": [
             {
@@ -3204,7 +3204,7 @@
               "operator_blockers_if_missing": [
                 "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
               ],
-              "provided_path": "/tmp/public-source-plan-worktree.pxzxTF/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+              "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
               "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
               "row_input_id": "subset_rows",
               "status": "provided"
@@ -3233,7 +3233,7 @@
                 "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
                 "posebusters_style_pose_validity::pose_rows_not_provided"
               ],
-              "provided_path": "/tmp/public-source-plan-worktree.pxzxTF/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+              "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
               "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
               "row_input_id": "pose_rows",
               "status": "provided"
@@ -3252,7 +3252,7 @@
               "operator_blockers_if_missing": [
                 "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
               ],
-              "provided_path": "/tmp/public-source-plan-worktree.pxzxTF/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+              "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
               "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
               "row_input_id": "enrichment_rows",
               "status": "provided"
@@ -4085,7 +4085,9 @@
               "case_id": "pocketmd_lite_case_001",
               "top_k_rank": 1
             },
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
             "missing_item_count": 6,
+            "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
             "operator_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
             "status": "blocked"
           },
@@ -4102,7 +4104,9 @@
                 "case_id": "pocketmd_lite_case_001",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 6,
+              "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
               "operator_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
               "status": "blocked"
             },
@@ -4138,7 +4142,9 @@
                 "status": "operator_completion_required",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
               "missing_item_count": 24,
+              "next_action": "complete_pocketmd_per_candidate_role_receipts",
               "operator_action": "complete_pocketmd_per_candidate_role_receipts",
               "status": "blocked"
             },
@@ -4154,7 +4160,9 @@
                 "operator_action": "attach_operator_input_source_source_id",
                 "status": "operator_completion_required"
               },
+              "materialization_command": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
               "missing_item_count": 5,
+              "next_action": "complete_pocketmd_operator_input_source_receipt",
               "operator_action": "complete_pocketmd_operator_input_source_receipt",
               "status": "blocked"
             },
@@ -4175,7 +4183,9 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 18,
+              "next_action": "fill_metric_family_receipt_fields_for_local_min_survival",
               "operator_action": "fill_metric_family_receipt_fields_for_local_min_survival",
               "status": "blocked"
             },
@@ -4194,7 +4204,9 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 6,
+              "next_action": "fill_metric_family_receipt_fields_for_contact_persistence",
               "operator_action": "fill_metric_family_receipt_fields_for_contact_persistence",
               "status": "blocked"
             },
@@ -4213,7 +4225,9 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 6,
+              "next_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
               "operator_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
               "status": "blocked"
             },
@@ -4233,7 +4247,9 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 12,
+              "next_action": "fill_metric_family_receipt_fields_for_clash_relief",
               "operator_action": "fill_metric_family_receipt_fields_for_clash_relief",
               "status": "blocked"
             },
@@ -4253,7 +4269,9 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "missing_item_count": 12,
+              "next_action": "fill_metric_family_receipt_fields_for_uncertainty",
               "operator_action": "fill_metric_family_receipt_fields_for_uncertainty",
               "status": "blocked"
             }
@@ -6481,7 +6499,7 @@
     ],
     "status": "operator_evidence_required"
   },
-  "source_commit_sha": "d20c0ced6b8327ff0eb5aa858a7e7f49faa0981a",
+  "source_commit_sha": "1056e2e2f52e8609c768f62d440792b25d45f2ad",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

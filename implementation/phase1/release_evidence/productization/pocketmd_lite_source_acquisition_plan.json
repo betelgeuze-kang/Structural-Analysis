@@ -29,18 +29,20 @@
       "case_id": "pocketmd_lite_case_001",
       "top_k_rank": 1
     },
+    "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
     "missing_item_count": 6,
+    "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
     "operator_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
     "status": "blocked"
   },
-  "generated_at": "2026-07-04T11:12:11.601097+00:00",
+  "generated_at": "2026-07-04T11:23:45.674355+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json": "sha256:fadc9e5facb979740584493fa30a807a79317afcdd6e80da096013a9d46ac3ed",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv": "sha256:4fac3161714e8bf0444ee3e085a3c34d2f9841acaf9b4427bd8de2224294e196",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:dc39006a0ed93c7141d4421294cb9d47e1af8a3c6fc2fe3531aeae754de53c89",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:09354cd520764e9fb23e9a23e1eed17a38e73328687154c5d35c5411731af093",
     "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:950ae4ecdfc630bf6d2558548bd42c8ff962efa1e5db9ffdf7d78fb2a22aff30",
-    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:f802d86d14d3fb068b469d2030eee03d1d3979c4bea534683157991a15150045",
+    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:a41b73604b17008edd0d3c0033712f63dfb496a2cf19ef32c540a3d16113aa0f",
     "scripts/build_pocketmd_lite_topk_rows_template_preflight.py": "sha256:15b5808c26ccc005162e3b693f88272ddb83cd696b1f54d0005872ce20294c55",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:dad666c08fff6ec709e535de64fdc41121b7c93de5e19c42f0876d71a44a67c9",
     "scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py": "sha256:7ab6a36a6f3c3bd87aa76a4e4bbb98d646e9bec2880b35acf3f85ffe75d6bee1",
@@ -1419,7 +1421,9 @@
         "case_id": "pocketmd_lite_case_001",
         "top_k_rank": 1
       },
+      "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
       "missing_item_count": 6,
+      "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
       "operator_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
       "status": "blocked"
     },
@@ -1455,7 +1459,9 @@
         "status": "operator_completion_required",
         "top_k_rank": 1
       },
+      "materialization_command": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
       "missing_item_count": 24,
+      "next_action": "complete_pocketmd_per_candidate_role_receipts",
       "operator_action": "complete_pocketmd_per_candidate_role_receipts",
       "status": "blocked"
     },
@@ -1471,7 +1477,9 @@
         "operator_action": "attach_operator_input_source_source_id",
         "status": "operator_completion_required"
       },
+      "materialization_command": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
       "missing_item_count": 5,
+      "next_action": "complete_pocketmd_operator_input_source_receipt",
       "operator_action": "complete_pocketmd_operator_input_source_receipt",
       "status": "blocked"
     },
@@ -1492,7 +1500,9 @@
         "run_key": "pocketmd_lite_case_001::rank_1",
         "top_k_rank": 1
       },
+      "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
       "missing_item_count": 18,
+      "next_action": "fill_metric_family_receipt_fields_for_local_min_survival",
       "operator_action": "fill_metric_family_receipt_fields_for_local_min_survival",
       "status": "blocked"
     },
@@ -1511,7 +1521,9 @@
         "run_key": "pocketmd_lite_case_001::rank_1",
         "top_k_rank": 1
       },
+      "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
       "missing_item_count": 6,
+      "next_action": "fill_metric_family_receipt_fields_for_contact_persistence",
       "operator_action": "fill_metric_family_receipt_fields_for_contact_persistence",
       "status": "blocked"
     },
@@ -1530,7 +1542,9 @@
         "run_key": "pocketmd_lite_case_001::rank_1",
         "top_k_rank": 1
       },
+      "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
       "missing_item_count": 6,
+      "next_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
       "operator_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
       "status": "blocked"
     },
@@ -1550,7 +1564,9 @@
         "run_key": "pocketmd_lite_case_001::rank_1",
         "top_k_rank": 1
       },
+      "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
       "missing_item_count": 12,
+      "next_action": "fill_metric_family_receipt_fields_for_clash_relief",
       "operator_action": "fill_metric_family_receipt_fields_for_clash_relief",
       "status": "blocked"
     },
@@ -1570,7 +1586,9 @@
         "run_key": "pocketmd_lite_case_001::rank_1",
         "top_k_rank": 1
       },
+      "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
       "missing_item_count": 12,
+      "next_action": "fill_metric_family_receipt_fields_for_uncertainty",
       "operator_action": "fill_metric_family_receipt_fields_for_uncertainty",
       "status": "blocked"
     }
@@ -1691,7 +1709,9 @@
         "case_id": "pocketmd_lite_case_001",
         "top_k_rank": 1
       },
+      "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
       "missing_item_count": 6,
+      "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
       "operator_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
       "status": "blocked"
     },
@@ -1708,7 +1728,9 @@
           "case_id": "pocketmd_lite_case_001",
           "top_k_rank": 1
         },
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
         "missing_item_count": 6,
+        "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
         "operator_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
         "status": "blocked"
       },
@@ -1744,7 +1766,9 @@
           "status": "operator_completion_required",
           "top_k_rank": 1
         },
+        "materialization_command": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
         "missing_item_count": 24,
+        "next_action": "complete_pocketmd_per_candidate_role_receipts",
         "operator_action": "complete_pocketmd_per_candidate_role_receipts",
         "status": "blocked"
       },
@@ -1760,7 +1784,9 @@
           "operator_action": "attach_operator_input_source_source_id",
           "status": "operator_completion_required"
         },
+        "materialization_command": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
         "missing_item_count": 5,
+        "next_action": "complete_pocketmd_operator_input_source_receipt",
         "operator_action": "complete_pocketmd_operator_input_source_receipt",
         "status": "blocked"
       },
@@ -1781,7 +1807,9 @@
           "run_key": "pocketmd_lite_case_001::rank_1",
           "top_k_rank": 1
         },
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
         "missing_item_count": 18,
+        "next_action": "fill_metric_family_receipt_fields_for_local_min_survival",
         "operator_action": "fill_metric_family_receipt_fields_for_local_min_survival",
         "status": "blocked"
       },
@@ -1800,7 +1828,9 @@
           "run_key": "pocketmd_lite_case_001::rank_1",
           "top_k_rank": 1
         },
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
         "missing_item_count": 6,
+        "next_action": "fill_metric_family_receipt_fields_for_contact_persistence",
         "operator_action": "fill_metric_family_receipt_fields_for_contact_persistence",
         "status": "blocked"
       },
@@ -1819,7 +1849,9 @@
           "run_key": "pocketmd_lite_case_001::rank_1",
           "top_k_rank": 1
         },
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
         "missing_item_count": 6,
+        "next_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
         "operator_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
         "status": "blocked"
       },
@@ -1839,7 +1871,9 @@
           "run_key": "pocketmd_lite_case_001::rank_1",
           "top_k_rank": 1
         },
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
         "missing_item_count": 12,
+        "next_action": "fill_metric_family_receipt_fields_for_clash_relief",
         "operator_action": "fill_metric_family_receipt_fields_for_clash_relief",
         "status": "blocked"
       },
@@ -1859,7 +1893,9 @@
           "run_key": "pocketmd_lite_case_001::rank_1",
           "top_k_rank": 1
         },
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
         "missing_item_count": 12,
+        "next_action": "fill_metric_family_receipt_fields_for_uncertainty",
         "operator_action": "fill_metric_family_receipt_fields_for_uncertainty",
         "status": "blocked"
       }
@@ -5390,7 +5426,7 @@
     ]
   },
   "schema_version": "pocketmd-lite-source-acquisition-plan.v1",
-  "source_commit_sha": "d20c0ced6b8327ff0eb5aa858a7e7f49faa0981a",
+  "source_commit_sha": "1056e2e2f52e8609c768f62d440792b25d45f2ad",
   "source_scope": "bounded_top_k_lite_refinement_rows",
   "status": "operator_acquisition_required",
   "summary": {

@@ -259,7 +259,9 @@ def _operator_blocker_family_row(
     first_missing_item: dict[str, Any],
     operator_action: str,
     command_key: str,
+    commands: dict[str, str] | None = None,
 ) -> dict[str, Any]:
+    materialization_command = str((commands or {}).get(command_key) or "")
     return {
         "family_id": family_id,
         "description": description,
@@ -268,7 +270,9 @@ def _operator_blocker_family_row(
         "blocked_case_count": blocked_case_count,
         "first_missing_item": first_missing_item if missing_item_count else {},
         "operator_action": operator_action,
+        "next_action": operator_action,
         "command_key": command_key,
+        "materialization_command": materialization_command,
     }
 
 
@@ -1068,6 +1072,7 @@ def _phase4_operator_blocker_family_plan(
     raw_row_candidate_status: dict[str, Any],
     template_preflight_summary: dict[str, Any],
     rows_from_receipt_bundle_report_summary: dict[str, Any],
+    commands: dict[str, str],
 ) -> list[dict[str, Any]]:
     missing_slots = [
         row
@@ -1105,6 +1110,7 @@ def _phase4_operator_blocker_family_plan(
                 "attach_pocketmd_lite_topk_rows_at_default_dropzone"
             ),
             command_key="materialize_rows_from_receipt_bundle",
+            commands=commands,
         ),
         _operator_blocker_family_row(
             family_id="per_candidate_role_receipts",
@@ -1119,6 +1125,7 @@ def _phase4_operator_blocker_family_plan(
             ),
             operator_action="complete_pocketmd_per_candidate_role_receipts",
             command_key="build_row_template_preflight",
+            commands=commands,
         ),
         _operator_blocker_family_row(
             family_id="operator_input_source_receipt",
@@ -1135,6 +1142,7 @@ def _phase4_operator_blocker_family_plan(
             ),
             operator_action="complete_pocketmd_operator_input_source_receipt",
             command_key="build_row_template_preflight",
+            commands=commands,
         ),
     ]
     for family in metric_family_plan:
@@ -1161,6 +1169,7 @@ def _phase4_operator_blocker_family_plan(
                     or f"fill_metric_family_receipt_fields_for_{family_id}"
                 ),
                 command_key="materialize_rows_from_receipt_bundle",
+                commands=commands,
             )
         )
     return plan
@@ -1173,6 +1182,7 @@ def _phase4_actual_evidence_audit(
     survival_report_status: dict[str, Any],
     template_preflight_summary: dict[str, Any],
     rows_from_receipt_bundle_report_summary: dict[str, Any],
+    commands: dict[str, str],
 ) -> dict[str, Any]:
     required_slot_count = int(
         raw_row_candidate_status.get("required_candidate_slot_count") or 0
@@ -1423,6 +1433,7 @@ def _phase4_actual_evidence_audit(
         rows_from_receipt_bundle_report_summary=(
             rows_from_receipt_bundle_report_summary
         ),
+        commands=commands,
     )
     blocked_operator_families = [
         row
@@ -2035,19 +2046,6 @@ def build_pocketmd_lite_source_acquisition_plan(
     rows_from_receipt_bundle_report_summary = (
         _rows_from_receipt_bundle_report_summary(repo_root)
     )
-    phase4_actual_evidence_audit = _phase4_actual_evidence_audit(
-        raw_row_candidate_status=raw_row_candidate_status,
-        phase4_completion_audit=phase4_completion_audit,
-        survival_report_status=survival_report_status,
-        template_preflight_summary=template_preflight_summary,
-        rows_from_receipt_bundle_report_summary=(
-            rows_from_receipt_bundle_report_summary
-        ),
-    )
-    refinement_execution_plan = _refinement_execution_plan_summary(
-        minimum_rows_by_case,
-        operator_rows_ready=operator_rows_ready,
-    )
     commands = {
         "write_plan": (
             "python3 scripts/build_pocketmd_lite_source_acquisition_plan.py"
@@ -2093,6 +2091,20 @@ def build_pocketmd_lite_source_acquisition_plan(
             "--fail-blocked"
         ),
     }
+    phase4_actual_evidence_audit = _phase4_actual_evidence_audit(
+        raw_row_candidate_status=raw_row_candidate_status,
+        phase4_completion_audit=phase4_completion_audit,
+        survival_report_status=survival_report_status,
+        template_preflight_summary=template_preflight_summary,
+        rows_from_receipt_bundle_report_summary=(
+            rows_from_receipt_bundle_report_summary
+        ),
+        commands=commands,
+    )
+    refinement_execution_plan = _refinement_execution_plan_summary(
+        minimum_rows_by_case,
+        operator_rows_ready=operator_rows_ready,
+    )
     pocketmd_rows_operator_action = _pocketmd_rows_operator_action(
         raw_row_candidate_status=raw_row_candidate_status,
         minimum_rows_by_case=minimum_rows_by_case,
@@ -2546,8 +2558,8 @@ def _markdown(payload: dict[str, Any]) -> str:
                     "",
                     "### Operator Blocker Families",
                     "",
-                    "| Family | Status | Missing Items | Blocked Cases | Operator Action |",
-                    "|---|---|---:|---:|---|",
+                    "| Family | Status | Missing Items | Blocked Cases | Operator Action | Command Key |",
+                    "|---|---|---:|---:|---|---|",
                 ]
             )
             for row in operator_blocker_families:
@@ -2556,7 +2568,8 @@ def _markdown(payload: dict[str, Any]) -> str:
                     f"`{row.get('status', '')}` | "
                     f"{row.get('missing_item_count', 0)} | "
                     f"{row.get('blocked_case_count', 0)} | "
-                    f"`{row.get('operator_action', '')}` |"
+                    f"`{row.get('operator_action', '')}` | "
+                    f"`{row.get('command_key', '')}` |"
                 )
     lines.extend(
         [
