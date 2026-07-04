@@ -667,6 +667,15 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     assert metric_family_plan["local_min_survival"][
         "missing_field_occurrence_count"
     ] == 18
+    assert metric_family_plan["local_min_survival"]["next_action"] == (
+        "fill_metric_family_receipt_fields_for_local_min_survival"
+    )
+    assert metric_family_plan["local_min_survival"]["command_key"] == (
+        "rerun_rows_materialization"
+    )
+    assert metric_family_plan["local_min_survival"][
+        "materialization_command"
+    ] == receipt_bundle_report["commands"]["rerun_rows_materialization"]
     assert metric_family_plan["contact_persistence"][
         "missing_field_occurrence_count"
     ] == 6

@@ -35,17 +35,17 @@
     "operator_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
     "status": "blocked"
   },
-  "generated_at": "2026-07-04T11:43:37.377089+00:00",
+  "generated_at": "2026-07-04T12:09:32.777804+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json": "sha256:fadc9e5facb979740584493fa30a807a79317afcdd6e80da096013a9d46ac3ed",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json": "sha256:2107e7c456fc6e1113f0b662abe0239c5e28b5281813d159d223df5d93df6688",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv": "sha256:4fac3161714e8bf0444ee3e085a3c34d2f9841acaf9b4427bd8de2224294e196",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:dc39006a0ed93c7141d4421294cb9d47e1af8a3c6fc2fe3531aeae754de53c89",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:09354cd520764e9fb23e9a23e1eed17a38e73328687154c5d35c5411731af093",
     "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:950ae4ecdfc630bf6d2558548bd42c8ff962efa1e5db9ffdf7d78fb2a22aff30",
-    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:e1f84daf60c4c5405ecba963b67839cc0bdff075ff1a50f369be1803cfa5c8e8",
+    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:f96cb98685938f086f3db1cd81ed4ec3a49c42f731f41a340c4a6f51c7108ac4",
     "scripts/build_pocketmd_lite_topk_rows_template_preflight.py": "sha256:15b5808c26ccc005162e3b693f88272ddb83cd696b1f54d0005872ce20294c55",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:dad666c08fff6ec709e535de64fdc41121b7c93de5e19c42f0876d71a44a67c9",
-    "scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py": "sha256:7ab6a36a6f3c3bd87aa76a4e4bbb98d646e9bec2880b35acf3f85ffe75d6bee1",
+    "scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py": "sha256:d92f21fd1e872e3d85096bfde29b4a0f557f91cfe2f467ba69497999882123ad",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:24aba7d75e0de5a6e62416cdbbab5980d231dee7030b2718c2f37f59d8437366"
   },
   "metric_receipt_contract": [
@@ -625,11 +625,19 @@
         "rows_from_receipt_bundle_report": {
           "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json",
           "blocker_count": 7,
+          "commands": {
+            "materialize_operator_intake": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
+            "materialize_survival_report": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+            "rerun_phase4_row_audit": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
+            "rerun_receipt_bundle": "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py --fail-blocked",
+            "rerun_rows_materialization": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked"
+          },
           "first_incomplete_receipt": {
             "blockers": [
               "receipt_not_complete"
             ],
             "case_id": "pocketmd_lite_case_001",
+            "command_key": "rerun_rows_materialization",
             "completion_filled_required_field_count": 5,
             "completion_missing_required_field_count": 18,
             "completion_missing_required_fields": [
@@ -653,6 +661,8 @@
               "operator_input_source.source_artifact_sha256"
             ],
             "completion_required_field_count": 23,
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+            "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
             "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
             "receipt_complete": false,
             "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
@@ -670,6 +680,7 @@
                 "receipt_not_complete"
               ],
               "case_id": "pocketmd_lite_case_001",
+              "command_key": "rerun_rows_materialization",
               "completion_filled_required_field_count": 5,
               "completion_missing_required_field_count": 18,
               "completion_missing_required_fields": [
@@ -693,6 +704,8 @@
                 "operator_input_source.source_artifact_sha256"
               ],
               "completion_required_field_count": 23,
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+              "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
               "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
               "receipt_complete": false,
               "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
@@ -706,6 +719,7 @@
                 "receipt_not_complete"
               ],
               "case_id": "pocketmd_lite_case_001",
+              "command_key": "rerun_rows_materialization",
               "completion_filled_required_field_count": 5,
               "completion_missing_required_field_count": 18,
               "completion_missing_required_fields": [
@@ -729,6 +743,8 @@
                 "operator_input_source.source_artifact_sha256"
               ],
               "completion_required_field_count": 23,
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+              "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
               "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
               "receipt_complete": false,
               "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_02_refinement_receipt.json",
@@ -742,6 +758,7 @@
                 "receipt_not_complete"
               ],
               "case_id": "pocketmd_lite_case_002",
+              "command_key": "rerun_rows_materialization",
               "completion_filled_required_field_count": 5,
               "completion_missing_required_field_count": 18,
               "completion_missing_required_fields": [
@@ -765,6 +782,8 @@
                 "operator_input_source.source_artifact_sha256"
               ],
               "completion_required_field_count": 23,
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+              "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
               "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
               "receipt_complete": false,
               "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_002/rank_01_refinement_receipt.json",
@@ -778,6 +797,7 @@
                 "receipt_not_complete"
               ],
               "case_id": "pocketmd_lite_case_002",
+              "command_key": "rerun_rows_materialization",
               "completion_filled_required_field_count": 5,
               "completion_missing_required_field_count": 18,
               "completion_missing_required_fields": [
@@ -801,6 +821,8 @@
                 "operator_input_source.source_artifact_sha256"
               ],
               "completion_required_field_count": 23,
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+              "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
               "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
               "receipt_complete": false,
               "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_002/rank_02_refinement_receipt.json",
@@ -814,6 +836,7 @@
                 "receipt_not_complete"
               ],
               "case_id": "pocketmd_lite_case_003",
+              "command_key": "rerun_rows_materialization",
               "completion_filled_required_field_count": 5,
               "completion_missing_required_field_count": 18,
               "completion_missing_required_fields": [
@@ -837,6 +860,8 @@
                 "operator_input_source.source_artifact_sha256"
               ],
               "completion_required_field_count": 23,
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+              "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
               "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
               "receipt_complete": false,
               "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_003/rank_01_refinement_receipt.json",
@@ -850,6 +875,7 @@
                 "receipt_not_complete"
               ],
               "case_id": "pocketmd_lite_case_003",
+              "command_key": "rerun_rows_materialization",
               "completion_filled_required_field_count": 5,
               "completion_missing_required_field_count": 18,
               "completion_missing_required_fields": [
@@ -873,6 +899,8 @@
                 "operator_input_source.source_artifact_sha256"
               ],
               "completion_required_field_count": 23,
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+              "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
               "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
               "receipt_complete": false,
               "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_003/rank_02_refinement_receipt.json",
@@ -961,6 +989,7 @@
                   "top_k_rank": 2
                 }
               ],
+              "command_key": "rerun_rows_materialization",
               "complete_receipt_count": 0,
               "first_blocked_receipt": {
                 "case_id": "pocketmd_lite_case_001",
@@ -974,8 +1003,10 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "metric_family_id": "local_min_survival",
               "missing_field_occurrence_count": 18,
+              "next_action": "fill_metric_family_receipt_fields_for_local_min_survival",
               "operator_completion_action": "fill_metric_family_receipt_fields_for_local_min_survival",
               "phase4_criterion_id": "local_min_survival_materialized",
               "product_requirement": "local-min survival and energy proxy movement are recorded",
@@ -1051,6 +1082,7 @@
                   "top_k_rank": 2
                 }
               ],
+              "command_key": "rerun_rows_materialization",
               "complete_receipt_count": 0,
               "first_blocked_receipt": {
                 "case_id": "pocketmd_lite_case_001",
@@ -1062,8 +1094,10 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "metric_family_id": "contact_persistence",
               "missing_field_occurrence_count": 6,
+              "next_action": "fill_metric_family_receipt_fields_for_contact_persistence",
               "operator_completion_action": "fill_metric_family_receipt_fields_for_contact_persistence",
               "phase4_criterion_id": "contact_persistence_materialized",
               "product_requirement": "contact persistence is recorded",
@@ -1137,6 +1171,7 @@
                   "top_k_rank": 2
                 }
               ],
+              "command_key": "rerun_rows_materialization",
               "complete_receipt_count": 0,
               "first_blocked_receipt": {
                 "case_id": "pocketmd_lite_case_001",
@@ -1148,8 +1183,10 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "metric_family_id": "h_bond_persistence",
               "missing_field_occurrence_count": 6,
+              "next_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
               "operator_completion_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
               "phase4_criterion_id": "h_bond_persistence_materialized",
               "product_requirement": "H-bond persistence is recorded",
@@ -1229,6 +1266,7 @@
                   "top_k_rank": 2
                 }
               ],
+              "command_key": "rerun_rows_materialization",
               "complete_receipt_count": 0,
               "first_blocked_receipt": {
                 "case_id": "pocketmd_lite_case_001",
@@ -1241,8 +1279,10 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "metric_family_id": "clash_relief",
               "missing_field_occurrence_count": 12,
+              "next_action": "fill_metric_family_receipt_fields_for_clash_relief",
               "operator_completion_action": "fill_metric_family_receipt_fields_for_clash_relief",
               "phase4_criterion_id": "clash_relief_materialized",
               "product_requirement": "clash relief before/after counts are recorded",
@@ -1323,6 +1363,7 @@
                   "top_k_rank": 2
                 }
               ],
+              "command_key": "rerun_rows_materialization",
               "complete_receipt_count": 0,
               "first_blocked_receipt": {
                 "case_id": "pocketmd_lite_case_001",
@@ -1335,8 +1376,10 @@
                 "run_key": "pocketmd_lite_case_001::rank_1",
                 "top_k_rank": 1
               },
+              "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "metric_family_id": "uncertainty",
               "missing_field_occurrence_count": 12,
+              "next_action": "fill_metric_family_receipt_fields_for_uncertainty",
               "operator_completion_action": "fill_metric_family_receipt_fields_for_uncertainty",
               "phase4_criterion_id": "uncertainty_summary_materialized",
               "product_requirement": "uncertainty interval bounds are recorded",
@@ -3607,11 +3650,19 @@
       "rows_from_receipt_bundle_report": {
         "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json",
         "blocker_count": 7,
+        "commands": {
+          "materialize_operator_intake": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
+          "materialize_survival_report": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+          "rerun_phase4_row_audit": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
+          "rerun_receipt_bundle": "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py --fail-blocked",
+          "rerun_rows_materialization": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked"
+        },
         "first_incomplete_receipt": {
           "blockers": [
             "receipt_not_complete"
           ],
           "case_id": "pocketmd_lite_case_001",
+          "command_key": "rerun_rows_materialization",
           "completion_filled_required_field_count": 5,
           "completion_missing_required_field_count": 18,
           "completion_missing_required_fields": [
@@ -3635,6 +3686,8 @@
             "operator_input_source.source_artifact_sha256"
           ],
           "completion_required_field_count": 23,
+          "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+          "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
           "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
           "receipt_complete": false,
           "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
@@ -3652,6 +3705,7 @@
               "receipt_not_complete"
             ],
             "case_id": "pocketmd_lite_case_001",
+            "command_key": "rerun_rows_materialization",
             "completion_filled_required_field_count": 5,
             "completion_missing_required_field_count": 18,
             "completion_missing_required_fields": [
@@ -3675,6 +3729,8 @@
               "operator_input_source.source_artifact_sha256"
             ],
             "completion_required_field_count": 23,
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+            "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
             "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
             "receipt_complete": false,
             "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
@@ -3688,6 +3744,7 @@
               "receipt_not_complete"
             ],
             "case_id": "pocketmd_lite_case_001",
+            "command_key": "rerun_rows_materialization",
             "completion_filled_required_field_count": 5,
             "completion_missing_required_field_count": 18,
             "completion_missing_required_fields": [
@@ -3711,6 +3768,8 @@
               "operator_input_source.source_artifact_sha256"
             ],
             "completion_required_field_count": 23,
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+            "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
             "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
             "receipt_complete": false,
             "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_02_refinement_receipt.json",
@@ -3724,6 +3783,7 @@
               "receipt_not_complete"
             ],
             "case_id": "pocketmd_lite_case_002",
+            "command_key": "rerun_rows_materialization",
             "completion_filled_required_field_count": 5,
             "completion_missing_required_field_count": 18,
             "completion_missing_required_fields": [
@@ -3747,6 +3807,8 @@
               "operator_input_source.source_artifact_sha256"
             ],
             "completion_required_field_count": 23,
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+            "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
             "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
             "receipt_complete": false,
             "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_002/rank_01_refinement_receipt.json",
@@ -3760,6 +3822,7 @@
               "receipt_not_complete"
             ],
             "case_id": "pocketmd_lite_case_002",
+            "command_key": "rerun_rows_materialization",
             "completion_filled_required_field_count": 5,
             "completion_missing_required_field_count": 18,
             "completion_missing_required_fields": [
@@ -3783,6 +3846,8 @@
               "operator_input_source.source_artifact_sha256"
             ],
             "completion_required_field_count": 23,
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+            "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
             "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
             "receipt_complete": false,
             "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_002/rank_02_refinement_receipt.json",
@@ -3796,6 +3861,7 @@
               "receipt_not_complete"
             ],
             "case_id": "pocketmd_lite_case_003",
+            "command_key": "rerun_rows_materialization",
             "completion_filled_required_field_count": 5,
             "completion_missing_required_field_count": 18,
             "completion_missing_required_fields": [
@@ -3819,6 +3885,8 @@
               "operator_input_source.source_artifact_sha256"
             ],
             "completion_required_field_count": 23,
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+            "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
             "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
             "receipt_complete": false,
             "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_003/rank_01_refinement_receipt.json",
@@ -3832,6 +3900,7 @@
               "receipt_not_complete"
             ],
             "case_id": "pocketmd_lite_case_003",
+            "command_key": "rerun_rows_materialization",
             "completion_filled_required_field_count": 5,
             "completion_missing_required_field_count": 18,
             "completion_missing_required_fields": [
@@ -3855,6 +3924,8 @@
               "operator_input_source.source_artifact_sha256"
             ],
             "completion_required_field_count": 23,
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+            "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
             "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
             "receipt_complete": false,
             "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_003/rank_02_refinement_receipt.json",
@@ -3943,6 +4014,7 @@
                 "top_k_rank": 2
               }
             ],
+            "command_key": "rerun_rows_materialization",
             "complete_receipt_count": 0,
             "first_blocked_receipt": {
               "case_id": "pocketmd_lite_case_001",
@@ -3956,8 +4028,10 @@
               "run_key": "pocketmd_lite_case_001::rank_1",
               "top_k_rank": 1
             },
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
             "metric_family_id": "local_min_survival",
             "missing_field_occurrence_count": 18,
+            "next_action": "fill_metric_family_receipt_fields_for_local_min_survival",
             "operator_completion_action": "fill_metric_family_receipt_fields_for_local_min_survival",
             "phase4_criterion_id": "local_min_survival_materialized",
             "product_requirement": "local-min survival and energy proxy movement are recorded",
@@ -4033,6 +4107,7 @@
                 "top_k_rank": 2
               }
             ],
+            "command_key": "rerun_rows_materialization",
             "complete_receipt_count": 0,
             "first_blocked_receipt": {
               "case_id": "pocketmd_lite_case_001",
@@ -4044,8 +4119,10 @@
               "run_key": "pocketmd_lite_case_001::rank_1",
               "top_k_rank": 1
             },
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
             "metric_family_id": "contact_persistence",
             "missing_field_occurrence_count": 6,
+            "next_action": "fill_metric_family_receipt_fields_for_contact_persistence",
             "operator_completion_action": "fill_metric_family_receipt_fields_for_contact_persistence",
             "phase4_criterion_id": "contact_persistence_materialized",
             "product_requirement": "contact persistence is recorded",
@@ -4119,6 +4196,7 @@
                 "top_k_rank": 2
               }
             ],
+            "command_key": "rerun_rows_materialization",
             "complete_receipt_count": 0,
             "first_blocked_receipt": {
               "case_id": "pocketmd_lite_case_001",
@@ -4130,8 +4208,10 @@
               "run_key": "pocketmd_lite_case_001::rank_1",
               "top_k_rank": 1
             },
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
             "metric_family_id": "h_bond_persistence",
             "missing_field_occurrence_count": 6,
+            "next_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
             "operator_completion_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
             "phase4_criterion_id": "h_bond_persistence_materialized",
             "product_requirement": "H-bond persistence is recorded",
@@ -4211,6 +4291,7 @@
                 "top_k_rank": 2
               }
             ],
+            "command_key": "rerun_rows_materialization",
             "complete_receipt_count": 0,
             "first_blocked_receipt": {
               "case_id": "pocketmd_lite_case_001",
@@ -4223,8 +4304,10 @@
               "run_key": "pocketmd_lite_case_001::rank_1",
               "top_k_rank": 1
             },
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
             "metric_family_id": "clash_relief",
             "missing_field_occurrence_count": 12,
+            "next_action": "fill_metric_family_receipt_fields_for_clash_relief",
             "operator_completion_action": "fill_metric_family_receipt_fields_for_clash_relief",
             "phase4_criterion_id": "clash_relief_materialized",
             "product_requirement": "clash relief before/after counts are recorded",
@@ -4305,6 +4388,7 @@
                 "top_k_rank": 2
               }
             ],
+            "command_key": "rerun_rows_materialization",
             "complete_receipt_count": 0,
             "first_blocked_receipt": {
               "case_id": "pocketmd_lite_case_001",
@@ -4317,8 +4401,10 @@
               "run_key": "pocketmd_lite_case_001::rank_1",
               "top_k_rank": 1
             },
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
             "metric_family_id": "uncertainty",
             "missing_field_occurrence_count": 12,
+            "next_action": "fill_metric_family_receipt_fields_for_uncertainty",
             "operator_completion_action": "fill_metric_family_receipt_fields_for_uncertainty",
             "phase4_criterion_id": "uncertainty_summary_materialized",
             "product_requirement": "uncertainty interval bounds are recorded",
@@ -4682,11 +4768,19 @@
   "rows_from_receipt_bundle_report_summary": {
     "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json",
     "blocker_count": 7,
+    "commands": {
+      "materialize_operator_intake": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
+      "materialize_survival_report": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+      "rerun_phase4_row_audit": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
+      "rerun_receipt_bundle": "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py --fail-blocked",
+      "rerun_rows_materialization": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked"
+    },
     "first_incomplete_receipt": {
       "blockers": [
         "receipt_not_complete"
       ],
       "case_id": "pocketmd_lite_case_001",
+      "command_key": "rerun_rows_materialization",
       "completion_filled_required_field_count": 5,
       "completion_missing_required_field_count": 18,
       "completion_missing_required_fields": [
@@ -4710,6 +4804,8 @@
         "operator_input_source.source_artifact_sha256"
       ],
       "completion_required_field_count": 23,
+      "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+      "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
       "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
       "receipt_complete": false,
       "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
@@ -4727,6 +4823,7 @@
           "receipt_not_complete"
         ],
         "case_id": "pocketmd_lite_case_001",
+        "command_key": "rerun_rows_materialization",
         "completion_filled_required_field_count": 5,
         "completion_missing_required_field_count": 18,
         "completion_missing_required_fields": [
@@ -4750,6 +4847,8 @@
           "operator_input_source.source_artifact_sha256"
         ],
         "completion_required_field_count": 23,
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+        "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
         "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
         "receipt_complete": false,
         "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
@@ -4763,6 +4862,7 @@
           "receipt_not_complete"
         ],
         "case_id": "pocketmd_lite_case_001",
+        "command_key": "rerun_rows_materialization",
         "completion_filled_required_field_count": 5,
         "completion_missing_required_field_count": 18,
         "completion_missing_required_fields": [
@@ -4786,6 +4886,8 @@
           "operator_input_source.source_artifact_sha256"
         ],
         "completion_required_field_count": 23,
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+        "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
         "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
         "receipt_complete": false,
         "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_02_refinement_receipt.json",
@@ -4799,6 +4901,7 @@
           "receipt_not_complete"
         ],
         "case_id": "pocketmd_lite_case_002",
+        "command_key": "rerun_rows_materialization",
         "completion_filled_required_field_count": 5,
         "completion_missing_required_field_count": 18,
         "completion_missing_required_fields": [
@@ -4822,6 +4925,8 @@
           "operator_input_source.source_artifact_sha256"
         ],
         "completion_required_field_count": 23,
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+        "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
         "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
         "receipt_complete": false,
         "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_002/rank_01_refinement_receipt.json",
@@ -4835,6 +4940,7 @@
           "receipt_not_complete"
         ],
         "case_id": "pocketmd_lite_case_002",
+        "command_key": "rerun_rows_materialization",
         "completion_filled_required_field_count": 5,
         "completion_missing_required_field_count": 18,
         "completion_missing_required_fields": [
@@ -4858,6 +4964,8 @@
           "operator_input_source.source_artifact_sha256"
         ],
         "completion_required_field_count": 23,
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+        "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
         "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
         "receipt_complete": false,
         "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_002/rank_02_refinement_receipt.json",
@@ -4871,6 +4979,7 @@
           "receipt_not_complete"
         ],
         "case_id": "pocketmd_lite_case_003",
+        "command_key": "rerun_rows_materialization",
         "completion_filled_required_field_count": 5,
         "completion_missing_required_field_count": 18,
         "completion_missing_required_fields": [
@@ -4894,6 +5003,8 @@
           "operator_input_source.source_artifact_sha256"
         ],
         "completion_required_field_count": 23,
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+        "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
         "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
         "receipt_complete": false,
         "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_003/rank_01_refinement_receipt.json",
@@ -4907,6 +5018,7 @@
           "receipt_not_complete"
         ],
         "case_id": "pocketmd_lite_case_003",
+        "command_key": "rerun_rows_materialization",
         "completion_filled_required_field_count": 5,
         "completion_missing_required_field_count": 18,
         "completion_missing_required_fields": [
@@ -4930,6 +5042,8 @@
           "operator_input_source.source_artifact_sha256"
         ],
         "completion_required_field_count": 23,
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+        "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
         "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
         "receipt_complete": false,
         "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_003/rank_02_refinement_receipt.json",
@@ -5018,6 +5132,7 @@
             "top_k_rank": 2
           }
         ],
+        "command_key": "rerun_rows_materialization",
         "complete_receipt_count": 0,
         "first_blocked_receipt": {
           "case_id": "pocketmd_lite_case_001",
@@ -5031,8 +5146,10 @@
           "run_key": "pocketmd_lite_case_001::rank_1",
           "top_k_rank": 1
         },
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
         "metric_family_id": "local_min_survival",
         "missing_field_occurrence_count": 18,
+        "next_action": "fill_metric_family_receipt_fields_for_local_min_survival",
         "operator_completion_action": "fill_metric_family_receipt_fields_for_local_min_survival",
         "phase4_criterion_id": "local_min_survival_materialized",
         "product_requirement": "local-min survival and energy proxy movement are recorded",
@@ -5108,6 +5225,7 @@
             "top_k_rank": 2
           }
         ],
+        "command_key": "rerun_rows_materialization",
         "complete_receipt_count": 0,
         "first_blocked_receipt": {
           "case_id": "pocketmd_lite_case_001",
@@ -5119,8 +5237,10 @@
           "run_key": "pocketmd_lite_case_001::rank_1",
           "top_k_rank": 1
         },
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
         "metric_family_id": "contact_persistence",
         "missing_field_occurrence_count": 6,
+        "next_action": "fill_metric_family_receipt_fields_for_contact_persistence",
         "operator_completion_action": "fill_metric_family_receipt_fields_for_contact_persistence",
         "phase4_criterion_id": "contact_persistence_materialized",
         "product_requirement": "contact persistence is recorded",
@@ -5194,6 +5314,7 @@
             "top_k_rank": 2
           }
         ],
+        "command_key": "rerun_rows_materialization",
         "complete_receipt_count": 0,
         "first_blocked_receipt": {
           "case_id": "pocketmd_lite_case_001",
@@ -5205,8 +5326,10 @@
           "run_key": "pocketmd_lite_case_001::rank_1",
           "top_k_rank": 1
         },
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
         "metric_family_id": "h_bond_persistence",
         "missing_field_occurrence_count": 6,
+        "next_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
         "operator_completion_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
         "phase4_criterion_id": "h_bond_persistence_materialized",
         "product_requirement": "H-bond persistence is recorded",
@@ -5286,6 +5409,7 @@
             "top_k_rank": 2
           }
         ],
+        "command_key": "rerun_rows_materialization",
         "complete_receipt_count": 0,
         "first_blocked_receipt": {
           "case_id": "pocketmd_lite_case_001",
@@ -5298,8 +5422,10 @@
           "run_key": "pocketmd_lite_case_001::rank_1",
           "top_k_rank": 1
         },
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
         "metric_family_id": "clash_relief",
         "missing_field_occurrence_count": 12,
+        "next_action": "fill_metric_family_receipt_fields_for_clash_relief",
         "operator_completion_action": "fill_metric_family_receipt_fields_for_clash_relief",
         "phase4_criterion_id": "clash_relief_materialized",
         "product_requirement": "clash relief before/after counts are recorded",
@@ -5380,6 +5506,7 @@
             "top_k_rank": 2
           }
         ],
+        "command_key": "rerun_rows_materialization",
         "complete_receipt_count": 0,
         "first_blocked_receipt": {
           "case_id": "pocketmd_lite_case_001",
@@ -5392,8 +5519,10 @@
           "run_key": "pocketmd_lite_case_001::rank_1",
           "top_k_rank": 1
         },
+        "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
         "metric_family_id": "uncertainty",
         "missing_field_occurrence_count": 12,
+        "next_action": "fill_metric_family_receipt_fields_for_uncertainty",
         "operator_completion_action": "fill_metric_family_receipt_fields_for_uncertainty",
         "phase4_criterion_id": "uncertainty_summary_materialized",
         "product_requirement": "uncertainty interval bounds are recorded",
@@ -5434,7 +5563,7 @@
     ]
   },
   "schema_version": "pocketmd-lite-source-acquisition-plan.v1",
-  "source_commit_sha": "68e04d4d2dd88e3c211bcae5eead05438b447fe9",
+  "source_commit_sha": "1fe8da6b79c85de6abbb6fda98a58c3085dc41d8",
   "source_scope": "bounded_top_k_lite_refinement_rows",
   "status": "operator_acquisition_required",
   "summary": {

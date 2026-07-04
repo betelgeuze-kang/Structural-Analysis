@@ -150,6 +150,46 @@ def _text(value: Any) -> str:
     return str(value or "").strip()
 
 
+def _operator_command_map(
+    *,
+    receipt_bundle: Path = DEFAULT_RECEIPT_BUNDLE,
+    out_rows: Path = DEFAULT_OUT_ROWS,
+    out_report: Path = DEFAULT_OUT_REPORT,
+) -> dict[str, str]:
+    return {
+        "rerun_receipt_bundle": (
+            "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py "
+            "--fail-blocked"
+        ),
+        "rerun_rows_materialization": (
+            "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py "
+            f"--receipt-bundle {receipt_bundle} --out-rows {out_rows} "
+            f"--out-report {out_report} --fail-blocked"
+        ),
+        "materialize_operator_intake": (
+            "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
+            f"--rows {out_rows} "
+            f"--out {PRODUCTIZATION / 'pocketmd_lite_operator_intake.json'} "
+            "--source-id <source-id> --source-url <source-url> "
+            "--source-license <license>"
+        ),
+        "materialize_survival_report": (
+            "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py "
+            f"--intake {PRODUCTIZATION / 'pocketmd_lite_operator_intake.json'} "
+            f"--contract {PRODUCTIZATION / 'pocketmd_lite_contract.json'} "
+            f"--out-report {PRODUCTIZATION / 'pocketmd_lite_topk_survival_report.json'} "
+            "--out-surface implementation/phase1/release_evidence/surface/"
+            "pocketmd_lite_science_product_surface.json --fail-blocked"
+        ),
+        "rerun_phase4_row_audit": (
+            "python3 scripts/materialize_science_actual_closure_from_rows.py "
+            f"--pocketmd-rows {out_rows} "
+            "--source-id <source-id> --source-url <source-url> "
+            "--source-license <license> --fail-blocked"
+        ),
+    }
+
+
 def _nested_text(payload: dict[str, Any], field: str) -> str:
     current: Any = payload
     for part in field.split("."):
@@ -328,11 +368,16 @@ def _row_from_bundle_receipt(
 
 def _receipt_completion_action_plan(
     row_statuses: list[dict[str, Any]],
+    *,
+    commands: dict[str, str] | None = None,
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
+    command_map = commands or {}
+    command_key = "rerun_rows_materialization"
     for status in row_statuses:
         if status.get("status") == "ready":
             continue
+        operator_action = str(status.get("operator_completion_action") or "")
         missing_fields = [
             str(field)
             for field in _as_list(status.get("completion_missing_required_fields"))
@@ -347,9 +392,10 @@ def _receipt_completion_action_plan(
                 "status": str(status.get("status") or ""),
                 "receipt_status": str(status.get("receipt_status") or ""),
                 "receipt_complete": bool(status.get("receipt_complete")),
-                "operator_completion_action": str(
-                    status.get("operator_completion_action") or ""
-                ),
+                "operator_completion_action": operator_action,
+                "next_action": operator_action,
+                "command_key": command_key,
+                "materialization_command": str(command_map.get(command_key) or ""),
                 "completion_required_field_count": int(
                     status.get("completion_required_field_count") or 0
                 ),
@@ -372,8 +418,11 @@ def _receipt_metric_family_completion_plan(
     receipt_completion_action_plan: list[dict[str, Any]],
     *,
     receipt_count: int,
+    commands: dict[str, str] | None = None,
 ) -> list[dict[str, Any]]:
     plan: list[dict[str, Any]] = []
+    command_map = commands or {}
+    command_key = "rerun_rows_materialization"
     for family in RECEIPT_METRIC_FAMILIES:
         required_fields = [
             str(field)
@@ -408,6 +457,12 @@ def _receipt_metric_family_completion_plan(
                 }
             )
         blocked_count = len(blocked_receipts)
+        operator_action = (
+            "fill_metric_family_receipt_fields_for_"
+            f"{family.get('metric_family_id')}"
+            if blocked_count
+            else "review_metric_family_receipts"
+        )
         plan.append(
             {
                 "metric_family_id": str(family.get("metric_family_id") or ""),
@@ -427,12 +482,10 @@ def _receipt_metric_family_completion_plan(
                     blocked_receipts[0] if blocked_receipts else {}
                 ),
                 "blocked_receipts": blocked_receipts,
-                "operator_completion_action": (
-                    "fill_metric_family_receipt_fields_for_"
-                    f"{family.get('metric_family_id')}"
-                    if blocked_count
-                    else "review_metric_family_receipts"
-                ),
+                "operator_completion_action": operator_action,
+                "next_action": operator_action,
+                "command_key": command_key,
+                "materialization_command": str(command_map.get(command_key) or ""),
             }
         )
     return plan
@@ -471,11 +524,20 @@ def materialize_pocketmd_lite_topk_rows_from_receipt_bundle(
         if row and status.get("status") == "ready"
     ]
     row_statuses = [status for _row, status in row_results]
-    receipt_completion_action_plan = _receipt_completion_action_plan(row_statuses)
+    commands = _operator_command_map(
+        receipt_bundle=receipt_bundle,
+        out_rows=out_rows,
+        out_report=out_report,
+    )
+    receipt_completion_action_plan = _receipt_completion_action_plan(
+        row_statuses,
+        commands=commands,
+    )
     receipt_metric_family_completion_plan = (
         _receipt_metric_family_completion_plan(
             receipt_completion_action_plan,
             receipt_count=len(raw_bundle_rows),
+            commands=commands,
         )
     )
     first_incomplete_receipt = (
@@ -609,38 +671,7 @@ def materialize_pocketmd_lite_topk_rows_from_receipt_bundle(
         "aggregate_validation_error": aggregate_error,
         "row_statuses": row_statuses,
         "blockers": blockers,
-        "commands": {
-            "rerun_receipt_bundle": (
-                "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py "
-                "--fail-blocked"
-            ),
-            "rerun_rows_materialization": (
-                "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py "
-                f"--receipt-bundle {receipt_bundle} --out-rows {out_rows} "
-                f"--out-report {out_report} --fail-blocked"
-            ),
-            "materialize_operator_intake": (
-                "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
-                f"--rows {out_rows} "
-                f"--out {PRODUCTIZATION / 'pocketmd_lite_operator_intake.json'} "
-                "--source-id <source-id> --source-url <source-url> "
-                "--source-license <license>"
-            ),
-            "materialize_survival_report": (
-                "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py "
-                f"--intake {PRODUCTIZATION / 'pocketmd_lite_operator_intake.json'} "
-                f"--contract {PRODUCTIZATION / 'pocketmd_lite_contract.json'} "
-                f"--out-report {PRODUCTIZATION / 'pocketmd_lite_topk_survival_report.json'} "
-                "--out-surface implementation/phase1/release_evidence/surface/"
-                "pocketmd_lite_science_product_surface.json --fail-blocked"
-            ),
-            "rerun_phase4_row_audit": (
-                "python3 scripts/materialize_science_actual_closure_from_rows.py "
-                f"--pocketmd-rows {out_rows} "
-                "--source-id <source-id> --source-url <source-url> "
-                "--source-license <license> --fail-blocked"
-            ),
-        },
+        "commands": commands,
         "summary": {
             "bundle_ready": bundle_ready,
             "rows_materialized": rows_written,

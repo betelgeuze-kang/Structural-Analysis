@@ -278,6 +278,13 @@ def test_pocketmd_topk_rows_from_receipt_bundle_reports_incomplete_templates(
     assert first_action["operator_completion_action"] == (
         "fill_completion_missing_required_fields_and_set_status_complete"
     )
+    assert first_action["next_action"] == (
+        "fill_completion_missing_required_fields_and_set_status_complete"
+    )
+    assert first_action["command_key"] == "rerun_rows_materialization"
+    assert first_action["materialization_command"] == report["commands"][
+        "rerun_rows_materialization"
+    ]
     assert report["receipt_metric_family_count"] == 5
     assert report["receipt_metric_family_blocked_count"] == 5
     assert report["receipt_metric_family_missing_field_occurrence_count"] == 54
@@ -298,6 +305,15 @@ def test_pocketmd_topk_rows_from_receipt_bundle_reports_incomplete_templates(
         "post_refinement_energy_proxy",
         "local_min_survived",
     ]
+    assert metric_family_plan["local_min_survival"]["next_action"] == (
+        "fill_metric_family_receipt_fields_for_local_min_survival"
+    )
+    assert metric_family_plan["local_min_survival"]["command_key"] == (
+        "rerun_rows_materialization"
+    )
+    assert metric_family_plan["local_min_survival"][
+        "materialization_command"
+    ] == report["commands"]["rerun_rows_materialization"]
     assert metric_family_plan["contact_persistence"][
         "missing_field_occurrence_count"
     ] == 6

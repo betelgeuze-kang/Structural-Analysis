@@ -1630,6 +1630,7 @@ def _rows_from_receipt_bundle_report_summary(repo_root: Path) -> dict[str, Any]:
             "unique_missing_required_fields": [],
             "unique_missing_required_field_count": 0,
             "total_missing_required_field_count": 0,
+            "commands": {},
         }
     row_statuses = [
         row for row in payload.get("row_statuses", []) if isinstance(row, dict)
@@ -1642,9 +1643,11 @@ def _rows_from_receipt_bundle_report_summary(repo_root: Path) -> dict[str, Any]:
         for row in _as_list(payload.get("receipt_completion_action_plan"))
         if isinstance(row, dict)
     ]
-    receipt_metric_family_completion_plan = (
-        _receipt_metric_family_completion_plan(receipt_completion_action_plan)
-    )
+    receipt_metric_family_completion_plan = [
+        row
+        for row in _as_list(payload.get("receipt_metric_family_completion_plan"))
+        if isinstance(row, dict)
+    ] or _receipt_metric_family_completion_plan(receipt_completion_action_plan)
     return {
         "present": True,
         "artifact": str(DEFAULT_ROWS_FROM_RECEIPT_BUNDLE_REPORT),
@@ -1692,6 +1695,7 @@ def _rows_from_receipt_bundle_report_summary(repo_root: Path) -> dict[str, Any]:
             or summary.get("total_missing_required_field_count")
             or 0
         ),
+        "commands": _as_dict(payload.get("commands")),
     }
 
 
