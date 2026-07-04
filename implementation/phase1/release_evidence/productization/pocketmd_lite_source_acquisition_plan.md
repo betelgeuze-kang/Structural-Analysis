@@ -17,6 +17,8 @@
 - `phase4_completion_blocked_requirement_count`: `7`
 - `phase4_actual_evidence_audit_status`: `operator_topk_rows_required`
 - `phase4_actual_evidence_blocked_component_count`: `4`
+- `phase4_actual_operator_blocker_family_count`: `8`
+- `phase4_actual_operator_blocker_family_missing_item_count`: `89`
 - `survival_report_status`: `operator_evidence_required`
 - `survival_report_blocker_count`: `6`
 - `template_preflight_status`: `operator_rows_completion_required`
@@ -71,6 +73,8 @@
 - `role_receipt_blocked_count`: `24`
 - `operator_input_source_receipt_blocked_count`: `5`
 - `missing_metric_count`: `5`
+- `operator_blocker_family_count`: `8`
+- `operator_blocker_family_missing_item_count`: `89`
 
 | Component | Status | Pass | Current | Required | Blockers |
 |---|---|---|---|---|---|
@@ -78,6 +82,19 @@
 | `per_candidate_role_receipts` | `blocked` | `False` | `{"role_receipt_blocked_count": 24, "role_receipt_plan_count": 24, "template_preflight_status": "operator_rows_completion_required"}` | `{"role_receipt_blocked_count": 0, "role_receipt_plan_count": 24}` | `pocketmd_lite_per_candidate_role_receipts_incomplete` |
 | `operator_input_source_receipt` | `blocked` | `False` | `{"survival_report_receipt_blocker_count": 1, "survival_report_receipt_contract_pass": false, "survival_report_receipt_status": "blocked", "template_preflight_blocked_count": 5, "template_preflight_requirement_count": 5}` | `{"survival_report_receipt_contract_pass": true, "template_preflight_blocked_count": 0, "template_preflight_requirement_count": 5}` | `operator_input_source_receipt_required`, `pocketmd_lite_operator_input_source_receipt_incomplete` |
 | `survival_metric_summary` | `blocked` | `False` | `{"reported_metric_count": 0, "required_metric_count": 5, "survival_report_contract_pass": false, "survival_report_status": "operator_evidence_required"}` | `{"missing_metric_count": 0, "required_metric_count": 5, "survival_report_contract_pass": true}` | `pocketmd_lite_local_min_survival_rows_missing`, `pocketmd_lite_contact_persistence_rows_missing`, `pocketmd_lite_h_bond_persistence_rows_missing`, `pocketmd_lite_clash_relief_rows_missing`, `pocketmd_lite_uncertainty_rows_missing` |
+
+### Operator Blocker Families
+
+| Family | Status | Missing Items | Blocked Cases | Operator Action |
+|---|---|---:|---:|---|
+| `top_k_candidate_rows` | `blocked` | 6 | 3 | `attach_pocketmd_lite_topk_rows_at_default_dropzone` |
+| `per_candidate_role_receipts` | `blocked` | 24 | 3 | `complete_pocketmd_per_candidate_role_receipts` |
+| `operator_input_source_receipt` | `blocked` | 5 | 0 | `complete_pocketmd_operator_input_source_receipt` |
+| `local_min_survival` | `blocked` | 18 | 3 | `fill_metric_family_receipt_fields_for_local_min_survival` |
+| `contact_persistence` | `blocked` | 6 | 3 | `fill_metric_family_receipt_fields_for_contact_persistence` |
+| `h_bond_persistence` | `blocked` | 6 | 3 | `fill_metric_family_receipt_fields_for_h_bond_persistence` |
+| `clash_relief` | `blocked` | 12 | 3 | `fill_metric_family_receipt_fields_for_clash_relief` |
+| `uncertainty` | `blocked` | 12 | 3 | `fill_metric_family_receipt_fields_for_uncertainty` |
 
 | Case | Minimum Rows | Required Rank Prefix | Scope |
 |---|---:|---|---|

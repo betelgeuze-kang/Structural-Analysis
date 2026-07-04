@@ -239,6 +239,39 @@ def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
+def _as_int(value: Any) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _case_count(rows: list[dict[str, Any]]) -> int:
+    return len({str(row.get("case_id") or "") for row in rows if row.get("case_id")})
+
+
+def _operator_blocker_family_row(
+    *,
+    family_id: str,
+    description: str,
+    missing_item_count: int,
+    blocked_case_count: int,
+    first_missing_item: dict[str, Any],
+    operator_action: str,
+    command_key: str,
+) -> dict[str, Any]:
+    return {
+        "family_id": family_id,
+        "description": description,
+        "status": "blocked" if missing_item_count else "ready",
+        "missing_item_count": missing_item_count,
+        "blocked_case_count": blocked_case_count,
+        "first_missing_item": first_missing_item if missing_item_count else {},
+        "operator_action": operator_action,
+        "command_key": command_key,
+    }
+
+
 def _receipt_metric_family_completion_plan(
     receipt_completion_action_plan: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
@@ -1030,12 +1063,116 @@ def _phase4_completion_audit(
     }
 
 
+def _phase4_operator_blocker_family_plan(
+    *,
+    raw_row_candidate_status: dict[str, Any],
+    template_preflight_summary: dict[str, Any],
+    rows_from_receipt_bundle_report_summary: dict[str, Any],
+) -> list[dict[str, Any]]:
+    missing_slots = [
+        row
+        for row in _as_list(raw_row_candidate_status.get("missing_required_slots"))
+        if isinstance(row, dict)
+    ]
+    role_receipt_blocked_count = _as_int(
+        template_preflight_summary.get("role_receipt_blocked_count")
+    )
+    source_receipt_blocked_count = _as_int(
+        template_preflight_summary.get(
+            "operator_input_source_receipt_blocked_count"
+        )
+    )
+    metric_family_plan = [
+        row
+        for row in _as_list(
+            rows_from_receipt_bundle_report_summary.get(
+                "receipt_metric_family_completion_plan"
+            )
+        )
+        if isinstance(row, dict)
+    ]
+    plan = [
+        _operator_blocker_family_row(
+            family_id="top_k_candidate_rows",
+            description=(
+                "Required bounded PocketMD Lite top-k candidate row slots are "
+                "missing."
+            ),
+            missing_item_count=len(missing_slots),
+            blocked_case_count=_case_count(missing_slots),
+            first_missing_item=missing_slots[0] if missing_slots else {},
+            operator_action=(
+                "attach_pocketmd_lite_topk_rows_at_default_dropzone"
+            ),
+            command_key="materialize_rows_from_receipt_bundle",
+        ),
+        _operator_blocker_family_row(
+            family_id="per_candidate_role_receipts",
+            description=(
+                "Per-candidate top-k scope, refinement, interaction, and "
+                "uncertainty receipts are incomplete."
+            ),
+            missing_item_count=role_receipt_blocked_count,
+            blocked_case_count=_case_count(missing_slots),
+            first_missing_item=_as_dict(
+                template_preflight_summary.get("first_blocked_role_receipt")
+            ),
+            operator_action="complete_pocketmd_per_candidate_role_receipts",
+            command_key="build_row_template_preflight",
+        ),
+        _operator_blocker_family_row(
+            family_id="operator_input_source_receipt",
+            description=(
+                "Operator input source receipt fields for the top-k row bundle "
+                "are incomplete."
+            ),
+            missing_item_count=source_receipt_blocked_count,
+            blocked_case_count=0,
+            first_missing_item=_as_dict(
+                template_preflight_summary.get(
+                    "first_blocked_operator_input_source_receipt"
+                )
+            ),
+            operator_action="complete_pocketmd_operator_input_source_receipt",
+            command_key="build_row_template_preflight",
+        ),
+    ]
+    for family in metric_family_plan:
+        family_id = str(family.get("metric_family_id") or "")
+        blocked_receipts = [
+            row
+            for row in _as_list(family.get("blocked_receipts"))
+            if isinstance(row, dict)
+        ]
+        blocked_case_count = _case_count(blocked_receipts)
+        if blocked_receipts and not blocked_case_count:
+            blocked_case_count = _as_int(family.get("blocked_receipt_count"))
+        plan.append(
+            _operator_blocker_family_row(
+                family_id=family_id,
+                description=str(family.get("product_requirement") or ""),
+                missing_item_count=_as_int(
+                    family.get("missing_field_occurrence_count")
+                ),
+                blocked_case_count=blocked_case_count,
+                first_missing_item=_as_dict(family.get("first_blocked_receipt")),
+                operator_action=str(
+                    family.get("operator_completion_action")
+                    or f"fill_metric_family_receipt_fields_for_{family_id}"
+                ),
+                command_key="materialize_rows_from_receipt_bundle",
+            )
+        )
+    return plan
+
+
 def _phase4_actual_evidence_audit(
     *,
     raw_row_candidate_status: dict[str, Any],
     phase4_completion_audit: dict[str, Any],
     survival_report_status: dict[str, Any],
     template_preflight_summary: dict[str, Any],
+    rows_from_receipt_bundle_report_summary: dict[str, Any],
 ) -> dict[str, Any]:
     required_slot_count = int(
         raw_row_candidate_status.get("required_candidate_slot_count") or 0
@@ -1280,6 +1417,18 @@ def _phase4_actual_evidence_audit(
             ]
         )
     )
+    operator_blocker_family_plan = _phase4_operator_blocker_family_plan(
+        raw_row_candidate_status=raw_row_candidate_status,
+        template_preflight_summary=template_preflight_summary,
+        rows_from_receipt_bundle_report_summary=(
+            rows_from_receipt_bundle_report_summary
+        ),
+    )
+    blocked_operator_families = [
+        row
+        for row in operator_blocker_family_plan
+        if str(row.get("status") or "") != "ready"
+    ]
     if not blocked_components and bool(
         phase4_completion_audit.get("actual_closure_ready")
     ):
@@ -1305,6 +1454,16 @@ def _phase4_actual_evidence_audit(
         "blocked_component_ids": [
             str(row["component_id"]) for row in blocked_components
         ],
+        "operator_blocker_family_count": len(operator_blocker_family_plan),
+        "operator_blocker_family_blocked_count": len(blocked_operator_families),
+        "operator_blocker_family_missing_item_count": sum(
+            _as_int(row.get("missing_item_count"))
+            for row in blocked_operator_families
+        ),
+        "first_operator_blocker_family": (
+            blocked_operator_families[0] if blocked_operator_families else {}
+        ),
+        "operator_blocker_family_plan": operator_blocker_family_plan,
         "remaining_blockers": remaining_blockers,
         "remaining_evidence": [
             str(row["component_id"]) for row in blocked_components
@@ -1881,6 +2040,9 @@ def build_pocketmd_lite_source_acquisition_plan(
         phase4_completion_audit=phase4_completion_audit,
         survival_report_status=survival_report_status,
         template_preflight_summary=template_preflight_summary,
+        rows_from_receipt_bundle_report_summary=(
+            rows_from_receipt_bundle_report_summary
+        ),
     )
     refinement_execution_plan = _refinement_execution_plan_summary(
         minimum_rows_by_case,
@@ -2005,6 +2167,23 @@ def build_pocketmd_lite_source_acquisition_plan(
         "phase4_metric_closure_matrix_count": len(phase4_metric_closure_matrix),
         "phase4_completion_audit": phase4_completion_audit,
         "phase4_actual_evidence_audit": phase4_actual_evidence_audit,
+        "operator_blocker_family_count": (
+            phase4_actual_evidence_audit["operator_blocker_family_count"]
+        ),
+        "operator_blocker_family_blocked_count": (
+            phase4_actual_evidence_audit["operator_blocker_family_blocked_count"]
+        ),
+        "operator_blocker_family_missing_item_count": (
+            phase4_actual_evidence_audit[
+                "operator_blocker_family_missing_item_count"
+            ]
+        ),
+        "first_operator_blocker_family": (
+            phase4_actual_evidence_audit["first_operator_blocker_family"]
+        ),
+        "operator_blocker_family_plan": (
+            phase4_actual_evidence_audit["operator_blocker_family_plan"]
+        ),
         "survival_report": survival_report_status,
         "refinement_execution_plan": refinement_execution_plan,
         "template_preflight_summary": template_preflight_summary,
@@ -2099,6 +2278,19 @@ def build_pocketmd_lite_source_acquisition_plan(
             "phase4_actual_evidence_missing_metric_count": (
                 phase4_actual_evidence_audit["survival_metric_summary"][
                     "missing_metric_count"
+                ]
+            ),
+            "phase4_actual_operator_blocker_family_count": (
+                phase4_actual_evidence_audit["operator_blocker_family_count"]
+            ),
+            "phase4_actual_operator_blocker_family_blocked_count": (
+                phase4_actual_evidence_audit[
+                    "operator_blocker_family_blocked_count"
+                ]
+            ),
+            "phase4_actual_operator_blocker_family_missing_item_count": (
+                phase4_actual_evidence_audit[
+                    "operator_blocker_family_missing_item_count"
                 ]
             ),
             "survival_report_status": survival_report_status["status"],
@@ -2220,6 +2412,10 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"`{payload['phase4_actual_evidence_audit']['status']}`",
         "- `phase4_actual_evidence_blocked_component_count`: "
         f"`{payload['phase4_actual_evidence_audit']['blocked_component_count']}`",
+        "- `phase4_actual_operator_blocker_family_count`: "
+        f"`{payload['phase4_actual_evidence_audit']['operator_blocker_family_count']}`",
+        "- `phase4_actual_operator_blocker_family_missing_item_count`: "
+        f"`{payload['phase4_actual_evidence_audit']['operator_blocker_family_missing_item_count']}`",
         f"- `survival_report_status`: `{payload['survival_report']['status']}`",
         "- `survival_report_blocker_count`: "
         f"`{payload['survival_report']['blocker_count']}`",
@@ -2289,6 +2485,16 @@ def _markdown(payload: dict[str, Any]) -> str:
         metric_summary = _as_dict(
             actual_evidence_audit.get("survival_metric_summary")
         )
+        operator_blocker_families = [
+            row
+            for row in actual_evidence_audit.get(
+                "operator_blocker_family_plan", []
+            )
+            if isinstance(row, dict)
+        ] if isinstance(
+            actual_evidence_audit.get("operator_blocker_family_plan"),
+            list,
+        ) else []
         lines.extend(
             [
                 "",
@@ -2304,6 +2510,10 @@ def _markdown(payload: dict[str, Any]) -> str:
                 f"`{template_evidence.get('operator_input_source_receipt_blocked_count')}`",
                 "- `missing_metric_count`: "
                 f"`{metric_summary.get('missing_metric_count')}`",
+                "- `operator_blocker_family_count`: "
+                f"`{actual_evidence_audit.get('operator_blocker_family_count')}`",
+                "- `operator_blocker_family_missing_item_count`: "
+                f"`{actual_evidence_audit.get('operator_blocker_family_missing_item_count')}`",
                 "",
                 "| Component | Status | Pass | Current | Required | Blockers |",
                 "|---|---|---|---|---|---|",
@@ -2330,6 +2540,24 @@ def _markdown(payload: dict[str, Any]) -> str:
                 f"`{row.get('status', '')}` | `{row.get('pass')}` | "
                 f"`{current}` | `{required}` | {blockers or '`none`'} |"
             )
+        if operator_blocker_families:
+            lines.extend(
+                [
+                    "",
+                    "### Operator Blocker Families",
+                    "",
+                    "| Family | Status | Missing Items | Blocked Cases | Operator Action |",
+                    "|---|---|---:|---:|---|",
+                ]
+            )
+            for row in operator_blocker_families:
+                lines.append(
+                    f"| `{row.get('family_id', '')}` | "
+                    f"`{row.get('status', '')}` | "
+                    f"{row.get('missing_item_count', 0)} | "
+                    f"{row.get('blocked_case_count', 0)} | "
+                    f"`{row.get('operator_action', '')}` |"
+                )
     lines.extend(
         [
             "",

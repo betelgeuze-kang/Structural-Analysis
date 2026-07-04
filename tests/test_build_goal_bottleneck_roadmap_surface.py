@@ -456,6 +456,9 @@ def test_goal_bottleneck_surface_exposes_active_thread_goal_audit() -> None:
     assert pocketmd["current"][
         "receipt_metric_family_missing_field_occurrence_count"
     ] == 54
+    assert pocketmd["current"]["operator_blocker_family_count"] == 8
+    assert pocketmd["current"]["operator_blocker_family_blocked_count"] == 8
+    assert pocketmd["current"]["operator_blocker_family_missing_item_count"] == 89
     assert pocketmd["current"]["ready_receipt_count"] == 0
     assert pocketmd["current"]["incomplete_receipt_count"] == 6
     assert "pocketmd_lite_local_min_survival_rows_missing" in pocketmd["blockers"]

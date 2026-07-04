@@ -1183,13 +1183,13 @@
         "vina_gnina_rows"
       ],
       "outputs": {
-        "enrichment_scorecard": "/tmp/codex-public-actual-family.5q7JVb/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
+        "enrichment_scorecard": "/tmp/pocketmd-worktree.Cb8MV5/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
         "phase2_row_audit": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
-        "pose_success_harness": "/tmp/codex-public-actual-family.5q7JVb/implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
-        "pose_validity_input": "/tmp/codex-public-actual-family.5q7JVb/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json",
-        "pose_validity_packet": "/tmp/codex-public-actual-family.5q7JVb/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
-        "rmsd_scorecard": "/tmp/codex-public-actual-family.5q7JVb/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
-        "subset_manifest": "/tmp/codex-public-actual-family.5q7JVb/implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
+        "pose_success_harness": "/tmp/pocketmd-worktree.Cb8MV5/implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
+        "pose_validity_input": "/tmp/pocketmd-worktree.Cb8MV5/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json",
+        "pose_validity_packet": "/tmp/pocketmd-worktree.Cb8MV5/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
+        "rmsd_scorecard": "/tmp/pocketmd-worktree.Cb8MV5/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
+        "subset_manifest": "/tmp/pocketmd-worktree.Cb8MV5/implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
       },
       "phase2_exit_gate_criteria": [
         {
@@ -1302,7 +1302,7 @@
       },
       "phase2_requirements": [
         {
-          "artifact": "/tmp/codex-public-actual-family.5q7JVb/implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
+          "artifact": "/tmp/pocketmd-worktree.Cb8MV5/implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
           "artifact_role": "pose_success_harness",
           "blocker_count": 0,
           "blockers": [],
@@ -1326,7 +1326,7 @@
           "status": "ready"
         },
         {
-          "artifact": "/tmp/codex-public-actual-family.5q7JVb/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
+          "artifact": "/tmp/pocketmd-worktree.Cb8MV5/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
           "artifact_role": "rmsd_scorecard",
           "blocker_count": 0,
           "blockers": [],
@@ -1349,7 +1349,7 @@
           "status": "ready"
         },
         {
-          "artifact": "/tmp/codex-public-actual-family.5q7JVb/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
+          "artifact": "/tmp/pocketmd-worktree.Cb8MV5/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
           "artifact_role": "pose_validity_packet",
           "blocker_count": 0,
           "blockers": [],
@@ -1400,7 +1400,7 @@
           "status": "operator_evidence_required"
         },
         {
-          "artifact": "/tmp/codex-public-actual-family.5q7JVb/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
+          "artifact": "/tmp/pocketmd-worktree.Cb8MV5/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
           "artifact_role": "enrichment_scorecard",
           "blocker_count": 0,
           "blockers": [],
@@ -1456,7 +1456,7 @@
           "operator_blockers_if_missing": [
             "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
           ],
-          "provided_path": "/tmp/codex-public-actual-family.5q7JVb/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+          "provided_path": "/tmp/pocketmd-worktree.Cb8MV5/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
           "required_by_components": [
             {
               "artifact_role": "pose_success_harness",
@@ -1511,7 +1511,7 @@
             "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
             "posebusters_style_pose_validity::pose_rows_not_provided"
           ],
-          "provided_path": "/tmp/codex-public-actual-family.5q7JVb/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+          "provided_path": "/tmp/pocketmd-worktree.Cb8MV5/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
           "required_by_components": [
             {
               "artifact_role": "pose_success_harness",
@@ -1572,7 +1572,7 @@
           "operator_blockers_if_missing": [
             "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
           ],
-          "provided_path": "/tmp/codex-public-actual-family.5q7JVb/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+          "provided_path": "/tmp/pocketmd-worktree.Cb8MV5/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
           "required_by_components": [
             {
               "artifact_role": "enrichment_scorecard",
@@ -1785,10 +1785,10 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T10:25:20.962719+00:00",
+  "generated_at": "2026-07-04T10:36:10.400597+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json": "sha256:98255bfca71cb82c3146a11e74e90cc338836518d93672950cbec5defd7d7147",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:d24e9229f8d0872f4c2db1590d5f887a61f90416af7d0d4e513468da19b38e4d",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:460885ec3a0978fbeeffd5bc010432a0b4bf58ddf3bfc44ae4f01548f68972fc",
     "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
     "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json": "sha256:ebad77368627c20437a800eeb1bcfe1bea120acc064275665fab9b9494d9e967",
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:d13e8aa26fbc64e113a2c14f40227a4ba9a17dd8ee0d5781966e89791a3024bc",
@@ -1864,7 +1864,7 @@
       "phase2_operator_blockers_if_missing": [
         "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
       ],
-      "provided_path": "/tmp/codex-public-actual-family.5q7JVb/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+      "provided_path": "/tmp/pocketmd-worktree.Cb8MV5/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
       "required_by_components": [
         {
           "artifact_role": "pose_success_harness",
@@ -1931,7 +1931,7 @@
         "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
         "posebusters_style_pose_validity::pose_rows_not_provided"
       ],
-      "provided_path": "/tmp/codex-public-actual-family.5q7JVb/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+      "provided_path": "/tmp/pocketmd-worktree.Cb8MV5/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
       "required_by_components": [
         {
           "artifact_role": "pose_success_harness",
@@ -2000,7 +2000,7 @@
       "phase2_operator_blockers_if_missing": [
         "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
       ],
-      "provided_path": "/tmp/codex-public-actual-family.5q7JVb/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+      "provided_path": "/tmp/pocketmd-worktree.Cb8MV5/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
       "required_by_components": [
         {
           "artifact_role": "enrichment_scorecard",
@@ -3216,7 +3216,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "bdffe60baaa3874cef5b52e893bbfcac25b7a831",
+  "source_commit_sha": "44372731adf3518b1d0420ee3d9f7906f38d7766",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,
@@ -4647,6 +4647,188 @@
             "status": "blocked"
           }
         ],
+        "first_operator_blocker_family": {
+          "blocked_case_count": 3,
+          "command_key": "materialize_rows_from_receipt_bundle",
+          "description": "Required bounded PocketMD Lite top-k candidate row slots are missing.",
+          "family_id": "top_k_candidate_rows",
+          "first_missing_item": {
+            "case_id": "pocketmd_lite_case_001",
+            "top_k_rank": 1
+          },
+          "missing_item_count": 6,
+          "operator_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
+          "status": "blocked"
+        },
+        "operator_blocker_family_blocked_count": 8,
+        "operator_blocker_family_count": 8,
+        "operator_blocker_family_missing_item_count": 89,
+        "operator_blocker_family_plan": [
+          {
+            "blocked_case_count": 3,
+            "command_key": "materialize_rows_from_receipt_bundle",
+            "description": "Required bounded PocketMD Lite top-k candidate row slots are missing.",
+            "family_id": "top_k_candidate_rows",
+            "first_missing_item": {
+              "case_id": "pocketmd_lite_case_001",
+              "top_k_rank": 1
+            },
+            "missing_item_count": 6,
+            "operator_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
+            "status": "blocked"
+          },
+          {
+            "blocked_case_count": 3,
+            "command_key": "build_row_template_preflight",
+            "description": "Per-candidate top-k scope, refinement, interaction, and uncertainty receipts are incomplete.",
+            "family_id": "per_candidate_role_receipts",
+            "first_missing_item": {
+              "blockers": [
+                "required_role_fields_missing"
+              ],
+              "candidate_id": "pocketmd_lite_case_001_rank_01",
+              "case_id": "pocketmd_lite_case_001",
+              "closes_phase4_criteria": [
+                "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage"
+              ],
+              "invalid_fields": [],
+              "missing_fields": [
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum"
+              ],
+              "operator_action": "attach_upstream_top_k_scope_receipt",
+              "required_fields": [
+                "case_id",
+                "candidate_id",
+                "top_k_rank",
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum"
+              ],
+              "role_id": "upstream_top_k_candidate_scope_receipt",
+              "status": "operator_completion_required",
+              "top_k_rank": 1
+            },
+            "missing_item_count": 24,
+            "operator_action": "complete_pocketmd_per_candidate_role_receipts",
+            "status": "blocked"
+          },
+          {
+            "blocked_case_count": 0,
+            "command_key": "build_row_template_preflight",
+            "description": "Operator input source receipt fields for the top-k row bundle are incomplete.",
+            "family_id": "operator_input_source_receipt",
+            "first_missing_item": {
+              "blocker": "source_id_required",
+              "expected_value": "",
+              "field": "source_id",
+              "operator_action": "attach_operator_input_source_source_id",
+              "status": "operator_completion_required"
+            },
+            "missing_item_count": 5,
+            "operator_action": "complete_pocketmd_operator_input_source_receipt",
+            "status": "blocked"
+          },
+          {
+            "blocked_case_count": 3,
+            "command_key": "materialize_rows_from_receipt_bundle",
+            "description": "local-min survival and energy proxy movement are recorded",
+            "family_id": "local_min_survival",
+            "first_missing_item": {
+              "case_id": "pocketmd_lite_case_001",
+              "missing_receipt_fields": [
+                "pre_refinement_energy_proxy",
+                "post_refinement_energy_proxy",
+                "local_min_survived"
+              ],
+              "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
+              "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
+              "run_key": "pocketmd_lite_case_001::rank_1",
+              "top_k_rank": 1
+            },
+            "missing_item_count": 18,
+            "operator_action": "fill_metric_family_receipt_fields_for_local_min_survival",
+            "status": "blocked"
+          },
+          {
+            "blocked_case_count": 3,
+            "command_key": "materialize_rows_from_receipt_bundle",
+            "description": "contact persistence is recorded",
+            "family_id": "contact_persistence",
+            "first_missing_item": {
+              "case_id": "pocketmd_lite_case_001",
+              "missing_receipt_fields": [
+                "contact_persistence_rate"
+              ],
+              "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
+              "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
+              "run_key": "pocketmd_lite_case_001::rank_1",
+              "top_k_rank": 1
+            },
+            "missing_item_count": 6,
+            "operator_action": "fill_metric_family_receipt_fields_for_contact_persistence",
+            "status": "blocked"
+          },
+          {
+            "blocked_case_count": 3,
+            "command_key": "materialize_rows_from_receipt_bundle",
+            "description": "H-bond persistence is recorded",
+            "family_id": "h_bond_persistence",
+            "first_missing_item": {
+              "case_id": "pocketmd_lite_case_001",
+              "missing_receipt_fields": [
+                "h_bond_persistence_rate"
+              ],
+              "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
+              "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
+              "run_key": "pocketmd_lite_case_001::rank_1",
+              "top_k_rank": 1
+            },
+            "missing_item_count": 6,
+            "operator_action": "fill_metric_family_receipt_fields_for_h_bond_persistence",
+            "status": "blocked"
+          },
+          {
+            "blocked_case_count": 3,
+            "command_key": "materialize_rows_from_receipt_bundle",
+            "description": "clash relief before/after counts are recorded",
+            "family_id": "clash_relief",
+            "first_missing_item": {
+              "case_id": "pocketmd_lite_case_001",
+              "missing_receipt_fields": [
+                "clash_count_before",
+                "clash_count_after"
+              ],
+              "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
+              "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
+              "run_key": "pocketmd_lite_case_001::rank_1",
+              "top_k_rank": 1
+            },
+            "missing_item_count": 12,
+            "operator_action": "fill_metric_family_receipt_fields_for_clash_relief",
+            "status": "blocked"
+          },
+          {
+            "blocked_case_count": 3,
+            "command_key": "materialize_rows_from_receipt_bundle",
+            "description": "uncertainty interval bounds are recorded",
+            "family_id": "uncertainty",
+            "first_missing_item": {
+              "case_id": "pocketmd_lite_case_001",
+              "missing_receipt_fields": [
+                "uncertainty_low",
+                "uncertainty_high"
+              ],
+              "operator_completion_action": "fill_completion_missing_required_fields_and_set_status_complete",
+              "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
+              "run_key": "pocketmd_lite_case_001::rank_1",
+              "top_k_rank": 1
+            },
+            "missing_item_count": 12,
+            "operator_action": "fill_metric_family_receipt_fields_for_uncertainty",
+            "status": "blocked"
+          }
+        ],
         "operator_input_source_receipt": {
           "blocker_count": 1,
           "blockers": [
@@ -5698,6 +5880,9 @@
         "phase4_actual_evidence_blocked_component_count": 4,
         "phase4_actual_evidence_missing_metric_count": 5,
         "phase4_actual_evidence_ready_component_count": 0,
+        "phase4_actual_operator_blocker_family_blocked_count": 8,
+        "phase4_actual_operator_blocker_family_count": 8,
+        "phase4_actual_operator_blocker_family_missing_item_count": 89,
         "phase4_candidate_slot_matrix_count": 6,
         "phase4_completion_audit_status": "operator_topk_rows_required",
         "phase4_completion_blocked_requirement_count": 7,

@@ -388,6 +388,71 @@ def _science_actions_by_component(
     }
 
 
+def _pocketmd_operator_blocker_family_counts(
+    pocketmd_summary: dict[str, Any],
+    pocketmd_actual_audit: dict[str, Any],
+) -> dict[str, int]:
+    metric_family_count = _as_int(
+        pocketmd_summary.get("rows_from_receipt_bundle_metric_family_count")
+    )
+    family_count = (
+        _as_int(pocketmd_actual_audit.get("operator_blocker_family_count"))
+        or _as_int(
+            pocketmd_summary.get("phase4_actual_operator_blocker_family_count")
+        )
+    )
+    if not family_count and metric_family_count:
+        family_count = 3 + metric_family_count
+    blocked_count = (
+        _as_int(
+            pocketmd_actual_audit.get("operator_blocker_family_blocked_count")
+        )
+        or _as_int(
+            pocketmd_summary.get(
+                "phase4_actual_operator_blocker_family_blocked_count"
+            )
+        )
+    )
+    if not blocked_count and family_count:
+        blocked_count = family_count
+    missing_item_count = (
+        _as_int(
+            pocketmd_actual_audit.get("operator_blocker_family_missing_item_count")
+        )
+        or _as_int(
+            pocketmd_summary.get(
+                "phase4_actual_operator_blocker_family_missing_item_count"
+            )
+        )
+    )
+    if not missing_item_count:
+        missing_item_count = sum(
+            [
+                _as_int(pocketmd_summary.get("phase4_missing_candidate_slot_count")),
+                _as_int(
+                    pocketmd_summary.get(
+                        "template_preflight_role_receipt_blocked_count"
+                    )
+                ),
+                _as_int(
+                    pocketmd_summary.get(
+                        "template_preflight_operator_input_source_receipt_blocked_count"
+                    )
+                ),
+                _as_int(
+                    pocketmd_summary.get(
+                        "rows_from_receipt_bundle_metric_family_missing_field_occurrence_count"
+                    )
+                ),
+            ]
+        )
+    return {
+        "operator_blocker_family_count": family_count,
+        "operator_blocker_family_blocked_count": blocked_count,
+        "operator_blocker_family_missing_item_count": missing_item_count,
+    }
+
+
 def _science_row_audit_component(
     science_row_audit: dict[str, Any],
     component_id: str,
@@ -1139,6 +1204,10 @@ def _active_thread_goal_objective_audit(
         "survival_metric_summary",
     )
     survival_current = _as_dict(survival_component.get("current"))
+    pocketmd_operator_family_counts = _pocketmd_operator_blocker_family_counts(
+        pocketmd_summary,
+        pocketmd_actual_audit,
+    )
     phase4_summary = _as_dict(phase4_row.get("summary"))
     phase4_gate = _as_dict(phase4_summary.get("phase4_exit_gate"))
     phase4_requirement_summary = _as_dict(
@@ -1336,6 +1405,21 @@ def _active_thread_goal_objective_audit(
                 "receipt_metric_family_missing_field_occurrence_count": _as_int(
                     pocketmd_summary.get(
                         "rows_from_receipt_bundle_metric_family_missing_field_occurrence_count"
+                    )
+                ),
+                "operator_blocker_family_count": _as_int(
+                    pocketmd_operator_family_counts.get(
+                        "operator_blocker_family_count"
+                    )
+                ),
+                "operator_blocker_family_blocked_count": _as_int(
+                    pocketmd_operator_family_counts.get(
+                        "operator_blocker_family_blocked_count"
+                    )
+                ),
+                "operator_blocker_family_missing_item_count": _as_int(
+                    pocketmd_operator_family_counts.get(
+                        "operator_blocker_family_missing_item_count"
                     )
                 ),
                 "ready_receipt_count": _as_int(

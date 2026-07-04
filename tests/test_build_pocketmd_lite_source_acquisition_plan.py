@@ -434,6 +434,41 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "operator_input_source_receipt",
         "survival_metric_summary",
     ]
+    assert actual_evidence_audit["operator_blocker_family_count"] == 8
+    assert actual_evidence_audit["operator_blocker_family_blocked_count"] == 8
+    assert actual_evidence_audit[
+        "operator_blocker_family_missing_item_count"
+    ] == 89
+    assert actual_evidence_audit["first_operator_blocker_family"][
+        "family_id"
+    ] == "top_k_candidate_rows"
+    assert payload["operator_blocker_family_count"] == 8
+    assert payload["operator_blocker_family_blocked_count"] == 8
+    assert payload["operator_blocker_family_missing_item_count"] == 89
+    operator_family_plan = {
+        row["family_id"]: row
+        for row in actual_evidence_audit["operator_blocker_family_plan"]
+    }
+    assert operator_family_plan["top_k_candidate_rows"][
+        "missing_item_count"
+    ] == 6
+    assert operator_family_plan["per_candidate_role_receipts"][
+        "missing_item_count"
+    ] == 24
+    assert operator_family_plan["operator_input_source_receipt"][
+        "missing_item_count"
+    ] == 5
+    assert operator_family_plan["local_min_survival"][
+        "missing_item_count"
+    ] == 18
+    assert operator_family_plan["contact_persistence"][
+        "missing_item_count"
+    ] == 6
+    assert operator_family_plan["h_bond_persistence"][
+        "missing_item_count"
+    ] == 6
+    assert operator_family_plan["clash_relief"]["missing_item_count"] == 12
+    assert operator_family_plan["uncertainty"]["missing_item_count"] == 12
     assert actual_evidence_audit["row_slot_coverage"][
         "missing_required_slot_count"
     ] == 6
@@ -699,6 +734,9 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "phase4_actual_evidence_ready_component_count": 0,
         "phase4_actual_evidence_blocked_component_count": 4,
         "phase4_actual_evidence_missing_metric_count": 5,
+        "phase4_actual_operator_blocker_family_count": 8,
+        "phase4_actual_operator_blocker_family_blocked_count": 8,
+        "phase4_actual_operator_blocker_family_missing_item_count": 89,
         "phase4_refinement_receipt_plan_status": "operator_receipts_required",
         "phase4_refinement_receipt_role_count": 4,
         "survival_report_status": "operator_evidence_required",
@@ -895,6 +933,11 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     )
     assert payload["summary"]["phase4_actual_evidence_blocked_component_count"] == 4
     assert payload["summary"]["phase4_actual_evidence_missing_metric_count"] == 5
+    assert payload["summary"]["phase4_actual_operator_blocker_family_count"] == 8
+    assert (
+        payload["summary"]["phase4_actual_operator_blocker_family_missing_item_count"]
+        == 89
+    )
     assert payload["phase4_completion_audit"]["blocked_requirement_count"] == 7
     assert payload["survival_report"]["blocker_count"] == 6
     assert payload["phase4_refinement_receipt_plan"]["receipt_role_count"] == 4
@@ -933,6 +976,10 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert "`uncertainty_reported`" in markdown
     assert "`pocketmd_lite_uncertainty_rows_missing`" in markdown
     assert "## Phase 4 Candidate Slot Matrix" in markdown
+    assert "### Operator Blocker Families" in markdown
+    assert "`phase4_actual_operator_blocker_family_count`: `8`" in markdown
+    assert "`operator_blocker_family_missing_item_count`: `89`" in markdown
+    assert "`top_k_candidate_rows`" in markdown
     assert "pocketmd_lite_case_001_rank_1" in markdown
     assert "## Phase 4 Metric Closure Matrix" in markdown
     assert "local_min_survival_materialized" in markdown
