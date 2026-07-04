@@ -60,6 +60,33 @@ def _as_list(payload: Any) -> list[Any]:
     return payload if isinstance(payload, list) else []
 
 
+def _int_header(value: Any) -> int:
+    try:
+        parsed = int(str(value or "").strip())
+    except ValueError:
+        return 0
+    return parsed if parsed > 0 else 0
+
+
+def _response_metadata(response: Any) -> dict[str, Any]:
+    headers = getattr(response, "headers", None)
+    if headers is None:
+        return {
+            "content_length_bytes": 0,
+            "content_type": "",
+            "last_modified": "",
+            "etag": "",
+            "accept_ranges": "",
+        }
+    return {
+        "content_length_bytes": _int_header(headers.get("Content-Length")),
+        "content_type": str(headers.get("Content-Type") or ""),
+        "last_modified": str(headers.get("Last-Modified") or ""),
+        "etag": str(headers.get("ETag") or ""),
+        "accept_ranges": str(headers.get("Accept-Ranges") or ""),
+    }
+
+
 def _head_probe(url: str, timeout_seconds: int) -> dict[str, Any]:
     request = Request(url, method="HEAD", headers={"User-Agent": USER_AGENT})
     try:
@@ -69,18 +96,25 @@ def _head_probe(url: str, timeout_seconds: int) -> dict[str, Any]:
                 "http_status": status,
                 "final_url": str(response.geturl() or url),
                 "error": "",
+                **_response_metadata(response),
             }
     except HTTPError as exc:
         return {
             "http_status": int(exc.code or 0),
             "final_url": str(exc.geturl() or url),
             "error": exc.__class__.__name__,
+            **_response_metadata(exc),
         }
     except (TimeoutError, URLError, OSError) as exc:
         return {
             "http_status": 0,
             "final_url": "",
             "error": exc.__class__.__name__,
+            "content_length_bytes": 0,
+            "content_type": "",
+            "last_modified": "",
+            "etag": "",
+            "accept_ranges": "",
         }
 
 
@@ -105,6 +139,11 @@ def _probe_target(
             "http_status": 0,
             "final_url": "",
             "error": "url_missing",
+            "content_length_bytes": 0,
+            "content_type": "",
+            "last_modified": "",
+            "etag": "",
+            "accept_ranges": "",
             "success_criteria_met": False,
         }
     if not probe_network:
@@ -116,6 +155,11 @@ def _probe_target(
             "http_status": 0,
             "final_url": "",
             "error": "",
+            "content_length_bytes": 0,
+            "content_type": "",
+            "last_modified": "",
+            "etag": "",
+            "accept_ranges": "",
             "success_criteria_met": False,
         }
     raw_probe = probe_func(url, timeout_seconds)
@@ -129,6 +173,11 @@ def _probe_target(
         "http_status": http_status,
         "final_url": str(raw_probe.get("final_url") or ""),
         "error": str(raw_probe.get("error") or ""),
+        "content_length_bytes": _int_header(raw_probe.get("content_length_bytes")),
+        "content_type": str(raw_probe.get("content_type") or ""),
+        "last_modified": str(raw_probe.get("last_modified") or ""),
+        "etag": str(raw_probe.get("etag") or ""),
+        "accept_ranges": str(raw_probe.get("accept_ranges") or ""),
         "success_criteria_met": success,
     }
 
@@ -174,6 +223,19 @@ def _row_blockers(
     return blockers
 
 
+def _selected_probe(
+    *,
+    row_status: str,
+    primary_probe: dict[str, Any],
+    fallback_probe: dict[str, Any],
+) -> tuple[str, dict[str, Any]]:
+    if row_status == "primary_reachable":
+        return "primary", primary_probe
+    if row_status == "fallback_reachable":
+        return "fallback", fallback_probe
+    return "", {}
+
+
 def build_public_benchmark_source_access_preflight_receipt(
     *,
     repo_root: Path = ROOT,
@@ -214,6 +276,11 @@ def build_public_benchmark_source_access_preflight_receipt(
             primary_probe=primary_probe,
             fallback_probe=fallback_probe,
         )
+        selected_probe_role, selected_probe = _selected_probe(
+            row_status=row_status,
+            primary_probe=primary_probe,
+            fallback_probe=fallback_probe,
+        )
         probe_rows.append(
             {
                 "source_id": str(row.get("source_id") or ""),
@@ -221,6 +288,10 @@ def build_public_benchmark_source_access_preflight_receipt(
                 "access_mode": str(row.get("access_mode") or ""),
                 "status": row_status,
                 "blockers": blockers,
+                "selected_probe_role": selected_probe_role,
+                "selected_content_length_bytes": int(
+                    selected_probe.get("content_length_bytes") or 0
+                ),
                 "operator_success_criteria": [
                     str(item)
                     for item in _as_list(row.get("operator_success_criteria"))
@@ -245,6 +316,20 @@ def build_public_benchmark_source_access_preflight_receipt(
         1 for row in probe_rows if row["status"] == "network_probe_not_run"
     )
     missing_row_count = 0 if probe_rows else 1
+    known_payload_rows = [
+        row
+        for row in probe_rows
+        if int(row.get("selected_content_length_bytes") or 0) > 0
+    ]
+    total_known_content_length_bytes = sum(
+        int(row.get("selected_content_length_bytes") or 0)
+        for row in known_payload_rows
+    )
+    largest_known_payload = max(
+        known_payload_rows,
+        key=lambda row: int(row.get("selected_content_length_bytes") or 0),
+        default={},
+    )
     if not probe_rows:
         status = "source_plan_preflight_rows_missing"
     elif not probe_network:
@@ -287,6 +372,18 @@ def build_public_benchmark_source_access_preflight_receipt(
             "missing_preflight_row_count": missing_row_count,
             "network_probe_performed": bool(probe_network),
             "source_access_ready": source_access_ready,
+            "known_content_length_probe_count": len(known_payload_rows),
+            "total_known_content_length_bytes": total_known_content_length_bytes,
+            "total_known_content_length_gib": round(
+                total_known_content_length_bytes / (1024**3),
+                3,
+            ),
+            "largest_known_payload_source_id": str(
+                largest_known_payload.get("source_id") or ""
+            ),
+            "largest_known_payload_bytes": int(
+                largest_known_payload.get("selected_content_length_bytes") or 0
+            ),
         },
         "claim_boundary": (
             "This receipt performs HEAD-only source access preflight checks. It "
@@ -310,16 +407,23 @@ def render_public_benchmark_source_access_preflight_markdown(
         f"- `reachable_count`: `{summary['reachable_count']}`",
         f"- `blocked_count`: `{summary['blocked_count']}`",
         f"- `not_run_count`: `{summary['not_run_count']}`",
+        "- `known_content_length_probe_count`: "
+        f"`{summary['known_content_length_probe_count']}`",
+        "- `total_known_content_length_gib`: "
+        f"`{summary['total_known_content_length_gib']}`",
+        "- `largest_known_payload_source_id`: "
+        f"`{summary['largest_known_payload_source_id']}`",
         "",
         "## Probe Rows",
         "",
-        "| Source | Status | Primary Status | Fallback Status | Blockers |",
-        "|---|---|---|---|---|",
+        "| Source | Status | Size Bytes | Primary Status | Fallback Status | Blockers |",
+        "|---|---|---:|---|---|---|",
     ]
     for row in payload["source_access_probe_rows"]:
         blockers = ", ".join(f"`{blocker}`" for blocker in row["blockers"])
         lines.append(
             f"| `{row['source_id']}` | `{row['status']}` | "
+            f"`{row['selected_content_length_bytes']}` | "
             f"`{row['primary_probe']['status']}` "
             f"({row['primary_probe']['http_status']}) | "
             f"`{row['fallback_probe']['status']}` "

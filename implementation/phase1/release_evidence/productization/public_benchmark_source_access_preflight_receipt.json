@@ -2,10 +2,10 @@
   "claim_boundary": "This receipt performs HEAD-only source access preflight checks. It does not download, redistribute, checksum, license, or prove raw benchmark payloads, and it does not close Public Benchmark Phase 2.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T05:07:26.482241+00:00",
+  "generated_at": "2026-07-04T07:06:13.395041+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:c69517da37e510f3e75216e0eda967777abb5bf15db5e24e88ec404b1dc2e8d1",
-    "scripts/build_public_benchmark_source_access_preflight_receipt.py": "sha256:47b23a61ea7eb470f8ab4b48337b4382ad3523a646b81c8bdddedf3451d1c2d1"
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:0ef71155a3309893ac1d93af0f8e20a1bfe2ec29ed9b2dfde115dab537e2ac2f",
+    "scripts/build_public_benchmark_source_access_preflight_receipt.py": "sha256:af7e5ca466c5fdaa6a2100e5c0d79c438ee3f873a00f7e049c562b99ac05c823"
   },
   "network_probe_command": "python3 scripts/build_public_benchmark_source_access_preflight_receipt.py --source-plan implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json --out implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md --probe-network",
   "network_probe_performed": true,
@@ -26,11 +26,16 @@
       "blockers": [],
       "claim_boundary": "This preflight checks source access path readiness only. It does not download benchmark payloads, grant license rights, or count as Phase 2 source evidence.",
       "fallback_probe": {
+        "accept_ranges": "bytes",
         "attempted": true,
+        "content_length_bytes": 664,
+        "content_type": "text/html; charset=utf-8",
         "error": "",
+        "etag": "\"6a3ca404-298\"",
         "final_url": "https://www.pdbbind-plus.org.cn/",
         "head_command": "curl --head --location --max-time 20 'https://www.pdbbind-plus.org.cn/'",
         "http_status": 200,
+        "last_modified": "Thu, 25 Jun 2026 03:44:04 GMT",
         "status": "reachable",
         "success_criteria_met": true,
         "url": "https://www.pdbbind-plus.org.cn/"
@@ -42,15 +47,22 @@
         "source_checksum_recorded_after_operator_acquisition"
       ],
       "primary_probe": {
+        "accept_ranges": "bytes",
         "attempted": true,
+        "content_length_bytes": 664,
+        "content_type": "text/html; charset=utf-8",
         "error": "",
+        "etag": "\"6a3ca404-298\"",
         "final_url": "https://www.pdbbind-plus.org.cn/casf",
         "head_command": "curl --head --location --max-time 20 'https://www.pdbbind-plus.org.cn/casf'",
         "http_status": 200,
+        "last_modified": "Thu, 25 Jun 2026 03:44:04 GMT",
         "status": "reachable",
         "success_criteria_met": true,
         "url": "https://www.pdbbind-plus.org.cn/casf"
       },
+      "selected_content_length_bytes": 664,
+      "selected_probe_role": "primary",
       "source_family": "CASF/PDBBind",
       "source_id": "pdbbind_plus_casf",
       "source_payload_policy": {
@@ -67,11 +79,16 @@
       "blockers": [],
       "claim_boundary": "This preflight checks source access path readiness only. It does not download benchmark payloads, grant license rights, or count as Phase 2 source evidence.",
       "fallback_probe": {
+        "accept_ranges": "",
         "attempted": true,
+        "content_length_bytes": 0,
+        "content_type": "text/html; charset=UTF-8",
         "error": "",
+        "etag": "",
         "final_url": "https://dude.docking.org/",
         "head_command": "curl --head --location --max-time 20 'https://dude.docking.org/'",
         "http_status": 200,
+        "last_modified": "",
         "status": "reachable",
         "success_criteria_met": true,
         "url": "https://dude.docking.org/"
@@ -83,15 +100,22 @@
         "source_checksum_recorded_after_operator_acquisition"
       ],
       "primary_probe": {
+        "accept_ranges": "",
         "attempted": true,
+        "content_length_bytes": 0,
+        "content_type": "text/html; charset=UTF-8",
         "error": "",
+        "etag": "",
         "final_url": "https://dude.docking.org/targets/",
         "head_command": "curl --head --location --max-time 20 'https://dude.docking.org/targets/'",
         "http_status": 200,
+        "last_modified": "",
         "status": "reachable",
         "success_criteria_met": true,
         "url": "https://dude.docking.org/targets/"
       },
+      "selected_content_length_bytes": 0,
+      "selected_probe_role": "primary",
       "source_family": "DUD-E",
       "source_id": "dud_e",
       "source_payload_policy": {
@@ -108,11 +132,16 @@
       "blockers": [],
       "claim_boundary": "This preflight checks source access path readiness only. It does not download benchmark payloads, grant license rights, or count as Phase 2 source evidence.",
       "fallback_probe": {
+        "accept_ranges": "bytes",
         "attempted": true,
+        "content_length_bytes": 47969,
+        "content_type": "text/html; charset=UTF-8",
         "error": "",
+        "etag": "\"bb61-5f8981cc2321e\"",
         "final_url": "https://drugdesign.unistra.fr/LIT-PCBA/index.htm",
         "head_command": "curl --head --location --max-time 20 'https://drugdesign.unistra.fr/LIT-PCBA/index.htm'",
         "http_status": 200,
+        "last_modified": "Wed, 05 Apr 2023 15:04:44 GMT",
         "status": "reachable",
         "success_criteria_met": true,
         "url": "https://drugdesign.unistra.fr/LIT-PCBA/index.htm"
@@ -124,15 +153,22 @@
         "source_checksum_recorded_after_operator_acquisition"
       ],
       "primary_probe": {
+        "accept_ranges": "bytes",
         "attempted": true,
+        "content_length_bytes": 49064,
+        "content_type": "text/html; charset=UTF-8",
         "error": "",
+        "etag": "\"bfa8-5f8981fe6e368\"",
         "final_url": "https://drugdesign.unistra.fr/LIT-PCBA/",
         "head_command": "curl --head --location --max-time 20 'https://drugdesign.unistra.fr/LIT-PCBA/'",
         "http_status": 200,
+        "last_modified": "Wed, 05 Apr 2023 15:05:37 GMT",
         "status": "reachable",
         "success_criteria_met": true,
         "url": "https://drugdesign.unistra.fr/LIT-PCBA/"
       },
+      "selected_content_length_bytes": 49064,
+      "selected_probe_role": "primary",
       "source_family": "LIT-PCBA",
       "source_id": "lit_pcba",
       "source_payload_policy": {
@@ -149,11 +185,16 @@
       "blockers": [],
       "claim_boundary": "This preflight checks source access path readiness only. It does not download benchmark payloads, grant license rights, or count as Phase 2 source evidence.",
       "fallback_probe": {
+        "accept_ranges": "bytes",
         "attempted": true,
+        "content_length_bytes": 0,
+        "content_type": "text/html; charset=utf-8",
         "error": "",
+        "etag": "W/\"95e96f471c9e5672c000642036160f88\"",
         "final_url": "https://github.com/ccsb-scripps/AutoDock-Vina",
         "head_command": "curl --head --location --max-time 20 'https://github.com/ccsb-scripps/AutoDock-Vina'",
         "http_status": 200,
+        "last_modified": "",
         "status": "reachable",
         "success_criteria_met": true,
         "url": "https://github.com/ccsb-scripps/AutoDock-Vina"
@@ -165,15 +206,22 @@
         "source_checksum_recorded_after_operator_acquisition"
       ],
       "primary_probe": {
+        "accept_ranges": "",
         "attempted": true,
+        "content_length_bytes": 0,
+        "content_type": "text/html; charset=UTF-8",
         "error": "",
+        "etag": "",
         "final_url": "https://vina.scripps.edu/",
         "head_command": "curl --head --location --max-time 20 'https://vina.scripps.edu/'",
         "http_status": 200,
+        "last_modified": "",
         "status": "reachable",
         "success_criteria_met": true,
         "url": "https://vina.scripps.edu/"
       },
+      "selected_content_length_bytes": 0,
+      "selected_probe_role": "primary",
       "source_family": "Vina",
       "source_id": "autodock_vina",
       "source_payload_policy": {
@@ -190,11 +238,16 @@
       "blockers": [],
       "claim_boundary": "This preflight checks source access path readiness only. It does not download benchmark payloads, grant license rights, or count as Phase 2 source evidence.",
       "fallback_probe": {
+        "accept_ranges": "bytes",
         "attempted": true,
+        "content_length_bytes": 5099972,
+        "content_type": "text/html; charset=utf-8",
         "error": "",
+        "etag": "\"6a42858f-4dd1c4\"",
         "final_url": "https://gnina.github.io/gnina/rsc_workshop2021/",
         "head_command": "curl --head --location --max-time 20 'https://gnina.github.io/gnina/rsc_workshop2021/'",
         "http_status": 200,
+        "last_modified": "Mon, 29 Jun 2026 14:47:43 GMT",
         "status": "reachable",
         "success_criteria_met": true,
         "url": "https://gnina.github.io/gnina/rsc_workshop2021/"
@@ -206,15 +259,22 @@
         "source_checksum_recorded_after_operator_acquisition"
       ],
       "primary_probe": {
+        "accept_ranges": "bytes",
         "attempted": true,
+        "content_length_bytes": 0,
+        "content_type": "text/html; charset=utf-8",
         "error": "",
+        "etag": "W/\"91ded247eb3d4e7be843f83b49745a13\"",
         "final_url": "https://github.com/gnina/gnina",
         "head_command": "curl --head --location --max-time 20 'https://github.com/gnina/gnina'",
         "http_status": 200,
+        "last_modified": "",
         "status": "reachable",
         "success_criteria_met": true,
         "url": "https://github.com/gnina/gnina"
       },
+      "selected_content_length_bytes": 0,
+      "selected_probe_role": "primary",
       "source_family": "GNINA",
       "source_id": "gnina",
       "source_payload_policy": {
@@ -231,11 +291,16 @@
       "blockers": [],
       "claim_boundary": "This preflight checks source access path readiness only. It does not download benchmark payloads, grant license rights, or count as Phase 2 source evidence.",
       "fallback_probe": {
+        "accept_ranges": "",
         "attempted": true,
+        "content_length_bytes": 122410,
+        "content_type": "text/html; charset=utf-8",
         "error": "",
+        "etag": "",
         "final_url": "https://zenodo.org/records/8278563",
         "head_command": "curl --head --location --max-time 20 'https://zenodo.org/records/8278563'",
         "http_status": 200,
+        "last_modified": "",
         "status": "reachable",
         "success_criteria_met": true,
         "url": "https://zenodo.org/records/8278563"
@@ -247,15 +312,22 @@
         "source_checksum_recorded_after_operator_acquisition"
       ],
       "primary_probe": {
+        "accept_ranges": "bytes",
         "attempted": true,
+        "content_length_bytes": 0,
+        "content_type": "text/html; charset=utf-8",
         "error": "",
+        "etag": "W/\"ec585fb562857235030c35d2cd97cf1f\"",
         "final_url": "https://github.com/maabuu/posebusters",
         "head_command": "curl --head --location --max-time 20 'https://github.com/maabuu/posebusters'",
         "http_status": 200,
+        "last_modified": "",
         "status": "reachable",
         "success_criteria_met": true,
         "url": "https://github.com/maabuu/posebusters"
       },
+      "selected_content_length_bytes": 0,
+      "selected_probe_role": "primary",
       "source_family": "PoseBusters",
       "source_id": "posebusters",
       "source_payload_policy": {
@@ -269,17 +341,22 @@
     }
   ],
   "source_access_ready": true,
-  "source_commit_sha": "3bc8f9bd5e0ccbf58e8dd360413eff189c01f371",
+  "source_commit_sha": "121908c28895500cde967f135aecdcf6806dd9d8",
   "source_plan_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
   "status": "reachable",
   "summary": {
     "blocked_count": 0,
+    "known_content_length_probe_count": 2,
+    "largest_known_payload_bytes": 49064,
+    "largest_known_payload_source_id": "lit_pcba",
     "missing_preflight_row_count": 0,
     "network_probe_performed": true,
     "not_run_count": 0,
     "reachable_count": 6,
     "source_access_probe_row_count": 6,
-    "source_access_ready": true
+    "source_access_ready": true,
+    "total_known_content_length_bytes": 49728,
+    "total_known_content_length_gib": 0.0
   },
   "timeout_seconds": 20
 }

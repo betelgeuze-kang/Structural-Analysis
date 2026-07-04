@@ -66,6 +66,9 @@ def test_current_vina_gnina_input_manifest_template_preflight_surfaces_gaps() ->
     assert payload["summary"]["missing_receipt_ref_count"] > 0
     assert payload["summary"]["source_file_requirement_count"] == 24
     assert payload["summary"]["source_file_missing_count"] == 24
+    assert payload["summary"]["source_url_probe_count"] == 1
+    assert payload["summary"]["source_url_probe_network_performed"] is False
+    assert payload["summary"]["source_url_not_run_count"] == 1
     assert payload["summary"]["prepared_input_requirement_count"] == 24
     assert payload["summary"]["prepared_input_missing_count"] == 24
     assert payload["summary"]["receipt_ref_requirement_count"] == 60
@@ -93,10 +96,109 @@ def test_current_vina_gnina_input_manifest_template_preflight_surfaces_gaps() ->
         payload
     )
     assert "## Source File Acquisition Plan" in markdown
+    assert "## Source URL Probe Plan" in markdown
     assert "CASF-2016/coreset/4llx/4llx_protein.pdb" in markdown
     assert "## Prepared Input Plan" in markdown
     assert "## Receipt Ref Plan" in markdown
     assert "does not promote the template" in payload["claim_boundary"]
+
+
+def test_vina_gnina_input_manifest_template_preflight_probes_source_urls(
+    tmp_path: Path,
+) -> None:
+    execution_plan = tmp_path / "execution_plan.json"
+    execution_plan.write_text(
+        json.dumps(
+            {
+                "case_execution_plans": [
+                    {"case_id": "casf2016_1abc", "complex_id": "1abc"}
+                ],
+                "input_manifest_status": {
+                    "status": "not_detected",
+                    "detected_manifest_artifact_count": 0,
+                },
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+    template = tmp_path / "template.csv"
+    _write_csv(
+        template,
+        [
+            {
+                "case_id": "casf2016_1abc",
+                "complex_id": "1abc",
+                "benchmark_split": "CASF-core",
+                "source_family": "CASF/PDBBind + Vina/GNINA",
+                "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+                "source_checksum": _checksum("source"),
+                "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+                "protein_structure_path": "CASF-2016/coreset/1abc/1abc_protein.pdb",
+                "protein_structure_checksum": _checksum("protein"),
+                "reference_ligand_path": "CASF-2016/coreset/1abc/1abc_ligand.sdf",
+                "reference_ligand_checksum": _checksum("ligand"),
+                "prepared_receptor_path": "prepared/1abc_receptor.pdbqt",
+                "prepared_receptor_checksum": "",
+                "prepared_ligand_path": "prepared/1abc_ligand.pdbqt",
+                "prepared_ligand_checksum": "",
+                "docking_box_center_x": "1.0",
+                "docking_box_center_y": "2.0",
+                "docking_box_center_z": "3.0",
+                "docking_box_size_x": "18.0",
+                "docking_box_size_y": "18.0",
+                "docking_box_size_z": "18.0",
+                "vina_config_ref": "operator_attached/vina_gnina/casf2016_1abc/vina_config.json",
+                "gnina_config_ref": "operator_attached/vina_gnina/casf2016_1abc/gnina_config.json",
+                "vina_run_receipt_ref": "operator_attached/vina_gnina/casf2016_1abc/vina_run_receipt.json",
+                "gnina_run_receipt_ref": "operator_attached/vina_gnina/casf2016_1abc/gnina_run_receipt.json",
+                "input_preparation_provenance_ref": "",
+            }
+        ],
+    )
+    seen: list[tuple[str, int]] = []
+
+    def fake_probe(url: str, timeout_seconds: int) -> dict[str, object]:
+        seen.append((url, timeout_seconds))
+        return {
+            "http_status": 200,
+            "final_url": url,
+            "error": "",
+            "content_length_bytes": 1_572_660_769,
+            "content_type": "application/octet-stream",
+            "last_modified": "Thu, 25 Jan 2024 03:25:36 GMT",
+            "etag": "\"casf\"",
+            "accept_ranges": "bytes",
+        }
+
+    payload = module.build_public_benchmark_vina_gnina_input_manifest_template_preflight(
+        repo_root=tmp_path,
+        execution_plan=execution_plan,
+        template=template,
+        expected_manifest=tmp_path / "public_benchmark_vina_gnina_input_manifest.csv",
+        probe_source_urls=True,
+        timeout_seconds=9,
+        probe_func=fake_probe,
+    )
+
+    assert seen == [
+        (
+            "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+            9,
+        )
+    ]
+    assert payload["summary"]["source_url_probe_network_performed"] is True
+    assert payload["summary"]["source_url_reachable_count"] == 1
+    assert payload["summary"]["known_source_url_content_length_bytes"] == 1_572_660_769
+    assert payload["summary"]["known_source_url_content_length_gib"] == 1.465
+    probe_row = payload["source_url_probe_plan"][0]
+    assert probe_row["status"] == "reachable"
+    assert probe_row["case_ids"] == ["casf2016_1abc"]
+    assert probe_row["file_roles"] == [
+        "source_protein_structure",
+        "source_reference_ligand",
+    ]
+    assert probe_row["probe"]["content_length_bytes"] == 1_572_660_769
 
 
 def test_vina_gnina_input_manifest_template_preflight_accepts_completed_rows(

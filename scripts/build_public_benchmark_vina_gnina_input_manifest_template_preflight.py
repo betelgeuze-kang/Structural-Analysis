@@ -9,7 +9,9 @@ import hashlib
 import json
 from pathlib import Path
 import sys
-from typing import Any
+from typing import Any, Callable
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,6 +39,8 @@ DEFAULT_OUT = (
 )
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 SCHEMA_VERSION = "public-benchmark-vina-gnina-input-manifest-template-preflight.v1"
+DEFAULT_TIMEOUT_SECONDS = 20
+USER_AGENT = "codex-public-benchmark-vina-gnina-input-preflight/1.0"
 CASE_ID_FIELD = "case_id"
 MANIFEST_REQUIRED_FIELDS = (CASE_ID_FIELD, *INPUT_MANIFEST_CASE_FIELDS)
 LOCAL_FILE_FIELDS = (
@@ -73,6 +77,8 @@ SOURCE_FAMILY_POLICY = {
     "placeholder_markers_rejected": True,
 }
 
+ProbeFunc = Callable[[str, int], dict[str, Any]]
+
 
 def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
@@ -93,6 +99,10 @@ def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
 def _read_csv_rows(repo_root: Path, path: Path) -> tuple[list[str], list[dict[str, str]]]:
     resolved = _resolve(repo_root, path)
     if not resolved.is_file():
@@ -108,6 +118,64 @@ def _read_csv_rows(repo_root: Path, path: Path) -> tuple[list[str], list[dict[st
             for row in reader
         ]
     return [str(field) for field in reader.fieldnames or []], rows
+
+
+def _int_header(value: Any) -> int:
+    try:
+        parsed = int(str(value or "").strip())
+    except ValueError:
+        return 0
+    return parsed if parsed > 0 else 0
+
+
+def _response_metadata(response: Any) -> dict[str, Any]:
+    headers = getattr(response, "headers", None)
+    if headers is None:
+        return {
+            "content_length_bytes": 0,
+            "content_type": "",
+            "last_modified": "",
+            "etag": "",
+            "accept_ranges": "",
+        }
+    return {
+        "content_length_bytes": _int_header(headers.get("Content-Length")),
+        "content_type": str(headers.get("Content-Type") or ""),
+        "last_modified": str(headers.get("Last-Modified") or ""),
+        "etag": str(headers.get("ETag") or ""),
+        "accept_ranges": str(headers.get("Accept-Ranges") or ""),
+    }
+
+
+def _head_probe(url: str, timeout_seconds: int) -> dict[str, Any]:
+    request = Request(url, method="HEAD", headers={"User-Agent": USER_AGENT})
+    try:
+        with urlopen(request, timeout=timeout_seconds) as response:
+            status = int(getattr(response, "status", response.getcode()) or 0)
+            return {
+                "http_status": status,
+                "final_url": str(response.geturl() or url),
+                "error": "",
+                **_response_metadata(response),
+            }
+    except HTTPError as exc:
+        return {
+            "http_status": int(exc.code or 0),
+            "final_url": str(exc.geturl() or url),
+            "error": exc.__class__.__name__,
+            **_response_metadata(exc),
+        }
+    except (TimeoutError, URLError, OSError) as exc:
+        return {
+            "http_status": 0,
+            "final_url": "",
+            "error": exc.__class__.__name__,
+            "content_length_bytes": 0,
+            "content_type": "",
+            "last_modified": "",
+            "etag": "",
+            "accept_ranges": "",
+        }
 
 
 def _sha256_file(path: Path) -> str:
@@ -286,6 +354,114 @@ def _ref_status(repo_root: Path, value: str) -> dict[str, Any]:
     }
 
 
+def _source_url_probe(
+    *,
+    url: str,
+    probe_source_urls: bool,
+    timeout_seconds: int,
+    probe_func: ProbeFunc,
+) -> dict[str, Any]:
+    if not url:
+        return {
+            "url": "",
+            "attempted": False,
+            "status": "url_missing",
+            "http_status": 0,
+            "final_url": "",
+            "error": "url_missing",
+            "content_length_bytes": 0,
+            "content_type": "",
+            "last_modified": "",
+            "etag": "",
+            "accept_ranges": "",
+            "success_criteria_met": False,
+        }
+    if not probe_source_urls:
+        return {
+            "url": url,
+            "attempted": False,
+            "status": "not_run",
+            "http_status": 0,
+            "final_url": "",
+            "error": "",
+            "content_length_bytes": 0,
+            "content_type": "",
+            "last_modified": "",
+            "etag": "",
+            "accept_ranges": "",
+            "success_criteria_met": False,
+        }
+    raw_probe = probe_func(url, timeout_seconds)
+    http_status = int(raw_probe.get("http_status") or 0)
+    success = 200 <= http_status < 400
+    return {
+        "url": url,
+        "attempted": True,
+        "status": "reachable" if success else "blocked",
+        "http_status": http_status,
+        "final_url": str(raw_probe.get("final_url") or ""),
+        "error": str(raw_probe.get("error") or ""),
+        "content_length_bytes": _int_header(raw_probe.get("content_length_bytes")),
+        "content_type": str(raw_probe.get("content_type") or ""),
+        "last_modified": str(raw_probe.get("last_modified") or ""),
+        "etag": str(raw_probe.get("etag") or ""),
+        "accept_ranges": str(raw_probe.get("accept_ranges") or ""),
+        "success_criteria_met": success,
+    }
+
+
+def _source_url_probe_plan(
+    *,
+    source_file_acquisition_plan: list[dict[str, Any]],
+    probe_source_urls: bool,
+    timeout_seconds: int,
+    probe_func: ProbeFunc,
+) -> list[dict[str, Any]]:
+    by_url: dict[str, dict[str, Any]] = {}
+    for row in source_file_acquisition_plan:
+        url = str(row.get("source_url") or "")
+        if not url:
+            continue
+        entry = by_url.setdefault(
+            url,
+            {
+                "source_url": url,
+                "case_ids": [],
+                "file_roles": [],
+                "head_command": (
+                    f"curl --head --location --max-time {timeout_seconds} '{url}'"
+                ),
+            },
+        )
+        case_id = str(row.get("case_id") or "")
+        file_role = str(row.get("file_role") or "")
+        if case_id and case_id not in entry["case_ids"]:
+            entry["case_ids"].append(case_id)
+        if file_role and file_role not in entry["file_roles"]:
+            entry["file_roles"].append(file_role)
+    plan: list[dict[str, Any]] = []
+    for url, entry in by_url.items():
+        probe = _source_url_probe(
+            url=url,
+            probe_source_urls=probe_source_urls,
+            timeout_seconds=timeout_seconds,
+            probe_func=probe_func,
+        )
+        plan.append(
+            {
+                **entry,
+                "status": probe["status"],
+                "blockers": [] if probe["success_criteria_met"] else [probe["status"]],
+                "probe": probe,
+                "claim_boundary": (
+                    "This is a HEAD-only source URL probe. It does not download "
+                    "or promote benchmark payloads as actual evidence."
+                ),
+            }
+        )
+    return plan
+
+
 def _expected_case_ids(execution_plan: dict[str, Any]) -> list[str]:
     case_plans = execution_plan.get("case_execution_plans")
     if not isinstance(case_plans, list):
@@ -451,6 +627,9 @@ def build_public_benchmark_vina_gnina_input_manifest_template_preflight(
     execution_plan: Path = DEFAULT_EXECUTION_PLAN,
     template: Path = DEFAULT_TEMPLATE,
     expected_manifest: Path = DEFAULT_INPUT_MANIFEST,
+    probe_source_urls: bool = False,
+    timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
+    probe_func: ProbeFunc = _head_probe,
 ) -> dict[str, Any]:
     execution_plan_payload = _load_json(repo_root, execution_plan)
     header_fields, rows = _read_csv_rows(repo_root, template)
@@ -475,6 +654,12 @@ def build_public_benchmark_vina_gnina_input_manifest_template_preflight(
         for row in row_preflights
         for requirement in row["receipt_ref_requirements"]
     ]
+    source_url_probe_plan = _source_url_probe_plan(
+        source_file_acquisition_plan=source_file_acquisition_plan,
+        probe_source_urls=probe_source_urls,
+        timeout_seconds=timeout_seconds,
+        probe_func=probe_func,
+    )
     expected_case_ids = _expected_case_ids(execution_plan_payload)
     template_case_ids = [row["case_id"] for row in row_preflights if row["case_id"]]
     missing_expected_case_ids = [
@@ -516,6 +701,19 @@ def build_public_benchmark_vina_gnina_input_manifest_template_preflight(
     )
     missing_receipt_requirement_count = sum(
         1 for row in receipt_ref_plan if row["blocker"]
+    )
+    source_url_reachable_count = sum(
+        1 for row in source_url_probe_plan if row["status"] == "reachable"
+    )
+    source_url_blocked_count = sum(
+        1 for row in source_url_probe_plan if row["status"] == "blocked"
+    )
+    source_url_not_run_count = sum(
+        1 for row in source_url_probe_plan if row["status"] == "not_run"
+    )
+    known_source_url_content_length_bytes = sum(
+        int(_as_dict(row.get("probe")).get("content_length_bytes") or 0)
+        for row in source_url_probe_plan
     )
     template_case_coverage_complete = bool(rows) and not (
         missing_expected_case_ids or unexpected_template_case_ids or duplicate_case_ids
@@ -578,11 +776,20 @@ def build_public_benchmark_vina_gnina_input_manifest_template_preflight(
         "source_file_acquisition_plan": source_file_acquisition_plan,
         "prepared_input_plan": prepared_input_plan,
         "receipt_ref_plan": receipt_ref_plan,
+        "source_url_probe_plan": source_url_probe_plan,
+        "source_url_probe_policy": {
+            "probe_source_urls": bool(probe_source_urls),
+            "timeout_seconds": int(timeout_seconds),
+            "network_probe_only": True,
+            "raw_payload_downloaded_by_plan": False,
+            "raw_payload_committed_by_plan": False,
+        },
         "operator_actions": [
             "do_not_commit_template_as_actual_manifest_evidence",
             "review_source_file_acquisition_plan",
             "review_prepared_input_plan",
             "review_receipt_ref_plan",
+            "review_source_url_probe_plan",
             "copy_template_to_expected_manifest_only_after_operator_completion",
             "attach_local_source_and_prepared_input_files",
             "fill_missing_prepared_input_checksums_and_preparation_receipts",
@@ -592,6 +799,10 @@ def build_public_benchmark_vina_gnina_input_manifest_template_preflight(
             "write_preflight": (
                 "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py "
                 f"--out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}"
+            ),
+            "probe_source_urls": (
+                "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py "
+                f"--out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --probe-source-urls"
             ),
             "rerun_execution_plan": (
                 "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
@@ -618,6 +829,18 @@ def build_public_benchmark_vina_gnina_input_manifest_template_preflight(
             "missing_receipt_ref_count": missing_receipt_ref_count,
             "source_file_requirement_count": len(source_file_acquisition_plan),
             "source_file_missing_count": missing_source_file_count,
+            "source_url_probe_count": len(source_url_probe_plan),
+            "source_url_probe_network_performed": bool(probe_source_urls),
+            "source_url_reachable_count": source_url_reachable_count,
+            "source_url_blocked_count": source_url_blocked_count,
+            "source_url_not_run_count": source_url_not_run_count,
+            "known_source_url_content_length_bytes": (
+                known_source_url_content_length_bytes
+            ),
+            "known_source_url_content_length_gib": round(
+                known_source_url_content_length_bytes / (1024**3),
+                3,
+            ),
             "prepared_input_requirement_count": len(prepared_input_plan),
             "prepared_input_missing_count": missing_prepared_input_count,
             "receipt_ref_requirement_count": len(receipt_ref_plan),
@@ -650,6 +873,9 @@ def render_public_benchmark_vina_gnina_input_manifest_template_preflight_markdow
         f"- `missing_local_file_count`: `{summary['missing_local_file_count']}`",
         f"- `missing_receipt_ref_count`: `{summary['missing_receipt_ref_count']}`",
         f"- `source_file_missing_count`: `{summary['source_file_missing_count']}`",
+        f"- `source_url_probe_count`: `{summary['source_url_probe_count']}`",
+        "- `known_source_url_content_length_gib`: "
+        f"`{summary['known_source_url_content_length_gib']}`",
         f"- `prepared_input_missing_count`: `{summary['prepared_input_missing_count']}`",
         f"- `receipt_ref_missing_count`: `{summary['receipt_ref_missing_count']}`",
         "",
@@ -685,6 +911,26 @@ def render_public_benchmark_vina_gnina_input_manifest_template_preflight_markdow
                 f"| `{row.get('case_id', '')}` | `{row.get('file_role', '')}` | "
                 f"`{row.get('path', '')}` | `{row.get('expected_checksum', '')}` | "
                 f"`{row.get('status', '')}` | `{row.get('operator_action', '')}` |"
+            )
+    source_url_plan = [
+        row for row in payload.get("source_url_probe_plan", []) if isinstance(row, dict)
+    ]
+    if source_url_plan:
+        lines.extend(
+            [
+                "",
+                "## Source URL Probe Plan",
+                "",
+                "| URL | Status | Size Bytes | Cases |",
+                "|---|---|---:|---:|",
+            ]
+        )
+        for row in source_url_plan:
+            probe = _as_dict(row.get("probe"))
+            lines.append(
+                f"| `{row.get('source_url', '')}` | `{row.get('status', '')}` | "
+                f"`{probe.get('content_length_bytes', 0)}` | "
+                f"`{len(row.get('case_ids', []))}` |"
             )
     prepared_plan = [
         row
@@ -741,12 +987,16 @@ def write_public_benchmark_vina_gnina_input_manifest_template_preflight(
     expected_manifest: Path = DEFAULT_INPUT_MANIFEST,
     out: Path = DEFAULT_OUT,
     out_md: Path = DEFAULT_OUT_MD,
+    probe_source_urls: bool = False,
+    timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
 ) -> dict[str, Any]:
     payload = build_public_benchmark_vina_gnina_input_manifest_template_preflight(
         repo_root=repo_root,
         execution_plan=execution_plan,
         template=template,
         expected_manifest=expected_manifest,
+        probe_source_urls=probe_source_urls,
+        timeout_seconds=timeout_seconds,
     )
     resolved_out = _resolve(repo_root, out)
     resolved_out.parent.mkdir(parents=True, exist_ok=True)
@@ -770,6 +1020,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--expected-manifest", type=Path, default=DEFAULT_INPUT_MANIFEST)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
+    parser.add_argument("--probe-source-urls", action="store_true")
+    parser.add_argument("--timeout-seconds", type=int, default=DEFAULT_TIMEOUT_SECONDS)
     parser.add_argument("--json", action="store_true")
     return parser
 
@@ -783,6 +1035,8 @@ def main(argv: list[str] | None = None) -> int:
         expected_manifest=args.expected_manifest,
         out=args.out,
         out_md=args.out_md,
+        probe_source_urls=args.probe_source_urls,
+        timeout_seconds=args.timeout_seconds,
     )
     if args.json:
         print(_json_text(payload), end="")

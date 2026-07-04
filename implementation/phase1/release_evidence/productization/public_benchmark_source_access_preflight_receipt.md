@@ -7,17 +7,20 @@
 - `reachable_count`: `6`
 - `blocked_count`: `0`
 - `not_run_count`: `0`
+- `known_content_length_probe_count`: `2`
+- `total_known_content_length_gib`: `0.0`
+- `largest_known_payload_source_id`: `lit_pcba`
 
 ## Probe Rows
 
-| Source | Status | Primary Status | Fallback Status | Blockers |
-|---|---|---|---|---|
-| `pdbbind_plus_casf` | `primary_reachable` | `reachable` (200) | `reachable` (200) |  |
-| `dud_e` | `primary_reachable` | `reachable` (200) | `reachable` (200) |  |
-| `lit_pcba` | `primary_reachable` | `reachable` (200) | `reachable` (200) |  |
-| `autodock_vina` | `primary_reachable` | `reachable` (200) | `reachable` (200) |  |
-| `gnina` | `primary_reachable` | `reachable` (200) | `reachable` (200) |  |
-| `posebusters` | `primary_reachable` | `reachable` (200) | `reachable` (200) |  |
+| Source | Status | Size Bytes | Primary Status | Fallback Status | Blockers |
+|---|---|---:|---|---|---|
+| `pdbbind_plus_casf` | `primary_reachable` | `664` | `reachable` (200) | `reachable` (200) |  |
+| `dud_e` | `primary_reachable` | `0` | `reachable` (200) | `reachable` (200) |  |
+| `lit_pcba` | `primary_reachable` | `49064` | `reachable` (200) | `reachable` (200) |  |
+| `autodock_vina` | `primary_reachable` | `0` | `reachable` (200) | `reachable` (200) |  |
+| `gnina` | `primary_reachable` | `0` | `reachable` (200) | `reachable` (200) |  |
+| `posebusters` | `primary_reachable` | `0` | `reachable` (200) | `reachable` (200) |  |
 
 ## Command
 

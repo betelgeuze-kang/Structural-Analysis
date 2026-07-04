@@ -104,6 +104,10 @@ def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
 def _engine_binary_status(engine_id: str) -> dict[str, Any]:
     env_var = _engine_binary_env_var(engine_id)
     env_executable = os.environ.get(env_var, "").strip()
@@ -618,6 +622,14 @@ def _input_manifest_template_preflight_summary(repo_root: Path) -> dict[str, Any
             "invalid_checksum_count": 0,
             "missing_local_file_count": 0,
             "missing_receipt_ref_count": 0,
+            "source_url_probe_count": 0,
+            "source_url_probe_network_performed": False,
+            "source_url_reachable_count": 0,
+            "source_url_blocked_count": 0,
+            "source_url_not_run_count": 0,
+            "known_source_url_content_length_bytes": 0,
+            "known_source_url_content_length_gib": 0.0,
+            "source_url_probe_plan": [],
             "first_blocked_case_preflight": {},
         }
     summary = payload.get("summary")
@@ -649,6 +661,39 @@ def _input_manifest_template_preflight_summary(repo_root: Path) -> dict[str, Any
         "missing_receipt_ref_count": int(
             summary.get("missing_receipt_ref_count") or 0
         ),
+        "source_url_probe_count": int(summary.get("source_url_probe_count") or 0),
+        "source_url_probe_network_performed": bool(
+            summary.get("source_url_probe_network_performed")
+        ),
+        "source_url_reachable_count": int(
+            summary.get("source_url_reachable_count") or 0
+        ),
+        "source_url_blocked_count": int(summary.get("source_url_blocked_count") or 0),
+        "source_url_not_run_count": int(summary.get("source_url_not_run_count") or 0),
+        "known_source_url_content_length_bytes": int(
+            summary.get("known_source_url_content_length_bytes") or 0
+        ),
+        "known_source_url_content_length_gib": float(
+            summary.get("known_source_url_content_length_gib") or 0.0
+        ),
+        "source_url_probe_plan": [
+            {
+                "source_url": str(row.get("source_url") or ""),
+                "status": str(row.get("status") or ""),
+                "case_count": len(row.get("case_ids", []))
+                if isinstance(row.get("case_ids"), list)
+                else 0,
+                "content_length_bytes": int(
+                    _as_dict(row.get("probe")).get("content_length_bytes") or 0
+                ),
+                "http_status": int(_as_dict(row.get("probe")).get("http_status") or 0),
+                "head_command": str(row.get("head_command") or ""),
+            }
+            for row in payload.get("source_url_probe_plan", [])
+            if isinstance(row, dict)
+        ]
+        if isinstance(payload.get("source_url_probe_plan"), list)
+        else [],
         "first_blocked_case_preflight": _first_blocked_preflight_row(
             payload.get("case_preflight_rows")
         ),

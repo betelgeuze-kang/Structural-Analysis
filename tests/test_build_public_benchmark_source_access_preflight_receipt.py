@@ -109,12 +109,17 @@ def test_source_access_receipt_defaults_to_network_probe_required(
     assert payload["source_access_ready"] is False
     assert payload["summary"] == {
         "blocked_count": 0,
+        "known_content_length_probe_count": 0,
+        "largest_known_payload_bytes": 0,
+        "largest_known_payload_source_id": "",
         "missing_preflight_row_count": 0,
         "network_probe_performed": False,
         "not_run_count": 2,
         "reachable_count": 0,
         "source_access_probe_row_count": 2,
         "source_access_ready": False,
+        "total_known_content_length_bytes": 0,
+        "total_known_content_length_gib": 0.0,
     }
     assert payload["network_probe_command"].endswith("--probe-network")
     first_row = payload["source_access_probe_rows"][0]
@@ -138,12 +143,36 @@ def test_source_access_receipt_uses_primary_fallback_and_auth_gate_statuses(
     def fake_probe(url: str, timeout_seconds: int) -> dict[str, Any]:
         seen.append((url, timeout_seconds))
         if url.endswith("/primary"):
-            return {"http_status": 500, "final_url": url, "error": "HTTPError"}
+            return {
+                "http_status": 500,
+                "final_url": url,
+                "error": "HTTPError",
+                "content_length_bytes": 11,
+            }
         if url.endswith("/fallback"):
-            return {"http_status": 302, "final_url": url, "error": ""}
+            return {
+                "http_status": 302,
+                "final_url": url,
+                "error": "",
+                "content_length_bytes": 123,
+                "last_modified": "Tue, 01 Jan 2030 00:00:00 GMT",
+                "etag": "\"fallback\"",
+                "accept_ranges": "bytes",
+            }
         if url.endswith("/auth"):
-            return {"http_status": 403, "final_url": url, "error": "HTTPError"}
-        return {"http_status": 0, "final_url": "", "error": "URLError"}
+            return {
+                "http_status": 403,
+                "final_url": url,
+                "error": "HTTPError",
+                "content_length_bytes": 456,
+                "content_type": "application/octet-stream",
+            }
+        return {
+            "http_status": 0,
+            "final_url": "",
+            "error": "URLError",
+            "content_length_bytes": 0,
+        }
 
     payload = module.build_public_benchmark_source_access_preflight_receipt(
         repo_root=tmp_path,
@@ -159,11 +188,20 @@ def test_source_access_receipt_uses_primary_fallback_and_auth_gate_statuses(
     assert payload["network_probe_performed"] is True
     assert payload["summary"]["reachable_count"] == 2
     assert payload["summary"]["blocked_count"] == 0
+    assert payload["summary"]["known_content_length_probe_count"] == 2
+    assert payload["summary"]["total_known_content_length_bytes"] == 579
+    assert payload["summary"]["largest_known_payload_source_id"] == "auth_gate"
+    assert payload["summary"]["largest_known_payload_bytes"] == 456
     assert rows["primary_then_fallback"]["status"] == "fallback_reachable"
     assert rows["primary_then_fallback"]["primary_probe"]["http_status"] == 500
     assert rows["primary_then_fallback"]["fallback_probe"]["http_status"] == 302
+    assert rows["primary_then_fallback"]["selected_probe_role"] == "fallback"
+    assert rows["primary_then_fallback"]["selected_content_length_bytes"] == 123
+    assert rows["primary_then_fallback"]["fallback_probe"]["etag"] == "\"fallback\""
     assert rows["auth_gate"]["status"] == "primary_reachable"
     assert rows["auth_gate"]["primary_probe"]["http_status"] == 403
+    assert rows["auth_gate"]["selected_probe_role"] == "primary"
+    assert rows["auth_gate"]["selected_content_length_bytes"] == 456
     assert seen == [
         ("https://example.invalid/primary", 7),
         ("https://example.invalid/fallback", 7),

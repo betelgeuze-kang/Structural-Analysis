@@ -235,6 +235,67 @@ def test_runtime_readiness_container_status_records_daemon_without_image(
     assert status["blocker"] == ""
 
 
+def test_runtime_readiness_compacts_input_manifest_source_url_probe(
+    tmp_path: Path,
+) -> None:
+    preflight = tmp_path / module.DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT
+    preflight.parent.mkdir(parents=True)
+    preflight.write_text(
+        json.dumps(
+            {
+                "status": "operator_manifest_completion_required",
+                "manifest_ready": False,
+                "summary": {
+                    "template_row_count": 12,
+                    "template_case_coverage_complete": True,
+                    "source_url_probe_count": 1,
+                    "source_url_probe_network_performed": True,
+                    "source_url_reachable_count": 1,
+                    "source_url_blocked_count": 0,
+                    "source_url_not_run_count": 0,
+                    "known_source_url_content_length_bytes": 1_572_660_769,
+                    "known_source_url_content_length_gib": 1.465,
+                },
+                "source_url_probe_plan": [
+                    {
+                        "source_url": (
+                            "https://static.pdbbind-plus.org.cn/download/"
+                            "CASF-2016.tar.gz"
+                        ),
+                        "status": "reachable",
+                        "case_ids": ["casf2016_1abc", "casf2016_2abc"],
+                        "head_command": "curl --head CASF-2016.tar.gz",
+                        "probe": {
+                            "content_length_bytes": 1_572_660_769,
+                            "http_status": 200,
+                        },
+                    }
+                ],
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+
+    summary = module._input_manifest_template_preflight_summary(tmp_path)
+
+    assert summary["source_url_probe_network_performed"] is True
+    assert summary["known_source_url_content_length_bytes"] == 1_572_660_769
+    assert summary["known_source_url_content_length_gib"] == 1.465
+    assert summary["source_url_probe_plan"] == [
+        {
+            "case_count": 2,
+            "content_length_bytes": 1_572_660_769,
+            "head_command": "curl --head CASF-2016.tar.gz",
+            "http_status": 200,
+            "source_url": (
+                "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz"
+            ),
+            "status": "reachable",
+        }
+    ]
+
+
 def test_runtime_readiness_records_missing_binaries_and_rows(
     tmp_path: Path,
     monkeypatch,
@@ -384,6 +445,8 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "first_blocked_case_preflight": {},
         "invalid_checksum_count": 0,
         "invalid_source_receipt_count": 0,
+        "known_source_url_content_length_bytes": 0,
+        "known_source_url_content_length_gib": 0.0,
         "manifest_ready": False,
         "markdown_artifact": (
             "implementation/phase1/release_evidence/productization/"
@@ -393,6 +456,12 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "missing_receipt_ref_count": 0,
         "missing_required_value_count": 0,
         "present": False,
+        "source_url_blocked_count": 0,
+        "source_url_not_run_count": 0,
+        "source_url_probe_count": 0,
+        "source_url_probe_network_performed": False,
+        "source_url_probe_plan": [],
+        "source_url_reachable_count": 0,
         "status": "missing",
         "template_case_coverage_complete": False,
         "template_row_count": 0,

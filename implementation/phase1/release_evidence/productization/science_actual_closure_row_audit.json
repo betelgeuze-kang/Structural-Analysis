@@ -1785,24 +1785,24 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T06:11:56.205376+00:00",
+  "generated_at": "2026-07-04T07:10:03.926530+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json": "sha256:98255bfca71cb82c3146a11e74e90cc338836518d93672950cbec5defd7d7147",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:6ccbe49dabe584c1efbe034d66ed8abfb3a6a9f4a7ca7cc41969ebf543f20814",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:47cdfb156fac230a9d22a757d4e639ee9287720771e2122f8ac377a13a0ec36c",
     "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
     "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json": "sha256:ebad77368627c20437a800eeb1bcfe1bea120acc064275665fab9b9494d9e967",
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:ee997c30245f167f34a47c829912b6c27e78ad678d8538a480d70c59a6e97657",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:cf1fb2dde06e0458461aa607085a48d5cbb9fd8dfe026fbacb0f16e4459d721f",
     "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json": "sha256:493ca5c42103711dbeb7ccadf29042ffa3e1adeac3116251e6ae3bc9685428e8",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json": "sha256:8a683e65f904fe56a67e739b1e92ab837a17aa6504195e9a27460ac2b6fb33ab",
     "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:e9a2b010be4254d67a3574ab917821583a6de5e5803ab1cbd6a92ca8d15eea30",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:dad666c08fff6ec709e535de64fdc41121b7c93de5e19c42f0876d71a44a67c9",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:161673d8ff036a7a31d657fb972764eeb4b62f6d55cc0840e26f398565707c6f",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:24aba7d75e0de5a6e62416cdbbab5980d231dee7030b2718c2f37f59d8437366",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
     "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:cea647619944140048844f8c2efc475f47008bbd55333cd276673bb56f80d192",
-    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:efa54ffbf6f124b9264d974fd93395ffd774364ee2d2445864e4f1bbb8a7e5ed"
+    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:25025c3a95320cb751287009638783e8e98172abf406d169aeedfa64e29998bb"
   },
   "missing_row_inputs": [
     "vina_gnina_rows",
@@ -3216,7 +3216,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "2c92c3293bb037f2ef8f56d5399c5519b0bc862d",
+  "source_commit_sha": "121908c28895500cde967f135aecdcf6806dd9d8",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,
@@ -5374,12 +5374,29 @@
               },
               "invalid_checksum_count": 0,
               "invalid_source_receipt_count": 0,
+              "known_source_url_content_length_bytes": 1572660769,
+              "known_source_url_content_length_gib": 1.465,
               "manifest_ready": false,
               "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
               "missing_local_file_count": 48,
               "missing_receipt_ref_count": 60,
               "missing_required_value_count": 36,
               "present": true,
+              "source_url_blocked_count": 0,
+              "source_url_not_run_count": 0,
+              "source_url_probe_count": 1,
+              "source_url_probe_network_performed": true,
+              "source_url_probe_plan": [
+                {
+                  "case_count": 12,
+                  "content_length_bytes": 1572660769,
+                  "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
+                  "http_status": 200,
+                  "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+                  "status": "reachable"
+                }
+              ],
+              "source_url_reachable_count": 1,
               "status": "operator_manifest_completion_required",
               "template_case_coverage_complete": true,
               "template_row_count": 12,
@@ -5751,7 +5768,7 @@
         "blocked_count": 0,
         "claim_boundary": "This receipt performs HEAD-only source access preflight checks. It does not download, redistribute, checksum, license, or prove raw benchmark payloads, and it does not close Public Benchmark Phase 2.",
         "contract_pass": true,
-        "generated_at": "2026-07-04T05:07:26.482241+00:00",
+        "generated_at": "2026-07-04T07:06:13.395041+00:00",
         "network_probe_performed": true,
         "not_run_count": 0,
         "present": true,
@@ -5762,12 +5779,17 @@
         "status": "reachable",
         "summary": {
           "blocked_count": 0,
+          "known_content_length_probe_count": 2,
+          "largest_known_payload_bytes": 49064,
+          "largest_known_payload_source_id": "lit_pcba",
           "missing_preflight_row_count": 0,
           "network_probe_performed": true,
           "not_run_count": 0,
           "reachable_count": 6,
           "source_access_probe_row_count": 6,
-          "source_access_ready": true
+          "source_access_ready": true,
+          "total_known_content_length_bytes": 49728,
+          "total_known_content_length_gib": 0.0
         }
       },
       "source_access_preflight_rows": [
@@ -7605,6 +7627,26 @@
           "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
           "input_manifest_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json",
           "input_manifest_template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+          "input_manifest_template_preflight_summary": {
+            "known_source_url_content_length_bytes": 1572660769,
+            "known_source_url_content_length_gib": 1.465,
+            "manifest_ready": false,
+            "source_url_probe_count": 1,
+            "source_url_probe_network_performed": true,
+            "source_url_probe_plan": [
+              {
+                "case_count": 12,
+                "content_length_bytes": 1572660769,
+                "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
+                "http_status": 200,
+                "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+                "status": "reachable"
+              }
+            ],
+            "source_url_reachable_count": 1,
+            "status": "operator_manifest_completion_required",
+            "template_row_count": 12
+          },
           "missing_engine_ids": [
             "vina",
             "gnina"

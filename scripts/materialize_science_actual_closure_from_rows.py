@@ -374,6 +374,12 @@ def _compact_vina_gnina_unblock_packet(payload: dict[str, Any]) -> dict[str, Any
     commands = payload.get("commands")
     if not isinstance(commands, dict):
         commands = {}
+    preflight_summary = payload.get("input_manifest_template_preflight_summary")
+    if not isinstance(preflight_summary, dict):
+        preflight_summary = {}
+    source_url_probe_plan = preflight_summary.get("source_url_probe_plan")
+    if not isinstance(source_url_probe_plan, list):
+        source_url_probe_plan = []
     return {
         "status": str(payload.get("status") or ""),
         "input_manifest_template_artifact": str(
@@ -385,6 +391,40 @@ def _compact_vina_gnina_unblock_packet(payload: dict[str, Any]) -> dict[str, Any
         "input_manifest_template_preflight_markdown_artifact": str(
             payload.get("input_manifest_template_preflight_markdown_artifact") or ""
         ),
+        "input_manifest_template_preflight_summary": {
+            "status": str(preflight_summary.get("status") or ""),
+            "manifest_ready": bool(preflight_summary.get("manifest_ready")),
+            "template_row_count": int(preflight_summary.get("template_row_count") or 0),
+            "source_url_probe_count": int(
+                preflight_summary.get("source_url_probe_count") or 0
+            ),
+            "source_url_probe_network_performed": bool(
+                preflight_summary.get("source_url_probe_network_performed")
+            ),
+            "source_url_reachable_count": int(
+                preflight_summary.get("source_url_reachable_count") or 0
+            ),
+            "known_source_url_content_length_bytes": int(
+                preflight_summary.get("known_source_url_content_length_bytes") or 0
+            ),
+            "known_source_url_content_length_gib": float(
+                preflight_summary.get("known_source_url_content_length_gib") or 0.0
+            ),
+            "source_url_probe_plan": [
+                {
+                    "source_url": str(row.get("source_url") or ""),
+                    "status": str(row.get("status") or ""),
+                    "case_count": int(row.get("case_count") or 0),
+                    "content_length_bytes": int(
+                        row.get("content_length_bytes") or 0
+                    ),
+                    "http_status": int(row.get("http_status") or 0),
+                    "head_command": str(row.get("head_command") or ""),
+                }
+                for row in source_url_probe_plan
+                if isinstance(row, dict)
+            ],
+        },
         "expected_rows_artifact": str(payload.get("expected_rows_artifact") or ""),
         "case_input_slot_count": int(payload.get("case_input_slot_count") or 0),
         "blocked_case_input_slot_count": int(

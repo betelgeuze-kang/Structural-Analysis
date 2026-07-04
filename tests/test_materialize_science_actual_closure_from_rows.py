@@ -953,6 +953,33 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
                             "implementation/phase1/release_evidence/productization/"
                             "public_benchmark_vina_gnina_input_manifest_template_preflight.json"
                         ),
+                        "input_manifest_template_preflight_summary": {
+                            "status": "operator_manifest_completion_required",
+                            "manifest_ready": False,
+                            "template_row_count": 12,
+                            "source_url_probe_count": 1,
+                            "source_url_probe_network_performed": True,
+                            "source_url_reachable_count": 1,
+                            "known_source_url_content_length_bytes": 1_572_660_769,
+                            "known_source_url_content_length_gib": 1.465,
+                            "source_url_probe_plan": [
+                                {
+                                    "source_url": (
+                                        "https://static.pdbbind-plus.org.cn/download/"
+                                        "CASF-2016.tar.gz"
+                                    ),
+                                    "status": "reachable",
+                                    "case_count": 12,
+                                    "content_length_bytes": 1_572_660_769,
+                                    "http_status": 200,
+                                    "head_command": (
+                                        "curl --head --location --max-time 20 "
+                                        "'https://static.pdbbind-plus.org.cn/download/"
+                                        "CASF-2016.tar.gz'"
+                                    ),
+                                }
+                            ],
+                        },
                         "operator_sequence": [
                             "review_public_benchmark_vina_gnina_input_manifest_template_preflight"
                         ],
@@ -1241,6 +1268,12 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
     assert runtime_summary["operator_unblock_packet"][
         "input_manifest_template_preflight_artifact"
     ].endswith("public_benchmark_vina_gnina_input_manifest_template_preflight.json")
+    compact_preflight = runtime_summary["operator_unblock_packet"][
+        "input_manifest_template_preflight_summary"
+    ]
+    assert compact_preflight["source_url_probe_network_performed"] is True
+    assert compact_preflight["known_source_url_content_length_bytes"] == 1_572_660_769
+    assert compact_preflight["source_url_probe_plan"][0]["case_count"] == 12
     vina_gnina_actual = audit["upstream_source_acquisition"][
         "public_benchmark_phase2"
     ]["vina_gnina_actual_evidence_audit"]
