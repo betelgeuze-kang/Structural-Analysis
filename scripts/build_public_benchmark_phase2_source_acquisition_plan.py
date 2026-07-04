@@ -2175,6 +2175,57 @@ def _vina_gnina_runtime_action_packet(
         )
         if isinstance(row, dict)
     ]
+    operator_blocker_family_plan = [
+        _compact_operator_blocker_family(row)
+        for row in _as_list(
+            unblock.get("operator_blocker_family_plan")
+            or vina_gnina_runtime_readiness_summary.get(
+                "operator_blocker_family_plan"
+            )
+        )
+        if isinstance(row, dict)
+    ]
+    operator_blocker_family_blocked_count = _as_int(
+        unblock.get("operator_blocker_family_blocked_count")
+        or vina_gnina_runtime_readiness_summary.get(
+            "operator_blocker_family_blocked_count"
+        )
+    )
+    if not operator_blocker_family_blocked_count and operator_blocker_family_plan:
+        operator_blocker_family_blocked_count = sum(
+            1
+            for row in operator_blocker_family_plan
+            if str(row.get("status") or "") != "ready"
+        )
+    operator_blocker_family_missing_item_count = _as_int(
+        unblock.get("operator_blocker_family_missing_item_count")
+        or vina_gnina_runtime_readiness_summary.get(
+            "operator_blocker_family_missing_item_count"
+        )
+    )
+    if not operator_blocker_family_missing_item_count:
+        operator_blocker_family_missing_item_count = sum(
+            _as_int(row.get("missing_item_count"))
+            for row in operator_blocker_family_plan
+            if str(row.get("status") or "") != "ready"
+        )
+    first_operator_blocker_family = _compact_operator_blocker_family(
+        _as_dict(
+            unblock.get("first_operator_blocker_family")
+            or vina_gnina_runtime_readiness_summary.get(
+                "first_operator_blocker_family"
+            )
+        )
+    )
+    if not first_operator_blocker_family and operator_blocker_family_plan:
+        first_operator_blocker_family = next(
+            (
+                row
+                for row in operator_blocker_family_plan
+                if str(row.get("status") or "") != "ready"
+            ),
+            {},
+        )
     return {
         "artifact": str(
             vina_gnina_runtime_readiness_summary.get("artifact") or ""
@@ -2237,6 +2288,15 @@ def _vina_gnina_runtime_action_packet(
                 "first_blocked_engine_run_slot"
             )
         ),
+        "operator_blocker_family_plan": operator_blocker_family_plan,
+        "operator_blocker_family_count": len(operator_blocker_family_plan),
+        "operator_blocker_family_blocked_count": (
+            operator_blocker_family_blocked_count
+        ),
+        "operator_blocker_family_missing_item_count": (
+            operator_blocker_family_missing_item_count
+        ),
+        "first_operator_blocker_family": first_operator_blocker_family,
         "expected_rows_artifact": str(
             unblock.get("expected_rows_artifact") or DEFAULT_VINA_GNINA_ROWS
         ),
@@ -3975,6 +4035,13 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         for row in vina_gnina_actual_audit.get("components", [])
         if isinstance(row, dict)
     ] if isinstance(vina_gnina_actual_audit.get("components"), list) else []
+    vina_gnina_operator_blocker_families = [
+        row
+        for row in _as_list(
+            vina_gnina_actual_audit.get("operator_blocker_family_plan")
+        )
+        if isinstance(row, dict)
+    ]
     if vina_gnina_actual_audit:
         lines.extend(
             [
@@ -3990,6 +4057,10 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                 f"`{vina_gnina_actual_audit.get('blocked_component_count')}`",
                 "- `remaining_evidence`: "
                 f"`{', '.join(vina_gnina_actual_audit.get('remaining_evidence', []))}`",
+                "- `operator_blocker_family_count`: "
+                f"`{vina_gnina_actual_audit.get('operator_blocker_family_count', 0)}`",
+                "- `operator_blocker_family_missing_item_count`: "
+                f"`{vina_gnina_actual_audit.get('operator_blocker_family_missing_item_count', 0)}`",
                 "",
                 "| Component | Status | Pass | Current | Required | Blockers |",
                 "|---|---|---|---|---|---|",
@@ -4016,6 +4087,24 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                 f"`{row.get('status', '')}` | `{row.get('pass')}` | "
                 f"`{current}` | `{required}` | {blockers or '`none`'} |"
             )
+        if vina_gnina_operator_blocker_families:
+            lines.extend(
+                [
+                    "",
+                    "### Vina/GNINA Operator Blocker Families",
+                    "",
+                    "| Family | Status | Missing Items | Blocked Cases | Operator Action |",
+                    "|---|---|---:|---:|---|",
+                ]
+            )
+            for row in vina_gnina_operator_blocker_families:
+                lines.append(
+                    f"| `{row.get('family_id', '')}` | "
+                    f"`{row.get('status', '')}` | "
+                    f"{_as_int(row.get('missing_item_count'))} | "
+                    f"{_as_int(row.get('blocked_case_count'))} | "
+                    f"`{row.get('operator_action', '')}` |"
+                )
     lines.extend(
         [
             "",
@@ -4146,6 +4235,14 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                 first_engine_slot = _as_dict(
                     action.get("first_blocked_engine_run_slot")
                 )
+                first_operator_blocker_family = _as_dict(
+                    action.get("first_operator_blocker_family")
+                )
+                operator_blocker_families = [
+                    row
+                    for row in _as_list(action.get("operator_blocker_family_plan"))
+                    if isinstance(row, dict)
+                ]
                 manifest_completion_plan = [
                     row
                     for row in action.get(
@@ -4169,6 +4266,9 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                         f"- `first_blocked_case_input_slot`: `{first_case_slot.get('case_id', '')}` / `{first_case_slot.get('operator_action', '')}`",
                         f"- `blocked_engine_run_slot_count`: `{action.get('blocked_engine_run_slot_count')}`",
                         f"- `first_blocked_engine_run_slot`: `{first_engine_slot.get('case_id', '')}` / `{first_engine_slot.get('engine_id', '')}` / `{first_engine_slot.get('docking_run_id', '')}`",
+                        f"- `operator_blocker_family_count`: `{action.get('operator_blocker_family_count', 0)}`",
+                        f"- `operator_blocker_family_missing_item_count`: `{action.get('operator_blocker_family_missing_item_count', 0)}`",
+                        f"- `first_operator_blocker_family`: `{first_operator_blocker_family.get('family_id', '')}` / `{first_operator_blocker_family.get('missing_item_count', '')}`",
                         f"- `first_operator_sequence_step`: `{(action.get('operator_sequence') or [''])[0]}`",
                         f"- `operator_sequence`: {operator_sequence or '`none`'}",
                         f"- `build_input_manifest_template_preflight_command`: `{commands.get('build_input_manifest_template_preflight', '')}`",
@@ -4176,6 +4276,24 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                         f"- `materialize_adapter_command`: `{commands.get('materialize_adapter', '')}`",
                     ]
                 )
+                if operator_blocker_families:
+                    lines.extend(
+                        [
+                            "",
+                            "#### Vina/GNINA Runtime Blocker Families",
+                            "",
+                            "| Family | Status | Missing Items | Blocked Cases | Command Key |",
+                            "|---|---|---:|---:|---|",
+                        ]
+                    )
+                    for row in operator_blocker_families:
+                        lines.append(
+                            f"| `{row.get('family_id', '')}` | "
+                            f"`{row.get('status', '')}` | "
+                            f"{_as_int(row.get('missing_item_count'))} | "
+                            f"{_as_int(row.get('blocked_case_count'))} | "
+                            f"`{row.get('command_key', '')}` |"
+                        )
         manifest_actions = [
             row.get("engine_input_manifest_action_packet")
             for row in missing_actions

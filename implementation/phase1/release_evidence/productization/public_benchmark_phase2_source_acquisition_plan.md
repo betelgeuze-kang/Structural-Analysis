@@ -135,6 +135,8 @@
 - `ready_component_count`: `0`
 - `blocked_component_count`: `6`
 - `remaining_evidence`: `engine_input_manifest, engine_runtime, engine_run_slots, adapter_rows, per_engine_run_receipts, external_receipts`
+- `operator_blocker_family_count`: `7`
+- `operator_blocker_family_missing_item_count`: `182`
 
 | Component | Status | Pass | Current | Required | Blockers |
 |---|---|---|---|---|---|
@@ -144,6 +146,18 @@
 | `adapter_rows` | `blocked` | `False` | `{"adapter_case_count": 0, "adapter_preflight_contract_pass": false, "adapter_preflight_status": "missing", "adapter_rows_ready": false, "detected_row_artifact_count": 0, "row_candidate_status": "row_artifact_missing", "selected_row_count": 0}` | `{"adapter_case_count": ">=1", "adapter_preflight_contract_pass": true, "detected_row_artifact_count": ">=1"}` | `public_benchmark_vina_gnina_rows_not_detected`, `vina_gnina_rows_not_provided` |
 | `per_engine_run_receipts` | `blocked` | `False` | `{"adapter_template_ready": false, "expected_rows_detected": false, "missing_engine_run_receipt_value_count": 72, "role_receipt_blocked_count": 72, "role_receipt_plan_count": 96, "rows_template_preflight_status": "operator_rows_completion_required"}` | `{"adapter_template_ready": true, "expected_rows_detected": true, "role_receipt_blocked_count": 0}` | `public_benchmark_vina_gnina_engine_run_receipts_incomplete` |
 | `external_receipts` | `blocked` | `False` | `{"all_expected_artifact_roles_complete": false, "blocked_official_receipt_role_count": 1, "external_receipt_completion_status": "blocked_pending_vina_gnina_receipts", "missing_expected_artifact_roles": ["vina_gnina_comparison_adapter"]}` | `{"all_expected_artifact_roles_complete": true, "blocked_official_receipt_role_count": 0}` | `vina_gnina_rows_not_provided`, `public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter`, `public_benchmark_vina_gnina_engine_runtime_not_ready` |
+
+### Vina/GNINA Operator Blocker Families
+
+| Family | Status | Missing Items | Blocked Cases | Operator Action |
+|---|---|---:|---:|---|
+| `manifest_required_values` | `blocked` | 36 | 12 | `complete_vina_gnina_input_manifest_required_values` |
+| `official_source_files` | `blocked` | 24 | 12 | `materialize_source_files_from_casf_archive_and_verify_checksum` |
+| `prepared_input_files` | `blocked` | 24 | 12 | `prepare_vina_gnina_inputs_and_record_checksums` |
+| `input_and_engine_receipt_refs` | `blocked` | 60 | 12 | `attach_vina_gnina_input_and_engine_receipt_refs` |
+| `engine_runtime` | `blocked` | 2 | 0 | `configure_vina_gnina_binary_or_container_runtime` |
+| `engine_run_slots` | `blocked` | 24 | 12 | `rerun_runtime_readiness_until_engine_run_slots_ready` |
+| `adapter_rows` | `blocked` | 12 | 12 | `attach_or_materialize_public_benchmark_vina_gnina_rows` |
 
 | Row Input | Source Family | Status | Unblocks |
 |---|---|---|---|
@@ -190,11 +204,26 @@
 - `first_blocked_case_input_slot`: `casf2016_4llx` / `fill_vina_gnina_input_manifest_row_for_casf2016_4llx`
 - `blocked_engine_run_slot_count`: `24`
 - `first_blocked_engine_run_slot`: `casf2016_4llx` / `vina` / `casf2016_4llx_vina_run`
+- `operator_blocker_family_count`: `7`
+- `operator_blocker_family_missing_item_count`: `182`
+- `first_operator_blocker_family`: `manifest_required_values` / `36`
 - `first_operator_sequence_step`: `review_public_benchmark_vina_gnina_input_manifest_template_preflight`
 - `operator_sequence`: `review_public_benchmark_vina_gnina_input_manifest_template_preflight`, `fill_public_benchmark_vina_gnina_input_manifest_from_template`, `rerun_public_benchmark_vina_gnina_execution_plan`, `configure_vina_gnina_binary_or_container_runtime`, `rerun_public_benchmark_vina_gnina_runtime_readiness`, `materialize_public_benchmark_vina_gnina_engine_run_bundle`, `review_public_benchmark_vina_gnina_rows_template_preflight`, `attach_public_benchmark_vina_gnina_rows`, `materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle`, `materialize_public_benchmark_vina_gnina_rows_from_completed_template`, `materialize_public_benchmark_vina_gnina_comparison_adapter`
 - `build_input_manifest_template_preflight_command`: `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md`
 - `build_rows_template_preflight_command`: `python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md`
 - `materialize_adapter_command`: `python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked`
+
+#### Vina/GNINA Runtime Blocker Families
+
+| Family | Status | Missing Items | Blocked Cases | Command Key |
+|---|---|---:|---:|---|
+| `manifest_required_values` | `blocked` | 36 | 12 | `build_input_manifest_template_preflight` |
+| `official_source_files` | `blocked` | 24 | 12 | `materialize_input_manifest_from_casf_archive` |
+| `prepared_input_files` | `blocked` | 24 | 12 | `build_input_manifest_template_preflight` |
+| `input_and_engine_receipt_refs` | `blocked` | 60 | 12 | `build_input_manifest_template_preflight` |
+| `engine_runtime` | `blocked` | 2 | 0 | `rerun_runtime_readiness` |
+| `engine_run_slots` | `blocked` | 24 | 12 | `rerun_runtime_readiness` |
+| `adapter_rows` | `blocked` | 12 | 12 | `materialize_rows_from_engine_run_bundle` |
 
 ### Vina/GNINA Input Manifest Action
 

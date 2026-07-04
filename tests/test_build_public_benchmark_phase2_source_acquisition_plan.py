@@ -1166,6 +1166,13 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "`adapter_rows`" in markdown
     assert "`per_engine_run_receipts`" in markdown
     assert "`external_receipts`" in markdown
+    assert "`operator_blocker_family_count`: `7`" in markdown
+    assert "`operator_blocker_family_missing_item_count`: `182`" in markdown
+    assert "### Vina/GNINA Operator Blocker Families" in markdown
+    assert (
+        "| `manifest_required_values` | `blocked` | 36 | 12 | "
+        "`complete_vina_gnina_input_manifest_required_values` |"
+    ) in markdown
     assert "`public_benchmark_vina_gnina_case_inputs_incomplete`" in markdown
     assert "`public_benchmark_vina_gnina_engine_run_receipts_incomplete`" in (
         markdown
@@ -1202,6 +1209,13 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
         "`casf2016_4llx_vina_run`"
     ) in markdown
     assert "`first_operator_sequence_step`: `review_public_benchmark_vina_gnina_input_manifest_template_preflight`" in markdown
+    assert "`first_operator_blocker_family`: `manifest_required_values` / `36`" in (
+        markdown
+    )
+    assert "#### Vina/GNINA Runtime Blocker Families" in markdown
+    assert "| `engine_runtime` | `blocked` | 2 | 0 | `rerun_runtime_readiness` |" in (
+        markdown
+    )
     assert "### Vina/GNINA Adapter Row Preflight Action" in markdown
     assert "public_benchmark_vina_gnina_rows_template_preflight.json" in markdown
     assert "build_public_benchmark_vina_gnina_rows_template_preflight.py" in markdown
