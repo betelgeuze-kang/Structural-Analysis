@@ -38,6 +38,10 @@ DEFAULT_ROWS_TEMPLATE_PREFLIGHT = (
     PRODUCTIZATION / "pocketmd_lite_topk_rows_template_preflight.json"
 )
 DEFAULT_ROWS_TEMPLATE_PREFLIGHT_MD = DEFAULT_ROWS_TEMPLATE_PREFLIGHT.with_suffix(".md")
+DEFAULT_RECEIPT_BUNDLE = PRODUCTIZATION / "pocketmd_lite_refinement_receipt_bundle.json"
+DEFAULT_ROWS_FROM_RECEIPT_BUNDLE_REPORT = (
+    PRODUCTIZATION / "pocketmd_lite_topk_rows_from_receipt_bundle_report.json"
+)
 DEFAULT_OPERATOR_INTAKE = PRODUCTIZATION / "pocketmd_lite_operator_intake.json"
 DEFAULT_OUT = PRODUCTIZATION / "pocketmd_lite_refinement_execution_plan.json"
 SCHEMA_VERSION = "pocketmd-lite-refinement-execution-plan.v1"
@@ -265,6 +269,9 @@ def _operator_unblock_packet(
         ),
         "operator_sequence": [
             "preflight_pocketmd_lite_topk_rows_template",
+            "materialize_pocketmd_lite_refinement_receipt_bundle",
+            "fill_pocketmd_lite_refinement_receipts",
+            "materialize_pocketmd_lite_topk_rows_from_receipt_bundle",
             "fill_pocketmd_lite_topk_rows_from_template",
             "materialize_pocketmd_lite_topk_rows_from_template",
             "materialize_pocketmd_lite_operator_intake_from_rows",
@@ -329,6 +336,17 @@ def build_pocketmd_lite_refinement_execution_plan(
             f"--out {DEFAULT_ROWS_TEMPLATE_PREFLIGHT} "
             f"--out-md {DEFAULT_ROWS_TEMPLATE_PREFLIGHT_MD}"
         ),
+        "materialize_refinement_receipt_bundle": (
+            "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py "
+            f"--refinement-plan {DEFAULT_OUT} "
+            f"--out {DEFAULT_RECEIPT_BUNDLE}"
+        ),
+        "materialize_rows_from_receipt_bundle": (
+            "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py "
+            f"--receipt-bundle {DEFAULT_RECEIPT_BUNDLE} --out-rows {rows_out} "
+            f"--out-report {DEFAULT_ROWS_FROM_RECEIPT_BUNDLE_REPORT} "
+            "--fail-blocked"
+        ),
         "materialize_rows_from_template": (
             "python3 scripts/materialize_pocketmd_lite_topk_rows_from_template.py "
             f"--template {DEFAULT_ROWS_TEMPLATE} --out-rows {rows_out} "
@@ -361,6 +379,10 @@ def build_pocketmd_lite_refinement_execution_plan(
         **release_evidence_metadata(
             input_paths=[
                 Path("scripts/build_pocketmd_lite_refinement_execution_plan.py"),
+                Path("scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py"),
+                Path(
+                    "scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py"
+                ),
                 source_acquisition_plan_path,
                 survival_report_path,
             ],

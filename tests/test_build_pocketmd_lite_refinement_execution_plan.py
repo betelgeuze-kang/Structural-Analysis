@@ -320,22 +320,39 @@ def test_refinement_execution_plan_enumerates_candidate_slots(
     assert unblock["provided_candidate_slot_count"] == 0
     assert unblock["missing_candidate_slot_count"] == 6
     assert unblock["first_missing_candidate_slot"]["slot_id"] == "case_a_rank_01"
-    assert unblock["operator_sequence"][:2] == [
+    assert unblock["operator_sequence"] == [
         "preflight_pocketmd_lite_topk_rows_template",
+        "materialize_pocketmd_lite_refinement_receipt_bundle",
+        "fill_pocketmd_lite_refinement_receipts",
+        "materialize_pocketmd_lite_topk_rows_from_receipt_bundle",
         "fill_pocketmd_lite_topk_rows_from_template",
+        "materialize_pocketmd_lite_topk_rows_from_template",
+        "materialize_pocketmd_lite_operator_intake_from_rows",
+        "materialize_pocketmd_lite_topk_survival_report",
+        "refresh_pocketmd_lite_refinement_execution_plan",
+        "rerun_science_actual_closure_row_audit",
     ]
+    assert "materialize_pocketmd_lite_refinement_receipt_bundle.py" in unblock[
+        "commands"
+    ]["materialize_refinement_receipt_bundle"]
+    assert "materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py" in unblock[
+        "commands"
+    ]["materialize_rows_from_receipt_bundle"]
     assert "materialize_pocketmd_lite_topk_rows_from_template" in unblock[
         "operator_sequence"
     ]
+    assert "materialize_pocketmd_lite_topk_rows_from_template.py" in unblock[
+        "commands"
+    ]["materialize_rows_from_template"]
+    assert "pocketmd_lite_topk_rows_from_receipt_bundle_report.json" in unblock[
+        "commands"
+    ]["materialize_rows_from_receipt_bundle"]
     assert unblock["row_template_preflight_artifact"].endswith(
         "pocketmd_lite_topk_rows_template_preflight.json"
     )
     assert "build_pocketmd_lite_topk_rows_template_preflight.py" in unblock[
         "commands"
     ]["build_row_template_preflight"]
-    assert "materialize_pocketmd_lite_topk_rows_from_template.py" in unblock[
-        "commands"
-    ]["materialize_rows_from_template"]
     assert "materialize_pocketmd_lite_operator_intake_from_rows.py" in payload[
         "operator_commands"
     ]["import_rows"]

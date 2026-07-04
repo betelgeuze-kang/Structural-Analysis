@@ -1,0 +1,161 @@
+{
+  "aggregate_validation_error": "",
+  "blockers": [
+    "pocketmd_lite_refinement_receipts_not_completed",
+    "pocketmd_lite_case_001::rank_1::receipt_file_missing",
+    "pocketmd_lite_case_001::rank_2::receipt_file_missing",
+    "pocketmd_lite_case_002::rank_1::receipt_file_missing",
+    "pocketmd_lite_case_002::rank_2::receipt_file_missing",
+    "pocketmd_lite_case_003::rank_1::receipt_file_missing",
+    "pocketmd_lite_case_003::rank_2::receipt_file_missing"
+  ],
+  "bundle_ready": true,
+  "case_count": 0,
+  "claim_boundary": "This helper only promotes completed PocketMD Lite receipt-bundle files into top-k rows after normalization and integrity validation. It does not run refinement, invent metrics, bypass operator source receipts, or close Phase 4 by itself.",
+  "commands": {
+    "materialize_operator_intake": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
+    "materialize_survival_report": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+    "rerun_phase4_row_audit": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
+    "rerun_receipt_bundle": "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py --fail-blocked",
+    "rerun_rows_materialization": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked"
+  },
+  "contract_pass": false,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-07-04T08:16:45.739361+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json": "sha256:c93e7af6a96ab85ebbef43af638b1b62463c4fb77755424bce88af194c3f9233",
+    "scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py": "sha256:1459d2fe5dd3ca0a8118b4abe87d02654294ae768ce5b39d24fea084a9a27970",
+    "scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py": "sha256:eb9cdab9e4a24be864247ead19691fd03e536192f91a545d2a3f088fb6134030"
+  },
+  "out_report_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json",
+  "out_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+  "ready_receipt_count": 0,
+  "receipt_bundle_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json",
+  "receipt_count": 6,
+  "reuse_policy": "pocketmd_lite_topk_rows_from_receipt_bundle_report",
+  "reused_evidence": false,
+  "row_count": 0,
+  "row_statuses": [
+    {
+      "blockers": [
+        "receipt_file_missing"
+      ],
+      "case_id": "pocketmd_lite_case_001",
+      "operator_input_source": {
+        "source_artifact": "",
+        "source_artifact_sha256": "",
+        "source_id": "",
+        "source_license": "",
+        "source_url": ""
+      },
+      "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
+      "receipt_status": "",
+      "run_key": "pocketmd_lite_case_001::rank_1",
+      "status": "operator_completion_required",
+      "top_k_rank": 1
+    },
+    {
+      "blockers": [
+        "receipt_file_missing"
+      ],
+      "case_id": "pocketmd_lite_case_001",
+      "operator_input_source": {
+        "source_artifact": "",
+        "source_artifact_sha256": "",
+        "source_id": "",
+        "source_license": "",
+        "source_url": ""
+      },
+      "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_02_refinement_receipt.json",
+      "receipt_status": "",
+      "run_key": "pocketmd_lite_case_001::rank_2",
+      "status": "operator_completion_required",
+      "top_k_rank": 2
+    },
+    {
+      "blockers": [
+        "receipt_file_missing"
+      ],
+      "case_id": "pocketmd_lite_case_002",
+      "operator_input_source": {
+        "source_artifact": "",
+        "source_artifact_sha256": "",
+        "source_id": "",
+        "source_license": "",
+        "source_url": ""
+      },
+      "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_002/rank_01_refinement_receipt.json",
+      "receipt_status": "",
+      "run_key": "pocketmd_lite_case_002::rank_1",
+      "status": "operator_completion_required",
+      "top_k_rank": 1
+    },
+    {
+      "blockers": [
+        "receipt_file_missing"
+      ],
+      "case_id": "pocketmd_lite_case_002",
+      "operator_input_source": {
+        "source_artifact": "",
+        "source_artifact_sha256": "",
+        "source_id": "",
+        "source_license": "",
+        "source_url": ""
+      },
+      "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_002/rank_02_refinement_receipt.json",
+      "receipt_status": "",
+      "run_key": "pocketmd_lite_case_002::rank_2",
+      "status": "operator_completion_required",
+      "top_k_rank": 2
+    },
+    {
+      "blockers": [
+        "receipt_file_missing"
+      ],
+      "case_id": "pocketmd_lite_case_003",
+      "operator_input_source": {
+        "source_artifact": "",
+        "source_artifact_sha256": "",
+        "source_id": "",
+        "source_license": "",
+        "source_url": ""
+      },
+      "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_003/rank_01_refinement_receipt.json",
+      "receipt_status": "",
+      "run_key": "pocketmd_lite_case_003::rank_1",
+      "status": "operator_completion_required",
+      "top_k_rank": 1
+    },
+    {
+      "blockers": [
+        "receipt_file_missing"
+      ],
+      "case_id": "pocketmd_lite_case_003",
+      "operator_input_source": {
+        "source_artifact": "",
+        "source_artifact_sha256": "",
+        "source_id": "",
+        "source_license": "",
+        "source_url": ""
+      },
+      "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_003/rank_02_refinement_receipt.json",
+      "receipt_status": "",
+      "run_key": "pocketmd_lite_case_003::rank_2",
+      "status": "operator_completion_required",
+      "top_k_rank": 2
+    }
+  ],
+  "rows_materialized": false,
+  "schema_version": "pocketmd-lite-topk-rows-from-receipt-bundle.v1",
+  "source_commit_sha": "a643319775cc9434d6158f4162bf63b694cc9650",
+  "status": "operator_receipts_completion_required",
+  "summary": {
+    "blocker_count": 7,
+    "bundle_ready": true,
+    "case_count": 0,
+    "ready_receipt_count": 0,
+    "receipt_count": 6,
+    "row_count": 0,
+    "rows_materialized": false
+  }
+}
