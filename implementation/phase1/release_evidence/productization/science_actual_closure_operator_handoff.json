@@ -12884,14 +12884,14 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T09:59:32.496366+00:00",
+  "generated_at": "2026-07-04T10:04:12.024828+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:31132ede1a9d42bd1eab0194ca04e24e9a4c80ac2ace134baef6e7fa48a636ef",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:3725e67d11aa4945e3ee88e3becf1293656a87b5bf8f29d80c20b98fb7252cdb",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:a6fa0328fbbdc35c1ff47f966c085b5ae0fc5e6dfa2f1aba17e647681cdc246a",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:dc39006a0ed93c7141d4421294cb9d47e1af8a3c6fc2fe3531aeae754de53c89",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:09354cd520764e9fb23e9a23e1eed17a38e73328687154c5d35c5411731af093",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:65177d59f3dc1803c067329c3726b5528235c66a0448ce1ceb809bb811afbee9",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:42207d023c02bcdad4ac7b06e06e9abb306491e3cf0ed1ed987a70291eabefba",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:28e5a5f6ccbd26eef376b1a226ed4c1851d52d37182a22724554ab38c93c5b03",
     "scripts/build_science_actual_closure_operator_handoff.py": "sha256:8f1cd28197fa5f12ccf427c9f0ac318f73e8000ce116ce5f2bb51ac456943d95"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
@@ -16988,7 +16988,7 @@
         "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
       ],
       "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
-      "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+      "provided_path": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
       "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
       "row_contract_ref": "row_intake_contracts.subset_rows",
       "row_input_id": "subset_rows",
@@ -18415,7 +18415,7 @@
         "posebusters_style_pose_validity::pose_rows_not_provided"
       ],
       "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
-      "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+      "provided_path": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
       "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
       "row_contract_ref": "row_intake_contracts.pose_rows",
       "row_input_id": "pose_rows",
@@ -19894,7 +19894,7 @@
         "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
       ],
       "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
-      "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+      "provided_path": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
       "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
       "row_contract_ref": "row_intake_contracts.enrichment_rows",
       "row_input_id": "enrichment_rows",
@@ -28745,7 +28745,7 @@
   },
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "66c4d843395c9c025b0cccfbc218be374f5ade4c",
+  "source_commit_sha": "9eb603c438f58e0300748b19054b09e21aef13f3",
   "status": "operator_rows_required",
   "summary": {
     "actual_closure_blocked_component_count": 2,

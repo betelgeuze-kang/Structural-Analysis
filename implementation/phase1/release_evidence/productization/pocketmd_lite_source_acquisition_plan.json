@@ -20,9 +20,9 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T09:41:11.953896+00:00",
+  "generated_at": "2026-07-04T10:04:11.706729+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json": "sha256:8c75514af901cfb011c8d8cc301d00b7bbbbbf1ee319e0d8a76d069d8e60ee5b",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json": "sha256:fadc9e5facb979740584493fa30a807a79317afcdd6e80da096013a9d46ac3ed",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv": "sha256:4fac3161714e8bf0444ee3e085a3c34d2f9841acaf9b4427bd8de2224294e196",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:dc39006a0ed93c7141d4421294cb9d47e1af8a3c6fc2fe3531aeae754de53c89",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:09354cd520764e9fb23e9a23e1eed17a38e73328687154c5d35c5411731af093",
@@ -30,7 +30,7 @@
     "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:839747164b80f030fe1b3b49c402d4399d1b1b0c437ff5139e9315b75f5a9d35",
     "scripts/build_pocketmd_lite_topk_rows_template_preflight.py": "sha256:15b5808c26ccc005162e3b693f88272ddb83cd696b1f54d0005872ce20294c55",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:dad666c08fff6ec709e535de64fdc41121b7c93de5e19c42f0876d71a44a67c9",
-    "scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py": "sha256:90f997cc8e566a6eaa3226c5a8d27801b55a8c1934b47e18c5e432f852b35d97",
+    "scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py": "sha256:7ab6a36a6f3c3bd87aa76a4e4bbb98d646e9bec2880b35acf3f85ffe75d6bee1",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:24aba7d75e0de5a6e62416cdbbab5980d231dee7030b2718c2f37f59d8437366"
   },
   "metric_receipt_contract": [
@@ -5026,7 +5026,7 @@
     ]
   },
   "schema_version": "pocketmd-lite-source-acquisition-plan.v1",
-  "source_commit_sha": "72adc7d887c84bb5a832135b5f62a6f3b8226520",
+  "source_commit_sha": "9eb603c438f58e0300748b19054b09e21aef13f3",
   "source_scope": "bounded_top_k_lite_refinement_rows",
   "status": "operator_acquisition_required",
   "summary": {

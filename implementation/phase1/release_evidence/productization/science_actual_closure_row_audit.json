@@ -1183,13 +1183,13 @@
         "vina_gnina_rows"
       ],
       "outputs": {
-        "enrichment_scorecard": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
+        "enrichment_scorecard": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
         "phase2_row_audit": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
-        "pose_success_harness": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
-        "pose_validity_input": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json",
-        "pose_validity_packet": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
-        "rmsd_scorecard": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
-        "subset_manifest": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
+        "pose_success_harness": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
+        "pose_validity_input": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json",
+        "pose_validity_packet": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
+        "rmsd_scorecard": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
+        "subset_manifest": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
       },
       "phase2_exit_gate_criteria": [
         {
@@ -1302,7 +1302,7 @@
       },
       "phase2_requirements": [
         {
-          "artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
+          "artifact": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
           "artifact_role": "pose_success_harness",
           "blocker_count": 0,
           "blockers": [],
@@ -1326,7 +1326,7 @@
           "status": "ready"
         },
         {
-          "artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
+          "artifact": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
           "artifact_role": "rmsd_scorecard",
           "blocker_count": 0,
           "blockers": [],
@@ -1349,7 +1349,7 @@
           "status": "ready"
         },
         {
-          "artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
+          "artifact": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
           "artifact_role": "pose_validity_packet",
           "blocker_count": 0,
           "blockers": [],
@@ -1400,7 +1400,7 @@
           "status": "operator_evidence_required"
         },
         {
-          "artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
+          "artifact": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
           "artifact_role": "enrichment_scorecard",
           "blocker_count": 0,
           "blockers": [],
@@ -1456,7 +1456,7 @@
           "operator_blockers_if_missing": [
             "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
           ],
-          "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+          "provided_path": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
           "required_by_components": [
             {
               "artifact_role": "pose_success_harness",
@@ -1511,7 +1511,7 @@
             "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
             "posebusters_style_pose_validity::pose_rows_not_provided"
           ],
-          "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+          "provided_path": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
           "required_by_components": [
             {
               "artifact_role": "pose_success_harness",
@@ -1572,7 +1572,7 @@
           "operator_blockers_if_missing": [
             "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
           ],
-          "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+          "provided_path": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
           "required_by_components": [
             {
               "artifact_role": "enrichment_scorecard",
@@ -1785,10 +1785,10 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T09:41:16.773955+00:00",
+  "generated_at": "2026-07-04T10:04:11.949474+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json": "sha256:98255bfca71cb82c3146a11e74e90cc338836518d93672950cbec5defd7d7147",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:78de1ad1030168bcd3fe66e6e4525e7b8ee619e097f9dd21c719d058e32e223e",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:d24e9229f8d0872f4c2db1590d5f887a61f90416af7d0d4e513468da19b38e4d",
     "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
     "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json": "sha256:ebad77368627c20437a800eeb1bcfe1bea120acc064275665fab9b9494d9e967",
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:34d6c64024d9c492273cbc2fd357d9d72d8d8b564dfa7667b4fd732b746abd84",
@@ -1864,7 +1864,7 @@
       "phase2_operator_blockers_if_missing": [
         "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
       ],
-      "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+      "provided_path": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
       "required_by_components": [
         {
           "artifact_role": "pose_success_harness",
@@ -1931,7 +1931,7 @@
         "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
         "posebusters_style_pose_validity::pose_rows_not_provided"
       ],
-      "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+      "provided_path": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
       "required_by_components": [
         {
           "artifact_role": "pose_success_harness",
@@ -2000,7 +2000,7 @@
       "phase2_operator_blockers_if_missing": [
         "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
       ],
-      "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+      "provided_path": "/tmp/pocketmd-metric-clean.qaNzWd/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
       "required_by_components": [
         {
           "artifact_role": "enrichment_scorecard",
@@ -3216,7 +3216,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "72adc7d887c84bb5a832135b5f62a6f3b8226520",
+  "source_commit_sha": "9eb603c438f58e0300748b19054b09e21aef13f3",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,
