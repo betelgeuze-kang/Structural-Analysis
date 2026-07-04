@@ -96,6 +96,48 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert payload["operator_rows_packet"]["first_missing_row_input"] == (
         "vina_gnina_rows"
     )
+    unblock_plan = {
+        row["row_input_id"]: row for row in payload["blocking_input_unblock_plan"]
+    }
+    assert payload["blocking_input_unblock_plan_count"] == 2
+    assert sorted(unblock_plan) == ["pocketmd_rows", "vina_gnina_rows"]
+    assert unblock_plan["vina_gnina_rows"]["status"] == "engine_inputs_required"
+    assert unblock_plan["vina_gnina_rows"]["first_operator_sequence_step"] == (
+        "review_public_benchmark_vina_gnina_input_manifest_template_preflight"
+    )
+    assert unblock_plan["vina_gnina_rows"]["expected_rows_artifact"].endswith(
+        "public_benchmark_vina_gnina_rows.json"
+    )
+    assert unblock_plan["vina_gnina_rows"]["artifact_refs"][
+        "input_manifest_template_preflight_artifact"
+    ].endswith("public_benchmark_vina_gnina_input_manifest_template_preflight.json")
+    assert unblock_plan["vina_gnina_rows"]["artifact_refs"][
+        "rows_template_preflight_artifact"
+    ].endswith("public_benchmark_vina_gnina_rows_template_preflight.json")
+    assert unblock_plan["vina_gnina_rows"]["counts"][
+        "blocked_engine_run_slot_count"
+    ] == 24
+    assert unblock_plan["vina_gnina_rows"]["commands"][
+        "build_rows_template_preflight"
+    ].startswith("python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py")
+    assert unblock_plan["pocketmd_rows"]["status"] == (
+        "operator_refinement_rows_required"
+    )
+    assert unblock_plan["pocketmd_rows"]["first_operator_sequence_step"] == (
+        "preflight_pocketmd_lite_topk_rows_template"
+    )
+    assert unblock_plan["pocketmd_rows"]["expected_rows_artifact"].endswith(
+        "pocketmd_lite_topk_rows.json"
+    )
+    assert unblock_plan["pocketmd_rows"]["artifact_refs"][
+        "row_template_preflight_artifact"
+    ].endswith("pocketmd_lite_topk_rows_template_preflight.json")
+    assert unblock_plan["pocketmd_rows"]["counts"][
+        "missing_candidate_slot_count"
+    ] == 6
+    assert unblock_plan["pocketmd_rows"]["commands"][
+        "materialize_survival_report"
+    ].startswith("python3 scripts/materialize_pocketmd_lite_topk_survival_report.py")
     row_contracts = payload["row_input_materialization_contracts"]
     assert sorted(row_contracts) == ["pocketmd_rows", "vina_gnina_rows"]
     assert row_contracts["vina_gnina_rows"]["operator_action"] == (

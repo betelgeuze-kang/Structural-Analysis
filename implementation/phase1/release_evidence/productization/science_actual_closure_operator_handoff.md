@@ -16,6 +16,13 @@
 | `gpcr_rows` | `provided` | `implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json` | `implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv` | `ranking_pr_auc_ci_low_min, top20_hit_rate_min, decoys_above_positive_count_max, no_positive_out_anchored_by_top_decoys, raw_hard_decoy_rows_actual_closure` | `review_gpcr_rows_materialization` |
 | `pocketmd_rows` | `operator_input_required` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv` | `top_k_refinement_rows_present, top_k_refinement_case_coverage, local_min_survival_materialized, contact_persistence_materialized, h_bond_persistence_materialized, clash_relief_materialized, uncertainty_summary_materialized, report_blockers_resolved, broad_all_atom_fep_claims_locked` | `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` |
 
+## Blocking Input Unblock Plan
+
+| Row Input | Status | Expected Rows | First Step | Preflight Artifacts | Primary Command |
+| --- | --- | --- | --- | --- | --- |
+| `vina_gnina_rows` | `engine_inputs_required` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `review_public_benchmark_vina_gnina_input_manifest_template_preflight` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` |
+| `pocketmd_rows` | `operator_refinement_rows_required` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `preflight_pocketmd_lite_topk_rows_template` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json` | `python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md` |
+
 ## Missing Row Packet
 
 | Row Input | Action | Template | Materialization |

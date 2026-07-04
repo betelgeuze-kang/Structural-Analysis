@@ -699,6 +699,87 @@
     "pocketmd_lite_source_acquisition::upstream_top_k_candidate_receipts_not_attached",
     "pocketmd_lite_source_acquisition::lite_refinement_metric_receipts_not_attached"
   ],
+  "blocking_input_unblock_plan": [
+    {
+      "artifact_refs": {
+        "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "input_manifest_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json",
+        "input_manifest_template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+        "rows_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+        "rows_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
+        "rows_template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md"
+      },
+      "claim_boundary": "This packet only enumerates the operator steps needed to unblock Vina/GNINA execution and adapter row materialization. It does not run engines or synthesize comparison rows.",
+      "commands": {
+        "build_input_manifest_template_preflight": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+        "build_rows_template_preflight": "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md",
+        "materialize_adapter": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+        "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+        "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
+      },
+      "component_id": "public_benchmark_phase2_actual_closure",
+      "counts": {
+        "blocked_case_input_slot_count": 12,
+        "blocked_engine_run_slot_count": 24,
+        "case_input_slot_count": 12,
+        "ready_engine_run_slot_count": 0,
+        "required_engine_run_count": 24
+      },
+      "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+      "first_operator_sequence_step": "review_public_benchmark_vina_gnina_input_manifest_template_preflight",
+      "operator_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+      "operator_sequence": [
+        "review_public_benchmark_vina_gnina_input_manifest_template_preflight",
+        "fill_public_benchmark_vina_gnina_input_manifest_from_template",
+        "rerun_public_benchmark_vina_gnina_execution_plan",
+        "configure_vina_gnina_binary_or_container_runtime",
+        "rerun_public_benchmark_vina_gnina_runtime_readiness",
+        "review_public_benchmark_vina_gnina_rows_template_preflight",
+        "attach_public_benchmark_vina_gnina_rows",
+        "materialize_public_benchmark_vina_gnina_comparison_adapter"
+      ],
+      "row_input_id": "vina_gnina_rows",
+      "source_acquisition_operator_action": "resolve_public_benchmark_phase2_source_acquisition_blockers",
+      "status": "engine_inputs_required"
+    },
+    {
+      "artifact_refs": {
+        "expected_operator_intake_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json",
+        "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+        "row_template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+        "row_template_preflight_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json",
+        "row_template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md"
+      },
+      "claim_boundary": "This packet lists the bounded top-k refinement rows required by PocketMD Lite. It does not run refinement or synthesize local-min, contact, H-bond, clash, or uncertainty metrics.",
+      "commands": {
+        "build_row_template_preflight": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
+        "import_rows": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
+        "materialize_survival_report": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
+      },
+      "component_id": "pocketmd_lite_topk_actual_closure",
+      "counts": {
+        "missing_candidate_slot_count": 6,
+        "provided_candidate_slot_count": 0,
+        "required_candidate_slot_count": 6
+      },
+      "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+      "first_operator_sequence_step": "preflight_pocketmd_lite_topk_rows_template",
+      "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+      "operator_sequence": [
+        "preflight_pocketmd_lite_topk_rows_template",
+        "fill_pocketmd_lite_topk_rows_from_template",
+        "materialize_pocketmd_lite_operator_intake_from_rows",
+        "materialize_pocketmd_lite_topk_survival_report",
+        "refresh_pocketmd_lite_refinement_execution_plan",
+        "rerun_science_actual_closure_row_audit"
+      ],
+      "row_input_id": "pocketmd_rows",
+      "source_acquisition_operator_action": "resolve_pocketmd_lite_source_acquisition_blockers",
+      "status": "operator_refinement_rows_required"
+    }
+  ],
+  "blocking_input_unblock_plan_count": 2,
   "claim_boundary": "This handoff is an operator checklist derived from the science row audit. It is not actual science evidence and does not close Phase 2, GPCR hard-decoy, or PocketMD Lite gates without accepted real rows.",
   "component_slot_summary": [
     {
@@ -2796,14 +2877,14 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T02:28:50.291447+00:00",
+  "generated_at": "2026-07-04T02:50:34.432038+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:3297c57ae81078bd2870229d05cee80ac83cf387d8434279140c00561e62142f",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:0613c235c6c1e052cb9bf9ee55cd7809224432112fac7c4cccdc60959499a979",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:9dd7c97c8a2b978436c07f11bfb088a2cef94f1fd1f33bc651ba8a4c09440b2b",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:92f3cd4970165177df9839683acb5dabc8a4c8193a8483d5267cd68d8136bf37",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:38284961e22e3780859ff077042c86a58db1b4e5c4378efc8aec10ae1763135c",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:a062ca10c1b4edeb84810fb3e773212d0a378da71f8aa0a2ff3780fea839e0cf",
     "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:154cd54c06a3732b58927d4a9c316f080de2516aa043e8fcad00e79208868192",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:22634eab113e7bd6405a73fc8727fcb96788ae4cda80a1984b4900f8b084603a"
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:1ddb5b712296d4a46a905014715a368e1a154651eacd98dbe2f41210ab476820"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -12122,7 +12203,7 @@
   ],
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "a75428f1c24179517d16ee7ed360069d733d8820",
+  "source_commit_sha": "9fd03b53a6c973f2ab2222b6ca1d9be8c3514cd0",
   "status": "operator_rows_required",
   "summary": {
     "blocked_component_operator_action_count": 2,

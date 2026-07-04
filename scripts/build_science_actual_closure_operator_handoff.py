@@ -808,6 +808,92 @@ def _operator_rows_packet(missing_slots: list[dict[str, Any]]) -> dict[str, Any]
     }
 
 
+def _unblock_plan_artifacts(unblock: dict[str, Any]) -> dict[str, str]:
+    artifact_keys = (
+        "expected_rows_artifact",
+        "expected_operator_intake_artifact",
+        "input_manifest_template_artifact",
+        "input_manifest_template_preflight_artifact",
+        "input_manifest_template_preflight_markdown_artifact",
+        "rows_template_artifact",
+        "rows_template_preflight_artifact",
+        "rows_template_preflight_markdown_artifact",
+        "row_template_artifact",
+        "row_template_preflight_artifact",
+        "row_template_preflight_markdown_artifact",
+    )
+    return {
+        key: str(unblock.get(key) or "")
+        for key in artifact_keys
+        if str(unblock.get(key) or "")
+    }
+
+
+def _unblock_plan_counts(unblock: dict[str, Any]) -> dict[str, int]:
+    count_keys = (
+        "case_input_slot_count",
+        "blocked_case_input_slot_count",
+        "required_engine_run_count",
+        "ready_engine_run_slot_count",
+        "blocked_engine_run_slot_count",
+        "required_candidate_slot_count",
+        "provided_candidate_slot_count",
+        "missing_candidate_slot_count",
+    )
+    return {
+        key: _as_int(unblock.get(key))
+        for key in count_keys
+        if key in unblock
+    }
+
+
+def _blocking_input_unblock_plan(
+    missing_slots: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for slot in missing_slots:
+        detail = _as_dict(slot.get("row_input_slot_detail"))
+        unblock = _as_dict(detail.get("operator_unblock_packet"))
+        if not unblock:
+            continue
+        operator_sequence = [
+            str(item) for item in _as_list(unblock.get("operator_sequence"))
+        ]
+        artifacts = _unblock_plan_artifacts(unblock)
+        rows.append(
+            {
+                "row_input_id": str(slot.get("row_input_id") or ""),
+                "component_id": str(
+                    slot.get("actual_closure_component_id") or ""
+                ),
+                "status": str(
+                    unblock.get("status")
+                    or detail.get("status")
+                    or slot.get("status")
+                    or ""
+                ),
+                "operator_action": str(slot.get("operator_action") or ""),
+                "source_acquisition_operator_action": str(
+                    slot.get("source_acquisition_operator_action") or ""
+                ),
+                "expected_rows_artifact": str(
+                    unblock.get("expected_rows_artifact")
+                    or slot.get("preferred_default_row_path")
+                    or ""
+                ),
+                "artifact_refs": artifacts,
+                "operator_sequence": operator_sequence,
+                "first_operator_sequence_step": (
+                    operator_sequence[0] if operator_sequence else ""
+                ),
+                "commands": _as_dict(unblock.get("commands")),
+                "counts": _unblock_plan_counts(unblock),
+                "claim_boundary": str(unblock.get("claim_boundary") or ""),
+            }
+        )
+    return rows
+
+
 def _blocked_component_operator_actions(
     slots: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
@@ -981,6 +1067,7 @@ def build_science_actual_closure_operator_handoff(
         missing_slots
     )
     operator_rows_packet = _operator_rows_packet(missing_slots)
+    blocking_input_unblock_plan = _blocking_input_unblock_plan(missing_slots)
     blocked_component_operator_actions = _blocked_component_operator_actions(slots)
     return {
         "schema_version": SCHEMA_VERSION,
@@ -1044,6 +1131,8 @@ def build_science_actual_closure_operator_handoff(
         ],
         "row_input_materialization_contracts": row_input_materialization_contracts,
         "operator_rows_packet": operator_rows_packet,
+        "blocking_input_unblock_plan": blocking_input_unblock_plan,
+        "blocking_input_unblock_plan_count": len(blocking_input_unblock_plan),
         "blocked_component_operator_actions": blocked_component_operator_actions,
         "first_missing_slot": missing_slots[0] if missing_slots else {},
         "operator_next_actions": [
@@ -1098,6 +1187,54 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"`{criteria}` | "
             f"`{slot.get('operator_action')}` |"
         )
+    unblock_plan = [
+        row
+        for row in _as_list(payload.get("blocking_input_unblock_plan"))
+        if isinstance(row, dict)
+    ]
+    if unblock_plan:
+        lines.extend(["", "## Blocking Input Unblock Plan", ""])
+        lines.extend(
+            [
+                "| Row Input | Status | Expected Rows | First Step | Preflight Artifacts | Primary Command |",
+                "| --- | --- | --- | --- | --- | --- |",
+            ]
+        )
+        command_preference = (
+            "build_input_manifest_template_preflight",
+            "build_row_template_preflight",
+            "build_rows_template_preflight",
+            "rerun_execution_plan",
+            "import_rows",
+            "materialize_survival_report",
+            "materialize_adapter",
+        )
+        preflight_keys = (
+            "input_manifest_template_preflight_artifact",
+            "rows_template_preflight_artifact",
+            "row_template_preflight_artifact",
+        )
+        for row in unblock_plan:
+            artifacts = _as_dict(row.get("artifact_refs"))
+            commands = _as_dict(row.get("commands"))
+            preflight_refs = [
+                artifacts[key] for key in preflight_keys if str(artifacts.get(key) or "")
+            ]
+            primary_command = ""
+            for key in command_preference:
+                command = str(commands.get(key) or "")
+                if command:
+                    primary_command = command
+                    break
+            lines.append(
+                "| "
+                f"`{row.get('row_input_id')}` | "
+                f"`{row.get('status')}` | "
+                f"`{row.get('expected_rows_artifact')}` | "
+                f"`{row.get('first_operator_sequence_step')}` | "
+                f"{_code_join(preflight_refs)} | "
+                f"`{primary_command}` |"
+            )
     operator_rows_packet = _as_dict(payload.get("operator_rows_packet"))
     packet_contracts = _as_dict(
         operator_rows_packet.get("row_input_materialization_contracts")
