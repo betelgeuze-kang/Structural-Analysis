@@ -687,6 +687,15 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
     assert unblock["commands"]["materialize_rows_from_engine_run_bundle"].startswith(
         "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py"
     )
+    assert unblock["commands"][
+        "materialize_input_manifest_from_casf_archive"
+    ].startswith(
+        "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py "
+        "--archive <CASF-2016.tar.gz>"
+    )
+    assert "--fail-blocked" in unblock["commands"][
+        "materialize_input_manifest_from_casf_archive"
+    ]
     assert unblock["case_input_slot_count"] == 1
     assert unblock["blocked_case_input_slot_count"] == 0
     assert unblock["required_engine_run_count"] == 2

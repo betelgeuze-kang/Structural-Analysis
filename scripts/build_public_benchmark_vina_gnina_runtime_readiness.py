@@ -1302,7 +1302,8 @@ def _operator_unblock_packet(
                 "--archive <CASF-2016.tar.gz> "
                 f"--out-manifest {PRODUCTIZATION / 'public_benchmark_vina_gnina_input_manifest.csv'} "
                 "--out-report "
-                f"{PRODUCTIZATION / 'public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json'}"
+                f"{PRODUCTIZATION / 'public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json'} "
+                "--fail-blocked"
             ),
             "rerun_execution_plan": (
                 "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
@@ -1571,7 +1572,8 @@ def build_vina_gnina_runtime_readiness(
                 "--archive <CASF-2016.tar.gz> "
                 f"--out-manifest {PRODUCTIZATION / 'public_benchmark_vina_gnina_input_manifest.csv'} "
                 "--out-report "
-                f"{PRODUCTIZATION / 'public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json'}"
+                f"{PRODUCTIZATION / 'public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json'} "
+                "--fail-blocked"
             ),
             "set_binary_overrides": (
                 "export PUBLIC_BENCHMARK_VINA_BIN=<path-to-vina> "
