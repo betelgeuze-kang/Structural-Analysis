@@ -37,6 +37,10 @@ DEFAULT_OUT = PRODUCTIZATION / "pocketmd_lite_source_acquisition_plan.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_ROWS_OUT = PRODUCTIZATION / "pocketmd_lite_topk_rows.json"
 DEFAULT_ROWS_TEMPLATE = PRODUCTIZATION / "pocketmd_lite_topk_rows_template.csv"
+DEFAULT_ROWS_TEMPLATE_PREFLIGHT = (
+    PRODUCTIZATION / "pocketmd_lite_topk_rows_template_preflight.json"
+)
+DEFAULT_ROWS_TEMPLATE_PREFLIGHT_MD = DEFAULT_ROWS_TEMPLATE_PREFLIGHT.with_suffix(".md")
 DEFAULT_OPERATOR_INTAKE = PRODUCTIZATION / "pocketmd_lite_operator_intake.json"
 DEFAULT_OPERATOR_TEMPLATE = PRODUCTIZATION / "pocketmd_lite_operator_template.json"
 DEFAULT_REFINEMENT_EXECUTION_PLAN = (
@@ -729,7 +733,14 @@ def _pocketmd_rows_operator_action(
                 raw_row_candidate_status.get("validation_error") or ""
             ),
             "blocker": row_blocker,
+            "template_preflight_artifact": str(DEFAULT_ROWS_TEMPLATE_PREFLIGHT),
+            "template_preflight_markdown_artifact": str(
+                DEFAULT_ROWS_TEMPLATE_PREFLIGHT_MD
+            ),
             "review_template_command": commands["review_row_template"],
+            "build_template_preflight_command": commands[
+                "build_row_template_preflight"
+            ],
             "import_rows_command": commands["import_rows"],
             "verify_science_actual_closure_command": (
                 commands["science_actual_closure"]
@@ -749,6 +760,10 @@ def _pocketmd_rows_operator_action(
                 else "operator_rows_required"
             ),
             "template_artifact": str(DEFAULT_ROWS_TEMPLATE),
+            "template_preflight_artifact": str(DEFAULT_ROWS_TEMPLATE_PREFLIGHT),
+            "template_preflight_markdown_artifact": str(
+                DEFAULT_ROWS_TEMPLATE_PREFLIGHT_MD
+            ),
             "expected_rows_artifact": str(DEFAULT_ROWS_OUT),
             "supported_candidate_paths": [
                 str(row.get("path") or "")
@@ -756,6 +771,9 @@ def _pocketmd_rows_operator_action(
                 if isinstance(row, dict)
             ],
             "review_template_command": commands["review_row_template"],
+            "build_template_preflight_command": commands[
+                "build_row_template_preflight"
+            ],
             "import_rows_command": commands["import_rows"],
             "materialize_survival_command": commands["materialize_survival"],
             "verify_science_actual_closure_command": (
@@ -812,6 +830,9 @@ def _pocketmd_rows_operator_action(
         "operator_blockers_if_missing": [row_blocker] if row_blocker else [],
         "commands": {
             "review_row_template": commands["review_row_template"],
+            "build_row_template_preflight": commands[
+                "build_row_template_preflight"
+            ],
             "import_rows": commands["import_rows"],
             "materialize_survival": commands["materialize_survival"],
             "science_actual_closure": commands["science_actual_closure"],
@@ -902,6 +923,11 @@ def build_pocketmd_lite_source_acquisition_plan(
             "python3 scripts/build_pocketmd_lite_source_acquisition_plan.py"
         ),
         "review_row_template": f"sed -n '1,20p' {DEFAULT_ROWS_TEMPLATE}",
+        "build_row_template_preflight": (
+            "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py "
+            f"--out {DEFAULT_ROWS_TEMPLATE_PREFLIGHT} "
+            f"--out-md {DEFAULT_ROWS_TEMPLATE_PREFLIGHT_MD}"
+        ),
         "build_refinement_execution_plan": _refinement_execution_plan_command(),
         "import_rows": (
             "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
@@ -942,9 +968,11 @@ def build_pocketmd_lite_source_acquisition_plan(
             input_paths=[
                 Path("scripts/build_pocketmd_lite_source_acquisition_plan.py"),
                 Path("scripts/build_pocketmd_lite_refinement_execution_plan.py"),
+                Path("scripts/build_pocketmd_lite_topk_rows_template_preflight.py"),
                 Path("scripts/materialize_pocketmd_lite_operator_intake_from_rows.py"),
                 Path("scripts/materialize_pocketmd_lite_topk_survival_report.py"),
                 DEFAULT_ROWS_TEMPLATE,
+                DEFAULT_ROWS_TEMPLATE_PREFLIGHT,
             ],
             reused_evidence=False,
             reuse_policy="pocketmd_lite_source_acquisition_plan",
@@ -978,6 +1006,11 @@ def build_pocketmd_lite_source_acquisition_plan(
         "row_artifact_contract": {
             "default_output": str(rows_out),
             "template_artifact": str(DEFAULT_ROWS_TEMPLATE),
+            "template_preflight_artifact": str(DEFAULT_ROWS_TEMPLATE_PREFLIGHT),
+            "template_preflight_markdown_artifact": str(
+                DEFAULT_ROWS_TEMPLATE_PREFLIGHT_MD
+            ),
+            "template_preflight_command": commands["build_row_template_preflight"],
             "template_usage_policy": (
                 "The template enumerates required columns and minimum case/rank "
                 "slots only. Operators must replace placeholder blanks with real "
@@ -1003,6 +1036,7 @@ def build_pocketmd_lite_source_acquisition_plan(
         "operator_acquisition_checklist": [
             "review_phase4_refinement_receipt_plan",
             "build_pocketmd_lite_refinement_execution_plan",
+            "build_pocketmd_lite_topk_rows_template_preflight",
             "select_upstream_ranked_top_k_candidate_sets",
             "attach_upstream_top_k_provenance_and_checksum_for_every_candidate",
             "run_bounded_lite_refinement_for_top_k_candidates_only",
@@ -1189,6 +1223,9 @@ def _markdown(payload: dict[str, Any]) -> str:
                     [
                         f"- `status`: `{action.get('status')}`",
                         f"- `expected_rows_artifact`: `{action.get('expected_rows_artifact')}`",
+                        f"- `template_preflight_artifact`: `{action.get('template_preflight_artifact')}`",
+                        f"- `template_preflight_markdown_artifact`: `{action.get('template_preflight_markdown_artifact')}`",
+                        f"- `build_template_preflight_command`: `{action.get('build_template_preflight_command')}`",
                         f"- `supported_candidate_paths`: {supported_paths}",
                         f"- `detected_row_artifact_count`: `{action.get('detected_row_artifact_count')}`",
                         f"- `selected_path`: `{action.get('selected_path')}`",
@@ -1233,6 +1270,8 @@ def _markdown(payload: dict[str, Any]) -> str:
                     [
                         f"- `status`: `{action.get('status')}`",
                         f"- `template_artifact`: `{action.get('template_artifact')}`",
+                        f"- `template_preflight_artifact`: `{action.get('template_preflight_artifact')}`",
+                        f"- `build_template_preflight_command`: `{action.get('build_template_preflight_command')}`",
                         f"- `expected_rows_artifact`: `{action.get('expected_rows_artifact')}`",
                         f"- `review_template_command`: `{action.get('review_template_command')}`",
                         f"- `import_rows_command`: `{action.get('import_rows_command')}`",

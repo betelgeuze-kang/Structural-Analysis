@@ -210,6 +210,15 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "implementation/phase1/release_evidence/productization/"
         "pocketmd_lite_topk_rows_template.csv"
     )
+    assert row_contract["template_preflight_artifact"].endswith(
+        "pocketmd_lite_topk_rows_template_preflight.json"
+    )
+    assert row_contract["template_preflight_markdown_artifact"].endswith(
+        "pocketmd_lite_topk_rows_template_preflight.md"
+    )
+    assert "build_pocketmd_lite_topk_rows_template_preflight.py" in row_contract[
+        "template_preflight_command"
+    ]
     assert row_contract["template_usage_policy"] == (
         "The template enumerates required columns and minimum case/rank slots only. "
         "Operators must replace placeholder blanks with real top-k refinement rows "
@@ -323,6 +332,12 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     assert preflight_action["expected_rows_artifact"].endswith(
         "pocketmd_lite_topk_rows.json"
     )
+    assert preflight_action["template_preflight_artifact"].endswith(
+        "pocketmd_lite_topk_rows_template_preflight.json"
+    )
+    assert "build_pocketmd_lite_topk_rows_template_preflight.py" in preflight_action[
+        "build_template_preflight_command"
+    ]
     assert preflight_action["supported_candidate_paths"] == [
         "implementation/phase1/release_evidence/productization/"
         "pocketmd_lite_topk_rows.json",
@@ -353,12 +368,18 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     assert top_k_action["template_artifact"].endswith(
         "pocketmd_lite_topk_rows_template.csv"
     )
+    assert top_k_action["template_preflight_artifact"].endswith(
+        "pocketmd_lite_topk_rows_template_preflight.json"
+    )
     assert top_k_action["expected_rows_artifact"].endswith(
         "pocketmd_lite_topk_rows.json"
     )
     assert top_k_action["review_template_command"] == row_action["commands"][
         "review_row_template"
     ]
+    assert top_k_action["build_template_preflight_command"] == row_action[
+        "commands"
+    ]["build_row_template_preflight"]
     assert top_k_action["import_rows_command"] == row_action["commands"][
         "import_rows"
     ]
@@ -486,6 +507,9 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     assert payload["commands"]["build_refinement_execution_plan"].startswith(
         "python3 scripts/build_pocketmd_lite_refinement_execution_plan.py"
     )
+    assert payload["commands"]["build_row_template_preflight"].startswith(
+        "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py"
+    )
     assert payload["commands"]["review_row_template"] == (
         "sed -n '1,20p' "
         "implementation/phase1/release_evidence/productization/"
@@ -585,6 +609,8 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert "# PocketMD Lite Source Acquisition Plan" in markdown
     assert "pocketmd_lite_refinement_execution_plan.json" in markdown
     assert "pocketmd_lite_topk_rows_template.csv" in markdown
+    assert "pocketmd_lite_topk_rows_template_preflight.json" in markdown
+    assert "build_pocketmd_lite_topk_rows_template_preflight.py" in markdown
     assert "## Phase 4 Candidate Slot Matrix" in markdown
     assert "pocketmd_lite_case_001_rank_1" in markdown
     assert "## Phase 4 Metric Closure Matrix" in markdown
