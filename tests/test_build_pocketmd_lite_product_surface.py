@@ -348,6 +348,25 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert survival["operator_gate_unblock_plan"][0]["minimum_evidence"][
         "required_case_fields"
     ] == survival["required_case_fields"]
+    assert survival["operator_gate_unblock_plan"][0][
+        "source_acquisition_plan_artifact"
+    ] == (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_source_acquisition_plan.json"
+    )
+    assert survival["operator_gate_unblock_plan"][0][
+        "row_template_preflight_artifact"
+    ] == (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows_template_preflight.json"
+    )
+    assert "build_pocketmd_lite_topk_rows_template_preflight.py" in survival[
+        "operator_gate_unblock_plan"
+    ][0]["row_template_preflight_command"]
+    assert survival["operator_gate_unblock_plan"][0]["materialization_steps"][:2] == [
+        "build_pocketmd_lite_source_acquisition_plan",
+        "preflight_pocketmd_lite_topk_rows_template",
+    ]
     assert survival["phase4_topk_row_closure_matrix_count"] == 1
     survival_closure = survival["phase4_topk_row_closure_matrix"][0]
     assert survival_closure["row_input_id"] == "pocketmd_lite_topk_rows"
@@ -355,6 +374,14 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert survival_closure["row_template_artifact"] == (
         "implementation/phase1/release_evidence/productization/"
         "pocketmd_lite_topk_rows_template.csv"
+    )
+    assert survival_closure["row_template_preflight_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows_template_preflight.json"
+    )
+    assert survival_closure["expected_rows_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows.json"
     )
     assert survival_closure["accepted_formats"] == [
         "csv",
@@ -719,7 +746,21 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
         "required_receipt_field": "source_checksum",
     }
+    assert gate_plan["source_acquisition_plan_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_source_acquisition_plan.json"
+    )
+    assert gate_plan["row_template_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows_template.csv"
+    )
+    assert gate_plan["row_template_preflight_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows_template_preflight.json"
+    )
     assert gate_plan["materialization_steps"] == [
+        "build_pocketmd_lite_source_acquisition_plan",
+        "preflight_pocketmd_lite_topk_rows_template",
         "materialize_pocketmd_lite_operator_intake_from_rows",
         "materialize_pocketmd_lite_topk_survival_report",
         "refresh_product_capabilities_surface",
@@ -811,6 +852,30 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
             "implementation/phase1/release_evidence/productization/"
             "pocketmd_lite_operator_template.json"
         ),
+        "source_acquisition_plan_artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_source_acquisition_plan.json"
+        ),
+        "source_acquisition_plan_markdown_artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_source_acquisition_plan.md"
+        ),
+        "expected_rows_artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_topk_rows.json"
+        ),
+        "row_template_artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_topk_rows_template.csv"
+        ),
+        "row_template_preflight_artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_topk_rows_template_preflight.json"
+        ),
+        "row_template_preflight_markdown_artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_topk_rows_template_preflight.md"
+        ),
         "first_blocker": "pocketmd_lite_topk_candidate_rows_missing",
         "first_blocked_target": "top_k_refinement_operator_intake",
         "first_next_action": "attach top-k candidate refinement rows",
@@ -891,11 +956,27 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
             "raw_row_supported_formats": ["csv", "tsv", "json", "jsonl", "ndjson"],
         },
         "materialization_steps": [
+            "build_pocketmd_lite_source_acquisition_plan",
+            "preflight_pocketmd_lite_topk_rows_template",
             "materialize_pocketmd_lite_operator_intake_from_rows",
             "materialize_pocketmd_lite_topk_survival_report",
             "refresh_product_capabilities_surface",
             "refresh_goal_bottleneck_roadmap_surface",
         ],
+        "source_acquisition_plan_command": (
+            "python3 scripts/build_pocketmd_lite_source_acquisition_plan.py "
+            "--out implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_source_acquisition_plan.json "
+            "--out-md implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_source_acquisition_plan.md"
+        ),
+        "row_template_preflight_command": (
+            "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py "
+            "--out implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_topk_rows_template_preflight.json "
+            "--out-md implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_topk_rows_template_preflight.md"
+        ),
         "raw_row_import_command": (
             "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
             "--rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json|jsonl|ndjson> "

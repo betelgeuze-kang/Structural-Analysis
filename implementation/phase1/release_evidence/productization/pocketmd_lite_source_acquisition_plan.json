@@ -18,7 +18,7 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T02:16:46.357268+00:00",
+  "generated_at": "2026-07-04T02:36:34.887841+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv": "sha256:4fac3161714e8bf0444ee3e085a3c34d2f9841acaf9b4427bd8de2224294e196",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:38284961e22e3780859ff077042c86a58db1b4e5c4378efc8aec10ae1763135c",
@@ -1866,7 +1866,7 @@
     "template_usage_policy": "The template enumerates required columns and minimum case/rank slots only. Operators must replace placeholder blanks with real top-k refinement rows and receipts before writing rows to the default output."
   },
   "schema_version": "pocketmd-lite-source-acquisition-plan.v1",
-  "source_commit_sha": "dc853a87bb71fe250cadf7f2435b304c9a3a327e",
+  "source_commit_sha": "6f4b1ad554fc3a87e7ba83fda0a590a1647a157b",
   "source_scope": "bounded_top_k_lite_refinement_rows",
   "status": "operator_acquisition_required",
   "summary": {

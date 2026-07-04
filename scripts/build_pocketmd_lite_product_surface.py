@@ -32,6 +32,10 @@ from materialize_pocketmd_lite_operator_intake_from_rows import (  # noqa: E402
 from build_pocketmd_lite_source_acquisition_plan import (  # noqa: E402
     DEFAULT_OUT as SOURCE_ACQUISITION_PLAN_DEFAULT_OUT,
     DEFAULT_OUT_MD as SOURCE_ACQUISITION_PLAN_DEFAULT_OUT_MD,
+    DEFAULT_ROWS_OUT as SOURCE_ACQUISITION_PLAN_ROWS_OUT,
+    DEFAULT_ROWS_TEMPLATE as SOURCE_ACQUISITION_PLAN_ROWS_TEMPLATE,
+    DEFAULT_ROWS_TEMPLATE_PREFLIGHT as SOURCE_ACQUISITION_PLAN_ROWS_TEMPLATE_PREFLIGHT,
+    DEFAULT_ROWS_TEMPLATE_PREFLIGHT_MD as SOURCE_ACQUISITION_PLAN_ROWS_TEMPLATE_PREFLIGHT_MD,
     SCHEMA_VERSION as SOURCE_ACQUISITION_PLAN_SCHEMA_VERSION,
     build_pocketmd_lite_source_acquisition_plan,
     render_pocketmd_lite_source_acquisition_markdown,
@@ -406,6 +410,14 @@ def _source_acquisition_plan_command() -> str:
     )
 
 
+def _row_template_preflight_command() -> str:
+    return (
+        "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py "
+        f"--out {SOURCE_ACQUISITION_PLAN_ROWS_TEMPLATE_PREFLIGHT} "
+        f"--out-md {SOURCE_ACQUISITION_PLAN_ROWS_TEMPLATE_PREFLIGHT_MD}"
+    )
+
+
 def _refinement_execution_plan_command() -> str:
     return (
         "python3 scripts/build_pocketmd_lite_refinement_execution_plan.py "
@@ -718,9 +730,27 @@ def _operator_gate_unblock_plan(
                 )
             },
             "template_artifact": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
+            "source_acquisition_plan_artifact": str(
+                DEFAULT_SOURCE_ACQUISITION_PLAN_OUT
+            ),
+            "source_acquisition_plan_markdown_artifact": str(
+                DEFAULT_SOURCE_ACQUISITION_PLAN_MD_OUT
+            ),
+            "source_acquisition_plan_command": _source_acquisition_plan_command(),
+            "expected_rows_artifact": str(SOURCE_ACQUISITION_PLAN_ROWS_OUT),
+            "row_template_artifact": str(SOURCE_ACQUISITION_PLAN_ROWS_TEMPLATE),
+            "row_template_preflight_artifact": str(
+                SOURCE_ACQUISITION_PLAN_ROWS_TEMPLATE_PREFLIGHT
+            ),
+            "row_template_preflight_markdown_artifact": str(
+                SOURCE_ACQUISITION_PLAN_ROWS_TEMPLATE_PREFLIGHT_MD
+            ),
+            "row_template_preflight_command": _row_template_preflight_command(),
             "raw_row_importer": raw_row_importer,
             "raw_row_import_command": raw_row_importer["command"],
             "materialization_steps": [
+                "build_pocketmd_lite_source_acquisition_plan",
+                "preflight_pocketmd_lite_topk_rows_template",
                 "materialize_pocketmd_lite_operator_intake_from_rows",
                 "materialize_pocketmd_lite_topk_survival_report",
                 "refresh_product_capabilities_surface",
@@ -751,6 +781,18 @@ def _phase4_topk_row_closure_matrix(
             "status": "operator_input_required",
             "default_row_path_candidates": list(DEFAULT_RAW_ROW_INPUT_CANDIDATES),
             "row_template_artifact": row_template_artifact,
+            "row_template_preflight_artifact": str(
+                SOURCE_ACQUISITION_PLAN_ROWS_TEMPLATE_PREFLIGHT
+            ),
+            "row_template_preflight_markdown_artifact": str(
+                SOURCE_ACQUISITION_PLAN_ROWS_TEMPLATE_PREFLIGHT_MD
+            ),
+            "row_template_preflight_command": _row_template_preflight_command(),
+            "source_acquisition_plan_artifact": str(
+                DEFAULT_SOURCE_ACQUISITION_PLAN_OUT
+            ),
+            "source_acquisition_plan_command": _source_acquisition_plan_command(),
+            "expected_rows_artifact": str(SOURCE_ACQUISITION_PLAN_ROWS_OUT),
             "accepted_formats": list(raw_row_importer["supported_source_formats"]),
             "required_flat_row_fields": _required_flat_row_fields(
                 required_case_fields
@@ -775,6 +817,8 @@ def _phase4_topk_row_closure_matrix(
             "preserves_phase4_criteria": list(PHASE4_TOPK_PRESERVED_CRITERIA),
             "criterion_by_field": dict(PHASE4_TOPK_CRITERION_BY_FIELD),
             "materialization_chain": [
+                "build_pocketmd_lite_source_acquisition_plan",
+                "preflight_pocketmd_lite_topk_rows_template",
                 "materialize_pocketmd_lite_operator_intake_from_rows",
                 "materialize_pocketmd_lite_topk_survival_report",
                 "refresh_pocketmd_lite_science_product_surface",
@@ -822,6 +866,26 @@ def _operator_handoff_context(
         ],
         "first_next_action": "attach top-k candidate refinement rows",
         "template_artifact": str(first_gate.get("template_artifact") or ""),
+        "source_acquisition_plan_artifact": str(
+            first_gate.get("source_acquisition_plan_artifact") or ""
+        ),
+        "source_acquisition_plan_markdown_artifact": str(
+            first_gate.get("source_acquisition_plan_markdown_artifact") or ""
+        ),
+        "source_acquisition_plan_command": str(
+            first_gate.get("source_acquisition_plan_command") or ""
+        ),
+        "expected_rows_artifact": str(first_gate.get("expected_rows_artifact") or ""),
+        "row_template_artifact": str(first_gate.get("row_template_artifact") or ""),
+        "row_template_preflight_artifact": str(
+            first_gate.get("row_template_preflight_artifact") or ""
+        ),
+        "row_template_preflight_markdown_artifact": str(
+            first_gate.get("row_template_preflight_markdown_artifact") or ""
+        ),
+        "row_template_preflight_command": str(
+            first_gate.get("row_template_preflight_command") or ""
+        ),
         "raw_row_importer": dict(first_gate.get("raw_row_importer") or {}),
         "raw_row_import_command": str(first_gate.get("raw_row_import_command") or ""),
         "minimum_evidence": dict(first_gate.get("minimum_evidence") or {}),
@@ -835,6 +899,24 @@ def _operator_handoff_context(
         "route": POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
         "artifact": str(DEFAULT_OPERATOR_INTAKE_OUT),
         "template_artifact": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
+        "source_acquisition_plan_artifact": first_operator_evidence_gap[
+            "source_acquisition_plan_artifact"
+        ],
+        "source_acquisition_plan_markdown_artifact": first_operator_evidence_gap[
+            "source_acquisition_plan_markdown_artifact"
+        ],
+        "expected_rows_artifact": first_operator_evidence_gap[
+            "expected_rows_artifact"
+        ],
+        "row_template_artifact": first_operator_evidence_gap[
+            "row_template_artifact"
+        ],
+        "row_template_preflight_artifact": first_operator_evidence_gap[
+            "row_template_preflight_artifact"
+        ],
+        "row_template_preflight_markdown_artifact": first_operator_evidence_gap[
+            "row_template_preflight_markdown_artifact"
+        ],
         "first_blocker": first_blocker,
         "first_blocked_target": first_blocked_target,
         "first_next_action": first_operator_evidence_gap["first_next_action"],
@@ -844,6 +926,12 @@ def _operator_handoff_context(
         "materialization_steps": list(
             first_operator_evidence_gap["materialization_steps"]
         ),
+        "source_acquisition_plan_command": first_operator_evidence_gap[
+            "source_acquisition_plan_command"
+        ],
+        "row_template_preflight_command": first_operator_evidence_gap[
+            "row_template_preflight_command"
+        ],
         "raw_row_import_command": first_operator_evidence_gap[
             "raw_row_import_command"
         ],
