@@ -726,9 +726,11 @@ def _operator_blocker_family_row(
     missing_items: list[dict[str, Any]],
     operator_action: str,
     command_key: str,
+    commands: dict[str, str] | None = None,
     blocked_case_count: int | None = None,
 ) -> dict[str, Any]:
     missing_item_count = len(missing_items)
+    command_map = commands or {}
     return {
         "family_id": family_id,
         "description": description,
@@ -742,7 +744,92 @@ def _operator_blocker_family_row(
         "first_missing_item": missing_items[0] if missing_items else {},
         "sample_missing_items": missing_items[:3],
         "operator_action": operator_action,
+        "next_action": operator_action,
         "command_key": command_key,
+        "materialization_command": str(command_map.get(command_key) or ""),
+    }
+
+
+def _operator_command_map(
+    *,
+    execution_plan_path: Path = DEFAULT_EXECUTION_PLAN,
+    vina_gnina_rows_path: Path = DEFAULT_VINA_GNINA_ROWS,
+) -> dict[str, str]:
+    adapter_command = (
+        "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py "
+        f"--intake {vina_gnina_rows_path} --out-adapter "
+        f"{PRODUCTIZATION / 'public_benchmark_vina_gnina_comparison_adapter.json'} "
+        "--out-report "
+        f"{PRODUCTIZATION / 'public_benchmark_vina_gnina_materialization_report.json'} "
+        "--fail-blocked"
+    )
+    return {
+        "build_execution_plan": (
+            "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
+            f"--out {DEFAULT_EXECUTION_PLAN}"
+        ),
+        "build_input_manifest_template_preflight": (
+            "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py "
+            f"--out {DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT} "
+            f"--out-md {DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT_MD}"
+        ),
+        "build_rows_template_preflight": (
+            "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py "
+            f"--out {DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT} "
+            f"--out-md {DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT_MD}"
+        ),
+        "materialize_rows_from_template": (
+            "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py "
+            f"--template {DEFAULT_VINA_GNINA_ROWS_TEMPLATE} "
+            f"--out-rows {vina_gnina_rows_path} "
+            f"--out-report {DEFAULT_VINA_GNINA_ROWS_FROM_TEMPLATE_REPORT}"
+        ),
+        "materialize_rows_from_engine_run_bundle": (
+            "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py "
+            f"--engine-run-bundle {DEFAULT_ENGINE_RUN_BUNDLE} "
+            f"--out-rows {vina_gnina_rows_path} "
+            f"--out-report {DEFAULT_VINA_GNINA_ROWS_FROM_ENGINE_RUN_BUNDLE_REPORT}"
+        ),
+        "materialize_input_manifest_from_casf_archive": (
+            "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py "
+            "--archive <CASF-2016.tar.gz> "
+            f"--out-manifest {PRODUCTIZATION / 'public_benchmark_vina_gnina_input_manifest.csv'} "
+            "--out-report "
+            f"{PRODUCTIZATION / 'public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json'} "
+            "--fail-blocked"
+        ),
+        "set_binary_overrides": (
+            "export PUBLIC_BENCHMARK_VINA_BIN=<path-to-vina> "
+            "PUBLIC_BENCHMARK_GNINA_BIN=<path-to-gnina>"
+        ),
+        "set_container_image_overrides": (
+            "export PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE=<local-vina-image> "
+            "PUBLIC_BENCHMARK_GNINA_CONTAINER_IMAGE=<local-gnina-image>"
+        ),
+        "inspect_container_images": (
+            "docker image inspect \"$PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE\" "
+            "\"$PUBLIC_BENCHMARK_GNINA_CONTAINER_IMAGE\""
+        ),
+        "rerun_execution_plan": (
+            "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
+            f"--out {DEFAULT_EXECUTION_PLAN}"
+        ),
+        "rerun_runtime_readiness": (
+            "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py "
+            f"--out {DEFAULT_OUT}"
+        ),
+        "materialize_engine_run_bundle": (
+            "python3 scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py "
+            f"--execution-plan {execution_plan_path} "
+            f"--out {DEFAULT_ENGINE_RUN_BUNDLE} "
+            f"--commands-out {DEFAULT_ENGINE_RUN_COMMANDS}"
+        ),
+        "materialize_adapter": adapter_command,
+        "materialize_adapter_from_rows": adapter_command,
+        "run_phase2_row_audit": (
+            "python3 scripts/materialize_public_benchmark_phase2_from_rows.py "
+            "--fail-blocked"
+        ),
     }
 
 
@@ -754,7 +841,9 @@ def _operator_blocker_family_plan(
     row_status: dict[str, Any],
     input_manifest_template_preflight_summary: dict[str, Any],
     adapter_rows_ready: bool,
+    commands: dict[str, str] | None = None,
 ) -> list[dict[str, Any]]:
+    command_map = commands or _operator_command_map()
     completion_actions = [
         row
         for row in input_manifest_template_preflight_summary.get(
@@ -853,6 +942,7 @@ def _operator_blocker_family_plan(
             missing_items=missing_required_values,
             operator_action="complete_vina_gnina_input_manifest_required_values",
             command_key="build_input_manifest_template_preflight",
+            commands=command_map,
         ),
         _operator_blocker_family_row(
             family_id="official_source_files",
@@ -860,6 +950,7 @@ def _operator_blocker_family_plan(
             missing_items=official_source_files,
             operator_action="materialize_source_files_from_casf_archive_and_verify_checksum",
             command_key="materialize_input_manifest_from_casf_archive",
+            commands=command_map,
         ),
         _operator_blocker_family_row(
             family_id="prepared_input_files",
@@ -867,6 +958,7 @@ def _operator_blocker_family_plan(
             missing_items=prepared_input_files,
             operator_action="prepare_vina_gnina_inputs_and_record_checksums",
             command_key="build_input_manifest_template_preflight",
+            commands=command_map,
         ),
         _operator_blocker_family_row(
             family_id="input_and_engine_receipt_refs",
@@ -874,6 +966,7 @@ def _operator_blocker_family_plan(
             missing_items=receipt_refs,
             operator_action="attach_vina_gnina_input_and_engine_receipt_refs",
             command_key="build_input_manifest_template_preflight",
+            commands=command_map,
         ),
         _operator_blocker_family_row(
             family_id="engine_runtime",
@@ -881,6 +974,7 @@ def _operator_blocker_family_plan(
             missing_items=missing_engine_runtimes,
             operator_action="configure_vina_gnina_binary_or_container_runtime",
             command_key="rerun_runtime_readiness",
+            commands=command_map,
         ),
         _operator_blocker_family_row(
             family_id="engine_run_slots",
@@ -888,6 +982,7 @@ def _operator_blocker_family_plan(
             missing_items=blocked_engine_runs,
             operator_action="rerun_runtime_readiness_until_engine_run_slots_ready",
             command_key="rerun_runtime_readiness",
+            commands=command_map,
             blocked_case_count=_case_count_for_items(blocked_engine_runs),
         ),
         _operator_blocker_family_row(
@@ -896,6 +991,7 @@ def _operator_blocker_family_plan(
             missing_items=adapter_row_items,
             operator_action="attach_or_materialize_public_benchmark_vina_gnina_rows",
             command_key="materialize_rows_from_engine_run_bundle",
+            commands=command_map,
             blocked_case_count=adapter_missing_count,
         ),
     ]
@@ -1111,7 +1207,9 @@ def _operator_unblock_packet(
     required_engine_run_count: int,
     runtime_ready: bool,
     adapter_rows_ready: bool,
+    commands: dict[str, str] | None = None,
 ) -> dict[str, Any]:
+    command_map = commands or _operator_command_map()
     blocked_engine_run_slots = [
         row
         for row in engine_run_slots
@@ -1135,6 +1233,7 @@ def _operator_unblock_packet(
             input_manifest_template_preflight_summary
         ),
         adapter_rows_ready=adapter_rows_ready,
+        commands=command_map,
     )
     blocked_operator_blocker_families = [
         row for row in operator_blocker_family_plan if row["status"] != "ready"
@@ -1274,60 +1373,7 @@ def _operator_unblock_packet(
             "materialize_public_benchmark_vina_gnina_rows_from_completed_template",
             "materialize_public_benchmark_vina_gnina_comparison_adapter",
         ],
-        "commands": {
-            "build_input_manifest_template_preflight": (
-                "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py "
-                f"--out {DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT} "
-                f"--out-md {DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT_MD}"
-            ),
-            "build_rows_template_preflight": (
-                "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py "
-                f"--out {DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT} "
-                f"--out-md {DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT_MD}"
-            ),
-            "materialize_rows_from_template": (
-                "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py "
-                f"--template {DEFAULT_VINA_GNINA_ROWS_TEMPLATE} "
-                f"--out-rows {DEFAULT_VINA_GNINA_ROWS} "
-                f"--out-report {DEFAULT_VINA_GNINA_ROWS_FROM_TEMPLATE_REPORT}"
-            ),
-            "materialize_rows_from_engine_run_bundle": (
-                "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py "
-                f"--engine-run-bundle {DEFAULT_ENGINE_RUN_BUNDLE} "
-                f"--out-rows {DEFAULT_VINA_GNINA_ROWS} "
-                f"--out-report {DEFAULT_VINA_GNINA_ROWS_FROM_ENGINE_RUN_BUNDLE_REPORT}"
-            ),
-            "materialize_input_manifest_from_casf_archive": (
-                "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py "
-                "--archive <CASF-2016.tar.gz> "
-                f"--out-manifest {PRODUCTIZATION / 'public_benchmark_vina_gnina_input_manifest.csv'} "
-                "--out-report "
-                f"{PRODUCTIZATION / 'public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json'} "
-                "--fail-blocked"
-            ),
-            "rerun_execution_plan": (
-                "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
-                f"--out {DEFAULT_EXECUTION_PLAN}"
-            ),
-            "materialize_engine_run_bundle": (
-                "python3 scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py "
-                f"--execution-plan {DEFAULT_EXECUTION_PLAN} "
-                f"--out {DEFAULT_ENGINE_RUN_BUNDLE} "
-                f"--commands-out {DEFAULT_ENGINE_RUN_COMMANDS}"
-            ),
-            "rerun_runtime_readiness": (
-                "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py "
-                f"--out {DEFAULT_OUT}"
-            ),
-            "materialize_adapter": (
-                "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py "
-                f"--intake {DEFAULT_VINA_GNINA_ROWS} --out-adapter "
-                f"{PRODUCTIZATION / 'public_benchmark_vina_gnina_comparison_adapter.json'} "
-                "--out-report "
-                f"{PRODUCTIZATION / 'public_benchmark_vina_gnina_materialization_report.json'} "
-                "--fail-blocked"
-            ),
-        },
+        "commands": command_map,
         "claim_boundary": (
             "This packet only enumerates the operator steps needed to unblock "
             "Vina/GNINA execution and adapter row materialization. It does not run "
@@ -1377,6 +1423,10 @@ def build_vina_gnina_runtime_readiness(
     engine_run_bundle = _engine_run_bundle_summary(repo_root)
     rows_from_engine_run_bundle_report = (
         _rows_from_engine_run_bundle_report_summary(repo_root)
+    )
+    operator_commands = _operator_command_map(
+        execution_plan_path=execution_plan_path,
+        vina_gnina_rows_path=vina_gnina_rows_path,
     )
     execution_plan_ready = bool(execution_plan.get("execution_plan_ready"))
     all_engines_available = all(
@@ -1439,6 +1489,7 @@ def build_vina_gnina_runtime_readiness(
         required_engine_run_count=required_engine_run_count,
         runtime_ready=runtime_ready,
         adapter_rows_ready=adapter_rows_ready,
+        commands=operator_commands,
     )
     blocked_case_input_slot_count = int(
         operator_unblock_packet.get("blocked_case_input_slot_count") or 0
@@ -1540,77 +1591,7 @@ def build_vina_gnina_runtime_readiness(
         "blocked_engine_run_slot_count": blocked_engine_run_slot_count,
         "first_blocked_case_input_slot": first_blocked_case_input_slot,
         "first_blocked_engine_run_slot": first_blocked_engine_run_slot,
-        "operator_commands": {
-            "build_execution_plan": (
-                "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
-                f"--out {DEFAULT_EXECUTION_PLAN}"
-            ),
-            "build_input_manifest_template_preflight": (
-                "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py "
-                f"--out {DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT} "
-                f"--out-md {DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT_MD}"
-            ),
-            "build_rows_template_preflight": (
-                "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py "
-                f"--out {DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT} "
-                f"--out-md {DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT_MD}"
-            ),
-            "materialize_rows_from_template": (
-                "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py "
-                f"--template {DEFAULT_VINA_GNINA_ROWS_TEMPLATE} "
-                f"--out-rows {vina_gnina_rows_path} "
-                f"--out-report {DEFAULT_VINA_GNINA_ROWS_FROM_TEMPLATE_REPORT}"
-            ),
-            "materialize_rows_from_engine_run_bundle": (
-                "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py "
-                f"--engine-run-bundle {DEFAULT_ENGINE_RUN_BUNDLE} "
-                f"--out-rows {vina_gnina_rows_path} "
-                f"--out-report {DEFAULT_VINA_GNINA_ROWS_FROM_ENGINE_RUN_BUNDLE_REPORT}"
-            ),
-            "materialize_input_manifest_from_casf_archive": (
-                "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py "
-                "--archive <CASF-2016.tar.gz> "
-                f"--out-manifest {PRODUCTIZATION / 'public_benchmark_vina_gnina_input_manifest.csv'} "
-                "--out-report "
-                f"{PRODUCTIZATION / 'public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json'} "
-                "--fail-blocked"
-            ),
-            "set_binary_overrides": (
-                "export PUBLIC_BENCHMARK_VINA_BIN=<path-to-vina> "
-                "PUBLIC_BENCHMARK_GNINA_BIN=<path-to-gnina>"
-            ),
-            "set_container_image_overrides": (
-                "export PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE=<local-vina-image> "
-                "PUBLIC_BENCHMARK_GNINA_CONTAINER_IMAGE=<local-gnina-image>"
-            ),
-            "inspect_container_images": (
-                "docker image inspect \"$PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE\" "
-                "\"$PUBLIC_BENCHMARK_GNINA_CONTAINER_IMAGE\""
-            ),
-            "rerun_runtime_readiness": (
-                "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py "
-                f"--out {DEFAULT_OUT}"
-            ),
-            "materialize_engine_run_bundle": (
-                "python3 scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py "
-                f"--execution-plan {execution_plan_path} "
-                f"--out {DEFAULT_ENGINE_RUN_BUNDLE} "
-                f"--commands-out {DEFAULT_ENGINE_RUN_COMMANDS}"
-            ),
-            "materialize_adapter_from_rows": (
-                "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py "
-                f"--intake {vina_gnina_rows_path} "
-                "--out-adapter "
-                f"{PRODUCTIZATION / 'public_benchmark_vina_gnina_comparison_adapter.json'} "
-                "--out-report "
-                f"{PRODUCTIZATION / 'public_benchmark_vina_gnina_materialization_report.json'} "
-                "--fail-blocked"
-            ),
-            "run_phase2_row_audit": (
-                "python3 scripts/materialize_public_benchmark_phase2_from_rows.py "
-                "--fail-blocked"
-            ),
-        },
+        "operator_commands": operator_commands,
         "blockers": blockers,
         "summary": {
             "execution_plan_ready": execution_plan_ready,

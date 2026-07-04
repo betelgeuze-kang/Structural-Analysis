@@ -711,11 +711,30 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         row["family_id"]: row for row in unblock["operator_blocker_family_plan"]
     }
     assert family_plan["engine_runtime"]["missing_item_count"] == 2
+    assert family_plan["engine_runtime"]["next_action"] == (
+        "configure_vina_gnina_binary_or_container_runtime"
+    )
+    assert family_plan["engine_runtime"]["command_key"] == "rerun_runtime_readiness"
+    assert family_plan["engine_runtime"]["materialization_command"] == (
+        unblock["commands"]["rerun_runtime_readiness"]
+    )
     assert family_plan["engine_run_slots"]["missing_item_count"] == 2
     assert family_plan["adapter_rows"]["missing_item_count"] == 1
+    assert family_plan["adapter_rows"]["next_action"] == (
+        "attach_or_materialize_public_benchmark_vina_gnina_rows"
+    )
+    assert family_plan["adapter_rows"]["command_key"] == (
+        "materialize_rows_from_engine_run_bundle"
+    )
+    assert family_plan["adapter_rows"]["materialization_command"] == (
+        unblock["commands"]["materialize_rows_from_engine_run_bundle"]
+    )
     assert payload["operator_blocker_family_count"] == 7
     assert payload["operator_blocker_family_blocked_count"] == 3
     assert payload["first_operator_blocker_family"]["family_id"] == "engine_runtime"
+    assert payload["first_operator_blocker_family"]["materialization_command"] == (
+        payload["operator_commands"]["rerun_runtime_readiness"]
+    )
     assert unblock["engine_runtime_actions"][0] == {
         "binary_env_var": "PUBLIC_BENCHMARK_VINA_BIN",
         "container_image_env_var": "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE",
@@ -843,11 +862,26 @@ def test_runtime_readiness_groups_manifest_operator_blocker_families() -> None:
 
     families = {row["family_id"]: row for row in family_plan}
     assert families["manifest_required_values"]["missing_item_count"] == 3
+    assert families["manifest_required_values"]["next_action"] == (
+        "complete_vina_gnina_input_manifest_required_values"
+    )
+    assert families["manifest_required_values"]["materialization_command"].startswith(
+        "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py"
+    )
     assert families["official_source_files"]["missing_item_count"] == 2
     assert families["official_source_files"]["blocked_case_count"] == 1
+    assert families["official_source_files"]["command_key"] == (
+        "materialize_input_manifest_from_casf_archive"
+    )
+    assert "--archive <CASF-2016.tar.gz>" in families["official_source_files"][
+        "materialization_command"
+    ]
     assert families["prepared_input_files"]["missing_item_count"] == 2
     assert families["input_and_engine_receipt_refs"]["missing_item_count"] == 2
     assert families["engine_runtime"]["missing_item_count"] == 1
+    assert families["engine_runtime"]["materialization_command"].startswith(
+        "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py"
+    )
     assert families["engine_run_slots"]["missing_item_count"] == 1
     assert families["adapter_rows"]["missing_item_count"] == 1
 
