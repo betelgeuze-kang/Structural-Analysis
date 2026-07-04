@@ -25,6 +25,11 @@ DEFAULT_OUT = PRODUCTIZATION / "public_benchmark_vina_gnina_engine_run_bundle.js
 DEFAULT_COMMANDS_OUT = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_engine_run_commands.sh"
 )
+DEFAULT_ROWS_FROM_ENGINE_RUN_BUNDLE_REPORT = (
+    PRODUCTIZATION
+    / "public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json"
+)
+DEFAULT_VINA_GNINA_ROWS = PRODUCTIZATION / "public_benchmark_vina_gnina_rows.json"
 SCHEMA_VERSION = "public-benchmark-vina-gnina-engine-run-bundle.v1"
 ENGINE_CONFIG_SCHEMA_VERSION = "public-benchmark-vina-gnina-engine-config.v1"
 ENGINE_RECEIPT_TEMPLATE_SCHEMA_VERSION = (
@@ -135,6 +140,9 @@ def _config_payload(case: dict[str, Any], run: dict[str, Any]) -> dict[str, Any]
         "schema_version": ENGINE_CONFIG_SCHEMA_VERSION,
         "case_id": str(case.get("case_id") or ""),
         "complex_id": str(case.get("complex_id") or ""),
+        "benchmark_split": str(case.get("benchmark_split") or ""),
+        "source_family": str(case.get("source_family") or ""),
+        "reference_pose_id": str(case.get("reference_pose_id") or ""),
         "engine_id": str(run.get("engine_id") or ""),
         "docking_run_id": str(run.get("docking_run_id") or ""),
         "prepared_receptor_path": str(run.get("prepared_receptor_path") or ""),
@@ -241,6 +249,9 @@ def _bundle_rows(
                 {
                     "case_id": str(case.get("case_id") or ""),
                     "complex_id": str(case.get("complex_id") or ""),
+                    "benchmark_split": str(case.get("benchmark_split") or ""),
+                    "source_family": str(case.get("source_family") or ""),
+                    "reference_pose_id": str(case.get("reference_pose_id") or ""),
                     "engine_id": engine_id,
                     "docking_run_id": str(run.get("docking_run_id") or ""),
                     "config_ref": config_ref,
@@ -384,6 +395,13 @@ def materialize_public_benchmark_vina_gnina_engine_run_bundle(
             ),
             "materialize_rows_from_completed_template": (
                 "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py "
+                "--fail-blocked"
+            ),
+            "materialize_rows_from_engine_run_bundle": (
+                "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py "
+                f"--engine-run-bundle {out} "
+                f"--out-rows {DEFAULT_VINA_GNINA_ROWS} "
+                f"--out-report {DEFAULT_ROWS_FROM_ENGINE_RUN_BUNDLE_REPORT} "
                 "--fail-blocked"
             ),
         },

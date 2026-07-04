@@ -188,6 +188,9 @@ def test_vina_gnina_execution_plan_builds_case_run_specs(
     assert payload["engine_run_bundle_materialization_command"].startswith(
         "python3 scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py"
     )
+    assert payload["rows_from_engine_run_bundle_materialization_command"].startswith(
+        "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py"
+    )
     assert payload["case_count"] == 1
     assert payload["required_engine_run_count"] == 2
     assert payload["missing_engine_ids"] == []

@@ -51,6 +51,10 @@ DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT_MD = (
 DEFAULT_VINA_GNINA_ROWS_FROM_TEMPLATE_REPORT = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_rows_from_template_report.json"
 )
+DEFAULT_VINA_GNINA_ROWS_FROM_ENGINE_RUN_BUNDLE_REPORT = (
+    PRODUCTIZATION
+    / "public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json"
+)
 DEFAULT_INPUT_MANIFEST_TEMPLATE = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest_template.csv"
 )
@@ -805,6 +809,7 @@ def _operator_unblock_packet(
             "materialize_public_benchmark_vina_gnina_engine_run_bundle",
             "review_public_benchmark_vina_gnina_rows_template_preflight",
             "attach_public_benchmark_vina_gnina_rows",
+            "materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle",
             "materialize_public_benchmark_vina_gnina_rows_from_completed_template",
             "materialize_public_benchmark_vina_gnina_comparison_adapter",
         ],
@@ -824,6 +829,12 @@ def _operator_unblock_packet(
                 f"--template {DEFAULT_VINA_GNINA_ROWS_TEMPLATE} "
                 f"--out-rows {DEFAULT_VINA_GNINA_ROWS} "
                 f"--out-report {DEFAULT_VINA_GNINA_ROWS_FROM_TEMPLATE_REPORT}"
+            ),
+            "materialize_rows_from_engine_run_bundle": (
+                "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py "
+                f"--engine-run-bundle {DEFAULT_ENGINE_RUN_BUNDLE} "
+                f"--out-rows {DEFAULT_VINA_GNINA_ROWS} "
+                f"--out-report {DEFAULT_VINA_GNINA_ROWS_FROM_ENGINE_RUN_BUNDLE_REPORT}"
             ),
             "materialize_input_manifest_from_casf_archive": (
                 "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py "
@@ -997,6 +1008,7 @@ def build_vina_gnina_runtime_readiness(
                 DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT,
                 Path("scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py"),
                 Path("scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py"),
+                Path("scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py"),
                 Path("scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py"),
                 Path("scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"),
             ],
@@ -1052,6 +1064,12 @@ def build_vina_gnina_runtime_readiness(
                 f"--template {DEFAULT_VINA_GNINA_ROWS_TEMPLATE} "
                 f"--out-rows {vina_gnina_rows_path} "
                 f"--out-report {DEFAULT_VINA_GNINA_ROWS_FROM_TEMPLATE_REPORT}"
+            ),
+            "materialize_rows_from_engine_run_bundle": (
+                "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py "
+                f"--engine-run-bundle {DEFAULT_ENGINE_RUN_BUNDLE} "
+                f"--out-rows {vina_gnina_rows_path} "
+                f"--out-report {DEFAULT_VINA_GNINA_ROWS_FROM_ENGINE_RUN_BUNDLE_REPORT}"
             ),
             "materialize_input_manifest_from_casf_archive": (
                 "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py "

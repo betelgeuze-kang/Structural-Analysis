@@ -1602,15 +1602,16 @@
     ],
     "status": "blocked"
   },
-  "generated_at": "2026-07-04T07:53:35.614800+00:00",
+  "generated_at": "2026-07-04T08:02:42.982866+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:884fed755cf1143aa1c2c4b8caee184838124b9b578c474482f7c516aa1702c2",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:c21d689b09dcf5b130bb62165b232f367f0c48735d7978e59d9a529490505d63",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json": "sha256:36948ce6ebb4b2d39104a84ae40f131419240e6526f1bf625fce0255c6bae3c3",
     "scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py": "sha256:51660e1839be099da19ee009cc0199c01be7c69f304b77e44130ea6cf000d48b",
     "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:0258e681ddd419d9fba1bba595ffda481b77f710b5e645ac628c5f2bf1444cee",
-    "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:03ca7e423b60d98449e0b01b0689fa577d99352c424681169b1c60a4f4a717c1",
+    "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:62e65fb9b6cb0e5961780291cbfa1f5b50102ebf71665ca2d8a2df5ee1e738f0",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:8c1ce46cbd085987f2923602424b666bb63e9edb6fdb2438158d36aee890dd41",
-    "scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py": "sha256:a90af97697c18a9f2e01f6958115a7256f71dc5d2f97f007b5aac9018ead9da0",
+    "scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py": "sha256:2bbd25e704d1f5bec27c001b4c02071ca00ba503e7bb0db16a250370bdcc17f5",
+    "scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py": "sha256:b254e06ca0ad71db0bcc6dd49335ef5015c221356bddb4f0810649608120c7b3",
     "scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py": "sha256:f5182005b8a700d3533ecd2ae586827637afa687eaa6f40fe023eb344bd5452e"
   },
   "input_manifest_template_preflight": {
@@ -1687,6 +1688,7 @@
     "materialize_adapter_from_rows": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
     "materialize_engine_run_bundle": "python3 scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py --execution-plan implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json --commands-out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
     "materialize_input_manifest_from_casf_archive": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json",
+    "materialize_rows_from_engine_run_bundle": "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py --engine-run-bundle implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json --out-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
     "materialize_rows_from_template": "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py --template implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv --out-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_template_report.json",
     "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
     "run_phase2_row_audit": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
@@ -1706,6 +1708,7 @@
       "materialize_adapter": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
       "materialize_engine_run_bundle": "python3 scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py --execution-plan implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json --commands-out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
       "materialize_input_manifest_from_casf_archive": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json",
+      "materialize_rows_from_engine_run_bundle": "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py --engine-run-bundle implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json --out-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
       "materialize_rows_from_template": "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py --template implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv --out-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_template_report.json",
       "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
       "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
@@ -1875,6 +1878,7 @@
       "materialize_public_benchmark_vina_gnina_engine_run_bundle",
       "review_public_benchmark_vina_gnina_rows_template_preflight",
       "attach_public_benchmark_vina_gnina_rows",
+      "materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle",
       "materialize_public_benchmark_vina_gnina_rows_from_completed_template",
       "materialize_public_benchmark_vina_gnina_comparison_adapter"
     ],
@@ -1954,7 +1958,7 @@
     "rows_artifact_required_after_engine_execution": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
   },
   "schema_version": "public-benchmark-vina-gnina-runtime-readiness.v1",
-  "source_commit_sha": "171f5efcd36ebd9d094545782a3c8ca343280d3d",
+  "source_commit_sha": "fe3b31972f05aa42b08d9dd4c001cbd88e8e3acc",
   "status": "execution_plan_blocked",
   "summary": {
     "adapter_case_count": 0,

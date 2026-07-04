@@ -1,0 +1,44 @@
+{
+  "adapter_validation_status": "not_run",
+  "adapter_validation_summary": {},
+  "blockers": [
+    "public_benchmark_vina_gnina_engine_run_bundle_not_ready"
+  ],
+  "bundle_ready": false,
+  "case_count": 0,
+  "claim_boundary": "This helper only promotes completed Vina/GNINA engine-run bundle receipts into adapter rows after file checksum and adapter validation. It does not run engines, compute RMSD, invent scores, or close Public Benchmark Phase 2 by itself.",
+  "commands": {
+    "materialize_adapter": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+    "rerun_engine_run_bundle": "python3 scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py --fail-blocked",
+    "rerun_phase2_row_audit": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --vina-gnina-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --fail-blocked",
+    "rerun_rows_materialization": "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py --engine-run-bundle implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json --out-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json --fail-blocked"
+  },
+  "contract_pass": false,
+  "engine_run_bundle_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+  "engine_run_count": 24,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-07-04T08:02:42.914330+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json": "sha256:dbf097f6a51a782c2344f72383134f401b1cd550f1ec11602dbba8be70cab3cb",
+    "scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py": "sha256:2bbd25e704d1f5bec27c001b4c02071ca00ba503e7bb0db16a250370bdcc17f5",
+    "scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py": "sha256:b254e06ca0ad71db0bcc6dd49335ef5015c221356bddb4f0810649608120c7b3"
+  },
+  "out_report_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+  "out_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+  "ready_engine_run_count": 0,
+  "reuse_policy": "public_benchmark_vina_gnina_rows_from_engine_run_bundle_report",
+  "reused_evidence": false,
+  "row_statuses": [],
+  "rows_materialized": false,
+  "schema_version": "public-benchmark-vina-gnina-rows-from-engine-run-bundle.v1",
+  "source_commit_sha": "fe3b31972f05aa42b08d9dd4c001cbd88e8e3acc",
+  "status": "engine_run_bundle_not_ready",
+  "summary": {
+    "blocker_count": 1,
+    "bundle_ready": false,
+    "case_count": 0,
+    "engine_run_count": 24,
+    "ready_engine_run_count": 0,
+    "rows_materialized": false
+  }
+}
