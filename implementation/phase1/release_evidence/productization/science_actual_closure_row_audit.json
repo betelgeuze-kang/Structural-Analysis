@@ -1440,13 +1440,14 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T01:35:20.577532+00:00",
+  "generated_at": "2026-07-04T01:40:25.146094+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json": "sha256:98255bfca71cb82c3146a11e74e90cc338836518d93672950cbec5defd7d7147",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:256d47d3e96c9a5e358d96c8bb0f8e19f8131f14986af5c7f4e7d009315860c3",
     "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:0050d5def428952494dcce36669825278bf268df9f6a2c8107e2d010df64e51b",
     "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json": "sha256:c3d8772c577c40903ac1656ef8d7474695cb374c3e60de312ffe0d37985483ff",
     "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:e9a2b010be4254d67a3574ab917821583a6de5e5803ab1cbd6a92ca8d15eea30",
@@ -1455,7 +1456,7 @@
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
     "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:cea647619944140048844f8c2efc475f47008bbd55333cd276673bb56f80d192",
-    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:14a8dd1cdd3ceade9510262a8b46f92a655b328422456d5e1be562645f3d376e"
+    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:d42eed5febf19c3eb53aeec23c1cfbf57fe7959a2105bdf450d65554041e0dcf"
   },
   "missing_row_inputs": [
     "vina_gnina_rows",
@@ -2869,7 +2870,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "87db65bce31f99467f00f4747c0ddc26b42e52aa",
+  "source_commit_sha": "891897356fb2ba494ed3a407a9574a23fda80403",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,
@@ -3772,6 +3773,7 @@
       "source_access_preflight_receipt_artifact": "",
       "source_access_preflight_receipt_command": "",
       "source_access_preflight_receipt_markdown_artifact": "",
+      "source_access_preflight_receipt_summary": {},
       "source_access_preflight_rows": [],
       "status": "operator_acquisition_required",
       "summary": {
@@ -4303,6 +4305,30 @@
       "source_access_preflight_receipt_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json",
       "source_access_preflight_receipt_command": "python3 scripts/build_public_benchmark_source_access_preflight_receipt.py --out implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md",
       "source_access_preflight_receipt_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md",
+      "source_access_preflight_receipt_summary": {
+        "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json",
+        "blocked_count": 0,
+        "claim_boundary": "This receipt performs HEAD-only source access preflight checks. It does not download, redistribute, checksum, license, or prove raw benchmark payloads, and it does not close Public Benchmark Phase 2.",
+        "contract_pass": true,
+        "generated_at": "2026-07-04T01:37:43.995999+00:00",
+        "network_probe_performed": true,
+        "not_run_count": 0,
+        "present": true,
+        "reachable_count": 6,
+        "source_access_probe_row_count": 6,
+        "source_access_ready": true,
+        "source_plan_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
+        "status": "reachable",
+        "summary": {
+          "blocked_count": 0,
+          "missing_preflight_row_count": 0,
+          "network_probe_performed": true,
+          "not_run_count": 0,
+          "reachable_count": 6,
+          "source_access_probe_row_count": 6,
+          "source_access_ready": true
+        }
+      },
       "source_access_preflight_rows": [
         {
           "access_mode": "operator_download_and_license_or_accession_receipt_required",

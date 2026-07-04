@@ -37,6 +37,9 @@ DEFAULT_PUBLIC_PHASE2_AUDIT = PRODUCTIZATION / "public_benchmark_phase2_row_audi
 DEFAULT_PUBLIC_SOURCE_ACQUISITION_PLAN = (
     PRODUCTIZATION / "public_benchmark_phase2_source_acquisition_plan.json"
 )
+DEFAULT_PUBLIC_SOURCE_ACCESS_PREFLIGHT_RECEIPT = (
+    PRODUCTIZATION / "public_benchmark_source_access_preflight_receipt.json"
+)
 DEFAULT_POCKETMD_SOURCE_ACQUISITION_PLAN = (
     PRODUCTIZATION / "pocketmd_lite_source_acquisition_plan.json"
 )
@@ -87,7 +90,13 @@ def _source_acquisition_summary(
     payload: dict[str, Any],
     *,
     artifact: Path,
+    source_access_receipt: dict[str, Any] | None = None,
+    source_access_receipt_artifact: Path | None = None,
 ) -> dict[str, Any]:
+    receipt_summary = _source_access_receipt_summary(
+        source_access_receipt or {},
+        artifact=source_access_receipt_artifact,
+    )
     if not payload:
         return {
             "artifact": str(artifact),
@@ -97,6 +106,7 @@ def _source_acquisition_summary(
             "blocker_count": 0,
             "blockers": [],
             "summary": {},
+            "source_access_preflight_receipt_summary": receipt_summary,
         }
     raw_blockers = payload.get("blockers", [])
     blockers = (
@@ -213,6 +223,7 @@ def _source_acquisition_summary(
             official_source_receipt_plan.get("source_access_network_probe_command")
             or ""
         ),
+        "source_access_preflight_receipt_summary": receipt_summary,
         "phase4_candidate_slot_matrix_count": int(
             payload.get("phase4_candidate_slot_matrix_count")
             or len(phase4_candidate_slot_matrix)
@@ -257,8 +268,54 @@ def _source_acquisition_summary(
     }
 
 
+def _source_access_receipt_summary(
+    payload: dict[str, Any],
+    *,
+    artifact: Path | None,
+) -> dict[str, Any]:
+    if not artifact:
+        return {}
+    if not payload:
+        return {
+            "artifact": str(artifact),
+            "present": False,
+            "status": "missing",
+            "contract_pass": None,
+            "network_probe_performed": False,
+            "source_access_ready": False,
+            "summary": {},
+        }
+    summary = payload.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+    return {
+        "artifact": str(artifact),
+        "present": True,
+        "status": str(payload.get("status") or ""),
+        "contract_pass": payload.get("contract_pass"),
+        "network_probe_performed": bool(payload.get("network_probe_performed")),
+        "source_access_ready": bool(payload.get("source_access_ready")),
+        "source_access_probe_row_count": int(
+            payload.get("source_access_preflight_count")
+            or summary.get("source_access_probe_row_count")
+            or 0
+        ),
+        "reachable_count": int(summary.get("reachable_count") or 0),
+        "blocked_count": int(summary.get("blocked_count") or 0),
+        "not_run_count": int(summary.get("not_run_count") or 0),
+        "generated_at": str(payload.get("generated_at") or ""),
+        "source_plan_artifact": str(payload.get("source_plan_artifact") or ""),
+        "summary": summary,
+        "claim_boundary": str(payload.get("claim_boundary") or ""),
+    }
+
+
 def _upstream_source_acquisition_context(repo_root: Path) -> dict[str, Any]:
     public_plan = _load_optional_json(repo_root, DEFAULT_PUBLIC_SOURCE_ACQUISITION_PLAN)
+    public_source_access_receipt = _load_optional_json(
+        repo_root,
+        DEFAULT_PUBLIC_SOURCE_ACCESS_PREFLIGHT_RECEIPT,
+    )
     pocketmd_plan = _load_optional_json(
         repo_root,
         DEFAULT_POCKETMD_SOURCE_ACQUISITION_PLAN,
@@ -267,6 +324,10 @@ def _upstream_source_acquisition_context(repo_root: Path) -> dict[str, Any]:
         "public_benchmark_phase2": _source_acquisition_summary(
             public_plan,
             artifact=DEFAULT_PUBLIC_SOURCE_ACQUISITION_PLAN,
+            source_access_receipt=public_source_access_receipt,
+            source_access_receipt_artifact=(
+                DEFAULT_PUBLIC_SOURCE_ACCESS_PREFLIGHT_RECEIPT
+            ),
         ),
         "pocketmd_lite": _source_acquisition_summary(
             pocketmd_plan,
@@ -1606,6 +1667,7 @@ def build_science_actual_closure_audit(
         input_paths.append(pocketmd_rows_path)
     for path in (
         DEFAULT_PUBLIC_SOURCE_ACQUISITION_PLAN,
+        DEFAULT_PUBLIC_SOURCE_ACCESS_PREFLIGHT_RECEIPT,
         DEFAULT_POCKETMD_SOURCE_ACQUISITION_PLAN,
     ):
         if _resolve(repo_root, path).exists():

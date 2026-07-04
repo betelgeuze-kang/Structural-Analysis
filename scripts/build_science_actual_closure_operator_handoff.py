@@ -246,6 +246,9 @@ def _slot_source_context(
         "source_access_network_probe_command": str(
             source.get("source_access_network_probe_command") or ""
         ),
+        "source_access_preflight_receipt_summary": _as_dict(
+            source.get("source_access_preflight_receipt_summary")
+        ),
         "phase4_candidate_slot_matrix_count": int(
             source.get("phase4_candidate_slot_matrix_count")
             or len(phase4_candidate_slot_matrix)
@@ -1406,12 +1409,21 @@ def _markdown(payload: dict[str, Any]) -> str:
                 public_source_context.get("source_access_network_probe_command")
                 or ""
             )
+            receipt_summary = _as_dict(
+                public_source_context.get(
+                    "source_access_preflight_receipt_summary"
+                )
+            )
             if receipt_artifact or receipt_command or network_probe_command:
                 lines.extend(
                     [
                         f"- `receipt_artifact`: `{receipt_artifact}`",
                         f"- `receipt_command`: `{receipt_command}`",
                         f"- `network_probe_command`: `{network_probe_command}`",
+                        "- `receipt_status`: "
+                        f"`{receipt_summary.get('status', '')}`",
+                        "- `receipt_reachable_count`: "
+                        f"`{receipt_summary.get('reachable_count', 0)}`",
                         "",
                     ]
                 )

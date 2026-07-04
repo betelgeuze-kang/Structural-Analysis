@@ -2455,6 +2455,30 @@
       "source_access_preflight_receipt_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json",
       "source_access_preflight_receipt_command": "python3 scripts/build_public_benchmark_source_access_preflight_receipt.py --out implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md",
       "source_access_preflight_receipt_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md",
+      "source_access_preflight_receipt_summary": {
+        "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json",
+        "blocked_count": 0,
+        "claim_boundary": "This receipt performs HEAD-only source access preflight checks. It does not download, redistribute, checksum, license, or prove raw benchmark payloads, and it does not close Public Benchmark Phase 2.",
+        "contract_pass": true,
+        "generated_at": "2026-07-04T01:37:43.995999+00:00",
+        "network_probe_performed": true,
+        "not_run_count": 0,
+        "present": true,
+        "reachable_count": 6,
+        "source_access_probe_row_count": 6,
+        "source_access_ready": true,
+        "source_plan_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
+        "status": "reachable",
+        "summary": {
+          "blocked_count": 0,
+          "missing_preflight_row_count": 0,
+          "network_probe_performed": true,
+          "not_run_count": 0,
+          "reachable_count": 6,
+          "source_access_probe_row_count": 6,
+          "source_access_ready": true
+        }
+      },
       "source_access_preflight_rows": [
         {
           "access_mode": "operator_download_and_license_or_accession_receipt_required",
@@ -2665,13 +2689,13 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T01:35:49.007215+00:00",
+  "generated_at": "2026-07-04T01:40:51.690098+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:9dd7c97c8a2b978436c07f11bfb088a2cef94f1fd1f33bc651ba8a4c09440b2b",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:bc734b71fe231cae6b4c1ab875507644db77164038387495a3ce904f75b43960",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:6e75a02c6b13b518bf6087e44db30b84c243e4935d2b50611e2fd0411e476118",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:d7baff04992ddf9c6639366d9a9ca8a18e7611eb04d4ff57d4b1e449a8dffb53",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:1e72995dca28a5b339fe9e522dcb7d8a2d611619ae2bb6637d4232a4afa266ca"
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:db69a07a6ec258a840c21d4457553065a640f0cb6fca0531c1df036c71f39fd7",
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:813f73f2992b92c080f3aaef05d5c3d9ce31e2c9492e7c71b2e3aab8bd36cf55"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -6572,6 +6596,30 @@
         "source_access_preflight_receipt_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json",
         "source_access_preflight_receipt_command": "python3 scripts/build_public_benchmark_source_access_preflight_receipt.py --out implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md",
         "source_access_preflight_receipt_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md",
+        "source_access_preflight_receipt_summary": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json",
+          "blocked_count": 0,
+          "claim_boundary": "This receipt performs HEAD-only source access preflight checks. It does not download, redistribute, checksum, license, or prove raw benchmark payloads, and it does not close Public Benchmark Phase 2.",
+          "contract_pass": true,
+          "generated_at": "2026-07-04T01:37:43.995999+00:00",
+          "network_probe_performed": true,
+          "not_run_count": 0,
+          "present": true,
+          "reachable_count": 6,
+          "source_access_probe_row_count": 6,
+          "source_access_ready": true,
+          "source_plan_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
+          "status": "reachable",
+          "summary": {
+            "blocked_count": 0,
+            "missing_preflight_row_count": 0,
+            "network_probe_performed": true,
+            "not_run_count": 0,
+            "reachable_count": 6,
+            "source_access_probe_row_count": 6,
+            "source_access_ready": true
+          }
+        },
         "source_access_preflight_rows": [
           {
             "access_mode": "operator_download_and_license_or_accession_receipt_required",
@@ -7096,6 +7144,30 @@
         "source_access_preflight_receipt_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json",
         "source_access_preflight_receipt_command": "python3 scripts/build_public_benchmark_source_access_preflight_receipt.py --out implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md",
         "source_access_preflight_receipt_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md",
+        "source_access_preflight_receipt_summary": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json",
+          "blocked_count": 0,
+          "claim_boundary": "This receipt performs HEAD-only source access preflight checks. It does not download, redistribute, checksum, license, or prove raw benchmark payloads, and it does not close Public Benchmark Phase 2.",
+          "contract_pass": true,
+          "generated_at": "2026-07-04T01:37:43.995999+00:00",
+          "network_probe_performed": true,
+          "not_run_count": 0,
+          "present": true,
+          "reachable_count": 6,
+          "source_access_probe_row_count": 6,
+          "source_access_ready": true,
+          "source_plan_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
+          "status": "reachable",
+          "summary": {
+            "blocked_count": 0,
+            "missing_preflight_row_count": 0,
+            "network_probe_performed": true,
+            "not_run_count": 0,
+            "reachable_count": 6,
+            "source_access_probe_row_count": 6,
+            "source_access_ready": true
+          }
+        },
         "source_access_preflight_rows": [
           {
             "access_mode": "operator_download_and_license_or_accession_receipt_required",
@@ -7672,6 +7744,30 @@
         "source_access_preflight_receipt_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json",
         "source_access_preflight_receipt_command": "python3 scripts/build_public_benchmark_source_access_preflight_receipt.py --out implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md",
         "source_access_preflight_receipt_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md",
+        "source_access_preflight_receipt_summary": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json",
+          "blocked_count": 0,
+          "claim_boundary": "This receipt performs HEAD-only source access preflight checks. It does not download, redistribute, checksum, license, or prove raw benchmark payloads, and it does not close Public Benchmark Phase 2.",
+          "contract_pass": true,
+          "generated_at": "2026-07-04T01:37:43.995999+00:00",
+          "network_probe_performed": true,
+          "not_run_count": 0,
+          "present": true,
+          "reachable_count": 6,
+          "source_access_probe_row_count": 6,
+          "source_access_ready": true,
+          "source_plan_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
+          "status": "reachable",
+          "summary": {
+            "blocked_count": 0,
+            "missing_preflight_row_count": 0,
+            "network_probe_performed": true,
+            "not_run_count": 0,
+            "reachable_count": 6,
+            "source_access_probe_row_count": 6,
+            "source_access_ready": true
+          }
+        },
         "source_access_preflight_rows": [
           {
             "access_mode": "operator_download_and_license_or_accession_receipt_required",
@@ -9585,6 +9681,30 @@
         "source_access_preflight_receipt_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json",
         "source_access_preflight_receipt_command": "python3 scripts/build_public_benchmark_source_access_preflight_receipt.py --out implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md",
         "source_access_preflight_receipt_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md",
+        "source_access_preflight_receipt_summary": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json",
+          "blocked_count": 0,
+          "claim_boundary": "This receipt performs HEAD-only source access preflight checks. It does not download, redistribute, checksum, license, or prove raw benchmark payloads, and it does not close Public Benchmark Phase 2.",
+          "contract_pass": true,
+          "generated_at": "2026-07-04T01:37:43.995999+00:00",
+          "network_probe_performed": true,
+          "not_run_count": 0,
+          "present": true,
+          "reachable_count": 6,
+          "source_access_probe_row_count": 6,
+          "source_access_ready": true,
+          "source_plan_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
+          "status": "reachable",
+          "summary": {
+            "blocked_count": 0,
+            "missing_preflight_row_count": 0,
+            "network_probe_performed": true,
+            "not_run_count": 0,
+            "reachable_count": 6,
+            "source_access_probe_row_count": 6,
+            "source_access_ready": true
+          }
+        },
         "source_access_preflight_rows": [
           {
             "access_mode": "operator_download_and_license_or_accession_receipt_required",
@@ -11387,6 +11507,7 @@
         "source_access_preflight_receipt_artifact": "",
         "source_access_preflight_receipt_command": "",
         "source_access_preflight_receipt_markdown_artifact": "",
+        "source_access_preflight_receipt_summary": {},
         "source_access_preflight_rows": [],
         "source_id": "pocketmd_lite",
         "status": "operator_acquisition_required",
@@ -11442,7 +11563,7 @@
   ],
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "87db65bce31f99467f00f4747c0ddc26b42e52aa",
+  "source_commit_sha": "891897356fb2ba494ed3a407a9574a23fda80403",
   "status": "operator_rows_required",
   "summary": {
     "blocked_component_operator_action_count": 2,
@@ -12333,6 +12454,7 @@
       "source_access_preflight_receipt_artifact": "",
       "source_access_preflight_receipt_command": "",
       "source_access_preflight_receipt_markdown_artifact": "",
+      "source_access_preflight_receipt_summary": {},
       "source_access_preflight_rows": [],
       "status": "operator_acquisition_required",
       "summary": {
@@ -12864,6 +12986,30 @@
       "source_access_preflight_receipt_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json",
       "source_access_preflight_receipt_command": "python3 scripts/build_public_benchmark_source_access_preflight_receipt.py --out implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md",
       "source_access_preflight_receipt_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md",
+      "source_access_preflight_receipt_summary": {
+        "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json",
+        "blocked_count": 0,
+        "claim_boundary": "This receipt performs HEAD-only source access preflight checks. It does not download, redistribute, checksum, license, or prove raw benchmark payloads, and it does not close Public Benchmark Phase 2.",
+        "contract_pass": true,
+        "generated_at": "2026-07-04T01:37:43.995999+00:00",
+        "network_probe_performed": true,
+        "not_run_count": 0,
+        "present": true,
+        "reachable_count": 6,
+        "source_access_probe_row_count": 6,
+        "source_access_ready": true,
+        "source_plan_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
+        "status": "reachable",
+        "summary": {
+          "blocked_count": 0,
+          "missing_preflight_row_count": 0,
+          "network_probe_performed": true,
+          "not_run_count": 0,
+          "reachable_count": 6,
+          "source_access_probe_row_count": 6,
+          "source_access_ready": true
+        }
+      },
       "source_access_preflight_rows": [
         {
           "access_mode": "operator_download_and_license_or_accession_receipt_required",

@@ -923,6 +923,30 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
         ),
         encoding="utf-8",
     )
+    (productization / "public_benchmark_source_access_preflight_receipt.json").write_text(
+        json.dumps(
+            {
+                "status": "reachable",
+                "contract_pass": True,
+                "network_probe_performed": True,
+                "source_access_ready": True,
+                "source_access_preflight_count": 1,
+                "source_plan_artifact": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "public_benchmark_phase2_source_acquisition_plan.json"
+                ),
+                "summary": {
+                    "blocked_count": 0,
+                    "not_run_count": 0,
+                    "reachable_count": 1,
+                    "source_access_probe_row_count": 1,
+                },
+                "claim_boundary": "HEAD-only preflight test receipt.",
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
     (productization / "pocketmd_lite_source_acquisition_plan.json").write_text(
         json.dumps(
             {
@@ -1010,6 +1034,13 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
     assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
         "source_access_network_probe_command"
     ].endswith("--probe-network")
+    receipt_summary = audit["upstream_source_acquisition"]["public_benchmark_phase2"][
+        "source_access_preflight_receipt_summary"
+    ]
+    assert receipt_summary["status"] == "reachable"
+    assert receipt_summary["source_access_ready"] is True
+    assert receipt_summary["network_probe_performed"] is True
+    assert receipt_summary["reachable_count"] == 1
     assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
         "vina_gnina_case_input_slot_matrix_count"
     ] == 12

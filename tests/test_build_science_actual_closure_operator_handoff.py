@@ -378,6 +378,14 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert vina_gnina["upstream_source_acquisition"][
         "source_access_network_probe_command"
     ].endswith("--probe-network")
+    receipt_summary = vina_gnina["upstream_source_acquisition"][
+        "source_access_preflight_receipt_summary"
+    ]
+    assert receipt_summary["status"] == "reachable"
+    assert receipt_summary["network_probe_performed"] is True
+    assert receipt_summary["source_access_ready"] is True
+    assert receipt_summary["reachable_count"] == 6
+    assert receipt_summary["blocked_count"] == 0
     assert vina_gnina["upstream_source_acquisition"][
         "vina_gnina_case_input_slot_matrix_count"
     ] == 12
@@ -660,6 +668,8 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "public_benchmark_vina_gnina_rows.csv" in markdown
     assert "`operator_rows_must_be_real_engine_outputs`: `True`" in markdown
     assert "### Public Benchmark Source Access Preflight" in markdown
+    assert "`receipt_status`: `reachable`" in markdown
+    assert "`receipt_reachable_count`: `6`" in markdown
     assert "curl --head --location --max-time 20" in markdown
     assert "### PocketMD Top-k Rows Action" in markdown
     assert "`phase4_metric_receipt_action_count`: `8`" in markdown
