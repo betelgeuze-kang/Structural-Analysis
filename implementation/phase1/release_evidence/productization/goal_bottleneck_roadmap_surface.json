@@ -1,5 +1,5 @@
 {
-  "blocked_roadmap_row_count": 1,
+  "blocked_roadmap_row_count": 3,
   "capability_summary_rows": [
     {
       "blocker_count": 0,
@@ -12,18 +12,432 @@
   "claim_boundary": "This read-only /goal surface aggregates existing PM release, freshness, and structural solver product capability evidence. It does not close release, limited-commercial, GA, or engineer-of-record replacement claims.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "first_operator_evidence_handoff": {},
-  "first_operator_evidence_handoff_slot": {},
-  "generated_at": "2026-07-04T04:35:37.274652+00:00",
+  "first_operator_evidence_handoff": {
+    "actual_closure_component_id": "",
+    "actual_evidence_audit_status": "engine_input_manifest_required",
+    "actual_evidence_blocked_component_count": 6,
+    "actual_evidence_remaining_evidence": [
+      "engine_input_manifest",
+      "engine_runtime",
+      "engine_run_slots",
+      "adapter_rows",
+      "per_engine_run_receipts",
+      "external_receipts"
+    ],
+    "blocked_criteria": [],
+    "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
+    "capability_id": "",
+    "evidence_artifacts": [
+      "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+      "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+      "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json"
+    ],
+    "first_blocked_target": "public_benchmark_phase2_actual_closure",
+    "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
+    "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+    "handoff_id": "science_actual_closure::vina_gnina_rows",
+    "linked_routes": [
+      "/goal/bottleneck",
+      "/goal/roadmap"
+    ],
+    "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+    "materialization_steps": [
+      "materialize_public_benchmark_vina_gnina_comparison_adapter"
+    ],
+    "minimum_evidence": {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "actual_evidence_audit_status": "engine_input_manifest_required",
+      "actual_evidence_blocked_component_count": 6,
+      "actual_evidence_remaining_evidence": [
+        "engine_input_manifest",
+        "engine_runtime",
+        "engine_run_slots",
+        "adapter_rows",
+        "per_engine_run_receipts",
+        "external_receipts"
+      ],
+      "blockers": [
+        "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
+      ],
+      "contract_field_groups": {
+        "required_case_fields": [
+          "case_id",
+          "source_family",
+          "benchmark_split",
+          "complex_id",
+          "reference_pose_id",
+          "engine_runs",
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "required_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "source_receipt_required_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ]
+      },
+      "contract_policies": {
+        "boolean_value_policy": {
+          "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+        },
+        "numeric_value_policy": {
+          "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+          "score": "must parse to a finite float; NaN and Infinity are rejected",
+          "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+        },
+        "row_integrity_policy": {
+          "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+          "required_unique_row_keys": {
+            "case_engine_runs": [
+              "engine_id",
+              "docking_run_id"
+            ],
+            "cases": [
+              "case_id"
+            ]
+          }
+        },
+        "score_direction_policy": {
+          "accepted_aliases": {
+            "higher_is_better": [
+              "higher",
+              "higher_is_better",
+              "descending"
+            ],
+            "lower_is_better": [
+              "lower",
+              "lower_is_better",
+              "ascending"
+            ]
+          },
+          "accepted_values": [
+            "higher_is_better",
+            "lower_is_better"
+          ],
+          "blank_values": "rejected; no implicit default is applied",
+          "required": true
+        },
+        "source_actuality_policy": {
+          "placeholder_markers_rejected": [
+            "<operator",
+            "dry-run",
+            "dummy",
+            "example.invalid",
+            "example://",
+            "fake",
+            "fixture",
+            "mock",
+            "operator_supplied",
+            "placeholder",
+            "synthetic",
+            "test-accession",
+            "todo",
+            "unit-test"
+          ],
+          "placeholder_provenance_prefixes_rejected": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ],
+          "required_pose_source_receipt_fields": [
+            "receptor_context.provenance_ref"
+          ],
+          "required_source_receipt_fields": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "required_vina_engine_run_pose_ref_fields": [
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "required_vina_engine_run_receipt_fields": [
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
+          "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+          "vina_engine_run_checksum_fields": [
+            "predicted_ligand_checksum",
+            "engine_config_checksum"
+          ],
+          "vina_engine_run_provenance_fields": [
+            "predicted_ligand_path_or_pose_ref",
+            "engine_run_provenance_ref"
+          ]
+        },
+        "source_checksum_policy": {
+          "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+          "required_receipt_field": "source_checksum"
+        }
+      },
+      "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
+    },
+    "phase_id": "phase_2_public_benchmark_actual_closure",
+    "phase_label": "Phase 2",
+    "queue_priority": 1,
+    "roadmap_item": "Public benchmark Phase 2 actual closure",
+    "root_cause_tags": [
+      "science_actual_closure",
+      "public_benchmark_phase2",
+      "vina_gnina_actual_rows"
+    ],
+    "slot_id": "vina_gnina_rows",
+    "source_acquisition_blockers": [],
+    "status": "operator_rows_required",
+    "target_id": "public_benchmark_phase2_actual_closure",
+    "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+    "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+  },
+  "first_operator_evidence_handoff_slot": {
+    "actual_closure_component_id": "",
+    "actual_evidence_audit_status": "engine_input_manifest_required",
+    "actual_evidence_blocked_component_count": 6,
+    "actual_evidence_remaining_evidence": [
+      "engine_input_manifest",
+      "engine_runtime",
+      "engine_run_slots",
+      "adapter_rows",
+      "per_engine_run_receipts",
+      "external_receipts"
+    ],
+    "blocked_criteria": [
+      "vina_gnina_comparison_ready"
+    ],
+    "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
+    "capability_id": "",
+    "evidence_artifacts": [
+      "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+      "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+      "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json"
+    ],
+    "first_blocked_target": "public_benchmark_phase2_actual_closure",
+    "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
+    "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+    "handoff_id": "science_actual_closure::vina_gnina_rows",
+    "linked_routes": [
+      "/goal/bottleneck",
+      "/goal/roadmap"
+    ],
+    "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+    "materialization_steps": [
+      "materialize_public_benchmark_vina_gnina_comparison_adapter"
+    ],
+    "minimum_evidence": {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "actual_evidence_audit_status": "engine_input_manifest_required",
+      "actual_evidence_blocked_component_count": 6,
+      "actual_evidence_remaining_evidence": [
+        "engine_input_manifest",
+        "engine_runtime",
+        "engine_run_slots",
+        "adapter_rows",
+        "per_engine_run_receipts",
+        "external_receipts"
+      ],
+      "blockers": [
+        "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
+      ],
+      "contract_field_groups": {
+        "required_case_fields": [
+          "case_id",
+          "source_family",
+          "benchmark_split",
+          "complex_id",
+          "reference_pose_id",
+          "engine_runs",
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "required_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "source_receipt_required_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ]
+      },
+      "contract_policies": {
+        "boolean_value_policy": {
+          "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+        },
+        "numeric_value_policy": {
+          "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+          "score": "must parse to a finite float; NaN and Infinity are rejected",
+          "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+        },
+        "row_integrity_policy": {
+          "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+          "required_unique_row_keys": {
+            "case_engine_runs": [
+              "engine_id",
+              "docking_run_id"
+            ],
+            "cases": [
+              "case_id"
+            ]
+          }
+        },
+        "score_direction_policy": {
+          "accepted_aliases": {
+            "higher_is_better": [
+              "higher",
+              "higher_is_better",
+              "descending"
+            ],
+            "lower_is_better": [
+              "lower",
+              "lower_is_better",
+              "ascending"
+            ]
+          },
+          "accepted_values": [
+            "higher_is_better",
+            "lower_is_better"
+          ],
+          "blank_values": "rejected; no implicit default is applied",
+          "required": true
+        },
+        "source_actuality_policy": {
+          "placeholder_markers_rejected": [
+            "<operator",
+            "dry-run",
+            "dummy",
+            "example.invalid",
+            "example://",
+            "fake",
+            "fixture",
+            "mock",
+            "operator_supplied",
+            "placeholder",
+            "synthetic",
+            "test-accession",
+            "todo",
+            "unit-test"
+          ],
+          "placeholder_provenance_prefixes_rejected": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ],
+          "required_pose_source_receipt_fields": [
+            "receptor_context.provenance_ref"
+          ],
+          "required_source_receipt_fields": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "required_vina_engine_run_pose_ref_fields": [
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "required_vina_engine_run_receipt_fields": [
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
+          "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+          "vina_engine_run_checksum_fields": [
+            "predicted_ligand_checksum",
+            "engine_config_checksum"
+          ],
+          "vina_engine_run_provenance_fields": [
+            "predicted_ligand_path_or_pose_ref",
+            "engine_run_provenance_ref"
+          ]
+        },
+        "source_checksum_policy": {
+          "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+          "required_receipt_field": "source_checksum"
+        }
+      },
+      "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
+    },
+    "phase_id": "phase_2_public_benchmark_actual_closure",
+    "phase_label": "Phase 2",
+    "phase_queue_priority": 2,
+    "queue_priority": 1,
+    "roadmap_item": "Public benchmark Phase 2 actual closure",
+    "root_cause_tags": [
+      "science_actual_closure",
+      "public_benchmark_phase2",
+      "vina_gnina_actual_rows"
+    ],
+    "slot_id": "vina_gnina_rows",
+    "slot_queue_priority": 1,
+    "source_acquisition_blockers": [],
+    "status": "operator_rows_required",
+    "target_id": "public_benchmark_phase2_actual_closure",
+    "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+    "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+  },
+  "generated_at": "2026-07-04T06:21:40.193100+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:5558e5f0d82be0cbcb22c4431c0247939a1a9f780938f6d40bcf8484561b0eed",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:fc87faa4fd9acfb4e87000f955f1086cc39a86f479b9325e30cb2864c9f19631",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:69285c5dcf0a4bdc30c7a71d48b86dabde7af6e458925f250a4e3f9b9616e109",
-    "implementation/phase1/release_evidence/productization/source_of_truth_gap_classification.json": "sha256:531d84c7411b3399a6b875233ef4d41021cead481f1c4e0c638eb426e0df1cee",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json": "sha256:4aef660b0e87465bda720c11b0eacf7c14f86c19ee181bfca516b632e6476597",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:a443d01c2c648bb1ec64396a7646c13c73dc04fc387f989a62f02ef19975092d",
+    "implementation/phase1/release_evidence/productization/source_of_truth_gap_classification.json": "sha256:5fb3525b23f2e4bc7582cc16aace64fbb7cc506c28e086a21bede3de61ea1b3c",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:c1af83f1b410aca8536d5ab832c0ba6a86153436844e42152860f84ec0002328",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:8adb767e05269c4063e04ca5e5060b0e94994916ccae4e9912c897c0c7fc9703",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:e8a6b5e0b8d86ef1b629c1a6d4e8caab6132dd4a3a311c64bc520c2e4e13954f",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:bd7be6b5de7c83e66b5bf74f75ea9cfd4549a71d66da91b869e2efd874b06f59"
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:7658b919aba5fc3383735966246880bf405329b07cf5dfb05d38bc259b5c7a86"
   },
   "mutation_allowed": false,
   "next_actions": [
@@ -31,14 +445,442 @@
   ],
   "non_expert_release_briefing": {
     "audience": "non_expert_pm_operator",
-    "blocked_science_or_beta_phase_count": 0,
-    "blocked_science_or_beta_phases": [],
+    "blocked_science_or_beta_phase_count": 2,
+    "blocked_science_or_beta_phases": [
+      {
+        "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
+        "first_blocked_target": "public_benchmark_phase2_actual_closure",
+        "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
+        "phase_id": "phase_2_public_benchmark_actual_closure",
+        "roadmap_item": "Public benchmark Phase 2 actual closure"
+      },
+      {
+        "bottleneck": "pocketmd_lite_topk_actual_rows_required",
+        "first_blocked_target": "pocketmd_lite_topk_actual_closure",
+        "first_blocker": "pocketmd_lite_topk_actual_closure::pocketmd_rows_not_provided",
+        "phase_id": "phase_4_pocketmd_lite_topk_actual_closure",
+        "roadmap_item": "PocketMD Lite top-k actual closure"
+      }
+    ],
     "claim_boundaries": [
       "do_not_claim_limited_commercial_release_until_release_allowed_true",
-      "do_not_replace_human_ux_observation_with_templates_or_automation"
+      "do_not_replace_human_ux_observation_with_templates_or_automation",
+      "do_not_claim_science_actual_closure_until_operator_rows_pass"
     ],
-    "first_operator_handoff": {},
-    "first_operator_handoff_slot": {},
+    "first_operator_handoff": {
+      "actual_closure_component_id": "",
+      "actual_evidence_audit_status": "engine_input_manifest_required",
+      "actual_evidence_blocked_component_count": 6,
+      "actual_evidence_remaining_evidence": [
+        "engine_input_manifest",
+        "engine_runtime",
+        "engine_run_slots",
+        "adapter_rows",
+        "per_engine_run_receipts",
+        "external_receipts"
+      ],
+      "blocked_criteria": [],
+      "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
+      "capability_id": "",
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+        "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json"
+      ],
+      "first_blocked_target": "public_benchmark_phase2_actual_closure",
+      "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
+      "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+      "handoff_id": "science_actual_closure::vina_gnina_rows",
+      "linked_routes": [
+        "/goal/bottleneck",
+        "/goal/roadmap"
+      ],
+      "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+      "materialization_steps": [
+        "materialize_public_benchmark_vina_gnina_comparison_adapter"
+      ],
+      "minimum_evidence": {
+        "accepted_formats": [
+          "json",
+          "jsonl",
+          "ndjson",
+          "csv"
+        ],
+        "actual_evidence_audit_status": "engine_input_manifest_required",
+        "actual_evidence_blocked_component_count": 6,
+        "actual_evidence_remaining_evidence": [
+          "engine_input_manifest",
+          "engine_runtime",
+          "engine_run_slots",
+          "adapter_rows",
+          "per_engine_run_receipts",
+          "external_receipts"
+        ],
+        "blockers": [
+          "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
+        ],
+        "contract_field_groups": {
+          "required_case_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "engine_runs",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "required_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "source_receipt_required_fields": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ]
+        },
+        "contract_policies": {
+          "boolean_value_policy": {
+            "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+          },
+          "numeric_value_policy": {
+            "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+            "score": "must parse to a finite float; NaN and Infinity are rejected",
+            "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+            "required_unique_row_keys": {
+              "case_engine_runs": [
+                "engine_id",
+                "docking_run_id"
+              ],
+              "cases": [
+                "case_id"
+              ]
+            }
+          },
+          "score_direction_policy": {
+            "accepted_aliases": {
+              "higher_is_better": [
+                "higher",
+                "higher_is_better",
+                "descending"
+              ],
+              "lower_is_better": [
+                "lower",
+                "lower_is_better",
+                "ascending"
+              ]
+            },
+            "accepted_values": [
+              "higher_is_better",
+              "lower_is_better"
+            ],
+            "blank_values": "rejected; no implicit default is applied",
+            "required": true
+          },
+          "source_actuality_policy": {
+            "placeholder_markers_rejected": [
+              "<operator",
+              "dry-run",
+              "dummy",
+              "example.invalid",
+              "example://",
+              "fake",
+              "fixture",
+              "mock",
+              "operator_supplied",
+              "placeholder",
+              "synthetic",
+              "test-accession",
+              "todo",
+              "unit-test"
+            ],
+            "placeholder_provenance_prefixes_rejected": [
+              "operator://",
+              "local-evidence://",
+              "local://",
+              "fixture://",
+              "mock://",
+              "synthetic://",
+              "placeholder://",
+              "test://",
+              "unit-test://",
+              "file://"
+            ],
+            "required_pose_source_receipt_fields": [
+              "receptor_context.provenance_ref"
+            ],
+            "required_source_receipt_fields": [
+              "source_license_or_accession",
+              "source_checksum",
+              "provenance_ref"
+            ],
+            "required_vina_engine_run_pose_ref_fields": [
+              "predicted_ligand_path_or_pose_ref"
+            ],
+            "required_vina_engine_run_receipt_fields": [
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref"
+            ],
+            "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
+            "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+            "vina_engine_run_checksum_fields": [
+              "predicted_ligand_checksum",
+              "engine_config_checksum"
+            ],
+            "vina_engine_run_provenance_fields": [
+              "predicted_ligand_path_or_pose_ref",
+              "engine_run_provenance_ref"
+            ]
+          },
+          "source_checksum_policy": {
+            "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+            "required_receipt_field": "source_checksum"
+          }
+        },
+        "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
+      },
+      "phase_id": "phase_2_public_benchmark_actual_closure",
+      "phase_label": "Phase 2",
+      "queue_priority": 1,
+      "roadmap_item": "Public benchmark Phase 2 actual closure",
+      "root_cause_tags": [
+        "science_actual_closure",
+        "public_benchmark_phase2",
+        "vina_gnina_actual_rows"
+      ],
+      "slot_id": "vina_gnina_rows",
+      "source_acquisition_blockers": [],
+      "status": "operator_rows_required",
+      "target_id": "public_benchmark_phase2_actual_closure",
+      "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+      "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+    },
+    "first_operator_handoff_slot": {
+      "actual_closure_component_id": "",
+      "actual_evidence_audit_status": "engine_input_manifest_required",
+      "actual_evidence_blocked_component_count": 6,
+      "actual_evidence_remaining_evidence": [
+        "engine_input_manifest",
+        "engine_runtime",
+        "engine_run_slots",
+        "adapter_rows",
+        "per_engine_run_receipts",
+        "external_receipts"
+      ],
+      "blocked_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
+      "capability_id": "",
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+        "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json"
+      ],
+      "first_blocked_target": "public_benchmark_phase2_actual_closure",
+      "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
+      "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+      "handoff_id": "science_actual_closure::vina_gnina_rows",
+      "linked_routes": [
+        "/goal/bottleneck",
+        "/goal/roadmap"
+      ],
+      "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+      "materialization_steps": [
+        "materialize_public_benchmark_vina_gnina_comparison_adapter"
+      ],
+      "minimum_evidence": {
+        "accepted_formats": [
+          "json",
+          "jsonl",
+          "ndjson",
+          "csv"
+        ],
+        "actual_evidence_audit_status": "engine_input_manifest_required",
+        "actual_evidence_blocked_component_count": 6,
+        "actual_evidence_remaining_evidence": [
+          "engine_input_manifest",
+          "engine_runtime",
+          "engine_run_slots",
+          "adapter_rows",
+          "per_engine_run_receipts",
+          "external_receipts"
+        ],
+        "blockers": [
+          "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
+        ],
+        "contract_field_groups": {
+          "required_case_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "engine_runs",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "required_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "source_receipt_required_fields": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ]
+        },
+        "contract_policies": {
+          "boolean_value_policy": {
+            "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+          },
+          "numeric_value_policy": {
+            "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+            "score": "must parse to a finite float; NaN and Infinity are rejected",
+            "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+            "required_unique_row_keys": {
+              "case_engine_runs": [
+                "engine_id",
+                "docking_run_id"
+              ],
+              "cases": [
+                "case_id"
+              ]
+            }
+          },
+          "score_direction_policy": {
+            "accepted_aliases": {
+              "higher_is_better": [
+                "higher",
+                "higher_is_better",
+                "descending"
+              ],
+              "lower_is_better": [
+                "lower",
+                "lower_is_better",
+                "ascending"
+              ]
+            },
+            "accepted_values": [
+              "higher_is_better",
+              "lower_is_better"
+            ],
+            "blank_values": "rejected; no implicit default is applied",
+            "required": true
+          },
+          "source_actuality_policy": {
+            "placeholder_markers_rejected": [
+              "<operator",
+              "dry-run",
+              "dummy",
+              "example.invalid",
+              "example://",
+              "fake",
+              "fixture",
+              "mock",
+              "operator_supplied",
+              "placeholder",
+              "synthetic",
+              "test-accession",
+              "todo",
+              "unit-test"
+            ],
+            "placeholder_provenance_prefixes_rejected": [
+              "operator://",
+              "local-evidence://",
+              "local://",
+              "fixture://",
+              "mock://",
+              "synthetic://",
+              "placeholder://",
+              "test://",
+              "unit-test://",
+              "file://"
+            ],
+            "required_pose_source_receipt_fields": [
+              "receptor_context.provenance_ref"
+            ],
+            "required_source_receipt_fields": [
+              "source_license_or_accession",
+              "source_checksum",
+              "provenance_ref"
+            ],
+            "required_vina_engine_run_pose_ref_fields": [
+              "predicted_ligand_path_or_pose_ref"
+            ],
+            "required_vina_engine_run_receipt_fields": [
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref"
+            ],
+            "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
+            "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+            "vina_engine_run_checksum_fields": [
+              "predicted_ligand_checksum",
+              "engine_config_checksum"
+            ],
+            "vina_engine_run_provenance_fields": [
+              "predicted_ligand_path_or_pose_ref",
+              "engine_run_provenance_ref"
+            ]
+          },
+          "source_checksum_policy": {
+            "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+            "required_receipt_field": "source_checksum"
+          }
+        },
+        "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
+      },
+      "phase_id": "phase_2_public_benchmark_actual_closure",
+      "phase_label": "Phase 2",
+      "phase_queue_priority": 2,
+      "queue_priority": 1,
+      "roadmap_item": "Public benchmark Phase 2 actual closure",
+      "root_cause_tags": [
+        "science_actual_closure",
+        "public_benchmark_phase2",
+        "vina_gnina_actual_rows"
+      ],
+      "slot_id": "vina_gnina_rows",
+      "slot_queue_priority": 1,
+      "source_acquisition_blockers": [],
+      "status": "operator_rows_required",
+      "target_id": "public_benchmark_phase2_actual_closure",
+      "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+      "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+    },
     "human_ux_blockers": [
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing"
@@ -131,8 +973,8 @@
       ],
       "workflow_step_pass_count": 0
     },
-    "next_owner_handoff_count": 0,
-    "next_owner_handoff_slot_count": 0,
+    "next_owner_handoff_count": 2,
+    "next_owner_handoff_slot_count": 2,
     "plain_status": "Release is blocked. The product can remain in restricted alpha/beta preparation, but it must not be presented as fully release-ready.",
     "primary_release_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "primary_roadmap_bottleneck": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
@@ -356,11 +1198,788 @@
     ]
   },
   "non_expert_release_briefing_ready": true,
-  "operator_evidence_handoff_count": 0,
-  "operator_evidence_handoff_queue": [],
+  "operator_evidence_handoff_count": 2,
+  "operator_evidence_handoff_queue": [
+    {
+      "actual_closure_component_id": "",
+      "actual_evidence_audit_status": "engine_input_manifest_required",
+      "actual_evidence_blocked_component_count": 6,
+      "actual_evidence_remaining_evidence": [
+        "engine_input_manifest",
+        "engine_runtime",
+        "engine_run_slots",
+        "adapter_rows",
+        "per_engine_run_receipts",
+        "external_receipts"
+      ],
+      "blocked_criteria": [],
+      "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
+      "capability_id": "",
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+        "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json"
+      ],
+      "first_blocked_target": "public_benchmark_phase2_actual_closure",
+      "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
+      "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+      "handoff_id": "science_actual_closure::vina_gnina_rows",
+      "linked_routes": [
+        "/goal/bottleneck",
+        "/goal/roadmap"
+      ],
+      "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+      "materialization_steps": [
+        "materialize_public_benchmark_vina_gnina_comparison_adapter"
+      ],
+      "minimum_evidence": {
+        "accepted_formats": [
+          "json",
+          "jsonl",
+          "ndjson",
+          "csv"
+        ],
+        "actual_evidence_audit_status": "engine_input_manifest_required",
+        "actual_evidence_blocked_component_count": 6,
+        "actual_evidence_remaining_evidence": [
+          "engine_input_manifest",
+          "engine_runtime",
+          "engine_run_slots",
+          "adapter_rows",
+          "per_engine_run_receipts",
+          "external_receipts"
+        ],
+        "blockers": [
+          "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
+        ],
+        "contract_field_groups": {
+          "required_case_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "engine_runs",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "required_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "source_receipt_required_fields": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ]
+        },
+        "contract_policies": {
+          "boolean_value_policy": {
+            "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+          },
+          "numeric_value_policy": {
+            "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+            "score": "must parse to a finite float; NaN and Infinity are rejected",
+            "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+            "required_unique_row_keys": {
+              "case_engine_runs": [
+                "engine_id",
+                "docking_run_id"
+              ],
+              "cases": [
+                "case_id"
+              ]
+            }
+          },
+          "score_direction_policy": {
+            "accepted_aliases": {
+              "higher_is_better": [
+                "higher",
+                "higher_is_better",
+                "descending"
+              ],
+              "lower_is_better": [
+                "lower",
+                "lower_is_better",
+                "ascending"
+              ]
+            },
+            "accepted_values": [
+              "higher_is_better",
+              "lower_is_better"
+            ],
+            "blank_values": "rejected; no implicit default is applied",
+            "required": true
+          },
+          "source_actuality_policy": {
+            "placeholder_markers_rejected": [
+              "<operator",
+              "dry-run",
+              "dummy",
+              "example.invalid",
+              "example://",
+              "fake",
+              "fixture",
+              "mock",
+              "operator_supplied",
+              "placeholder",
+              "synthetic",
+              "test-accession",
+              "todo",
+              "unit-test"
+            ],
+            "placeholder_provenance_prefixes_rejected": [
+              "operator://",
+              "local-evidence://",
+              "local://",
+              "fixture://",
+              "mock://",
+              "synthetic://",
+              "placeholder://",
+              "test://",
+              "unit-test://",
+              "file://"
+            ],
+            "required_pose_source_receipt_fields": [
+              "receptor_context.provenance_ref"
+            ],
+            "required_source_receipt_fields": [
+              "source_license_or_accession",
+              "source_checksum",
+              "provenance_ref"
+            ],
+            "required_vina_engine_run_pose_ref_fields": [
+              "predicted_ligand_path_or_pose_ref"
+            ],
+            "required_vina_engine_run_receipt_fields": [
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref"
+            ],
+            "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
+            "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+            "vina_engine_run_checksum_fields": [
+              "predicted_ligand_checksum",
+              "engine_config_checksum"
+            ],
+            "vina_engine_run_provenance_fields": [
+              "predicted_ligand_path_or_pose_ref",
+              "engine_run_provenance_ref"
+            ]
+          },
+          "source_checksum_policy": {
+            "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+            "required_receipt_field": "source_checksum"
+          }
+        },
+        "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
+      },
+      "phase_id": "phase_2_public_benchmark_actual_closure",
+      "phase_label": "Phase 2",
+      "queue_priority": 1,
+      "roadmap_item": "Public benchmark Phase 2 actual closure",
+      "root_cause_tags": [
+        "science_actual_closure",
+        "public_benchmark_phase2",
+        "vina_gnina_actual_rows"
+      ],
+      "slot_id": "vina_gnina_rows",
+      "source_acquisition_blockers": [],
+      "status": "operator_rows_required",
+      "target_id": "public_benchmark_phase2_actual_closure",
+      "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+      "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+    },
+    {
+      "actual_closure_component_id": "",
+      "actual_evidence_audit_status": "operator_topk_rows_required",
+      "actual_evidence_blocked_component_count": 4,
+      "actual_evidence_remaining_evidence": [
+        "bounded_top_k_row_slots",
+        "per_candidate_role_receipts",
+        "operator_input_source_receipt",
+        "survival_metric_summary"
+      ],
+      "blocked_criteria": [],
+      "bottleneck": "pocketmd_lite_topk_actual_rows_required",
+      "capability_id": "",
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+        "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json"
+      ],
+      "first_blocked_target": "pocketmd_lite_topk_actual_closure",
+      "first_blocker": "pocketmd_lite_topk_actual_closure::pocketmd_rows_not_provided",
+      "first_next_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+      "handoff_id": "science_actual_closure::pocketmd_rows",
+      "linked_routes": [
+        "/goal/bottleneck",
+        "/goal/roadmap"
+      ],
+      "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
+      "materialization_steps": [
+        "materialize_pocketmd_lite_operator_intake_from_rows",
+        "materialize_pocketmd_lite_topk_survival_report",
+        "build_pocketmd_lite_science_product_surface"
+      ],
+      "minimum_evidence": {
+        "accepted_formats": [
+          "csv",
+          "tsv",
+          "json",
+          "jsonl",
+          "ndjson"
+        ],
+        "actual_evidence_audit_status": "operator_topk_rows_required",
+        "actual_evidence_blocked_component_count": 4,
+        "actual_evidence_remaining_evidence": [
+          "bounded_top_k_row_slots",
+          "per_candidate_role_receipts",
+          "operator_input_source_receipt",
+          "survival_metric_summary"
+        ],
+        "blockers": [
+          "pocketmd_lite_topk_actual_closure::pocketmd_rows_not_provided"
+        ],
+        "contract_field_groups": {
+          "required_case_fields": [
+            "case_id",
+            "source_family",
+            "top_k_rank",
+            "candidate_id",
+            "upstream_top_k_provenance_ref",
+            "upstream_top_k_source_checksum",
+            "pre_refinement_energy_proxy",
+            "post_refinement_energy_proxy",
+            "local_min_survived",
+            "contact_persistence_rate",
+            "h_bond_persistence_rate",
+            "clash_count_before",
+            "clash_count_after",
+            "uncertainty_interval",
+            "provenance_ref",
+            "source_checksum"
+          ],
+          "required_component_metrics": [
+            "local_min_survival_rate",
+            "contact_persistence_rate",
+            "h_bond_persistence_rate",
+            "clash_relief_rate",
+            "uncertainty_width_median"
+          ],
+          "required_summary_metrics": [
+            "local_min_survival_rate",
+            "contact_persistence_rate_median",
+            "h_bond_persistence_rate_median",
+            "clash_relief_rate",
+            "uncertainty_width_median"
+          ],
+          "source_receipt_required_fields": [
+            "source_id",
+            "source_url",
+            "source_license",
+            "source_artifact_sha256",
+            "per_row_source_checksum",
+            "per_row_provenance_ref"
+          ],
+          "uncertainty_field_modes": [
+            "uncertainty_interval:{low,high,unit}",
+            "uncertainty_low+uncertainty_high+uncertainty_unit"
+          ]
+        },
+        "contract_policies": {
+          "boolean_value_policy": {
+            "local_min_survived": "must parse to a boolean value"
+          },
+          "numeric_value_policy": {
+            "contact_persistence_rate": "must parse to a finite float in [0, 1]; NaN and Infinity are rejected",
+            "h_bond_persistence_rate": "must parse to a finite float in [0, 1]; NaN and Infinity are rejected",
+            "post_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+            "pre_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+            "uncertainty_interval.high": "must parse to a finite float and be >= low; NaN and Infinity are rejected",
+            "uncertainty_interval.low": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "per_row_source_actuality_policy": {
+            "placeholder_markers_rejected": [
+              "<operator",
+              "fixture",
+              "synthetic",
+              "mock",
+              "placeholder",
+              "dummy",
+              "example",
+              "operator_supplied",
+              "unit-test",
+              "test-only"
+            ],
+            "placeholder_provenance_prefixes_rejected": [
+              "operator://",
+              "local-evidence://",
+              "local://",
+              "fixture://",
+              "mock://",
+              "synthetic://",
+              "placeholder://",
+              "test://",
+              "unit-test://"
+            ],
+            "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest"
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate PocketMD Lite top-k ranks or candidate identities cannot be used to inflate case, candidate, or survival counts.",
+            "required_unique_row_keys": {
+              "top_k_refinement_rows": [
+                [
+                  "case_id",
+                  "top_k_rank"
+                ],
+                [
+                  "case_id",
+                  "candidate_id"
+                ]
+              ]
+            }
+          },
+          "top_k_row_quality_minimums": {
+            "min_candidate_count_per_case": 2,
+            "min_real_refinement_case_count": 3,
+            "min_top_k_rank_coverage_per_case": 2,
+            "min_total_top_k_candidate_count": 6
+          }
+        },
+        "preferred_default_row_path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json"
+      },
+      "phase_id": "phase_4_pocketmd_lite_topk_actual_closure",
+      "phase_label": "Phase 4",
+      "queue_priority": 2,
+      "roadmap_item": "PocketMD Lite top-k actual closure",
+      "root_cause_tags": [
+        "science_actual_closure",
+        "pocketmd_lite",
+        "top_k_refinement_rows"
+      ],
+      "slot_id": "pocketmd_rows",
+      "source_acquisition_blockers": [],
+      "status": "operator_rows_required",
+      "target_id": "pocketmd_lite_topk_actual_closure",
+      "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+      "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
+    }
+  ],
   "operator_evidence_handoff_scope": "first_blocked_operator_gap_per_blocked_phase",
-  "operator_evidence_handoff_slot_count": 0,
-  "operator_evidence_handoff_slot_queue": [],
+  "operator_evidence_handoff_slot_count": 2,
+  "operator_evidence_handoff_slot_queue": [
+    {
+      "actual_closure_component_id": "",
+      "actual_evidence_audit_status": "engine_input_manifest_required",
+      "actual_evidence_blocked_component_count": 6,
+      "actual_evidence_remaining_evidence": [
+        "engine_input_manifest",
+        "engine_runtime",
+        "engine_run_slots",
+        "adapter_rows",
+        "per_engine_run_receipts",
+        "external_receipts"
+      ],
+      "blocked_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
+      "capability_id": "",
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+        "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json"
+      ],
+      "first_blocked_target": "public_benchmark_phase2_actual_closure",
+      "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
+      "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+      "handoff_id": "science_actual_closure::vina_gnina_rows",
+      "linked_routes": [
+        "/goal/bottleneck",
+        "/goal/roadmap"
+      ],
+      "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+      "materialization_steps": [
+        "materialize_public_benchmark_vina_gnina_comparison_adapter"
+      ],
+      "minimum_evidence": {
+        "accepted_formats": [
+          "json",
+          "jsonl",
+          "ndjson",
+          "csv"
+        ],
+        "actual_evidence_audit_status": "engine_input_manifest_required",
+        "actual_evidence_blocked_component_count": 6,
+        "actual_evidence_remaining_evidence": [
+          "engine_input_manifest",
+          "engine_runtime",
+          "engine_run_slots",
+          "adapter_rows",
+          "per_engine_run_receipts",
+          "external_receipts"
+        ],
+        "blockers": [
+          "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
+        ],
+        "contract_field_groups": {
+          "required_case_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "engine_runs",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "required_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "source_receipt_required_fields": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ]
+        },
+        "contract_policies": {
+          "boolean_value_policy": {
+            "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+          },
+          "numeric_value_policy": {
+            "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+            "score": "must parse to a finite float; NaN and Infinity are rejected",
+            "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+            "required_unique_row_keys": {
+              "case_engine_runs": [
+                "engine_id",
+                "docking_run_id"
+              ],
+              "cases": [
+                "case_id"
+              ]
+            }
+          },
+          "score_direction_policy": {
+            "accepted_aliases": {
+              "higher_is_better": [
+                "higher",
+                "higher_is_better",
+                "descending"
+              ],
+              "lower_is_better": [
+                "lower",
+                "lower_is_better",
+                "ascending"
+              ]
+            },
+            "accepted_values": [
+              "higher_is_better",
+              "lower_is_better"
+            ],
+            "blank_values": "rejected; no implicit default is applied",
+            "required": true
+          },
+          "source_actuality_policy": {
+            "placeholder_markers_rejected": [
+              "<operator",
+              "dry-run",
+              "dummy",
+              "example.invalid",
+              "example://",
+              "fake",
+              "fixture",
+              "mock",
+              "operator_supplied",
+              "placeholder",
+              "synthetic",
+              "test-accession",
+              "todo",
+              "unit-test"
+            ],
+            "placeholder_provenance_prefixes_rejected": [
+              "operator://",
+              "local-evidence://",
+              "local://",
+              "fixture://",
+              "mock://",
+              "synthetic://",
+              "placeholder://",
+              "test://",
+              "unit-test://",
+              "file://"
+            ],
+            "required_pose_source_receipt_fields": [
+              "receptor_context.provenance_ref"
+            ],
+            "required_source_receipt_fields": [
+              "source_license_or_accession",
+              "source_checksum",
+              "provenance_ref"
+            ],
+            "required_vina_engine_run_pose_ref_fields": [
+              "predicted_ligand_path_or_pose_ref"
+            ],
+            "required_vina_engine_run_receipt_fields": [
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref"
+            ],
+            "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
+            "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+            "vina_engine_run_checksum_fields": [
+              "predicted_ligand_checksum",
+              "engine_config_checksum"
+            ],
+            "vina_engine_run_provenance_fields": [
+              "predicted_ligand_path_or_pose_ref",
+              "engine_run_provenance_ref"
+            ]
+          },
+          "source_checksum_policy": {
+            "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+            "required_receipt_field": "source_checksum"
+          }
+        },
+        "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
+      },
+      "phase_id": "phase_2_public_benchmark_actual_closure",
+      "phase_label": "Phase 2",
+      "phase_queue_priority": 2,
+      "queue_priority": 1,
+      "roadmap_item": "Public benchmark Phase 2 actual closure",
+      "root_cause_tags": [
+        "science_actual_closure",
+        "public_benchmark_phase2",
+        "vina_gnina_actual_rows"
+      ],
+      "slot_id": "vina_gnina_rows",
+      "slot_queue_priority": 1,
+      "source_acquisition_blockers": [],
+      "status": "operator_rows_required",
+      "target_id": "public_benchmark_phase2_actual_closure",
+      "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+      "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+    },
+    {
+      "actual_closure_component_id": "",
+      "actual_evidence_audit_status": "operator_topk_rows_required",
+      "actual_evidence_blocked_component_count": 4,
+      "actual_evidence_remaining_evidence": [
+        "bounded_top_k_row_slots",
+        "per_candidate_role_receipts",
+        "operator_input_source_receipt",
+        "survival_metric_summary"
+      ],
+      "blocked_criteria": [
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved"
+      ],
+      "bottleneck": "pocketmd_lite_topk_actual_rows_required",
+      "capability_id": "",
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+        "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json"
+      ],
+      "first_blocked_target": "pocketmd_lite_topk_actual_closure",
+      "first_blocker": "pocketmd_lite_topk_actual_closure::pocketmd_rows_not_provided",
+      "first_next_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+      "handoff_id": "science_actual_closure::pocketmd_rows",
+      "linked_routes": [
+        "/goal/bottleneck",
+        "/goal/roadmap"
+      ],
+      "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
+      "materialization_steps": [
+        "materialize_pocketmd_lite_operator_intake_from_rows",
+        "materialize_pocketmd_lite_topk_survival_report",
+        "build_pocketmd_lite_science_product_surface"
+      ],
+      "minimum_evidence": {
+        "accepted_formats": [
+          "csv",
+          "tsv",
+          "json",
+          "jsonl",
+          "ndjson"
+        ],
+        "actual_evidence_audit_status": "operator_topk_rows_required",
+        "actual_evidence_blocked_component_count": 4,
+        "actual_evidence_remaining_evidence": [
+          "bounded_top_k_row_slots",
+          "per_candidate_role_receipts",
+          "operator_input_source_receipt",
+          "survival_metric_summary"
+        ],
+        "blockers": [
+          "pocketmd_lite_topk_actual_closure::pocketmd_rows_not_provided"
+        ],
+        "contract_field_groups": {
+          "required_case_fields": [
+            "case_id",
+            "source_family",
+            "top_k_rank",
+            "candidate_id",
+            "upstream_top_k_provenance_ref",
+            "upstream_top_k_source_checksum",
+            "pre_refinement_energy_proxy",
+            "post_refinement_energy_proxy",
+            "local_min_survived",
+            "contact_persistence_rate",
+            "h_bond_persistence_rate",
+            "clash_count_before",
+            "clash_count_after",
+            "uncertainty_interval",
+            "provenance_ref",
+            "source_checksum"
+          ],
+          "required_component_metrics": [
+            "local_min_survival_rate",
+            "contact_persistence_rate",
+            "h_bond_persistence_rate",
+            "clash_relief_rate",
+            "uncertainty_width_median"
+          ],
+          "required_summary_metrics": [
+            "local_min_survival_rate",
+            "contact_persistence_rate_median",
+            "h_bond_persistence_rate_median",
+            "clash_relief_rate",
+            "uncertainty_width_median"
+          ],
+          "source_receipt_required_fields": [
+            "source_id",
+            "source_url",
+            "source_license",
+            "source_artifact_sha256",
+            "per_row_source_checksum",
+            "per_row_provenance_ref"
+          ],
+          "uncertainty_field_modes": [
+            "uncertainty_interval:{low,high,unit}",
+            "uncertainty_low+uncertainty_high+uncertainty_unit"
+          ]
+        },
+        "contract_policies": {
+          "boolean_value_policy": {
+            "local_min_survived": "must parse to a boolean value"
+          },
+          "numeric_value_policy": {
+            "contact_persistence_rate": "must parse to a finite float in [0, 1]; NaN and Infinity are rejected",
+            "h_bond_persistence_rate": "must parse to a finite float in [0, 1]; NaN and Infinity are rejected",
+            "post_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+            "pre_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+            "uncertainty_interval.high": "must parse to a finite float and be >= low; NaN and Infinity are rejected",
+            "uncertainty_interval.low": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "per_row_source_actuality_policy": {
+            "placeholder_markers_rejected": [
+              "<operator",
+              "fixture",
+              "synthetic",
+              "mock",
+              "placeholder",
+              "dummy",
+              "example",
+              "operator_supplied",
+              "unit-test",
+              "test-only"
+            ],
+            "placeholder_provenance_prefixes_rejected": [
+              "operator://",
+              "local-evidence://",
+              "local://",
+              "fixture://",
+              "mock://",
+              "synthetic://",
+              "placeholder://",
+              "test://",
+              "unit-test://"
+            ],
+            "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest"
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate PocketMD Lite top-k ranks or candidate identities cannot be used to inflate case, candidate, or survival counts.",
+            "required_unique_row_keys": {
+              "top_k_refinement_rows": [
+                [
+                  "case_id",
+                  "top_k_rank"
+                ],
+                [
+                  "case_id",
+                  "candidate_id"
+                ]
+              ]
+            }
+          },
+          "top_k_row_quality_minimums": {
+            "min_candidate_count_per_case": 2,
+            "min_real_refinement_case_count": 3,
+            "min_top_k_rank_coverage_per_case": 2,
+            "min_total_top_k_candidate_count": 6
+          }
+        },
+        "preferred_default_row_path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json"
+      },
+      "phase_id": "phase_4_pocketmd_lite_topk_actual_closure",
+      "phase_label": "Phase 4",
+      "phase_queue_priority": 3,
+      "queue_priority": 2,
+      "roadmap_item": "PocketMD Lite top-k actual closure",
+      "root_cause_tags": [
+        "science_actual_closure",
+        "pocketmd_lite",
+        "top_k_refinement_rows"
+      ],
+      "slot_id": "pocketmd_rows",
+      "slot_queue_priority": 1,
+      "source_acquisition_blockers": [],
+      "status": "operator_rows_required",
+      "target_id": "pocketmd_lite_topk_actual_closure",
+      "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+      "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
+    }
+  ],
   "operator_evidence_handoff_slot_scope": "all_blocked_operator_slots_per_blocked_phase",
   "primary_next_actions": [
     "work_release_decision_operator_actions"
@@ -514,13 +2133,1675 @@
         "product_capability_count": 1,
         "release_allowed": false
       }
+    },
+    {
+      "blocked_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "blocked_criteria_count": 1,
+      "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+        "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json"
+      ],
+      "first_blocked_target": "public_benchmark_phase2_actual_closure",
+      "first_blocker": "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
+      "linked_routes": [
+        "/goal/bottleneck",
+        "/goal/roadmap"
+      ],
+      "next_actions": [
+        "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "attach_vina_gnina_rows",
+        "attach_pocketmd_rows",
+        "resolve_public_benchmark_phase2_source_acquisition_blockers",
+        "resolve_pocketmd_lite_source_acquisition_blockers",
+        "run_science_actual_closure_row_materializer",
+        "review_science_actual_closure_row_audit"
+      ],
+      "phase_id": "phase_2_public_benchmark_actual_closure",
+      "phase_label": "Phase 2",
+      "roadmap_item": "Public benchmark Phase 2 actual closure",
+      "root_cause_tags": [
+        "science_actual_closure",
+        "public_benchmark_phase2",
+        "vina_gnina_actual_rows"
+      ],
+      "state": "blocked",
+      "summary": {
+        "actual_closure_ready": false,
+        "actual_evidence_audit": {
+          "actual_closure_ready": false,
+          "blocked_component_count": 6,
+          "blocked_component_ids": [
+            "engine_input_manifest",
+            "engine_runtime",
+            "engine_run_slots",
+            "adapter_rows",
+            "per_engine_run_receipts",
+            "external_receipts"
+          ],
+          "claim_boundary": "This audit summarizes actual Vina/GNINA Phase 2 closure evidence. It does not run docking engines, fill manifests, synthesize adapter rows, or replace external source receipts.",
+          "component_count": 6,
+          "components": [
+            {
+              "blockers": [
+                "public_benchmark_vina_gnina_input_manifest_not_detected",
+                "public_benchmark_vina_gnina_case_inputs_incomplete"
+              ],
+              "component_id": "engine_input_manifest",
+              "current": {
+                "blocked_case_input_slot_count": 12,
+                "input_manifest_detected": false,
+                "input_manifest_row_count": 0,
+                "input_manifest_status": "not_detected",
+                "required_case_count": 12,
+                "template_manifest_ready": false,
+                "template_missing_local_file_count": 48,
+                "template_missing_receipt_ref_count": 60,
+                "template_preflight_status": "operator_manifest_completion_required"
+              },
+              "pass": false,
+              "required": {
+                "blocked_case_input_slot_count": 0,
+                "input_manifest_detected": true,
+                "input_manifest_row_count": ">=12"
+              },
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "vina_gnina_execution_plan_not_ready",
+                "vina_binary_missing",
+                "gnina_binary_missing"
+              ],
+              "component_id": "engine_runtime",
+              "current": {
+                "available_engine_count": 0,
+                "missing_engine_count": 2,
+                "missing_engine_ids": [
+                  "vina",
+                  "gnina"
+                ],
+                "runtime_ready_for_engine_execution": false,
+                "runtime_status": "execution_plan_blocked"
+              },
+              "pass": false,
+              "required": {
+                "missing_engine_count": 0,
+                "runtime_ready_for_engine_execution": true
+              },
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "public_benchmark_vina_gnina_engine_run_slots_incomplete"
+              ],
+              "component_id": "engine_run_slots",
+              "current": {
+                "blocked_engine_run_slot_count": 24,
+                "ready_engine_run_slot_count": 0,
+                "required_engine_run_count": 24
+              },
+              "pass": false,
+              "required": {
+                "blocked_engine_run_slot_count": 0,
+                "ready_engine_run_slot_count": 24
+              },
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "public_benchmark_vina_gnina_rows_not_detected",
+                "vina_gnina_rows_not_provided"
+              ],
+              "component_id": "adapter_rows",
+              "current": {
+                "adapter_case_count": 0,
+                "adapter_preflight_contract_pass": false,
+                "adapter_preflight_status": "missing",
+                "adapter_rows_ready": false,
+                "detected_row_artifact_count": 0,
+                "row_candidate_status": "row_artifact_missing",
+                "selected_row_count": 0
+              },
+              "pass": false,
+              "required": {
+                "adapter_case_count": ">=1",
+                "adapter_preflight_contract_pass": true,
+                "detected_row_artifact_count": ">=1"
+              },
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "public_benchmark_vina_gnina_engine_run_receipts_incomplete"
+              ],
+              "component_id": "per_engine_run_receipts",
+              "current": {
+                "adapter_template_ready": false,
+                "expected_rows_detected": false,
+                "missing_engine_run_receipt_value_count": 72,
+                "role_receipt_blocked_count": 72,
+                "role_receipt_plan_count": 96,
+                "rows_template_preflight_status": "operator_rows_completion_required"
+              },
+              "pass": false,
+              "required": {
+                "adapter_template_ready": true,
+                "expected_rows_detected": true,
+                "role_receipt_blocked_count": 0
+              },
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "vina_gnina_rows_not_provided",
+                "public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter",
+                "public_benchmark_vina_gnina_input_manifest_not_detected",
+                "public_benchmark_vina_gnina_engine_runtime_not_ready"
+              ],
+              "component_id": "external_receipts",
+              "current": {
+                "all_expected_artifact_roles_complete": false,
+                "blocked_official_receipt_role_count": 1,
+                "external_receipt_completion_status": "blocked_pending_vina_gnina_receipts",
+                "missing_expected_artifact_roles": [
+                  "vina_gnina_comparison_adapter"
+                ]
+              },
+              "pass": false,
+              "required": {
+                "all_expected_artifact_roles_complete": true,
+                "blocked_official_receipt_role_count": 0
+              },
+              "status": "blocked"
+            }
+          ],
+          "first_blocked_case_input_slot": {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing"
+            ],
+            "case_id": "casf2016_4llx",
+            "case_inputs_ready": false,
+            "complex_id": "4llx",
+            "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+            "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_4llx",
+            "status": "blocked"
+          },
+          "first_blocked_engine_run_slot": {
+            "blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing",
+              "vina_binary_missing"
+            ],
+            "case_blockers": [
+              "protein_structure_path_missing",
+              "reference_ligand_path_missing",
+              "prepared_receptor_path_missing",
+              "prepared_ligand_path_missing"
+            ],
+            "case_id": "casf2016_4llx",
+            "case_inputs_ready": false,
+            "command_template": "<vina> --receptor <prepared/4llx_receptor> --ligand <prepared/4llx_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+            "complex_id": "4llx",
+            "docking_box_ready": true,
+            "docking_run_id": "casf2016_4llx_vina_run",
+            "engine_available": false,
+            "engine_command_prefix": "",
+            "engine_container_image": "",
+            "engine_executable": "",
+            "engine_execution_source": "",
+            "engine_id": "vina",
+            "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+            "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+            "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+            "required_adapter_case_fields": [
+              "case_id",
+              "source_family",
+              "benchmark_split",
+              "complex_id",
+              "reference_pose_id",
+              "engine_runs",
+              "source_license_or_accession",
+              "source_checksum",
+              "provenance_ref"
+            ],
+            "required_adapter_engine_run_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_version",
+              "engine_config_checksum",
+              "engine_run_provenance_ref",
+              "symmetry_aware_rmsd_angstrom",
+              "pose_success",
+              "score",
+              "score_direction"
+            ],
+            "status": "blocked"
+          },
+          "first_blocked_role_receipt": {
+            "blockers": [
+              "required_role_fields_missing",
+              "required_role_fields_invalid"
+            ],
+            "case_id": "casf2016_4llx",
+            "closes_phase2_criteria": [
+              "vina_gnina_comparison_ready"
+            ],
+            "docking_run_id": "casf2016_4llx_vina_run",
+            "engine_id": "vina",
+            "invalid_fields": [
+              "engine_run_provenance_ref",
+              "predicted_ligand_path_or_pose_ref"
+            ],
+            "missing_fields": [
+              "predicted_ligand_checksum"
+            ],
+            "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+            "required_fields": [
+              "engine_id",
+              "docking_run_id",
+              "predicted_ligand_path_or_pose_ref",
+              "predicted_ligand_checksum",
+              "engine_run_provenance_ref"
+            ],
+            "role_id": "engine_run_artifact_receipt",
+            "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+            "status": "operator_completion_required"
+          },
+          "minimum_comparison_case_count": 1,
+          "pass": false,
+          "ready_component_count": 0,
+          "remaining_blockers": [
+            "public_benchmark_vina_gnina_input_manifest_not_detected",
+            "public_benchmark_vina_gnina_case_inputs_incomplete",
+            "vina_gnina_execution_plan_not_ready",
+            "vina_binary_missing",
+            "gnina_binary_missing",
+            "public_benchmark_vina_gnina_engine_run_slots_incomplete",
+            "public_benchmark_vina_gnina_rows_not_detected",
+            "vina_gnina_rows_not_provided",
+            "public_benchmark_vina_gnina_engine_run_receipts_incomplete",
+            "public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter",
+            "public_benchmark_vina_gnina_engine_runtime_not_ready"
+          ],
+          "remaining_evidence": [
+            "engine_input_manifest",
+            "engine_runtime",
+            "engine_run_slots",
+            "adapter_rows",
+            "per_engine_run_receipts",
+            "external_receipts"
+          ],
+          "required_case_count": 12,
+          "required_engine_run_count": 24,
+          "status": "engine_input_manifest_required"
+        },
+        "actual_evidence_audit_status": "engine_input_manifest_required",
+        "actual_evidence_blocked_component_count": 6,
+        "component_id": "public_benchmark_phase2_actual_closure",
+        "failed_criteria": [
+          "vina_gnina_comparison_ready"
+        ],
+        "first_operator_evidence_gap": {
+          "actual_evidence_audit_status": "engine_input_manifest_required",
+          "actual_evidence_blocked_component_count": 6,
+          "actual_evidence_remaining_evidence": [
+            "engine_input_manifest",
+            "engine_runtime",
+            "engine_run_slots",
+            "adapter_rows",
+            "per_engine_run_receipts",
+            "external_receipts"
+          ],
+          "blocked_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+          "handoff_id": "science_actual_closure::vina_gnina_rows",
+          "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+          "materialization_steps": [
+            "materialize_public_benchmark_vina_gnina_comparison_adapter"
+          ],
+          "minimum_evidence": {
+            "accepted_formats": [
+              "json",
+              "jsonl",
+              "ndjson",
+              "csv"
+            ],
+            "actual_evidence_audit_status": "engine_input_manifest_required",
+            "actual_evidence_blocked_component_count": 6,
+            "actual_evidence_remaining_evidence": [
+              "engine_input_manifest",
+              "engine_runtime",
+              "engine_run_slots",
+              "adapter_rows",
+              "per_engine_run_receipts",
+              "external_receipts"
+            ],
+            "blockers": [
+              "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
+            ],
+            "contract_field_groups": {
+              "required_case_fields": [
+                "case_id",
+                "source_family",
+                "benchmark_split",
+                "complex_id",
+                "reference_pose_id",
+                "engine_runs",
+                "source_license_or_accession",
+                "source_checksum",
+                "provenance_ref"
+              ],
+              "required_engine_run_fields": [
+                "engine_id",
+                "docking_run_id",
+                "predicted_ligand_path_or_pose_ref",
+                "predicted_ligand_checksum",
+                "engine_version",
+                "engine_config_checksum",
+                "engine_run_provenance_ref",
+                "symmetry_aware_rmsd_angstrom",
+                "pose_success",
+                "score",
+                "score_direction"
+              ],
+              "source_receipt_required_fields": [
+                "source_license_or_accession",
+                "source_checksum",
+                "provenance_ref"
+              ]
+            },
+            "contract_policies": {
+              "boolean_value_policy": {
+                "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+              },
+              "numeric_value_policy": {
+                "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+                "score": "must parse to a finite float; NaN and Infinity are rejected",
+                "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+              },
+              "row_integrity_policy": {
+                "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+                "required_unique_row_keys": {
+                  "case_engine_runs": [
+                    "engine_id",
+                    "docking_run_id"
+                  ],
+                  "cases": [
+                    "case_id"
+                  ]
+                }
+              },
+              "score_direction_policy": {
+                "accepted_aliases": {
+                  "higher_is_better": [
+                    "higher",
+                    "higher_is_better",
+                    "descending"
+                  ],
+                  "lower_is_better": [
+                    "lower",
+                    "lower_is_better",
+                    "ascending"
+                  ]
+                },
+                "accepted_values": [
+                  "higher_is_better",
+                  "lower_is_better"
+                ],
+                "blank_values": "rejected; no implicit default is applied",
+                "required": true
+              },
+              "source_actuality_policy": {
+                "placeholder_markers_rejected": [
+                  "<operator",
+                  "dry-run",
+                  "dummy",
+                  "example.invalid",
+                  "example://",
+                  "fake",
+                  "fixture",
+                  "mock",
+                  "operator_supplied",
+                  "placeholder",
+                  "synthetic",
+                  "test-accession",
+                  "todo",
+                  "unit-test"
+                ],
+                "placeholder_provenance_prefixes_rejected": [
+                  "operator://",
+                  "local-evidence://",
+                  "local://",
+                  "fixture://",
+                  "mock://",
+                  "synthetic://",
+                  "placeholder://",
+                  "test://",
+                  "unit-test://",
+                  "file://"
+                ],
+                "required_pose_source_receipt_fields": [
+                  "receptor_context.provenance_ref"
+                ],
+                "required_source_receipt_fields": [
+                  "source_license_or_accession",
+                  "source_checksum",
+                  "provenance_ref"
+                ],
+                "required_vina_engine_run_pose_ref_fields": [
+                  "predicted_ligand_path_or_pose_ref"
+                ],
+                "required_vina_engine_run_receipt_fields": [
+                  "predicted_ligand_path_or_pose_ref",
+                  "predicted_ligand_checksum",
+                  "engine_version",
+                  "engine_config_checksum",
+                  "engine_run_provenance_ref"
+                ],
+                "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
+                "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+                "vina_engine_run_checksum_fields": [
+                  "predicted_ligand_checksum",
+                  "engine_config_checksum"
+                ],
+                "vina_engine_run_provenance_fields": [
+                  "predicted_ligand_path_or_pose_ref",
+                  "engine_run_provenance_ref"
+                ]
+              },
+              "source_checksum_policy": {
+                "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+                "required_receipt_field": "source_checksum"
+              }
+            },
+            "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
+          },
+          "slot_id": "vina_gnina_rows",
+          "source_acquisition_blockers": [],
+          "status": "operator_rows_required",
+          "target_id": "public_benchmark_phase2_actual_closure",
+          "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+          "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+        },
+        "missing_row_inputs": [
+          "vina_gnina_rows"
+        ],
+        "operator_evidence_gap_count": 1,
+        "operator_evidence_gap_register": [
+          {
+            "actual_evidence_audit_status": "engine_input_manifest_required",
+            "actual_evidence_blocked_component_count": 6,
+            "actual_evidence_remaining_evidence": [
+              "engine_input_manifest",
+              "engine_runtime",
+              "engine_run_slots",
+              "adapter_rows",
+              "per_engine_run_receipts",
+              "external_receipts"
+            ],
+            "blocked_criteria": [
+              "vina_gnina_comparison_ready"
+            ],
+            "first_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+            "handoff_id": "science_actual_closure::vina_gnina_rows",
+            "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+            "materialization_steps": [
+              "materialize_public_benchmark_vina_gnina_comparison_adapter"
+            ],
+            "minimum_evidence": {
+              "accepted_formats": [
+                "json",
+                "jsonl",
+                "ndjson",
+                "csv"
+              ],
+              "actual_evidence_audit_status": "engine_input_manifest_required",
+              "actual_evidence_blocked_component_count": 6,
+              "actual_evidence_remaining_evidence": [
+                "engine_input_manifest",
+                "engine_runtime",
+                "engine_run_slots",
+                "adapter_rows",
+                "per_engine_run_receipts",
+                "external_receipts"
+              ],
+              "blockers": [
+                "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
+              ],
+              "contract_field_groups": {
+                "required_case_fields": [
+                  "case_id",
+                  "source_family",
+                  "benchmark_split",
+                  "complex_id",
+                  "reference_pose_id",
+                  "engine_runs",
+                  "source_license_or_accession",
+                  "source_checksum",
+                  "provenance_ref"
+                ],
+                "required_engine_run_fields": [
+                  "engine_id",
+                  "docking_run_id",
+                  "predicted_ligand_path_or_pose_ref",
+                  "predicted_ligand_checksum",
+                  "engine_version",
+                  "engine_config_checksum",
+                  "engine_run_provenance_ref",
+                  "symmetry_aware_rmsd_angstrom",
+                  "pose_success",
+                  "score",
+                  "score_direction"
+                ],
+                "source_receipt_required_fields": [
+                  "source_license_or_accession",
+                  "source_checksum",
+                  "provenance_ref"
+                ]
+              },
+              "contract_policies": {
+                "boolean_value_policy": {
+                  "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+                },
+                "numeric_value_policy": {
+                  "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+                  "score": "must parse to a finite float; NaN and Infinity are rejected",
+                  "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+                },
+                "row_integrity_policy": {
+                  "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+                  "required_unique_row_keys": {
+                    "case_engine_runs": [
+                      "engine_id",
+                      "docking_run_id"
+                    ],
+                    "cases": [
+                      "case_id"
+                    ]
+                  }
+                },
+                "score_direction_policy": {
+                  "accepted_aliases": {
+                    "higher_is_better": [
+                      "higher",
+                      "higher_is_better",
+                      "descending"
+                    ],
+                    "lower_is_better": [
+                      "lower",
+                      "lower_is_better",
+                      "ascending"
+                    ]
+                  },
+                  "accepted_values": [
+                    "higher_is_better",
+                    "lower_is_better"
+                  ],
+                  "blank_values": "rejected; no implicit default is applied",
+                  "required": true
+                },
+                "source_actuality_policy": {
+                  "placeholder_markers_rejected": [
+                    "<operator",
+                    "dry-run",
+                    "dummy",
+                    "example.invalid",
+                    "example://",
+                    "fake",
+                    "fixture",
+                    "mock",
+                    "operator_supplied",
+                    "placeholder",
+                    "synthetic",
+                    "test-accession",
+                    "todo",
+                    "unit-test"
+                  ],
+                  "placeholder_provenance_prefixes_rejected": [
+                    "operator://",
+                    "local-evidence://",
+                    "local://",
+                    "fixture://",
+                    "mock://",
+                    "synthetic://",
+                    "placeholder://",
+                    "test://",
+                    "unit-test://",
+                    "file://"
+                  ],
+                  "required_pose_source_receipt_fields": [
+                    "receptor_context.provenance_ref"
+                  ],
+                  "required_source_receipt_fields": [
+                    "source_license_or_accession",
+                    "source_checksum",
+                    "provenance_ref"
+                  ],
+                  "required_vina_engine_run_pose_ref_fields": [
+                    "predicted_ligand_path_or_pose_ref"
+                  ],
+                  "required_vina_engine_run_receipt_fields": [
+                    "predicted_ligand_path_or_pose_ref",
+                    "predicted_ligand_checksum",
+                    "engine_version",
+                    "engine_config_checksum",
+                    "engine_run_provenance_ref"
+                  ],
+                  "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
+                  "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+                  "vina_engine_run_checksum_fields": [
+                    "predicted_ligand_checksum",
+                    "engine_config_checksum"
+                  ],
+                  "vina_engine_run_provenance_fields": [
+                    "predicted_ligand_path_or_pose_ref",
+                    "engine_run_provenance_ref"
+                  ]
+                },
+                "source_checksum_policy": {
+                  "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+                  "required_receipt_field": "source_checksum"
+                }
+              },
+              "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
+            },
+            "slot_id": "vina_gnina_rows",
+            "source_acquisition_blockers": [],
+            "status": "operator_rows_required",
+            "target_id": "public_benchmark_phase2_actual_closure",
+            "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+            "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
+          }
+        ],
+        "requirement_count": 5,
+        "requirement_pass_count": 4,
+        "science_actual_closure_audit_summary": {
+          "actual_closure_ready": false,
+          "blocked_component_ids": [
+            "pocketmd_lite_topk_actual_closure",
+            "public_benchmark_phase2_actual_closure"
+          ],
+          "blocked_requirement_count": 9,
+          "blocker_count": 2,
+          "component_count": 3,
+          "component_ready_count": 1,
+          "gpcr_phase3_passing_requirement_count": 5,
+          "gpcr_phase3_requirement_count": 5,
+          "missing_row_input_count": 2,
+          "missing_row_inputs": [
+            "vina_gnina_rows",
+            "pocketmd_rows"
+          ],
+          "passing_requirement_count": 10,
+          "pocketmd_phase4_passing_requirement_count": 1,
+          "pocketmd_phase4_requirement_count": 9,
+          "public_benchmark_phase2_passing_requirement_count": 4,
+          "public_benchmark_phase2_requirement_count": 5,
+          "ready_component_count": 1,
+          "required_component_count": 3,
+          "requirement_count": 19,
+          "upstream_source_blocker_count": 8,
+          "upstream_source_context_count": 2
+        },
+        "science_actual_closure_contract_pass": false,
+        "science_actual_closure_missing_row_inputs": [
+          "vina_gnina_rows",
+          "pocketmd_rows"
+        ],
+        "science_actual_closure_status": "operator_evidence_required",
+        "source_acquisition_blocker_count": 5,
+        "source_acquisition_blockers": [
+          "public_benchmark_vina_gnina_rows_not_acquired",
+          "public_benchmark_vina_gnina_engine_runtime_not_ready",
+          "public_benchmark_vina_gnina_input_manifest_not_detected",
+          "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
+          "public_benchmark_external_receipts_not_attached"
+        ],
+        "status": "operator_rows_required"
+      }
+    },
+    {
+      "blocked_criteria": [],
+      "blocked_criteria_count": 0,
+      "bottleneck": "",
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+        "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json"
+      ],
+      "first_blocked_target": "",
+      "first_blocker": "",
+      "linked_routes": [
+        "/goal/bottleneck",
+        "/goal/roadmap"
+      ],
+      "next_actions": [],
+      "phase_id": "phase_3_gpcr_hard_decoy_actual_closure",
+      "phase_label": "Phase 3",
+      "roadmap_item": "GPCR hard-decoy actual closure",
+      "root_cause_tags": [
+        "science_actual_closure",
+        "gpcr_hard_decoy",
+        "actual_gate_metrics"
+      ],
+      "state": "ready",
+      "summary": {
+        "actual_closure_ready": true,
+        "actual_evidence_audit": {},
+        "actual_evidence_audit_status": "",
+        "actual_evidence_blocked_component_count": 0,
+        "component_id": "gpcr_hard_decoy_actual_closure",
+        "failed_criteria": [],
+        "first_operator_evidence_gap": {},
+        "missing_row_inputs": [],
+        "operator_evidence_gap_count": 0,
+        "operator_evidence_gap_register": [],
+        "requirement_count": 5,
+        "requirement_pass_count": 5,
+        "science_actual_closure_audit_summary": {
+          "actual_closure_ready": false,
+          "blocked_component_ids": [
+            "pocketmd_lite_topk_actual_closure",
+            "public_benchmark_phase2_actual_closure"
+          ],
+          "blocked_requirement_count": 9,
+          "blocker_count": 2,
+          "component_count": 3,
+          "component_ready_count": 1,
+          "gpcr_phase3_passing_requirement_count": 5,
+          "gpcr_phase3_requirement_count": 5,
+          "missing_row_input_count": 2,
+          "missing_row_inputs": [
+            "vina_gnina_rows",
+            "pocketmd_rows"
+          ],
+          "passing_requirement_count": 10,
+          "pocketmd_phase4_passing_requirement_count": 1,
+          "pocketmd_phase4_requirement_count": 9,
+          "public_benchmark_phase2_passing_requirement_count": 4,
+          "public_benchmark_phase2_requirement_count": 5,
+          "ready_component_count": 1,
+          "required_component_count": 3,
+          "requirement_count": 19,
+          "upstream_source_blocker_count": 8,
+          "upstream_source_context_count": 2
+        },
+        "science_actual_closure_contract_pass": false,
+        "science_actual_closure_missing_row_inputs": [
+          "vina_gnina_rows",
+          "pocketmd_rows"
+        ],
+        "science_actual_closure_status": "operator_evidence_required",
+        "source_acquisition_blocker_count": 0,
+        "source_acquisition_blockers": [],
+        "status": "complete"
+      }
+    },
+    {
+      "blocked_criteria": [
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved"
+      ],
+      "blocked_criteria_count": 8,
+      "bottleneck": "pocketmd_lite_topk_actual_rows_required",
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+        "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json"
+      ],
+      "first_blocked_target": "pocketmd_lite_topk_actual_closure",
+      "first_blocker": "pocketmd_lite_topk_actual_closure::pocketmd_rows_not_provided",
+      "linked_routes": [
+        "/goal/bottleneck",
+        "/goal/roadmap"
+      ],
+      "next_actions": [
+        "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+        "attach_vina_gnina_rows",
+        "attach_pocketmd_rows",
+        "resolve_public_benchmark_phase2_source_acquisition_blockers",
+        "resolve_pocketmd_lite_source_acquisition_blockers",
+        "run_science_actual_closure_row_materializer",
+        "review_science_actual_closure_row_audit"
+      ],
+      "phase_id": "phase_4_pocketmd_lite_topk_actual_closure",
+      "phase_label": "Phase 4",
+      "roadmap_item": "PocketMD Lite top-k actual closure",
+      "root_cause_tags": [
+        "science_actual_closure",
+        "pocketmd_lite",
+        "top_k_refinement_rows"
+      ],
+      "state": "blocked",
+      "summary": {
+        "actual_closure_ready": false,
+        "actual_evidence_audit": {
+          "actual_closure_ready": false,
+          "blocked_component_count": 4,
+          "blocked_component_ids": [
+            "bounded_top_k_row_slots",
+            "per_candidate_role_receipts",
+            "operator_input_source_receipt",
+            "survival_metric_summary"
+          ],
+          "claim_boundary": "This audit summarizes actual PocketMD Lite closure evidence only. It keeps top-k scope, source receipts, survival metrics, and broad all-atom/FEP claim locks visible without fabricating operator rows.",
+          "component_count": 4,
+          "components": [
+            {
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "pocketmd_lite_topk_candidate_rows_missing"
+              ],
+              "component_id": "bounded_top_k_row_slots",
+              "current": {
+                "covered_required_slot_count": 0,
+                "missing_required_slot_count": 6,
+                "raw_row_candidate_status": "row_artifact_missing",
+                "required_candidate_slot_count": 6
+              },
+              "pass": false,
+              "required": {
+                "coverage_ready": true,
+                "required_candidate_slot_count": 6
+              },
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_per_candidate_role_receipts_incomplete"
+              ],
+              "component_id": "per_candidate_role_receipts",
+              "current": {
+                "role_receipt_blocked_count": 24,
+                "role_receipt_plan_count": 24,
+                "template_preflight_status": "operator_rows_completion_required"
+              },
+              "pass": false,
+              "required": {
+                "role_receipt_blocked_count": 0,
+                "role_receipt_plan_count": 24
+              },
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "operator_input_source_receipt_required",
+                "pocketmd_lite_operator_input_source_receipt_incomplete"
+              ],
+              "component_id": "operator_input_source_receipt",
+              "current": {
+                "survival_report_receipt_blocker_count": 1,
+                "survival_report_receipt_contract_pass": false,
+                "survival_report_receipt_status": "blocked",
+                "template_preflight_blocked_count": 5,
+                "template_preflight_requirement_count": 5
+              },
+              "pass": false,
+              "required": {
+                "survival_report_receipt_contract_pass": true,
+                "template_preflight_blocked_count": 0,
+                "template_preflight_requirement_count": 5
+              },
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_local_min_survival_rows_missing",
+                "pocketmd_lite_contact_persistence_rows_missing",
+                "pocketmd_lite_h_bond_persistence_rows_missing",
+                "pocketmd_lite_clash_relief_rows_missing",
+                "pocketmd_lite_uncertainty_rows_missing"
+              ],
+              "component_id": "survival_metric_summary",
+              "current": {
+                "reported_metric_count": 0,
+                "required_metric_count": 5,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "pass": false,
+              "required": {
+                "missing_metric_count": 0,
+                "required_metric_count": 5,
+                "survival_report_contract_pass": true
+              },
+              "status": "blocked"
+            }
+          ],
+          "operator_input_source_receipt": {
+            "blocker_count": 1,
+            "blockers": [
+              "operator_input_source_receipt_required"
+            ],
+            "contract_pass": false,
+            "status": "blocked"
+          },
+          "pass": false,
+          "ready_component_count": 0,
+          "remaining_blockers": [
+            "pocketmd_lite_topk_rows_not_acquired",
+            "pocketmd_lite_topk_candidate_rows_missing",
+            "pocketmd_lite_local_min_survival_rows_missing",
+            "pocketmd_lite_contact_persistence_rows_missing",
+            "pocketmd_lite_h_bond_persistence_rows_missing",
+            "pocketmd_lite_clash_relief_rows_missing",
+            "pocketmd_lite_uncertainty_rows_missing",
+            "pocketmd_lite_per_candidate_role_receipts_incomplete",
+            "operator_input_source_receipt_required",
+            "pocketmd_lite_operator_input_source_receipt_incomplete"
+          ],
+          "remaining_evidence": [
+            "bounded_top_k_row_slots",
+            "per_candidate_role_receipts",
+            "operator_input_source_receipt",
+            "survival_metric_summary"
+          ],
+          "row_slot_coverage": {
+            "covered_required_slot_count": 0,
+            "missing_required_slot_count": 6,
+            "missing_required_slots": [
+              {
+                "case_id": "pocketmd_lite_case_001",
+                "top_k_rank": 1
+              },
+              {
+                "case_id": "pocketmd_lite_case_001",
+                "top_k_rank": 2
+              },
+              {
+                "case_id": "pocketmd_lite_case_002",
+                "top_k_rank": 1
+              },
+              {
+                "case_id": "pocketmd_lite_case_002",
+                "top_k_rank": 2
+              },
+              {
+                "case_id": "pocketmd_lite_case_003",
+                "top_k_rank": 1
+              },
+              {
+                "case_id": "pocketmd_lite_case_003",
+                "top_k_rank": 2
+              }
+            ],
+            "pass": false,
+            "raw_row_candidate_status": {
+              "blocker": "pocketmd_lite_topk_rows_not_acquired",
+              "candidate_paths": [
+                {
+                  "exists": false,
+                  "is_file": false,
+                  "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json"
+                },
+                {
+                  "exists": false,
+                  "is_file": false,
+                  "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl"
+                },
+                {
+                  "exists": false,
+                  "is_file": false,
+                  "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson"
+                },
+                {
+                  "exists": false,
+                  "is_file": false,
+                  "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv"
+                },
+                {
+                  "exists": false,
+                  "is_file": false,
+                  "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+                }
+              ],
+              "case_top_k_rank_prefixes": {},
+              "coverage_ready": false,
+              "covered_required_slot_count": 0,
+              "default_rows_out": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "detected_row_artifact_count": 0,
+              "first_detected_path": "",
+              "missing_required_slots": [
+                {
+                  "case_id": "pocketmd_lite_case_001",
+                  "top_k_rank": 1
+                },
+                {
+                  "case_id": "pocketmd_lite_case_001",
+                  "top_k_rank": 2
+                },
+                {
+                  "case_id": "pocketmd_lite_case_002",
+                  "top_k_rank": 1
+                },
+                {
+                  "case_id": "pocketmd_lite_case_002",
+                  "top_k_rank": 2
+                },
+                {
+                  "case_id": "pocketmd_lite_case_003",
+                  "top_k_rank": 1
+                },
+                {
+                  "case_id": "pocketmd_lite_case_003",
+                  "top_k_rank": 2
+                }
+              ],
+              "required_candidate_slot_count": 6,
+              "selected_path": "",
+              "selected_row_count": 0,
+              "status": "row_artifact_missing",
+              "validated_case_count": 0,
+              "validated_row_count": 0,
+              "validation_error": ""
+            },
+            "required_candidate_slot_count": 6,
+            "status": "blocked"
+          },
+          "status": "operator_topk_rows_required",
+          "survival_metric_summary": {
+            "metrics": [
+              {
+                "blockers": [
+                  "pocketmd_lite_local_min_survival_rows_missing"
+                ],
+                "current": null,
+                "pass": false,
+                "phase4_criterion_id": "local_min_survival_materialized",
+                "required": "present",
+                "requirement_id": "local_min_survival_reported",
+                "status": "blocked",
+                "summary_field": "local_min_survival_rate"
+              },
+              {
+                "blockers": [
+                  "pocketmd_lite_contact_persistence_rows_missing"
+                ],
+                "current": null,
+                "pass": false,
+                "phase4_criterion_id": "contact_persistence_materialized",
+                "required": "present",
+                "requirement_id": "contact_persistence_reported",
+                "status": "blocked",
+                "summary_field": "contact_persistence_rate_median"
+              },
+              {
+                "blockers": [
+                  "pocketmd_lite_h_bond_persistence_rows_missing"
+                ],
+                "current": null,
+                "pass": false,
+                "phase4_criterion_id": "h_bond_persistence_materialized",
+                "required": "present",
+                "requirement_id": "h_bond_persistence_reported",
+                "status": "blocked",
+                "summary_field": "h_bond_persistence_rate_median"
+              },
+              {
+                "blockers": [
+                  "pocketmd_lite_clash_relief_rows_missing"
+                ],
+                "current": null,
+                "pass": false,
+                "phase4_criterion_id": "clash_relief_materialized",
+                "required": "present",
+                "requirement_id": "clash_relief_reported",
+                "status": "blocked",
+                "summary_field": "clash_relief_rate"
+              },
+              {
+                "blockers": [
+                  "pocketmd_lite_uncertainty_rows_missing"
+                ],
+                "current": null,
+                "pass": false,
+                "phase4_criterion_id": "uncertainty_summary_materialized",
+                "required": "present",
+                "requirement_id": "uncertainty_reported",
+                "status": "blocked",
+                "summary_field": "uncertainty_width_median"
+              }
+            ],
+            "missing_metric_count": 5,
+            "pass": false,
+            "reported_metric_count": 0,
+            "required_metric_count": 5,
+            "status": "blocked"
+          },
+          "template_preflight_evidence": {
+            "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json",
+            "first_blocked_operator_input_source_receipt": {
+              "blocker": "source_id_required",
+              "expected_value": "",
+              "field": "source_id",
+              "operator_action": "attach_operator_input_source_source_id",
+              "status": "operator_completion_required"
+            },
+            "first_blocked_role_receipt": {
+              "blockers": [
+                "required_role_fields_missing"
+              ],
+              "candidate_id": "pocketmd_lite_case_001_rank_01",
+              "case_id": "pocketmd_lite_case_001",
+              "closes_phase4_criteria": [
+                "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage"
+              ],
+              "invalid_fields": [],
+              "missing_fields": [
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum"
+              ],
+              "operator_action": "attach_upstream_top_k_scope_receipt",
+              "required_fields": [
+                "case_id",
+                "candidate_id",
+                "top_k_rank",
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum"
+              ],
+              "role_id": "upstream_top_k_candidate_scope_receipt",
+              "status": "operator_completion_required",
+              "top_k_rank": 1
+            },
+            "operator_input_source_receipt_blocked_count": 5,
+            "operator_input_source_receipt_requirement_count": 5,
+            "present": true,
+            "role_receipt_blocked_count": 24,
+            "role_receipt_plan_count": 24,
+            "status": "operator_rows_completion_required",
+            "top_k_template_ready": false
+          }
+        },
+        "actual_evidence_audit_status": "operator_topk_rows_required",
+        "actual_evidence_blocked_component_count": 4,
+        "component_id": "pocketmd_lite_topk_actual_closure",
+        "failed_criteria": [
+          "top_k_refinement_rows_present",
+          "top_k_refinement_case_coverage",
+          "local_min_survival_materialized",
+          "contact_persistence_materialized",
+          "h_bond_persistence_materialized",
+          "clash_relief_materialized",
+          "uncertainty_summary_materialized",
+          "report_blockers_resolved"
+        ],
+        "first_operator_evidence_gap": {
+          "actual_evidence_audit_status": "operator_topk_rows_required",
+          "actual_evidence_blocked_component_count": 4,
+          "actual_evidence_remaining_evidence": [
+            "bounded_top_k_row_slots",
+            "per_candidate_role_receipts",
+            "operator_input_source_receipt",
+            "survival_metric_summary"
+          ],
+          "blocked_criteria": [
+            "top_k_refinement_rows_present",
+            "top_k_refinement_case_coverage",
+            "local_min_survival_materialized",
+            "contact_persistence_materialized",
+            "h_bond_persistence_materialized",
+            "clash_relief_materialized",
+            "uncertainty_summary_materialized",
+            "report_blockers_resolved"
+          ],
+          "first_next_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+          "handoff_id": "science_actual_closure::pocketmd_rows",
+          "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
+          "materialization_steps": [
+            "materialize_pocketmd_lite_operator_intake_from_rows",
+            "materialize_pocketmd_lite_topk_survival_report",
+            "build_pocketmd_lite_science_product_surface"
+          ],
+          "minimum_evidence": {
+            "accepted_formats": [
+              "csv",
+              "tsv",
+              "json",
+              "jsonl",
+              "ndjson"
+            ],
+            "actual_evidence_audit_status": "operator_topk_rows_required",
+            "actual_evidence_blocked_component_count": 4,
+            "actual_evidence_remaining_evidence": [
+              "bounded_top_k_row_slots",
+              "per_candidate_role_receipts",
+              "operator_input_source_receipt",
+              "survival_metric_summary"
+            ],
+            "blockers": [
+              "pocketmd_lite_topk_actual_closure::pocketmd_rows_not_provided"
+            ],
+            "contract_field_groups": {
+              "required_case_fields": [
+                "case_id",
+                "source_family",
+                "top_k_rank",
+                "candidate_id",
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum",
+                "pre_refinement_energy_proxy",
+                "post_refinement_energy_proxy",
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_interval",
+                "provenance_ref",
+                "source_checksum"
+              ],
+              "required_component_metrics": [
+                "local_min_survival_rate",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_relief_rate",
+                "uncertainty_width_median"
+              ],
+              "required_summary_metrics": [
+                "local_min_survival_rate",
+                "contact_persistence_rate_median",
+                "h_bond_persistence_rate_median",
+                "clash_relief_rate",
+                "uncertainty_width_median"
+              ],
+              "source_receipt_required_fields": [
+                "source_id",
+                "source_url",
+                "source_license",
+                "source_artifact_sha256",
+                "per_row_source_checksum",
+                "per_row_provenance_ref"
+              ],
+              "uncertainty_field_modes": [
+                "uncertainty_interval:{low,high,unit}",
+                "uncertainty_low+uncertainty_high+uncertainty_unit"
+              ]
+            },
+            "contract_policies": {
+              "boolean_value_policy": {
+                "local_min_survived": "must parse to a boolean value"
+              },
+              "numeric_value_policy": {
+                "contact_persistence_rate": "must parse to a finite float in [0, 1]; NaN and Infinity are rejected",
+                "h_bond_persistence_rate": "must parse to a finite float in [0, 1]; NaN and Infinity are rejected",
+                "post_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+                "pre_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+                "uncertainty_interval.high": "must parse to a finite float and be >= low; NaN and Infinity are rejected",
+                "uncertainty_interval.low": "must parse to a finite float; NaN and Infinity are rejected"
+              },
+              "per_row_source_actuality_policy": {
+                "placeholder_markers_rejected": [
+                  "<operator",
+                  "fixture",
+                  "synthetic",
+                  "mock",
+                  "placeholder",
+                  "dummy",
+                  "example",
+                  "operator_supplied",
+                  "unit-test",
+                  "test-only"
+                ],
+                "placeholder_provenance_prefixes_rejected": [
+                  "operator://",
+                  "local-evidence://",
+                  "local://",
+                  "fixture://",
+                  "mock://",
+                  "synthetic://",
+                  "placeholder://",
+                  "test://",
+                  "unit-test://"
+                ],
+                "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest"
+              },
+              "row_integrity_policy": {
+                "purpose": "Duplicate PocketMD Lite top-k ranks or candidate identities cannot be used to inflate case, candidate, or survival counts.",
+                "required_unique_row_keys": {
+                  "top_k_refinement_rows": [
+                    [
+                      "case_id",
+                      "top_k_rank"
+                    ],
+                    [
+                      "case_id",
+                      "candidate_id"
+                    ]
+                  ]
+                }
+              },
+              "top_k_row_quality_minimums": {
+                "min_candidate_count_per_case": 2,
+                "min_real_refinement_case_count": 3,
+                "min_top_k_rank_coverage_per_case": 2,
+                "min_total_top_k_candidate_count": 6
+              }
+            },
+            "preferred_default_row_path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json"
+          },
+          "slot_id": "pocketmd_rows",
+          "source_acquisition_blockers": [],
+          "status": "operator_rows_required",
+          "target_id": "pocketmd_lite_topk_actual_closure",
+          "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+          "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
+        },
+        "missing_row_inputs": [
+          "pocketmd_rows"
+        ],
+        "operator_evidence_gap_count": 1,
+        "operator_evidence_gap_register": [
+          {
+            "actual_evidence_audit_status": "operator_topk_rows_required",
+            "actual_evidence_blocked_component_count": 4,
+            "actual_evidence_remaining_evidence": [
+              "bounded_top_k_row_slots",
+              "per_candidate_role_receipts",
+              "operator_input_source_receipt",
+              "survival_metric_summary"
+            ],
+            "blocked_criteria": [
+              "top_k_refinement_rows_present",
+              "top_k_refinement_case_coverage",
+              "local_min_survival_materialized",
+              "contact_persistence_materialized",
+              "h_bond_persistence_materialized",
+              "clash_relief_materialized",
+              "uncertainty_summary_materialized",
+              "report_blockers_resolved"
+            ],
+            "first_next_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "handoff_id": "science_actual_closure::pocketmd_rows",
+            "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
+            "materialization_steps": [
+              "materialize_pocketmd_lite_operator_intake_from_rows",
+              "materialize_pocketmd_lite_topk_survival_report",
+              "build_pocketmd_lite_science_product_surface"
+            ],
+            "minimum_evidence": {
+              "accepted_formats": [
+                "csv",
+                "tsv",
+                "json",
+                "jsonl",
+                "ndjson"
+              ],
+              "actual_evidence_audit_status": "operator_topk_rows_required",
+              "actual_evidence_blocked_component_count": 4,
+              "actual_evidence_remaining_evidence": [
+                "bounded_top_k_row_slots",
+                "per_candidate_role_receipts",
+                "operator_input_source_receipt",
+                "survival_metric_summary"
+              ],
+              "blockers": [
+                "pocketmd_lite_topk_actual_closure::pocketmd_rows_not_provided"
+              ],
+              "contract_field_groups": {
+                "required_case_fields": [
+                  "case_id",
+                  "source_family",
+                  "top_k_rank",
+                  "candidate_id",
+                  "upstream_top_k_provenance_ref",
+                  "upstream_top_k_source_checksum",
+                  "pre_refinement_energy_proxy",
+                  "post_refinement_energy_proxy",
+                  "local_min_survived",
+                  "contact_persistence_rate",
+                  "h_bond_persistence_rate",
+                  "clash_count_before",
+                  "clash_count_after",
+                  "uncertainty_interval",
+                  "provenance_ref",
+                  "source_checksum"
+                ],
+                "required_component_metrics": [
+                  "local_min_survival_rate",
+                  "contact_persistence_rate",
+                  "h_bond_persistence_rate",
+                  "clash_relief_rate",
+                  "uncertainty_width_median"
+                ],
+                "required_summary_metrics": [
+                  "local_min_survival_rate",
+                  "contact_persistence_rate_median",
+                  "h_bond_persistence_rate_median",
+                  "clash_relief_rate",
+                  "uncertainty_width_median"
+                ],
+                "source_receipt_required_fields": [
+                  "source_id",
+                  "source_url",
+                  "source_license",
+                  "source_artifact_sha256",
+                  "per_row_source_checksum",
+                  "per_row_provenance_ref"
+                ],
+                "uncertainty_field_modes": [
+                  "uncertainty_interval:{low,high,unit}",
+                  "uncertainty_low+uncertainty_high+uncertainty_unit"
+                ]
+              },
+              "contract_policies": {
+                "boolean_value_policy": {
+                  "local_min_survived": "must parse to a boolean value"
+                },
+                "numeric_value_policy": {
+                  "contact_persistence_rate": "must parse to a finite float in [0, 1]; NaN and Infinity are rejected",
+                  "h_bond_persistence_rate": "must parse to a finite float in [0, 1]; NaN and Infinity are rejected",
+                  "post_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+                  "pre_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+                  "uncertainty_interval.high": "must parse to a finite float and be >= low; NaN and Infinity are rejected",
+                  "uncertainty_interval.low": "must parse to a finite float; NaN and Infinity are rejected"
+                },
+                "per_row_source_actuality_policy": {
+                  "placeholder_markers_rejected": [
+                    "<operator",
+                    "fixture",
+                    "synthetic",
+                    "mock",
+                    "placeholder",
+                    "dummy",
+                    "example",
+                    "operator_supplied",
+                    "unit-test",
+                    "test-only"
+                  ],
+                  "placeholder_provenance_prefixes_rejected": [
+                    "operator://",
+                    "local-evidence://",
+                    "local://",
+                    "fixture://",
+                    "mock://",
+                    "synthetic://",
+                    "placeholder://",
+                    "test://",
+                    "unit-test://"
+                  ],
+                  "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest"
+                },
+                "row_integrity_policy": {
+                  "purpose": "Duplicate PocketMD Lite top-k ranks or candidate identities cannot be used to inflate case, candidate, or survival counts.",
+                  "required_unique_row_keys": {
+                    "top_k_refinement_rows": [
+                      [
+                        "case_id",
+                        "top_k_rank"
+                      ],
+                      [
+                        "case_id",
+                        "candidate_id"
+                      ]
+                    ]
+                  }
+                },
+                "top_k_row_quality_minimums": {
+                  "min_candidate_count_per_case": 2,
+                  "min_real_refinement_case_count": 3,
+                  "min_top_k_rank_coverage_per_case": 2,
+                  "min_total_top_k_candidate_count": 6
+                }
+              },
+              "preferred_default_row_path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json"
+            },
+            "slot_id": "pocketmd_rows",
+            "source_acquisition_blockers": [],
+            "status": "operator_rows_required",
+            "target_id": "pocketmd_lite_topk_actual_closure",
+            "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+            "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
+          }
+        ],
+        "requirement_count": 9,
+        "requirement_pass_count": 1,
+        "science_actual_closure_audit_summary": {
+          "actual_closure_ready": false,
+          "blocked_component_ids": [
+            "pocketmd_lite_topk_actual_closure",
+            "public_benchmark_phase2_actual_closure"
+          ],
+          "blocked_requirement_count": 9,
+          "blocker_count": 2,
+          "component_count": 3,
+          "component_ready_count": 1,
+          "gpcr_phase3_passing_requirement_count": 5,
+          "gpcr_phase3_requirement_count": 5,
+          "missing_row_input_count": 2,
+          "missing_row_inputs": [
+            "vina_gnina_rows",
+            "pocketmd_rows"
+          ],
+          "passing_requirement_count": 10,
+          "pocketmd_phase4_passing_requirement_count": 1,
+          "pocketmd_phase4_requirement_count": 9,
+          "public_benchmark_phase2_passing_requirement_count": 4,
+          "public_benchmark_phase2_requirement_count": 5,
+          "ready_component_count": 1,
+          "required_component_count": 3,
+          "requirement_count": 19,
+          "upstream_source_blocker_count": 8,
+          "upstream_source_context_count": 2
+        },
+        "science_actual_closure_contract_pass": false,
+        "science_actual_closure_missing_row_inputs": [
+          "vina_gnina_rows",
+          "pocketmd_rows"
+        ],
+        "science_actual_closure_status": "operator_evidence_required",
+        "source_acquisition_blocker_count": 3,
+        "source_acquisition_blockers": [
+          "pocketmd_lite_topk_rows_not_acquired",
+          "upstream_top_k_candidate_receipts_not_attached",
+          "lite_refinement_metric_receipts_not_attached"
+        ],
+        "status": "operator_rows_required"
+      }
     }
   ],
   "route": "/goal/bottleneck",
   "schema_version": "goal-bottleneck-roadmap-surface.v1",
-  "science_evidence_surface_bottlenecks": [],
-  "science_evidence_surface_status": {},
-  "source_commit_sha": "287c080ef1fcb227721e1d8af78f64cfa7f6131f",
+  "science_evidence_surface_bottlenecks": [
+    "public_benchmark_vina_gnina_actual_rows_required",
+    "pocketmd_lite_topk_actual_rows_required"
+  ],
+  "science_evidence_surface_status": {
+    "completion_progress": {
+      "actual_closure_ready": false,
+      "blocked_component_count": 2,
+      "blocked_component_ids": [
+        "public_benchmark_phase2_actual_closure",
+        "pocketmd_lite_topk_actual_closure"
+      ],
+      "blocked_requirement_count": 9,
+      "claim_boundary": "This completion audit summarizes already-materialized requirement rows and row-input resolution only; it does not promote missing operator rows, proxy rows, or source-acquisition plans into actual closure.",
+      "complete_component_count": 1,
+      "complete_component_ids": [
+        "gpcr_hard_decoy_actual_closure"
+      ],
+      "component_progress": [
+        {
+          "actual_closure_ready": false,
+          "component_id": "public_benchmark_phase2_actual_closure",
+          "failed_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "missing_row_inputs": [
+            "vina_gnina_rows"
+          ],
+          "requirement_count": 5,
+          "requirement_pass_count": 4,
+          "status": "operator_rows_required"
+        },
+        {
+          "actual_closure_ready": true,
+          "component_id": "gpcr_hard_decoy_actual_closure",
+          "failed_criteria": [],
+          "missing_row_inputs": [],
+          "requirement_count": 5,
+          "requirement_pass_count": 5,
+          "status": "complete"
+        },
+        {
+          "actual_closure_ready": false,
+          "component_id": "pocketmd_lite_topk_actual_closure",
+          "failed_criteria": [
+            "top_k_refinement_rows_present",
+            "top_k_refinement_case_coverage",
+            "local_min_survival_materialized",
+            "contact_persistence_materialized",
+            "h_bond_persistence_materialized",
+            "clash_relief_materialized",
+            "uncertainty_summary_materialized",
+            "report_blockers_resolved"
+          ],
+          "missing_row_inputs": [
+            "pocketmd_rows"
+          ],
+          "requirement_count": 9,
+          "requirement_pass_count": 1,
+          "status": "operator_rows_required"
+        }
+      ],
+      "first_blocked_component_id": "public_benchmark_phase2_actual_closure",
+      "missing_row_input_count": 2,
+      "missing_row_inputs": [
+        "vina_gnina_rows",
+        "pocketmd_rows"
+      ],
+      "required_component_count": 3,
+      "requirement_count": 19,
+      "requirement_pass_count": 10,
+      "status": "operator_evidence_required"
+    },
+    "contract_pass": false,
+    "missing_row_inputs": [
+      "vina_gnina_rows",
+      "pocketmd_rows"
+    ],
+    "status": "operator_evidence_required"
+  },
+  "source_commit_sha": "529d192047026e16bcf3c9ff50c37bf100b2916c",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
@@ -682,7 +3963,7 @@
     "no_op_count": 0
   },
   "status": "ready_release_blocked",
-  "summary_line": "Goal bottleneck roadmap surface: READY | release_allowed=False | primary_bottleneck=basic_ci::pr_ci_30_consecutive_pass_evidence_missing | blocked_roadmap_rows=1",
+  "summary_line": "Goal bottleneck roadmap surface: READY | release_allowed=False | primary_bottleneck=basic_ci::pr_ci_30_consecutive_pass_evidence_missing | blocked_roadmap_rows=3",
   "surface_id": "goal_bottleneck_roadmap_surface",
   "surface_kind": "goal_bottleneck_roadmap_surface",
   "surface_scope": "goal_release_bottleneck_and_product_roadmap"

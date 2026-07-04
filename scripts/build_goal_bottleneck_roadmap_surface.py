@@ -26,6 +26,12 @@ DEFAULT_FRESHNESS_REPORT = PRODUCTIZATION / "release_evidence_freshness_report.j
 DEFAULT_SOURCE_OF_TRUTH_GAP_CLASSIFICATION = (
     PRODUCTIZATION / "source_of_truth_gap_classification.json"
 )
+DEFAULT_SCIENCE_ACTUAL_CLOSURE_ROW_AUDIT = (
+    PRODUCTIZATION / "science_actual_closure_row_audit.json"
+)
+DEFAULT_SCIENCE_ACTUAL_CLOSURE_OPERATOR_HANDOFF = (
+    PRODUCTIZATION / "science_actual_closure_operator_handoff.json"
+)
 DEFAULT_PRODUCT_CAPABILITIES = SURFACE_DIR / "product_capabilities_surface.json"
 DEFAULT_UX_OBSERVATION_REPORT = PRODUCTIZATION / "ux_new_user_observation_report.json"
 DEFAULT_UX_OBSERVATION_INTAKE_PACKET = (
@@ -36,6 +42,56 @@ DEFAULT_OUT = PRODUCTIZATION / "goal_bottleneck_roadmap_surface.json"
 SCHEMA_VERSION = "goal-bottleneck-roadmap-surface.v1"
 STRUCTURAL_PHASE_CAPABILITY_IDS: dict[str, str] = {}
 STRUCTURAL_PHASE_ACTUAL_CLOSURE_COMPONENT_IDS: dict[str, str] = {}
+SCIENCE_ACTUAL_CLOSURE_COMPONENT_PHASES: dict[str, dict[str, Any]] = {
+    "public_benchmark_phase2_actual_closure": {
+        "phase_id": "phase_2_public_benchmark_actual_closure",
+        "phase_label": "Phase 2",
+        "roadmap_item": "Public benchmark Phase 2 actual closure",
+        "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
+        "root_cause_tags": [
+            "science_actual_closure",
+            "public_benchmark_phase2",
+            "vina_gnina_actual_rows",
+        ],
+        "evidence_artifacts": [
+            DEFAULT_SCIENCE_ACTUAL_CLOSURE_ROW_AUDIT,
+            DEFAULT_SCIENCE_ACTUAL_CLOSURE_OPERATOR_HANDOFF,
+            PRODUCTIZATION / "public_benchmark_phase2_source_acquisition_plan.json",
+        ],
+    },
+    "gpcr_hard_decoy_actual_closure": {
+        "phase_id": "phase_3_gpcr_hard_decoy_actual_closure",
+        "phase_label": "Phase 3",
+        "roadmap_item": "GPCR hard-decoy actual closure",
+        "bottleneck": "gpcr_hard_decoy_actual_rows_required",
+        "root_cause_tags": [
+            "science_actual_closure",
+            "gpcr_hard_decoy",
+            "actual_gate_metrics",
+        ],
+        "evidence_artifacts": [
+            DEFAULT_SCIENCE_ACTUAL_CLOSURE_ROW_AUDIT,
+            DEFAULT_SCIENCE_ACTUAL_CLOSURE_OPERATOR_HANDOFF,
+            PRODUCTIZATION / "gpcr_hard_decoy_suite_report.json",
+        ],
+    },
+    "pocketmd_lite_topk_actual_closure": {
+        "phase_id": "phase_4_pocketmd_lite_topk_actual_closure",
+        "phase_label": "Phase 4",
+        "roadmap_item": "PocketMD Lite top-k actual closure",
+        "bottleneck": "pocketmd_lite_topk_actual_rows_required",
+        "root_cause_tags": [
+            "science_actual_closure",
+            "pocketmd_lite",
+            "top_k_refinement_rows",
+        ],
+        "evidence_artifacts": [
+            DEFAULT_SCIENCE_ACTUAL_CLOSURE_ROW_AUDIT,
+            DEFAULT_SCIENCE_ACTUAL_CLOSURE_OPERATOR_HANDOFF,
+            PRODUCTIZATION / "pocketmd_lite_source_acquisition_plan.json",
+        ],
+    },
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -79,6 +135,8 @@ def _input_paths() -> list[Path]:
         DEFAULT_ACTION_REGISTER,
         DEFAULT_FRESHNESS_REPORT,
         DEFAULT_SOURCE_OF_TRUTH_GAP_CLASSIFICATION,
+        DEFAULT_SCIENCE_ACTUAL_CLOSURE_ROW_AUDIT,
+        DEFAULT_SCIENCE_ACTUAL_CLOSURE_OPERATOR_HANDOFF,
         DEFAULT_PRODUCT_CAPABILITIES,
         DEFAULT_UX_OBSERVATION_REPORT,
         DEFAULT_UX_OBSERVATION_INTAKE_PACKET,
@@ -269,6 +327,271 @@ def _release_cockpit_row(
     )
 
 
+def _science_actual_audit_for_component(
+    science_handoff: dict[str, Any],
+    component_id: str,
+) -> dict[str, Any]:
+    upstream = _as_dict(science_handoff.get("upstream_source_acquisition"))
+    if component_id == "public_benchmark_phase2_actual_closure":
+        return _as_dict(
+            _as_dict(upstream.get("public_benchmark_phase2")).get(
+                "vina_gnina_actual_evidence_audit"
+            )
+        )
+    if component_id == "pocketmd_lite_topk_actual_closure":
+        return _as_dict(
+            _as_dict(upstream.get("pocketmd_lite")).get(
+                "phase4_actual_evidence_audit"
+            )
+        )
+    return {}
+
+
+def _science_source_blockers_for_component(
+    science_handoff: dict[str, Any],
+    component_id: str,
+) -> list[str]:
+    upstream = _as_dict(science_handoff.get("upstream_source_acquisition"))
+    if component_id == "public_benchmark_phase2_actual_closure":
+        source = _as_dict(upstream.get("public_benchmark_phase2"))
+    elif component_id == "pocketmd_lite_topk_actual_closure":
+        source = _as_dict(upstream.get("pocketmd_lite"))
+    else:
+        source = {}
+    return [str(row) for row in _as_list(source.get("blockers"))]
+
+
+def _science_row_contracts_by_component(
+    science_handoff: dict[str, Any],
+) -> dict[str, list[dict[str, Any]]]:
+    contracts_by_component: dict[str, list[dict[str, Any]]] = {}
+    contracts = _as_dict(science_handoff.get("row_input_materialization_contracts"))
+    for row_input_id, contract_value in contracts.items():
+        contract = _as_dict(contract_value)
+        if not contract:
+            continue
+        contract = {**contract, "row_input_id": str(row_input_id)}
+        component_id = str(contract.get("actual_closure_component_id") or "")
+        if not component_id:
+            continue
+        contracts_by_component.setdefault(component_id, []).append(contract)
+    return contracts_by_component
+
+
+def _science_actions_by_component(
+    science_handoff: dict[str, Any],
+) -> dict[str, dict[str, Any]]:
+    return {
+        str(row.get("component_id") or ""): row
+        for row in _as_list(science_handoff.get("blocked_component_operator_actions"))
+        if isinstance(row, dict) and str(row.get("component_id") or "")
+    }
+
+
+def _science_first_blocker(
+    *,
+    science_handoff: dict[str, Any],
+    component_id: str,
+    operator_gaps: list[dict[str, Any]],
+    actual_audit: dict[str, Any],
+) -> str:
+    for gap in operator_gaps:
+        blockers = _as_list(_as_dict(gap.get("minimum_evidence")).get("blockers"))
+        if blockers:
+            return str(blockers[0])
+    for blocker in _as_list(science_handoff.get("science_actual_closure_blockers")):
+        blocker_text = str(blocker)
+        if blocker_text.startswith(f"{component_id}::"):
+            return blocker_text
+    for row in _as_list(actual_audit.get("components")):
+        if not isinstance(row, dict):
+            continue
+        blockers = _as_list(row.get("blockers"))
+        if blockers:
+            return str(blockers[0])
+    return ""
+
+
+def _science_operator_gap_register(
+    *,
+    component: dict[str, Any],
+    contracts: list[dict[str, Any]],
+    action: dict[str, Any],
+    actual_audit: dict[str, Any],
+) -> list[dict[str, Any]]:
+    component_id = str(component.get("component_id") or "")
+    failed_criteria = [str(row) for row in _as_list(component.get("failed_criteria"))]
+    source_blockers = [
+        str(row) for row in _as_list(action.get("upstream_source_blockers"))
+    ]
+    gaps: list[dict[str, Any]] = []
+    for contract in contracts:
+        row_input_id = str(contract.get("row_input_id") or "")
+        operator_blockers = [
+            str(row) for row in _as_list(contract.get("operator_blockers_if_missing"))
+        ]
+        materialization_chain = [
+            str(row) for row in _as_list(contract.get("materialization_chain"))
+        ]
+        materialization_command = str(contract.get("materialization_command") or "")
+        gaps.append(
+            {
+                "handoff_id": f"science_actual_closure::{row_input_id}",
+                "slot_id": row_input_id,
+                "target_id": component_id,
+                "status": "operator_rows_required",
+                "blocked_criteria": failed_criteria,
+                "first_next_action": str(contract.get("operator_action") or ""),
+                "template_artifact": str(contract.get("row_template_artifact") or ""),
+                "minimum_evidence": {
+                    "accepted_formats": [
+                        str(row) for row in _as_list(contract.get("accepted_formats"))
+                    ],
+                    "preferred_default_row_path": str(
+                        contract.get("preferred_default_row_path") or ""
+                    ),
+                    "contract_field_groups": _as_dict(
+                        contract.get("contract_field_groups")
+                    ),
+                    "contract_policies": _as_dict(contract.get("contract_policies")),
+                    "actual_evidence_audit_status": str(
+                        actual_audit.get("status") or ""
+                    ),
+                    "actual_evidence_blocked_component_count": _as_int(
+                        actual_audit.get("blocked_component_count")
+                    ),
+                    "actual_evidence_remaining_evidence": [
+                        str(row)
+                        for row in _as_list(actual_audit.get("remaining_evidence"))
+                    ],
+                    "blockers": operator_blockers or source_blockers,
+                },
+                "materialization_steps": materialization_chain,
+                "materialization_command": materialization_command,
+                "validation_command": materialization_command,
+                "actual_evidence_audit_status": str(actual_audit.get("status") or ""),
+                "actual_evidence_blocked_component_count": _as_int(
+                    actual_audit.get("blocked_component_count")
+                ),
+                "actual_evidence_remaining_evidence": [
+                    str(row) for row in _as_list(actual_audit.get("remaining_evidence"))
+                ],
+                "source_acquisition_blockers": source_blockers,
+            }
+        )
+    return gaps
+
+
+def _science_actual_closure_rows(
+    *,
+    science_handoff: dict[str, Any],
+    science_row_audit: dict[str, Any],
+) -> list[dict[str, Any]]:
+    progress = _as_dict(
+        science_handoff.get("science_actual_closure_completion_progress")
+    )
+    component_rows = [
+        row for row in _as_list(progress.get("component_progress")) if isinstance(row, dict)
+    ]
+    if not component_rows:
+        return []
+
+    contracts_by_component = _science_row_contracts_by_component(science_handoff)
+    actions_by_component = _science_actions_by_component(science_handoff)
+    audit_summary = _as_dict(science_row_audit.get("summary"))
+    rows: list[dict[str, Any]] = []
+    for component in component_rows:
+        component_id = str(component.get("component_id") or "")
+        phase = _as_dict(SCIENCE_ACTUAL_CLOSURE_COMPONENT_PHASES.get(component_id))
+        if not phase:
+            continue
+        actual_ready = _as_bool(component.get("actual_closure_ready"))
+        actual_audit = _science_actual_audit_for_component(science_handoff, component_id)
+        action = _as_dict(actions_by_component.get(component_id))
+        operator_gaps = _science_operator_gap_register(
+            component=component,
+            contracts=contracts_by_component.get(component_id, []),
+            action=action,
+            actual_audit=actual_audit,
+        )
+        source_blockers = _science_source_blockers_for_component(
+            science_handoff,
+            component_id,
+        )
+        first_gap = operator_gaps[0] if operator_gaps else {}
+        first_blocker = _science_first_blocker(
+            science_handoff=science_handoff,
+            component_id=component_id,
+            operator_gaps=operator_gaps,
+            actual_audit=actual_audit,
+        )
+        next_actions = _dedupe(
+            [str(first_gap.get("first_next_action") or "")]
+            + [str(row) for row in _as_list(science_handoff.get("operator_next_actions"))]
+        )
+        rows.append(
+            _roadmap_row(
+                phase_id=str(phase.get("phase_id") or ""),
+                phase_label=str(phase.get("phase_label") or ""),
+                roadmap_item=str(phase.get("roadmap_item") or ""),
+                state="ready" if actual_ready else "blocked",
+                bottleneck="" if actual_ready else str(phase.get("bottleneck") or ""),
+                first_blocker="" if actual_ready else first_blocker,
+                first_blocked_target="" if actual_ready else component_id,
+                root_cause_tags=[
+                    str(row) for row in _as_list(phase.get("root_cause_tags"))
+                ],
+                evidence_artifacts=[
+                    Path(str(row)) for row in _as_list(phase.get("evidence_artifacts"))
+                ],
+                linked_routes=["/goal/bottleneck", "/goal/roadmap"],
+                next_actions=[] if actual_ready else next_actions,
+                blocked_criteria=[
+                    str(row) for row in _as_list(component.get("failed_criteria"))
+                ],
+                summary={
+                    "component_id": component_id,
+                    "status": str(component.get("status") or ""),
+                    "actual_closure_ready": actual_ready,
+                    "requirement_count": _as_int(component.get("requirement_count")),
+                    "requirement_pass_count": _as_int(
+                        component.get("requirement_pass_count")
+                    ),
+                    "failed_criteria": [
+                        str(row) for row in _as_list(component.get("failed_criteria"))
+                    ],
+                    "missing_row_inputs": [
+                        str(row) for row in _as_list(component.get("missing_row_inputs"))
+                    ],
+                    "first_operator_evidence_gap": first_gap,
+                    "operator_evidence_gap_register": operator_gaps,
+                    "operator_evidence_gap_count": len(operator_gaps),
+                    "actual_evidence_audit": actual_audit,
+                    "actual_evidence_audit_status": str(
+                        actual_audit.get("status") or ""
+                    ),
+                    "actual_evidence_blocked_component_count": _as_int(
+                        actual_audit.get("blocked_component_count")
+                    ),
+                    "source_acquisition_blockers": source_blockers,
+                    "source_acquisition_blocker_count": len(source_blockers),
+                    "science_actual_closure_status": str(
+                        science_handoff.get("science_actual_closure_status") or ""
+                    ),
+                    "science_actual_closure_contract_pass": _as_bool(
+                        science_handoff.get("science_actual_closure_contract_pass")
+                    ),
+                    "science_actual_closure_missing_row_inputs": [
+                        str(row)
+                        for row in _as_list(science_handoff.get("missing_row_inputs"))
+                    ],
+                    "science_actual_closure_audit_summary": audit_summary,
+                },
+            )
+        )
+    return rows
+
+
 def _capability_summary_rows(product_capabilities: dict[str, Any]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for row in _as_list(product_capabilities.get("capability_rows")):
@@ -302,7 +625,7 @@ def _operator_evidence_handoff_queue(roadmap_rows: list[dict[str, Any]]) -> list
         )
         queue.append(
             {
-                "queue_priority": index,
+                "queue_priority": len(queue) + 1,
                 "handoff_id": _operator_handoff_id(
                     namespace=str(row.get("bottleneck") or ""),
                     phase_id=phase_id,
@@ -337,6 +660,22 @@ def _operator_evidence_handoff_queue(roadmap_rows: list[dict[str, Any]]) -> list
                 ],
                 "materialization_command": str(first_gap.get("materialization_command") or ""),
                 "validation_command": str(first_gap.get("validation_command") or ""),
+                "actual_evidence_audit_status": str(
+                    first_gap.get("actual_evidence_audit_status") or ""
+                ),
+                "actual_evidence_blocked_component_count": _as_int(
+                    first_gap.get("actual_evidence_blocked_component_count")
+                ),
+                "actual_evidence_remaining_evidence": [
+                    str(item)
+                    for item in _as_list(
+                        first_gap.get("actual_evidence_remaining_evidence")
+                    )
+                ],
+                "source_acquisition_blockers": [
+                    str(item)
+                    for item in _as_list(first_gap.get("source_acquisition_blockers"))
+                ],
                 "evidence_artifacts": [
                     str(path) for path in _as_list(row.get("evidence_artifacts"))
                 ],
@@ -413,6 +752,22 @@ def _operator_evidence_handoff_slot_queue(
                         slot.get("materialization_command") or ""
                     ),
                     "validation_command": str(slot.get("validation_command") or ""),
+                    "actual_evidence_audit_status": str(
+                        slot.get("actual_evidence_audit_status") or ""
+                    ),
+                    "actual_evidence_blocked_component_count": _as_int(
+                        slot.get("actual_evidence_blocked_component_count")
+                    ),
+                    "actual_evidence_remaining_evidence": [
+                        str(item)
+                        for item in _as_list(
+                            slot.get("actual_evidence_remaining_evidence")
+                        )
+                    ],
+                    "source_acquisition_blockers": [
+                        str(item)
+                        for item in _as_list(slot.get("source_acquisition_blockers"))
+                    ],
                     "evidence_artifacts": [
                         str(path) for path in _as_list(row.get("evidence_artifacts"))
                     ],
@@ -642,7 +997,12 @@ def _non_expert_release_briefing(
         ux_observation_report=ux_observation_report,
         ux_observation_intake_packet=ux_observation_intake_packet,
     )
-    blocked_science_or_beta_rows: list[dict[str, Any]] = []
+    blocked_science_or_beta_rows = [
+        row
+        for row in roadmap_rows
+        if row.get("state") != "ready"
+        and "science_actual_closure" in _as_list(row.get("root_cause_tags"))
+    ]
     refresh_required_actions = [
         row
         for row in release_decision_operator_actions
@@ -700,6 +1060,7 @@ def _non_expert_release_briefing(
         "claim_boundaries": [
             "do_not_claim_limited_commercial_release_until_release_allowed_true",
             "do_not_replace_human_ux_observation_with_templates_or_automation",
+            "do_not_claim_science_actual_closure_until_operator_rows_pass",
         ],
     }
 
@@ -711,6 +1072,11 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
     source_of_truth_gap = _load_json(
         repo_root,
         DEFAULT_SOURCE_OF_TRUTH_GAP_CLASSIFICATION,
+    )
+    science_row_audit = _load_json(repo_root, DEFAULT_SCIENCE_ACTUAL_CLOSURE_ROW_AUDIT)
+    science_handoff = _load_json(
+        repo_root,
+        DEFAULT_SCIENCE_ACTUAL_CLOSURE_OPERATOR_HANDOFF,
     )
     product_capabilities = _load_json(repo_root, DEFAULT_PRODUCT_CAPABILITIES)
     ux_observation_report = _load_json(repo_root, DEFAULT_UX_OBSERVATION_REPORT)
@@ -741,6 +1107,10 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
             action_register=action_register,
             product_capabilities=product_capabilities,
         ),
+        *_science_actual_closure_rows(
+            science_handoff=science_handoff,
+            science_row_audit=science_row_audit,
+        ),
     ]
     blocked_roadmap_rows = [row for row in roadmap_rows if row["state"] != "ready"]
     primary_bottleneck_row = next(
@@ -748,7 +1118,13 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         blocked_roadmap_rows[0] if blocked_roadmap_rows else {},
     )
     primary_bottleneck = str(primary_bottleneck_row.get("bottleneck") or "")
-    science_bottlenecks: list[str] = []
+    science_bottlenecks = [
+        str(row.get("bottleneck") or "")
+        for row in roadmap_rows
+        if row.get("state") != "ready"
+        and "science_actual_closure" in _as_list(row.get("root_cause_tags"))
+        and str(row.get("bottleneck") or "")
+    ]
     source_of_truth_gap_classification = [
         {
             "candidate": str(row.get("candidate") or ""),
@@ -872,7 +1248,18 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
             source_of_truth_gap_evidence_matrix
         ),
         "science_evidence_surface_bottlenecks": science_bottlenecks,
-        "science_evidence_surface_status": {},
+        "science_evidence_surface_status": {
+            "status": str(science_handoff.get("science_actual_closure_status") or ""),
+            "contract_pass": _as_bool(
+                science_handoff.get("science_actual_closure_contract_pass")
+            ),
+            "missing_row_inputs": [
+                str(row) for row in _as_list(science_handoff.get("missing_row_inputs"))
+            ],
+            "completion_progress": _as_dict(
+                science_handoff.get("science_actual_closure_completion_progress")
+            ),
+        },
         "capability_summary_rows": _capability_summary_rows(product_capabilities),
         "roadmap_rows": roadmap_rows,
         "blocked_roadmap_row_count": len(blocked_roadmap_rows),
