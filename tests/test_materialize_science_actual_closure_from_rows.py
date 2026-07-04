@@ -438,6 +438,40 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
     assert audit["summary"]["blocked_requirement_count"] == 18
     assert audit["summary"]["passing_requirement_count"] == 1
     assert audit["summary"]["actual_closure_ready"] is False
+    completion_audit = audit["completion_audit"]
+    assert completion_audit["status"] == "operator_evidence_required"
+    assert completion_audit["actual_closure_ready"] is False
+    assert completion_audit["complete_component_count"] == 0
+    assert completion_audit["required_component_count"] == 3
+    assert completion_audit["missing_row_inputs"] == [
+        "subset_rows",
+        "pose_rows",
+        "enrichment_rows",
+        "vina_gnina_rows",
+        "gpcr_rows",
+        "pocketmd_rows",
+    ]
+    completion_components = {
+        row["component_id"]: row for row in completion_audit["component_audits"]
+    }
+    assert completion_components["public_benchmark_phase2_actual_closure"][
+        "status"
+    ] == "operator_rows_required"
+    assert completion_components["public_benchmark_phase2_actual_closure"][
+        "missing_row_inputs"
+    ] == ["subset_rows", "pose_rows", "enrichment_rows", "vina_gnina_rows"]
+    assert completion_components["gpcr_hard_decoy_actual_closure"][
+        "requirement_pass_count"
+    ] == 0
+    assert completion_components["gpcr_hard_decoy_actual_closure"][
+        "missing_row_inputs"
+    ] == ["gpcr_rows"]
+    assert completion_components["pocketmd_lite_topk_actual_closure"][
+        "requirement_pass_count"
+    ] == 1
+    assert completion_components["pocketmd_lite_topk_actual_closure"][
+        "missing_row_inputs"
+    ] == ["pocketmd_rows"]
     assert audit["summary"]["upstream_source_context_count"] == 0
     assert audit["summary"]["upstream_source_blocker_count"] == 0
     assert audit["upstream_source_blockers"] == []
@@ -1204,6 +1238,8 @@ def test_science_actual_closure_audit_cli_writes_markdown(
     markdown = out_md.read_text(encoding="utf-8")
     assert payload["status"] == "operator_evidence_required"
     assert "# Science Actual Closure Row Audit" in markdown
+    assert "completion_audit_status" in markdown
+    assert "| Completion Component | Status | Requirements | Missing Row Inputs | Failed Criteria |" in markdown
     assert "| `subset_rows` | `missing` |" in markdown
     assert "| `gpcr_rows` | `missing` |" in markdown
     assert "| `pocketmd_rows` | `missing` |" in markdown
@@ -1276,6 +1312,24 @@ def test_science_actual_closure_audit_materializes_both_ready_surfaces(
         "required_component_count": 3,
         "requirement_count": 19,
     }
+    completion_audit = audit["completion_audit"]
+    assert completion_audit["status"] == "complete"
+    assert completion_audit["actual_closure_ready"] is True
+    assert completion_audit["complete_component_count"] == 3
+    assert completion_audit["required_component_count"] == 3
+    assert completion_audit["complete_component_ids"] == [
+        "public_benchmark_phase2_actual_closure",
+        "gpcr_hard_decoy_actual_closure",
+        "pocketmd_lite_topk_actual_closure",
+    ]
+    assert completion_audit["blocked_component_ids"] == []
+    assert completion_audit["missing_row_inputs"] == []
+    assert completion_audit["requirement_pass_count"] == 19
+    assert completion_audit["requirement_count"] == 19
+    assert all(
+        row["status"] == "complete" and row["missing_row_inputs"] == []
+        for row in completion_audit["component_audits"]
+    )
     assert audit["row_intake_contracts"]["subset_rows"]["accepted_formats"] == [
         "json",
         "jsonl",
@@ -1341,6 +1395,86 @@ def test_science_actual_closure_audit_materializes_both_ready_surfaces(
     assert (tmp_path / "public_operator_bundle.json").exists()
     assert (tmp_path / "gpcr_surface.json").exists()
     assert (tmp_path / "pocketmd_surface.json").exists()
+
+
+def test_science_actual_closure_completion_audit_surfaces_current_goal_blockers(
+    tmp_path: Path,
+) -> None:
+    public_rows = _write_public_phase2_rows(tmp_path)
+    gpcr_rows = tmp_path / "gpcr_rows.csv"
+    _write_gpcr_rows(gpcr_rows)
+
+    audit = module.build_science_actual_closure_audit(
+        repo_root=tmp_path,
+        subset_rows_path=public_rows["subset"],
+        pose_rows_path=public_rows["pose"],
+        enrichment_rows_path=public_rows["enrichment"],
+        **_public_output_kwargs(tmp_path),
+        gpcr_rows_path=gpcr_rows,
+        gpcr_template_out=tmp_path / "gpcr_template.json",
+        gpcr_report_out=tmp_path / "gpcr_report.json",
+        gpcr_surface_out=tmp_path / "gpcr_surface.json",
+        pocketmd_intake_out=tmp_path / "pocketmd_intake.json",
+        pocketmd_report_out=tmp_path / "pocketmd_report.json",
+        pocketmd_surface_out=tmp_path / "pocketmd_surface.json",
+        source_id="operator_attached_science_actual_closure_rows",
+        source_url="https://zenodo.org/records/2468135",
+        source_license="CC-BY-4.0",
+    )
+
+    assert audit["status"] == "operator_evidence_required"
+    assert audit["missing_row_inputs"] == ["vina_gnina_rows", "pocketmd_rows"]
+    assert audit["actual_closure_requirement_summary"][
+        "gpcr_phase3_passing_requirement_count"
+    ] == 5
+    assert audit["actual_closure_requirement_summary"][
+        "public_benchmark_phase2_passing_requirement_count"
+    ] == 4
+    assert audit["actual_closure_requirement_summary"][
+        "pocketmd_phase4_passing_requirement_count"
+    ] == 1
+
+    completion_audit = audit["completion_audit"]
+    assert completion_audit["status"] == "operator_evidence_required"
+    assert completion_audit["complete_component_ids"] == [
+        "gpcr_hard_decoy_actual_closure"
+    ]
+    assert completion_audit["blocked_component_ids"] == [
+        "public_benchmark_phase2_actual_closure",
+        "pocketmd_lite_topk_actual_closure",
+    ]
+    completion_components = {
+        row["component_id"]: row for row in completion_audit["component_audits"]
+    }
+    public = completion_components["public_benchmark_phase2_actual_closure"]
+    gpcr = completion_components["gpcr_hard_decoy_actual_closure"]
+    pocketmd = completion_components["pocketmd_lite_topk_actual_closure"]
+
+    assert public["status"] == "operator_rows_required"
+    assert public["requirement_pass_count"] == 4
+    assert public["requirement_count"] == 5
+    assert public["missing_row_inputs"] == ["vina_gnina_rows"]
+    assert public["failed_criteria"] == ["vina_gnina_comparison_ready"]
+    assert gpcr["status"] == "complete"
+    assert gpcr["requirement_pass_count"] == 5
+    assert gpcr["requirement_count"] == 5
+    assert gpcr["missing_row_inputs"] == []
+    gpcr_criteria = {row["criterion_id"]: row for row in gpcr["criteria"]}
+    assert gpcr_criteria["ranking_pr_auc_ci_low_min"]["required"] == ">=0.45"
+    assert gpcr_criteria["ranking_pr_auc_ci_low_min"]["pass"] is True
+    assert gpcr_criteria["top20_hit_rate_min"]["required"] == ">=0.2"
+    assert gpcr_criteria["top20_hit_rate_min"]["pass"] is True
+    assert gpcr_criteria["decoys_above_positive_count_max"]["required"] == "<=0"
+    assert gpcr_criteria["decoys_above_positive_count_max"]["pass"] is True
+    assert (
+        gpcr_criteria["no_positive_out_anchored_by_top_decoys"]["required"] is False
+    )
+    assert gpcr_criteria["no_positive_out_anchored_by_top_decoys"]["pass"] is True
+    assert pocketmd["status"] == "operator_rows_required"
+    assert pocketmd["requirement_pass_count"] == 1
+    assert pocketmd["requirement_count"] == 9
+    assert pocketmd["missing_row_inputs"] == ["pocketmd_rows"]
+    assert "h_bond_persistence_materialized" in pocketmd["failed_criteria"]
 
 
 def test_science_actual_closure_preserves_existing_gpcr_source_receipt(

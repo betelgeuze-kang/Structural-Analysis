@@ -4,8 +4,15 @@
 - `contract_pass`: `False`
 - `component_ready_count`: `1/3`
 - `requirement_pass_count`: `10/19`
+- `completion_audit_status`: `operator_evidence_required`
 - `missing_row_inputs`: `vina_gnina_rows, pocketmd_rows`
 - `upstream_source_blockers`: `public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_rows_not_acquired, public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_engine_runtime_not_ready, public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_input_manifest_not_detected, public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_engine_binaries_or_container_images_missing, public_benchmark_phase2_source_acquisition::public_benchmark_external_receipts_not_attached, pocketmd_lite_source_acquisition::pocketmd_lite_topk_rows_not_acquired, pocketmd_lite_source_acquisition::upstream_top_k_candidate_receipts_not_attached, pocketmd_lite_source_acquisition::lite_refinement_metric_receipts_not_attached`
+
+| Completion Component | Status | Requirements | Missing Row Inputs | Failed Criteria |
+|---|---|---|---|---|
+| `public_benchmark_phase2_actual_closure` | `operator_rows_required` | `4/5` | `vina_gnina_rows` | `vina_gnina_comparison_ready` |
+| `gpcr_hard_decoy_actual_closure` | `complete` | `5/5` | `none` | `none` |
+| `pocketmd_lite_topk_actual_closure` | `operator_rows_required` | `1/9` | `pocketmd_rows` | `top_k_refinement_rows_present, top_k_refinement_case_coverage, local_min_survival_materialized, contact_persistence_materialized, h_bond_persistence_materialized, clash_relief_materialized, uncertainty_summary_materialized, report_blockers_resolved` |
 
 | Row Input | Status | Component | Closes Criteria | Default Path |
 |---|---|---|---|---|

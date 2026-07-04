@@ -1078,6 +1078,152 @@ def _component_requirement_summary(
     }
 
 
+def _requirement_row_input_ids(requirement: dict[str, Any]) -> list[str]:
+    row_input_ids = requirement.get("row_input_ids")
+    if isinstance(row_input_ids, list):
+        return sorted({str(item) for item in row_input_ids if str(item)})
+    row_input_id = str(requirement.get("row_input_id") or "")
+    return [row_input_id] if row_input_id else []
+
+
+def _completion_requirement_rows(
+    requirements: list[dict[str, Any]],
+    *,
+    component_id: str,
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for requirement in requirements:
+        if str(requirement.get("component_id") or "") != component_id:
+            continue
+        row = {
+            "criterion_id": str(requirement.get("criterion_id") or ""),
+            "pass": bool(requirement.get("pass")),
+            "required": requirement.get("required"),
+            "row_input_ids": _requirement_row_input_ids(requirement),
+            "blockers": [
+                str(item) for item in requirement.get("blockers", []) if str(item)
+            ],
+        }
+        for key in ("current", "current_by_target", "failed_targets"):
+            if key in requirement:
+                row[key] = requirement[key]
+        rows.append(row)
+    return rows
+
+
+def _component_completion_audits(
+    components: list[dict[str, Any]],
+    requirements: list[dict[str, Any]],
+    row_closure_matrix: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    completion_rows: list[dict[str, Any]] = []
+    for component in components:
+        component_id = str(component.get("component_id") or "")
+        requirement_rows = _completion_requirement_rows(
+            requirements,
+            component_id=component_id,
+        )
+        missing_row_inputs = [
+            str(row.get("row_input_id") or "")
+            for row in row_closure_matrix
+            if str(row.get("actual_closure_component_id") or "") == component_id
+            and bool(row.get("missing"))
+            and str(row.get("row_input_id") or "")
+        ]
+        provided_row_inputs = [
+            str(row.get("row_input_id") or "")
+            for row in row_closure_matrix
+            if str(row.get("actual_closure_component_id") or "") == component_id
+            and not bool(row.get("missing"))
+            and str(row.get("row_input_id") or "")
+        ]
+        passed_criteria = [
+            str(row.get("criterion_id") or "") for row in requirement_rows if row["pass"]
+        ]
+        failed_criteria = [
+            str(row.get("criterion_id") or "")
+            for row in requirement_rows
+            if not row["pass"]
+        ]
+        actual_closure_ready = bool(component.get("actual_closure_ready"))
+        if actual_closure_ready:
+            status = "complete"
+        elif missing_row_inputs:
+            status = "operator_rows_required"
+        else:
+            status = "blocked"
+        completion_rows.append(
+            {
+                "component_id": component_id,
+                "status": status,
+                "actual_closure_ready": actual_closure_ready,
+                "contract_pass": bool(component.get("contract_pass")),
+                "materialized": bool(component.get("materialized")),
+                "requirement_pass_count": len(passed_criteria),
+                "requirement_count": len(requirement_rows),
+                "passed_criteria": passed_criteria,
+                "failed_criteria": failed_criteria,
+                "missing_row_inputs": missing_row_inputs,
+                "provided_row_inputs": provided_row_inputs,
+                "blockers": [
+                    str(item) for item in component.get("blockers", []) if str(item)
+                ],
+                "criteria": requirement_rows,
+            }
+        )
+    return completion_rows
+
+
+def _science_completion_audit(
+    *,
+    components: list[dict[str, Any]],
+    requirements: list[dict[str, Any]],
+    row_closure_matrix: list[dict[str, Any]],
+    missing_row_inputs: list[str],
+    blockers: list[str],
+    upstream_source_blockers: list[str],
+    requirement_summary: dict[str, Any],
+) -> dict[str, Any]:
+    component_audits = _component_completion_audits(
+        components,
+        requirements,
+        row_closure_matrix,
+    )
+    complete_component_ids = [
+        row["component_id"] for row in component_audits if row["status"] == "complete"
+    ]
+    blocked_component_ids = [
+        row["component_id"] for row in component_audits if row["status"] != "complete"
+    ]
+    actual_closure_ready = (
+        bool(requirement_summary.get("actual_closure_ready"))
+        and not blockers
+        and not upstream_source_blockers
+    )
+    return {
+        "status": "complete" if actual_closure_ready else "operator_evidence_required",
+        "actual_closure_ready": actual_closure_ready,
+        "complete_component_count": len(complete_component_ids),
+        "required_component_count": len(component_audits),
+        "complete_component_ids": complete_component_ids,
+        "blocked_component_ids": blocked_component_ids,
+        "missing_row_inputs": missing_row_inputs,
+        "missing_row_input_count": len(missing_row_inputs),
+        "requirement_pass_count": int(
+            requirement_summary.get("passing_requirement_count") or 0
+        ),
+        "requirement_count": int(requirement_summary.get("requirement_count") or 0),
+        "blocker_count": len(blockers),
+        "upstream_source_blocker_count": len(upstream_source_blockers),
+        "component_audits": component_audits,
+        "claim_boundary": (
+            "This completion audit summarizes already-materialized requirement rows "
+            "and row-input resolution only; it does not promote missing operator "
+            "rows, proxy rows, or source-acquisition plans into actual closure."
+        ),
+    }
+
+
 def _attach_component_requirement_summaries(
     components: list[dict[str, Any]],
     requirements: list[dict[str, Any]],
@@ -1284,6 +1430,9 @@ def _markdown(payload: dict[str, Any]) -> str:
     summary = payload.get("summary")
     if not isinstance(summary, dict):
         summary = {}
+    completion_audit = payload.get("completion_audit")
+    if not isinstance(completion_audit, dict):
+        completion_audit = {}
     missing_row_inputs = [
         str(item) for item in payload.get("missing_row_inputs", []) if str(item)
     ]
@@ -1297,12 +1446,31 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `contract_pass`: `{payload.get('contract_pass', False)}`",
         f"- `component_ready_count`: `{payload.get('component_ready_count', 0)}/{payload.get('component_count', 0)}`",
         f"- `requirement_pass_count`: `{summary.get('passing_requirement_count', 0)}/{summary.get('requirement_count', 0)}`",
+        f"- `completion_audit_status`: `{completion_audit.get('status', '')}`",
         f"- `missing_row_inputs`: `{_comma_join(missing_row_inputs)}`",
         f"- `upstream_source_blockers`: `{_comma_join(upstream_source_blockers)}`",
         "",
-        "| Row Input | Status | Component | Closes Criteria | Default Path |",
+        "| Completion Component | Status | Requirements | Missing Row Inputs | Failed Criteria |",
         "|---|---|---|---|---|",
     ]
+    for component in completion_audit.get("component_audits", []):
+        if not isinstance(component, dict):
+            continue
+        lines.append(
+            "| "
+            f"`{component.get('component_id', '')}` | "
+            f"`{component.get('status', '')}` | "
+            f"`{component.get('requirement_pass_count', 0)}/{component.get('requirement_count', 0)}` | "
+            f"`{_comma_join(component.get('missing_row_inputs', []))}` | "
+            f"`{_comma_join(component.get('failed_criteria', []))}` |"
+        )
+    lines.extend(
+        [
+        "",
+        "| Row Input | Status | Component | Closes Criteria | Default Path |",
+        "|---|---|---|---|---|",
+        ]
+    )
     for row in payload.get("row_closure_matrix", []):
         if not isinstance(row, dict):
             continue
@@ -1810,6 +1978,15 @@ def build_science_actual_closure_audit(
         row_intake_contracts=row_intake_contracts,
         actual_closure_requirements=actual_closure_requirements,
     )
+    completion_audit = _science_completion_audit(
+        components=components,
+        requirements=actual_closure_requirements,
+        row_closure_matrix=row_closure_matrix,
+        missing_row_inputs=missing_row_inputs,
+        blockers=blockers,
+        upstream_source_blockers=upstream_source_blockers,
+        requirement_summary=requirement_summary,
+    )
     operator_next_actions = _operator_next_actions(
         missing_row_inputs=missing_row_inputs,
         contract_pass=contract_pass,
@@ -1885,6 +2062,7 @@ def build_science_actual_closure_audit(
         "component_requirement_summaries": component_requirement_summaries,
         "actual_closure_requirements": actual_closure_requirements,
         "actual_closure_requirement_summary": requirement_summary,
+        "completion_audit": completion_audit,
         "required_actual_closures": [
             PUBLIC_BENCHMARK_COMPONENT_ID,
             GPCR_COMPONENT_ID,
