@@ -145,6 +145,9 @@ def _source_acquisition_summary(
     vina_gnina_runtime_readiness = payload.get("vina_gnina_runtime_readiness")
     if not isinstance(vina_gnina_runtime_readiness, dict):
         vina_gnina_runtime_readiness = {}
+    vina_gnina_runtime_readiness_summary = _vina_gnina_runtime_readiness_summary(
+        vina_gnina_runtime_readiness
+    )
     official_source_receipt_plan = payload.get("official_source_receipt_plan")
     if not isinstance(official_source_receipt_plan, dict):
         official_source_receipt_plan = {}
@@ -264,7 +267,101 @@ def _source_acquisition_summary(
             )
         ),
         "vina_gnina_engine_run_slot_matrix": vina_gnina_engine_run_slot_matrix,
+        "vina_gnina_runtime_readiness": vina_gnina_runtime_readiness_summary,
         "summary": summary,
+    }
+
+
+def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, Any]:
+    if not payload:
+        return {}
+    missing_engine_ids = [
+        str(row) for row in payload.get("missing_engine_ids", []) if str(row)
+    ] if isinstance(payload.get("missing_engine_ids"), list) else []
+    operator_unblock_packet = payload.get("operator_unblock_packet")
+    if not isinstance(operator_unblock_packet, dict):
+        operator_unblock_packet = {}
+    return {
+        "artifact": str(payload.get("artifact") or ""),
+        "status": str(payload.get("status") or ""),
+        "contract_pass": payload.get("contract_pass"),
+        "execution_plan_ready": bool(payload.get("execution_plan_ready")),
+        "runtime_ready_for_engine_execution": bool(
+            payload.get("runtime_ready_for_engine_execution")
+        ),
+        "operator_execution_ready": bool(payload.get("operator_execution_ready")),
+        "adapter_rows_ready": bool(payload.get("adapter_rows_ready")),
+        "case_count": int(payload.get("case_count") or 0),
+        "required_engine_run_count": int(
+            payload.get("required_engine_run_count") or 0
+        ),
+        "ready_engine_run_slot_count": int(
+            payload.get("ready_engine_run_slot_count") or 0
+        ),
+        "case_input_slot_matrix_count": int(
+            payload.get("case_input_slot_matrix_count") or 0
+        ),
+        "blocked_case_input_slot_count": int(
+            payload.get("blocked_case_input_slot_count") or 0
+        ),
+        "engine_run_slot_matrix_count": int(
+            payload.get("engine_run_slot_matrix_count") or 0
+        ),
+        "blocked_engine_run_slot_count": int(
+            payload.get("blocked_engine_run_slot_count") or 0
+        ),
+        "missing_engine_ids": missing_engine_ids,
+        "adapter_row_preflight_status": str(
+            payload.get("adapter_row_preflight_status") or ""
+        ),
+        "operator_unblock_packet": _compact_vina_gnina_unblock_packet(
+            operator_unblock_packet
+        ),
+        "command": str(payload.get("command") or ""),
+    }
+
+
+def _compact_vina_gnina_unblock_packet(payload: dict[str, Any]) -> dict[str, Any]:
+    if not payload:
+        return {}
+    commands = payload.get("commands")
+    if not isinstance(commands, dict):
+        commands = {}
+    return {
+        "status": str(payload.get("status") or ""),
+        "input_manifest_template_artifact": str(
+            payload.get("input_manifest_template_artifact") or ""
+        ),
+        "input_manifest_template_preflight_artifact": str(
+            payload.get("input_manifest_template_preflight_artifact") or ""
+        ),
+        "input_manifest_template_preflight_markdown_artifact": str(
+            payload.get("input_manifest_template_preflight_markdown_artifact") or ""
+        ),
+        "expected_rows_artifact": str(payload.get("expected_rows_artifact") or ""),
+        "case_input_slot_count": int(payload.get("case_input_slot_count") or 0),
+        "blocked_case_input_slot_count": int(
+            payload.get("blocked_case_input_slot_count") or 0
+        ),
+        "required_engine_run_count": int(
+            payload.get("required_engine_run_count") or 0
+        ),
+        "ready_engine_run_slot_count": int(
+            payload.get("ready_engine_run_slot_count") or 0
+        ),
+        "blocked_engine_run_slot_count": int(
+            payload.get("blocked_engine_run_slot_count") or 0
+        ),
+        "missing_engine_ids": [
+            str(row) for row in payload.get("missing_engine_ids", []) if str(row)
+        ] if isinstance(payload.get("missing_engine_ids"), list) else [],
+        "adapter_row_preflight_status": str(
+            payload.get("adapter_row_preflight_status") or ""
+        ),
+        "operator_sequence": [
+            str(row) for row in payload.get("operator_sequence", []) if str(row)
+        ] if isinstance(payload.get("operator_sequence"), list) else [],
+        "commands": {str(key): str(value) for key, value in commands.items()},
     }
 
 

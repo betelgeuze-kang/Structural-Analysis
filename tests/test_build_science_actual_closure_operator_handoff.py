@@ -398,6 +398,16 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert vina_gnina["upstream_source_acquisition"][
         "vina_gnina_blocked_engine_run_slot_count"
     ] == 24
+    upstream_runtime = vina_gnina["upstream_source_acquisition"][
+        "vina_gnina_runtime_readiness"
+    ]
+    assert upstream_runtime["status"] == "execution_plan_blocked"
+    assert upstream_runtime["operator_unblock_packet"][
+        "input_manifest_template_preflight_artifact"
+    ].endswith("public_benchmark_vina_gnina_input_manifest_template_preflight.json")
+    assert upstream_runtime["operator_unblock_packet"]["operator_sequence"][0] == (
+        "review_public_benchmark_vina_gnina_input_manifest_template_preflight"
+    )
     assert vina_gnina["source_acquisition_operator_action"] == (
         "resolve_public_benchmark_phase2_source_acquisition_blockers"
     )

@@ -889,6 +889,11 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
                     ],
                 },
                 "vina_gnina_runtime_readiness": {
+                    "status": "execution_plan_blocked",
+                    "contract_pass": True,
+                    "execution_plan_ready": False,
+                    "runtime_ready_for_engine_execution": False,
+                    "operator_execution_ready": False,
                     "case_input_slot_matrix_count": 12,
                     "blocked_case_input_slot_count": 12,
                     "case_input_slot_matrix": [
@@ -900,6 +905,19 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
                     ],
                     "engine_run_slot_matrix_count": 24,
                     "blocked_engine_run_slot_count": 24,
+                    "required_engine_run_count": 24,
+                    "ready_engine_run_slot_count": 0,
+                    "missing_engine_ids": ["vina", "gnina"],
+                    "operator_unblock_packet": {
+                        "status": "engine_inputs_required",
+                        "input_manifest_template_preflight_artifact": (
+                            "implementation/phase1/release_evidence/productization/"
+                            "public_benchmark_vina_gnina_input_manifest_template_preflight.json"
+                        ),
+                        "operator_sequence": [
+                            "review_public_benchmark_vina_gnina_input_manifest_template_preflight"
+                        ],
+                    },
                     "engine_run_slot_matrix": [
                         {
                             "slot_id": "casf2016_4llx_vina",
@@ -1059,6 +1077,16 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
     assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
         "vina_gnina_engine_run_slot_matrix"
     ][0]["slot_id"] == "casf2016_4llx_vina"
+    runtime_summary = audit["upstream_source_acquisition"][
+        "public_benchmark_phase2"
+    ]["vina_gnina_runtime_readiness"]
+    assert runtime_summary["status"] == "execution_plan_blocked"
+    assert runtime_summary["operator_unblock_packet"]["status"] == (
+        "engine_inputs_required"
+    )
+    assert runtime_summary["operator_unblock_packet"][
+        "input_manifest_template_preflight_artifact"
+    ].endswith("public_benchmark_vina_gnina_input_manifest_template_preflight.json")
     assert audit["upstream_source_acquisition"]["pocketmd_lite"][
         "missing_row_input_actions"
     ][0]["operator_action"] == (

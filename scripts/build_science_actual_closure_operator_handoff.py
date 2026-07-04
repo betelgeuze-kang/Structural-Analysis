@@ -285,6 +285,9 @@ def _slot_source_context(
                 if row.get("status") != "ready_for_engine_execution"
             )
         ),
+        "vina_gnina_runtime_readiness": _as_dict(
+            source.get("vina_gnina_runtime_readiness")
+        ),
         "summary": _as_dict(source.get("summary")),
         "operator_action": (
             f"resolve_{source_id}_source_acquisition_blockers"
