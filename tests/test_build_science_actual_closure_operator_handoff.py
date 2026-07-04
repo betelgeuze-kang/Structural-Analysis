@@ -190,6 +190,15 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert manifest_preflight["unsupported_benchmark_field_count"] == 0
     assert manifest_preflight["missing_local_file_count"] == 48
     assert manifest_preflight["missing_receipt_ref_count"] == 60
+    assert vina_runtime_action["input_manifest_completion_action_case_count"] == 12
+    assert vina_runtime_action["input_manifest_completion_blocked_case_count"] == 12
+    first_manifest_action = vina_runtime_action[
+        "input_manifest_completion_action_plan"
+    ][0]
+    assert first_manifest_action["case_id"] == "casf2016_4llx"
+    assert first_manifest_action["operator_completion_action"] == (
+        "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+    )
     assert vina_runtime_action["engine_runtime_actions"] == [
         {
             "binary_env_var": "PUBLIC_BENCHMARK_VINA_BIN",
@@ -1092,6 +1101,11 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "public_benchmark_vina_gnina_input_manifest.json" in markdown
     assert "public_benchmark_vina_gnina_input_manifest.csv" in markdown
     assert "public_benchmark_vina_gnina_input_manifest_template_preflight" in markdown
+    assert (
+        "manifest:casf2016_4llx/"
+        "complete_vina_gnina_input_manifest_row_for_casf2016_4llx/"
+        "missing_files=4"
+    ) in markdown
     assert "`recommended_template_dropzone_is_supported_candidate_path`: `True`" in markdown
     assert "`input_manifest_load_errors`: `none`" in markdown
     assert "`do_not_treat_blank_prepared_checksums_as_ready`: `True`" in markdown

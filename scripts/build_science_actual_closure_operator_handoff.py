@@ -358,6 +358,52 @@ def _source_acquisition_row_action(
     return {}
 
 
+def _compact_input_manifest_completion_action(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "case_id": str(row.get("case_id") or ""),
+        "complex_id": str(row.get("complex_id") or ""),
+        "status": str(row.get("status") or ""),
+        "operator_completion_action": str(
+            row.get("operator_completion_action") or ""
+        ),
+        "missing_required_field_count": _as_int(
+            row.get("missing_required_field_count")
+        ),
+        "missing_local_file_count": _as_int(row.get("missing_local_file_count")),
+        "missing_receipt_ref_count": _as_int(
+            row.get("missing_receipt_ref_count")
+        ),
+    }
+
+
+def _omit_repeated_input_manifest_completion_plans(value: Any) -> Any:
+    if isinstance(value, list):
+        return [
+            _omit_repeated_input_manifest_completion_plans(item)
+            for item in value
+        ]
+    if not isinstance(value, dict):
+        return value
+    sanitized: dict[str, Any] = {}
+    for key, item in value.items():
+        if key == "input_manifest_completion_action_plan":
+            action_plan = [row for row in _as_list(item) if isinstance(row, dict)]
+            sanitized["input_manifest_completion_action_plan_count"] = len(
+                action_plan
+            )
+            sanitized["input_manifest_completion_action_plan_omitted"] = bool(
+                action_plan
+            )
+            sanitized["first_input_manifest_completion_action"] = (
+                _compact_input_manifest_completion_action(action_plan[0])
+                if action_plan
+                else {}
+            )
+            continue
+        sanitized[key] = _omit_repeated_input_manifest_completion_plans(item)
+    return sanitized
+
+
 def _compact_candidate_slot_status(row: dict[str, Any]) -> dict[str, Any]:
     return {
         "slot_id": str(row.get("slot_id") or ""),
@@ -953,6 +999,22 @@ def _unblock_plan_runtime_action_packet(
     first_blocked_engine_run_slot = _as_dict(
         unblock.get("first_blocked_engine_run_slot")
     )
+    preflight_summary = _as_dict(
+        source_runtime_action_packet.get("input_manifest_template_preflight_summary")
+        or unblock.get("input_manifest_template_preflight_summary")
+    )
+    compact_preflight_summary = _omit_repeated_input_manifest_completion_plans(
+        preflight_summary
+    )
+    input_manifest_completion_action_plan = [
+        row
+        for row in _as_list(
+            source_runtime_action_packet.get("input_manifest_completion_action_plan")
+            or unblock.get("input_manifest_completion_action_plan")
+            or preflight_summary.get("input_manifest_completion_action_plan")
+        )
+        if isinstance(row, dict)
+    ]
     if (
         not first_blocked_case_input_slot
         and not first_blocked_engine_run_slot
@@ -1021,6 +1083,26 @@ def _unblock_plan_runtime_action_packet(
         "first_blocked_engine_run_slot": _as_dict(
             source_runtime_action_packet.get("first_blocked_engine_run_slot")
             or first_blocked_engine_run_slot
+        ),
+        "input_manifest_template_preflight_summary": compact_preflight_summary,
+        "input_manifest_completion_action_case_count": _as_int(
+            source_runtime_action_packet.get(
+                "input_manifest_completion_action_case_count"
+            )
+            or unblock.get("input_manifest_completion_action_case_count")
+            or preflight_summary.get("input_manifest_completion_action_case_count")
+            or len(input_manifest_completion_action_plan)
+        ),
+        "input_manifest_completion_blocked_case_count": _as_int(
+            source_runtime_action_packet.get(
+                "input_manifest_completion_blocked_case_count"
+            )
+            or unblock.get("input_manifest_completion_blocked_case_count")
+            or preflight_summary.get("input_manifest_completion_blocked_case_count")
+            or len(input_manifest_completion_action_plan)
+        ),
+        "input_manifest_completion_action_plan": (
+            input_manifest_completion_action_plan
         ),
         "detected_row_artifact_count": _as_int(
             unblock.get("detected_row_artifact_count")
@@ -1559,6 +1641,26 @@ def build_science_actual_closure_operator_handoff(
     blocking_input_unblock_plan = _blocking_input_unblock_plan(missing_slots)
     blocked_component_operator_actions = _blocked_component_operator_actions(slots)
     completion_progress = _science_completion_progress(audit)
+    handoff_upstream_source_acquisition = (
+        _omit_repeated_input_manifest_completion_plans(upstream_source_acquisition)
+    )
+    handoff_row_input_materialization_contracts = (
+        _omit_repeated_input_manifest_completion_plans(
+            row_input_materialization_contracts
+        )
+    )
+    handoff_operator_rows_packet = _omit_repeated_input_manifest_completion_plans(
+        operator_rows_packet
+    )
+    handoff_blocked_component_operator_actions = (
+        _omit_repeated_input_manifest_completion_plans(
+            blocked_component_operator_actions
+        )
+    )
+    handoff_slots = _omit_repeated_input_manifest_completion_plans(slots)
+    handoff_first_missing_slot = _omit_repeated_input_manifest_completion_plans(
+        missing_slots[0] if missing_slots else {}
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -1628,20 +1730,24 @@ def build_science_actual_closure_operator_handoff(
         "blockers": blockers,
         "blocker_count": len(blockers),
         "science_actual_closure_blockers": science_actual_closure_blockers,
-        "upstream_source_acquisition": upstream_source_acquisition,
+        "upstream_source_acquisition": handoff_upstream_source_acquisition,
         "upstream_source_blockers": upstream_source_blockers,
         "row_template_artifacts": row_template_artifacts,
         "missing_row_template_artifacts": missing_row_template_artifacts,
         "missing_row_inputs": [
             str(slot.get("row_input_id") or "") for slot in missing_slots
         ],
-        "row_input_materialization_contracts": row_input_materialization_contracts,
-        "operator_rows_packet": operator_rows_packet,
+        "row_input_materialization_contracts": (
+            handoff_row_input_materialization_contracts
+        ),
+        "operator_rows_packet": handoff_operator_rows_packet,
         "science_actual_closure_completion_progress": completion_progress,
         "blocking_input_unblock_plan": blocking_input_unblock_plan,
         "blocking_input_unblock_plan_count": len(blocking_input_unblock_plan),
-        "blocked_component_operator_actions": blocked_component_operator_actions,
-        "first_missing_slot": missing_slots[0] if missing_slots else {},
+        "blocked_component_operator_actions": (
+            handoff_blocked_component_operator_actions
+        ),
+        "first_missing_slot": handoff_first_missing_slot,
         "operator_next_actions": [
             str(item) for item in _as_list(audit.get("operator_next_actions"))
         ],
@@ -1653,7 +1759,7 @@ def build_science_actual_closure_operator_handoff(
             str(item) for item in _as_list(audit.get("required_actual_closures"))
         ],
         "component_slot_summary": _component_slot_summary(slots),
-        "row_slot_handoffs": slots,
+        "row_slot_handoffs": handoff_slots,
         "row_slot_handoff_count": len(slots),
         "claim_boundary": (
             "This handoff is an operator checklist derived from the science row "
@@ -1774,6 +1880,16 @@ def _markdown(payload: dict[str, Any]) -> str:
             first_engine_slot = _as_dict(
                 runtime_action.get("first_blocked_engine_run_slot")
             )
+            manifest_completion_plan = [
+                item
+                for item in _as_list(
+                    runtime_action.get("input_manifest_completion_action_plan")
+                )
+                if isinstance(item, dict)
+            ]
+            first_manifest_completion_action = (
+                manifest_completion_plan[0] if manifest_completion_plan else {}
+            )
             refinement_action = _as_dict(row.get("refinement_action_packet"))
             first_candidate_slot = _as_dict(
                 refinement_action.get("first_missing_candidate_slot")
@@ -1849,6 +1965,14 @@ def _markdown(payload: dict[str, Any]) -> str:
                 first_blocked_slot_refs.append(
                     "report:"
                     f"{survival_report.get('first_blocked_target', '')}"
+                )
+            if first_manifest_completion_action:
+                first_blocked_slot_refs.append(
+                    "manifest:"
+                    f"{first_manifest_completion_action.get('case_id', '')}/"
+                    f"{first_manifest_completion_action.get('operator_completion_action', '')}/"
+                    "missing_files="
+                    f"{first_manifest_completion_action.get('missing_local_file_count', '')}"
                 )
             preflight_refs = [
                 artifacts[key] for key in preflight_keys if str(artifacts.get(key) or "")

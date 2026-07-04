@@ -180,6 +180,9 @@
 - `expected_rows_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json`
 - `input_manifest_template_preflight_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json`
 - `rows_template_preflight_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json`
+- `input_manifest_completion_action_case_count`: `12`
+- `input_manifest_completion_blocked_case_count`: `12`
+- `first_input_manifest_completion_action`: `casf2016_4llx` / `complete_vina_gnina_input_manifest_row_for_casf2016_4llx`
 - `blocked_case_input_slot_count`: `12`
 - `first_blocked_case_input_slot`: `casf2016_4llx` / `fill_vina_gnina_input_manifest_row_for_casf2016_4llx`
 - `blocked_engine_run_slot_count`: `24`

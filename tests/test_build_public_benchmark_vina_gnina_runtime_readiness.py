@@ -296,6 +296,159 @@ def test_runtime_readiness_compacts_input_manifest_source_url_probe(
     ]
 
 
+def test_runtime_readiness_compacts_input_manifest_completion_action_plan(
+    tmp_path: Path,
+) -> None:
+    preflight = tmp_path / module.DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT
+    preflight.parent.mkdir(parents=True)
+    preflight.write_text(
+        json.dumps(
+            {
+                "status": "operator_manifest_completion_required",
+                "manifest_ready": False,
+                "summary": {
+                    "template_row_count": 1,
+                    "template_case_coverage_complete": True,
+                    "missing_required_value_count": 3,
+                    "missing_local_file_count": 4,
+                    "missing_receipt_ref_count": 5,
+                },
+                "case_preflight_rows": [
+                    {
+                        "case_id": "casf2016_4llx",
+                        "complex_id": "4llx",
+                        "status": "operator_completion_required",
+                        "missing_required_fields": [
+                            "prepared_receptor_checksum",
+                            "prepared_ligand_checksum",
+                            "input_preparation_provenance_ref",
+                        ],
+                        "missing_local_file_fields": [
+                            "protein_structure_path",
+                            "reference_ligand_path",
+                            "prepared_receptor_path",
+                            "prepared_ligand_path",
+                        ],
+                        "missing_receipt_ref_fields": [
+                            "vina_config_ref",
+                            "gnina_config_ref",
+                            "vina_run_receipt_ref",
+                            "gnina_run_receipt_ref",
+                            "input_preparation_provenance_ref",
+                        ],
+                        "local_file_requirements": [
+                            {
+                                "case_id": "casf2016_4llx",
+                                "complex_id": "4llx",
+                                "field": "protein_structure_path",
+                                "file_role": "source_protein_structure",
+                                "file_group": "official_source_file",
+                                "path": "CASF-2016/coreset/4llx/4llx_protein.pdb",
+                                "expected_checksum_field": (
+                                    "protein_structure_checksum"
+                                ),
+                                "expected_checksum": "sha256:" + "a" * 64,
+                                "source_url": (
+                                    "https://static.pdbbind-plus.org.cn/download/"
+                                    "CASF-2016.tar.gz"
+                                ),
+                                "source_license_or_accession": (
+                                    "PDBbind+ CASF-2016 official package"
+                                ),
+                                "status": "operator_completion_required",
+                                "blocker": "path_not_found",
+                                "operator_action": (
+                                    "materialize_source_files_from_casf_archive_"
+                                    "and_verify_checksum"
+                                ),
+                            },
+                            {
+                                "case_id": "casf2016_4llx",
+                                "complex_id": "4llx",
+                                "field": "prepared_ligand_path",
+                                "file_role": "prepared_ligand",
+                                "file_group": "prepared_input_file",
+                                "path": "prepared/4llx_ligand",
+                                "expected_checksum_field": (
+                                    "prepared_ligand_checksum"
+                                ),
+                                "expected_checksum": "sha256:" + "b" * 64,
+                                "source_url": "",
+                                "source_license_or_accession": "",
+                                "status": "ready",
+                                "blocker": "",
+                                "operator_action": (
+                                    "verify_prepared_input_file_checksum"
+                                ),
+                            },
+                        ],
+                        "receipt_ref_requirements": [
+                            {
+                                "case_id": "casf2016_4llx",
+                                "complex_id": "4llx",
+                                "field": "vina_config_ref",
+                                "ref": (
+                                    "operator_attached/vina_gnina/"
+                                    "casf2016_4llx/vina_config.json"
+                                ),
+                                "status": "operator_completion_required",
+                                "blocker": "local_ref_not_found",
+                                "operator_action": "attach_vina_config_ref",
+                            }
+                        ],
+                        "blockers": [
+                            "manifest_required_fields_missing",
+                            "manifest_local_files_missing_or_unverified",
+                            "manifest_receipt_refs_missing",
+                        ],
+                    }
+                ],
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+
+    summary = module._input_manifest_template_preflight_summary(tmp_path)
+
+    assert summary["input_manifest_completion_action_case_count"] == 1
+    assert summary["input_manifest_completion_blocked_case_count"] == 1
+    action = summary["input_manifest_completion_action_plan"][0]
+    assert action["case_id"] == "casf2016_4llx"
+    assert action["operator_completion_action"] == (
+        "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+    )
+    assert action["missing_required_field_count"] == 3
+    assert action["missing_local_file_count"] == 4
+    assert action["missing_receipt_ref_count"] == 5
+    assert action["missing_local_file_requirements"] == [
+        {
+            "case_id": "casf2016_4llx",
+            "complex_id": "4llx",
+            "field": "protein_structure_path",
+            "file_role": "source_protein_structure",
+            "file_group": "official_source_file",
+            "path": "CASF-2016/coreset/4llx/4llx_protein.pdb",
+            "expected_checksum_field": "protein_structure_checksum",
+            "expected_checksum": "sha256:" + "a" * 64,
+            "source_url": (
+                "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz"
+            ),
+            "source_license_or_accession": (
+                "PDBbind+ CASF-2016 official package"
+            ),
+            "status": "operator_completion_required",
+            "blocker": "path_not_found",
+            "operator_action": (
+                "materialize_source_files_from_casf_archive_and_verify_checksum"
+            ),
+        }
+    ]
+    assert action["missing_receipt_ref_requirements"][0]["field"] == (
+        "vina_config_ref"
+    )
+
+
 def test_runtime_readiness_records_missing_binaries_and_rows(
     tmp_path: Path,
     monkeypatch,
@@ -408,8 +561,12 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "first_blocked_case_input_case_id": "",
         "first_blocked_engine_run_case_id": "casf2016_1abc",
         "first_blocked_engine_run_engine_id": "vina",
+        "input_manifest_completion_action_case_count": 0,
+        "input_manifest_completion_blocked_case_count": 0,
         "input_manifest_template_invalid_source_receipt_count": 0,
         "input_manifest_template_manifest_ready": False,
+        "input_manifest_template_missing_local_file_count": 0,
+        "input_manifest_template_missing_receipt_ref_count": 0,
         "input_manifest_template_preflight_status": "missing",
         "missing_engine_count": 2,
         "operator_execution_ready": False,
@@ -458,6 +615,9 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
             "public_benchmark_vina_gnina_input_manifest_template_preflight.json"
         ),
         "first_blocked_case_preflight": {},
+        "input_manifest_completion_action_case_count": 0,
+        "input_manifest_completion_action_plan": [],
+        "input_manifest_completion_blocked_case_count": 0,
         "invalid_checksum_count": 0,
         "invalid_source_receipt_count": 0,
         "known_source_url_content_length_bytes": 0,
@@ -482,6 +642,9 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "template_row_count": 0,
         "unsupported_benchmark_field_count": 0,
     }
+    assert unblock["input_manifest_completion_action_case_count"] == 0
+    assert unblock["input_manifest_completion_blocked_case_count"] == 0
+    assert unblock["input_manifest_completion_action_plan"] == []
     assert unblock["rows_template_artifact"] == (
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_rows_template.csv"

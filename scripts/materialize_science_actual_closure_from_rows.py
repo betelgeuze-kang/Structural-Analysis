@@ -380,6 +380,56 @@ def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, 
     }
 
 
+def _as_string_list(value: Any) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [str(item) for item in value if str(item)]
+
+
+def _compact_vina_gnina_input_manifest_completion_action(
+    row: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "case_id": str(row.get("case_id") or ""),
+        "complex_id": str(row.get("complex_id") or ""),
+        "status": str(row.get("status") or ""),
+        "operator_completion_action": str(
+            row.get("operator_completion_action") or ""
+        ),
+        "missing_required_field_count": int(
+            row.get("missing_required_field_count") or 0
+        ),
+        "missing_local_file_count": int(row.get("missing_local_file_count") or 0),
+        "missing_receipt_ref_count": int(
+            row.get("missing_receipt_ref_count") or 0
+        ),
+        "missing_required_fields": _as_string_list(
+            row.get("missing_required_fields")
+        ),
+        "missing_local_file_fields": _as_string_list(
+            row.get("missing_local_file_fields")
+        ),
+        "missing_receipt_ref_fields": _as_string_list(
+            row.get("missing_receipt_ref_fields")
+        ),
+        "missing_local_file_requirements": [
+            requirement
+            for requirement in row.get("missing_local_file_requirements", [])
+            if isinstance(requirement, dict)
+        ]
+        if isinstance(row.get("missing_local_file_requirements"), list)
+        else [],
+        "missing_receipt_ref_requirements": [
+            requirement
+            for requirement in row.get("missing_receipt_ref_requirements", [])
+            if isinstance(requirement, dict)
+        ]
+        if isinstance(row.get("missing_receipt_ref_requirements"), list)
+        else [],
+        "blockers": _as_string_list(row.get("blockers")),
+    }
+
+
 def _compact_vina_gnina_unblock_packet(payload: dict[str, Any]) -> dict[str, Any]:
     if not payload:
         return {}
@@ -392,6 +442,11 @@ def _compact_vina_gnina_unblock_packet(payload: dict[str, Any]) -> dict[str, Any
     source_url_probe_plan = preflight_summary.get("source_url_probe_plan")
     if not isinstance(source_url_probe_plan, list):
         source_url_probe_plan = []
+    completion_action_plan = preflight_summary.get(
+        "input_manifest_completion_action_plan"
+    )
+    if not isinstance(completion_action_plan, list):
+        completion_action_plan = []
     engine_run_bundle_summary = payload.get("engine_run_bundle_summary")
     if not isinstance(engine_run_bundle_summary, dict):
         engine_run_bundle_summary = {}
@@ -415,6 +470,24 @@ def _compact_vina_gnina_unblock_packet(payload: dict[str, Any]) -> dict[str, Any
             "status": str(preflight_summary.get("status") or ""),
             "manifest_ready": bool(preflight_summary.get("manifest_ready")),
             "template_row_count": int(preflight_summary.get("template_row_count") or 0),
+            "template_case_coverage_complete": bool(
+                preflight_summary.get("template_case_coverage_complete")
+            ),
+            "missing_required_value_count": int(
+                preflight_summary.get("missing_required_value_count") or 0
+            ),
+            "unsupported_benchmark_field_count": int(
+                preflight_summary.get("unsupported_benchmark_field_count") or 0
+            ),
+            "invalid_source_receipt_count": int(
+                preflight_summary.get("invalid_source_receipt_count") or 0
+            ),
+            "missing_local_file_count": int(
+                preflight_summary.get("missing_local_file_count") or 0
+            ),
+            "missing_receipt_ref_count": int(
+                preflight_summary.get("missing_receipt_ref_count") or 0
+            ),
             "source_url_probe_count": int(
                 preflight_summary.get("source_url_probe_count") or 0
             ),
@@ -442,6 +515,19 @@ def _compact_vina_gnina_unblock_packet(payload: dict[str, Any]) -> dict[str, Any
                     "head_command": str(row.get("head_command") or ""),
                 }
                 for row in source_url_probe_plan
+                if isinstance(row, dict)
+            ],
+            "input_manifest_completion_action_case_count": int(
+                preflight_summary.get("input_manifest_completion_action_case_count")
+                or len(completion_action_plan)
+            ),
+            "input_manifest_completion_blocked_case_count": int(
+                preflight_summary.get("input_manifest_completion_blocked_case_count")
+                or len(completion_action_plan)
+            ),
+            "input_manifest_completion_action_plan": [
+                _compact_vina_gnina_input_manifest_completion_action(row)
+                for row in completion_action_plan
                 if isinstance(row, dict)
             ],
         },

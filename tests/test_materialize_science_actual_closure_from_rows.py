@@ -979,6 +979,12 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
                             "status": "operator_manifest_completion_required",
                             "manifest_ready": False,
                             "template_row_count": 12,
+                            "template_case_coverage_complete": True,
+                            "missing_required_value_count": 36,
+                            "unsupported_benchmark_field_count": 0,
+                            "invalid_source_receipt_count": 0,
+                            "missing_local_file_count": 48,
+                            "missing_receipt_ref_count": 60,
                             "source_url_probe_count": 1,
                             "source_url_probe_network_performed": True,
                             "source_url_reachable_count": 1,
@@ -999,6 +1005,65 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
                                         "'https://static.pdbbind-plus.org.cn/download/"
                                         "CASF-2016.tar.gz'"
                                     ),
+                                }
+                            ],
+                            "input_manifest_completion_action_case_count": 12,
+                            "input_manifest_completion_blocked_case_count": 12,
+                            "input_manifest_completion_action_plan": [
+                                {
+                                    "case_id": "casf2016_4llx",
+                                    "complex_id": "4llx",
+                                    "status": "operator_completion_required",
+                                    "operator_completion_action": (
+                                        "complete_vina_gnina_input_manifest_row_for_"
+                                        "casf2016_4llx"
+                                    ),
+                                    "missing_required_field_count": 3,
+                                    "missing_local_file_count": 4,
+                                    "missing_receipt_ref_count": 5,
+                                    "missing_required_fields": [
+                                        "prepared_receptor_checksum",
+                                        "prepared_ligand_checksum",
+                                        "input_preparation_provenance_ref",
+                                    ],
+                                    "missing_local_file_fields": [
+                                        "protein_structure_path",
+                                        "reference_ligand_path",
+                                        "prepared_receptor_path",
+                                        "prepared_ligand_path",
+                                    ],
+                                    "missing_receipt_ref_fields": [
+                                        "vina_config_ref",
+                                        "gnina_config_ref",
+                                        "vina_run_receipt_ref",
+                                        "gnina_run_receipt_ref",
+                                        "input_preparation_provenance_ref",
+                                    ],
+                                    "missing_local_file_requirements": [
+                                        {
+                                            "field": "protein_structure_path",
+                                            "path": (
+                                                "CASF-2016/coreset/4llx/"
+                                                "4llx_protein.pdb"
+                                            ),
+                                            "blocker": "path_not_found",
+                                        }
+                                    ],
+                                    "missing_receipt_ref_requirements": [
+                                        {
+                                            "field": "vina_config_ref",
+                                            "ref": (
+                                                "operator_attached/vina_gnina/"
+                                                "casf2016_4llx/vina_config.json"
+                                            ),
+                                            "blocker": "local_ref_not_found",
+                                        }
+                                    ],
+                                    "blockers": [
+                                        "manifest_required_fields_missing",
+                                        "manifest_local_files_missing_or_unverified",
+                                        "manifest_receipt_refs_missing",
+                                    ],
                                 }
                             ],
                         },
@@ -1308,6 +1373,16 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
     assert compact_preflight["source_url_probe_network_performed"] is True
     assert compact_preflight["known_source_url_content_length_bytes"] == 1_572_660_769
     assert compact_preflight["source_url_probe_plan"][0]["case_count"] == 12
+    assert compact_preflight["missing_local_file_count"] == 48
+    assert compact_preflight["missing_receipt_ref_count"] == 60
+    assert compact_preflight["input_manifest_completion_action_case_count"] == 12
+    assert compact_preflight["input_manifest_completion_blocked_case_count"] == 12
+    assert compact_preflight["input_manifest_completion_action_plan"][0][
+        "case_id"
+    ] == "casf2016_4llx"
+    assert compact_preflight["input_manifest_completion_action_plan"][0][
+        "missing_local_file_count"
+    ] == 4
     vina_gnina_actual = audit["upstream_source_acquisition"][
         "public_benchmark_phase2"
     ]["vina_gnina_actual_evidence_audit"]

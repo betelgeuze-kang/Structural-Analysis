@@ -618,6 +618,103 @@ def _first_blocked_preflight_row(rows: Any) -> dict[str, Any]:
     return {}
 
 
+def _string_list(value: Any) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [str(item) for item in value if str(item)]
+
+
+def _compact_local_file_requirement(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "case_id": str(row.get("case_id") or ""),
+        "complex_id": str(row.get("complex_id") or ""),
+        "field": str(row.get("field") or ""),
+        "file_role": str(row.get("file_role") or ""),
+        "file_group": str(row.get("file_group") or ""),
+        "path": str(row.get("path") or ""),
+        "expected_checksum_field": str(row.get("expected_checksum_field") or ""),
+        "expected_checksum": str(row.get("expected_checksum") or ""),
+        "source_url": str(row.get("source_url") or ""),
+        "source_license_or_accession": str(
+            row.get("source_license_or_accession") or ""
+        ),
+        "status": str(row.get("status") or ""),
+        "blocker": str(row.get("blocker") or ""),
+        "operator_action": str(row.get("operator_action") or ""),
+    }
+
+
+def _compact_receipt_ref_requirement(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "case_id": str(row.get("case_id") or ""),
+        "complex_id": str(row.get("complex_id") or ""),
+        "field": str(row.get("field") or ""),
+        "ref": str(row.get("ref") or ""),
+        "status": str(row.get("status") or ""),
+        "blocker": str(row.get("blocker") or ""),
+        "operator_action": str(row.get("operator_action") or ""),
+    }
+
+
+def _blocked_requirements(
+    value: Any,
+    *,
+    compact,
+) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    return [
+        compact(row)
+        for row in value
+        if isinstance(row, dict)
+        and (
+            str(row.get("blocker") or "")
+            or str(row.get("status") or "") == "operator_completion_required"
+        )
+    ]
+
+
+def _input_manifest_completion_action_plan(rows: Any) -> list[dict[str, Any]]:
+    if not isinstance(rows, list):
+        return []
+    action_plan = []
+    for row in rows:
+        if not isinstance(row, dict) or row.get("status") == "ready":
+            continue
+        case_id = str(row.get("case_id") or "")
+        missing_required_fields = _string_list(row.get("missing_required_fields"))
+        missing_local_file_fields = _string_list(row.get("missing_local_file_fields"))
+        missing_receipt_ref_fields = _string_list(row.get("missing_receipt_ref_fields"))
+        action_plan.append(
+            {
+                "case_id": case_id,
+                "complex_id": str(row.get("complex_id") or ""),
+                "status": str(row.get("status") or ""),
+                "operator_completion_action": (
+                    f"complete_vina_gnina_input_manifest_row_for_{case_id}"
+                    if case_id
+                    else "complete_vina_gnina_input_manifest_row"
+                ),
+                "missing_required_field_count": len(missing_required_fields),
+                "missing_local_file_count": len(missing_local_file_fields),
+                "missing_receipt_ref_count": len(missing_receipt_ref_fields),
+                "missing_required_fields": missing_required_fields,
+                "missing_local_file_fields": missing_local_file_fields,
+                "missing_receipt_ref_fields": missing_receipt_ref_fields,
+                "missing_local_file_requirements": _blocked_requirements(
+                    row.get("local_file_requirements"),
+                    compact=_compact_local_file_requirement,
+                ),
+                "missing_receipt_ref_requirements": _blocked_requirements(
+                    row.get("receipt_ref_requirements"),
+                    compact=_compact_receipt_ref_requirement,
+                ),
+                "blockers": _string_list(row.get("blockers")),
+            }
+        )
+    return action_plan
+
+
 def _input_manifest_template_preflight_summary(repo_root: Path) -> dict[str, Any]:
     payload = _load_json(repo_root, DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT)
     if not payload:
@@ -644,10 +741,16 @@ def _input_manifest_template_preflight_summary(repo_root: Path) -> dict[str, Any
             "known_source_url_content_length_gib": 0.0,
             "source_url_probe_plan": [],
             "first_blocked_case_preflight": {},
+            "input_manifest_completion_action_case_count": 0,
+            "input_manifest_completion_blocked_case_count": 0,
+            "input_manifest_completion_action_plan": [],
         }
     summary = payload.get("summary")
     if not isinstance(summary, dict):
         summary = {}
+    completion_action_plan = _input_manifest_completion_action_plan(
+        payload.get("case_preflight_rows")
+    )
     return {
         "present": True,
         "artifact": str(DEFAULT_INPUT_MANIFEST_TEMPLATE_PREFLIGHT),
@@ -710,6 +813,11 @@ def _input_manifest_template_preflight_summary(repo_root: Path) -> dict[str, Any
         "first_blocked_case_preflight": _first_blocked_preflight_row(
             payload.get("case_preflight_rows")
         ),
+        "input_manifest_completion_action_case_count": len(completion_action_plan),
+        "input_manifest_completion_blocked_case_count": sum(
+            1 for row in completion_action_plan if row.get("status") != "ready"
+        ),
+        "input_manifest_completion_action_plan": completion_action_plan,
     }
 
 
@@ -860,6 +968,32 @@ def _operator_unblock_packet(
         "input_manifest_template_preflight_summary": (
             input_manifest_template_preflight_summary
         ),
+        "input_manifest_completion_action_case_count": int(
+            input_manifest_template_preflight_summary.get(
+                "input_manifest_completion_action_case_count"
+            )
+            or 0
+        ),
+        "input_manifest_completion_blocked_case_count": int(
+            input_manifest_template_preflight_summary.get(
+                "input_manifest_completion_blocked_case_count"
+            )
+            or 0
+        ),
+        "input_manifest_completion_action_plan": [
+            row
+            for row in input_manifest_template_preflight_summary.get(
+                "input_manifest_completion_action_plan", []
+            )
+            if isinstance(row, dict)
+        ]
+        if isinstance(
+            input_manifest_template_preflight_summary.get(
+                "input_manifest_completion_action_plan"
+            ),
+            list,
+        )
+        else [],
         "expected_rows_artifact": str(DEFAULT_VINA_GNINA_ROWS),
         "engine_run_bundle_summary": engine_run_bundle_summary,
         "engine_run_bundle_status": str(engine_run_bundle_summary.get("status") or ""),
@@ -1290,6 +1424,24 @@ def build_vina_gnina_runtime_readiness(
             "input_manifest_template_invalid_source_receipt_count": int(
                 input_manifest_template_preflight.get(
                     "invalid_source_receipt_count"
+                )
+                or 0
+            ),
+            "input_manifest_template_missing_local_file_count": int(
+                input_manifest_template_preflight.get("missing_local_file_count") or 0
+            ),
+            "input_manifest_template_missing_receipt_ref_count": int(
+                input_manifest_template_preflight.get("missing_receipt_ref_count") or 0
+            ),
+            "input_manifest_completion_action_case_count": int(
+                input_manifest_template_preflight.get(
+                    "input_manifest_completion_action_case_count"
+                )
+                or 0
+            ),
+            "input_manifest_completion_blocked_case_count": int(
+                input_manifest_template_preflight.get(
+                    "input_manifest_completion_blocked_case_count"
                 )
                 or 0
             ),

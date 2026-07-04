@@ -1951,6 +1951,20 @@ def _vina_gnina_runtime_action_packet(
     commands = _as_dict(unblock.get("commands"))
     if not vina_gnina_runtime_readiness_summary and not unblock:
         return {}
+    preflight_summary = _as_dict(
+        unblock.get("input_manifest_template_preflight_summary")
+        or vina_gnina_runtime_readiness_summary.get(
+            "input_manifest_template_preflight"
+        )
+    )
+    input_manifest_completion_action_plan = [
+        row
+        for row in _as_list(
+            unblock.get("input_manifest_completion_action_plan")
+            or preflight_summary.get("input_manifest_completion_action_plan")
+        )
+        if isinstance(row, dict)
+    ]
     return {
         "artifact": str(
             vina_gnina_runtime_readiness_summary.get("artifact") or ""
@@ -2081,6 +2095,19 @@ def _vina_gnina_runtime_action_packet(
             or vina_gnina_runtime_readiness_summary.get(
                 "input_manifest_template_preflight"
             )
+        ),
+        "input_manifest_completion_action_case_count": _as_int(
+            unblock.get("input_manifest_completion_action_case_count")
+            or preflight_summary.get("input_manifest_completion_action_case_count")
+            or len(input_manifest_completion_action_plan)
+        ),
+        "input_manifest_completion_blocked_case_count": _as_int(
+            unblock.get("input_manifest_completion_blocked_case_count")
+            or preflight_summary.get("input_manifest_completion_blocked_case_count")
+            or len(input_manifest_completion_action_plan)
+        ),
+        "input_manifest_completion_action_plan": (
+            input_manifest_completion_action_plan
         ),
         "rows_template_artifact": str(
             unblock.get("rows_template_artifact")
@@ -3788,12 +3815,25 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                 first_engine_slot = _as_dict(
                     action.get("first_blocked_engine_run_slot")
                 )
+                manifest_completion_plan = [
+                    row
+                    for row in action.get(
+                        "input_manifest_completion_action_plan", []
+                    )
+                    if isinstance(row, dict)
+                ]
+                first_manifest_completion_action = (
+                    manifest_completion_plan[0] if manifest_completion_plan else {}
+                )
                 lines.extend(
                     [
                         f"- `status`: `{action.get('status')}`",
                         f"- `expected_rows_artifact`: `{action.get('expected_rows_artifact')}`",
                         f"- `input_manifest_template_preflight_artifact`: `{action.get('input_manifest_template_preflight_artifact')}`",
                         f"- `rows_template_preflight_artifact`: `{action.get('rows_template_preflight_artifact')}`",
+                        f"- `input_manifest_completion_action_case_count`: `{action.get('input_manifest_completion_action_case_count')}`",
+                        f"- `input_manifest_completion_blocked_case_count`: `{action.get('input_manifest_completion_blocked_case_count')}`",
+                        f"- `first_input_manifest_completion_action`: `{first_manifest_completion_action.get('case_id', '')}` / `{first_manifest_completion_action.get('operator_completion_action', '')}`",
                         f"- `blocked_case_input_slot_count`: `{action.get('blocked_case_input_slot_count')}`",
                         f"- `first_blocked_case_input_slot`: `{first_case_slot.get('case_id', '')}` / `{first_case_slot.get('operator_action', '')}`",
                         f"- `blocked_engine_run_slot_count`: `{action.get('blocked_engine_run_slot_count')}`",
