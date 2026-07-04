@@ -199,6 +199,10 @@ def _as_dict(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
+def _as_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
 def _required_flat_row_fields() -> list[str]:
     fields: list[str] = []
     for field in REQUIRED_CASE_FIELDS:
@@ -1340,6 +1344,11 @@ def _rows_from_receipt_bundle_report_summary(repo_root: Path) -> dict[str, Any]:
             "row_count": 0,
             "blocker_count": 0,
             "first_incomplete_receipt": {},
+            "receipt_completion_action_plan": [],
+            "incomplete_receipt_count": 0,
+            "unique_missing_required_fields": [],
+            "unique_missing_required_field_count": 0,
+            "total_missing_required_field_count": 0,
         }
     row_statuses = [
         row for row in payload.get("row_statuses", []) if isinstance(row, dict)
@@ -1356,7 +1365,35 @@ def _rows_from_receipt_bundle_report_summary(repo_root: Path) -> dict[str, Any]:
         "ready_receipt_count": int(payload.get("ready_receipt_count") or 0),
         "row_count": int(payload.get("row_count") or 0),
         "blocker_count": int(summary.get("blocker_count") or 0),
-        "first_incomplete_receipt": _first_blocked_row(row_statuses),
+        "first_incomplete_receipt": _as_dict(
+            payload.get("first_incomplete_receipt")
+        )
+        or _first_blocked_row(row_statuses),
+        "receipt_completion_action_plan": [
+            row
+            for row in _as_list(payload.get("receipt_completion_action_plan"))
+            if isinstance(row, dict)
+        ],
+        "incomplete_receipt_count": int(
+            payload.get("incomplete_receipt_count")
+            or summary.get("incomplete_receipt_count")
+            or 0
+        ),
+        "unique_missing_required_fields": [
+            str(field)
+            for field in _as_list(payload.get("unique_missing_required_fields"))
+            if str(field)
+        ],
+        "unique_missing_required_field_count": int(
+            payload.get("unique_missing_required_field_count")
+            or summary.get("unique_missing_required_field_count")
+            or 0
+        ),
+        "total_missing_required_field_count": int(
+            payload.get("total_missing_required_field_count")
+            or summary.get("total_missing_required_field_count")
+            or 0
+        ),
     }
 
 
@@ -1963,11 +2000,26 @@ def build_pocketmd_lite_source_acquisition_plan(
             "rows_from_receipt_bundle_ready_receipt_count": (
                 rows_from_receipt_bundle_report_summary["ready_receipt_count"]
             ),
+            "rows_from_receipt_bundle_incomplete_receipt_count": (
+                rows_from_receipt_bundle_report_summary[
+                    "incomplete_receipt_count"
+                ]
+            ),
             "rows_from_receipt_bundle_missing_required_field_count": int(
                 rows_from_receipt_bundle_report_summary.get(
                     "first_incomplete_receipt", {}
                 ).get("completion_missing_required_field_count")
                 or 0
+            ),
+            "rows_from_receipt_bundle_unique_missing_required_field_count": (
+                rows_from_receipt_bundle_report_summary[
+                    "unique_missing_required_field_count"
+                ]
+            ),
+            "rows_from_receipt_bundle_total_missing_required_field_count": (
+                rows_from_receipt_bundle_report_summary[
+                    "total_missing_required_field_count"
+                ]
             ),
             "refinement_execution_plan_status": refinement_execution_plan["status"],
             "refinement_execution_plan_ready": refinement_execution_plan[

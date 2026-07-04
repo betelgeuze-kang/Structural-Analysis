@@ -274,8 +274,17 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "rows_from_receipt_bundle_ready_receipt_count"
     ] == 0
     assert pocketmd_refinement_action[
+        "rows_from_receipt_bundle_incomplete_receipt_count"
+    ] == 6
+    assert pocketmd_refinement_action[
         "rows_from_receipt_bundle_missing_required_field_count"
     ] == 18
+    assert pocketmd_refinement_action[
+        "rows_from_receipt_bundle_unique_missing_required_field_count"
+    ] == 18
+    assert pocketmd_refinement_action[
+        "rows_from_receipt_bundle_total_missing_required_field_count"
+    ] == 108
     receipt_bundle_report = pocketmd_refinement_action[
         "rows_from_receipt_bundle_report"
     ]
@@ -284,6 +293,8 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     )
     assert receipt_bundle_report["ready_receipt_count"] == 0
     assert receipt_bundle_report["receipt_count"] == 6
+    assert receipt_bundle_report["incomplete_receipt_count"] == 6
+    assert len(receipt_bundle_report["receipt_completion_action_plan"]) == 6
     first_incomplete_receipt = pocketmd_refinement_action[
         "first_incomplete_receipt"
     ]

@@ -1126,8 +1126,19 @@ def _unblock_plan_refinement_action_packet(
         "rows_from_receipt_bundle_ready_receipt_count": _as_int(
             rows_from_receipt_bundle_report.get("ready_receipt_count")
         ),
+        "rows_from_receipt_bundle_incomplete_receipt_count": _as_int(
+            rows_from_receipt_bundle_report.get("incomplete_receipt_count")
+        ),
         "rows_from_receipt_bundle_missing_required_field_count": _as_int(
             first_incomplete_receipt.get("completion_missing_required_field_count")
+        ),
+        "rows_from_receipt_bundle_unique_missing_required_field_count": _as_int(
+            rows_from_receipt_bundle_report.get(
+                "unique_missing_required_field_count"
+            )
+        ),
+        "rows_from_receipt_bundle_total_missing_required_field_count": _as_int(
+            rows_from_receipt_bundle_report.get("total_missing_required_field_count")
         ),
         "first_incomplete_receipt": first_incomplete_receipt,
         "survival_report": survival_report,

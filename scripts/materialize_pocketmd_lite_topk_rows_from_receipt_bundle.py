@@ -290,6 +290,48 @@ def _row_from_bundle_receipt(
     return normalized_row, row_status
 
 
+def _receipt_completion_action_plan(
+    row_statuses: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for status in row_statuses:
+        if status.get("status") == "ready":
+            continue
+        missing_fields = [
+            str(field)
+            for field in _as_list(status.get("completion_missing_required_fields"))
+            if str(field)
+        ]
+        rows.append(
+            {
+                "run_key": str(status.get("run_key") or ""),
+                "case_id": str(status.get("case_id") or ""),
+                "top_k_rank": status.get("top_k_rank"),
+                "receipt_ref": str(status.get("receipt_ref") or ""),
+                "status": str(status.get("status") or ""),
+                "receipt_status": str(status.get("receipt_status") or ""),
+                "receipt_complete": bool(status.get("receipt_complete")),
+                "operator_completion_action": str(
+                    status.get("operator_completion_action") or ""
+                ),
+                "completion_required_field_count": int(
+                    status.get("completion_required_field_count") or 0
+                ),
+                "completion_filled_required_field_count": int(
+                    status.get("completion_filled_required_field_count") or 0
+                ),
+                "completion_missing_required_field_count": len(missing_fields),
+                "completion_missing_required_fields": missing_fields,
+                "blockers": [
+                    str(blocker)
+                    for blocker in _as_list(status.get("blockers"))
+                    if str(blocker)
+                ],
+            }
+        )
+    return rows
+
+
 def materialize_pocketmd_lite_topk_rows_from_receipt_bundle(
     *,
     repo_root: Path = ROOT,
@@ -323,6 +365,22 @@ def materialize_pocketmd_lite_topk_rows_from_receipt_bundle(
         if row and status.get("status") == "ready"
     ]
     row_statuses = [status for _row, status in row_results]
+    receipt_completion_action_plan = _receipt_completion_action_plan(row_statuses)
+    first_incomplete_receipt = (
+        receipt_completion_action_plan[0] if receipt_completion_action_plan else {}
+    )
+    unique_missing_required_fields = sorted(
+        {
+            field
+            for row in receipt_completion_action_plan
+            for field in _as_list(row.get("completion_missing_required_fields"))
+            if str(field)
+        }
+    )
+    total_missing_required_field_count = sum(
+        int(row.get("completion_missing_required_field_count") or 0)
+        for row in receipt_completion_action_plan
+    )
     row_blockers = [
         f"{status['run_key']}::{blocker}"
         for status in row_statuses
@@ -413,6 +471,12 @@ def materialize_pocketmd_lite_topk_rows_from_receipt_bundle(
         "ready_receipt_count": sum(
             1 for row in row_statuses if row.get("status") == "ready"
         ),
+        "incomplete_receipt_count": len(receipt_completion_action_plan),
+        "first_incomplete_receipt": first_incomplete_receipt,
+        "receipt_completion_action_plan": receipt_completion_action_plan,
+        "unique_missing_required_fields": unique_missing_required_fields,
+        "unique_missing_required_field_count": len(unique_missing_required_fields),
+        "total_missing_required_field_count": total_missing_required_field_count,
         "row_count": len(ready_rows),
         "case_count": len({str(row["case_id"]) for row in ready_rows}),
         "aggregate_validation_error": aggregate_error,
@@ -456,6 +520,11 @@ def materialize_pocketmd_lite_topk_rows_from_receipt_bundle(
             "receipt_count": len(raw_bundle_rows),
             "ready_receipt_count": sum(
                 1 for row in row_statuses if row.get("status") == "ready"
+            ),
+            "incomplete_receipt_count": len(receipt_completion_action_plan),
+            "unique_missing_required_field_count": len(unique_missing_required_fields),
+            "total_missing_required_field_count": (
+                total_missing_required_field_count
             ),
             "row_count": len(ready_rows),
             "case_count": len({str(row["case_id"]) for row in ready_rows}),

@@ -161,6 +161,11 @@ def test_materializes_pocketmd_topk_rows_from_completed_receipt_bundle(
     assert report["rows_materialized"] is True
     assert report["receipt_count"] == 6
     assert report["ready_receipt_count"] == 6
+    assert report["incomplete_receipt_count"] == 0
+    assert report["first_incomplete_receipt"] == {}
+    assert report["receipt_completion_action_plan"] == []
+    assert report["unique_missing_required_fields"] == []
+    assert report["total_missing_required_field_count"] == 0
     assert report["row_count"] == 6
     assert report["case_count"] == 3
     rows_payload = json.loads(out_rows.read_text(encoding="utf-8"))
@@ -210,6 +215,8 @@ def test_pocketmd_topk_rows_from_receipt_bundle_blocks_missing_receipts(
     assert report["rows_materialized"] is False
     assert report["receipt_count"] == 6
     assert report["ready_receipt_count"] == 0
+    assert report["incomplete_receipt_count"] == 6
+    assert len(report["receipt_completion_action_plan"]) == 6
     assert "receipt_file_missing" in "\n".join(report["blockers"])
     assert not out_rows.exists()
     assert json.loads(out_report.read_text(encoding="utf-8"))["status"] == (
@@ -245,11 +252,21 @@ def test_pocketmd_topk_rows_from_receipt_bundle_reports_incomplete_templates(
     assert report["status"] == "operator_receipts_completion_required"
     assert report["receipt_count"] == 6
     assert report["ready_receipt_count"] == 0
+    assert report["incomplete_receipt_count"] == 6
     assert "receipt_not_complete" in blockers_text
     assert "receipt_file_missing" not in blockers_text
     assert "operator_input_source" not in blockers_text
     assert "row_normalization_failed" not in blockers_text
     first_status = report["row_statuses"][0]
+    first_action = report["receipt_completion_action_plan"][0]
+    assert report["first_incomplete_receipt"] == first_action
+    assert first_action["receipt_ref"].endswith("case_a/rank_01_refinement_receipt.json")
+    assert first_action["completion_missing_required_field_count"] == 18
+    assert first_action["operator_completion_action"] == (
+        "fill_completion_missing_required_fields_and_set_status_complete"
+    )
+    assert report["unique_missing_required_field_count"] == 18
+    assert report["total_missing_required_field_count"] == 108
     assert first_status["receipt_complete"] is False
     assert first_status["completion_required_field_count"] == 23
     assert first_status["completion_filled_required_field_count"] == 5

@@ -568,9 +568,13 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     )
     assert receipt_bundle_report["receipt_count"] == 6
     assert receipt_bundle_report["ready_receipt_count"] == 0
+    assert receipt_bundle_report["incomplete_receipt_count"] == 6
+    assert len(receipt_bundle_report["receipt_completion_action_plan"]) == 6
     assert receipt_bundle_report["first_incomplete_receipt"][
         "completion_missing_required_field_count"
     ] == 18
+    assert receipt_bundle_report["unique_missing_required_field_count"] == 18
+    assert receipt_bundle_report["total_missing_required_field_count"] == 108
     assert "upstream_top_k_provenance_ref" in receipt_bundle_report[
         "first_incomplete_receipt"
     ]["completion_missing_required_fields"]
@@ -669,7 +673,10 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
             "operator_receipts_completion_required"
         ),
         "rows_from_receipt_bundle_ready_receipt_count": 0,
+        "rows_from_receipt_bundle_incomplete_receipt_count": 6,
         "rows_from_receipt_bundle_missing_required_field_count": 18,
+        "rows_from_receipt_bundle_unique_missing_required_field_count": 18,
+        "rows_from_receipt_bundle_total_missing_required_field_count": 108,
         "raw_row_artifact_detected": False,
         "raw_row_candidate_status": "row_artifact_missing",
         "validated_row_count": 0,
