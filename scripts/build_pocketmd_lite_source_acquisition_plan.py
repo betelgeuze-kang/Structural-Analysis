@@ -112,6 +112,42 @@ PHASE4_METRIC_CRITERIA = {
         "materialized_report_field": "uncertainty_width_summary",
     },
 }
+POCKETMD_RECEIPT_METRIC_FAMILIES = (
+    {
+        "metric_family_id": "local_min_survival",
+        "product_requirement": "local-min survival and energy proxy movement are recorded",
+        "phase4_criterion_id": "local_min_survival_materialized",
+        "required_receipt_fields": [
+            "pre_refinement_energy_proxy",
+            "post_refinement_energy_proxy",
+            "local_min_survived",
+        ],
+    },
+    {
+        "metric_family_id": "contact_persistence",
+        "product_requirement": "contact persistence is recorded",
+        "phase4_criterion_id": "contact_persistence_materialized",
+        "required_receipt_fields": ["contact_persistence_rate"],
+    },
+    {
+        "metric_family_id": "h_bond_persistence",
+        "product_requirement": "H-bond persistence is recorded",
+        "phase4_criterion_id": "h_bond_persistence_materialized",
+        "required_receipt_fields": ["h_bond_persistence_rate"],
+    },
+    {
+        "metric_family_id": "clash_relief",
+        "product_requirement": "clash relief before/after counts are recorded",
+        "phase4_criterion_id": "clash_relief_materialized",
+        "required_receipt_fields": ["clash_count_before", "clash_count_after"],
+    },
+    {
+        "metric_family_id": "uncertainty",
+        "product_requirement": "uncertainty interval bounds are recorded",
+        "phase4_criterion_id": "uncertainty_summary_materialized",
+        "required_receipt_fields": ["uncertainty_low", "uncertainty_high"],
+    },
+)
 PHASE4_COMPLETION_REQUIREMENTS = [
     {
         "requirement_id": "bounded_top_k_scope_contract",
@@ -201,6 +237,77 @@ def _as_dict(value: Any) -> dict[str, Any]:
 
 def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
+
+
+def _receipt_metric_family_completion_plan(
+    receipt_completion_action_plan: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    plan: list[dict[str, Any]] = []
+    receipt_count = len(receipt_completion_action_plan)
+    for family in POCKETMD_RECEIPT_METRIC_FAMILIES:
+        required_fields = [
+            str(field)
+            for field in _as_list(family.get("required_receipt_fields"))
+            if str(field)
+        ]
+        blocked_receipts: list[dict[str, Any]] = []
+        missing_field_occurrence_count = 0
+        for receipt in receipt_completion_action_plan:
+            missing_fields = [
+                field
+                for field in required_fields
+                if field
+                in {
+                    str(item)
+                    for item in _as_list(
+                        receipt.get("completion_missing_required_fields")
+                    )
+                }
+            ]
+            if not missing_fields:
+                continue
+            missing_field_occurrence_count += len(missing_fields)
+            blocked_receipts.append(
+                {
+                    "case_id": str(receipt.get("case_id") or ""),
+                    "top_k_rank": int(receipt.get("top_k_rank") or 0),
+                    "run_key": str(receipt.get("run_key") or ""),
+                    "receipt_ref": str(receipt.get("receipt_ref") or ""),
+                    "missing_receipt_fields": missing_fields,
+                    "operator_completion_action": str(
+                        receipt.get("operator_completion_action") or ""
+                    ),
+                }
+            )
+        blocked_count = len(blocked_receipts)
+        plan.append(
+            {
+                "metric_family_id": str(family.get("metric_family_id") or ""),
+                "product_requirement": str(
+                    family.get("product_requirement") or ""
+                ),
+                "phase4_criterion_id": str(
+                    family.get("phase4_criterion_id") or ""
+                ),
+                "status": "blocked" if blocked_count else "ready",
+                "required_receipt_fields": required_fields,
+                "receipt_count": receipt_count,
+                "complete_receipt_count": max(0, receipt_count - blocked_count),
+                "blocked_receipt_count": blocked_count,
+                "missing_field_occurrence_count": missing_field_occurrence_count,
+                "first_blocked_receipt": (
+                    blocked_receipts[0] if blocked_receipts else {}
+                ),
+                "blocked_receipts": blocked_receipts,
+                "operator_completion_action": (
+                    "fill_metric_family_receipt_fields_for_"
+                    f"{family.get('metric_family_id')}"
+                    if blocked_count
+                    else "review_metric_family_receipts"
+                ),
+            }
+        )
+    return plan
 
 
 def _required_flat_row_fields() -> list[str]:
@@ -1345,6 +1452,10 @@ def _rows_from_receipt_bundle_report_summary(repo_root: Path) -> dict[str, Any]:
             "blocker_count": 0,
             "first_incomplete_receipt": {},
             "receipt_completion_action_plan": [],
+            "receipt_metric_family_completion_plan": [],
+            "receipt_metric_family_count": 0,
+            "receipt_metric_family_blocked_count": 0,
+            "receipt_metric_family_missing_field_occurrence_count": 0,
             "incomplete_receipt_count": 0,
             "unique_missing_required_fields": [],
             "unique_missing_required_field_count": 0,
@@ -1356,6 +1467,14 @@ def _rows_from_receipt_bundle_report_summary(repo_root: Path) -> dict[str, Any]:
     summary = payload.get("summary")
     if not isinstance(summary, dict):
         summary = {}
+    receipt_completion_action_plan = [
+        row
+        for row in _as_list(payload.get("receipt_completion_action_plan"))
+        if isinstance(row, dict)
+    ]
+    receipt_metric_family_completion_plan = (
+        _receipt_metric_family_completion_plan(receipt_completion_action_plan)
+    )
     return {
         "present": True,
         "artifact": str(DEFAULT_ROWS_FROM_RECEIPT_BUNDLE_REPORT),
@@ -1369,11 +1488,20 @@ def _rows_from_receipt_bundle_report_summary(repo_root: Path) -> dict[str, Any]:
             payload.get("first_incomplete_receipt")
         )
         or _first_blocked_row(row_statuses),
-        "receipt_completion_action_plan": [
-            row
-            for row in _as_list(payload.get("receipt_completion_action_plan"))
-            if isinstance(row, dict)
-        ],
+        "receipt_completion_action_plan": receipt_completion_action_plan,
+        "receipt_metric_family_completion_plan": (
+            receipt_metric_family_completion_plan
+        ),
+        "receipt_metric_family_count": len(receipt_metric_family_completion_plan),
+        "receipt_metric_family_blocked_count": sum(
+            1
+            for row in receipt_metric_family_completion_plan
+            if row.get("status") != "ready"
+        ),
+        "receipt_metric_family_missing_field_occurrence_count": sum(
+            int(row.get("missing_field_occurrence_count") or 0)
+            for row in receipt_metric_family_completion_plan
+        ),
         "incomplete_receipt_count": int(
             payload.get("incomplete_receipt_count")
             or summary.get("incomplete_receipt_count")
@@ -2021,6 +2149,21 @@ def build_pocketmd_lite_source_acquisition_plan(
                     "total_missing_required_field_count"
                 ]
             ),
+            "rows_from_receipt_bundle_metric_family_count": (
+                rows_from_receipt_bundle_report_summary[
+                    "receipt_metric_family_count"
+                ]
+            ),
+            "rows_from_receipt_bundle_metric_family_blocked_count": (
+                rows_from_receipt_bundle_report_summary[
+                    "receipt_metric_family_blocked_count"
+                ]
+            ),
+            "rows_from_receipt_bundle_metric_family_missing_field_occurrence_count": (
+                rows_from_receipt_bundle_report_summary[
+                    "receipt_metric_family_missing_field_occurrence_count"
+                ]
+            ),
             "refinement_execution_plan_status": refinement_execution_plan["status"],
             "refinement_execution_plan_ready": refinement_execution_plan[
                 "execution_plan_ready"
@@ -2089,6 +2232,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"`{payload['rows_from_receipt_bundle_report_summary']['status']}`",
         "- `rows_from_receipt_bundle_ready_receipt_count`: "
         f"`{payload['rows_from_receipt_bundle_report_summary']['ready_receipt_count']}`",
+        "- `rows_from_receipt_bundle_metric_family_blocked_count`: "
+        f"`{payload['rows_from_receipt_bundle_report_summary']['receipt_metric_family_blocked_count']}`",
         f"- `row_template_artifact`: `{payload['row_artifact_contract']['template_artifact']}`",
         "",
         "## Operator Next Actions",
@@ -2334,6 +2479,23 @@ def _markdown(payload: dict[str, Any]) -> str:
                     for row in action.get("phase4_metric_receipt_actions", [])
                     if isinstance(row, dict)
                 ]
+                rows_from_receipt_bundle_report = (
+                    action.get("rows_from_receipt_bundle_report")
+                    if isinstance(action.get("rows_from_receipt_bundle_report"), dict)
+                    else {}
+                )
+                metric_family_completion_plan = [
+                    row
+                    for row in rows_from_receipt_bundle_report.get(
+                        "receipt_metric_family_completion_plan", []
+                    )
+                    if isinstance(row, dict)
+                ]
+                first_metric_family_blocker = (
+                    metric_family_completion_plan[0]
+                    if metric_family_completion_plan
+                    else {}
+                )
                 role_receipt_summary = (
                     action.get("role_receipt_plan_summary")
                     if isinstance(action.get("role_receipt_plan_summary"), dict)
@@ -2381,6 +2543,8 @@ def _markdown(payload: dict[str, Any]) -> str:
                         f"- `operator_input_source_receipt_blocked_count`: `{input_source_receipt_summary.get('blocked_count')}`",
                         f"- `first_blocked_operator_input_source_receipt`: `{first_blocked_source_receipt.get('field', '')}`",
                         f"- `phase4_metric_receipt_action_count`: `{action.get('phase4_metric_receipt_action_count')}`",
+                        f"- `receipt_metric_family_blocked_count`: `{rows_from_receipt_bundle_report.get('receipt_metric_family_blocked_count')}`",
+                        f"- `first_receipt_metric_family_blocker`: `{first_metric_family_blocker.get('metric_family_id', '')}` / `{first_metric_family_blocker.get('blocked_receipt_count', '')}`",
                         f"- `template_is_not_evidence`: `{safety_policy.get('template_is_not_evidence')}`",
                         f"- `placeholder_or_fixture_rows_do_not_promote`: `{safety_policy.get('placeholder_or_fixture_rows_do_not_promote')}`",
                         f"- `summary_only_metrics_do_not_promote`: `{safety_policy.get('summary_only_metrics_do_not_promote')}`",

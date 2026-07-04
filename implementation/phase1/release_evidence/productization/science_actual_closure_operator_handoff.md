@@ -166,6 +166,8 @@
 - `operator_input_source_receipt_blocked_count`: `5`
 - `first_blocked_operator_input_source_receipt`: `source_id`
 - `phase4_metric_receipt_action_count`: `8`
+- `receipt_metric_family_blocked_count`: `5`
+- `first_receipt_metric_family_blocker`: `local_min_survival` / `6`
 - `template_is_not_evidence`: `True`
 - `placeholder_or_fixture_rows_do_not_promote`: `True`
 - `summary_only_metrics_do_not_promote`: `True`

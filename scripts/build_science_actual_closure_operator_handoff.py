@@ -2417,6 +2417,23 @@ def _markdown(payload: dict[str, Any]) -> str:
                     for row in _as_list(action.get("phase4_metric_receipt_actions"))
                     if isinstance(row, dict)
                 ]
+                rows_from_receipt_bundle_report = _as_dict(
+                    action.get("rows_from_receipt_bundle_report")
+                )
+                metric_family_completion_plan = [
+                    row
+                    for row in _as_list(
+                        rows_from_receipt_bundle_report.get(
+                            "receipt_metric_family_completion_plan"
+                        )
+                    )
+                    if isinstance(row, dict)
+                ]
+                first_metric_family_blocker = (
+                    metric_family_completion_plan[0]
+                    if metric_family_completion_plan
+                    else {}
+                )
                 role_receipt_summary = _as_dict(
                     action.get("role_receipt_plan_summary")
                 )
@@ -2446,6 +2463,8 @@ def _markdown(payload: dict[str, Any]) -> str:
                         f"- `operator_input_source_receipt_blocked_count`: `{input_source_receipt_summary.get('blocked_count')}`",
                         f"- `first_blocked_operator_input_source_receipt`: `{first_blocked_source_receipt.get('field', '')}`",
                         f"- `phase4_metric_receipt_action_count`: `{action.get('phase4_metric_receipt_action_count')}`",
+                        f"- `receipt_metric_family_blocked_count`: `{rows_from_receipt_bundle_report.get('receipt_metric_family_blocked_count')}`",
+                        f"- `first_receipt_metric_family_blocker`: `{first_metric_family_blocker.get('metric_family_id', '')}` / `{first_metric_family_blocker.get('blocked_receipt_count', '')}`",
                         f"- `template_is_not_evidence`: `{safety_policy.get('template_is_not_evidence')}`",
                         f"- `placeholder_or_fixture_rows_do_not_promote`: `{safety_policy.get('placeholder_or_fixture_rows_do_not_promote')}`",
                         f"- `summary_only_metrics_do_not_promote`: `{safety_policy.get('summary_only_metrics_do_not_promote')}`",

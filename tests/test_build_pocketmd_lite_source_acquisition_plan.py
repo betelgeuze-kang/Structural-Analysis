@@ -575,6 +575,45 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     ] == 18
     assert receipt_bundle_report["unique_missing_required_field_count"] == 18
     assert receipt_bundle_report["total_missing_required_field_count"] == 108
+    assert receipt_bundle_report["receipt_metric_family_count"] == 5
+    assert receipt_bundle_report["receipt_metric_family_blocked_count"] == 5
+    assert (
+        receipt_bundle_report[
+            "receipt_metric_family_missing_field_occurrence_count"
+        ]
+        == 54
+    )
+    metric_family_plan = {
+        row["metric_family_id"]: row
+        for row in receipt_bundle_report[
+            "receipt_metric_family_completion_plan"
+        ]
+    }
+    assert metric_family_plan["local_min_survival"][
+        "required_receipt_fields"
+    ] == [
+        "pre_refinement_energy_proxy",
+        "post_refinement_energy_proxy",
+        "local_min_survived",
+    ]
+    assert metric_family_plan["local_min_survival"][
+        "blocked_receipt_count"
+    ] == 6
+    assert metric_family_plan["local_min_survival"][
+        "missing_field_occurrence_count"
+    ] == 18
+    assert metric_family_plan["contact_persistence"][
+        "missing_field_occurrence_count"
+    ] == 6
+    assert metric_family_plan["h_bond_persistence"][
+        "missing_field_occurrence_count"
+    ] == 6
+    assert metric_family_plan["clash_relief"][
+        "missing_field_occurrence_count"
+    ] == 12
+    assert metric_family_plan["uncertainty"][
+        "missing_field_occurrence_count"
+    ] == 12
     assert "upstream_top_k_provenance_ref" in receipt_bundle_report[
         "first_incomplete_receipt"
     ]["completion_missing_required_fields"]
@@ -677,6 +716,9 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "rows_from_receipt_bundle_missing_required_field_count": 18,
         "rows_from_receipt_bundle_unique_missing_required_field_count": 18,
         "rows_from_receipt_bundle_total_missing_required_field_count": 108,
+        "rows_from_receipt_bundle_metric_family_count": 5,
+        "rows_from_receipt_bundle_metric_family_blocked_count": 5,
+        "rows_from_receipt_bundle_metric_family_missing_field_occurrence_count": 54,
         "raw_row_artifact_detected": False,
         "raw_row_candidate_status": "row_artifact_missing",
         "validated_row_count": 0,
@@ -902,6 +944,11 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert "`preflight_does_not_run_refinement`: `True`" in markdown
     assert "### PocketMD Top-k Rows Action" in markdown
     assert "`phase4_metric_receipt_action_count`: `8`" in markdown
+    assert "`rows_from_receipt_bundle_metric_family_blocked_count`: `5`" in markdown
+    assert "`receipt_metric_family_blocked_count`: `5`" in markdown
+    assert "`first_receipt_metric_family_blocker`: `local_min_survival` / `6`" in (
+        markdown
+    )
     assert "#### PocketMD Phase 4 Receipt Closure Actions" in markdown
     assert "local_min_survival_materialized" in markdown
     assert "interaction_persistence_receipt" in markdown

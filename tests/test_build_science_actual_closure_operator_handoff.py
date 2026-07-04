@@ -304,6 +304,17 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert receipt_bundle_report["receipt_count"] == 6
     assert receipt_bundle_report["incomplete_receipt_count"] == 6
     assert len(receipt_bundle_report["receipt_completion_action_plan"]) == 6
+    assert receipt_bundle_report["receipt_metric_family_count"] == 5
+    assert receipt_bundle_report["receipt_metric_family_blocked_count"] == 5
+    assert (
+        receipt_bundle_report[
+            "receipt_metric_family_missing_field_occurrence_count"
+        ]
+        == 54
+    )
+    assert receipt_bundle_report["receipt_metric_family_completion_plan"][0][
+        "metric_family_id"
+    ] == "local_min_survival"
     first_incomplete_receipt = pocketmd_refinement_action[
         "first_incomplete_receipt"
     ]
@@ -1146,6 +1157,10 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "`operator_input_source_receipt_blocked_count`: `5`" in markdown
     assert "`first_blocked_operator_input_source_receipt`: `source_id`" in markdown
     assert "`phase4_metric_receipt_action_count`: `8`" in markdown
+    assert "`receipt_metric_family_blocked_count`: `5`" in markdown
+    assert "`first_receipt_metric_family_blocker`: `local_min_survival` / `6`" in (
+        markdown
+    )
     assert "#### PocketMD Phase 4 Receipt Closure Actions" in markdown
     assert "interaction_persistence_receipt" in markdown
     assert "### PocketMD Phase 4 Completion Audit" in markdown
