@@ -320,6 +320,20 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "closes_phase4_criteria"
     ]
     assert payload["phase4_metric_closure_matrix_count"] == 8
+    assert payload["template_preflight_summary"]["status"] == (
+        "operator_rows_completion_required"
+    )
+    assert payload["template_preflight_summary"]["role_receipt_plan_count"] == 24
+    assert payload["template_preflight_summary"]["role_receipt_blocked_count"] == 24
+    assert payload["template_preflight_summary"][
+        "operator_input_source_receipt_requirement_count"
+    ] == 5
+    assert payload["template_preflight_summary"][
+        "operator_input_source_receipt_blocked_count"
+    ] == 5
+    assert payload["template_preflight_summary"]["first_blocked_role_receipt"][
+        "role_id"
+    ] == "upstream_top_k_candidate_scope_receipt"
     metric_matrix = {
         row["criterion_id"]: row for row in payload["phase4_metric_closure_matrix"]
     }
@@ -368,6 +382,12 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     assert preflight_action["required_candidate_slot_count"] == 6
     assert len(preflight_action["missing_required_slots"]) == 6
     assert preflight_action["blocker"] == "pocketmd_lite_topk_rows_not_acquired"
+    assert preflight_action["template_preflight_summary"][
+        "role_receipt_blocked_count"
+    ] == 24
+    assert preflight_action["template_preflight_summary"][
+        "operator_input_source_receipt_blocked_count"
+    ] == 5
     assert preflight_action["template_safety_policy"] == {
         "broad_all_atom_or_fep_claims_remain_locked": True,
         "operator_rows_must_be_real_top_k_refinement_outputs": True,
@@ -415,6 +435,18 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     assert "uncertainty_interval_receipt" in top_k_action[
         "required_receipt_roles"
     ]
+    assert top_k_action["role_receipt_plan_summary"][
+        "role_receipt_blocked_count"
+    ] == 24
+    assert top_k_action["role_receipt_plan_summary"]["first_blocked_role_receipt"][
+        "role_id"
+    ] == "upstream_top_k_candidate_scope_receipt"
+    assert top_k_action["operator_input_source_receipt_plan_summary"][
+        "blocked_count"
+    ] == 5
+    assert top_k_action["operator_input_source_receipt_plan_summary"][
+        "first_blocked_receipt"
+    ]["field"] == "source_id"
     assert top_k_action["phase4_metric_receipt_action_count"] == 8
     metric_receipt_actions = {
         row["criterion_id"]: row
@@ -491,6 +523,11 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "phase4_missing_candidate_slot_count": 6,
         "phase4_refinement_receipt_plan_status": "operator_receipts_required",
         "phase4_refinement_receipt_role_count": 4,
+        "template_preflight_status": "operator_rows_completion_required",
+        "template_preflight_role_receipt_plan_count": 24,
+        "template_preflight_role_receipt_blocked_count": 24,
+        "template_preflight_operator_input_source_receipt_requirement_count": 5,
+        "template_preflight_operator_input_source_receipt_blocked_count": 5,
         "raw_row_artifact_detected": False,
         "raw_row_candidate_status": "row_artifact_missing",
         "validated_row_count": 0,

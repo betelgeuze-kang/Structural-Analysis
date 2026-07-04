@@ -12,6 +12,9 @@
 - `phase4_candidate_slot_matrix_count`: `6`
 - `phase4_missing_candidate_slot_count`: `6`
 - `phase4_metric_closure_matrix_count`: `8`
+- `template_preflight_status`: `operator_rows_completion_required`
+- `template_preflight_role_receipt_blocked_count`: `24`
+- `template_preflight_operator_input_source_receipt_blocked_count`: `5`
 - `row_template_artifact`: `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv`
 
 ## Operator Next Actions
@@ -90,6 +93,8 @@
 - `missing_required_slot_count`: `6`
 - `validation_error`: ``
 - `blocker`: `pocketmd_lite_topk_rows_not_acquired`
+- `template_preflight_role_receipt_blocked_count`: `24`
+- `template_preflight_operator_input_source_receipt_blocked_count`: `5`
 - `import_rows_command`: `python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>`
 - `verify_science_actual_closure_command`: `python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked`
 - `operator_rows_must_be_real_top_k_refinement_outputs`: `True`
@@ -108,6 +113,10 @@
 - `verify_science_actual_closure_command`: `python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked`
 - `operator_must_fill_or_verify`: `case_id`, `source_family`, `top_k_rank`, `candidate_id`, `upstream_top_k_provenance_ref`, `upstream_top_k_source_checksum`, `pre_refinement_energy_proxy`, `post_refinement_energy_proxy`, `local_min_survived`, `contact_persistence_rate`, `h_bond_persistence_rate`, `clash_count_before`, `clash_count_after`, `uncertainty_low`, `uncertainty_high`, `uncertainty_unit`, `provenance_ref`, `source_checksum`, `operator_input_source.source_artifact`, `operator_input_source.source_artifact_sha256`, `operator_input_source.source_id`, `operator_input_source.source_url`, `operator_input_source.source_license`
 - `required_receipt_roles`: `upstream_top_k_candidate_scope_receipt`, `lite_refinement_run_receipt`, `interaction_persistence_receipt`, `uncertainty_interval_receipt`
+- `role_receipt_blocked_count`: `24`
+- `first_blocked_role_receipt`: `upstream_top_k_candidate_scope_receipt` / `pocketmd_lite_case_001_rank_01`
+- `operator_input_source_receipt_blocked_count`: `5`
+- `first_blocked_operator_input_source_receipt`: `source_id`
 - `phase4_metric_receipt_action_count`: `8`
 - `template_is_not_evidence`: `True`
 - `placeholder_or_fixture_rows_do_not_promote`: `True`

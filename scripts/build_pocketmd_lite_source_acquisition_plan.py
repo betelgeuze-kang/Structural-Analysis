@@ -115,6 +115,21 @@ def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
+    resolved = path if path.is_absolute() else repo_root / path
+    if not resolved.exists():
+        return {}
+    try:
+        payload = json.loads(resolved.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
 def _required_flat_row_fields() -> list[str]:
     fields: list[str] = []
     for field in REQUIRED_CASE_FIELDS:
@@ -618,6 +633,72 @@ def _phase4_metric_receipt_actions(
     ]
 
 
+def _first_blocked_row(rows: list[Any]) -> dict[str, Any]:
+    for row in rows:
+        if isinstance(row, dict) and row.get("status") != "ready":
+            return row
+    return {}
+
+
+def _template_preflight_summary(repo_root: Path) -> dict[str, Any]:
+    payload = _load_json(repo_root, DEFAULT_ROWS_TEMPLATE_PREFLIGHT)
+    if not payload:
+        return {
+            "present": False,
+            "artifact": str(DEFAULT_ROWS_TEMPLATE_PREFLIGHT),
+            "markdown_artifact": str(DEFAULT_ROWS_TEMPLATE_PREFLIGHT_MD),
+            "status": "missing",
+            "role_receipt_plan_count": 0,
+            "role_receipt_blocked_count": 0,
+            "operator_input_source_receipt_requirement_count": 0,
+            "operator_input_source_receipt_blocked_count": 0,
+            "first_blocked_role_receipt": {},
+            "first_blocked_operator_input_source_receipt": {},
+        }
+    role_receipt_plan = [
+        row for row in payload.get("role_receipt_plan", []) if isinstance(row, dict)
+    ]
+    operator_input_source_receipt_plan = [
+        row
+        for row in payload.get("operator_input_source_receipt_plan", [])
+        if isinstance(row, dict)
+    ]
+    summary = payload.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+    return {
+        "present": True,
+        "artifact": str(DEFAULT_ROWS_TEMPLATE_PREFLIGHT),
+        "markdown_artifact": str(DEFAULT_ROWS_TEMPLATE_PREFLIGHT_MD),
+        "status": str(payload.get("status") or ""),
+        "top_k_template_ready": bool(payload.get("top_k_template_ready")),
+        "expected_rows_detected": bool(payload.get("expected_rows_detected")),
+        "role_receipt_plan_count": int(
+            summary.get("role_receipt_plan_count") or len(role_receipt_plan)
+        ),
+        "role_receipt_blocked_count": int(
+            summary.get("role_receipt_blocked_count")
+            or sum(1 for row in role_receipt_plan if row.get("status") != "ready")
+        ),
+        "operator_input_source_receipt_requirement_count": int(
+            summary.get("operator_input_source_receipt_requirement_count")
+            or len(operator_input_source_receipt_plan)
+        ),
+        "operator_input_source_receipt_blocked_count": int(
+            summary.get("operator_input_source_receipt_blocked_count")
+            or sum(
+                1
+                for row in operator_input_source_receipt_plan
+                if row.get("status") != "ready"
+            )
+        ),
+        "first_blocked_role_receipt": _first_blocked_row(role_receipt_plan),
+        "first_blocked_operator_input_source_receipt": _first_blocked_row(
+            operator_input_source_receipt_plan
+        ),
+    }
+
+
 def _refinement_execution_plan_command() -> str:
     return (
         "python3 scripts/build_pocketmd_lite_refinement_execution_plan.py "
@@ -659,6 +740,7 @@ def _pocketmd_rows_operator_action(
     minimum_rows_by_case: list[dict[str, Any]],
     phase4_metric_closure_matrix: list[dict[str, Any]],
     required_flat_row_fields: list[str],
+    template_preflight_summary: dict[str, Any],
     commands: dict[str, str],
 ) -> dict[str, Any]:
     row_blocker = str(raw_row_candidate_status.get("blocker") or "")
@@ -737,6 +819,7 @@ def _pocketmd_rows_operator_action(
             "template_preflight_markdown_artifact": str(
                 DEFAULT_ROWS_TEMPLATE_PREFLIGHT_MD
             ),
+            "template_preflight_summary": template_preflight_summary,
             "review_template_command": commands["review_row_template"],
             "build_template_preflight_command": commands[
                 "build_row_template_preflight"
@@ -765,6 +848,37 @@ def _pocketmd_rows_operator_action(
                 DEFAULT_ROWS_TEMPLATE_PREFLIGHT_MD
             ),
             "expected_rows_artifact": str(DEFAULT_ROWS_OUT),
+            "role_receipt_plan_summary": {
+                "role_receipt_plan_count": int(
+                    template_preflight_summary.get("role_receipt_plan_count") or 0
+                ),
+                "role_receipt_blocked_count": int(
+                    template_preflight_summary.get("role_receipt_blocked_count") or 0
+                ),
+                "first_blocked_role_receipt": dict(
+                    template_preflight_summary.get("first_blocked_role_receipt") or {}
+                ),
+            },
+            "operator_input_source_receipt_plan_summary": {
+                "requirement_count": int(
+                    template_preflight_summary.get(
+                        "operator_input_source_receipt_requirement_count"
+                    )
+                    or 0
+                ),
+                "blocked_count": int(
+                    template_preflight_summary.get(
+                        "operator_input_source_receipt_blocked_count"
+                    )
+                    or 0
+                ),
+                "first_blocked_receipt": dict(
+                    template_preflight_summary.get(
+                        "first_blocked_operator_input_source_receipt"
+                    )
+                    or {}
+                ),
+            },
             "supported_candidate_paths": [
                 str(row.get("path") or "")
                 for row in raw_row_candidate_status.get("candidate_paths", [])
@@ -914,6 +1028,7 @@ def build_pocketmd_lite_source_acquisition_plan(
         phase4_refinement_receipt_plan=phase4_refinement_receipt_plan,
         raw_row_candidate_status=raw_row_candidate_status,
     )
+    template_preflight_summary = _template_preflight_summary(repo_root)
     refinement_execution_plan = _refinement_execution_plan_summary(
         minimum_rows_by_case,
         operator_rows_ready=operator_rows_ready,
@@ -955,6 +1070,7 @@ def build_pocketmd_lite_source_acquisition_plan(
         minimum_rows_by_case=minimum_rows_by_case,
         phase4_metric_closure_matrix=phase4_metric_closure_matrix,
         required_flat_row_fields=required_flat_row_fields,
+        template_preflight_summary=template_preflight_summary,
         commands=commands,
     )
     missing_row_input_actions = (
@@ -1013,6 +1129,7 @@ def build_pocketmd_lite_source_acquisition_plan(
         "phase4_metric_closure_matrix": phase4_metric_closure_matrix,
         "phase4_metric_closure_matrix_count": len(phase4_metric_closure_matrix),
         "refinement_execution_plan": refinement_execution_plan,
+        "template_preflight_summary": template_preflight_summary,
         "phase4_refinement_receipt_promotion_policy": dict(
             PHASE4_REFINEMENT_RECEIPT_PROMOTION_POLICY
         ),
@@ -1079,6 +1196,23 @@ def build_pocketmd_lite_source_acquisition_plan(
             "phase4_metric_closure_matrix_count": len(
                 phase4_metric_closure_matrix
             ),
+            "template_preflight_status": template_preflight_summary["status"],
+            "template_preflight_role_receipt_plan_count": (
+                template_preflight_summary["role_receipt_plan_count"]
+            ),
+            "template_preflight_role_receipt_blocked_count": (
+                template_preflight_summary["role_receipt_blocked_count"]
+            ),
+            "template_preflight_operator_input_source_receipt_requirement_count": (
+                template_preflight_summary[
+                    "operator_input_source_receipt_requirement_count"
+                ]
+            ),
+            "template_preflight_operator_input_source_receipt_blocked_count": (
+                template_preflight_summary[
+                    "operator_input_source_receipt_blocked_count"
+                ]
+            ),
             "refinement_execution_plan_status": refinement_execution_plan["status"],
             "refinement_execution_plan_ready": refinement_execution_plan[
                 "execution_plan_ready"
@@ -1125,6 +1259,11 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `phase4_candidate_slot_matrix_count`: `{payload['phase4_candidate_slot_matrix_count']}`",
         f"- `phase4_missing_candidate_slot_count`: `{payload['phase4_missing_candidate_slot_count']}`",
         f"- `phase4_metric_closure_matrix_count`: `{payload['phase4_metric_closure_matrix_count']}`",
+        f"- `template_preflight_status`: `{payload['template_preflight_summary']['status']}`",
+        "- `template_preflight_role_receipt_blocked_count`: "
+        f"`{payload['template_preflight_summary']['role_receipt_blocked_count']}`",
+        "- `template_preflight_operator_input_source_receipt_blocked_count`: "
+        f"`{payload['template_preflight_summary']['operator_input_source_receipt_blocked_count']}`",
         f"- `row_template_artifact`: `{payload['row_artifact_contract']['template_artifact']}`",
         "",
         "## Operator Next Actions",
@@ -1247,6 +1386,10 @@ def _markdown(payload: dict[str, Any]) -> str:
                         f"- `missing_required_slot_count`: `{len(action.get('missing_required_slots', []))}`",
                         f"- `validation_error`: `{action.get('validation_error')}`",
                         f"- `blocker`: `{action.get('blocker')}`",
+                        "- `template_preflight_role_receipt_blocked_count`: "
+                        f"`{_as_dict(action.get('template_preflight_summary')).get('role_receipt_blocked_count')}`",
+                        "- `template_preflight_operator_input_source_receipt_blocked_count`: "
+                        f"`{_as_dict(action.get('template_preflight_summary')).get('operator_input_source_receipt_blocked_count')}`",
                         f"- `import_rows_command`: `{action.get('import_rows_command')}`",
                         f"- `verify_science_actual_closure_command`: `{action.get('verify_science_actual_closure_command')}`",
                         f"- `operator_rows_must_be_real_top_k_refinement_outputs`: `{safety_policy.get('operator_rows_must_be_real_top_k_refinement_outputs')}`",
@@ -1279,6 +1422,35 @@ def _markdown(payload: dict[str, Any]) -> str:
                     for row in action.get("phase4_metric_receipt_actions", [])
                     if isinstance(row, dict)
                 ]
+                role_receipt_summary = (
+                    action.get("role_receipt_plan_summary")
+                    if isinstance(action.get("role_receipt_plan_summary"), dict)
+                    else {}
+                )
+                input_source_receipt_summary = (
+                    action.get("operator_input_source_receipt_plan_summary")
+                    if isinstance(
+                        action.get("operator_input_source_receipt_plan_summary"),
+                        dict,
+                    )
+                    else {}
+                )
+                first_blocked_role = (
+                    role_receipt_summary.get("first_blocked_role_receipt")
+                    if isinstance(
+                        role_receipt_summary.get("first_blocked_role_receipt"),
+                        dict,
+                    )
+                    else {}
+                )
+                first_blocked_source_receipt = (
+                    input_source_receipt_summary.get("first_blocked_receipt")
+                    if isinstance(
+                        input_source_receipt_summary.get("first_blocked_receipt"),
+                        dict,
+                    )
+                    else {}
+                )
                 lines.extend(
                     [
                         f"- `status`: `{action.get('status')}`",
@@ -1292,6 +1464,10 @@ def _markdown(payload: dict[str, Any]) -> str:
                         f"- `verify_science_actual_closure_command`: `{action.get('verify_science_actual_closure_command')}`",
                         f"- `operator_must_fill_or_verify`: {required_fields}",
                         f"- `required_receipt_roles`: {receipt_roles}",
+                        f"- `role_receipt_blocked_count`: `{role_receipt_summary.get('role_receipt_blocked_count')}`",
+                        f"- `first_blocked_role_receipt`: `{first_blocked_role.get('role_id', '')}` / `{first_blocked_role.get('candidate_id', '')}`",
+                        f"- `operator_input_source_receipt_blocked_count`: `{input_source_receipt_summary.get('blocked_count')}`",
+                        f"- `first_blocked_operator_input_source_receipt`: `{first_blocked_source_receipt.get('field', '')}`",
                         f"- `phase4_metric_receipt_action_count`: `{action.get('phase4_metric_receipt_action_count')}`",
                         f"- `template_is_not_evidence`: `{safety_policy.get('template_is_not_evidence')}`",
                         f"- `placeholder_or_fixture_rows_do_not_promote`: `{safety_policy.get('placeholder_or_fixture_rows_do_not_promote')}`",

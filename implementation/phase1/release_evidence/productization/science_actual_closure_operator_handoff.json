@@ -247,6 +247,52 @@
               ],
               "template_preflight_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json",
               "template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
+              "template_preflight_summary": {
+                "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json",
+                "expected_rows_detected": false,
+                "first_blocked_operator_input_source_receipt": {
+                  "blocker": "source_id_required",
+                  "expected_value": "",
+                  "field": "source_id",
+                  "operator_action": "attach_operator_input_source_source_id",
+                  "status": "operator_completion_required"
+                },
+                "first_blocked_role_receipt": {
+                  "blockers": [
+                    "required_role_fields_missing"
+                  ],
+                  "candidate_id": "pocketmd_lite_case_001_rank_01",
+                  "case_id": "pocketmd_lite_case_001",
+                  "closes_phase4_criteria": [
+                    "top_k_refinement_rows_present",
+                    "top_k_refinement_case_coverage"
+                  ],
+                  "invalid_fields": [],
+                  "missing_fields": [
+                    "upstream_top_k_provenance_ref",
+                    "upstream_top_k_source_checksum"
+                  ],
+                  "operator_action": "attach_upstream_top_k_scope_receipt",
+                  "required_fields": [
+                    "case_id",
+                    "candidate_id",
+                    "top_k_rank",
+                    "upstream_top_k_provenance_ref",
+                    "upstream_top_k_source_checksum"
+                  ],
+                  "role_id": "upstream_top_k_candidate_scope_receipt",
+                  "status": "operator_completion_required",
+                  "top_k_rank": 1
+                },
+                "markdown_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
+                "operator_input_source_receipt_blocked_count": 5,
+                "operator_input_source_receipt_requirement_count": 5,
+                "present": true,
+                "role_receipt_blocked_count": 24,
+                "role_receipt_plan_count": 24,
+                "status": "operator_rows_completion_required",
+                "top_k_template_ready": false
+              },
               "template_safety_policy": {
                 "broad_all_atom_or_fep_claims_remain_locked": true,
                 "operator_rows_must_be_real_top_k_refinement_outputs": true,
@@ -267,6 +313,17 @@
               "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
               "import_rows_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
               "materialize_survival_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+              "operator_input_source_receipt_plan_summary": {
+                "blocked_count": 5,
+                "first_blocked_receipt": {
+                  "blocker": "source_id_required",
+                  "expected_value": "",
+                  "field": "source_id",
+                  "operator_action": "attach_operator_input_source_source_id",
+                  "status": "operator_completion_required"
+                },
+                "requirement_count": 5
+              },
               "operator_must_fill_or_verify": [
                 "case_id",
                 "source_family",
@@ -445,6 +502,37 @@
                 "uncertainty_interval_receipt"
               ],
               "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+              "role_receipt_plan_summary": {
+                "first_blocked_role_receipt": {
+                  "blockers": [
+                    "required_role_fields_missing"
+                  ],
+                  "candidate_id": "pocketmd_lite_case_001_rank_01",
+                  "case_id": "pocketmd_lite_case_001",
+                  "closes_phase4_criteria": [
+                    "top_k_refinement_rows_present",
+                    "top_k_refinement_case_coverage"
+                  ],
+                  "invalid_fields": [],
+                  "missing_fields": [
+                    "upstream_top_k_provenance_ref",
+                    "upstream_top_k_source_checksum"
+                  ],
+                  "operator_action": "attach_upstream_top_k_scope_receipt",
+                  "required_fields": [
+                    "case_id",
+                    "candidate_id",
+                    "top_k_rank",
+                    "upstream_top_k_provenance_ref",
+                    "upstream_top_k_source_checksum"
+                  ],
+                  "role_id": "upstream_top_k_candidate_scope_receipt",
+                  "status": "operator_completion_required",
+                  "top_k_rank": 1
+                },
+                "role_receipt_blocked_count": 24,
+                "role_receipt_plan_count": 24
+              },
               "status": "operator_rows_required",
               "supported_candidate_paths": [
                 "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
@@ -3043,14 +3131,14 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T03:28:35.871609+00:00",
+  "generated_at": "2026-07-04T03:52:41.895506+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:93fc9d22b516f6b535c7d9d704e3dc43d82a9e2e538670078b42ccb792c19dc8",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:7a4ff345eb479093b342fdcdbcfb9f06d57a3af6dc33c181622f0bb0f7fe6d6b",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:92f3cd4970165177df9839683acb5dabc8a4c8193a8483d5267cd68d8136bf37",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:38284961e22e3780859ff077042c86a58db1b4e5c4378efc8aec10ae1763135c",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:a062ca10c1b4edeb84810fb3e773212d0a378da71f8aa0a2ff3780fea839e0cf",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:cc00719a688561f82c8e402512ade5053af2ddf25ea3e04d86b5bafff31a5f74",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:d9457e2f507a67a29c9935a79c2ba8c3a8474bdd4d7ec861dec54db8b4b7284b"
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:1aa07a73ba0f9770659d6317d4d813eff0660669c991dd35c5b89726f4045f20",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:5eaa0791cbcbc2b19bbd06c01fcddd636026dcf2b1316447e044d463e4cf97c2",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:20774d174c420eb82f785f40ca34202ce7165e6dc796bfa90644c111725ea7cd",
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:b35e28f7999ff067ac040fddca9c47f4fd88d296ddb8dc85c47067429aa260b0"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -11958,6 +12046,52 @@
           ],
           "template_preflight_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json",
           "template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
+          "template_preflight_summary": {
+            "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json",
+            "expected_rows_detected": false,
+            "first_blocked_operator_input_source_receipt": {
+              "blocker": "source_id_required",
+              "expected_value": "",
+              "field": "source_id",
+              "operator_action": "attach_operator_input_source_source_id",
+              "status": "operator_completion_required"
+            },
+            "first_blocked_role_receipt": {
+              "blockers": [
+                "required_role_fields_missing"
+              ],
+              "candidate_id": "pocketmd_lite_case_001_rank_01",
+              "case_id": "pocketmd_lite_case_001",
+              "closes_phase4_criteria": [
+                "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage"
+              ],
+              "invalid_fields": [],
+              "missing_fields": [
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum"
+              ],
+              "operator_action": "attach_upstream_top_k_scope_receipt",
+              "required_fields": [
+                "case_id",
+                "candidate_id",
+                "top_k_rank",
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum"
+              ],
+              "role_id": "upstream_top_k_candidate_scope_receipt",
+              "status": "operator_completion_required",
+              "top_k_rank": 1
+            },
+            "markdown_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
+            "operator_input_source_receipt_blocked_count": 5,
+            "operator_input_source_receipt_requirement_count": 5,
+            "present": true,
+            "role_receipt_blocked_count": 24,
+            "role_receipt_plan_count": 24,
+            "status": "operator_rows_completion_required",
+            "top_k_template_ready": false
+          },
           "template_safety_policy": {
             "broad_all_atom_or_fep_claims_remain_locked": true,
             "operator_rows_must_be_real_top_k_refinement_outputs": true,
@@ -11978,6 +12112,17 @@
           "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
           "import_rows_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
           "materialize_survival_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+          "operator_input_source_receipt_plan_summary": {
+            "blocked_count": 5,
+            "first_blocked_receipt": {
+              "blocker": "source_id_required",
+              "expected_value": "",
+              "field": "source_id",
+              "operator_action": "attach_operator_input_source_source_id",
+              "status": "operator_completion_required"
+            },
+            "requirement_count": 5
+          },
           "operator_must_fill_or_verify": [
             "case_id",
             "source_family",
@@ -12156,6 +12301,37 @@
             "uncertainty_interval_receipt"
           ],
           "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+          "role_receipt_plan_summary": {
+            "first_blocked_role_receipt": {
+              "blockers": [
+                "required_role_fields_missing"
+              ],
+              "candidate_id": "pocketmd_lite_case_001_rank_01",
+              "case_id": "pocketmd_lite_case_001",
+              "closes_phase4_criteria": [
+                "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage"
+              ],
+              "invalid_fields": [],
+              "missing_fields": [
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum"
+              ],
+              "operator_action": "attach_upstream_top_k_scope_receipt",
+              "required_fields": [
+                "case_id",
+                "candidate_id",
+                "top_k_rank",
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum"
+              ],
+              "role_id": "upstream_top_k_candidate_scope_receipt",
+              "status": "operator_completion_required",
+              "top_k_rank": 1
+            },
+            "role_receipt_blocked_count": 24,
+            "role_receipt_plan_count": 24
+          },
           "status": "operator_rows_required",
           "supported_candidate_paths": [
             "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
@@ -12398,6 +12574,52 @@
               ],
               "template_preflight_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json",
               "template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
+              "template_preflight_summary": {
+                "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json",
+                "expected_rows_detected": false,
+                "first_blocked_operator_input_source_receipt": {
+                  "blocker": "source_id_required",
+                  "expected_value": "",
+                  "field": "source_id",
+                  "operator_action": "attach_operator_input_source_source_id",
+                  "status": "operator_completion_required"
+                },
+                "first_blocked_role_receipt": {
+                  "blockers": [
+                    "required_role_fields_missing"
+                  ],
+                  "candidate_id": "pocketmd_lite_case_001_rank_01",
+                  "case_id": "pocketmd_lite_case_001",
+                  "closes_phase4_criteria": [
+                    "top_k_refinement_rows_present",
+                    "top_k_refinement_case_coverage"
+                  ],
+                  "invalid_fields": [],
+                  "missing_fields": [
+                    "upstream_top_k_provenance_ref",
+                    "upstream_top_k_source_checksum"
+                  ],
+                  "operator_action": "attach_upstream_top_k_scope_receipt",
+                  "required_fields": [
+                    "case_id",
+                    "candidate_id",
+                    "top_k_rank",
+                    "upstream_top_k_provenance_ref",
+                    "upstream_top_k_source_checksum"
+                  ],
+                  "role_id": "upstream_top_k_candidate_scope_receipt",
+                  "status": "operator_completion_required",
+                  "top_k_rank": 1
+                },
+                "markdown_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
+                "operator_input_source_receipt_blocked_count": 5,
+                "operator_input_source_receipt_requirement_count": 5,
+                "present": true,
+                "role_receipt_blocked_count": 24,
+                "role_receipt_plan_count": 24,
+                "status": "operator_rows_completion_required",
+                "top_k_template_ready": false
+              },
               "template_safety_policy": {
                 "broad_all_atom_or_fep_claims_remain_locked": true,
                 "operator_rows_must_be_real_top_k_refinement_outputs": true,
@@ -12418,6 +12640,17 @@
               "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
               "import_rows_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
               "materialize_survival_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+              "operator_input_source_receipt_plan_summary": {
+                "blocked_count": 5,
+                "first_blocked_receipt": {
+                  "blocker": "source_id_required",
+                  "expected_value": "",
+                  "field": "source_id",
+                  "operator_action": "attach_operator_input_source_source_id",
+                  "status": "operator_completion_required"
+                },
+                "requirement_count": 5
+              },
               "operator_must_fill_or_verify": [
                 "case_id",
                 "source_family",
@@ -12596,6 +12829,37 @@
                 "uncertainty_interval_receipt"
               ],
               "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+              "role_receipt_plan_summary": {
+                "first_blocked_role_receipt": {
+                  "blockers": [
+                    "required_role_fields_missing"
+                  ],
+                  "candidate_id": "pocketmd_lite_case_001_rank_01",
+                  "case_id": "pocketmd_lite_case_001",
+                  "closes_phase4_criteria": [
+                    "top_k_refinement_rows_present",
+                    "top_k_refinement_case_coverage"
+                  ],
+                  "invalid_fields": [],
+                  "missing_fields": [
+                    "upstream_top_k_provenance_ref",
+                    "upstream_top_k_source_checksum"
+                  ],
+                  "operator_action": "attach_upstream_top_k_scope_receipt",
+                  "required_fields": [
+                    "case_id",
+                    "candidate_id",
+                    "top_k_rank",
+                    "upstream_top_k_provenance_ref",
+                    "upstream_top_k_source_checksum"
+                  ],
+                  "role_id": "upstream_top_k_candidate_scope_receipt",
+                  "status": "operator_completion_required",
+                  "top_k_rank": 1
+                },
+                "role_receipt_blocked_count": 24,
+                "role_receipt_plan_count": 24
+              },
               "status": "operator_rows_required",
               "supported_candidate_paths": [
                 "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
@@ -12669,6 +12933,11 @@
           "required_candidate_slot_count": 6,
           "required_case_count": 3,
           "required_total_candidate_rows": 6,
+          "template_preflight_operator_input_source_receipt_blocked_count": 5,
+          "template_preflight_operator_input_source_receipt_requirement_count": 5,
+          "template_preflight_role_receipt_blocked_count": 24,
+          "template_preflight_role_receipt_plan_count": 24,
+          "template_preflight_status": "operator_rows_completion_required",
           "validated_row_count": 0
         },
         "vina_gnina_blocked_case_input_slot_count": 0,
@@ -12700,7 +12969,7 @@
   ],
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "c202f309b4c2f0b35926eed659af88b9c1842b86",
+  "source_commit_sha": "623ecaf9fc2c14c5fa66f2d20f65c701e3a8cb25",
   "status": "operator_rows_required",
   "summary": {
     "blocked_component_operator_action_count": 2,
@@ -12939,6 +13208,52 @@
             ],
             "template_preflight_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json",
             "template_preflight_markdown_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
+            "template_preflight_summary": {
+              "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json",
+              "expected_rows_detected": false,
+              "first_blocked_operator_input_source_receipt": {
+                "blocker": "source_id_required",
+                "expected_value": "",
+                "field": "source_id",
+                "operator_action": "attach_operator_input_source_source_id",
+                "status": "operator_completion_required"
+              },
+              "first_blocked_role_receipt": {
+                "blockers": [
+                  "required_role_fields_missing"
+                ],
+                "candidate_id": "pocketmd_lite_case_001_rank_01",
+                "case_id": "pocketmd_lite_case_001",
+                "closes_phase4_criteria": [
+                  "top_k_refinement_rows_present",
+                  "top_k_refinement_case_coverage"
+                ],
+                "invalid_fields": [],
+                "missing_fields": [
+                  "upstream_top_k_provenance_ref",
+                  "upstream_top_k_source_checksum"
+                ],
+                "operator_action": "attach_upstream_top_k_scope_receipt",
+                "required_fields": [
+                  "case_id",
+                  "candidate_id",
+                  "top_k_rank",
+                  "upstream_top_k_provenance_ref",
+                  "upstream_top_k_source_checksum"
+                ],
+                "role_id": "upstream_top_k_candidate_scope_receipt",
+                "status": "operator_completion_required",
+                "top_k_rank": 1
+              },
+              "markdown_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
+              "operator_input_source_receipt_blocked_count": 5,
+              "operator_input_source_receipt_requirement_count": 5,
+              "present": true,
+              "role_receipt_blocked_count": 24,
+              "role_receipt_plan_count": 24,
+              "status": "operator_rows_completion_required",
+              "top_k_template_ready": false
+            },
             "template_safety_policy": {
               "broad_all_atom_or_fep_claims_remain_locked": true,
               "operator_rows_must_be_real_top_k_refinement_outputs": true,
@@ -12959,6 +13274,17 @@
             "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
             "import_rows_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
             "materialize_survival_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+            "operator_input_source_receipt_plan_summary": {
+              "blocked_count": 5,
+              "first_blocked_receipt": {
+                "blocker": "source_id_required",
+                "expected_value": "",
+                "field": "source_id",
+                "operator_action": "attach_operator_input_source_source_id",
+                "status": "operator_completion_required"
+              },
+              "requirement_count": 5
+            },
             "operator_must_fill_or_verify": [
               "case_id",
               "source_family",
@@ -13137,6 +13463,37 @@
               "uncertainty_interval_receipt"
             ],
             "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+            "role_receipt_plan_summary": {
+              "first_blocked_role_receipt": {
+                "blockers": [
+                  "required_role_fields_missing"
+                ],
+                "candidate_id": "pocketmd_lite_case_001_rank_01",
+                "case_id": "pocketmd_lite_case_001",
+                "closes_phase4_criteria": [
+                  "top_k_refinement_rows_present",
+                  "top_k_refinement_case_coverage"
+                ],
+                "invalid_fields": [],
+                "missing_fields": [
+                  "upstream_top_k_provenance_ref",
+                  "upstream_top_k_source_checksum"
+                ],
+                "operator_action": "attach_upstream_top_k_scope_receipt",
+                "required_fields": [
+                  "case_id",
+                  "candidate_id",
+                  "top_k_rank",
+                  "upstream_top_k_provenance_ref",
+                  "upstream_top_k_source_checksum"
+                ],
+                "role_id": "upstream_top_k_candidate_scope_receipt",
+                "status": "operator_completion_required",
+                "top_k_rank": 1
+              },
+              "role_receipt_blocked_count": 24,
+              "role_receipt_plan_count": 24
+            },
             "status": "operator_rows_required",
             "supported_candidate_paths": [
               "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
@@ -13637,6 +13994,11 @@
         "required_candidate_slot_count": 6,
         "required_case_count": 3,
         "required_total_candidate_rows": 6,
+        "template_preflight_operator_input_source_receipt_blocked_count": 5,
+        "template_preflight_operator_input_source_receipt_requirement_count": 5,
+        "template_preflight_role_receipt_blocked_count": 24,
+        "template_preflight_role_receipt_plan_count": 24,
+        "template_preflight_status": "operator_rows_completion_required",
         "validated_row_count": 0
       },
       "vina_gnina_blocked_case_input_slot_count": 0,

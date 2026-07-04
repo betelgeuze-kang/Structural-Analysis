@@ -316,6 +316,12 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "pocketmd_lite_topk_rows.tsv"
     )
     assert len(pocketmd_preflight_action["missing_required_slots"]) == 6
+    assert pocketmd_preflight_action["template_preflight_summary"][
+        "role_receipt_blocked_count"
+    ] == 24
+    assert pocketmd_preflight_action["template_preflight_summary"][
+        "operator_input_source_receipt_blocked_count"
+    ] == 5
     assert pocketmd_preflight_action["template_safety_policy"][
         "preflight_does_not_run_refinement"
     ] is True
@@ -325,6 +331,18 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert pocketmd_topk_action["expected_rows_artifact"].endswith(
         "pocketmd_lite_topk_rows.json"
     )
+    assert pocketmd_topk_action["role_receipt_plan_summary"][
+        "role_receipt_blocked_count"
+    ] == 24
+    assert pocketmd_topk_action["role_receipt_plan_summary"][
+        "first_blocked_role_receipt"
+    ]["role_id"] == "upstream_top_k_candidate_scope_receipt"
+    assert pocketmd_topk_action["operator_input_source_receipt_plan_summary"][
+        "blocked_count"
+    ] == 5
+    assert pocketmd_topk_action["operator_input_source_receipt_plan_summary"][
+        "first_blocked_receipt"
+    ]["field"] == "source_id"
     assert pocketmd_topk_action["phase4_metric_receipt_action_count"] == 8
     metric_receipt_actions = {
         row["criterion_id"]: row
@@ -787,10 +805,23 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "`external_receipts_complete_roles`: `0/3`" in markdown
     assert "curl --head --location --max-time 20" in markdown
     assert "### PocketMD Top-k Rows Action" in markdown
+    assert "`role_receipt_blocked_count`: `24`" in markdown
+    assert (
+        "`first_blocked_role_receipt`: "
+        "`upstream_top_k_candidate_scope_receipt` / "
+        "`pocketmd_lite_case_001_rank_01`"
+    ) in markdown
+    assert "`operator_input_source_receipt_blocked_count`: `5`" in markdown
+    assert "`first_blocked_operator_input_source_receipt`: `source_id`" in markdown
     assert "`phase4_metric_receipt_action_count`: `8`" in markdown
     assert "#### PocketMD Phase 4 Receipt Closure Actions" in markdown
     assert "interaction_persistence_receipt" in markdown
     assert "### PocketMD Row Preflight Action" in markdown
+    assert "`template_preflight_role_receipt_blocked_count`: `24`" in markdown
+    assert (
+        "`template_preflight_operator_input_source_receipt_blocked_count`: `5`"
+        in markdown
+    )
     assert "pocketmd_lite_topk_rows.tsv" in markdown
     assert "`operator_rows_must_be_real_top_k_refinement_outputs`: `True`" in markdown
     assert "operator_input_source.source_artifact_sha256" in markdown
