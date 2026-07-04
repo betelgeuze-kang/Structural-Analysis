@@ -11,7 +11,7 @@
 - `missing_receipt_ref_count`: `60`
 - `source_file_missing_count`: `24`
 - `source_url_probe_count`: `1`
-- `known_source_url_content_length_gib`: `0.0`
+- `known_source_url_content_length_gib`: `1.465`
 - `prepared_input_missing_count`: `24`
 - `receipt_ref_missing_count`: `60`
 
@@ -65,7 +65,7 @@
 
 | URL | Status | Size Bytes | Cases |
 |---|---|---:|---:|
-| `https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz` | `not_run` | `0` | `12` |
+| `https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz` | `reachable` | `1572660769` | `12` |
 
 ## Prepared Input Plan
 

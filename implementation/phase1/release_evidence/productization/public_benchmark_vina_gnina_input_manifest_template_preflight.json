@@ -3313,7 +3313,7 @@
     "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
     "status": "ready"
   },
-  "generated_at": "2026-07-04T08:36:41.330385+00:00",
+  "generated_at": "2026-07-04T09:30:49.500399+00:00",
   "header_fields": [
     "case_id",
     "complex_id",
@@ -4310,7 +4310,7 @@
   "reuse_policy": "public_benchmark_vina_gnina_input_manifest_template_preflight",
   "reused_evidence": false,
   "schema_version": "public-benchmark-vina-gnina-input-manifest-template-preflight.v1",
-  "source_commit_sha": "78538d6ecb7096aec38e7679ded4367b401d53e0",
+  "source_commit_sha": "c271cced050b34f96ae74a02ef48dec0ea685fc5",
   "source_family_policy": {
     "accepted_markers": [
       "casf",
@@ -4696,9 +4696,7 @@
   ],
   "source_url_probe_plan": [
     {
-      "blockers": [
-        "not_run"
-      ],
+      "blockers": [],
       "case_ids": [
         "casf2016_4llx",
         "casf2016_5c28",
@@ -4720,26 +4718,26 @@
       ],
       "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
       "probe": {
-        "accept_ranges": "",
-        "attempted": false,
-        "content_length_bytes": 0,
-        "content_type": "",
+        "accept_ranges": "bytes",
+        "attempted": true,
+        "content_length_bytes": 1572660769,
+        "content_type": "application/octet-stream",
         "error": "",
-        "etag": "",
-        "final_url": "",
-        "http_status": 0,
-        "last_modified": "",
-        "status": "not_run",
-        "success_criteria_met": false,
+        "etag": "\"78c0c1dd8f716a9f124e7ccdb20f5712-188\"",
+        "final_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+        "http_status": 200,
+        "last_modified": "Thu, 25 Jan 2024 03:25:36 GMT",
+        "status": "reachable",
+        "success_criteria_met": true,
         "url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz"
       },
       "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-      "status": "not_run"
+      "status": "reachable"
     }
   ],
   "source_url_probe_policy": {
     "network_probe_only": true,
-    "probe_source_urls": false,
+    "probe_source_urls": true,
     "raw_payload_committed_by_plan": false,
     "raw_payload_downloaded_by_plan": false,
     "timeout_seconds": 20
@@ -4750,8 +4748,8 @@
     "expected_case_count": 12,
     "invalid_checksum_count": 0,
     "invalid_source_receipt_count": 0,
-    "known_source_url_content_length_bytes": 0,
-    "known_source_url_content_length_gib": 0.0,
+    "known_source_url_content_length_bytes": 1572660769,
+    "known_source_url_content_length_gib": 1.465,
     "manifest_ready": false,
     "missing_expected_case_count": 0,
     "missing_local_file_count": 48,
@@ -4764,10 +4762,10 @@
     "source_file_missing_count": 24,
     "source_file_requirement_count": 24,
     "source_url_blocked_count": 0,
-    "source_url_not_run_count": 1,
+    "source_url_not_run_count": 0,
     "source_url_probe_count": 1,
-    "source_url_probe_network_performed": false,
-    "source_url_reachable_count": 0,
+    "source_url_probe_network_performed": true,
+    "source_url_reachable_count": 1,
     "template_case_count": 12,
     "template_case_coverage_complete": true,
     "template_row_count": 12,

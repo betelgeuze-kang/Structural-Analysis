@@ -1620,11 +1620,11 @@
     ],
     "status": "blocked"
   },
-  "generated_at": "2026-07-04T09:25:05.947230+00:00",
+  "generated_at": "2026-07-04T09:30:59.993382+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json": "sha256:c088b33bb3ce0502bf4f0cba3f845b8511c18b8115a0f61e2047ed4cb4c913c2",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:30cea0a365c966479ebe1e3b48f0b2b99ba6358c8434f9b1e64d51e4d1329aba",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json": "sha256:91893c442fcdf064cf807aef530e9770ceee8573c7db7995eb4d3409a7e46668",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json": "sha256:c8eb5d67ef51eda5582f162b53843c3f65ab723bf0148c24e902785403c63eda",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json": "sha256:26a80f6babe19ae18b29b8b4b6075a0df44f757ff4e791e6b337cf8d4a53259d",
     "scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py": "sha256:0aaea5d86732b33257e3a5d9f7bbf18ed732e2ca07d7aff489dc2e4173bf523a",
     "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:0258e681ddd419d9fba1bba595ffda481b77f710b5e645ac628c5f2bf1444cee",
@@ -3364,8 +3364,8 @@
     "input_manifest_completion_blocked_case_count": 12,
     "invalid_checksum_count": 0,
     "invalid_source_receipt_count": 0,
-    "known_source_url_content_length_bytes": 0,
-    "known_source_url_content_length_gib": 0.0,
+    "known_source_url_content_length_bytes": 1572660769,
+    "known_source_url_content_length_gib": 1.465,
     "manifest_ready": false,
     "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
     "missing_local_file_count": 48,
@@ -3373,20 +3373,20 @@
     "missing_required_value_count": 36,
     "present": true,
     "source_url_blocked_count": 0,
-    "source_url_not_run_count": 1,
+    "source_url_not_run_count": 0,
     "source_url_probe_count": 1,
-    "source_url_probe_network_performed": false,
+    "source_url_probe_network_performed": true,
     "source_url_probe_plan": [
       {
         "case_count": 12,
-        "content_length_bytes": 0,
+        "content_length_bytes": 1572660769,
         "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-        "http_status": 0,
+        "http_status": 200,
         "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-        "status": "not_run"
+        "status": "reachable"
       }
     ],
-    "source_url_reachable_count": 0,
+    "source_url_reachable_count": 1,
     "status": "operator_manifest_completion_required",
     "template_case_coverage_complete": true,
     "template_row_count": 12,
@@ -6965,8 +6965,8 @@
       "input_manifest_completion_blocked_case_count": 12,
       "invalid_checksum_count": 0,
       "invalid_source_receipt_count": 0,
-      "known_source_url_content_length_bytes": 0,
-      "known_source_url_content_length_gib": 0.0,
+      "known_source_url_content_length_bytes": 1572660769,
+      "known_source_url_content_length_gib": 1.465,
       "manifest_ready": false,
       "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
       "missing_local_file_count": 48,
@@ -6974,20 +6974,20 @@
       "missing_required_value_count": 36,
       "present": true,
       "source_url_blocked_count": 0,
-      "source_url_not_run_count": 1,
+      "source_url_not_run_count": 0,
       "source_url_probe_count": 1,
-      "source_url_probe_network_performed": false,
+      "source_url_probe_network_performed": true,
       "source_url_probe_plan": [
         {
           "case_count": 12,
-          "content_length_bytes": 0,
+          "content_length_bytes": 1572660769,
           "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
-          "http_status": 0,
+          "http_status": 200,
           "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-          "status": "not_run"
+          "status": "reachable"
         }
       ],
-      "source_url_reachable_count": 0,
+      "source_url_reachable_count": 1,
       "status": "operator_manifest_completion_required",
       "template_case_coverage_complete": true,
       "template_row_count": 12,
@@ -7118,7 +7118,7 @@
     "rows_artifact_required_after_engine_execution": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
   },
   "schema_version": "public-benchmark-vina-gnina-runtime-readiness.v1",
-  "source_commit_sha": "058d8a87c7d064bd283d0cc641498ca3aaa580bb",
+  "source_commit_sha": "c271cced050b34f96ae74a02ef48dec0ea685fc5",
   "status": "execution_plan_blocked",
   "summary": {
     "adapter_case_count": 0,
