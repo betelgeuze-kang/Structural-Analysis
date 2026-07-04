@@ -990,6 +990,9 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert "pocketmd_lite_topk_rows.tsv" in markdown
     assert "`preflight_does_not_run_refinement`: `True`" in markdown
     assert "### PocketMD Top-k Rows Action" in markdown
+    assert "materialize_rows_from_template_command" in markdown
+    assert "materialize_rows_from_receipt_bundle_command" in markdown
+    assert "materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py" in markdown
     assert "`phase4_metric_receipt_action_count`: `8`" in markdown
     assert "`rows_from_receipt_bundle_metric_family_blocked_count`: `5`" in markdown
     assert "`receipt_metric_family_blocked_count`: `5`" in markdown

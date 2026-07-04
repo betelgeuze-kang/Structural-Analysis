@@ -1190,6 +1190,9 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "`external_receipts_complete_roles`: `2/3`" in markdown
     assert "curl --head --location --max-time 20" in markdown
     assert "### PocketMD Top-k Rows Action" in markdown
+    assert "materialize_rows_from_template_command" in markdown
+    assert "materialize_rows_from_receipt_bundle_command" in markdown
+    assert "materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py" in markdown
     assert "### PocketMD Actual Evidence Audit" in markdown
     assert "`operator_blocker_family_count`" in markdown
     assert "`bounded_top_k_row_slots`" in markdown

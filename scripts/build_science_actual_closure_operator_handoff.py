@@ -2591,6 +2591,8 @@ def _markdown(payload: dict[str, Any]) -> str:
                         f"- `template_artifact`: `{action.get('template_artifact')}`",
                         f"- `expected_rows_artifact`: `{action.get('expected_rows_artifact')}`",
                         f"- `import_rows_command`: `{action.get('import_rows_command')}`",
+                        f"- `materialize_rows_from_template_command`: `{action.get('materialize_rows_from_template_command')}`",
+                        f"- `materialize_rows_from_receipt_bundle_command`: `{action.get('materialize_rows_from_receipt_bundle_command')}`",
                         f"- `materialize_survival_command`: `{action.get('materialize_survival_command')}`",
                         f"- `verify_science_actual_closure_command`: `{action.get('verify_science_actual_closure_command')}`",
                         f"- `operator_must_fill_or_verify`: {_code_join(_as_list(action.get('operator_must_fill_or_verify')))}",
