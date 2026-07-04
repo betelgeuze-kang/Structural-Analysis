@@ -1176,6 +1176,7 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "curl --head --location --max-time 20" in markdown
     assert "### PocketMD Top-k Rows Action" in markdown
     assert "### PocketMD Actual Evidence Audit" in markdown
+    assert "`operator_blocker_family_count`" in markdown
     assert "`bounded_top_k_row_slots`" in markdown
     assert "`survival_metric_summary`" in markdown
     assert "`pocketmd_lite_operator_input_source_receipt_incomplete`" in markdown

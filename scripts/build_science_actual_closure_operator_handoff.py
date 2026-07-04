@@ -1597,6 +1597,11 @@ def _actual_evidence_audit_lines(title: str, audit: dict[str, Any]) -> list[str]
     components = [
         row for row in _as_list(audit.get("components")) if isinstance(row, dict)
     ]
+    operator_blocker_families = [
+        row
+        for row in _as_list(audit.get("operator_blocker_family_plan"))
+        if isinstance(row, dict)
+    ]
     lines = [
         "",
         f"### {title}",
@@ -1609,6 +1614,10 @@ def _actual_evidence_audit_lines(title: str, audit: dict[str, Any]) -> list[str]
         f"`{audit.get('blocked_component_count')}`",
         "- `remaining_evidence`: "
         f"{_code_join(_as_list(audit.get('remaining_evidence')))}",
+        "- `operator_blocker_family_count`: "
+        f"`{audit.get('operator_blocker_family_count', 0)}`",
+        "- `operator_blocker_family_missing_item_count`: "
+        f"`{audit.get('operator_blocker_family_missing_item_count', 0)}`",
         "",
         "| Component | Status | Pass | Current | Required | Blockers |",
         "|---|---|---|---|---|---|",
@@ -1633,6 +1642,25 @@ def _actual_evidence_audit_lines(title: str, audit: dict[str, Any]) -> list[str]
             f"`{required}` | "
             f"{_code_join(_as_list(row.get('blockers')))} |"
         )
+    if operator_blocker_families:
+        lines.extend(
+            [
+                "",
+                "#### Operator Blocker Families",
+                "",
+                "| Family | Status | Missing Items | Blocked Cases | Operator Action |",
+                "|---|---|---:|---:|---|",
+            ]
+        )
+        for row in operator_blocker_families:
+            lines.append(
+                "| "
+                f"`{row.get('family_id', '')}` | "
+                f"`{row.get('status', '')}` | "
+                f"{_as_int(row.get('missing_item_count'))} | "
+                f"{_as_int(row.get('blocked_case_count'))} | "
+                f"`{row.get('operator_action', '')}` |"
+            )
     return lines
 
 

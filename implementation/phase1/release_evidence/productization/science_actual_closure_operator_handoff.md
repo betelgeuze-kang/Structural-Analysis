@@ -257,6 +257,8 @@
 - `ready_component_count`: `0`
 - `blocked_component_count`: `4`
 - `remaining_evidence`: `bounded_top_k_row_slots`, `per_candidate_role_receipts`, `operator_input_source_receipt`, `survival_metric_summary`
+- `operator_blocker_family_count`: `8`
+- `operator_blocker_family_missing_item_count`: `89`
 
 | Component | Status | Pass | Current | Required | Blockers |
 |---|---|---|---|---|---|
@@ -265,6 +267,19 @@
 | `operator_input_source_receipt` | `blocked` | `False` | `{"survival_report_receipt_blocker_count": 1, "survival_report_receipt_contract_pass": false, "survival_report_receipt_status": "blocked", "template_preflight_blocked_count": 5, "template_preflight_requirement_count": 5}` | `{"survival_report_receipt_contract_pass": true, "template_preflight_blocked_count": 0, "template_preflight_requirement_count": 5}` | `operator_input_source_receipt_required`, `pocketmd_lite_operator_input_source_receipt_incomplete` |
 | `survival_metric_summary` | `blocked` | `False` | `{"reported_metric_count": 0, "required_metric_count": 5, "survival_report_contract_pass": false, "survival_report_status": "operator_evidence_required"}` | `{"missing_metric_count": 0, "required_metric_count": 5, "survival_report_contract_pass": true}` | `pocketmd_lite_local_min_survival_rows_missing`, `pocketmd_lite_contact_persistence_rows_missing`, `pocketmd_lite_h_bond_persistence_rows_missing`, `pocketmd_lite_clash_relief_rows_missing`, `pocketmd_lite_uncertainty_rows_missing` |
 
+#### Operator Blocker Families
+
+| Family | Status | Missing Items | Blocked Cases | Operator Action |
+|---|---|---:|---:|---|
+| `top_k_candidate_rows` | `blocked` | 6 | 3 | `attach_pocketmd_lite_topk_rows_at_default_dropzone` |
+| `per_candidate_role_receipts` | `blocked` | 24 | 3 | `complete_pocketmd_per_candidate_role_receipts` |
+| `operator_input_source_receipt` | `blocked` | 5 | 0 | `complete_pocketmd_operator_input_source_receipt` |
+| `local_min_survival` | `blocked` | 18 | 3 | `fill_metric_family_receipt_fields_for_local_min_survival` |
+| `contact_persistence` | `blocked` | 6 | 3 | `fill_metric_family_receipt_fields_for_contact_persistence` |
+| `h_bond_persistence` | `blocked` | 6 | 3 | `fill_metric_family_receipt_fields_for_h_bond_persistence` |
+| `clash_relief` | `blocked` | 12 | 3 | `fill_metric_family_receipt_fields_for_clash_relief` |
+| `uncertainty` | `blocked` | 12 | 3 | `fill_metric_family_receipt_fields_for_uncertainty` |
+
 ### Public Benchmark Vina/GNINA Actual Evidence Audit
 
 - `status`: `engine_input_manifest_required`
@@ -272,6 +287,8 @@
 - `ready_component_count`: `0`
 - `blocked_component_count`: `6`
 - `remaining_evidence`: `engine_input_manifest`, `engine_runtime`, `engine_run_slots`, `adapter_rows`, `per_engine_run_receipts`, `external_receipts`
+- `operator_blocker_family_count`: `7`
+- `operator_blocker_family_missing_item_count`: `182`
 
 | Component | Status | Pass | Current | Required | Blockers |
 |---|---|---|---|---|---|
@@ -281,6 +298,18 @@
 | `adapter_rows` | `blocked` | `False` | `{"adapter_case_count": 0, "adapter_preflight_contract_pass": false, "adapter_preflight_status": "missing", "adapter_rows_ready": false, "detected_row_artifact_count": 0, "row_candidate_status": "row_artifact_missing", "selected_row_count": 0}` | `{"adapter_case_count": ">=1", "adapter_preflight_contract_pass": true, "detected_row_artifact_count": ">=1"}` | `public_benchmark_vina_gnina_rows_not_detected`, `vina_gnina_rows_not_provided` |
 | `per_engine_run_receipts` | `blocked` | `False` | `{"adapter_template_ready": false, "expected_rows_detected": false, "missing_engine_run_receipt_value_count": 72, "role_receipt_blocked_count": 72, "role_receipt_plan_count": 96, "rows_template_preflight_status": "operator_rows_completion_required"}` | `{"adapter_template_ready": true, "expected_rows_detected": true, "role_receipt_blocked_count": 0}` | `public_benchmark_vina_gnina_engine_run_receipts_incomplete` |
 | `external_receipts` | `blocked` | `False` | `{"all_expected_artifact_roles_complete": false, "blocked_official_receipt_role_count": 1, "external_receipt_completion_status": "blocked_pending_vina_gnina_receipts", "missing_expected_artifact_roles": ["vina_gnina_comparison_adapter"]}` | `{"all_expected_artifact_roles_complete": true, "blocked_official_receipt_role_count": 0}` | `vina_gnina_rows_not_provided`, `public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter`, `public_benchmark_vina_gnina_engine_runtime_not_ready` |
+
+#### Operator Blocker Families
+
+| Family | Status | Missing Items | Blocked Cases | Operator Action |
+|---|---|---:|---:|---|
+| `manifest_required_values` | `blocked` | 36 | 12 | `complete_vina_gnina_input_manifest_required_values` |
+| `official_source_files` | `blocked` | 24 | 12 | `materialize_source_files_from_casf_archive_and_verify_checksum` |
+| `prepared_input_files` | `blocked` | 24 | 12 | `prepare_vina_gnina_inputs_and_record_checksums` |
+| `input_and_engine_receipt_refs` | `blocked` | 60 | 12 | `attach_vina_gnina_input_and_engine_receipt_refs` |
+| `engine_runtime` | `blocked` | 2 | 0 | `configure_vina_gnina_binary_or_container_runtime` |
+| `engine_run_slots` | `blocked` | 24 | 12 | `rerun_runtime_readiness_until_engine_run_slots_ready` |
+| `adapter_rows` | `blocked` | 12 | 12 | `attach_or_materialize_public_benchmark_vina_gnina_rows` |
 
 ### Public Benchmark Source Access Preflight
 
