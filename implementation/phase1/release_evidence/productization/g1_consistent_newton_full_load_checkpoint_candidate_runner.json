@@ -50,7 +50,7 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
-  "generated_at": "2026-07-04T17:12:47.648780+00:00",
+  "generated_at": "2026-07-04T18:04:33.860138+00:00",
   "hip_worker_contract": {
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -120,11 +120,11 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json": "sha256:bb1e06da4f7073f2b17405cb4f973e180bf49a9be386d280df4259236c008af2",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:92ca6c7d4e23dd89132e0fe834fbe16ca753e17ae860786ff5ad7bed97a27aad",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:9671fbbf84ffa7098c5eeae31967a72f9961138e0f12df04884bafaf77a1631d",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:c271afd6c0cb4650d8072b5f13e55602d79dfd19d0ba27abe113804a5cfd4ddd",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:461c82706d56e914cd27e1781e2bbfc9bbeb6b58e266952918766d2e00963858",
-    "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:c7bc800b9b456d06aab4c3d094eba55aeec1c4712cb51313ecf6b171c382e425",
+    "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:0e96511bed831fc9fc664343057b35f3a03d09dd93a32002925dca198a9ee70b",
     "implementation/phase1/release_evidence/productization/g1_true_newton_load_sweep_status.json": "sha256:c1a862c28a6f31163f15f8cbe03334e0060a6cbb81138b9e3819d53fad497aca",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:ee8e3e4eabfd81383a7043d340696a7828d98618b743ca209cda92b884d0424e",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:ef82ce63b77e6b18397ee3635dabef44ad6bd1db9374a832c3cff19604cda1b4",
     "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:d354d0a7e5a4cd52af0f06092f3c9a26b556db9172dab7a18c6492dc85c3d5d7"
   },
   "next_actions": [
@@ -244,7 +244,7 @@
     "runner_id": "build_consistent_newton_full_load_checkpoint_candidate_runner"
   },
   "schema_version": "g1-consistent-newton-full-load-checkpoint-candidate-runner.v1",
-  "source_commit_sha": "7894aa2439253fd2729e5659431955a12cb9104e",
+  "source_commit_sha": "5305aeacb04ef30afd2728e92ff96020039187d0",
   "status": "ready_for_runner_implementation",
   "summary": {
     "assembly_contract_cpu_seed_newton_gate_passed": true,

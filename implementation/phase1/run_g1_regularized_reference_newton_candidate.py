@@ -68,6 +68,35 @@ def _finite(x: np.ndarray) -> bool:
     return bool(np.all(np.isfinite(np.asarray(x, dtype=np.float64))))
 
 
+def _line_search_trial_summary(ls: dict[str, Any]) -> dict[str, Any]:
+    alpha_rows = [
+        row for row in ls.get("alpha_rows", []) if isinstance(row, dict)
+    ]
+    finite_rows = [row for row in alpha_rows if row.get("finite") is True]
+    best_trial = (
+        min(
+            finite_rows,
+            key=lambda row: float(row.get("residual_inf_n", float("inf"))),
+        )
+        if finite_rows
+        else None
+    )
+    return {
+        "status": ls.get("status"),
+        "reason_code": ls.get("reason_code"),
+        "accepted_alpha": ls.get("accepted_alpha"),
+        "residual_before_n": ls.get("residual_before_n"),
+        "residual_after_n": ls.get("residual_after_n"),
+        "residual_reduction_ratio": ls.get("residual_reduction_ratio"),
+        "alpha_row_count": len(alpha_rows),
+        "all_trials_finite": (
+            len(alpha_rows) > 0 and len(alpha_rows) == len(finite_rows)
+        ),
+        "best_trial": best_trial,
+        "alpha_rows": alpha_rows,
+    }
+
+
 def run_multistep_newton(
     residual_fn: ResidualFn,
     x0: np.ndarray,
@@ -78,6 +107,7 @@ def run_multistep_newton(
     min_reduction_per_step: float = 1.0e-6,
     alphas: tuple[float, ...] = DEFAULT_ALPHAS,
     return_final_state: bool = False,
+    allow_signed_direction_globalization: bool = False,
 ) -> dict[str, Any]:
     """Testable multi-step Newton loop on a physical residual with line-search.
 
@@ -114,14 +144,71 @@ def run_multistep_newton(
                             "accepted_alpha": None})
             stop_reason = (meta or {}).get("solve_stop_reason", STOP_SOLVE_FAILED)
             break
+        direction_inf = _inf_norm(p)
         jvp_action = physical_consistent_jvp(residual_fn, x, p)
+        jvp_action_inf = _inf_norm(jvp_action)
         ls = physical_residual_backtracking_line_search(
             residual_fn, x, p, jvp_action=jvp_action, alphas=alphas,
         )
         if ls.get("status") != "ready":
+            ls_summary = _line_search_trial_summary(ls)
+            reverse_ls = physical_residual_backtracking_line_search(
+                residual_fn,
+                x,
+                -p,
+                jvp_action=-jvp_action,
+                alphas=alphas,
+            )
+            reverse_summary = _line_search_trial_summary(reverse_ls)
+            if (
+                allow_signed_direction_globalization
+                and reverse_summary["status"] == "ready"
+            ):
+                alpha = float(reverse_summary["accepted_alpha"])
+                ra = float(reverse_summary["residual_after_n"])
+                reduction = (rb - ra) / max(rb, 1.0e-30)
+                row = {
+                    "iteration": it,
+                    "residual_before_n": rb,
+                    "direction_solve_status": "ready",
+                    "accepted_alpha": alpha,
+                    "accepted_direction_sign": -1,
+                    "residual_after_n": ra,
+                    "residual_reduction_ratio": reduction,
+                    "line_search_status": "ready_reverse_direction",
+                    "forward_line_search_status": ls_summary["status"],
+                    "forward_line_search_reason_code": ls_summary["reason_code"],
+                    "direction_inf_norm": direction_inf,
+                    "jvp_action_inf_n": jvp_action_inf,
+                    "line_search_best_trial": ls_summary["best_trial"],
+                    "reverse_direction_line_search_preview": reverse_summary,
+                    "signed_direction_globalization_used": True,
+                }
+                for key in ("tangent_rebuilt", "assembled_tangent_parity_pass"):
+                    if meta and key in meta:
+                        row[key] = meta[key]
+                history.append(row)
+                if ra > rb:
+                    monotonic = False
+                x = x - alpha * p
+                if reduction < min_reduction_per_step:
+                    stop_reason = STOP_STALLED
+                    break
+                continue
             history.append({"iteration": it, "residual_before_n": rb,
                             "direction_solve_status": "ready",
-                            "line_search_status": ls.get("status"), "accepted_alpha": None})
+                            "line_search_status": ls_summary["status"],
+                            "line_search_reason_code": ls_summary["reason_code"],
+                            "accepted_alpha": None,
+                            "direction_inf_norm": direction_inf,
+                            "jvp_action_inf_n": jvp_action_inf,
+                            "line_search_alpha_row_count": ls_summary["alpha_row_count"],
+                            "line_search_all_trials_finite": ls_summary[
+                                "all_trials_finite"
+                            ],
+                            "line_search_best_trial": ls_summary["best_trial"],
+                            "line_search_alpha_rows": ls_summary["alpha_rows"],
+                            "reverse_direction_line_search_preview": reverse_summary})
             stop_reason = STOP_NO_DESCENT
             break
         alpha = float(ls["accepted_alpha"])
@@ -129,8 +216,11 @@ def run_multistep_newton(
         reduction = (rb - ra) / max(rb, 1.0e-30)
         row = {"iteration": it, "residual_before_n": rb,
                "direction_solve_status": "ready", "accepted_alpha": alpha,
+               "accepted_direction_sign": 1,
                "residual_after_n": ra, "residual_reduction_ratio": reduction,
-               "line_search_status": "ready"}
+               "line_search_status": "ready",
+               "direction_inf_norm": direction_inf,
+               "jvp_action_inf_n": jvp_action_inf}
         for key in ("tangent_rebuilt", "assembled_tangent_parity_pass"):
             if meta and key in meta:
                 row[key] = meta[key]
@@ -151,6 +241,12 @@ def run_multistep_newton(
         "residual_gate_passed": bool(final is not None and final <= residual_gate_n),
         "stop_reason": stop_reason,
         "steps_taken": len(history),
+        "signed_direction_globalization_used": any(
+            row.get("signed_direction_globalization_used") is True for row in history
+        ),
+        "signed_direction_step_count": sum(
+            1 for row in history if row.get("accepted_direction_sign") == -1
+        ),
     }
     result = {"newton_history": history, "summary": summary}
     if return_final_state:
@@ -168,6 +264,7 @@ def run_g1_regularized_reference_newton_candidate(
     regularization_mu: float = 0.1,
     max_newton_steps: int = 8,
     residual_gate_n: float = 5.0e-4,
+    allow_signed_direction_globalization: bool = False,
     output_json: Path | None = DEFAULT_OUTPUT_JSON,
 ) -> dict[str, Any]:
     mgt_model = Path(mgt_model)
@@ -182,6 +279,10 @@ def run_g1_regularized_reference_newton_candidate(
             "frame_service_tangent_source": frame_service_tangent_source,
             "regularization": {
                 "mode": regularization_mode, "mu": regularization_mu, "selected_from_f2f": True,
+            },
+            "signed_direction_globalization": {
+                "enabled": bool(allow_signed_direction_globalization),
+                "claim_boundary": "non_promoting_diagnostic_globalization_only",
             },
             "production_lambda": PRODUCTION_LAMBDA,
             "claim_boundary": "non_promoting_regularized_reference_newton_candidate_only",
@@ -223,6 +324,9 @@ def run_g1_regularized_reference_newton_candidate(
                 result = run_multistep_newton(
                     residual_fn, x0, direction_fn,
                     max_newton_steps=max_newton_steps, residual_gate_n=residual_gate_n,
+                    allow_signed_direction_globalization=(
+                        allow_signed_direction_globalization
+                    ),
                 )
                 summary = result["summary"]
                 status = "ready" if summary["stop_reason"] in {STOP_GATE, STOP_MAX_STEPS, STOP_STALLED} else "review"
@@ -269,6 +373,7 @@ def main() -> int:
     parser.add_argument("--direction-solver", default="sparse_direct_spsolve")  # interface parity
     parser.add_argument("--max-newton-steps", type=int, default=8)
     parser.add_argument("--residual-gate-n", type=float, default=5.0e-4)
+    parser.add_argument("--allow-signed-direction-globalization", action="store_true")
     parser.add_argument("--out", "--output-json", dest="output_json", type=Path, default=DEFAULT_OUTPUT_JSON)
     args = parser.parse_args()
     payload = run_g1_regularized_reference_newton_candidate(
@@ -276,6 +381,7 @@ def main() -> int:
         frame_service_tangent_source=args.frame_service_tangent_source,
         regularization_mode=args.regularization_mode, regularization_mu=args.regularization_mu,
         max_newton_steps=args.max_newton_steps, residual_gate_n=args.residual_gate_n,
+        allow_signed_direction_globalization=args.allow_signed_direction_globalization,
         output_json=args.output_json,
     )
     s = payload.get("summary", {})

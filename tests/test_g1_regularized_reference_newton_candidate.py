@@ -139,6 +139,49 @@ def test_line_search_no_descent():
     out = drv.run_multistep_newton(residual_fn, np.zeros(n), ascent_dir,
                                    max_newton_steps=5, residual_gate_n=1e-12)
     assert out["summary"]["stop_reason"] == drv.STOP_NO_DESCENT
+    assert out["summary"]["signed_direction_globalization_used"] is False
+    assert out["summary"]["signed_direction_step_count"] == 0
+    assert out["newton_history"][0]["accepted_alpha"] is None
+    assert out["newton_history"][0]["reverse_direction_line_search_preview"]["status"] == "ready"
+
+
+def test_signed_direction_globalization_accepts_reverse_descent_only_when_enabled():
+    drv = _load("run_g1_regularized_reference_newton_candidate")
+    n = 6
+    a = _spd(n)
+    f = np.arange(1.0, n + 1.0)
+
+    def residual_fn(x):
+        return a @ np.asarray(x, dtype=np.float64) - f
+
+    def ascent_dir(x, r):
+        return np.linalg.solve(a, r), {"reason_code": "ok"}
+
+    default = drv.run_multistep_newton(
+        residual_fn,
+        np.zeros(n),
+        ascent_dir,
+        max_newton_steps=5,
+        residual_gate_n=1e-12,
+    )
+    enabled = drv.run_multistep_newton(
+        residual_fn,
+        np.zeros(n),
+        ascent_dir,
+        max_newton_steps=5,
+        residual_gate_n=1e-12,
+        allow_signed_direction_globalization=True,
+    )
+
+    assert default["summary"]["stop_reason"] == drv.STOP_NO_DESCENT
+    assert enabled["summary"]["residual_gate_passed"] is True
+    assert enabled["summary"]["signed_direction_globalization_used"] is True
+    assert enabled["summary"]["signed_direction_step_count"] == 1
+    first = enabled["newton_history"][0]
+    assert first["accepted_direction_sign"] == -1
+    assert first["line_search_status"] == "ready_reverse_direction"
+    assert first["forward_line_search_status"] == "no_descent_found"
+    assert first["reverse_direction_line_search_preview"]["status"] == "ready"
 
 
 # ---------------------------------------------------------------------------

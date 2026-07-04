@@ -78,6 +78,7 @@ def build_g1_true_newton_full_load_checkpoint_candidate_status(
     residual_gate_n: float = DEFAULT_RESIDUAL_GATE_N,
     regularization_mode: str = DEFAULT_REGULARIZATION_MODE,
     regularization_mu: float = DEFAULT_REGULARIZATION_MU,
+    allow_signed_direction_globalization: bool = False,
 ) -> dict[str, Any]:
     resolved_checkpoint = _resolve(repo_root, checkpoint_npz)
     candidate = run_g1_true_newton_reference_candidate(
@@ -86,6 +87,7 @@ def build_g1_true_newton_full_load_checkpoint_candidate_status(
         residual_gate_n=float(residual_gate_n),
         regularization_mode=str(regularization_mode),
         regularization_mu=float(regularization_mu),
+        allow_signed_direction_globalization=bool(allow_signed_direction_globalization),
         initial_checkpoint_npz=(
             _resolve(repo_root, initial_checkpoint_npz)
             if initial_checkpoint_npz is not None
@@ -184,6 +186,22 @@ def build_g1_true_newton_full_load_checkpoint_candidate_status(
             ),
             "residual_gate_passed": residual_gate_passed,
             "stop_reason": true_candidate.get("stop_reason"),
+            "signed_direction_globalization_used": true_candidate.get(
+                "signed_direction_globalization_used"
+            ),
+            "signed_direction_step_count": true_candidate.get(
+                "signed_direction_step_count"
+            ),
+        },
+        "signed_direction_globalization": {
+            "enabled": bool(allow_signed_direction_globalization),
+            "used": bool(
+                true_candidate.get("signed_direction_globalization_used") is True
+            ),
+            "signed_direction_step_count": true_candidate.get(
+                "signed_direction_step_count"
+            ),
+            "claim_boundary": "non_promoting_diagnostic_globalization_only",
         },
         "checkpoint_candidate": checkpoint,
         "checkpoint_written": checkpoint_written,
@@ -241,6 +259,7 @@ def write_g1_true_newton_full_load_checkpoint_candidate_status(
     residual_gate_n: float = DEFAULT_RESIDUAL_GATE_N,
     regularization_mode: str = DEFAULT_REGULARIZATION_MODE,
     regularization_mu: float = DEFAULT_REGULARIZATION_MU,
+    allow_signed_direction_globalization: bool = False,
 ) -> dict[str, Any]:
     payload = build_g1_true_newton_full_load_checkpoint_candidate_status(
         repo_root=repo_root,
@@ -251,6 +270,7 @@ def write_g1_true_newton_full_load_checkpoint_candidate_status(
         residual_gate_n=residual_gate_n,
         regularization_mode=regularization_mode,
         regularization_mu=regularization_mu,
+        allow_signed_direction_globalization=allow_signed_direction_globalization,
     )
     resolved_out = _resolve(repo_root, out)
     resolved_out_md = _resolve(repo_root, out_md)
@@ -273,6 +293,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--residual-gate-n", type=float, default=DEFAULT_RESIDUAL_GATE_N)
     parser.add_argument("--regularization-mode", default=DEFAULT_REGULARIZATION_MODE)
     parser.add_argument("--regularization-mu", type=float, default=DEFAULT_REGULARIZATION_MU)
+    parser.add_argument("--allow-signed-direction-globalization", action="store_true")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     return parser
@@ -291,6 +312,7 @@ def main(argv: list[str] | None = None) -> int:
         residual_gate_n=args.residual_gate_n,
         regularization_mode=args.regularization_mode,
         regularization_mu=args.regularization_mu,
+        allow_signed_direction_globalization=args.allow_signed_direction_globalization,
     )
     if args.json:
         print(_json_text(payload), end="")

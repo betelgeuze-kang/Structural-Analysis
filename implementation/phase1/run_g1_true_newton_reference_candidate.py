@@ -280,6 +280,7 @@ def run_g1_true_newton_reference_candidate(
     regularization_mu: float = 0.1,
     max_newton_steps: int = 12,
     residual_gate_n: float = 5.0e-4,
+    allow_signed_direction_globalization: bool = False,
     initial_checkpoint_npz: Path | None = DEFAULT_INITIAL_CHECKPOINT_NPZ,
     output_json: Path | None = DEFAULT_OUTPUT_JSON,
     output_final_checkpoint_npz: Path | None = DEFAULT_FINAL_CHECKPOINT_NPZ,
@@ -301,6 +302,10 @@ def run_g1_true_newton_reference_candidate(
                 "mode": "real_per_element_state_updated",
                 "state_updated": True,
                 "claim_boundary": "not_material_newton_breadth",
+            },
+            "signed_direction_globalization": {
+                "enabled": bool(allow_signed_direction_globalization),
+                "claim_boundary": "non_promoting_diagnostic_globalization_only",
             },
             "production_lambda": PRODUCTION_LAMBDA,
             "claim_boundary": "non_promoting_true_newton_reference_candidate_only",
@@ -342,12 +347,19 @@ def run_g1_true_newton_reference_candidate(
             # modified-Newton baseline (reference tangent reused)
             mod_dir = _make_modified_direction_fn(k_free, regularization_mode, regularization_mu)
             mod = run_multistep_newton(residual_fn, x_start, mod_dir,
-                                       max_newton_steps=max_newton_steps, residual_gate_n=residual_gate_n)
+                                       max_newton_steps=max_newton_steps,
+                                       residual_gate_n=residual_gate_n,
+                                       allow_signed_direction_globalization=(
+                                           allow_signed_direction_globalization
+                                       ))
             # true-Newton candidate (per-step re-linearization)
             true_dir = _make_true_direction_fn(residual_fn, tangent_rebuild_fn, regularization_mode, regularization_mu)
             true = run_multistep_newton(residual_fn, x_start, true_dir,
                                         max_newton_steps=max_newton_steps, residual_gate_n=residual_gate_n,
-                                        return_final_state=output_final_checkpoint_npz is not None)
+                                        return_final_state=output_final_checkpoint_npz is not None,
+                                        allow_signed_direction_globalization=(
+                                            allow_signed_direction_globalization
+                                        ))
 
             ts = true["summary"]
             status = "ready" if ts["stop_reason"] in {STOP_GATE, STOP_MAX_STEPS, STOP_STALLED} else "review"
@@ -386,6 +398,12 @@ def run_g1_true_newton_reference_candidate(
                     "total_reduction_ratio": mod["summary"]["total_reduction_ratio"],
                     "residual_gate_passed": mod["summary"]["residual_gate_passed"],
                     "stop_reason": mod["summary"]["stop_reason"],
+                    "signed_direction_globalization_used": mod["summary"].get(
+                        "signed_direction_globalization_used"
+                    ),
+                    "signed_direction_step_count": mod["summary"].get(
+                        "signed_direction_step_count"
+                    ),
                 },
                 "true_newton_candidate": {
                     "steps": ts["steps_taken"],
@@ -400,6 +418,12 @@ def run_g1_true_newton_reference_candidate(
                     "residual_gate_n": residual_gate_n,
                     "residual_gate_passed": ts["residual_gate_passed"],
                     "stop_reason": ts["stop_reason"],
+                    "signed_direction_globalization_used": ts.get(
+                        "signed_direction_globalization_used"
+                    ),
+                    "signed_direction_step_count": ts.get(
+                        "signed_direction_step_count"
+                    ),
                 },
                 "true_newton_faster_than_modified": bool(
                     ts["final_residual_n"] is not None
@@ -436,6 +460,7 @@ def main() -> int:
     parser.add_argument("--regularization-mu", type=float, default=0.1)
     parser.add_argument("--max-newton-steps", type=int, default=12)
     parser.add_argument("--residual-gate-n", type=float, default=5.0e-4)
+    parser.add_argument("--allow-signed-direction-globalization", action="store_true")
     parser.add_argument("--initial-checkpoint-npz", type=Path, default=DEFAULT_INITIAL_CHECKPOINT_NPZ)
     parser.add_argument("--out", "--output-json", dest="output_json", type=Path, default=DEFAULT_OUTPUT_JSON)
     parser.add_argument("--output-final-checkpoint-npz", type=Path, default=DEFAULT_FINAL_CHECKPOINT_NPZ)
@@ -445,6 +470,7 @@ def main() -> int:
         frame_service_tangent_source=args.frame_service_tangent_source,
         regularization_mode=args.regularization_mode, regularization_mu=args.regularization_mu,
         max_newton_steps=args.max_newton_steps, residual_gate_n=args.residual_gate_n,
+        allow_signed_direction_globalization=args.allow_signed_direction_globalization,
         initial_checkpoint_npz=args.initial_checkpoint_npz,
         output_json=args.output_json,
         output_final_checkpoint_npz=args.output_final_checkpoint_npz,

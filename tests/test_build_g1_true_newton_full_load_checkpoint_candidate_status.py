@@ -26,6 +26,7 @@ def _fake_candidate(**kwargs: object) -> dict:
     checkpoint = Path(kwargs["output_final_checkpoint_npz"])
     checkpoint.parent.mkdir(parents=True, exist_ok=True)
     checkpoint.write_bytes(b"fixture")
+    signed_enabled = bool(kwargs.get("allow_signed_direction_globalization") is True)
     return {
         "schema_version": "g1-true-newton-reference-candidate.v1",
         "status": "ready",
@@ -49,6 +50,8 @@ def _fake_candidate(**kwargs: object) -> dict:
             "monotonic_residual_decrease": True,
             "residual_gate_passed": False,
             "stop_reason": "max_steps",
+            "signed_direction_globalization_used": signed_enabled,
+            "signed_direction_step_count": 1 if signed_enabled else 0,
         },
         "output_final_checkpoint": {
             "written": True,
@@ -84,6 +87,14 @@ def test_full_load_checkpoint_candidate_status_records_candidate_without_closure
     assert payload["checkpoint_schema_pass"] is True
     assert payload["checkpoint_load_scale_pass"] is True
     assert payload["true_newton_candidate"]["final_residual_n"] == 464.56223807569995
+    assert payload["true_newton_candidate"]["signed_direction_globalization_used"] is False
+    assert payload["true_newton_candidate"]["signed_direction_step_count"] == 0
+    assert payload["signed_direction_globalization"] == {
+        "enabled": False,
+        "used": False,
+        "signed_direction_step_count": 0,
+        "claim_boundary": "non_promoting_diagnostic_globalization_only",
+    }
     assert payload["full_load_true_newton_residual_descent_observed"] is True
     assert payload["full_load_true_newton_residual_gate_passed"] is False
     assert "full_load_true_newton_checkpoint_residual_gate_not_passed" in payload[
@@ -160,4 +171,33 @@ def test_full_load_checkpoint_candidate_status_forwards_regularization(
     assert payload["regularization"] == {
         "mode": "absolute_diagonal_shift",
         "mu": 0.03,
+    }
+
+
+def test_full_load_checkpoint_candidate_status_forwards_signed_globalization(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    calls: list[dict[str, object]] = []
+
+    def fake_candidate(**kwargs: object) -> dict:
+        calls.append(dict(kwargs))
+        return _fake_candidate(**kwargs)
+
+    monkeypatch.setattr(module, "run_g1_true_newton_reference_candidate", fake_candidate)
+
+    payload = module.build_g1_true_newton_full_load_checkpoint_candidate_status(
+        repo_root=REPO_ROOT,
+        checkpoint_npz=tmp_path / "candidate.npz",
+        allow_signed_direction_globalization=True,
+    )
+
+    assert calls[-1]["allow_signed_direction_globalization"] is True
+    assert payload["true_newton_candidate"]["signed_direction_globalization_used"] is True
+    assert payload["true_newton_candidate"]["signed_direction_step_count"] == 1
+    assert payload["signed_direction_globalization"] == {
+        "enabled": True,
+        "used": True,
+        "signed_direction_step_count": 1,
+        "claim_boundary": "non_promoting_diagnostic_globalization_only",
     }

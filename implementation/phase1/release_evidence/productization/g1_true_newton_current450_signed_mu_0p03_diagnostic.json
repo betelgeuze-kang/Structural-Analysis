@@ -7,15 +7,15 @@
   ],
   "checkpoint_candidate": {
     "accepted_history_count": 0,
-    "accepted_iteration_count": 455,
+    "accepted_iteration_count": 459,
     "claim_boundary": "This is a loadable true-Newton full-load checkpoint candidate only. It does not close G1 unless direct residual, increment, full-mesh, material breadth, and production ROCm/HIP gates also pass.",
-    "direct_relative_residual_inf": 0.04953219345368595,
-    "direct_residual_inf_n": 655.1039650392886,
+    "direct_relative_residual_inf": 0.04953025802321033,
+    "direct_residual_inf_n": 655.0783673806704,
     "dof_count": 78282,
     "free_dof_count": 58998,
     "load_scale": 1.0,
-    "max_translation_m": 0.00030177872051144364,
-    "path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+    "max_translation_m": 0.0003017760538795748,
+    "path": "implementation/phase1/release_evidence/productization/g1_true_newton_current450_signed_mu_0p03_diagnostic.npz",
     "promotes_g1_closure": false,
     "residual_gate_n": 0.0005,
     "residual_gate_passed": false,
@@ -31,7 +31,7 @@
   "evidence_closure_pass": false,
   "full_load_true_newton_residual_descent_observed": true,
   "full_load_true_newton_residual_gate_passed": false,
-  "generated_at": "2026-07-04T18:00:27.389618+00:00",
+  "generated_at": "2026-07-04T17:59:24.969421+00:00",
   "initial_checkpoint_npz": "implementation/phase1/release_evidence/productization/g1_full_load_current450_target16_support2_rowcorr_diagnostic.npz",
   "initial_state": {
     "checkpoint": {
@@ -55,7 +55,7 @@
     "implementation/phase1/run_g1_true_newton_reference_candidate.py": "sha256:c829d85093dfb02c039491b39148b83a1ba3fbe81a09d746fb3609185df7742b",
     "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py": "sha256:389eecb6fec3e4e9778365e3987404ff72f3432388a8382f48014b12fff946fd"
   },
-  "max_newton_steps": 24,
+  "max_newton_steps": 16,
   "next_actions": [
     "run_full_load_direct_residual_probe_against_true_newton_checkpoint_candidate",
     "run_hip_required_residual_jvp_probe_against_true_newton_checkpoint_candidate",
@@ -73,24 +73,24 @@
   "schema_version": "g1-true-newton-full-load-checkpoint-candidate-status.v1",
   "signed_direction_globalization": {
     "claim_boundary": "non_promoting_diagnostic_globalization_only",
-    "enabled": false,
-    "signed_direction_step_count": 0,
-    "used": false
+    "enabled": true,
+    "signed_direction_step_count": 1,
+    "used": true
   },
   "source_commit_sha": "5305aeacb04ef30afd2728e92ff96020039187d0",
   "status": "candidate_created",
-  "summary_line": "G1 true-Newton full-load checkpoint candidate: CANDIDATE_CREATED | checkpoint_written=True | final_residual=655.1039650392886 | residual_gate=False",
+  "summary_line": "G1 true-Newton full-load checkpoint candidate: CANDIDATE_CREATED | checkpoint_written=True | final_residual=655.0783673806704 | residual_gate=False",
   "true_newton_candidate": {
-    "final_residual_n": 655.1039650392886,
+    "final_residual_n": 655.0783673806704,
     "initial_residual_n": 656.9728665992692,
     "monotonic_residual_decrease": true,
     "reason_code": "line_search_no_descent",
     "residual_gate_passed": false,
-    "signed_direction_globalization_used": false,
-    "signed_direction_step_count": 0,
+    "signed_direction_globalization_used": true,
+    "signed_direction_step_count": 1,
     "status": "review",
-    "steps": 4,
+    "steps": 8,
     "stop_reason": "line_search_no_descent",
-    "total_reduction_ratio": 0.0028447165096097725
+    "total_reduction_ratio": 0.00288367954738431
   }
 }
