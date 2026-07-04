@@ -103,6 +103,12 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert packet["source_acquisition_plan"]["vina_gnina_execution_plan"][
         "required_engine_run_count"
     ] == 24
+    assert packet["source_acquisition_plan"][
+        "vina_gnina_rows_template_preflight_summary"
+    ]["role_receipt_plan_count"] == 96
+    assert packet["source_acquisition_plan"][
+        "vina_gnina_rows_template_preflight_summary"
+    ]["role_receipt_blocked_count"] == 72
     runtime = packet["source_acquisition_plan"]["vina_gnina_runtime_readiness"]
     assert runtime["status"] == "execution_plan_blocked"
     assert runtime["adapter_row_preflight_status"] == "row_artifact_missing"
@@ -114,6 +120,9 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert packet["summary"][
         "vina_gnina_runtime_adapter_row_preflight_status"
     ] == "row_artifact_missing"
+    assert packet["summary"][
+        "vina_gnina_rows_template_role_receipt_blocked_count"
+    ] == 72
     receipt_plan = packet["source_acquisition_plan"][
         "official_source_receipt_plan"
     ]
@@ -567,6 +576,13 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert runtime_action["commands"]["build_rows_template_preflight"].startswith(
         "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py"
     )
+    assert runtime_action["rows_template_role_receipt_plan_count"] == 96
+    assert runtime_action["rows_template_role_receipt_blocked_count"] == 72
+    assert runtime_action["first_blocked_role_receipt"] == {
+        "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+        "role_id": "engine_run_artifact_receipt",
+        "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+    }
     row_matrix = {
         row["row_input_id"]: row for row in packet["phase2_row_closure_matrix"]
     }
@@ -619,6 +635,9 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert row_matrix["vina_gnina_rows"]["runtime_action_packet"][
         "rows_template_preflight_artifact"
     ].endswith("public_benchmark_vina_gnina_rows_template_preflight.json")
+    assert row_matrix["vina_gnina_rows"]["runtime_action_packet"][
+        "rows_template_role_receipt_blocked_count"
+    ] == 72
 
     gap_register = {
         row["slot_id"]: row for row in packet["operator_evidence_gap_register"]
@@ -969,6 +988,16 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
     assert "# Public Benchmark Operator Intake Packet" in markdown
     assert (
         "- `vina_gnina_adapter_row_preflight_status`: `row_artifact_missing`"
+        in markdown
+    )
+    assert (
+        "- `vina_gnina_rows_template_role_receipt_blocked_count`: `72`"
+        in markdown
+    )
+    assert (
+        "- `vina_gnina_first_blocked_role_receipt`: "
+        "`engine_run_artifact_receipt` / "
+        "`casf2016_4llx_vina_casf2016_4llx_vina_run`"
         in markdown
     )
     assert "## Phase 2 Row Closure Matrix" in markdown

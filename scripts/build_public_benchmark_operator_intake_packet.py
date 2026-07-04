@@ -266,6 +266,9 @@ def _source_acquisition_plan_summary(
     vina_gnina_runtime_readiness = _as_dict(
         source_acquisition_plan.get("vina_gnina_runtime_readiness")
     )
+    vina_gnina_rows_template_preflight_summary = _as_dict(
+        source_acquisition_plan.get("vina_gnina_rows_template_preflight_summary")
+    )
     row_input_receipt_roles = [
         row
         for row in _as_list(
@@ -319,6 +322,9 @@ def _source_acquisition_plan_summary(
             source_acquisition_plan.get("vina_gnina_execution_plan")
         ),
         "vina_gnina_runtime_readiness": vina_gnina_runtime_readiness,
+        "vina_gnina_rows_template_preflight_summary": (
+            vina_gnina_rows_template_preflight_summary
+        ),
         "official_source_receipt_plan": {
             "plan_id": str(official_source_receipt_plan.get("plan_id") or ""),
             "status": str(official_source_receipt_plan.get("status") or ""),
@@ -361,6 +367,12 @@ def _vina_gnina_runtime_action_packet(
     runtime = _as_dict(source_acquisition_summary.get("vina_gnina_runtime_readiness"))
     unblock = _as_dict(runtime.get("operator_unblock_packet"))
     commands = _as_dict(unblock.get("commands"))
+    rows_template_preflight = _as_dict(
+        source_acquisition_summary.get("vina_gnina_rows_template_preflight_summary")
+    )
+    first_blocked_role = _as_dict(
+        rows_template_preflight.get("first_blocked_role_receipt")
+    )
     if not runtime and not unblock:
         return {}
     return {
@@ -407,6 +419,20 @@ def _vina_gnina_runtime_action_packet(
         "rows_template_preflight_artifact": str(
             unblock.get("rows_template_preflight_artifact") or ""
         ),
+        "rows_template_preflight_status": str(
+            rows_template_preflight.get("status") or ""
+        ),
+        "rows_template_role_receipt_plan_count": int(
+            rows_template_preflight.get("role_receipt_plan_count") or 0
+        ),
+        "rows_template_role_receipt_blocked_count": int(
+            rows_template_preflight.get("role_receipt_blocked_count") or 0
+        ),
+        "first_blocked_role_receipt": {
+            "role_id": str(first_blocked_role.get("role_id") or ""),
+            "slot_id": str(first_blocked_role.get("slot_id") or ""),
+            "operator_action": str(first_blocked_role.get("operator_action") or ""),
+        },
         "operator_sequence": [
             str(row) for row in _as_list(unblock.get("operator_sequence")) if str(row)
         ],
@@ -2107,6 +2133,14 @@ def build_public_benchmark_operator_intake_packet(
                 ).get("adapter_row_preflight_status")
                 or ""
             ),
+            "vina_gnina_rows_template_role_receipt_blocked_count": int(
+                _as_dict(
+                    source_acquisition_summary.get(
+                        "vina_gnina_rows_template_preflight_summary"
+                    )
+                ).get("role_receipt_blocked_count")
+                or 0
+            ),
             "public_benchmark_ready": False,
         },
         "summary_line": (
@@ -2134,6 +2168,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `source_acquisition_plan`: `{payload['source_acquisition_plan']['artifact']}`",
         f"- `source_acquisition_plan_status`: `{payload['source_acquisition_plan']['status']}`",
         f"- `vina_gnina_adapter_row_preflight_status`: `{payload['summary']['vina_gnina_runtime_adapter_row_preflight_status']}`",
+        "- `vina_gnina_rows_template_role_receipt_blocked_count`: "
+        f"`{payload['summary']['vina_gnina_rows_template_role_receipt_blocked_count']}`",
         f"- `claim_boundary`: {payload['claim_boundary']}",
         "",
         "| Slot | Status | Intake Artifact | Validation Command |",
@@ -2169,6 +2205,17 @@ def _markdown(payload: dict[str, Any]) -> str:
         criteria = ", ".join(
             f"`{criterion}`" for criterion in row["closes_phase2_criteria"]
         )
+        runtime_action = _as_dict(row.get("runtime_action_packet"))
+        if runtime_action and row["row_input_id"] == "vina_gnina_rows":
+            first_role = _as_dict(runtime_action.get("first_blocked_role_receipt"))
+            lines.append(
+                "- `vina_gnina_rows_template_role_receipt_blocked_count`: "
+                f"`{runtime_action.get('rows_template_role_receipt_blocked_count')}`"
+            )
+            lines.append(
+                "- `vina_gnina_first_blocked_role_receipt`: "
+                f"`{first_role.get('role_id', '')}` / `{first_role.get('slot_id', '')}`"
+            )
         row_template_artifact = str(
             _as_dict(payload.get("row_template_artifacts")).get(row["row_input_id"])
             or ""
