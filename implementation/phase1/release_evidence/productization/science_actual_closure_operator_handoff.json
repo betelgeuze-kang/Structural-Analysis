@@ -7022,9 +7022,17 @@
       "first_operator_sequence_step": "review_public_benchmark_vina_gnina_input_manifest_template_preflight",
       "first_runtime_action": {
         "action_source": "first_operator_blocker_family",
+        "blocked_case_count": 12,
         "command_key": "build_input_manifest_template_preflight",
         "family_id": "manifest_required_values",
+        "first_missing_item": {
+          "case_id": "casf2016_4llx",
+          "complex_id": "4llx",
+          "field": "prepared_receptor_checksum",
+          "operator_action": "complete_vina_gnina_input_manifest_row_for_casf2016_4llx"
+        },
         "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+        "missing_item_count": 36,
         "next_action": "complete_vina_gnina_input_manifest_required_values"
       },
       "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
@@ -9278,9 +9286,35 @@
       "first_operator_sequence_step": "preflight_pocketmd_lite_topk_rows_template",
       "first_refinement_receipt_action": {
         "action_source": "first_incomplete_receipt",
+        "case_id": "pocketmd_lite_case_001",
         "command_key": "rerun_rows_materialization",
         "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
-        "next_action": "fill_completion_missing_required_fields_and_set_status_complete"
+        "metric_family_id": "",
+        "missing_receipt_field_count": 18,
+        "missing_receipt_fields": [
+          "upstream_top_k_provenance_ref",
+          "upstream_top_k_source_checksum",
+          "pre_refinement_energy_proxy",
+          "post_refinement_energy_proxy",
+          "local_min_survived",
+          "contact_persistence_rate",
+          "h_bond_persistence_rate",
+          "clash_count_before",
+          "clash_count_after",
+          "uncertainty_low",
+          "uncertainty_high",
+          "provenance_ref",
+          "source_checksum",
+          "operator_input_source.source_id",
+          "operator_input_source.source_url",
+          "operator_input_source.source_license",
+          "operator_input_source.source_artifact",
+          "operator_input_source.source_artifact_sha256"
+        ],
+        "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
+        "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
+        "run_key": "pocketmd_lite_case_001::rank_1",
+        "top_k_rank": 1
       },
       "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
       "next_action": "fill_completion_missing_required_fields_and_set_status_complete",
@@ -15289,15 +15323,15 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T12:23:37.419200+00:00",
+  "generated_at": "2026-07-04T12:28:28.382894+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:dc7421cdd9d0bc4a91d6524bc52b7b4eab39c720cd6a2df15adf67f21eda978a",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:31132ede1a9d42bd1eab0194ca04e24e9a4c80ac2ace134baef6e7fa48a636ef",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:a6fa0328fbbdc35c1ff47f966c085b5ae0fc5e6dfa2f1aba17e647681cdc246a",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:dc39006a0ed93c7141d4421294cb9d47e1af8a3c6fc2fe3531aeae754de53c89",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:09354cd520764e9fb23e9a23e1eed17a38e73328687154c5d35c5411731af093",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:36113742bcdbca3379501deb49c14f0d86f2ff9d48e59f2e8cef20795e2856bf",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:499b507708268b7bf1be76574dd0663604d46945297fdea44067f98a85d2de23",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:b5c3db45605c4a2d82d677b4d9f5cb069316b7c93652e0837a0ae437b4bd2154"
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:781a71aa4ca54ed58be70e95bf15b75f4c7771ffdbc2b0899ce913b1a3de5afb",
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:c5f0767add2847b4a14bd0e6f601b3beca92d14b1de6708558bcb1363c4f64c0"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -34284,7 +34318,7 @@
   },
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "298947647ba434916cedeb774e35079459ccce38",
+  "source_commit_sha": "b623e72245d6617468baa742d5d92e927819d619",
   "status": "operator_rows_required",
   "summary": {
     "actual_closure_blocked_component_count": 2,

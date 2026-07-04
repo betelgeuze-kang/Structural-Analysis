@@ -257,7 +257,13 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "materialization_command": first_runtime_family[
             "materialization_command"
         ],
+        "missing_item_count": first_runtime_family["missing_item_count"],
+        "blocked_case_count": first_runtime_family["blocked_case_count"],
+        "first_missing_item": first_runtime_family["first_missing_item"],
     }
+    assert unblock_plan["vina_gnina_rows"]["first_runtime_action"][
+        "first_missing_item"
+    ]["field"] == "prepared_receptor_checksum"
     assert unblock_plan["vina_gnina_rows"]["next_action"] == (
         "complete_vina_gnina_input_manifest_required_values"
     )
@@ -374,6 +380,15 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "materialization_command": receipt_bundle_report["commands"][
             "rerun_rows_materialization"
         ],
+        "case_id": "pocketmd_lite_case_001",
+        "run_key": "pocketmd_lite_case_001::rank_1",
+        "top_k_rank": 1,
+        "receipt_ref": first_incomplete_receipt["receipt_ref"],
+        "metric_family_id": "",
+        "missing_receipt_fields": first_incomplete_receipt[
+            "completion_missing_required_fields"
+        ],
+        "missing_receipt_field_count": 18,
     }
     assert unblock_plan["pocketmd_rows"]["next_action"] == (
         "fill_completion_missing_required_fields_and_set_status_complete"

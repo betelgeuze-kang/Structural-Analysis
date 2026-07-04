@@ -351,6 +351,9 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert handoffs["vina_gnina_rows"]["first_unblock_action"][
         "action_source"
     ] == "first_operator_blocker_family"
+    assert handoffs["vina_gnina_rows"]["first_unblock_action"][
+        "first_missing_item"
+    ]["field"] == "prepared_receptor_checksum"
     assert handoffs["vina_gnina_rows"][
         "actual_evidence_audit_status"
     ] == "engine_input_manifest_required"
@@ -375,6 +378,12 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert handoffs["pocketmd_rows"]["first_unblock_action"][
         "action_source"
     ] == "first_incomplete_receipt"
+    assert handoffs["pocketmd_rows"]["first_unblock_action"][
+        "receipt_ref"
+    ].endswith("pocketmd_lite_case_001/rank_01_refinement_receipt.json")
+    assert "upstream_top_k_provenance_ref" in handoffs["pocketmd_rows"][
+        "first_unblock_action"
+    ]["missing_receipt_fields"]
     assert handoffs["pocketmd_rows"][
         "actual_evidence_audit_status"
     ] == "operator_topk_rows_required"

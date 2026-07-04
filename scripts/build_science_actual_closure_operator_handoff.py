@@ -1462,6 +1462,9 @@ def _first_runtime_blocker_action(
         "next_action": next_action,
         "command_key": command_key,
         "materialization_command": materialization_command,
+        "missing_item_count": _as_int(first_family.get("missing_item_count")),
+        "blocked_case_count": _as_int(first_family.get("blocked_case_count")),
+        "first_missing_item": _as_dict(first_family.get("first_missing_item")),
     }
 
 
@@ -1503,6 +1506,23 @@ def _first_refinement_receipt_action(
                 "next_action": next_action,
                 "command_key": command_key,
                 "materialization_command": materialization_command,
+                "case_id": str(row.get("case_id") or ""),
+                "run_key": str(row.get("run_key") or ""),
+                "top_k_rank": row.get("top_k_rank"),
+                "receipt_ref": str(row.get("receipt_ref") or ""),
+                "metric_family_id": str(row.get("metric_family_id") or ""),
+                "missing_receipt_fields": [
+                    str(item)
+                    for item in _as_list(
+                        row.get("missing_receipt_fields")
+                        or row.get("completion_missing_required_fields")
+                    )
+                    if str(item)
+                ],
+                "missing_receipt_field_count": _as_int(
+                    row.get("completion_missing_required_field_count")
+                    or row.get("missing_field_occurrence_count")
+                ),
             }
     return {}
 
