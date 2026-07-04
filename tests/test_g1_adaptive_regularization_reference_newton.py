@@ -10,6 +10,7 @@ from pathlib import Path
 import sys
 
 import numpy as np
+from scipy.sparse import csr_matrix
 
 
 PHASE1 = Path(__file__).resolve().parents[1] / "implementation" / "phase1"
@@ -96,6 +97,25 @@ def test_no_candidate_descent():
     assert out["summary"]["stop_reason"] == drv.STOP_NO_DESCENT
 
 
+def test_signed_direction_globalization_can_accept_reverse_direction():
+    drv = _load("run_g1_adaptive_regularization_reference_newton")
+    residual_fn, x0, a = _linear_closure()
+    inv = np.linalg.inv(a)
+    ascent = (0.1, lambda r: inv @ r)              # forward grows residual
+    out = drv.run_adaptive_greedy_newton(
+        residual_fn,
+        x0,
+        [ascent],
+        max_newton_steps=2,
+        residual_gate_n=1e-6,
+        allow_signed_direction_globalization=True,
+    )
+
+    assert out["summary"]["residual_gate_passed"] is True
+    assert out["history"][0]["line_search_status"] == "ready_reverse_direction"
+    assert out["history"][0]["accepted_direction_sign"] == -1
+
+
 # ---------------------------------------------------------------------------
 # 6 + 8 + 9. monotonic + gate pass (no G1) + selected_mu schedule recorded
 # ---------------------------------------------------------------------------
@@ -140,6 +160,131 @@ def test_report_non_promoting(tmp_path):
     assert payload["adaptive_strategy"]["mode"] == "greedy_per_step_mu_selection"
     assert payload["claim_boundary"] == "non_promoting_adaptive_regularization_reference_candidate_only"
     assert str(drv.DEFAULT_OUTPUT_JSON).endswith(".local.json")
+
+
+def test_runner_forwards_frame_tangent_and_initial_checkpoint(tmp_path, monkeypatch):
+    drv = _load("run_g1_adaptive_regularization_reference_newton")
+    n = 4
+    a = np.eye(n)
+    f = np.arange(1.0, n + 1.0)
+    calls: list[dict[str, object]] = []
+    loaded: list[Path] = []
+
+    def residual_fn(x):
+        return a @ np.asarray(x, dtype=np.float64) - f
+
+    def fake_closure(**kwargs):
+        calls.append(dict(kwargs))
+        return residual_fn, np.zeros(n), {
+            "tangent_free_csr": csr_matrix(a),
+            "free": np.arange(n, dtype=np.int64),
+            "dof_count": n,
+            "free_dof_count": n,
+            "element_count": 1,
+            "external_load_inf_n": float(np.max(np.abs(f))),
+            "u0": np.zeros(n, dtype=np.float64),
+            "frame_tangent_source": kwargs.get("frame_tangent_source"),
+            "shell_pressure_load_path_policy": kwargs.get(
+                "shell_pressure_load_path_policy"
+            ),
+        }
+
+    def fake_load_initial_checkpoint_state(**kwargs):
+        loaded.append(Path(kwargs["path"]))
+        return np.zeros(n), {"path": str(kwargs["path"]), "load_scale": kwargs["load_scale"]}
+
+    monkeypatch.setattr(drv, "build_mgt_physical_residual_closure", fake_closure)
+    monkeypatch.setattr(
+        drv,
+        "_load_initial_checkpoint_state",
+        fake_load_initial_checkpoint_state,
+    )
+    mgt = tmp_path / "fixture.mgt"
+    mgt.write_text("*NODE\n", encoding="utf-8")
+    checkpoint = tmp_path / "initial.npz"
+    checkpoint.write_bytes(b"fixture")
+    final_checkpoint = tmp_path / "adaptive.npz"
+
+    payload = drv.run_g1_adaptive_regularization_reference_newton(
+        mgt_model=mgt,
+        initial_checkpoint_npz=checkpoint,
+        frame_tangent_source="force_based_residual_tangent",
+        shell_pressure_load_path_policy="attached_components_only",
+        regularization_mode="scalar_shift",
+        mu_candidates=(0.0,),
+        baseline_mu=0.0,
+        max_newton_steps=2,
+        output_json=tmp_path / "o.json",
+        output_final_checkpoint_npz=final_checkpoint,
+    )
+
+    assert calls[-1]["frame_tangent_source"] == "force_based_residual_tangent"
+    assert calls[-1]["shell_pressure_load_path_policy"] == "attached_components_only"
+    assert loaded == [checkpoint]
+    assert payload["frame_tangent_source"] == "force_based_residual_tangent"
+    assert payload["shell_pressure_load_path_policy"] == "attached_components_only"
+    assert payload["initial_state"]["source"] == "checkpoint"
+    assert payload["summary"]["residual_gate_passed"] is True
+    assert payload["output_final_checkpoint"]["written"] is True
+    with np.load(final_checkpoint, allow_pickle=False) as archive:
+        assert str(np.asarray(archive["checkpoint_schema"]).item()) == drv.CHECKPOINT_SCHEMA
+        assert str(np.asarray(archive["frame_tangent_source"]).item()) == (
+            "force_based_residual_tangent"
+        )
+        assert str(np.asarray(archive["shell_pressure_load_path_policy"]).item()) == (
+            "attached_components_only"
+        )
+        assert bool(np.asarray(archive["adaptive_regularization_candidate_only"]).item()) is True
+        assert bool(np.asarray(archive["promotes_g1_closure"]).item()) is False
+
+
+def test_relinearized_runner_rebuilds_tangent_each_step(tmp_path, monkeypatch):
+    drv = _load("run_g1_adaptive_regularization_reference_newton")
+    n = 4
+    a = np.eye(n)
+    f = np.arange(1.0, n + 1.0)
+    rebuild_count = 0
+
+    def residual_fn(x):
+        return a @ np.asarray(x, dtype=np.float64) - f
+
+    def tangent_rebuild_fn(_x):
+        nonlocal rebuild_count
+        rebuild_count += 1
+        return csr_matrix(a)
+
+    def fake_closure(**_kwargs):
+        return residual_fn, np.zeros(n), {
+            "tangent_free_csr": csr_matrix(a),
+            "tangent_rebuild_fn": tangent_rebuild_fn,
+            "free": np.arange(n, dtype=np.int64),
+            "dof_count": n,
+            "free_dof_count": n,
+            "element_count": 1,
+            "external_load_inf_n": float(np.max(np.abs(f))),
+            "u0": np.zeros(n, dtype=np.float64),
+        }
+
+    monkeypatch.setattr(drv, "build_mgt_physical_residual_closure", fake_closure)
+    mgt = tmp_path / "fixture.mgt"
+    mgt.write_text("*NODE\n", encoding="utf-8")
+
+    payload = drv.run_g1_adaptive_regularization_reference_newton(
+        mgt_model=mgt,
+        tangent_update_mode=drv.TANGENT_UPDATE_PER_STEP_RELINEARIZED,
+        regularization_mode="scalar_shift",
+        mu_candidates=(0.0,),
+        baseline_mu=0.0,
+        max_newton_steps=2,
+        output_json=tmp_path / "o.json",
+    )
+
+    assert payload["adaptive_strategy"]["tangent_update_mode"] == (
+        drv.TANGENT_UPDATE_PER_STEP_RELINEARIZED
+    )
+    assert payload["summary"]["residual_gate_passed"] is True
+    assert payload["history"][0]["tangent_rebuilt"] is True
+    assert rebuild_count >= 2  # adaptive + baseline paths both rebuild.
 
 
 def test_prefactor_skips_singular_mu():

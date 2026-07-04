@@ -36,7 +36,10 @@ from run_g1_regularized_reference_newton_candidate import (
     STOP_GATE,
     STOP_MAX_STEPS,
     STOP_STALLED,
+    _direction_row_metadata,
+    regularized_direction_solve_contract,
     run_multistep_newton,
+    tangent_component_actions,
 )
 
 
@@ -225,8 +228,16 @@ def _write_true_newton_checkpoint(
     }
 
 
-def _make_modified_direction_fn(k_free: Any, mode: str, mu: float):
-    k_reg, _shift, _src = regularize_matrix(k_free, mode, mu)
+def _make_modified_direction_fn(
+    k_free: Any,
+    mode: str,
+    mu: float,
+    *,
+    row_metadata: dict[str, Any] | None = None,
+    component_residual_fn: Any | None = None,
+    tangent_component_stiffness_free: dict[str, Any] | None = None,
+):
+    k_reg, shift, scale_source = regularize_matrix(k_free, mode, mu)
     factor = splu(csc_matrix(k_reg))
 
     def direction_fn(x: np.ndarray, r: np.ndarray):
@@ -234,20 +245,53 @@ def _make_modified_direction_fn(k_free: Any, mode: str, mu: float):
             p = np.asarray(factor.solve(-np.asarray(r, dtype=np.float64)), dtype=np.float64)
         except Exception as exc:  # noqa: BLE001
             return None, {"reason_code": f"solve_error:{type(exc).__name__}"}
-        return p, {"reason_code": "ok", "tangent_rebuilt": False}
+        contract, action_meta = regularized_direction_solve_contract(
+            k_free,
+            k_reg,
+            p,
+            r,
+            regularization_mode=mode,
+            regularization_mu=mu,
+            effective_shift=shift,
+            scale_source=scale_source,
+        )
+        return p, {
+            "reason_code": "ok",
+            "tangent_rebuilt": False,
+            "direction_solve_contract": contract,
+            "_row_metadata": row_metadata,
+            "_component_residual_fn": component_residual_fn,
+            "_tangent_component_actions": tangent_component_actions(
+                tangent_component_stiffness_free,
+                p,
+            ),
+            **action_meta,
+        }
 
     return direction_fn
 
 
-def _make_true_direction_fn(residual_fn, tangent_rebuild_fn, mode: str, mu: float):
+def _make_true_direction_fn(
+    residual_fn,
+    tangent_rebuild_fn,
+    mode: str,
+    mu: float,
+    *,
+    row_metadata: dict[str, Any] | None = None,
+    component_residual_fn: Any | None = None,
+):
     rng = np.random.default_rng(0)
 
     def direction_fn(x: np.ndarray, r: np.ndarray):
         try:
-            k_state = tangent_rebuild_fn(x)
+            rebuilt = tangent_rebuild_fn(x)
         except Exception as exc:  # noqa: BLE001
             return None, {"reason_code": f"tangent_rebuild_error:{type(exc).__name__}",
                           "solve_stop_reason": "solve_failed"}
+        if isinstance(rebuilt, tuple):
+            k_state, rebuild_meta = rebuilt
+        else:
+            k_state, rebuild_meta = rebuilt, {}
         # per-step parity: re-linearized tangent must match the physical residual JVP
         n = int(np.asarray(x).size)
         v = rng.standard_normal(n)
@@ -257,15 +301,36 @@ def _make_true_direction_fn(residual_fn, tangent_rebuild_fn, mode: str, mu: floa
             return None, {"reason_code": "assembled_tangent_parity_failed",
                           "solve_stop_reason": "parity_failed",
                           "assembled_tangent_parity_pass": False}
-        k_reg, _shift, _src = regularize_matrix(k_state, mode, mu)
+        k_reg, shift, scale_source = regularize_matrix(k_state, mode, mu)
         try:
             factor = splu(csc_matrix(k_reg))
             p = np.asarray(factor.solve(-np.asarray(r, dtype=np.float64)), dtype=np.float64)
         except Exception as exc:  # noqa: BLE001
             return None, {"reason_code": f"solve_error:{type(exc).__name__}",
                           "solve_stop_reason": "solve_failed"}
-        return p, {"reason_code": "ok", "tangent_rebuilt": True,
-                   "assembled_tangent_parity_pass": True}
+        contract, action_meta = regularized_direction_solve_contract(
+            k_state,
+            k_reg,
+            p,
+            r,
+            regularization_mode=mode,
+            regularization_mu=mu,
+            effective_shift=shift,
+            scale_source=scale_source,
+        )
+        return p, {
+            "reason_code": "ok",
+            "tangent_rebuilt": True,
+            "assembled_tangent_parity_pass": True,
+            "direction_solve_contract": contract,
+            "_row_metadata": row_metadata,
+            "_component_residual_fn": component_residual_fn,
+            "_tangent_component_actions": tangent_component_actions(
+                rebuild_meta.get("component_stiffness_free"),
+                p,
+            ),
+            **action_meta,
+        }
 
     return direction_fn
 
@@ -276,6 +341,7 @@ def run_g1_true_newton_reference_candidate(
     roundtrip_npz: Path | None = None,
     load_scale: float = 0.1,
     frame_service_tangent_source: str = "real_per_element",
+    frame_tangent_source: str = "service_material_plus_geometric_delta",
     regularization_mode: str = "relative_diagonal_shift",
     regularization_mu: float = 0.1,
     max_newton_steps: int = 12,
@@ -296,6 +362,7 @@ def run_g1_true_newton_reference_candidate(
             "load_scale": load_scale,
             "initial_checkpoint_npz": str(initial_checkpoint_npz) if initial_checkpoint_npz else None,
             "frame_service_tangent_source": frame_service_tangent_source,
+            "frame_tangent_source": frame_tangent_source,
             "regularization": {"mode": regularization_mode, "mu": regularization_mu, "fixed_or_adaptive": "fixed"},
             "newton_mode": "true_newton_per_step_relinearization",
             "material_tangent_update": {
@@ -320,6 +387,7 @@ def run_g1_true_newton_reference_candidate(
             residual_fn, x0, meta = build_mgt_physical_residual_closure(
                 mgt_path=mgt_model, roundtrip_npz=roundtrip_npz, load_scale=load_scale,
                 frame_service_tangent_source=frame_service_tangent_source,
+                frame_tangent_source=frame_tangent_source,
             )
         except Exception as exc:  # noqa: BLE001
             payload = {**_base(), "status": "blocked", "reason_code": ERR_MGT_STATE_BUILD_FAILED,
@@ -343,9 +411,20 @@ def run_g1_true_newton_reference_candidate(
                 if initial_checkpoint is not None
                 else 0
             )
+            row_metadata = _direction_row_metadata(meta)
+            component_residual_fn = meta.get("component_residual_fn")
 
             # modified-Newton baseline (reference tangent reused)
-            mod_dir = _make_modified_direction_fn(k_free, regularization_mode, regularization_mu)
+            mod_dir = _make_modified_direction_fn(
+                k_free,
+                regularization_mode,
+                regularization_mu,
+                row_metadata=row_metadata,
+                component_residual_fn=component_residual_fn,
+                tangent_component_stiffness_free=meta.get(
+                    "tangent_component_stiffness_free"
+                ),
+            )
             mod = run_multistep_newton(residual_fn, x_start, mod_dir,
                                        max_newton_steps=max_newton_steps,
                                        residual_gate_n=residual_gate_n,
@@ -353,7 +432,14 @@ def run_g1_true_newton_reference_candidate(
                                            allow_signed_direction_globalization
                                        ))
             # true-Newton candidate (per-step re-linearization)
-            true_dir = _make_true_direction_fn(residual_fn, tangent_rebuild_fn, regularization_mode, regularization_mu)
+            true_dir = _make_true_direction_fn(
+                residual_fn,
+                tangent_rebuild_fn,
+                regularization_mode,
+                regularization_mu,
+                row_metadata=row_metadata,
+                component_residual_fn=component_residual_fn,
+            )
             true = run_multistep_newton(residual_fn, x_start, true_dir,
                                         max_newton_steps=max_newton_steps, residual_gate_n=residual_gate_n,
                                         return_final_state=output_final_checkpoint_npz is not None,
@@ -404,6 +490,9 @@ def run_g1_true_newton_reference_candidate(
                     "signed_direction_step_count": mod["summary"].get(
                         "signed_direction_step_count"
                     ),
+                    "directional_residual_jvp_contract": mod["summary"].get(
+                        "directional_residual_jvp_contract"
+                    ),
                 },
                 "true_newton_candidate": {
                     "steps": ts["steps_taken"],
@@ -423,6 +512,9 @@ def run_g1_true_newton_reference_candidate(
                     ),
                     "signed_direction_step_count": ts.get(
                         "signed_direction_step_count"
+                    ),
+                    "directional_residual_jvp_contract": ts.get(
+                        "directional_residual_jvp_contract"
                     ),
                 },
                 "true_newton_faster_than_modified": bool(
@@ -456,6 +548,11 @@ def main() -> int:
         "--frame-service-tangent-source",
         choices=["real_per_element", "placeholder_1mpa"], default="real_per_element",
     )
+    parser.add_argument(
+        "--frame-tangent-source",
+        choices=["service_material_plus_geometric_delta", "force_based_residual_tangent"],
+        default="service_material_plus_geometric_delta",
+    )
     parser.add_argument("--regularization-mode", default="relative_diagonal_shift")
     parser.add_argument("--regularization-mu", type=float, default=0.1)
     parser.add_argument("--max-newton-steps", type=int, default=12)
@@ -468,6 +565,7 @@ def main() -> int:
     payload = run_g1_true_newton_reference_candidate(
         mgt_model=args.mgt_model, roundtrip_npz=args.roundtrip_npz, load_scale=args.load_scale,
         frame_service_tangent_source=args.frame_service_tangent_source,
+        frame_tangent_source=args.frame_tangent_source,
         regularization_mode=args.regularization_mode, regularization_mu=args.regularization_mu,
         max_newton_steps=args.max_newton_steps, residual_gate_n=args.residual_gate_n,
         allow_signed_direction_globalization=args.allow_signed_direction_globalization,

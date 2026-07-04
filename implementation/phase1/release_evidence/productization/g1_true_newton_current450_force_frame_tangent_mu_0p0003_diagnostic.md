@@ -1,14 +1,14 @@
 # G1 True-Newton Full-Load Checkpoint Candidate Status
 
-- `summary_line`: `G1 true-Newton full-load checkpoint candidate: CANDIDATE_CREATED | checkpoint_written=True | final_residual=655.1039650392886 | residual_gate=False`
+- `summary_line`: `G1 true-Newton full-load checkpoint candidate: CANDIDATE_CREATED | checkpoint_written=True | final_residual=647.6177166981101 | residual_gate=False`
 - `contract_pass`: `True`
 - `evidence_closure_pass`: `False`
-- `frame_tangent_source`: `service_material_plus_geometric_delta`
-- `checkpoint_path`: `implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz`
+- `frame_tangent_source`: `force_based_residual_tangent`
+- `checkpoint_path`: `implementation/phase1/release_evidence/productization/g1_true_newton_current450_force_frame_tangent_mu_0p0003_diagnostic.npz`
 - `checkpoint_schema`: `mgt-direct-residual-newton-state.v1`
 - `checkpoint_load_scale`: `1.0`
-- `steps`: `4`
-- `final_residual_n`: `655.1039650392886`
+- `steps`: `2`
+- `final_residual_n`: `647.6177166981101`
 - `residual_gate_passed`: `False`
 
 ## Blockers

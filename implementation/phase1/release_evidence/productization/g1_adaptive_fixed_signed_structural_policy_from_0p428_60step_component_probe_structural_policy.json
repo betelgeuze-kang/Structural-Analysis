@@ -1,0 +1,763 @@
+{
+  "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
+  "generated_at": "2026-07-04T20:13:16.944028+00:00",
+  "source_commit_sha": "22832c462db7c14b857ff00956ac077196ed369b",
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "reused_evidence": false,
+  "status": "partial",
+  "residual_jacobian_consistency_ready": false,
+  "consistent_residual_jacobian_newton_passed": false,
+  "consistent_residual_jacobian_newton_gate_passed": false,
+  "rocm_hip_required": false,
+  "rocm_hip_runtime_preflight": {
+    "checked_at": "2026-07-04T20:13:16.944028+00:00",
+    "hip_available": false,
+    "hip_required": false,
+    "unavailable_reason": "not_required_for_legacy_cpu_diagnostic"
+  },
+  "checkpoint": {
+    "path": "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_structural_policy_from_0p428_60step_diagnostic.npz",
+    "load_scale": 1.0,
+    "dof_count": 78282,
+    "checkpoint_schema": "mgt-direct-residual-newton-state.v1",
+    "accepted_state_history_count": 0,
+    "accepted_residual_history_count": 0,
+    "accepted_iteration_count": 32,
+    "residual_inf_n": 0.00047091187565051484,
+    "fixed_point_relative_increment": null,
+    "max_translation_m": 0.05360178515421764
+  },
+  "load_scale": 1.0,
+  "shell_pressure_load_path_policy": "structural_components_only",
+  "base_residual_inf_n": 0.00047091187565051484,
+  "base_relative_residual_inf": 3.5605490684155014e-08,
+  "rhs_inf_n": 13225.821821354024,
+  "free_dof_count": 58998,
+  "top_residual_count": 12,
+  "residual_component_breakdown": {
+    "component_inf_n": {
+      "frame": 239015.4594360777,
+      "spring": 0.0003556903982948452,
+      "material_stress_correction": 0.0,
+      "shell_bending_drilling": 239103.89996533009,
+      "shell_membrane": 72278.66532701437
+    },
+    "top_rows": [
+      {
+        "free_row": 33007,
+        "global_dof": 45877,
+        "node_index": 7646,
+        "dof": "uy",
+        "residual_n": -0.00047091187565051484,
+        "external_load_n": 0.0,
+        "component_values_n": {
+          "frame": -0.00047091187565051484,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": -0.00047091187565051484,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 33175,
+        "global_dof": 46045,
+        "node_index": 7674,
+        "dof": "uy",
+        "residual_n": 0.00040014858752041027,
+        "external_load_n": 0.0,
+        "component_values_n": {
+          "frame": 0.00040014858752041027,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 0.00040014858752041027,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 30795,
+        "global_dof": 41691,
+        "node_index": 6948,
+        "dof": "rx",
+        "residual_n": 0.0003556903982948452,
+        "external_load_n": 0.0,
+        "component_values_n": {
+          "frame": 0.0,
+          "spring": 0.0003556903982948452,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 0.0003556903982948452,
+        "dominant_component": "spring"
+      },
+      {
+        "free_row": 30801,
+        "global_dof": 41703,
+        "node_index": 6950,
+        "dof": "rx",
+        "residual_n": 0.00034805816654669223,
+        "external_load_n": 0.0,
+        "component_values_n": {
+          "frame": 0.0,
+          "spring": 0.00034805816654669223,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 0.00034805816654669223,
+        "dominant_component": "spring"
+      },
+      {
+        "free_row": 30807,
+        "global_dof": 41715,
+        "node_index": 6952,
+        "dof": "rx",
+        "residual_n": 0.00029948600768822995,
+        "external_load_n": 0.0,
+        "component_values_n": {
+          "frame": 0.0,
+          "spring": 0.00029948600768822995,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 0.00029948600768822995,
+        "dominant_component": "spring"
+      },
+      {
+        "free_row": 30789,
+        "global_dof": 41679,
+        "node_index": 6946,
+        "dof": "rx",
+        "residual_n": 0.0002669216288215636,
+        "external_load_n": 0.0,
+        "component_values_n": {
+          "frame": 0.0,
+          "spring": 0.0002669216288215636,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 0.0002669216288215636,
+        "dominant_component": "spring"
+      },
+      {
+        "free_row": 28942,
+        "global_dof": 37984,
+        "node_index": 6330,
+        "dof": "ry",
+        "residual_n": 0.00022502871139251258,
+        "external_load_n": 0.0,
+        "component_values_n": {
+          "frame": 0.0,
+          "spring": 0.00022502871139251258,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 0.00022502871139251258,
+        "dominant_component": "spring"
+      },
+      {
+        "free_row": 30855,
+        "global_dof": 41811,
+        "node_index": 6968,
+        "dof": "rx",
+        "residual_n": 0.00021889967489387136,
+        "external_load_n": 0.0,
+        "component_values_n": {
+          "frame": 0.0,
+          "spring": 0.00021889967489387136,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 0.00021889967489387136,
+        "dominant_component": "spring"
+      },
+      {
+        "free_row": 26260,
+        "global_dof": 32620,
+        "node_index": 5436,
+        "dof": "ry",
+        "residual_n": -0.00021870825096660033,
+        "external_load_n": 0.0,
+        "component_values_n": {
+          "frame": 0.0,
+          "spring": -0.00021870825096660033,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": -0.00021870825096660033,
+        "dominant_component": "spring"
+      },
+      {
+        "free_row": 30777,
+        "global_dof": 41655,
+        "node_index": 6942,
+        "dof": "rx",
+        "residual_n": 0.00021699121744115488,
+        "external_load_n": 0.0,
+        "component_values_n": {
+          "frame": 0.0,
+          "spring": 0.00021699121744115488,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 0.00021699121744115488,
+        "dominant_component": "spring"
+      },
+      {
+        "free_row": 30783,
+        "global_dof": 41667,
+        "node_index": 6944,
+        "dof": "rx",
+        "residual_n": 0.00021247773272432268,
+        "external_load_n": 0.0,
+        "component_values_n": {
+          "frame": 0.0,
+          "spring": 0.00021247773272432268,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 0.00021247773272432268,
+        "dominant_component": "spring"
+      },
+      {
+        "free_row": 30837,
+        "global_dof": 41775,
+        "node_index": 6962,
+        "dof": "rx",
+        "residual_n": 0.00020820654098019465,
+        "external_load_n": 0.0,
+        "component_values_n": {
+          "frame": 0.0,
+          "spring": 0.00020820654098019465,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 0.00020820654098019465,
+        "dominant_component": "spring"
+      }
+    ],
+    "top_row_dominant_component_counts": {
+      "frame": 2,
+      "spring": 10
+    }
+  },
+  "residual_shell_load_balance": {
+    "evaluated": false,
+    "reason": "no_shell_dominant_top_rows",
+    "row_count": 0,
+    "rows": []
+  },
+  "residual_shell_surface_load_diagnostics": {
+    "evaluated": true,
+    "row_count": 0,
+    "load_scale": 1.0,
+    "external_minus_reference_shell_load_inf_n": 0.0,
+    "required_reference_shell_load_scale_min": null,
+    "required_reference_shell_load_scale_median": null,
+    "required_reference_shell_load_scale_max": null,
+    "rows": [],
+    "claim_boundary": "Diagnostic only: reconstructs the reference unit shell surface load assigned by the current triangular shell load rule for selected hotspot rows."
+  },
+  "residual_shell_internal_element_diagnostics": {
+    "evaluated": true,
+    "row_count": 0,
+    "component_minus_reconstructed_shell_inf_n": 0.0,
+    "component_minus_reconstructed_bending_inf_n": 0.0,
+    "component_minus_reconstructed_membrane_inf_n": 0.0,
+    "rows": [],
+    "claim_boundary": "Diagnostic only: reconstructs selected shell hotspot internal-force rows from incident element stiffness contributions at the current checkpoint displacement."
+  },
+  "residual_shell_local_projection": {
+    "self_rows": {
+      "evaluated": false,
+      "reason": "no_matching_top_rows",
+      "selected_row_count": 0
+    },
+    "node_block_strongest8": {
+      "evaluated": false,
+      "reason": "no_matching_top_rows",
+      "selected_row_count": 0
+    }
+  },
+  "residual_hotspot_shell_membrane_diagnostics": [
+    {
+      "free_row": 33007,
+      "global_dof": 45877,
+      "node_index": 7646,
+      "dof": "uy",
+      "dominant_component": "frame",
+      "residual_n": -0.00047091187565051484,
+      "node_xyz_m": [
+        149.505,
+        163.177,
+        3.7
+      ],
+      "node_translation_m": [
+        -2.1953300628924855e-05,
+        7.812165602556171e-05,
+        -8.364112101827043e-05
+      ],
+      "incident_surface_element_count": 0,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 0.0,
+      "max_relative_membrane_displacement_m": 0.0,
+      "max_relative_normal_displacement_m": 0.0,
+      "sample_incident_elements": []
+    },
+    {
+      "free_row": 33175,
+      "global_dof": 46045,
+      "node_index": 7674,
+      "dof": "uy",
+      "dominant_component": "frame",
+      "residual_n": 0.00040014858752041027,
+      "node_xyz_m": [
+        130.119,
+        164.873,
+        3.7
+      ],
+      "node_translation_m": [
+        -2.1758212877251296e-05,
+        -7.070753372027388e-05,
+        -8.346616867062634e-05
+      ],
+      "incident_surface_element_count": 0,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 0.0,
+      "max_relative_membrane_displacement_m": 0.0,
+      "max_relative_normal_displacement_m": 0.0,
+      "sample_incident_elements": []
+    },
+    {
+      "free_row": 30795,
+      "global_dof": 41691,
+      "node_index": 6948,
+      "dof": "rx",
+      "dominant_component": "spring",
+      "residual_n": 0.0003556903982948452,
+      "node_xyz_m": [
+        138.8717,
+        206.429,
+        -0.075
+      ],
+      "node_translation_m": [
+        3.380869956166679e-07,
+        8.477980075239434e-07,
+        -0.00020075572373482643
+      ],
+      "incident_surface_element_count": 0,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 0.0,
+      "max_relative_membrane_displacement_m": 0.0,
+      "max_relative_normal_displacement_m": 0.0,
+      "sample_incident_elements": []
+    },
+    {
+      "free_row": 30801,
+      "global_dof": 41703,
+      "node_index": 6950,
+      "dof": "rx",
+      "dominant_component": "spring",
+      "residual_n": 0.00034805816654669223,
+      "node_xyz_m": [
+        139.94025,
+        205.7645,
+        -0.075
+      ],
+      "node_translation_m": [
+        3.8245136632700344e-07,
+        9.52126225331389e-07,
+        -0.00032029115610224956
+      ],
+      "incident_surface_element_count": 0,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 0.0,
+      "max_relative_membrane_displacement_m": 0.0,
+      "max_relative_normal_displacement_m": 0.0,
+      "sample_incident_elements": []
+    },
+    {
+      "free_row": 30807,
+      "global_dof": 41715,
+      "node_index": 6952,
+      "dof": "rx",
+      "dominant_component": "spring",
+      "residual_n": 0.00029948600768822995,
+      "node_xyz_m": [
+        140.0635,
+        205.013,
+        -0.075
+      ],
+      "node_translation_m": [
+        4.1644438862854013e-07,
+        9.006818976273818e-07,
+        -0.0005364102302930858
+      ],
+      "incident_surface_element_count": 0,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 0.0,
+      "max_relative_membrane_displacement_m": 0.0,
+      "max_relative_normal_displacement_m": 0.0,
+      "sample_incident_elements": []
+    },
+    {
+      "free_row": 30789,
+      "global_dof": 41679,
+      "node_index": 6946,
+      "dof": "rx",
+      "dominant_component": "spring",
+      "residual_n": 0.0002669216288215636,
+      "node_xyz_m": [
+        137.9264,
+        206.342,
+        -0.075
+      ],
+      "node_translation_m": [
+        3.5630569254859924e-07,
+        7.648124346410648e-07,
+        -0.00026106787529259977
+      ],
+      "incident_surface_element_count": 0,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 0.0,
+      "max_relative_membrane_displacement_m": 0.0,
+      "max_relative_normal_displacement_m": 0.0,
+      "sample_incident_elements": []
+    },
+    {
+      "free_row": 28942,
+      "global_dof": 37984,
+      "node_index": 6330,
+      "dof": "ry",
+      "dominant_component": "spring",
+      "residual_n": 0.00022502871139251258,
+      "node_xyz_m": [
+        129.21625,
+        187.9595,
+        -0.075
+      ],
+      "node_translation_m": [
+        7.169686434008696e-07,
+        5.23224308875124e-07,
+        -0.00018221362696582116
+      ],
+      "incident_surface_element_count": 0,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 0.0,
+      "max_relative_membrane_displacement_m": 0.0,
+      "max_relative_normal_displacement_m": 0.0,
+      "sample_incident_elements": []
+    },
+    {
+      "free_row": 30855,
+      "global_dof": 41811,
+      "node_index": 6968,
+      "dof": "rx",
+      "dominant_component": "spring",
+      "residual_n": 0.00021889967489387136,
+      "node_xyz_m": [
+        138.10229828708,
+        205.39632634242,
+        -0.075
+      ],
+      "node_translation_m": [
+        4.157035899838876e-07,
+        7.716741056650152e-07,
+        -0.0004759303590892694
+      ],
+      "incident_surface_element_count": 0,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 0.0,
+      "max_relative_membrane_displacement_m": 0.0,
+      "max_relative_normal_displacement_m": 0.0,
+      "sample_incident_elements": []
+    },
+    {
+      "free_row": 26260,
+      "global_dof": 32620,
+      "node_index": 5436,
+      "dof": "ry",
+      "dominant_component": "spring",
+      "residual_n": -0.00021870825096660033,
+      "node_xyz_m": [
+        147.03675,
+        176.0175,
+        -0.075
+      ],
+      "node_translation_m": [
+        1.1869286277752605e-06,
+        3.200431481404068e-07,
+        -0.00022875035698496427
+      ],
+      "incident_surface_element_count": 0,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 0.0,
+      "max_relative_membrane_displacement_m": 0.0,
+      "max_relative_normal_displacement_m": 0.0,
+      "sample_incident_elements": []
+    },
+    {
+      "free_row": 30777,
+      "global_dof": 41655,
+      "node_index": 6942,
+      "dof": "rx",
+      "dominant_component": "spring",
+      "residual_n": 0.00021699121744115488,
+      "node_xyz_m": [
+        136.0358,
+        206.168,
+        -0.075
+      ],
+      "node_translation_m": [
+        3.9921449960919457e-07,
+        6.523511393710747e-07,
+        -0.00032668806846479736
+      ],
+      "incident_surface_element_count": 0,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 0.0,
+      "max_relative_membrane_displacement_m": 0.0,
+      "max_relative_normal_displacement_m": 0.0,
+      "sample_incident_elements": []
+    },
+    {
+      "free_row": 30783,
+      "global_dof": 41667,
+      "node_index": 6944,
+      "dof": "rx",
+      "dominant_component": "spring",
+      "residual_n": 0.00021247773272432268,
+      "node_xyz_m": [
+        136.9811,
+        206.255,
+        -0.075
+      ],
+      "node_translation_m": [
+        3.765291162350633e-07,
+        7.028058854213071e-07,
+        -0.00030750427356923666
+      ],
+      "incident_surface_element_count": 0,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 0.0,
+      "max_relative_membrane_displacement_m": 0.0,
+      "max_relative_normal_displacement_m": 0.0,
+      "sample_incident_elements": []
+    },
+    {
+      "free_row": 30837,
+      "global_dof": 41775,
+      "node_index": 6962,
+      "dof": "rx",
+      "dominant_component": "spring",
+      "residual_n": 0.00020820654098019465,
+      "node_xyz_m": [
+        139.050951807758,
+        205.476372213368,
+        -0.075
+      ],
+      "node_translation_m": [
+        4.0714920131906784e-07,
+        8.466705917079601e-07,
+        -0.0004683721394717864
+      ],
+      "incident_surface_element_count": 0,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 0.0,
+      "max_relative_membrane_displacement_m": 0.0,
+      "max_relative_normal_displacement_m": 0.0,
+      "sample_incident_elements": []
+    }
+  ],
+  "residual_hotspot_frame_diagnostics": [
+    {
+      "free_row": 33007,
+      "global_dof": 45877,
+      "node_index": 7646,
+      "raw_node_id": 7647,
+      "dof": "uy",
+      "residual_n": -0.00047091187565051484,
+      "external_load_n": 0.0,
+      "component_frame_n": -0.00047091187565051484,
+      "incident_frame_element_count": 2,
+      "incident_frame_target_dof_contribution_sum_n": -0.00047091187565062587,
+      "component_reconstruction_error_n": -1.1102230246251565e-16,
+      "node_xyz_m": [
+        149.505,
+        163.177,
+        3.7
+      ],
+      "node_translation_m": [
+        -2.1953300628924855e-05,
+        7.812165602556171e-05,
+        -8.364112101827043e-05
+      ],
+      "max_abs_sample_contribution_n": 0.0002596720471409464,
+      "sample_incident_frame_elements": [
+        {
+          "elem_id": 32884,
+          "end": "i",
+          "other_node_index": 2200,
+          "section_id": 1088,
+          "material_id": 3,
+          "used_real_props": true,
+          "length_m": 3.7,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": 0.0,
+          "axial_force_n": 1.6464924822265505,
+          "target_dof_force_contribution_n": -0.0002596720471409464
+        },
+        {
+          "elem_id": 32883,
+          "end": "j",
+          "other_node_index": 2200,
+          "section_id": 1088,
+          "material_id": 3,
+          "used_real_props": true,
+          "length_m": 3.7,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": 0.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -0.00021123982850967948
+        }
+      ]
+    },
+    {
+      "free_row": 33175,
+      "global_dof": 46045,
+      "node_index": 7674,
+      "raw_node_id": 7675,
+      "dof": "uy",
+      "residual_n": 0.00040014858752041027,
+      "external_load_n": 0.0,
+      "component_frame_n": 0.00040014858752041027,
+      "incident_frame_element_count": 2,
+      "incident_frame_target_dof_contribution_sum_n": 0.00040014858752035476,
+      "component_reconstruction_error_n": -5.551115123125783e-17,
+      "node_xyz_m": [
+        130.119,
+        164.873,
+        3.7
+      ],
+      "node_translation_m": [
+        -2.1758212877251296e-05,
+        -7.070753372027388e-05,
+        -8.346616867062634e-05
+      ],
+      "max_abs_sample_contribution_n": 0.0002222203752333396,
+      "sample_incident_frame_elements": [
+        {
+          "elem_id": 32988,
+          "end": "i",
+          "other_node_index": 2211,
+          "section_id": 1088,
+          "material_id": 3,
+          "used_real_props": true,
+          "length_m": 3.7,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": 0.0,
+          "axial_force_n": 4.939477446679652,
+          "target_dof_force_contribution_n": 0.0002222203752333396
+        },
+        {
+          "elem_id": 32987,
+          "end": "j",
+          "other_node_index": 2211,
+          "section_id": 1088,
+          "material_id": 3,
+          "used_real_props": true,
+          "length_m": 3.7,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": 0.0,
+          "axial_force_n": 3.292984964453101,
+          "target_dof_force_contribution_n": 0.00017792821228701516
+        }
+      ]
+    }
+  ],
+  "residual_hotspot_signed_displacement_sweep": {
+    "enabled": false
+  },
+  "residual_hotspot_tangent_fd_jvp_rows": [],
+  "residual_hotspot_tangent_fd_jvp_component_filter": "frame",
+  "residual_hotspot_diagonal_newton_sweep": {
+    "enabled": false
+  },
+  "fd_step": 1e-06,
+  "relative_error_threshold": 0.25,
+  "cosine_threshold": 0.8,
+  "direction_rows": [],
+  "state_scale_sweep": [],
+  "component_only": true,
+  "base_meta": {
+    "physical_internal_force_model": "corotational_force_based_6dof_plus_force_consistent_shell_plus_springs",
+    "newton_tangent_model": "equilibrium_operator_consistent_with_force_based_f_int",
+    "equilibrium_geometry_contract": "reference_node_xyz_u_only",
+    "stiffness_unit_audit": {
+      "per_component": {
+        "frame": {
+          "free_diag_count": 58998,
+          "nonzero_diag_count": 12882,
+          "diag_abs_min": 2172.9583362166586,
+          "diag_abs_max": 263291938026322.7,
+          "diag_abs_mean": 156315356584.5623,
+          "diag_abs_median": 82837515.0898557,
+          "unit": "N_per_m_or_Nm_per_rad"
+        },
+        "shell": {
+          "free_diag_count": 58998,
+          "nonzero_diag_count": 44988,
+          "diag_abs_min": 411.94743221423107,
+          "diag_abs_max": 936561378488.6742,
+          "diag_abs_mean": 22775105512.83593,
+          "diag_abs_median": 6701456070.4574375,
+          "unit": "N_per_m_or_Nm_per_rad"
+        },
+        "spring": {
+          "free_diag_count": 58998,
+          "nonzero_diag_count": 20304,
+          "diag_abs_min": 1.0,
+          "diag_abs_max": 1000000000.0,
+          "diag_abs_mean": 166700000.5,
+          "diag_abs_median": 50000.5,
+          "unit": "N_per_m_or_Nm_per_rad"
+        }
+      },
+      "cross_component_diag_max_ratio": 263291938026322.7,
+      "unit_consistency_warning": true,
+      "imbalance_ratio_threshold": 100000000.0,
+      "claim_boundary": "Diagonal audit only; it does not prove unit conversion correctness but flags solver-hostile stiffness scale separation across coupled components."
+    },
+    "shell_pressure_load_path_meta": {
+      "shell_pressure_load_path_policy": "structural_components_only",
+      "pressure_load_filter_enabled": true,
+      "surface_component_count": 3,
+      "attached_surface_component_count": 1,
+      "free_pressure_surface_component_count": 2,
+      "pressure_load_allowed_surface_element_count": 7150,
+      "pressure_load_suppressed_surface_element_count": 2,
+      "claim_boundary": "Production load-path policy: shell pressure is applied only to surface components with a structural load path, defined as a frame-connected node or an authored translational restraint; unattached pressure-only shell components are classified as non-structural external loads."
+    }
+  },
+  "runtime_metrics": {
+    "setup_and_reference_seconds": 16.083577156008687,
+    "base_assembly_seconds": 11.66382448899094,
+    "total_seconds": 27.790617689024657
+  },
+  "claim_boundary": "Full-model diagnostic comparing assembled tangent K*d against finite-difference physical residual action dR/du*d. This is not a nonlinear equilibrium closure. The production ROCm/HIP residual-Jacobian proof remains false unless explicitly reported by the consistent_residual_jacobian_newton_* fields.",
+  "blockers": [
+    "component_only_diagnostic_not_consistency_closure"
+  ]
+}

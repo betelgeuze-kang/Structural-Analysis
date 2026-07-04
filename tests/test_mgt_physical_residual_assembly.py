@@ -10,7 +10,10 @@ from scipy.sparse import coo_matrix
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "implementation" / "phase1"))
 
-from mgt_frame_force_based_assembly import assemble_frame_force_based_f_int  # noqa: E402
+from mgt_frame_force_based_assembly import (  # noqa: E402
+    assemble_frame_force_based_f_int,
+    prepack_frame_force_based_assembly,
+)
 from mgt_physical_residual_assembly import (  # noqa: E402
     assemble_physical_internal_force_components,
     assemble_physical_internal_forces,
@@ -79,6 +82,40 @@ def test_force_based_frame_matches_reference_stiffness_at_small_strain() -> None
 
     assert meta["frame_internal_force_model"] == "corotational_force_based_6dof"
     np.testing.assert_allclose(f_force, f_quasi, rtol=1.0e-9, atol=1.0e-6)
+
+
+def test_prepacked_force_based_frame_exposes_equivalent_sparse_matrix() -> None:
+    node_xyz = np.asarray([[0.0, 0.0, 0.0], [0.0, 0.0, 4.0]], dtype=np.float64)
+    elements = [
+        FrameElement(
+            elem_id=1,
+            node_i=0,
+            node_j=1,
+            section_id=1,
+            material_id=1,
+            length_m=4.0,
+        )
+    ]
+    section_props = {
+        1: {"A_m2": 0.02, "Iy_m4": 8.0e-5, "Iz_m4": 4.0e-5},
+    }
+    material_props = {1: {"E_kN_per_m2": 210000.0, "poisson": 0.3}}
+    u = np.linspace(-0.002, 0.002, 12, dtype=np.float64)
+    prepacked = prepack_frame_force_based_assembly(
+        node_xyz=node_xyz,
+        frame_elements=elements,
+        section_props=section_props,
+        material_props=material_props,
+        include_geometric=False,
+    )
+
+    f_force, _meta = prepacked.assemble(u)
+    np.testing.assert_allclose(
+        np.asarray(prepacked.stiffness_matrix() @ u, dtype=np.float64),
+        f_force,
+        rtol=1.0e-12,
+        atol=1.0e-9,
+    )
 
 
 def test_assemble_physical_internal_forces_defaults_to_force_based_frame() -> None:

@@ -41,6 +41,15 @@ def test_closure_default_service_tangent_is_real():
     assert sig.parameters["frame_service_tangent_source"].default == "real_per_element"
 
 
+def test_closure_default_frame_tangent_preserves_service_operator():
+    smoke = _load("run_g1_mgt_physical_line_search_smoke")
+    sig = inspect.signature(smoke.build_mgt_physical_residual_closure)
+    assert (
+        sig.parameters["frame_tangent_source"].default
+        == "service_material_plus_geometric_delta"
+    )
+
+
 def test_sparse_direct_driver_default_service_tangent_is_real():
     drv = _load("run_g1_mgt_sparse_direct_physical_line_search_smoke")
     sig = inspect.signature(drv.run_g1_mgt_sparse_direct_physical_line_search_smoke)
@@ -81,3 +90,11 @@ def test_cli_service_tangent_source_choices():
     assert "--frame-service-tangent-source" in text
     assert "real_per_element" in text
     assert "placeholder_1mpa" in text
+
+
+def test_true_newton_cli_frame_tangent_source_choices():
+    src = PHASE1 / "run_g1_true_newton_reference_candidate.py"
+    text = src.read_text(encoding="utf-8")
+    assert "--frame-tangent-source" in text
+    assert "service_material_plus_geometric_delta" in text
+    assert "force_based_residual_tangent" in text

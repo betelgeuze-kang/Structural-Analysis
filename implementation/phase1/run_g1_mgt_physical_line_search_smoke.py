@@ -49,6 +49,17 @@ HERE = Path(__file__).resolve().parent
 PRODUCTIZATION = HERE / "release_evidence" / "productization"
 DEFAULT_OUTPUT_JSON = PRODUCTIZATION / "g1_mgt_physical_line_search_smoke.local.json"
 DEFAULT_MGT_MODEL = HERE / "open_data" / "midas" / "midas_generator_33.optimized.mgt"
+FRAME_TANGENT_SOURCE_SERVICE = "service_material_plus_geometric_delta"
+FRAME_TANGENT_SOURCE_FORCE_BASED = "force_based_residual_tangent"
+FRAME_TANGENT_SOURCE_CHOICES = [
+    FRAME_TANGENT_SOURCE_SERVICE,
+    FRAME_TANGENT_SOURCE_FORCE_BASED,
+]
+SHELL_PRESSURE_LOAD_PATH_POLICIES = [
+    "all_components",
+    "attached_components_only",
+    "structural_components_only",
+]
 
 # Reason codes (machine-readable, fail-closed).
 PASS = "PASS"
@@ -266,6 +277,8 @@ def build_mgt_physical_residual_closure(
     stiffness_scale_to_si: float = 1000.0,
     apply_shell_material_tangent: bool = False,
     frame_service_tangent_source: str = "real_per_element",
+    frame_tangent_source: str = FRAME_TANGENT_SOURCE_SERVICE,
+    shell_pressure_load_path_policy: str = "all_components",
 ) -> tuple[ReducedResidualFn, np.ndarray, dict[str, Any]]:
     """Build a reduced free-space physical residual closure from a real MGT model.
 
@@ -354,9 +367,10 @@ def build_mgt_physical_residual_closure(
         dof_count=int(node_xyz.shape[0]) * DOF_PER_NODE,
         stiffness_scale_to_si=stiffness_scale_to_si,
     )
-    pressure_allowed, _ = surface_pressure_load_path_filter(
+    pressure_allowed, pressure_load_path_meta = surface_pressure_load_path_filter(
         frame_elements=frame_elements, elem_type_code=elem_type_code,
-        conn_ptr=conn_ptr, conn_idx=conn_idx, restrained=restrained, policy="all_components",
+        conn_ptr=conn_ptr, conn_idx=conn_idx, restrained=restrained,
+        policy=shell_pressure_load_path_policy,
     )
     base_axial = _component_gravity_axial_forces(
         elements=frame_elements, node_xyz=node_xyz,
@@ -369,8 +383,50 @@ def build_mgt_physical_residual_closure(
         section_props=section_props, material_props=material_props,
         element_axial_forces=ffa, include_geometric=True,
     )
+    force_based_frame_stiffness = frame_force_cache.stiffness_matrix().tocsr()
     ndof = int(node_xyz.shape[0]) * DOF_PER_NODE
     u0 = np.zeros(ndof, dtype=np.float64)
+
+    frame_tangent_source = str(frame_tangent_source)
+    if frame_tangent_source not in FRAME_TANGENT_SOURCE_CHOICES:
+        raise ValueError(
+            f"unknown frame_tangent_source {frame_tangent_source!r}; "
+            f"expected one of {FRAME_TANGENT_SOURCE_CHOICES!r}"
+        )
+
+    def _select_frame_tangent(stiffness_matrix: Any, tangent_meta: dict[str, Any]) -> tuple[Any, dict[str, Any]]:
+        tangent_meta = dict(tangent_meta)
+        components = dict(tangent_meta.get("component_stiffness", {}))
+        if frame_tangent_source == FRAME_TANGENT_SOURCE_FORCE_BASED:
+            components["frame"] = force_based_frame_stiffness
+            selected = force_based_frame_stiffness
+            if "shell" in components:
+                selected = selected + components["shell"]
+            if "spring" in components:
+                selected = selected + components["spring"]
+            tangent_meta.update(
+                {
+                    "frame_tangent_source": frame_tangent_source,
+                    "frame_tangent_source_default": FRAME_TANGENT_SOURCE_SERVICE,
+                    "frame_tangent_source_claim_boundary": (
+                        "diagnostic_only_residual_consistent_frame_tangent"
+                    ),
+                    "frame_force_based_residual_tangent_nnz": int(
+                        force_based_frame_stiffness.nnz
+                    ),
+                    "component_stiffness": components,
+                    "coupled_stiffness_nnz": int(selected.nnz),
+                }
+            )
+            return selected.tocsr(), tangent_meta
+        tangent_meta.update(
+            {
+                "frame_tangent_source": frame_tangent_source,
+                "frame_tangent_source_default": FRAME_TANGENT_SOURCE_SERVICE,
+                "component_stiffness": components,
+            }
+        )
+        return stiffness_matrix, tangent_meta
 
     service_tangent_source = str(frame_service_tangent_source)
     if service_tangent_source == "placeholder_1mpa":
@@ -387,7 +443,7 @@ def build_mgt_physical_residual_closure(
             "expected 'real_per_element' or 'placeholder_1mpa'"
         )
     _svc_values = np.asarray(list(service_tangent.values()), dtype=np.float64)
-    stiffness, assembled_f_ext, _ = assemble_newton_tangent_stiffness(
+    stiffness, assembled_f_ext, tangent_meta0 = assemble_newton_tangent_stiffness(
         u=u0, node_xyz=node_xyz, frame_elements=frame_elements,
         elem_type_code=elem_type_code, elem_section_id=elem_section_id,
         elem_material_id=elem_material_id, conn_ptr=conn_ptr, conn_idx=conn_idx,
@@ -397,6 +453,7 @@ def build_mgt_physical_residual_closure(
         load_scale=load_scale, service_tangent_by_element=service_tangent,
         service_material_meta={}, shell_pressure_load_allowed_surface_elements=pressure_allowed,
     )
+    stiffness, tangent_meta0 = _select_frame_tangent(stiffness, tangent_meta0)
     diag = np.asarray(stiffness.diagonal(), dtype=np.float64)
     active = np.where(np.abs(diag) > 1.0e-9)[0]
     free = np.asarray([i for i in active.tolist() if i not in restrained], dtype=np.int64)
@@ -404,6 +461,13 @@ def build_mgt_physical_residual_closure(
     # free-space assembled tangent (for F2b-ii-a sparse-direct / ILU solves)
     tangent_csr = stiffness.tocsr()
     tangent_free_csr = tangent_csr[free][:, free].tocsr()
+
+    def _free_component_stiffness(tangent_meta: dict[str, Any]) -> dict[str, Any]:
+        components = tangent_meta.get("component_stiffness", {})
+        return {
+            name: values.tocsr()[free][:, free].tocsr()
+            for name, values in components.items()
+        }
 
     def residual_fn(x_free: np.ndarray) -> np.ndarray:
         u = u0.copy()
@@ -460,7 +524,7 @@ def build_mgt_physical_residual_closure(
         state_service_tangent, _m = _service_tangent_by_element(
             elements=frame_elements, node_xyz=node_xyz, u=u, material_props=material_props,
         )
-        k_state, _fext, _meta = assemble_newton_tangent_stiffness(
+        k_state, _fext, tangent_meta = assemble_newton_tangent_stiffness(
             u=u, node_xyz=node_xyz, frame_elements=frame_elements,
             elem_type_code=elem_type_code, elem_section_id=elem_section_id,
             elem_material_id=elem_material_id, conn_ptr=conn_ptr, conn_idx=conn_idx,
@@ -470,7 +534,11 @@ def build_mgt_physical_residual_closure(
             load_scale=load_scale, service_tangent_by_element=state_service_tangent,
             service_material_meta={}, shell_pressure_load_allowed_surface_elements=pressure_allowed,
         )
-        return k_state.tocsr()[free][:, free].tocsr()
+        k_state, tangent_meta = _select_frame_tangent(k_state, tangent_meta)
+        return (
+            k_state.tocsr()[free][:, free].tocsr(),
+            {"component_stiffness_free": _free_component_stiffness(tangent_meta)},
+        )
 
     meta = {
         "dof_count": int(ndof),
@@ -480,6 +548,7 @@ def build_mgt_physical_residual_closure(
         "external_load_inf_n": float(np.max(np.abs(f_ext))) if f_ext.size else 0.0,
         "diag_free": np.asarray(diag[free], dtype=np.float64),
         "tangent_free_csr": tangent_free_csr,
+        "tangent_component_stiffness_free": _free_component_stiffness(tangent_meta0),
         "tangent_free_nnz": int(tangent_free_csr.nnz),
         "component_residual_fn": component_residual_fn,
         "spring_free_csr": spring_free_csr,
@@ -496,6 +565,12 @@ def build_mgt_physical_residual_closure(
             "u0": u0,
         },
         "frame_service_tangent_source": service_tangent_source,
+        "frame_tangent_source": frame_tangent_source,
+        "shell_pressure_load_path_policy": pressure_load_path_meta.get(
+            "shell_pressure_load_path_policy",
+            str(shell_pressure_load_path_policy),
+        ),
+        "shell_pressure_load_path_meta": pressure_load_path_meta,
         "roundtrip_npz": str(roundtrip_npz),
         "parser_source": parser_source,
         "parser_report_path": parser_report_path,
@@ -517,6 +592,8 @@ def run_g1_mgt_physical_line_search_smoke(
     roundtrip_npz: Path | None = None,
     global_newton_operator: str = GLOBAL_NEWTON_OPERATOR_PHYSICAL,
     load_scale: float = 0.1,
+    frame_tangent_source: str = FRAME_TANGENT_SOURCE_SERVICE,
+    shell_pressure_load_path_policy: str = "all_components",
     gmres_maxiter: int = 150,
     output_json: Path | None = DEFAULT_OUTPUT_JSON,
 ) -> dict[str, Any]:
@@ -532,6 +609,8 @@ def run_g1_mgt_physical_line_search_smoke(
         try:
             residual_fn, x0, meta = build_mgt_physical_residual_closure(
                 mgt_path=mgt_model, roundtrip_npz=roundtrip_npz, load_scale=load_scale,
+                frame_tangent_source=frame_tangent_source,
+                shell_pressure_load_path_policy=shell_pressure_load_path_policy,
             )
         except FileNotFoundError as exc:
             payload = _report(
@@ -575,13 +654,25 @@ def main() -> int:
         default=GLOBAL_NEWTON_OPERATOR_PHYSICAL,
     )
     parser.add_argument("--load-scale", type=float, default=0.1)
+    parser.add_argument(
+        "--frame-tangent-source",
+        choices=FRAME_TANGENT_SOURCE_CHOICES,
+        default=FRAME_TANGENT_SOURCE_SERVICE,
+    )
+    parser.add_argument(
+        "--shell-pressure-load-path-policy",
+        choices=SHELL_PRESSURE_LOAD_PATH_POLICIES,
+        default="all_components",
+    )
     parser.add_argument("--gmres-maxiter", type=int, default=150)
     parser.add_argument("--out", "--output-json", dest="output_json", type=Path, default=DEFAULT_OUTPUT_JSON)
     args = parser.parse_args()
     payload = run_g1_mgt_physical_line_search_smoke(
         mgt_model=args.mgt_model, roundtrip_npz=args.roundtrip_npz,
         global_newton_operator=args.global_newton_operator,
-        load_scale=args.load_scale, gmres_maxiter=args.gmres_maxiter,
+        load_scale=args.load_scale, frame_tangent_source=args.frame_tangent_source,
+        shell_pressure_load_path_policy=args.shell_pressure_load_path_policy,
+        gmres_maxiter=args.gmres_maxiter,
         output_json=args.output_json,
     )
     print(

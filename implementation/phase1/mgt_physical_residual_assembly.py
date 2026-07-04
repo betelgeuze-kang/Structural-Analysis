@@ -634,6 +634,11 @@ def assemble_newton_tangent_stiffness(
             "shell_material_tangent_applied": False,
         },
         "shell_meta": shell_meta,
+        "component_stiffness": {
+            "frame": frame_stiffness,
+            "shell": shell_stiffness,
+            "spring": spring_stiffness,
+        },
     }
 
 

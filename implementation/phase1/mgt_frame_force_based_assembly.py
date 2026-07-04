@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
+from scipy.sparse import coo_matrix
 
 from run_mgt_full_frame_6dof_sparse_equilibrium import (
     FrameElement,
@@ -76,6 +77,20 @@ class PrepackedFrameForceBasedAssembly:
             "frame_force_based_batch_size": int(states.shape[0]),
             "frame_force_based_prepacked_element_count": int(self.dofs.shape[0]),
         }
+
+    def stiffness_matrix(self):
+        """Assemble the sparse global matrix represented by the prepacked frame forces."""
+        element_count = int(self.dofs.shape[0])
+        if element_count == 0:
+            return coo_matrix((int(self.n_dof), int(self.n_dof)), dtype=np.float64).tocsr()
+        rows = np.broadcast_to(self.dofs[:, :, None], (element_count, 12, 12)).ravel()
+        cols = np.broadcast_to(self.dofs[:, None, :], (element_count, 12, 12)).ravel()
+        data = np.asarray(self.element_stiffness, dtype=np.float64).ravel()
+        return coo_matrix(
+            (data, (rows, cols)),
+            shape=(int(self.n_dof), int(self.n_dof)),
+            dtype=np.float64,
+        ).tocsr()
 
 
 def _frame_12_transform(rotation: np.ndarray) -> np.ndarray:

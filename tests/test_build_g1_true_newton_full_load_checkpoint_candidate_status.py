@@ -52,6 +52,23 @@ def _fake_candidate(**kwargs: object) -> dict:
             "stop_reason": "max_steps",
             "signed_direction_globalization_used": signed_enabled,
             "signed_direction_step_count": 1 if signed_enabled else 0,
+            "directional_residual_jvp_contract": {
+                "forward_directions": {
+                    "count": 2,
+                    "max_jvp_plus_residual_relative_inf": 0.25,
+                    "all_local_l2_residual_descent": True,
+                },
+                "accepted_directions": {
+                    "count": 2,
+                    "max_jvp_plus_residual_relative_inf": 0.25,
+                    "all_local_l2_residual_descent": True,
+                },
+                "reverse_direction_previews": {
+                    "count": 0,
+                    "max_jvp_plus_residual_relative_inf": None,
+                    "all_local_l2_residual_descent": None,
+                },
+            },
         },
         "output_final_checkpoint": {
             "written": True,
@@ -89,6 +106,9 @@ def test_full_load_checkpoint_candidate_status_records_candidate_without_closure
     assert payload["true_newton_candidate"]["final_residual_n"] == 464.56223807569995
     assert payload["true_newton_candidate"]["signed_direction_globalization_used"] is False
     assert payload["true_newton_candidate"]["signed_direction_step_count"] == 0
+    assert payload["true_newton_candidate"]["directional_residual_jvp_contract"][
+        "accepted_directions"
+    ]["max_jvp_plus_residual_relative_inf"] == 0.25
     assert payload["signed_direction_globalization"] == {
         "enabled": False,
         "used": False,
@@ -172,6 +192,28 @@ def test_full_load_checkpoint_candidate_status_forwards_regularization(
         "mode": "absolute_diagonal_shift",
         "mu": 0.03,
     }
+
+
+def test_full_load_checkpoint_candidate_status_forwards_frame_tangent_source(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    calls: list[dict[str, object]] = []
+
+    def fake_candidate(**kwargs: object) -> dict:
+        calls.append(dict(kwargs))
+        return _fake_candidate(**kwargs)
+
+    monkeypatch.setattr(module, "run_g1_true_newton_reference_candidate", fake_candidate)
+
+    payload = module.build_g1_true_newton_full_load_checkpoint_candidate_status(
+        repo_root=REPO_ROOT,
+        checkpoint_npz=tmp_path / "candidate.npz",
+        frame_tangent_source="force_based_residual_tangent",
+    )
+
+    assert calls[-1]["frame_tangent_source"] == "force_based_residual_tangent"
+    assert payload["frame_tangent_source"] == "force_based_residual_tangent"
 
 
 def test_full_load_checkpoint_candidate_status_forwards_signed_globalization(

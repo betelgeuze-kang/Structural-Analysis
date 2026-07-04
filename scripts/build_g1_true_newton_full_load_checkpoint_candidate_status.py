@@ -35,6 +35,11 @@ DEFAULT_MAX_NEWTON_STEPS = 36
 DEFAULT_RESIDUAL_GATE_N = 5.0e-4
 DEFAULT_REGULARIZATION_MODE = "relative_diagonal_shift"
 DEFAULT_REGULARIZATION_MU = 0.1
+DEFAULT_FRAME_TANGENT_SOURCE = "service_material_plus_geometric_delta"
+FRAME_TANGENT_SOURCE_CHOICES = [
+    DEFAULT_FRAME_TANGENT_SOURCE,
+    "force_based_residual_tangent",
+]
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -78,6 +83,7 @@ def build_g1_true_newton_full_load_checkpoint_candidate_status(
     residual_gate_n: float = DEFAULT_RESIDUAL_GATE_N,
     regularization_mode: str = DEFAULT_REGULARIZATION_MODE,
     regularization_mu: float = DEFAULT_REGULARIZATION_MU,
+    frame_tangent_source: str = DEFAULT_FRAME_TANGENT_SOURCE,
     allow_signed_direction_globalization: bool = False,
 ) -> dict[str, Any]:
     resolved_checkpoint = _resolve(repo_root, checkpoint_npz)
@@ -87,6 +93,7 @@ def build_g1_true_newton_full_load_checkpoint_candidate_status(
         residual_gate_n=float(residual_gate_n),
         regularization_mode=str(regularization_mode),
         regularization_mu=float(regularization_mu),
+        frame_tangent_source=str(frame_tangent_source),
         allow_signed_direction_globalization=bool(allow_signed_direction_globalization),
         initial_checkpoint_npz=(
             _resolve(repo_root, initial_checkpoint_npz)
@@ -168,6 +175,7 @@ def build_g1_true_newton_full_load_checkpoint_candidate_status(
             "mode": str(regularization_mode),
             "mu": float(regularization_mu),
         },
+        "frame_tangent_source": str(frame_tangent_source),
         "initial_checkpoint_npz": (
             _repo_relative_string(repo_root, str(_resolve(repo_root, initial_checkpoint_npz)))
             if initial_checkpoint_npz is not None
@@ -191,6 +199,9 @@ def build_g1_true_newton_full_load_checkpoint_candidate_status(
             ),
             "signed_direction_step_count": true_candidate.get(
                 "signed_direction_step_count"
+            ),
+            "directional_residual_jvp_contract": true_candidate.get(
+                "directional_residual_jvp_contract"
             ),
         },
         "signed_direction_globalization": {
@@ -233,6 +244,7 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `summary_line`: `{payload['summary_line']}`",
         f"- `contract_pass`: `{payload['contract_pass']}`",
         f"- `evidence_closure_pass`: `{payload['evidence_closure_pass']}`",
+        f"- `frame_tangent_source`: `{payload.get('frame_tangent_source')}`",
         f"- `checkpoint_path`: `{checkpoint.get('path')}`",
         f"- `checkpoint_schema`: `{checkpoint.get('schema')}`",
         f"- `checkpoint_load_scale`: `{checkpoint.get('load_scale')}`",
@@ -259,6 +271,7 @@ def write_g1_true_newton_full_load_checkpoint_candidate_status(
     residual_gate_n: float = DEFAULT_RESIDUAL_GATE_N,
     regularization_mode: str = DEFAULT_REGULARIZATION_MODE,
     regularization_mu: float = DEFAULT_REGULARIZATION_MU,
+    frame_tangent_source: str = DEFAULT_FRAME_TANGENT_SOURCE,
     allow_signed_direction_globalization: bool = False,
 ) -> dict[str, Any]:
     payload = build_g1_true_newton_full_load_checkpoint_candidate_status(
@@ -270,6 +283,7 @@ def write_g1_true_newton_full_load_checkpoint_candidate_status(
         residual_gate_n=residual_gate_n,
         regularization_mode=regularization_mode,
         regularization_mu=regularization_mu,
+        frame_tangent_source=frame_tangent_source,
         allow_signed_direction_globalization=allow_signed_direction_globalization,
     )
     resolved_out = _resolve(repo_root, out)
@@ -293,6 +307,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--residual-gate-n", type=float, default=DEFAULT_RESIDUAL_GATE_N)
     parser.add_argument("--regularization-mode", default=DEFAULT_REGULARIZATION_MODE)
     parser.add_argument("--regularization-mu", type=float, default=DEFAULT_REGULARIZATION_MU)
+    parser.add_argument(
+        "--frame-tangent-source",
+        choices=FRAME_TANGENT_SOURCE_CHOICES,
+        default=DEFAULT_FRAME_TANGENT_SOURCE,
+    )
     parser.add_argument("--allow-signed-direction-globalization", action="store_true")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
@@ -312,6 +331,7 @@ def main(argv: list[str] | None = None) -> int:
         residual_gate_n=args.residual_gate_n,
         regularization_mode=args.regularization_mode,
         regularization_mu=args.regularization_mu,
+        frame_tangent_source=args.frame_tangent_source,
         allow_signed_direction_globalization=args.allow_signed_direction_globalization,
     )
     if args.json:

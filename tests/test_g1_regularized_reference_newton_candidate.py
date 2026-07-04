@@ -62,9 +62,13 @@ def test_multistep_monotonic_decrease_and_max_steps():
     for h in hist:
         if h.get("residual_after_n") is not None:
             assert h["residual_after_n"] <= h["residual_before_n"]
+            assert h["accepted_residual_jvp_contract"]["local_l2_residual_descent"] is True
     assert out["summary"]["monotonic_residual_decrease"] is True
     assert out["summary"]["stop_reason"] == drv.STOP_MAX_STEPS
     assert out["summary"]["total_reduction_ratio"] > 0.0
+    assert out["summary"]["directional_residual_jvp_contract"][
+        "accepted_directions"
+    ]["all_local_l2_residual_descent"] is True
 
 
 # ---------------------------------------------------------------------------
@@ -87,9 +91,121 @@ def test_gate_pass_no_g1_closure():
     out = drv.run_multistep_newton(residual_fn, np.zeros(n), direction_fn,
                                    max_newton_steps=5, residual_gate_n=1e-6)
     assert out["summary"]["residual_gate_passed"] is True
+    assert out["newton_history"][0]["accepted_residual_jvp_contract"][
+        "jvp_plus_residual_relative_inf"
+    ] < 1.0e-6
+    assert out["newton_history"][0]["accepted_residual_jvp_contract"][
+        "negative_residual_alignment_cosine"
+    ] > 0.999999
     flat = repr(out).lower()
     assert "g1_closure" not in flat
     assert "promotes_g1_closure" not in flat
+
+
+def test_direction_solve_contract_decomposes_regularization_vs_jvp():
+    drv = _load("run_g1_regularized_reference_newton_candidate")
+    n = 5
+    a = _spd(n)
+    shift = 0.25
+    k_reg = a + shift * np.eye(n)
+    f = np.arange(1.0, n + 1.0)
+
+    def residual_fn(x):
+        return a @ np.asarray(x, dtype=np.float64) - f
+
+    def component_residual_fn(x):
+        x = np.asarray(x, dtype=np.float64)
+        return {
+            "linear_component": a @ x,
+            "zero_component": np.zeros_like(x),
+        }
+
+    row_metadata = {
+        "free": np.arange(12, 12 + n, dtype=np.int64),
+        "node_id": np.asarray([100, 101, 102], dtype=np.int64),
+        "dof_per_node": 6,
+    }
+
+    def direction_fn(x, r):
+        p = np.linalg.solve(k_reg, -np.asarray(r, dtype=np.float64))
+        contract, action_meta = drv.regularized_direction_solve_contract(
+            a,
+            k_reg,
+            p,
+            r,
+            regularization_mode="scalar_shift",
+            regularization_mu=shift,
+            effective_shift=shift,
+            scale_source="absolute",
+        )
+        return p, {
+            "reason_code": "ok",
+            "direction_solve_contract": contract,
+            "_row_metadata": row_metadata,
+            "_component_residual_fn": component_residual_fn,
+            "_tangent_component_actions": {
+                "linear_component": a @ p,
+                "zero_component": np.zeros_like(p),
+            },
+            **action_meta,
+        }
+
+    out = drv.run_multistep_newton(
+        residual_fn,
+        np.zeros(n),
+        direction_fn,
+        max_newton_steps=1,
+        residual_gate_n=1e-12,
+    )
+
+    row = out["newton_history"][0]
+    contract = row["direction_solve_contract"]
+    assert contract["regularized_linear_solve_relative_inf"] < 1.0e-12
+    assert contract["jvp_minus_unregularized_tangent_action_relative_inf"] < 1.0e-8
+    assert contract["unregularized_tangent_plus_residual_relative_inf"] > 0.0
+    assert contract["diagnostic_row_space"] == (
+        "free_reduced_dof_index_with_global_dof_mapping"
+    )
+    assert contract["dominant_jvp_minus_unregularized_tangent_action_rows"]
+    first_gap_row = contract["dominant_jvp_minus_unregularized_tangent_action_rows"][0]
+    assert "global_dof" in first_gap_row
+    assert "node_id" in first_gap_row
+    assert first_gap_row["dof_label"] in drv.DOF_LABELS
+    component_breakdown = contract["dominant_jvp_gap_component_breakdown"]
+    assert component_breakdown["status"] == "ready"
+    assert component_breakdown["component_names"] == [
+        "linear_component",
+        "zero_component",
+    ]
+    assert component_breakdown["rows"][0]["dominant_component"] == "linear_component"
+    assert component_breakdown["rows"][0]["dominant_component_tangent_gap"] in {
+        "linear_component",
+        "zero_component",
+    }
+    assert abs(
+        component_breakdown["rows"][0]["dominant_component_tangent_gap_value"]
+    ) < 1.0e-8
+    assert abs(component_breakdown["rows"][0]["component_sum_minus_total_jvp"]) < 1e-8
+    assert contract["dominant_unregularized_tangent_plus_residual_rows"]
+    assert contract["dominant_regularization_action_rows"]
+    assert abs(
+        contract["unregularized_tangent_plus_residual_relative_inf"]
+        - contract["regularization_action_vs_residual_inf"]
+    ) < 1.0e-12
+    summary = out["summary"]["directional_residual_jvp_contract"][
+        "direction_solve_contracts"
+    ]
+    assert summary["count"] == 1
+    assert summary["max_regularized_linear_solve_relative_inf"] < 1.0e-12
+    assert summary["dominant_jvp_gap_row_set"][
+        "diagnostic_row_space"
+    ] == "free_reduced_dof_index_with_global_dof_mapping"
+    assert summary["dominant_jvp_gap_row_set"][
+        "dominant_jvp_minus_unregularized_tangent_action_rows"
+    ]
+    assert summary["dominant_jvp_gap_row_set"][
+        "dominant_jvp_gap_component_breakdown"
+    ]["rows"][0]["dominant_component"] == "linear_component"
 
 
 def test_multistep_can_return_final_state_without_changing_default():
@@ -143,6 +259,12 @@ def test_line_search_no_descent():
     assert out["summary"]["signed_direction_step_count"] == 0
     assert out["newton_history"][0]["accepted_alpha"] is None
     assert out["newton_history"][0]["reverse_direction_line_search_preview"]["status"] == "ready"
+    assert out["newton_history"][0]["forward_residual_jvp_contract"][
+        "local_l2_residual_descent"
+    ] is False
+    assert out["newton_history"][0]["reverse_residual_jvp_contract"][
+        "local_l2_residual_descent"
+    ] is True
 
 
 def test_signed_direction_globalization_accepts_reverse_descent_only_when_enabled():
@@ -182,6 +304,11 @@ def test_signed_direction_globalization_accepts_reverse_descent_only_when_enable
     assert first["line_search_status"] == "ready_reverse_direction"
     assert first["forward_line_search_status"] == "no_descent_found"
     assert first["reverse_direction_line_search_preview"]["status"] == "ready"
+    assert first["forward_residual_jvp_contract"]["local_l2_residual_descent"] is False
+    assert first["accepted_residual_jvp_contract"]["local_l2_residual_descent"] is True
+    assert first["accepted_residual_jvp_contract"][
+        "jvp_plus_residual_relative_inf"
+    ] < 1.0e-6
 
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,799 @@
+{
+  "schema_version": "g1-adaptive-regularization-reference-newton.v1",
+  "generated_at": "2026-07-04T19:44:09.297084+00:00",
+  "is_candidate_only": true,
+  "promotes_g1_closure": false,
+  "load_scale": 1.0,
+  "frame_service_tangent_source": "real_per_element",
+  "frame_tangent_source": "force_based_residual_tangent",
+  "initial_checkpoint_npz": "implementation/phase1/release_evidence/productization/g1_adaptive_regularization_current450_force_frame_tangent_140step_diagnostic.npz",
+  "output_final_checkpoint_npz": "implementation/phase1/release_evidence/productization/g1_adaptive_relinearized_signed_current450_force_frame_tangent_from_0p428_diagnostic.npz",
+  "adaptive_strategy": {
+    "mode": "greedy_per_step_mu_selection",
+    "tangent_update_mode": "per_step_relinearized",
+    "allow_signed_direction_globalization": true,
+    "regularization_mode": "relative_diagonal_shift",
+    "mu_candidates": [
+      0.003,
+      0.0003,
+      3e-05,
+      3e-06
+    ],
+    "selection_metric": "min_residual_after_line_search"
+  },
+  "production_lambda": 515.4025311317521,
+  "material_tangent_update": {
+    "claim_boundary": "not_material_newton_breadth"
+  },
+  "claim_boundary": "non_promoting_adaptive_regularization_reference_candidate_only",
+  "status": "ready",
+  "reason_code": "max_steps",
+  "uses_real_mgt_model": true,
+  "mgt_source": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "initial_state": {
+    "source": "checkpoint",
+    "checkpoint": {
+      "path": "implementation/phase1/release_evidence/productization/g1_adaptive_regularization_current450_force_frame_tangent_140step_diagnostic.npz",
+      "content_sha256": "sha256:f262f6554c3d6c94050914048eadaf3ab5a5f5dad1eac734506f9679a41e143c",
+      "schema": "mgt-direct-residual-newton-state.v1",
+      "load_scale": 1.0,
+      "dof_count": 78282,
+      "free_dof_count": 58998,
+      "accepted_iteration_count": 83,
+      "direct_residual_inf_n": 0.4278807102111144
+    }
+  },
+  "baseline_fixed_mu": {
+    "mu": 3e-05,
+    "final_residual_n": 0.4278807085135352,
+    "total_reduction_ratio": 3.967412289966414e-09,
+    "residual_gate_passed": false,
+    "stop_reason": "max_steps"
+  },
+  "history": [
+    {
+      "iteration": 0,
+      "residual_before_n": 0.4278807102111144,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788070925399424,
+          "residual_reduction_ratio": 2.2368855105261458e-09
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788070923038735,
+          "residual_reduction_ratio": 2.29205718256895e-09
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278807092960304,
+          "residual_reduction_ratio": 2.1386428196695357e-09
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.125,
+          "residual_after_n": 0.4278807100789259,
+          "residual_reduction_ratio": 3.0893769975554203e-10
+        }
+      ],
+      "selected_mu": 0.0003,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.42788070923038735,
+      "residual_reduction_ratio": 2.29205718256895e-09,
+      "tangent_rebuilt": true,
+      "factorable_mu_count": 4
+    },
+    {
+      "iteration": 1,
+      "residual_before_n": 0.42788070923038735,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.015625,
+          "residual_after_n": 0.42788070907561293,
+          "residual_reduction_ratio": 3.6172328447463895e-10
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.4278807092268868,
+          "residual_reduction_ratio": 8.18109608853223e-12
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.015625,
+          "residual_after_n": 0.4278807091850174,
+          "residual_reduction_ratio": 1.060340628974065e-10
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.015625,
+          "residual_after_n": 0.4278807092096182,
+          "residual_reduction_ratio": 4.853961330396135e-11
+        }
+      ],
+      "selected_mu": 0.003,
+      "selected_alpha": 0.015625,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.42788070907561293,
+      "residual_reduction_ratio": 3.6172328447463895e-10,
+      "tangent_rebuilt": true,
+      "factorable_mu_count": 4
+    },
+    {
+      "iteration": 2,
+      "residual_before_n": 0.42788070907561293,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788070683299284,
+          "residual_reduction_ratio": 5.241227384326029e-09
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278807069863908,
+          "residual_reduction_ratio": 4.882721011529691e-09
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788070698224145,
+          "residual_reduction_ratio": 4.892418451597036e-09
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.125,
+          "residual_after_n": 0.4278807089085488,
+          "residual_reduction_ratio": 3.9044560027131666e-10
+        }
+      ],
+      "selected_mu": 0.003,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.42788070683299284,
+      "residual_reduction_ratio": 5.241227384326029e-09,
+      "tangent_rebuilt": true,
+      "factorable_mu_count": 4
+    },
+    {
+      "iteration": 3,
+      "residual_before_n": 0.42788070683299284,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278807025645961,
+          "residual_reduction_ratio": 9.975670038403073e-09
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.000244140625,
+          "residual_after_n": 0.4278807068077197,
+          "residual_reduction_ratio": 5.90658015866826e-11
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278807023291802,
+          "residual_reduction_ratio": 1.0525860559334641e-08
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.125,
+          "residual_after_n": 0.4278807063752199,
+          "residual_reduction_ratio": 1.0698611163411186e-09
+        }
+      ],
+      "selected_mu": 3e-05,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.4278807023291802,
+      "residual_reduction_ratio": 1.0525860559334641e-08,
+      "tangent_rebuilt": true,
+      "factorable_mu_count": 4
+    },
+    {
+      "iteration": 4,
+      "residual_before_n": 0.4278807023291802,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788069346043245,
+          "residual_reduction_ratio": 2.072715055370394e-08
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.000244140625,
+          "residual_after_n": 0.42788070228927233,
+          "residual_reduction_ratio": 9.32686484371262e-11
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.4278807023041844,
+          "residual_reduction_ratio": 5.841764558427262e-11
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.00390625,
+          "residual_after_n": 0.42788070231552533,
+          "residual_reduction_ratio": 3.191276201553179e-11
+        }
+      ],
+      "selected_mu": 0.003,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.42788069346043245,
+      "residual_reduction_ratio": 2.072715055370394e-08,
+      "tangent_rebuilt": true,
+      "factorable_mu_count": 4
+    },
+    {
+      "iteration": 5,
+      "residual_before_n": 0.42788069346043245,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.42788069344339386,
+          "residual_reduction_ratio": 3.9820896383813806e-11
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.25,
+          "residual_after_n": 0.4278806889057447,
+          "residual_reduction_ratio": 1.0644761045989664e-08
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00048828125,
+          "residual_after_n": 0.4278806934439767,
+          "residual_reduction_ratio": 3.8458677669960786e-11
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0001220703125,
+          "residual_after_n": 0.4278806934317343,
+          "residual_reduction_ratio": 6.707046006549835e-11
+        }
+      ],
+      "selected_mu": 0.0003,
+      "selected_alpha": 0.25,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.4278806889057447,
+      "residual_reduction_ratio": 1.0644761045989664e-08,
+      "tangent_rebuilt": true,
+      "factorable_mu_count": 4
+    },
+    {
+      "iteration": 6,
+      "residual_before_n": 0.4278806889057447,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0001220703125,
+          "residual_after_n": 0.4278806888909652,
+          "residual_reduction_ratio": 3.45411964868335e-11
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.125,
+          "residual_after_n": 0.4278806861783482,
+          "residual_reduction_ratio": 6.374198699686266e-09
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.000244140625,
+          "residual_after_n": 0.4278806888921791,
+          "residual_reduction_ratio": 3.17041489485826e-11
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0001220703125,
+          "residual_after_n": 0.42788068887120145,
+          "residual_reduction_ratio": 8.073104965761034e-11
+        }
+      ],
+      "selected_mu": 0.0003,
+      "selected_alpha": 0.125,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.4278806861783482,
+      "residual_reduction_ratio": 6.374198699686266e-09,
+      "tangent_rebuilt": true,
+      "factorable_mu_count": 4
+    },
+    {
+      "iteration": 7,
+      "residual_before_n": 0.4278806861783482,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0001220703125,
+          "residual_after_n": 0.42788068613460095,
+          "residual_reduction_ratio": 1.0224165164607373e-10
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.000244140625,
+          "residual_after_n": 0.4278806861401505,
+          "residual_reduction_ratio": 8.927177244807189e-11
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.0078125,
+          "residual_after_n": 0.42788068609213603,
+          "residual_reduction_ratio": 2.01486422070667e-10
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.42788068616596875,
+          "residual_reduction_ratio": 2.893196915324283e-11
+        }
+      ],
+      "selected_mu": 3e-05,
+      "selected_alpha": 0.0078125,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.42788068609213603,
+      "residual_reduction_ratio": 2.01486422070667e-10,
+      "tangent_rebuilt": true,
+      "factorable_mu_count": 4
+    },
+    {
+      "iteration": 8,
+      "residual_before_n": 0.42788068609213603,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.42788068607614194,
+          "residual_reduction_ratio": 3.7379801092286046e-11
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.42788068604176743,
+          "residual_reduction_ratio": 1.1771645652252733e-10
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.42788068603751017,
+          "residual_reduction_ratio": 1.276661021798471e-10
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.427880686072146,
+          "residual_reduction_ratio": 4.671865381481912e-11
+        }
+      ],
+      "selected_mu": 3e-05,
+      "selected_alpha": 0.0009765625,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.42788068603751017,
+      "residual_reduction_ratio": 1.276661021798471e-10,
+      "tangent_rebuilt": true,
+      "factorable_mu_count": 4
+    },
+    {
+      "iteration": 9,
+      "residual_before_n": 0.42788068603751017,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00048828125,
+          "residual_after_n": 0.4278806860225626,
+          "residual_reduction_ratio": 3.4934034655242364e-11
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00048828125,
+          "residual_after_n": 0.42788068598941487,
+          "residual_reduction_ratio": 1.1240354399112877e-10
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.4278806859725557,
+          "residual_reduction_ratio": 1.5180513716485032e-10
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.42788068598571405,
+          "residual_reduction_ratio": 1.2105272482833314e-10
+        }
+      ],
+      "selected_mu": 3e-05,
+      "selected_alpha": 0.0009765625,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.4278806859725557,
+      "residual_reduction_ratio": 1.5180513716485032e-10,
+      "tangent_rebuilt": true,
+      "factorable_mu_count": 4
+    },
+    {
+      "iteration": 10,
+      "residual_before_n": 0.4278806859725557,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.42788068597076134,
+          "residual_reduction_ratio": 4.193557950204528e-12
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.4278806859553561,
+          "residual_reduction_ratio": 4.019712892251488e-11
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.42788068592149875,
+          "residual_reduction_ratio": 1.193251720170807e-10
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.4278806859441737,
+          "residual_reduction_ratio": 6.633149000780758e-11
+        }
+      ],
+      "selected_mu": 3e-05,
+      "selected_alpha": 0.0009765625,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.42788068592149875,
+      "residual_reduction_ratio": 1.193251720170807e-10,
+      "tangent_rebuilt": true,
+      "factorable_mu_count": 4
+    },
+    {
+      "iteration": 11,
+      "residual_before_n": 0.42788068592149875,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.5,
+          "residual_after_n": 0.42788067334628765,
+          "residual_reduction_ratio": 2.938952728743531e-08
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.000244140625,
+          "residual_after_n": 0.4278806858819444,
+          "residual_reduction_ratio": 9.244249878291341e-11
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0001220703125,
+          "residual_after_n": 0.42788068589315675,
+          "residual_reduction_ratio": 6.623808073084115e-11
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.000244140625,
+          "residual_after_n": 0.4278806858848305,
+          "residual_reduction_ratio": 8.569731053353059e-11
+        }
+      ],
+      "selected_mu": 0.003,
+      "selected_alpha": 0.5,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.42788067334628765,
+      "residual_reduction_ratio": 2.938952728743531e-08,
+      "tangent_rebuilt": true,
+      "factorable_mu_count": 4
+    }
+  ],
+  "summary": {
+    "initial_residual_n": 0.4278807102111144,
+    "final_residual_n": 0.42788067334628765,
+    "total_reduction_ratio": 8.61567859149774e-08,
+    "monotonic_residual_decrease": true,
+    "residual_gate_n": 0.0005,
+    "residual_gate_passed": false,
+    "stop_reason": "max_steps",
+    "steps_taken": 12,
+    "selected_mu_schedule": [
+      0.0003,
+      0.003,
+      0.003,
+      3e-05,
+      0.003,
+      0.0003,
+      0.0003,
+      3e-05,
+      3e-05,
+      3e-05,
+      3e-05,
+      0.003
+    ],
+    "beats_fixed_mu_baseline": true
+  },
+  "output_final_checkpoint": {
+    "written": true,
+    "path": "implementation/phase1/release_evidence/productization/g1_adaptive_relinearized_signed_current450_force_frame_tangent_from_0p428_diagnostic.npz",
+    "schema": "mgt-direct-residual-newton-state.v1",
+    "load_scale": 1.0,
+    "dof_count": 78282,
+    "free_dof_count": 58998,
+    "direct_residual_inf_n": 0.42788067334628765,
+    "direct_relative_residual_inf": 3.235191575433476e-05,
+    "max_translation_m": 0.05356321534783758,
+    "accepted_iteration_count": 12,
+    "accepted_history_count": 0,
+    "residual_gate_n": 0.0005,
+    "residual_gate_passed": false,
+    "promotes_g1_closure": false,
+    "claim_boundary": "This is a loadable adaptive-regularization checkpoint candidate only. It does not close G1 unless direct residual, increment, full-mesh, material breadth, and production ROCm/HIP gates also pass."
+  },
+  "resource_usage": {
+    "dof_count": 78282,
+    "free_dof_count": 58998,
+    "element_count": 12728,
+    "factorable_mu_count": null
+  }
+}

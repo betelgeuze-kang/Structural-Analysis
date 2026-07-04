@@ -1,0 +1,132 @@
+{
+  "schema_version": "g1-adaptive-regularization-reference-newton.v1",
+  "generated_at": "2026-07-04T19:37:56.415966+00:00",
+  "is_candidate_only": true,
+  "promotes_g1_closure": false,
+  "load_scale": 1.0,
+  "frame_service_tangent_source": "real_per_element",
+  "frame_tangent_source": "force_based_residual_tangent",
+  "initial_checkpoint_npz": "implementation/phase1/release_evidence/productization/g1_adaptive_regularization_current450_force_frame_tangent_140step_diagnostic.npz",
+  "output_final_checkpoint_npz": "implementation/phase1/release_evidence/productization/g1_adaptive_relinearized_current450_force_frame_tangent_from_0p428_diagnostic.npz",
+  "adaptive_strategy": {
+    "mode": "greedy_per_step_mu_selection",
+    "tangent_update_mode": "per_step_relinearized",
+    "regularization_mode": "relative_diagonal_shift",
+    "mu_candidates": [
+      0.003,
+      0.0003,
+      3e-05,
+      3e-06
+    ],
+    "selection_metric": "min_residual_after_line_search"
+  },
+  "production_lambda": 515.4025311317521,
+  "material_tangent_update": {
+    "claim_boundary": "not_material_newton_breadth"
+  },
+  "claim_boundary": "non_promoting_adaptive_regularization_reference_candidate_only",
+  "status": "review",
+  "reason_code": "no_candidate_descent",
+  "uses_real_mgt_model": true,
+  "mgt_source": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "initial_state": {
+    "source": "checkpoint",
+    "checkpoint": {
+      "path": "implementation/phase1/release_evidence/productization/g1_adaptive_regularization_current450_force_frame_tangent_140step_diagnostic.npz",
+      "content_sha256": "sha256:f262f6554c3d6c94050914048eadaf3ab5a5f5dad1eac734506f9679a41e143c",
+      "schema": "mgt-direct-residual-newton-state.v1",
+      "load_scale": 1.0,
+      "dof_count": 78282,
+      "free_dof_count": 58998,
+      "accepted_iteration_count": 83,
+      "direct_residual_inf_n": 0.4278807102111144
+    }
+  },
+  "baseline_fixed_mu": {
+    "mu": 3e-05,
+    "final_residual_n": 0.4278807102111144,
+    "total_reduction_ratio": 0.0,
+    "residual_gate_passed": false,
+    "stop_reason": "no_candidate_descent"
+  },
+  "history": [
+    {
+      "iteration": 0,
+      "residual_before_n": 0.4278807102111144,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "no_descent_found",
+          "accepted_alpha": null,
+          "residual_after_n": null,
+          "residual_reduction_ratio": 0.0
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "no_descent_found",
+          "accepted_alpha": null,
+          "residual_after_n": null,
+          "residual_reduction_ratio": 0.0
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "no_descent_found",
+          "accepted_alpha": null,
+          "residual_after_n": null,
+          "residual_reduction_ratio": 0.0
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "no_descent_found",
+          "accepted_alpha": null,
+          "residual_after_n": null,
+          "residual_reduction_ratio": 0.0
+        }
+      ],
+      "selected_mu": null,
+      "tangent_rebuilt": true,
+      "factorable_mu_count": 4
+    }
+  ],
+  "summary": {
+    "initial_residual_n": 0.4278807102111144,
+    "final_residual_n": 0.4278807102111144,
+    "total_reduction_ratio": 0.0,
+    "monotonic_residual_decrease": true,
+    "residual_gate_n": 0.0005,
+    "residual_gate_passed": false,
+    "stop_reason": "no_candidate_descent",
+    "steps_taken": 1,
+    "selected_mu_schedule": [
+      null
+    ],
+    "beats_fixed_mu_baseline": false
+  },
+  "output_final_checkpoint": {
+    "written": true,
+    "path": "implementation/phase1/release_evidence/productization/g1_adaptive_relinearized_current450_force_frame_tangent_from_0p428_diagnostic.npz",
+    "schema": "mgt-direct-residual-newton-state.v1",
+    "load_scale": 1.0,
+    "dof_count": 78282,
+    "free_dof_count": 58998,
+    "direct_residual_inf_n": 0.4278807102111144,
+    "direct_relative_residual_inf": 3.2351918541672075e-05,
+    "max_translation_m": 0.053567823025692914,
+    "accepted_iteration_count": 1,
+    "accepted_history_count": 0,
+    "residual_gate_n": 0.0005,
+    "residual_gate_passed": false,
+    "promotes_g1_closure": false,
+    "claim_boundary": "This is a loadable adaptive-regularization checkpoint candidate only. It does not close G1 unless direct residual, increment, full-mesh, material breadth, and production ROCm/HIP gates also pass."
+  },
+  "resource_usage": {
+    "dof_count": 78282,
+    "free_dof_count": 58998,
+    "element_count": 12728,
+    "factorable_mu_count": null
+  }
+}
