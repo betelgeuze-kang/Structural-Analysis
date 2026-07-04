@@ -46,7 +46,7 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "actual_closure_complete_component_count": 1,
         "actual_closure_requirement_count": 19,
         "actual_closure_requirement_pass_count": 10,
-        "blocker_count": 10,
+        "blocker_count": 9,
         "blocked_component_operator_action_count": 2,
         "closes_actual_closure_criteria_count": 19,
         "component_count": 3,
@@ -58,10 +58,10 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "row_template_artifact_count": 6,
         "science_actual_closure_blocker_count": 2,
         "slot_count": 6,
-        "upstream_source_blocker_count": 8,
+        "upstream_source_blocker_count": 7,
         "upstream_source_context_count": 2,
     }
-    assert payload["blocker_count"] == 10
+    assert payload["blocker_count"] == 9
     assert payload["science_actual_closure_blockers"] == [
         (
             "public_benchmark_phase2_actual_closure::"
@@ -383,7 +383,7 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert public_manifest_action["supported_manifest_candidate_paths"][3].endswith(
         "public_benchmark_vina_gnina_input_manifest.csv"
     )
-    assert public_manifest_action["detected_manifest_artifact_count"] == 0
+    assert public_manifest_action["detected_manifest_artifact_count"] == 1
     assert public_manifest_action["input_manifest_load_errors"] == []
     assert public_manifest_action["template_safety_policy"][
         "template_is_not_evidence"
@@ -532,7 +532,7 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert "pocketmd_lite_topk_rows_not_acquired" in pocketmd_action[
         "upstream_source_blockers"
     ]
-    assert len(payload["upstream_source_blockers"]) == 8
+    assert len(payload["upstream_source_blockers"]) == 7
     assert payload["upstream_source_acquisition"]["public_benchmark_phase2"][
         "present"
     ] is True
@@ -678,7 +678,7 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert "public_benchmark_vina_gnina_engine_runtime_not_ready" in vina_gnina[
         "upstream_source_blockers"
     ]
-    assert "public_benchmark_vina_gnina_input_manifest_not_detected" in vina_gnina[
+    assert "public_benchmark_vina_gnina_input_manifest_not_detected" not in vina_gnina[
         "upstream_source_blockers"
     ]
     vina_detail = vina_gnina["row_input_slot_detail"]
@@ -970,7 +970,7 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "| `subset_rows` | `provided` |" in markdown
     assert "| `vina_gnina_rows` | `operator_input_required` |" in markdown
     assert "| `pocketmd_rows` | `operator_input_required` |" in markdown
-    assert "- `blocker_count`: `10`" in markdown
+    assert "- `blocker_count`: `9`" in markdown
     assert "## Actual Closure Progress" in markdown
     assert "- `requirements`: `10/19`" in markdown
     assert "- `blocked_requirement_count`: `9`" in markdown
@@ -1090,7 +1090,7 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
         "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing"
         in markdown
     )
-    assert "public_benchmark_vina_gnina_input_manifest_not_detected" in markdown
+    assert "public_benchmark_vina_gnina_input_manifest_not_detected" not in markdown
     assert "### Vina/GNINA Engine Run Slots" in markdown
     assert "`operator_unblock_status`: `engine_inputs_required`" in markdown
     assert "`missing_engine_ids`: `vina`, `gnina`" in markdown

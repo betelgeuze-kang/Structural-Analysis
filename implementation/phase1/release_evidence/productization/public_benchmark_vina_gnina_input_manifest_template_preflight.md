@@ -11,7 +11,7 @@
 - `missing_receipt_ref_count`: `60`
 - `source_file_missing_count`: `24`
 - `source_url_probe_count`: `1`
-- `known_source_url_content_length_gib`: `1.465`
+- `known_source_url_content_length_gib`: `0.0`
 - `prepared_input_missing_count`: `24`
 - `receipt_ref_missing_count`: `60`
 
@@ -65,7 +65,7 @@
 
 | URL | Status | Size Bytes | Cases |
 |---|---|---:|---:|
-| `https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz` | `reachable` | `1572660769` | `12` |
+| `https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz` | `not_run` | `0` | `12` |
 
 ## Prepared Input Plan
 
@@ -166,6 +166,7 @@
 - `write_preflight`: `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md`
 - `probe_source_urls`: `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md --probe-source-urls`
 - `materialize_input_manifest_from_casf_archive`: `python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --extract-dir tmp/public_benchmark_vina_gnina/casf2016_source_files --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json`
+- `materialize_input_manifest_working_copy_from_template`: `python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_template.py --template implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_template_report.json`
 - `rerun_execution_plan`: `python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json`
 - `rerun_runtime_readiness`: `python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json`
 

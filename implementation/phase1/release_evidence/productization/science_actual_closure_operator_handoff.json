@@ -1453,10 +1453,10 @@
               ],
               "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
               "default_execution_plan_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
-              "detected_manifest_artifact_count": 0,
+              "detected_manifest_artifact_count": 1,
               "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
               "input_manifest_load_errors": [],
-              "input_manifest_row_count": 0,
+              "input_manifest_row_count": 12,
               "operator_must_fill_or_verify": [
                 "prepared_receptor_path",
                 "prepared_receptor_checksum",
@@ -1471,8 +1471,8 @@
               "recommended_template_dropzone": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
               "recommended_template_dropzone_is_supported_candidate_path": true,
               "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-              "selected_manifest_format": "",
-              "selected_manifest_path": "",
+              "selected_manifest_format": "csv",
+              "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
               "status": "operator_manifest_required",
               "supported_manifest_candidate_paths": [
                 "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
@@ -1492,10 +1492,8 @@
               "verify_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
               "verify_runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
             },
-            "engine_input_manifest_current_blockers": [
-              "public_benchmark_vina_gnina_input_manifest_not_detected"
-            ],
-            "engine_input_manifest_current_status": "not_detected",
+            "engine_input_manifest_current_blockers": [],
+            "engine_input_manifest_current_status": "ready",
             "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
             "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
             "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
@@ -1753,15 +1751,14 @@
             "components": [
               {
                 "blockers": [
-                  "public_benchmark_vina_gnina_input_manifest_not_detected",
                   "public_benchmark_vina_gnina_case_inputs_incomplete"
                 ],
                 "component_id": "engine_input_manifest",
                 "current": {
                   "blocked_case_input_slot_count": 12,
-                  "input_manifest_detected": false,
-                  "input_manifest_row_count": 0,
-                  "input_manifest_status": "not_detected",
+                  "input_manifest_detected": true,
+                  "input_manifest_row_count": 12,
+                  "input_manifest_status": "ready",
                   "required_case_count": 12,
                   "template_manifest_ready": false,
                   "template_missing_local_file_count": 48,
@@ -1865,7 +1862,6 @@
                 "blockers": [
                   "vina_gnina_rows_not_provided",
                   "public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter",
-                  "public_benchmark_vina_gnina_input_manifest_not_detected",
                   "public_benchmark_vina_gnina_engine_runtime_not_ready"
                 ],
                 "component_id": "external_receipts",
@@ -1988,7 +1984,6 @@
             "pass": false,
             "ready_component_count": 0,
             "remaining_blockers": [
-              "public_benchmark_vina_gnina_input_manifest_not_detected",
               "public_benchmark_vina_gnina_case_inputs_incomplete",
               "vina_gnina_execution_plan_not_ready",
               "vina_binary_missing",
@@ -2015,7 +2010,6 @@
           "upstream_source_blockers": [
             "public_benchmark_vina_gnina_rows_not_acquired",
             "public_benchmark_vina_gnina_engine_runtime_not_ready",
-            "public_benchmark_vina_gnina_input_manifest_not_detected",
             "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
             "public_benchmark_external_receipts_not_attached"
           ]
@@ -2032,13 +2026,12 @@
       ]
     }
   ],
-  "blocker_count": 10,
+  "blocker_count": 9,
   "blockers": [
     "science_actual_closure::public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
     "science_actual_closure::pocketmd_lite_topk_actual_closure::pocketmd_lite_topk_rows_not_provided",
     "public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_rows_not_acquired",
     "public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_engine_runtime_not_ready",
-    "public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_input_manifest_not_detected",
     "public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
     "public_benchmark_phase2_source_acquisition::public_benchmark_external_receipts_not_attached",
     "pocketmd_lite_source_acquisition::pocketmd_lite_topk_rows_not_acquired",
@@ -4196,10 +4189,10 @@
         ],
         "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
         "default_execution_plan_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
-        "detected_manifest_artifact_count": 0,
+        "detected_manifest_artifact_count": 1,
         "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
         "input_manifest_load_errors": [],
-        "input_manifest_row_count": 0,
+        "input_manifest_row_count": 12,
         "operator_must_fill_or_verify": [
           "prepared_receptor_path",
           "prepared_receptor_checksum",
@@ -4214,8 +4207,8 @@
         "recommended_template_dropzone": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
         "recommended_template_dropzone_is_supported_candidate_path": true,
         "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-        "selected_manifest_format": "",
-        "selected_manifest_path": "",
+        "selected_manifest_format": "csv",
+        "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
         "status": "operator_manifest_required",
         "supported_manifest_candidate_paths": [
           "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
@@ -4235,10 +4228,8 @@
         "verify_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
         "verify_runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
       },
-      "engine_input_manifest_current_blockers": [
-        "public_benchmark_vina_gnina_input_manifest_not_detected"
-      ],
-      "engine_input_manifest_current_status": "not_detected",
+      "engine_input_manifest_current_blockers": [],
+      "engine_input_manifest_current_status": "ready",
       "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
       "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
       "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
@@ -4483,11 +4474,10 @@
     "status": "operator_input_required",
     "upstream_source_acquisition": {
       "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
-      "blocker_count": 5,
+      "blocker_count": 4,
       "blockers": [
         "public_benchmark_vina_gnina_rows_not_acquired",
         "public_benchmark_vina_gnina_engine_runtime_not_ready",
-        "public_benchmark_vina_gnina_input_manifest_not_detected",
         "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
         "public_benchmark_external_receipts_not_attached"
       ],
@@ -4662,10 +4652,10 @@
             ],
             "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
             "default_execution_plan_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
-            "detected_manifest_artifact_count": 0,
+            "detected_manifest_artifact_count": 1,
             "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
             "input_manifest_load_errors": [],
-            "input_manifest_row_count": 0,
+            "input_manifest_row_count": 12,
             "operator_must_fill_or_verify": [
               "prepared_receptor_path",
               "prepared_receptor_checksum",
@@ -4680,8 +4670,8 @@
             "recommended_template_dropzone": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
             "recommended_template_dropzone_is_supported_candidate_path": true,
             "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-            "selected_manifest_format": "",
-            "selected_manifest_path": "",
+            "selected_manifest_format": "csv",
+            "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
             "status": "operator_manifest_required",
             "supported_manifest_candidate_paths": [
               "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
@@ -4701,10 +4691,8 @@
             "verify_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
             "verify_runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
           },
-          "engine_input_manifest_current_blockers": [
-            "public_benchmark_vina_gnina_input_manifest_not_detected"
-          ],
-          "engine_input_manifest_current_status": "not_detected",
+          "engine_input_manifest_current_blockers": [],
+          "engine_input_manifest_current_status": "ready",
           "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
           "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
           "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
@@ -5155,7 +5143,7 @@
       "status": "operator_acquisition_required",
       "summary": {
         "actual_closure_ready": false,
-        "blocker_count": 5,
+        "blocker_count": 4,
         "external_receipt_all_expected_artifact_roles_complete": false,
         "external_receipt_blocked_official_role_count": 1,
         "external_receipt_completion_audit_status": "blocked_pending_vina_gnina_receipts",
@@ -5211,9 +5199,9 @@
         "vina_gnina_actual_evidence_required_engine_run_count": 24,
         "vina_gnina_execution_plan_ready": false,
         "vina_gnina_execution_plan_status": "engine_input_blocked",
-        "vina_gnina_input_manifest_detected": false,
-        "vina_gnina_input_manifest_row_count": 0,
-        "vina_gnina_input_manifest_status": "not_detected",
+        "vina_gnina_input_manifest_detected": true,
+        "vina_gnina_input_manifest_row_count": 12,
+        "vina_gnina_input_manifest_status": "ready",
         "vina_gnina_missing_engine_count": 2,
         "vina_gnina_required_engine_run_count": 24,
         "vina_gnina_rows_template_preflight_status": "operator_rows_completion_required",
@@ -5251,15 +5239,14 @@
         "components": [
           {
             "blockers": [
-              "public_benchmark_vina_gnina_input_manifest_not_detected",
               "public_benchmark_vina_gnina_case_inputs_incomplete"
             ],
             "component_id": "engine_input_manifest",
             "current": {
               "blocked_case_input_slot_count": 12,
-              "input_manifest_detected": false,
-              "input_manifest_row_count": 0,
-              "input_manifest_status": "not_detected",
+              "input_manifest_detected": true,
+              "input_manifest_row_count": 12,
+              "input_manifest_status": "ready",
               "required_case_count": 12,
               "template_manifest_ready": false,
               "template_missing_local_file_count": 48,
@@ -5363,7 +5350,6 @@
             "blockers": [
               "vina_gnina_rows_not_provided",
               "public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter",
-              "public_benchmark_vina_gnina_input_manifest_not_detected",
               "public_benchmark_vina_gnina_engine_runtime_not_ready"
             ],
             "component_id": "external_receipts",
@@ -5486,7 +5472,6 @@
         "pass": false,
         "ready_component_count": 0,
         "remaining_blockers": [
-          "public_benchmark_vina_gnina_input_manifest_not_detected",
           "public_benchmark_vina_gnina_case_inputs_incomplete",
           "vina_gnina_execution_plan_not_ready",
           "vina_binary_missing",
@@ -5603,20 +5588,19 @@
     "upstream_source_blockers": [
       "public_benchmark_vina_gnina_rows_not_acquired",
       "public_benchmark_vina_gnina_engine_runtime_not_ready",
-      "public_benchmark_vina_gnina_input_manifest_not_detected",
       "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
       "public_benchmark_external_receipts_not_attached"
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T08:22:16.118109+00:00",
+  "generated_at": "2026-07-04T08:36:54.602150+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:86198e034f7edd40f87f92cafc4af6df65a8979a2e306e4cb5cbb16196f9da52",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:1cb7df67297b5c43a7e5dbc1629b66259944a63feb8ec0cf93839895ce2da3d3",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:a6fa0328fbbdc35c1ff47f966c085b5ae0fc5e6dfa2f1aba17e647681cdc246a",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:dc39006a0ed93c7141d4421294cb9d47e1af8a3c6fc2fe3531aeae754de53c89",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:09354cd520764e9fb23e9a23e1eed17a38e73328687154c5d35c5411731af093",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:0252ff361623b5f3011177634c55d6826868ef9d51e770602c74f7fda74f12a5",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:78a0edc4ff8c726f757d759073996fe609da7b09f1d86a753edd1316cd810a85",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:ab6c8e6620229a2eaaeec0eaec6a69f1878343bc58dc14732851c077b5d2d2a7",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:20162947a9e109a284ae1d6ba1c527a8e653dcf3410ce03cd04e2f0c12cbed53",
     "scripts/build_science_actual_closure_operator_handoff.py": "sha256:e421130fd064b5d3372981d3c7478cac2577df9f62cd78a6a0d6467b90bb6ab8"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
@@ -7540,7 +7524,6 @@
         "upstream_source_blockers": [
           "public_benchmark_vina_gnina_rows_not_acquired",
           "public_benchmark_vina_gnina_engine_runtime_not_ready",
-          "public_benchmark_vina_gnina_input_manifest_not_detected",
           "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
           "public_benchmark_external_receipts_not_attached"
         ],
@@ -9453,7 +9436,6 @@
       "upstream_source_blockers": [
         "public_benchmark_vina_gnina_rows_not_acquired",
         "public_benchmark_vina_gnina_engine_runtime_not_ready",
-        "public_benchmark_vina_gnina_input_manifest_not_detected",
         "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
         "public_benchmark_external_receipts_not_attached"
       ],
@@ -9617,11 +9599,10 @@
       "status": "provided",
       "upstream_source_acquisition": {
         "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
-        "blocker_count": 5,
+        "blocker_count": 4,
         "blockers": [
           "public_benchmark_vina_gnina_rows_not_acquired",
           "public_benchmark_vina_gnina_engine_runtime_not_ready",
-          "public_benchmark_vina_gnina_input_manifest_not_detected",
           "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
           "public_benchmark_external_receipts_not_attached"
         ],
@@ -9796,10 +9777,10 @@
               ],
               "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
               "default_execution_plan_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
-              "detected_manifest_artifact_count": 0,
+              "detected_manifest_artifact_count": 1,
               "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
               "input_manifest_load_errors": [],
-              "input_manifest_row_count": 0,
+              "input_manifest_row_count": 12,
               "operator_must_fill_or_verify": [
                 "prepared_receptor_path",
                 "prepared_receptor_checksum",
@@ -9814,8 +9795,8 @@
               "recommended_template_dropzone": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
               "recommended_template_dropzone_is_supported_candidate_path": true,
               "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-              "selected_manifest_format": "",
-              "selected_manifest_path": "",
+              "selected_manifest_format": "csv",
+              "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
               "status": "operator_manifest_required",
               "supported_manifest_candidate_paths": [
                 "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
@@ -9835,10 +9816,8 @@
               "verify_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
               "verify_runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
             },
-            "engine_input_manifest_current_blockers": [
-              "public_benchmark_vina_gnina_input_manifest_not_detected"
-            ],
-            "engine_input_manifest_current_status": "not_detected",
+            "engine_input_manifest_current_blockers": [],
+            "engine_input_manifest_current_status": "ready",
             "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
             "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
             "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
@@ -10289,7 +10268,7 @@
         "status": "operator_acquisition_required",
         "summary": {
           "actual_closure_ready": false,
-          "blocker_count": 5,
+          "blocker_count": 4,
           "external_receipt_all_expected_artifact_roles_complete": false,
           "external_receipt_blocked_official_role_count": 1,
           "external_receipt_completion_audit_status": "blocked_pending_vina_gnina_receipts",
@@ -10345,9 +10324,9 @@
           "vina_gnina_actual_evidence_required_engine_run_count": 24,
           "vina_gnina_execution_plan_ready": false,
           "vina_gnina_execution_plan_status": "engine_input_blocked",
-          "vina_gnina_input_manifest_detected": false,
-          "vina_gnina_input_manifest_row_count": 0,
-          "vina_gnina_input_manifest_status": "not_detected",
+          "vina_gnina_input_manifest_detected": true,
+          "vina_gnina_input_manifest_row_count": 12,
+          "vina_gnina_input_manifest_status": "ready",
           "vina_gnina_missing_engine_count": 2,
           "vina_gnina_required_engine_run_count": 24,
           "vina_gnina_rows_template_preflight_status": "operator_rows_completion_required",
@@ -10385,15 +10364,14 @@
           "components": [
             {
               "blockers": [
-                "public_benchmark_vina_gnina_input_manifest_not_detected",
                 "public_benchmark_vina_gnina_case_inputs_incomplete"
               ],
               "component_id": "engine_input_manifest",
               "current": {
                 "blocked_case_input_slot_count": 12,
-                "input_manifest_detected": false,
-                "input_manifest_row_count": 0,
-                "input_manifest_status": "not_detected",
+                "input_manifest_detected": true,
+                "input_manifest_row_count": 12,
+                "input_manifest_status": "ready",
                 "required_case_count": 12,
                 "template_manifest_ready": false,
                 "template_missing_local_file_count": 48,
@@ -10497,7 +10475,6 @@
               "blockers": [
                 "vina_gnina_rows_not_provided",
                 "public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter",
-                "public_benchmark_vina_gnina_input_manifest_not_detected",
                 "public_benchmark_vina_gnina_engine_runtime_not_ready"
               ],
               "component_id": "external_receipts",
@@ -10620,7 +10597,6 @@
           "pass": false,
           "ready_component_count": 0,
           "remaining_blockers": [
-            "public_benchmark_vina_gnina_input_manifest_not_detected",
             "public_benchmark_vina_gnina_case_inputs_incomplete",
             "vina_gnina_execution_plan_not_ready",
             "vina_binary_missing",
@@ -10737,7 +10713,6 @@
       "upstream_source_blockers": [
         "public_benchmark_vina_gnina_rows_not_acquired",
         "public_benchmark_vina_gnina_engine_runtime_not_ready",
-        "public_benchmark_vina_gnina_input_manifest_not_detected",
         "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
         "public_benchmark_external_receipts_not_attached"
       ],
@@ -10878,11 +10853,10 @@
       "status": "provided",
       "upstream_source_acquisition": {
         "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
-        "blocker_count": 5,
+        "blocker_count": 4,
         "blockers": [
           "public_benchmark_vina_gnina_rows_not_acquired",
           "public_benchmark_vina_gnina_engine_runtime_not_ready",
-          "public_benchmark_vina_gnina_input_manifest_not_detected",
           "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
           "public_benchmark_external_receipts_not_attached"
         ],
@@ -11057,10 +11031,10 @@
               ],
               "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
               "default_execution_plan_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
-              "detected_manifest_artifact_count": 0,
+              "detected_manifest_artifact_count": 1,
               "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
               "input_manifest_load_errors": [],
-              "input_manifest_row_count": 0,
+              "input_manifest_row_count": 12,
               "operator_must_fill_or_verify": [
                 "prepared_receptor_path",
                 "prepared_receptor_checksum",
@@ -11075,8 +11049,8 @@
               "recommended_template_dropzone": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
               "recommended_template_dropzone_is_supported_candidate_path": true,
               "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-              "selected_manifest_format": "",
-              "selected_manifest_path": "",
+              "selected_manifest_format": "csv",
+              "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
               "status": "operator_manifest_required",
               "supported_manifest_candidate_paths": [
                 "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
@@ -11096,10 +11070,8 @@
               "verify_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
               "verify_runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
             },
-            "engine_input_manifest_current_blockers": [
-              "public_benchmark_vina_gnina_input_manifest_not_detected"
-            ],
-            "engine_input_manifest_current_status": "not_detected",
+            "engine_input_manifest_current_blockers": [],
+            "engine_input_manifest_current_status": "ready",
             "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
             "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
             "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
@@ -11550,7 +11522,7 @@
         "status": "operator_acquisition_required",
         "summary": {
           "actual_closure_ready": false,
-          "blocker_count": 5,
+          "blocker_count": 4,
           "external_receipt_all_expected_artifact_roles_complete": false,
           "external_receipt_blocked_official_role_count": 1,
           "external_receipt_completion_audit_status": "blocked_pending_vina_gnina_receipts",
@@ -11606,9 +11578,9 @@
           "vina_gnina_actual_evidence_required_engine_run_count": 24,
           "vina_gnina_execution_plan_ready": false,
           "vina_gnina_execution_plan_status": "engine_input_blocked",
-          "vina_gnina_input_manifest_detected": false,
-          "vina_gnina_input_manifest_row_count": 0,
-          "vina_gnina_input_manifest_status": "not_detected",
+          "vina_gnina_input_manifest_detected": true,
+          "vina_gnina_input_manifest_row_count": 12,
+          "vina_gnina_input_manifest_status": "ready",
           "vina_gnina_missing_engine_count": 2,
           "vina_gnina_required_engine_run_count": 24,
           "vina_gnina_rows_template_preflight_status": "operator_rows_completion_required",
@@ -11646,15 +11618,14 @@
           "components": [
             {
               "blockers": [
-                "public_benchmark_vina_gnina_input_manifest_not_detected",
                 "public_benchmark_vina_gnina_case_inputs_incomplete"
               ],
               "component_id": "engine_input_manifest",
               "current": {
                 "blocked_case_input_slot_count": 12,
-                "input_manifest_detected": false,
-                "input_manifest_row_count": 0,
-                "input_manifest_status": "not_detected",
+                "input_manifest_detected": true,
+                "input_manifest_row_count": 12,
+                "input_manifest_status": "ready",
                 "required_case_count": 12,
                 "template_manifest_ready": false,
                 "template_missing_local_file_count": 48,
@@ -11758,7 +11729,6 @@
               "blockers": [
                 "vina_gnina_rows_not_provided",
                 "public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter",
-                "public_benchmark_vina_gnina_input_manifest_not_detected",
                 "public_benchmark_vina_gnina_engine_runtime_not_ready"
               ],
               "component_id": "external_receipts",
@@ -11881,7 +11851,6 @@
           "pass": false,
           "ready_component_count": 0,
           "remaining_blockers": [
-            "public_benchmark_vina_gnina_input_manifest_not_detected",
             "public_benchmark_vina_gnina_case_inputs_incomplete",
             "vina_gnina_execution_plan_not_ready",
             "vina_binary_missing",
@@ -11998,7 +11967,6 @@
       "upstream_source_blockers": [
         "public_benchmark_vina_gnina_rows_not_acquired",
         "public_benchmark_vina_gnina_engine_runtime_not_ready",
-        "public_benchmark_vina_gnina_input_manifest_not_detected",
         "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
         "public_benchmark_external_receipts_not_attached"
       ],
@@ -12191,11 +12159,10 @@
       "status": "provided",
       "upstream_source_acquisition": {
         "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
-        "blocker_count": 5,
+        "blocker_count": 4,
         "blockers": [
           "public_benchmark_vina_gnina_rows_not_acquired",
           "public_benchmark_vina_gnina_engine_runtime_not_ready",
-          "public_benchmark_vina_gnina_input_manifest_not_detected",
           "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
           "public_benchmark_external_receipts_not_attached"
         ],
@@ -12370,10 +12337,10 @@
               ],
               "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
               "default_execution_plan_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
-              "detected_manifest_artifact_count": 0,
+              "detected_manifest_artifact_count": 1,
               "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
               "input_manifest_load_errors": [],
-              "input_manifest_row_count": 0,
+              "input_manifest_row_count": 12,
               "operator_must_fill_or_verify": [
                 "prepared_receptor_path",
                 "prepared_receptor_checksum",
@@ -12388,8 +12355,8 @@
               "recommended_template_dropzone": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
               "recommended_template_dropzone_is_supported_candidate_path": true,
               "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-              "selected_manifest_format": "",
-              "selected_manifest_path": "",
+              "selected_manifest_format": "csv",
+              "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
               "status": "operator_manifest_required",
               "supported_manifest_candidate_paths": [
                 "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
@@ -12409,10 +12376,8 @@
               "verify_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
               "verify_runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
             },
-            "engine_input_manifest_current_blockers": [
-              "public_benchmark_vina_gnina_input_manifest_not_detected"
-            ],
-            "engine_input_manifest_current_status": "not_detected",
+            "engine_input_manifest_current_blockers": [],
+            "engine_input_manifest_current_status": "ready",
             "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
             "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
             "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
@@ -12863,7 +12828,7 @@
         "status": "operator_acquisition_required",
         "summary": {
           "actual_closure_ready": false,
-          "blocker_count": 5,
+          "blocker_count": 4,
           "external_receipt_all_expected_artifact_roles_complete": false,
           "external_receipt_blocked_official_role_count": 1,
           "external_receipt_completion_audit_status": "blocked_pending_vina_gnina_receipts",
@@ -12919,9 +12884,9 @@
           "vina_gnina_actual_evidence_required_engine_run_count": 24,
           "vina_gnina_execution_plan_ready": false,
           "vina_gnina_execution_plan_status": "engine_input_blocked",
-          "vina_gnina_input_manifest_detected": false,
-          "vina_gnina_input_manifest_row_count": 0,
-          "vina_gnina_input_manifest_status": "not_detected",
+          "vina_gnina_input_manifest_detected": true,
+          "vina_gnina_input_manifest_row_count": 12,
+          "vina_gnina_input_manifest_status": "ready",
           "vina_gnina_missing_engine_count": 2,
           "vina_gnina_required_engine_run_count": 24,
           "vina_gnina_rows_template_preflight_status": "operator_rows_completion_required",
@@ -12959,15 +12924,14 @@
           "components": [
             {
               "blockers": [
-                "public_benchmark_vina_gnina_input_manifest_not_detected",
                 "public_benchmark_vina_gnina_case_inputs_incomplete"
               ],
               "component_id": "engine_input_manifest",
               "current": {
                 "blocked_case_input_slot_count": 12,
-                "input_manifest_detected": false,
-                "input_manifest_row_count": 0,
-                "input_manifest_status": "not_detected",
+                "input_manifest_detected": true,
+                "input_manifest_row_count": 12,
+                "input_manifest_status": "ready",
                 "required_case_count": 12,
                 "template_manifest_ready": false,
                 "template_missing_local_file_count": 48,
@@ -13071,7 +13035,6 @@
               "blockers": [
                 "vina_gnina_rows_not_provided",
                 "public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter",
-                "public_benchmark_vina_gnina_input_manifest_not_detected",
                 "public_benchmark_vina_gnina_engine_runtime_not_ready"
               ],
               "component_id": "external_receipts",
@@ -13194,7 +13157,6 @@
           "pass": false,
           "ready_component_count": 0,
           "remaining_blockers": [
-            "public_benchmark_vina_gnina_input_manifest_not_detected",
             "public_benchmark_vina_gnina_case_inputs_incomplete",
             "vina_gnina_execution_plan_not_ready",
             "vina_binary_missing",
@@ -13311,7 +13273,6 @@
       "upstream_source_blockers": [
         "public_benchmark_vina_gnina_rows_not_acquired",
         "public_benchmark_vina_gnina_engine_runtime_not_ready",
-        "public_benchmark_vina_gnina_input_manifest_not_detected",
         "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
         "public_benchmark_external_receipts_not_attached"
       ],
@@ -14894,10 +14855,10 @@
           ],
           "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
           "default_execution_plan_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
-          "detected_manifest_artifact_count": 0,
+          "detected_manifest_artifact_count": 1,
           "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
           "input_manifest_load_errors": [],
-          "input_manifest_row_count": 0,
+          "input_manifest_row_count": 12,
           "operator_must_fill_or_verify": [
             "prepared_receptor_path",
             "prepared_receptor_checksum",
@@ -14912,8 +14873,8 @@
           "recommended_template_dropzone": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
           "recommended_template_dropzone_is_supported_candidate_path": true,
           "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-          "selected_manifest_format": "",
-          "selected_manifest_path": "",
+          "selected_manifest_format": "csv",
+          "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
           "status": "operator_manifest_required",
           "supported_manifest_candidate_paths": [
             "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
@@ -14933,10 +14894,8 @@
           "verify_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
           "verify_runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
         },
-        "engine_input_manifest_current_blockers": [
-          "public_benchmark_vina_gnina_input_manifest_not_detected"
-        ],
-        "engine_input_manifest_current_status": "not_detected",
+        "engine_input_manifest_current_blockers": [],
+        "engine_input_manifest_current_status": "ready",
         "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
         "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
         "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
@@ -15181,11 +15140,10 @@
       "status": "operator_input_required",
       "upstream_source_acquisition": {
         "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
-        "blocker_count": 5,
+        "blocker_count": 4,
         "blockers": [
           "public_benchmark_vina_gnina_rows_not_acquired",
           "public_benchmark_vina_gnina_engine_runtime_not_ready",
-          "public_benchmark_vina_gnina_input_manifest_not_detected",
           "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
           "public_benchmark_external_receipts_not_attached"
         ],
@@ -15360,10 +15318,10 @@
               ],
               "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
               "default_execution_plan_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
-              "detected_manifest_artifact_count": 0,
+              "detected_manifest_artifact_count": 1,
               "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
               "input_manifest_load_errors": [],
-              "input_manifest_row_count": 0,
+              "input_manifest_row_count": 12,
               "operator_must_fill_or_verify": [
                 "prepared_receptor_path",
                 "prepared_receptor_checksum",
@@ -15378,8 +15336,8 @@
               "recommended_template_dropzone": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
               "recommended_template_dropzone_is_supported_candidate_path": true,
               "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-              "selected_manifest_format": "",
-              "selected_manifest_path": "",
+              "selected_manifest_format": "csv",
+              "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
               "status": "operator_manifest_required",
               "supported_manifest_candidate_paths": [
                 "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
@@ -15399,10 +15357,8 @@
               "verify_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
               "verify_runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
             },
-            "engine_input_manifest_current_blockers": [
-              "public_benchmark_vina_gnina_input_manifest_not_detected"
-            ],
-            "engine_input_manifest_current_status": "not_detected",
+            "engine_input_manifest_current_blockers": [],
+            "engine_input_manifest_current_status": "ready",
             "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
             "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
             "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
@@ -15853,7 +15809,7 @@
         "status": "operator_acquisition_required",
         "summary": {
           "actual_closure_ready": false,
-          "blocker_count": 5,
+          "blocker_count": 4,
           "external_receipt_all_expected_artifact_roles_complete": false,
           "external_receipt_blocked_official_role_count": 1,
           "external_receipt_completion_audit_status": "blocked_pending_vina_gnina_receipts",
@@ -15909,9 +15865,9 @@
           "vina_gnina_actual_evidence_required_engine_run_count": 24,
           "vina_gnina_execution_plan_ready": false,
           "vina_gnina_execution_plan_status": "engine_input_blocked",
-          "vina_gnina_input_manifest_detected": false,
-          "vina_gnina_input_manifest_row_count": 0,
-          "vina_gnina_input_manifest_status": "not_detected",
+          "vina_gnina_input_manifest_detected": true,
+          "vina_gnina_input_manifest_row_count": 12,
+          "vina_gnina_input_manifest_status": "ready",
           "vina_gnina_missing_engine_count": 2,
           "vina_gnina_required_engine_run_count": 24,
           "vina_gnina_rows_template_preflight_status": "operator_rows_completion_required",
@@ -15949,15 +15905,14 @@
           "components": [
             {
               "blockers": [
-                "public_benchmark_vina_gnina_input_manifest_not_detected",
                 "public_benchmark_vina_gnina_case_inputs_incomplete"
               ],
               "component_id": "engine_input_manifest",
               "current": {
                 "blocked_case_input_slot_count": 12,
-                "input_manifest_detected": false,
-                "input_manifest_row_count": 0,
-                "input_manifest_status": "not_detected",
+                "input_manifest_detected": true,
+                "input_manifest_row_count": 12,
+                "input_manifest_status": "ready",
                 "required_case_count": 12,
                 "template_manifest_ready": false,
                 "template_missing_local_file_count": 48,
@@ -16061,7 +16016,6 @@
               "blockers": [
                 "vina_gnina_rows_not_provided",
                 "public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter",
-                "public_benchmark_vina_gnina_input_manifest_not_detected",
                 "public_benchmark_vina_gnina_engine_runtime_not_ready"
               ],
               "component_id": "external_receipts",
@@ -16184,7 +16138,6 @@
           "pass": false,
           "ready_component_count": 0,
           "remaining_blockers": [
-            "public_benchmark_vina_gnina_input_manifest_not_detected",
             "public_benchmark_vina_gnina_case_inputs_incomplete",
             "vina_gnina_execution_plan_not_ready",
             "vina_binary_missing",
@@ -16301,7 +16254,6 @@
       "upstream_source_blockers": [
         "public_benchmark_vina_gnina_rows_not_acquired",
         "public_benchmark_vina_gnina_engine_runtime_not_ready",
-        "public_benchmark_vina_gnina_input_manifest_not_detected",
         "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
         "public_benchmark_external_receipts_not_attached"
       ],
@@ -19037,7 +18989,7 @@
   },
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "fa32ae270001380d06a740bdbc98af4d082e6b6d",
+  "source_commit_sha": "78538d6ecb7096aec38e7679ded4367b401d53e0",
   "status": "operator_rows_required",
   "summary": {
     "actual_closure_blocked_component_count": 2,
@@ -19046,7 +18998,7 @@
     "actual_closure_requirement_count": 19,
     "actual_closure_requirement_pass_count": 10,
     "blocked_component_operator_action_count": 2,
-    "blocker_count": 10,
+    "blocker_count": 9,
     "closes_actual_closure_criteria_count": 19,
     "component_count": 3,
     "expected_slot_count": 6,
@@ -19057,7 +19009,7 @@
     "row_template_artifact_count": 6,
     "science_actual_closure_blocker_count": 2,
     "slot_count": 6,
-    "upstream_source_blocker_count": 8,
+    "upstream_source_blocker_count": 7,
     "upstream_source_context_count": 2
   },
   "upstream_source_acquisition": {
@@ -20793,11 +20745,10 @@
     },
     "public_benchmark_phase2": {
       "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
-      "blocker_count": 5,
+      "blocker_count": 4,
       "blockers": [
         "public_benchmark_vina_gnina_rows_not_acquired",
         "public_benchmark_vina_gnina_engine_runtime_not_ready",
-        "public_benchmark_vina_gnina_input_manifest_not_detected",
         "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
         "public_benchmark_external_receipts_not_attached"
       ],
@@ -20972,10 +20923,10 @@
             ],
             "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
             "default_execution_plan_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
-            "detected_manifest_artifact_count": 0,
+            "detected_manifest_artifact_count": 1,
             "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
             "input_manifest_load_errors": [],
-            "input_manifest_row_count": 0,
+            "input_manifest_row_count": 12,
             "operator_must_fill_or_verify": [
               "prepared_receptor_path",
               "prepared_receptor_checksum",
@@ -20990,8 +20941,8 @@
             "recommended_template_dropzone": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
             "recommended_template_dropzone_is_supported_candidate_path": true,
             "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-            "selected_manifest_format": "",
-            "selected_manifest_path": "",
+            "selected_manifest_format": "csv",
+            "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
             "status": "operator_manifest_required",
             "supported_manifest_candidate_paths": [
               "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
@@ -21011,10 +20962,8 @@
             "verify_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
             "verify_runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
           },
-          "engine_input_manifest_current_blockers": [
-            "public_benchmark_vina_gnina_input_manifest_not_detected"
-          ],
-          "engine_input_manifest_current_status": "not_detected",
+          "engine_input_manifest_current_blockers": [],
+          "engine_input_manifest_current_status": "ready",
           "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
           "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
           "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
@@ -21760,7 +21709,7 @@
       "status": "operator_acquisition_required",
       "summary": {
         "actual_closure_ready": false,
-        "blocker_count": 5,
+        "blocker_count": 4,
         "external_receipt_all_expected_artifact_roles_complete": false,
         "external_receipt_blocked_official_role_count": 1,
         "external_receipt_completion_audit_status": "blocked_pending_vina_gnina_receipts",
@@ -21816,9 +21765,9 @@
         "vina_gnina_actual_evidence_required_engine_run_count": 24,
         "vina_gnina_execution_plan_ready": false,
         "vina_gnina_execution_plan_status": "engine_input_blocked",
-        "vina_gnina_input_manifest_detected": false,
-        "vina_gnina_input_manifest_row_count": 0,
-        "vina_gnina_input_manifest_status": "not_detected",
+        "vina_gnina_input_manifest_detected": true,
+        "vina_gnina_input_manifest_row_count": 12,
+        "vina_gnina_input_manifest_status": "ready",
         "vina_gnina_missing_engine_count": 2,
         "vina_gnina_required_engine_run_count": 24,
         "vina_gnina_rows_template_preflight_status": "operator_rows_completion_required",
@@ -21856,15 +21805,14 @@
         "components": [
           {
             "blockers": [
-              "public_benchmark_vina_gnina_input_manifest_not_detected",
               "public_benchmark_vina_gnina_case_inputs_incomplete"
             ],
             "component_id": "engine_input_manifest",
             "current": {
               "blocked_case_input_slot_count": 12,
-              "input_manifest_detected": false,
-              "input_manifest_row_count": 0,
-              "input_manifest_status": "not_detected",
+              "input_manifest_detected": true,
+              "input_manifest_row_count": 12,
+              "input_manifest_status": "ready",
               "required_case_count": 12,
               "template_manifest_ready": false,
               "template_missing_local_file_count": 48,
@@ -21968,7 +21916,6 @@
             "blockers": [
               "vina_gnina_rows_not_provided",
               "public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter",
-              "public_benchmark_vina_gnina_input_manifest_not_detected",
               "public_benchmark_vina_gnina_engine_runtime_not_ready"
             ],
             "component_id": "external_receipts",
@@ -22091,7 +22038,6 @@
         "pass": false,
         "ready_component_count": 0,
         "remaining_blockers": [
-          "public_benchmark_vina_gnina_input_manifest_not_detected",
           "public_benchmark_vina_gnina_case_inputs_incomplete",
           "vina_gnina_execution_plan_not_ready",
           "vina_binary_missing",
@@ -23507,7 +23453,6 @@
   "upstream_source_blockers": [
     "public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_rows_not_acquired",
     "public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_engine_runtime_not_ready",
-    "public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_input_manifest_not_detected",
     "public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
     "public_benchmark_phase2_source_acquisition::public_benchmark_external_receipts_not_attached",
     "pocketmd_lite_source_acquisition::pocketmd_lite_topk_rows_not_acquired",

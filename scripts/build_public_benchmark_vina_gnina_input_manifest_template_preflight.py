@@ -47,6 +47,9 @@ DEFAULT_CASF_ARCHIVE_OUT_MANIFEST = (
 DEFAULT_CASF_ARCHIVE_SOURCE_REPORT = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json"
 )
+DEFAULT_TEMPLATE_COPY_REPORT = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest_from_template_report.json"
+)
 SCHEMA_VERSION = "public-benchmark-vina-gnina-input-manifest-template-preflight.v1"
 DEFAULT_TIMEOUT_SECONDS = 20
 USER_AGENT = "codex-public-benchmark-vina-gnina-input-preflight/1.0"
@@ -833,6 +836,12 @@ def build_public_benchmark_vina_gnina_input_manifest_template_preflight(
                 f"--archive <CASF-2016.tar.gz> --extract-dir {DEFAULT_CASF_ARCHIVE_EXTRACT_DIR} "
                 f"--out-manifest {DEFAULT_CASF_ARCHIVE_OUT_MANIFEST} "
                 f"--out-report {DEFAULT_CASF_ARCHIVE_SOURCE_REPORT}"
+            ),
+            "materialize_input_manifest_working_copy_from_template": (
+                "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_template.py "
+                f"--template {DEFAULT_TEMPLATE} "
+                f"--out-manifest {DEFAULT_CASF_ARCHIVE_OUT_MANIFEST} "
+                f"--out-report {DEFAULT_TEMPLATE_COPY_REPORT}"
             ),
             "rerun_execution_plan": (
                 "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "

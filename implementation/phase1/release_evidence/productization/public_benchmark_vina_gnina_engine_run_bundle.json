@@ -10,7 +10,7 @@
       "case_id": "casf2016_4llx",
       "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/4llx_receptor --ligand prepared/4llx_ligand --center_x 4.43235 --center_y 13.11385 --center_z 43.2458 --size_x 20.1159 --size_y 21.3075 --size_z 21.9792 --out operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
       "complex_id": "4llx",
-      "config_checksum": "sha256:dee30cf8996531ffa96064d4e5b5a8e89d3aee5f4635400bf7a6aecc13ea8db4",
+      "config_checksum": "sha256:327f1079df1b5135c6364eeffb3fc9520a6e6524e99770ca6cb59c4ee640f24a",
       "config_path": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -43,7 +43,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:740e385f5a12882b6515f8f8c6228b5b62d5d051de2650ee2bd0073513471fc3",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
@@ -59,7 +59,7 @@
         "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/4llx_receptor --ligand prepared/4llx_ligand --center_x 4.43235 --center_y 13.11385 --center_z 43.2458 --size_x 20.1159 --size_y 21.3075 --size_z 21.9792 --out operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
         "complex_id": "4llx",
         "docking_run_id": "casf2016_4llx_vina_run",
-        "engine_config_checksum": "sha256:dee30cf8996531ffa96064d4e5b5a8e89d3aee5f4635400bf7a6aecc13ea8db4",
+        "engine_config_checksum": "sha256:327f1079df1b5135c6364eeffb3fc9520a6e6524e99770ca6cb59c4ee640f24a",
         "engine_id": "vina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
         "engine_version": "",
@@ -83,7 +83,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
       "reference_pose_id": "casf2016_4llx_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -91,7 +91,7 @@
       "case_id": "casf2016_4llx",
       "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/4llx_receptor --ligand prepared/4llx_ligand --center_x 4.43235 --center_y 13.11385 --center_z 43.2458 --size_x 20.1159 --size_y 21.3075 --size_z 21.9792 --out operator_attached/vina_gnina/casf2016_4llx/gnina_pose.sdf",
       "complex_id": "4llx",
-      "config_checksum": "sha256:24beb47293815743285eacb88aafc9385bc3d65a091e51f93a387e7cebab4b58",
+      "config_checksum": "sha256:1cbe86274b7fadeeed842b7cc797d34685dab8e9a559d0fedd8823d0909bd8e3",
       "config_path": "operator_attached/vina_gnina/casf2016_4llx/gnina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -124,7 +124,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:740e385f5a12882b6515f8f8c6228b5b62d5d051de2650ee2bd0073513471fc3",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_config.json",
@@ -140,7 +140,7 @@
         "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/4llx_receptor --ligand prepared/4llx_ligand --center_x 4.43235 --center_y 13.11385 --center_z 43.2458 --size_x 20.1159 --size_y 21.3075 --size_z 21.9792 --out operator_attached/vina_gnina/casf2016_4llx/gnina_pose.sdf",
         "complex_id": "4llx",
         "docking_run_id": "casf2016_4llx_gnina_run",
-        "engine_config_checksum": "sha256:24beb47293815743285eacb88aafc9385bc3d65a091e51f93a387e7cebab4b58",
+        "engine_config_checksum": "sha256:1cbe86274b7fadeeed842b7cc797d34685dab8e9a559d0fedd8823d0909bd8e3",
         "engine_id": "gnina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_run_receipt.json",
         "engine_version": "",
@@ -164,7 +164,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_run_receipt.json",
       "reference_pose_id": "casf2016_4llx_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -172,7 +172,7 @@
       "case_id": "casf2016_5c28",
       "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/5c28_receptor --ligand prepared/5c28_ligand --center_x 3.85875 --center_y 12.7493 --center_z 42.1003 --size_x 19.3455 --size_y 21.8 --size_z 23.8036 --out operator_attached/vina_gnina/casf2016_5c28/vina_pose.sdf",
       "complex_id": "5c28",
-      "config_checksum": "sha256:4b4c5f356be86ac3bfad7e0b309520efd285d18929ce93b9027f3580dd43602a",
+      "config_checksum": "sha256:d862a6485e7e539c22b633ab61926a5f0557d2009a997f47da3974556aacf929",
       "config_path": "operator_attached/vina_gnina/casf2016_5c28/vina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -205,7 +205,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:9439782979e3d784197b0cb71e96c67e8f88bbbee1c3c203dfe1bf2e2593c899",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_config.json",
@@ -221,7 +221,7 @@
         "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/5c28_receptor --ligand prepared/5c28_ligand --center_x 3.85875 --center_y 12.7493 --center_z 42.1003 --size_x 19.3455 --size_y 21.8 --size_z 23.8036 --out operator_attached/vina_gnina/casf2016_5c28/vina_pose.sdf",
         "complex_id": "5c28",
         "docking_run_id": "casf2016_5c28_vina_run",
-        "engine_config_checksum": "sha256:4b4c5f356be86ac3bfad7e0b309520efd285d18929ce93b9027f3580dd43602a",
+        "engine_config_checksum": "sha256:d862a6485e7e539c22b633ab61926a5f0557d2009a997f47da3974556aacf929",
         "engine_id": "vina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_run_receipt.json",
         "engine_version": "",
@@ -245,7 +245,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_run_receipt.json",
       "reference_pose_id": "casf2016_5c28_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -253,7 +253,7 @@
       "case_id": "casf2016_5c28",
       "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/5c28_receptor --ligand prepared/5c28_ligand --center_x 3.85875 --center_y 12.7493 --center_z 42.1003 --size_x 19.3455 --size_y 21.8 --size_z 23.8036 --out operator_attached/vina_gnina/casf2016_5c28/gnina_pose.sdf",
       "complex_id": "5c28",
-      "config_checksum": "sha256:0f198a922cc14e319e908530a335e0d039cc73d2100b315e5c1b10b8967c499a",
+      "config_checksum": "sha256:0537b1d064903a6e3d70af34cf610ddf87d3905f95d25be0d64f2718793f61e4",
       "config_path": "operator_attached/vina_gnina/casf2016_5c28/gnina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -286,7 +286,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:9439782979e3d784197b0cb71e96c67e8f88bbbee1c3c203dfe1bf2e2593c899",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_config.json",
@@ -302,7 +302,7 @@
         "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/5c28_receptor --ligand prepared/5c28_ligand --center_x 3.85875 --center_y 12.7493 --center_z 42.1003 --size_x 19.3455 --size_y 21.8 --size_z 23.8036 --out operator_attached/vina_gnina/casf2016_5c28/gnina_pose.sdf",
         "complex_id": "5c28",
         "docking_run_id": "casf2016_5c28_gnina_run",
-        "engine_config_checksum": "sha256:0f198a922cc14e319e908530a335e0d039cc73d2100b315e5c1b10b8967c499a",
+        "engine_config_checksum": "sha256:0537b1d064903a6e3d70af34cf610ddf87d3905f95d25be0d64f2718793f61e4",
         "engine_id": "gnina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_run_receipt.json",
         "engine_version": "",
@@ -326,7 +326,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_run_receipt.json",
       "reference_pose_id": "casf2016_5c28_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -334,7 +334,7 @@
       "case_id": "casf2016_3uuo",
       "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/3uuo_receptor --ligand prepared/3uuo_ligand --center_x 5.19755 --center_y 12.495 --center_z 43.7852 --size_x 23.1595 --size_y 24.1588 --size_z 25.8566 --out operator_attached/vina_gnina/casf2016_3uuo/vina_pose.sdf",
       "complex_id": "3uuo",
-      "config_checksum": "sha256:afab7ccd89e26ac1fc770c8d2c88fa2bd5491688e8f1dc269450a875c923025b",
+      "config_checksum": "sha256:e6a69698429c7eb97027bc70824dea23b2d64f90c08d98f548f9beacf9066912",
       "config_path": "operator_attached/vina_gnina/casf2016_3uuo/vina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -367,7 +367,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:05002ef7e724566be40cdea596d599243989a19fa05994bd4198b36498c59f03",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_config.json",
@@ -383,7 +383,7 @@
         "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/3uuo_receptor --ligand prepared/3uuo_ligand --center_x 5.19755 --center_y 12.495 --center_z 43.7852 --size_x 23.1595 --size_y 24.1588 --size_z 25.8566 --out operator_attached/vina_gnina/casf2016_3uuo/vina_pose.sdf",
         "complex_id": "3uuo",
         "docking_run_id": "casf2016_3uuo_vina_run",
-        "engine_config_checksum": "sha256:afab7ccd89e26ac1fc770c8d2c88fa2bd5491688e8f1dc269450a875c923025b",
+        "engine_config_checksum": "sha256:e6a69698429c7eb97027bc70824dea23b2d64f90c08d98f548f9beacf9066912",
         "engine_id": "vina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_run_receipt.json",
         "engine_version": "",
@@ -407,7 +407,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_run_receipt.json",
       "reference_pose_id": "casf2016_3uuo_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -415,7 +415,7 @@
       "case_id": "casf2016_3uuo",
       "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/3uuo_receptor --ligand prepared/3uuo_ligand --center_x 5.19755 --center_y 12.495 --center_z 43.7852 --size_x 23.1595 --size_y 24.1588 --size_z 25.8566 --out operator_attached/vina_gnina/casf2016_3uuo/gnina_pose.sdf",
       "complex_id": "3uuo",
-      "config_checksum": "sha256:bbeefc37610f0308c2c5d769fdae8009c23a7dee0cc19990abbf88e3921ba15c",
+      "config_checksum": "sha256:e4cd2c34c3eb19cfe34bd741954331a08da6bc0562735d52f8058f329698c722",
       "config_path": "operator_attached/vina_gnina/casf2016_3uuo/gnina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -448,7 +448,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:05002ef7e724566be40cdea596d599243989a19fa05994bd4198b36498c59f03",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_config.json",
@@ -464,7 +464,7 @@
         "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/3uuo_receptor --ligand prepared/3uuo_ligand --center_x 5.19755 --center_y 12.495 --center_z 43.7852 --size_x 23.1595 --size_y 24.1588 --size_z 25.8566 --out operator_attached/vina_gnina/casf2016_3uuo/gnina_pose.sdf",
         "complex_id": "3uuo",
         "docking_run_id": "casf2016_3uuo_gnina_run",
-        "engine_config_checksum": "sha256:bbeefc37610f0308c2c5d769fdae8009c23a7dee0cc19990abbf88e3921ba15c",
+        "engine_config_checksum": "sha256:e4cd2c34c3eb19cfe34bd741954331a08da6bc0562735d52f8058f329698c722",
         "engine_id": "gnina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_run_receipt.json",
         "engine_version": "",
@@ -488,7 +488,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_run_receipt.json",
       "reference_pose_id": "casf2016_3uuo_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -496,7 +496,7 @@
       "case_id": "casf2016_3ui7",
       "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/3ui7_receptor --ligand prepared/3ui7_ligand --center_x 5.83915 --center_y 12.50425 --center_z 43.77535 --size_x 22.8429 --size_y 23.7287 --size_z 25.5305 --out operator_attached/vina_gnina/casf2016_3ui7/vina_pose.sdf",
       "complex_id": "3ui7",
-      "config_checksum": "sha256:1ef6d01b0e0d588e2ff255929a4e4c63672b79a13c15df42366114074e36b0c2",
+      "config_checksum": "sha256:befa6cf382d41491eeaf933db2bedd07e02ea7a80e2c68ff0ca5aeecd2085316",
       "config_path": "operator_attached/vina_gnina/casf2016_3ui7/vina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -529,7 +529,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:0e6013d93997926592a33f01b38598daf29e40deb028ff211673982c0f678341",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_config.json",
@@ -545,7 +545,7 @@
         "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/3ui7_receptor --ligand prepared/3ui7_ligand --center_x 5.83915 --center_y 12.50425 --center_z 43.77535 --size_x 22.8429 --size_y 23.7287 --size_z 25.5305 --out operator_attached/vina_gnina/casf2016_3ui7/vina_pose.sdf",
         "complex_id": "3ui7",
         "docking_run_id": "casf2016_3ui7_vina_run",
-        "engine_config_checksum": "sha256:1ef6d01b0e0d588e2ff255929a4e4c63672b79a13c15df42366114074e36b0c2",
+        "engine_config_checksum": "sha256:befa6cf382d41491eeaf933db2bedd07e02ea7a80e2c68ff0ca5aeecd2085316",
         "engine_id": "vina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_run_receipt.json",
         "engine_version": "",
@@ -569,7 +569,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_run_receipt.json",
       "reference_pose_id": "casf2016_3ui7_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -577,7 +577,7 @@
       "case_id": "casf2016_3ui7",
       "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/3ui7_receptor --ligand prepared/3ui7_ligand --center_x 5.83915 --center_y 12.50425 --center_z 43.77535 --size_x 22.8429 --size_y 23.7287 --size_z 25.5305 --out operator_attached/vina_gnina/casf2016_3ui7/gnina_pose.sdf",
       "complex_id": "3ui7",
-      "config_checksum": "sha256:286f614c6d085156900e908ac9c6d2aa1b9b5adeffe7d3f2b860a47ed74c7eb6",
+      "config_checksum": "sha256:46c3ed88aac4bc2c78c622ee3804ab22a9fcf397ee28e0f2b428da3be913ad49",
       "config_path": "operator_attached/vina_gnina/casf2016_3ui7/gnina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -610,7 +610,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:0e6013d93997926592a33f01b38598daf29e40deb028ff211673982c0f678341",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_config.json",
@@ -626,7 +626,7 @@
         "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/3ui7_receptor --ligand prepared/3ui7_ligand --center_x 5.83915 --center_y 12.50425 --center_z 43.77535 --size_x 22.8429 --size_y 23.7287 --size_z 25.5305 --out operator_attached/vina_gnina/casf2016_3ui7/gnina_pose.sdf",
         "complex_id": "3ui7",
         "docking_run_id": "casf2016_3ui7_gnina_run",
-        "engine_config_checksum": "sha256:286f614c6d085156900e908ac9c6d2aa1b9b5adeffe7d3f2b860a47ed74c7eb6",
+        "engine_config_checksum": "sha256:46c3ed88aac4bc2c78c622ee3804ab22a9fcf397ee28e0f2b428da3be913ad49",
         "engine_id": "gnina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_run_receipt.json",
         "engine_version": "",
@@ -650,7 +650,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_run_receipt.json",
       "reference_pose_id": "casf2016_3ui7_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -658,7 +658,7 @@
       "case_id": "casf2016_5c2h",
       "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/5c2h_receptor --ligand prepared/5c2h_ligand --center_x 4.96205 --center_y 39.55165 --center_z 57.7324 --size_x 30.3601 --size_y 26.2897 --size_z 27.6698 --out operator_attached/vina_gnina/casf2016_5c2h/vina_pose.sdf",
       "complex_id": "5c2h",
-      "config_checksum": "sha256:8b6d7bbfd23d8e2b42854079b65ed583e393f7764d7a6da6ff988061795181a4",
+      "config_checksum": "sha256:5894389f64eab6a4bba3d61af06c60ba33e8a94ea01dccd2b4635b3f529717a7",
       "config_path": "operator_attached/vina_gnina/casf2016_5c2h/vina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -691,7 +691,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:363d9a878ecbeeb13bcc8fa4e7a80091071465cd19b6482a1b0c52ebcc29a6a7",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_config.json",
@@ -707,7 +707,7 @@
         "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/5c2h_receptor --ligand prepared/5c2h_ligand --center_x 4.96205 --center_y 39.55165 --center_z 57.7324 --size_x 30.3601 --size_y 26.2897 --size_z 27.6698 --out operator_attached/vina_gnina/casf2016_5c2h/vina_pose.sdf",
         "complex_id": "5c2h",
         "docking_run_id": "casf2016_5c2h_vina_run",
-        "engine_config_checksum": "sha256:8b6d7bbfd23d8e2b42854079b65ed583e393f7764d7a6da6ff988061795181a4",
+        "engine_config_checksum": "sha256:5894389f64eab6a4bba3d61af06c60ba33e8a94ea01dccd2b4635b3f529717a7",
         "engine_id": "vina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_run_receipt.json",
         "engine_version": "",
@@ -731,7 +731,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_run_receipt.json",
       "reference_pose_id": "casf2016_5c2h_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -739,7 +739,7 @@
       "case_id": "casf2016_5c2h",
       "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/5c2h_receptor --ligand prepared/5c2h_ligand --center_x 4.96205 --center_y 39.55165 --center_z 57.7324 --size_x 30.3601 --size_y 26.2897 --size_z 27.6698 --out operator_attached/vina_gnina/casf2016_5c2h/gnina_pose.sdf",
       "complex_id": "5c2h",
-      "config_checksum": "sha256:e5b7f599769c5f9002d4f33f1bf2693a9cce965ce241b07bb56296abfca10aa5",
+      "config_checksum": "sha256:dfb9fd930a90fb3f01d185e16bd9a2bc1eaaaf83e88f9840d67d9b6c51fb6577",
       "config_path": "operator_attached/vina_gnina/casf2016_5c2h/gnina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -772,7 +772,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:363d9a878ecbeeb13bcc8fa4e7a80091071465cd19b6482a1b0c52ebcc29a6a7",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_config.json",
@@ -788,7 +788,7 @@
         "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/5c2h_receptor --ligand prepared/5c2h_ligand --center_x 4.96205 --center_y 39.55165 --center_z 57.7324 --size_x 30.3601 --size_y 26.2897 --size_z 27.6698 --out operator_attached/vina_gnina/casf2016_5c2h/gnina_pose.sdf",
         "complex_id": "5c2h",
         "docking_run_id": "casf2016_5c2h_gnina_run",
-        "engine_config_checksum": "sha256:e5b7f599769c5f9002d4f33f1bf2693a9cce965ce241b07bb56296abfca10aa5",
+        "engine_config_checksum": "sha256:dfb9fd930a90fb3f01d185e16bd9a2bc1eaaaf83e88f9840d67d9b6c51fb6577",
         "engine_id": "gnina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_run_receipt.json",
         "engine_version": "",
@@ -812,7 +812,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_run_receipt.json",
       "reference_pose_id": "casf2016_5c2h_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -820,7 +820,7 @@
       "case_id": "casf2016_2v00",
       "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/2v00_receptor --ligand prepared/2v00_ligand --center_x -1.7256 --center_y 2.6666 --center_z 10.71815 --size_x 25.0072 --size_y 23.7954 --size_z 20.6135 --out operator_attached/vina_gnina/casf2016_2v00/vina_pose.sdf",
       "complex_id": "2v00",
-      "config_checksum": "sha256:c2691f40d437039bb111490f61413b956ddb3baf1ee5ce28a37da20e32f64b19",
+      "config_checksum": "sha256:c5b1a5f9ae3b6d69b2ec67de62e5440809ba284656b07c609b40a77777a0184e",
       "config_path": "operator_attached/vina_gnina/casf2016_2v00/vina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -853,7 +853,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:0ca5f029c5fe7ca0191fd2c9c33234e3fc51aa8bc0fbf5a7592ca2dc253383b4",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_config.json",
@@ -869,7 +869,7 @@
         "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/2v00_receptor --ligand prepared/2v00_ligand --center_x -1.7256 --center_y 2.6666 --center_z 10.71815 --size_x 25.0072 --size_y 23.7954 --size_z 20.6135 --out operator_attached/vina_gnina/casf2016_2v00/vina_pose.sdf",
         "complex_id": "2v00",
         "docking_run_id": "casf2016_2v00_vina_run",
-        "engine_config_checksum": "sha256:c2691f40d437039bb111490f61413b956ddb3baf1ee5ce28a37da20e32f64b19",
+        "engine_config_checksum": "sha256:c5b1a5f9ae3b6d69b2ec67de62e5440809ba284656b07c609b40a77777a0184e",
         "engine_id": "vina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_run_receipt.json",
         "engine_version": "",
@@ -893,7 +893,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_run_receipt.json",
       "reference_pose_id": "casf2016_2v00_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -901,7 +901,7 @@
       "case_id": "casf2016_2v00",
       "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/2v00_receptor --ligand prepared/2v00_ligand --center_x -1.7256 --center_y 2.6666 --center_z 10.71815 --size_x 25.0072 --size_y 23.7954 --size_z 20.6135 --out operator_attached/vina_gnina/casf2016_2v00/gnina_pose.sdf",
       "complex_id": "2v00",
-      "config_checksum": "sha256:e30a99aa1ff20a297f9e659b9e591eadcacd4cfc2bdaca376a55ef7c8437b8b8",
+      "config_checksum": "sha256:0a0142a9d74d0f14a02083645c2149ace9dd20aadb68033689f957ab0d802ca5",
       "config_path": "operator_attached/vina_gnina/casf2016_2v00/gnina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -934,7 +934,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:0ca5f029c5fe7ca0191fd2c9c33234e3fc51aa8bc0fbf5a7592ca2dc253383b4",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_config.json",
@@ -950,7 +950,7 @@
         "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/2v00_receptor --ligand prepared/2v00_ligand --center_x -1.7256 --center_y 2.6666 --center_z 10.71815 --size_x 25.0072 --size_y 23.7954 --size_z 20.6135 --out operator_attached/vina_gnina/casf2016_2v00/gnina_pose.sdf",
         "complex_id": "2v00",
         "docking_run_id": "casf2016_2v00_gnina_run",
-        "engine_config_checksum": "sha256:e30a99aa1ff20a297f9e659b9e591eadcacd4cfc2bdaca376a55ef7c8437b8b8",
+        "engine_config_checksum": "sha256:0a0142a9d74d0f14a02083645c2149ace9dd20aadb68033689f957ab0d802ca5",
         "engine_id": "gnina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_run_receipt.json",
         "engine_version": "",
@@ -974,7 +974,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_run_receipt.json",
       "reference_pose_id": "casf2016_2v00_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -982,7 +982,7 @@
       "case_id": "casf2016_3wz8",
       "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/3wz8_receptor --ligand prepared/3wz8_ligand --center_x 23.1742 --center_y 3.68095 --center_z 58.60175 --size_x 27.2284 --size_y 31.2691 --size_z 22.4397 --out operator_attached/vina_gnina/casf2016_3wz8/vina_pose.sdf",
       "complex_id": "3wz8",
-      "config_checksum": "sha256:3c54f07a6b6febf6ffe60a1054dee4f6873e9304796eee02ed4fc73ee1666c65",
+      "config_checksum": "sha256:75c2d91c011d7e8bc3fccfac395be9c908838f2edb8e208b4721a4d5286ba2da",
       "config_path": "operator_attached/vina_gnina/casf2016_3wz8/vina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -1015,7 +1015,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:2aa5a843fb5cccd932ba65c7b33c115fbdbc80c7656b3f15916a1c51ce017696",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_config.json",
@@ -1031,7 +1031,7 @@
         "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/3wz8_receptor --ligand prepared/3wz8_ligand --center_x 23.1742 --center_y 3.68095 --center_z 58.60175 --size_x 27.2284 --size_y 31.2691 --size_z 22.4397 --out operator_attached/vina_gnina/casf2016_3wz8/vina_pose.sdf",
         "complex_id": "3wz8",
         "docking_run_id": "casf2016_3wz8_vina_run",
-        "engine_config_checksum": "sha256:3c54f07a6b6febf6ffe60a1054dee4f6873e9304796eee02ed4fc73ee1666c65",
+        "engine_config_checksum": "sha256:75c2d91c011d7e8bc3fccfac395be9c908838f2edb8e208b4721a4d5286ba2da",
         "engine_id": "vina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_run_receipt.json",
         "engine_version": "",
@@ -1055,7 +1055,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_run_receipt.json",
       "reference_pose_id": "casf2016_3wz8_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -1063,7 +1063,7 @@
       "case_id": "casf2016_3wz8",
       "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/3wz8_receptor --ligand prepared/3wz8_ligand --center_x 23.1742 --center_y 3.68095 --center_z 58.60175 --size_x 27.2284 --size_y 31.2691 --size_z 22.4397 --out operator_attached/vina_gnina/casf2016_3wz8/gnina_pose.sdf",
       "complex_id": "3wz8",
-      "config_checksum": "sha256:ef7973b004b1e7891a630ab6206b3ff773bff5200b5d2189c89c8e99cfefcfd3",
+      "config_checksum": "sha256:49dcabb8581d796277cd1d39388c907d19a177cb966ab23491f4d51df9443c80",
       "config_path": "operator_attached/vina_gnina/casf2016_3wz8/gnina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -1096,7 +1096,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:2aa5a843fb5cccd932ba65c7b33c115fbdbc80c7656b3f15916a1c51ce017696",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_config.json",
@@ -1112,7 +1112,7 @@
         "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/3wz8_receptor --ligand prepared/3wz8_ligand --center_x 23.1742 --center_y 3.68095 --center_z 58.60175 --size_x 27.2284 --size_y 31.2691 --size_z 22.4397 --out operator_attached/vina_gnina/casf2016_3wz8/gnina_pose.sdf",
         "complex_id": "3wz8",
         "docking_run_id": "casf2016_3wz8_gnina_run",
-        "engine_config_checksum": "sha256:ef7973b004b1e7891a630ab6206b3ff773bff5200b5d2189c89c8e99cfefcfd3",
+        "engine_config_checksum": "sha256:49dcabb8581d796277cd1d39388c907d19a177cb966ab23491f4d51df9443c80",
         "engine_id": "gnina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_run_receipt.json",
         "engine_version": "",
@@ -1136,7 +1136,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_run_receipt.json",
       "reference_pose_id": "casf2016_3wz8_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -1144,7 +1144,7 @@
       "case_id": "casf2016_3pww",
       "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/3pww_receptor --ligand prepared/3pww_ligand --center_x -1.9487 --center_y 4.96425 --center_z 10.0338 --size_x 30.3758 --size_y 31.4855 --size_z 27.7702 --out operator_attached/vina_gnina/casf2016_3pww/vina_pose.sdf",
       "complex_id": "3pww",
-      "config_checksum": "sha256:ad4f362dbf8df532d0fa7ee033bbf0b9ea40424ff1a27819dc17e1534e67d219",
+      "config_checksum": "sha256:6dcb1a940bf7aa99e847183ec6afac15262279b99fcec13d756b5ba8fd8f04ba",
       "config_path": "operator_attached/vina_gnina/casf2016_3pww/vina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -1177,7 +1177,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:8f1d45ed485f8a7ee9fc3e0b8e57f5066dfc44c040e6de302117081da1fe45ca",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_config.json",
@@ -1193,7 +1193,7 @@
         "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/3pww_receptor --ligand prepared/3pww_ligand --center_x -1.9487 --center_y 4.96425 --center_z 10.0338 --size_x 30.3758 --size_y 31.4855 --size_z 27.7702 --out operator_attached/vina_gnina/casf2016_3pww/vina_pose.sdf",
         "complex_id": "3pww",
         "docking_run_id": "casf2016_3pww_vina_run",
-        "engine_config_checksum": "sha256:ad4f362dbf8df532d0fa7ee033bbf0b9ea40424ff1a27819dc17e1534e67d219",
+        "engine_config_checksum": "sha256:6dcb1a940bf7aa99e847183ec6afac15262279b99fcec13d756b5ba8fd8f04ba",
         "engine_id": "vina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_run_receipt.json",
         "engine_version": "",
@@ -1217,7 +1217,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_run_receipt.json",
       "reference_pose_id": "casf2016_3pww_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -1225,7 +1225,7 @@
       "case_id": "casf2016_3pww",
       "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/3pww_receptor --ligand prepared/3pww_ligand --center_x -1.9487 --center_y 4.96425 --center_z 10.0338 --size_x 30.3758 --size_y 31.4855 --size_z 27.7702 --out operator_attached/vina_gnina/casf2016_3pww/gnina_pose.sdf",
       "complex_id": "3pww",
-      "config_checksum": "sha256:1d3702d6ec2e80c2b63a9d33f2670c4d11c4b03d2255df285a63747576999941",
+      "config_checksum": "sha256:d397583078b3373d9b80cf4a70867b02ec16b85f074631575d4d7c5c7bf45a0d",
       "config_path": "operator_attached/vina_gnina/casf2016_3pww/gnina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -1258,7 +1258,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:8f1d45ed485f8a7ee9fc3e0b8e57f5066dfc44c040e6de302117081da1fe45ca",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_config.json",
@@ -1274,7 +1274,7 @@
         "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/3pww_receptor --ligand prepared/3pww_ligand --center_x -1.9487 --center_y 4.96425 --center_z 10.0338 --size_x 30.3758 --size_y 31.4855 --size_z 27.7702 --out operator_attached/vina_gnina/casf2016_3pww/gnina_pose.sdf",
         "complex_id": "3pww",
         "docking_run_id": "casf2016_3pww_gnina_run",
-        "engine_config_checksum": "sha256:1d3702d6ec2e80c2b63a9d33f2670c4d11c4b03d2255df285a63747576999941",
+        "engine_config_checksum": "sha256:d397583078b3373d9b80cf4a70867b02ec16b85f074631575d4d7c5c7bf45a0d",
         "engine_id": "gnina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_run_receipt.json",
         "engine_version": "",
@@ -1298,7 +1298,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_run_receipt.json",
       "reference_pose_id": "casf2016_3pww_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -1306,7 +1306,7 @@
       "case_id": "casf2016_3prs",
       "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/3prs_receptor --ligand prepared/3prs_ligand --center_x -2.10335 --center_y 4.1157 --center_z 10.7508 --size_x 31.6791 --size_y 32.243 --size_z 28.9062 --out operator_attached/vina_gnina/casf2016_3prs/vina_pose.sdf",
       "complex_id": "3prs",
-      "config_checksum": "sha256:1f0ebf03bf6d48122083adfb26b26079d6d33ddac9cb780d20bbe4765d85b17d",
+      "config_checksum": "sha256:b15813db1b02f154ddb2685b3c876795487703286ea9494f57460d6deff74f17",
       "config_path": "operator_attached/vina_gnina/casf2016_3prs/vina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -1339,7 +1339,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:977dcc3b37426a97e561a12b65eb98a0c5599318e7ed1b8573ec766014861344",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_config.json",
@@ -1355,7 +1355,7 @@
         "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/3prs_receptor --ligand prepared/3prs_ligand --center_x -2.10335 --center_y 4.1157 --center_z 10.7508 --size_x 31.6791 --size_y 32.243 --size_z 28.9062 --out operator_attached/vina_gnina/casf2016_3prs/vina_pose.sdf",
         "complex_id": "3prs",
         "docking_run_id": "casf2016_3prs_vina_run",
-        "engine_config_checksum": "sha256:1f0ebf03bf6d48122083adfb26b26079d6d33ddac9cb780d20bbe4765d85b17d",
+        "engine_config_checksum": "sha256:b15813db1b02f154ddb2685b3c876795487703286ea9494f57460d6deff74f17",
         "engine_id": "vina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_run_receipt.json",
         "engine_version": "",
@@ -1379,7 +1379,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_run_receipt.json",
       "reference_pose_id": "casf2016_3prs_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -1387,7 +1387,7 @@
       "case_id": "casf2016_3prs",
       "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/3prs_receptor --ligand prepared/3prs_ligand --center_x -2.10335 --center_y 4.1157 --center_z 10.7508 --size_x 31.6791 --size_y 32.243 --size_z 28.9062 --out operator_attached/vina_gnina/casf2016_3prs/gnina_pose.sdf",
       "complex_id": "3prs",
-      "config_checksum": "sha256:fefe961cdc666d1899ea7a0520878ae3bdc15f89fdcff87673c2f4c2c946f929",
+      "config_checksum": "sha256:035dc71718cf11bdbbf5aaeea55251b73610ff559cbc6486bf7cf30f6b5a1627",
       "config_path": "operator_attached/vina_gnina/casf2016_3prs/gnina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -1420,7 +1420,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:977dcc3b37426a97e561a12b65eb98a0c5599318e7ed1b8573ec766014861344",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_config.json",
@@ -1436,7 +1436,7 @@
         "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/3prs_receptor --ligand prepared/3prs_ligand --center_x -2.10335 --center_y 4.1157 --center_z 10.7508 --size_x 31.6791 --size_y 32.243 --size_z 28.9062 --out operator_attached/vina_gnina/casf2016_3prs/gnina_pose.sdf",
         "complex_id": "3prs",
         "docking_run_id": "casf2016_3prs_gnina_run",
-        "engine_config_checksum": "sha256:fefe961cdc666d1899ea7a0520878ae3bdc15f89fdcff87673c2f4c2c946f929",
+        "engine_config_checksum": "sha256:035dc71718cf11bdbbf5aaeea55251b73610ff559cbc6486bf7cf30f6b5a1627",
         "engine_id": "gnina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_run_receipt.json",
         "engine_version": "",
@@ -1460,7 +1460,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_run_receipt.json",
       "reference_pose_id": "casf2016_3prs_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -1468,7 +1468,7 @@
       "case_id": "casf2016_3uri",
       "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/3uri_receptor --ligand prepared/3uri_ligand --center_x 1.84375 --center_y 31.63795 --center_z 18.57955 --size_x 31.2535 --size_y 35.0481 --size_z 32.7671 --out operator_attached/vina_gnina/casf2016_3uri/vina_pose.sdf",
       "complex_id": "3uri",
-      "config_checksum": "sha256:b5f35e527d39ea738dc324663d1a0a577d2bc8464dcce66a0b57edc31f217a36",
+      "config_checksum": "sha256:088cce5c3eb9cb049e3eb4c076fb2f89955ed0f41cdfab174f1349806f3423f2",
       "config_path": "operator_attached/vina_gnina/casf2016_3uri/vina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -1501,7 +1501,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:611b2b2802de17514068f4d2943f85d8ac27b7cae16cfa919ebd3c0242efff0c",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_config.json",
@@ -1517,7 +1517,7 @@
         "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/3uri_receptor --ligand prepared/3uri_ligand --center_x 1.84375 --center_y 31.63795 --center_z 18.57955 --size_x 31.2535 --size_y 35.0481 --size_z 32.7671 --out operator_attached/vina_gnina/casf2016_3uri/vina_pose.sdf",
         "complex_id": "3uri",
         "docking_run_id": "casf2016_3uri_vina_run",
-        "engine_config_checksum": "sha256:b5f35e527d39ea738dc324663d1a0a577d2bc8464dcce66a0b57edc31f217a36",
+        "engine_config_checksum": "sha256:088cce5c3eb9cb049e3eb4c076fb2f89955ed0f41cdfab174f1349806f3423f2",
         "engine_id": "vina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_run_receipt.json",
         "engine_version": "",
@@ -1541,7 +1541,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_run_receipt.json",
       "reference_pose_id": "casf2016_3uri_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -1549,7 +1549,7 @@
       "case_id": "casf2016_3uri",
       "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/3uri_receptor --ligand prepared/3uri_ligand --center_x 1.84375 --center_y 31.63795 --center_z 18.57955 --size_x 31.2535 --size_y 35.0481 --size_z 32.7671 --out operator_attached/vina_gnina/casf2016_3uri/gnina_pose.sdf",
       "complex_id": "3uri",
-      "config_checksum": "sha256:76a489867b210cf3cf2431e3a0b5592ab25feac8b15b053b2e9f2cb13a8ed7be",
+      "config_checksum": "sha256:125a03af0b7473a133fe06ee9fcad5250bc4903e42b13e3dbacadef052feb518",
       "config_path": "operator_attached/vina_gnina/casf2016_3uri/gnina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -1582,7 +1582,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:611b2b2802de17514068f4d2943f85d8ac27b7cae16cfa919ebd3c0242efff0c",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_config.json",
@@ -1598,7 +1598,7 @@
         "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/3uri_receptor --ligand prepared/3uri_ligand --center_x 1.84375 --center_y 31.63795 --center_z 18.57955 --size_x 31.2535 --size_y 35.0481 --size_z 32.7671 --out operator_attached/vina_gnina/casf2016_3uri/gnina_pose.sdf",
         "complex_id": "3uri",
         "docking_run_id": "casf2016_3uri_gnina_run",
-        "engine_config_checksum": "sha256:76a489867b210cf3cf2431e3a0b5592ab25feac8b15b053b2e9f2cb13a8ed7be",
+        "engine_config_checksum": "sha256:125a03af0b7473a133fe06ee9fcad5250bc4903e42b13e3dbacadef052feb518",
         "engine_id": "gnina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_run_receipt.json",
         "engine_version": "",
@@ -1622,7 +1622,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_run_receipt.json",
       "reference_pose_id": "casf2016_3uri_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -1630,7 +1630,7 @@
       "case_id": "casf2016_4m0z",
       "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/4m0z_receptor --ligand prepared/4m0z_ligand --center_x -4.53895 --center_y 9.3687 --center_z 13.31405 --size_x 24.2179 --size_y 25.4252 --size_z 23.7723 --out operator_attached/vina_gnina/casf2016_4m0z/vina_pose.sdf",
       "complex_id": "4m0z",
-      "config_checksum": "sha256:7c153fef380cd8846574dd90852ded786b5aedf26cd8b7d8319e567a3fc268e3",
+      "config_checksum": "sha256:7b7e8fdc3507c6f5e9de93443da207cbc6bdcf7ba8a2a34485d40005780fcb4a",
       "config_path": "operator_attached/vina_gnina/casf2016_4m0z/vina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -1663,7 +1663,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:43dd7dad2ed329dd3fe2d69b67befa9950b97acd3733f12aa7992e7985480fdc",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_config.json",
@@ -1679,7 +1679,7 @@
         "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/4m0z_receptor --ligand prepared/4m0z_ligand --center_x -4.53895 --center_y 9.3687 --center_z 13.31405 --size_x 24.2179 --size_y 25.4252 --size_z 23.7723 --out operator_attached/vina_gnina/casf2016_4m0z/vina_pose.sdf",
         "complex_id": "4m0z",
         "docking_run_id": "casf2016_4m0z_vina_run",
-        "engine_config_checksum": "sha256:7c153fef380cd8846574dd90852ded786b5aedf26cd8b7d8319e567a3fc268e3",
+        "engine_config_checksum": "sha256:7b7e8fdc3507c6f5e9de93443da207cbc6bdcf7ba8a2a34485d40005780fcb4a",
         "engine_id": "vina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_run_receipt.json",
         "engine_version": "",
@@ -1703,7 +1703,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_run_receipt.json",
       "reference_pose_id": "casf2016_4m0z_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -1711,7 +1711,7 @@
       "case_id": "casf2016_4m0z",
       "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/4m0z_receptor --ligand prepared/4m0z_ligand --center_x -4.53895 --center_y 9.3687 --center_z 13.31405 --size_x 24.2179 --size_y 25.4252 --size_z 23.7723 --out operator_attached/vina_gnina/casf2016_4m0z/gnina_pose.sdf",
       "complex_id": "4m0z",
-      "config_checksum": "sha256:cd661ccbff5a7a34682f0aacfb7e216c161eac938efcf8b318011446b42a52e3",
+      "config_checksum": "sha256:63a3d910f673b9437c2cb0fa281c867613860875b8c6a568aa44a7eda743348b",
       "config_path": "operator_attached/vina_gnina/casf2016_4m0z/gnina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -1744,7 +1744,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:43dd7dad2ed329dd3fe2d69b67befa9950b97acd3733f12aa7992e7985480fdc",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_config.json",
@@ -1760,7 +1760,7 @@
         "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/4m0z_receptor --ligand prepared/4m0z_ligand --center_x -4.53895 --center_y 9.3687 --center_z 13.31405 --size_x 24.2179 --size_y 25.4252 --size_z 23.7723 --out operator_attached/vina_gnina/casf2016_4m0z/gnina_pose.sdf",
         "complex_id": "4m0z",
         "docking_run_id": "casf2016_4m0z_gnina_run",
-        "engine_config_checksum": "sha256:cd661ccbff5a7a34682f0aacfb7e216c161eac938efcf8b318011446b42a52e3",
+        "engine_config_checksum": "sha256:63a3d910f673b9437c2cb0fa281c867613860875b8c6a568aa44a7eda743348b",
         "engine_id": "gnina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_run_receipt.json",
         "engine_version": "",
@@ -1784,7 +1784,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_run_receipt.json",
       "reference_pose_id": "casf2016_4m0z_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -1792,7 +1792,7 @@
       "case_id": "casf2016_4m0y",
       "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/4m0y_receptor --ligand prepared/4m0y_ligand --center_x 6.5638 --center_y 5.39075 --center_z 22.92185 --size_x 25.8452 --size_y 24.0781 --size_z 25.2557 --out operator_attached/vina_gnina/casf2016_4m0y/vina_pose.sdf",
       "complex_id": "4m0y",
-      "config_checksum": "sha256:a3a8d97f9b1f96414d66ec006638a25a8aadcf4ecbd1148a7943133edc9f1f16",
+      "config_checksum": "sha256:6eb399ed74b5916d6773214306a203a0020af1d3a0cf2aa6d4a6a0a42be80a9c",
       "config_path": "operator_attached/vina_gnina/casf2016_4m0y/vina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -1825,7 +1825,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:490c2a65230e07efc35f5c625a4a538f59fdf02e5e1e3845c7719f11d0f1b506",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_config.json",
@@ -1841,7 +1841,7 @@
         "command": "<PUBLIC_BENCHMARK_VINA_BIN_OR_CONTAINER> --receptor prepared/4m0y_receptor --ligand prepared/4m0y_ligand --center_x 6.5638 --center_y 5.39075 --center_z 22.92185 --size_x 25.8452 --size_y 24.0781 --size_z 25.2557 --out operator_attached/vina_gnina/casf2016_4m0y/vina_pose.sdf",
         "complex_id": "4m0y",
         "docking_run_id": "casf2016_4m0y_vina_run",
-        "engine_config_checksum": "sha256:a3a8d97f9b1f96414d66ec006638a25a8aadcf4ecbd1148a7943133edc9f1f16",
+        "engine_config_checksum": "sha256:6eb399ed74b5916d6773214306a203a0020af1d3a0cf2aa6d4a6a0a42be80a9c",
         "engine_id": "vina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_run_receipt.json",
         "engine_version": "",
@@ -1865,7 +1865,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_run_receipt.json",
       "reference_pose_id": "casf2016_4m0y_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     },
     {
       "benchmark_split": "CASF-core",
@@ -1873,7 +1873,7 @@
       "case_id": "casf2016_4m0y",
       "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/4m0y_receptor --ligand prepared/4m0y_ligand --center_x 6.5638 --center_y 5.39075 --center_z 22.92185 --size_x 25.8452 --size_y 24.0781 --size_z 25.2557 --out operator_attached/vina_gnina/casf2016_4m0y/gnina_pose.sdf",
       "complex_id": "4m0y",
-      "config_checksum": "sha256:ac477b91b6d80368aef393709812e034590c3813fd425229df37739329776b77",
+      "config_checksum": "sha256:ac4de9794d5251c1407dfd19f53a2f6472b0077e680e786820dd3d44db122b2e",
       "config_path": "operator_attached/vina_gnina/casf2016_4m0y/gnina_config.json",
       "config_payload": {
         "benchmark_split": "CASF-core",
@@ -1906,7 +1906,7 @@
         "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
         "score_direction": "lower_is_better",
         "source_checksum": "sha256:490c2a65230e07efc35f5c625a4a538f59fdf02e5e1e3845c7719f11d0f1b506",
-        "source_family": "CASF/PDBBind",
+        "source_family": "CASF/PDBBind + Vina/GNINA",
         "source_license_or_accession": "PDBbind+ CASF-2016 official package"
       },
       "config_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_config.json",
@@ -1922,7 +1922,7 @@
         "command": "<PUBLIC_BENCHMARK_GNINA_BIN_OR_CONTAINER> --receptor prepared/4m0y_receptor --ligand prepared/4m0y_ligand --center_x 6.5638 --center_y 5.39075 --center_z 22.92185 --size_x 25.8452 --size_y 24.0781 --size_z 25.2557 --out operator_attached/vina_gnina/casf2016_4m0y/gnina_pose.sdf",
         "complex_id": "4m0y",
         "docking_run_id": "casf2016_4m0y_gnina_run",
-        "engine_config_checksum": "sha256:ac477b91b6d80368aef393709812e034590c3813fd425229df37739329776b77",
+        "engine_config_checksum": "sha256:ac4de9794d5251c1407dfd19f53a2f6472b0077e680e786820dd3d44db122b2e",
         "engine_id": "gnina",
         "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_run_receipt.json",
         "engine_version": "",
@@ -1946,7 +1946,7 @@
       },
       "receipt_template_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_run_receipt.json",
       "reference_pose_id": "casf2016_4m0y_reference",
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind + Vina/GNINA"
     }
   ],
   "case_count": 12,
@@ -1969,9 +1969,9 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "execution_plan_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
   "execution_plan_ready": false,
-  "generated_at": "2026-07-04T08:02:42.875483+00:00",
+  "generated_at": "2026-07-04T08:36:34.516737+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:c21d689b09dcf5b130bb62165b232f367f0c48735d7978e59d9a529490505d63",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:30cea0a365c966479ebe1e3b48f0b2b99ba6358c8434f9b1e64d51e4d1329aba",
     "scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py": "sha256:2bbd25e704d1f5bec27c001b4c02071ca00ba503e7bb0db16a250370bdcc17f5"
   },
   "operator_execution_ready": false,
@@ -1980,7 +1980,7 @@
   "reuse_policy": "public_benchmark_vina_gnina_engine_run_bundle_from_execution_plan",
   "reused_evidence": false,
   "schema_version": "public-benchmark-vina-gnina-engine-run-bundle.v1",
-  "source_commit_sha": "fe3b31972f05aa42b08d9dd4c001cbd88e8e3acc",
+  "source_commit_sha": "78538d6ecb7096aec38e7679ded4367b401d53e0",
   "status": "execution_plan_not_ready",
   "summary": {
     "blocker_count": 1,

@@ -55,7 +55,9 @@ def test_current_vina_gnina_input_manifest_template_preflight_surfaces_gaps() ->
     assert payload["status"] == "operator_manifest_completion_required"
     assert payload["contract_pass"] is True
     assert payload["manifest_ready"] is False
-    assert payload["filled_manifest_detected"] is False
+    assert payload["filled_manifest_detected"] is True
+    assert payload["filled_manifest_status"]["status"] == "ready"
+    assert payload["filled_manifest_status"]["row_count"] == 12
     assert payload["summary"]["template_row_count"] == 12
     assert payload["summary"]["template_case_coverage_complete"] is True
     assert payload["summary"]["missing_expected_case_count"] == 0

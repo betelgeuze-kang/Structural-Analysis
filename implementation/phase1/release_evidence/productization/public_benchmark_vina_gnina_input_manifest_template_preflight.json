@@ -3228,6 +3228,7 @@
   "claim_boundary": "This preflight audits the operator input-manifest template only. It does not promote the template to an actual manifest, verify license rights, run Vina/GNINA, create adapter rows, or close Public Benchmark Phase 2.",
   "commands": {
     "materialize_input_manifest_from_casf_archive": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --extract-dir tmp/public_benchmark_vina_gnina/casf2016_source_files --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json",
+    "materialize_input_manifest_working_copy_from_template": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_template.py --template implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_template_report.json",
     "probe_source_urls": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md --probe-source-urls",
     "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
     "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
@@ -3251,7 +3252,7 @@
     "casf2016_4m0y"
   ],
   "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
-  "filled_manifest_detected": false,
+  "filled_manifest_detected": true,
   "filled_manifest_status": {
     "accepted_formats": [
       "json",
@@ -3260,9 +3261,7 @@
       "csv",
       "tsv"
     ],
-    "blockers": [
-      "public_benchmark_vina_gnina_input_manifest_not_detected"
-    ],
+    "blockers": [],
     "candidate_paths": [
       {
         "exists": false,
@@ -3289,12 +3288,12 @@
         "row_count": 0
       },
       {
-        "exists": false,
+        "exists": true,
         "format": "csv",
-        "is_file": false,
+        "is_file": true,
         "load_error": "",
         "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
-        "row_count": 0
+        "row_count": 12
       },
       {
         "exists": false,
@@ -3305,16 +3304,16 @@
         "row_count": 0
       }
     ],
-    "case_count": 0,
+    "case_count": 12,
     "default_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
-    "detected_manifest_artifact_count": 0,
+    "detected_manifest_artifact_count": 1,
     "duplicate_case_ids": [],
-    "row_count": 0,
-    "selected_manifest_format": "",
-    "selected_manifest_path": "",
-    "status": "not_detected"
+    "row_count": 12,
+    "selected_manifest_format": "csv",
+    "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+    "status": "ready"
   },
-  "generated_at": "2026-07-04T07:25:14.261080+00:00",
+  "generated_at": "2026-07-04T08:36:41.330385+00:00",
   "header_fields": [
     "case_id",
     "complex_id",
@@ -3344,10 +3343,10 @@
     "input_preparation_provenance_ref"
   ],
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:d91bbc8402c86796ce3d60d0a053610cceea2dcbbb0f5faf00adeaad7698bea4",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:30cea0a365c966479ebe1e3b48f0b2b99ba6358c8434f9b1e64d51e4d1329aba",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv": "sha256:ff3afa49ab7c79ed82a78f1755272ecc13ca7f6b6e01ef2b35ea5d58b12d3611",
-    "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1",
-    "scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py": "sha256:51660e1839be099da19ee009cc0199c01be7c69f304b77e44130ea6cf000d48b"
+    "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:19cb915b9e0926181b87e17f60ee010ed0fd4b3da6148843d1a077825e5d45bd",
+    "scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py": "sha256:0aaea5d86732b33257e3a5d9f7bbf18ed732e2ca07d7aff489dc2e4173bf523a"
   },
   "local_file_fields": [
     "protein_structure_path",
@@ -4311,7 +4310,7 @@
   "reuse_policy": "public_benchmark_vina_gnina_input_manifest_template_preflight",
   "reused_evidence": false,
   "schema_version": "public-benchmark-vina-gnina-input-manifest-template-preflight.v1",
-  "source_commit_sha": "8adfc9c62c921664234cfb665b546e3c1a3eeb65",
+  "source_commit_sha": "78538d6ecb7096aec38e7679ded4367b401d53e0",
   "source_family_policy": {
     "accepted_markers": [
       "casf",
@@ -4697,7 +4696,9 @@
   ],
   "source_url_probe_plan": [
     {
-      "blockers": [],
+      "blockers": [
+        "not_run"
+      ],
       "case_ids": [
         "casf2016_4llx",
         "casf2016_5c28",
@@ -4719,26 +4720,26 @@
       ],
       "head_command": "curl --head --location --max-time 20 'https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz'",
       "probe": {
-        "accept_ranges": "bytes",
-        "attempted": true,
-        "content_length_bytes": 1572660769,
-        "content_type": "application/octet-stream",
+        "accept_ranges": "",
+        "attempted": false,
+        "content_length_bytes": 0,
+        "content_type": "",
         "error": "",
-        "etag": "\"78c0c1dd8f716a9f124e7ccdb20f5712-188\"",
-        "final_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-        "http_status": 200,
-        "last_modified": "Thu, 25 Jan 2024 03:25:36 GMT",
-        "status": "reachable",
-        "success_criteria_met": true,
+        "etag": "",
+        "final_url": "",
+        "http_status": 0,
+        "last_modified": "",
+        "status": "not_run",
+        "success_criteria_met": false,
         "url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz"
       },
       "source_url": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
-      "status": "reachable"
+      "status": "not_run"
     }
   ],
   "source_url_probe_policy": {
     "network_probe_only": true,
-    "probe_source_urls": true,
+    "probe_source_urls": false,
     "raw_payload_committed_by_plan": false,
     "raw_payload_downloaded_by_plan": false,
     "timeout_seconds": 20
@@ -4749,8 +4750,8 @@
     "expected_case_count": 12,
     "invalid_checksum_count": 0,
     "invalid_source_receipt_count": 0,
-    "known_source_url_content_length_bytes": 1572660769,
-    "known_source_url_content_length_gib": 1.465,
+    "known_source_url_content_length_bytes": 0,
+    "known_source_url_content_length_gib": 0.0,
     "manifest_ready": false,
     "missing_expected_case_count": 0,
     "missing_local_file_count": 48,
@@ -4763,10 +4764,10 @@
     "source_file_missing_count": 24,
     "source_file_requirement_count": 24,
     "source_url_blocked_count": 0,
-    "source_url_not_run_count": 0,
+    "source_url_not_run_count": 1,
     "source_url_probe_count": 1,
-    "source_url_probe_network_performed": true,
-    "source_url_reachable_count": 1,
+    "source_url_probe_network_performed": false,
+    "source_url_reachable_count": 0,
     "template_case_count": 12,
     "template_case_coverage_complete": true,
     "template_row_count": 12,

@@ -5,7 +5,7 @@
 - `science_actual_closure_contract_pass`: `False`
 - `missing_slot_count`: `2`
 - `slot_count`: `6`
-- `blocker_count`: `10`
+- `blocker_count`: `9`
 
 ## Actual Closure Progress
 
@@ -195,10 +195,10 @@
 - `recommended_template_dropzone_is_supported_candidate_path`: `True`
 - `accepted_manifest_formats`: `json`, `jsonl`, `ndjson`, `csv`, `tsv`
 - `supported_manifest_candidate_paths`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.jsonl`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.ndjson`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.tsv`
-- `detected_manifest_artifact_count`: `0`
-- `selected_manifest_path`: ``
-- `selected_manifest_format`: ``
-- `input_manifest_row_count`: `0`
+- `detected_manifest_artifact_count`: `1`
+- `selected_manifest_path`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv`
+- `selected_manifest_format`: `csv`
+- `input_manifest_row_count`: `12`
 - `input_manifest_load_errors`: `none`
 - `template_to_manifest_command`: `cp implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv`
 - `verify_execution_plan_command`: `python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json`
@@ -273,12 +273,12 @@
 
 | Component | Status | Pass | Current | Required | Blockers |
 |---|---|---|---|---|---|
-| `engine_input_manifest` | `blocked` | `False` | `{"blocked_case_input_slot_count": 12, "input_manifest_detected": false, "input_manifest_row_count": 0, "input_manifest_status": "not_detected", "required_case_count": 12, "template_manifest_ready": false, "template_missing_local_file_count": 48, "template_missing_receipt_ref_count": 60, "template_preflight_status": "operator_manifest_completion_required"}` | `{"blocked_case_input_slot_count": 0, "input_manifest_detected": true, "input_manifest_row_count": ">=12"}` | `public_benchmark_vina_gnina_input_manifest_not_detected`, `public_benchmark_vina_gnina_case_inputs_incomplete` |
+| `engine_input_manifest` | `blocked` | `False` | `{"blocked_case_input_slot_count": 12, "input_manifest_detected": true, "input_manifest_row_count": 12, "input_manifest_status": "ready", "required_case_count": 12, "template_manifest_ready": false, "template_missing_local_file_count": 48, "template_missing_receipt_ref_count": 60, "template_preflight_status": "operator_manifest_completion_required"}` | `{"blocked_case_input_slot_count": 0, "input_manifest_detected": true, "input_manifest_row_count": ">=12"}` | `public_benchmark_vina_gnina_case_inputs_incomplete` |
 | `engine_runtime` | `blocked` | `False` | `{"available_engine_count": 0, "missing_engine_count": 2, "missing_engine_ids": ["vina", "gnina"], "runtime_ready_for_engine_execution": false, "runtime_status": "execution_plan_blocked"}` | `{"missing_engine_count": 0, "runtime_ready_for_engine_execution": true}` | `vina_gnina_execution_plan_not_ready`, `vina_binary_missing`, `gnina_binary_missing` |
 | `engine_run_slots` | `blocked` | `False` | `{"blocked_engine_run_slot_count": 24, "ready_engine_run_slot_count": 0, "required_engine_run_count": 24}` | `{"blocked_engine_run_slot_count": 0, "ready_engine_run_slot_count": 24}` | `public_benchmark_vina_gnina_engine_run_slots_incomplete` |
 | `adapter_rows` | `blocked` | `False` | `{"adapter_case_count": 0, "adapter_preflight_contract_pass": false, "adapter_preflight_status": "missing", "adapter_rows_ready": false, "detected_row_artifact_count": 0, "row_candidate_status": "row_artifact_missing", "selected_row_count": 0}` | `{"adapter_case_count": ">=1", "adapter_preflight_contract_pass": true, "detected_row_artifact_count": ">=1"}` | `public_benchmark_vina_gnina_rows_not_detected`, `vina_gnina_rows_not_provided` |
 | `per_engine_run_receipts` | `blocked` | `False` | `{"adapter_template_ready": false, "expected_rows_detected": false, "missing_engine_run_receipt_value_count": 72, "role_receipt_blocked_count": 72, "role_receipt_plan_count": 96, "rows_template_preflight_status": "operator_rows_completion_required"}` | `{"adapter_template_ready": true, "expected_rows_detected": true, "role_receipt_blocked_count": 0}` | `public_benchmark_vina_gnina_engine_run_receipts_incomplete` |
-| `external_receipts` | `blocked` | `False` | `{"all_expected_artifact_roles_complete": false, "blocked_official_receipt_role_count": 1, "external_receipt_completion_status": "blocked_pending_vina_gnina_receipts", "missing_expected_artifact_roles": ["vina_gnina_comparison_adapter"]}` | `{"all_expected_artifact_roles_complete": true, "blocked_official_receipt_role_count": 0}` | `vina_gnina_rows_not_provided`, `public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter`, `public_benchmark_vina_gnina_input_manifest_not_detected`, `public_benchmark_vina_gnina_engine_runtime_not_ready` |
+| `external_receipts` | `blocked` | `False` | `{"all_expected_artifact_roles_complete": false, "blocked_official_receipt_role_count": 1, "external_receipt_completion_status": "blocked_pending_vina_gnina_receipts", "missing_expected_artifact_roles": ["vina_gnina_comparison_adapter"]}` | `{"all_expected_artifact_roles_complete": true, "blocked_official_receipt_role_count": 0}` | `vina_gnina_rows_not_provided`, `public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter`, `public_benchmark_vina_gnina_engine_runtime_not_ready` |
 
 ### Public Benchmark Source Access Preflight
 
@@ -317,7 +317,6 @@
 
 - `public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_rows_not_acquired`
 - `public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_engine_runtime_not_ready`
-- `public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_input_manifest_not_detected`
 - `public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_engine_binaries_or_container_images_missing`
 - `public_benchmark_phase2_source_acquisition::public_benchmark_external_receipts_not_attached`
 - `pocketmd_lite_source_acquisition::pocketmd_lite_topk_rows_not_acquired`

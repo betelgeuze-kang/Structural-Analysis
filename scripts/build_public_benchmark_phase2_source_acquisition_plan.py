@@ -92,6 +92,9 @@ DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE = (
 DEFAULT_VINA_GNINA_INPUT_MANIFEST = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest.csv"
 )
+DEFAULT_VINA_GNINA_INPUT_MANIFEST_FROM_TEMPLATE_REPORT = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest_from_template_report.json"
+)
 DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT = (
     PRODUCTIZATION / "public_benchmark_source_access_preflight_receipt.json"
 )
@@ -2890,6 +2893,12 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
             f"--out {DEFAULT_VINA_GNINA_EXECUTION_PLAN}"
         ),
+        "materialize_vina_gnina_input_manifest_from_template": (
+            "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_template.py "
+            f"--template {DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE} "
+            f"--out-manifest {DEFAULT_VINA_GNINA_INPUT_MANIFEST} "
+            f"--out-report {DEFAULT_VINA_GNINA_INPUT_MANIFEST_FROM_TEMPLATE_REPORT}"
+        ),
         "check_vina_gnina_runtime_readiness": (
             "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py "
             f"--out {DEFAULT_VINA_GNINA_RUNTIME_READINESS}"
@@ -3008,9 +3017,14 @@ def build_public_benchmark_phase2_source_acquisition_plan(
                 Path("scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"),
                 Path("scripts/build_public_benchmark_vina_gnina_execution_plan.py"),
                 Path("scripts/build_public_benchmark_vina_gnina_runtime_readiness.py"),
+                Path(
+                    "scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_template.py"
+                ),
                 Path("scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py"),
                 DEFAULT_VINA_GNINA_ROWS_TEMPLATE,
                 DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT,
+                DEFAULT_VINA_GNINA_INPUT_MANIFEST,
+                DEFAULT_VINA_GNINA_INPUT_MANIFEST_FROM_TEMPLATE_REPORT,
                 Path("scripts/build_public_benchmark_source_access_preflight_receipt.py"),
                 DEFAULT_VINA_GNINA_EXECUTION_PLAN,
                 DEFAULT_VINA_GNINA_RUNTIME_READINESS,
