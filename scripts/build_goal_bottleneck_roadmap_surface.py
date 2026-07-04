@@ -436,7 +436,188 @@ def _phase2_requirement_summary_row(
     }
 
 
-def _science_component_gate_summary(component_audit: dict[str, Any]) -> dict[str, Any]:
+def _phase4_requirement_summary_row(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "requirement_id": str(row.get("requirement_id") or ""),
+        "criterion_id": str(
+            row.get("phase4_criterion_id") or row.get("criterion_id") or ""
+        ),
+        "product_requirement": str(row.get("product_requirement") or ""),
+        "evidence_kind": str(row.get("evidence_kind") or ""),
+        "status": str(row.get("status") or ""),
+        "pass": _as_bool(row.get("pass")),
+        "current": row.get("current"),
+        "required": row.get("required"),
+        "summary_field": str(row.get("summary_field") or ""),
+        "blocker_id": str(row.get("blocker_id") or ""),
+        "blockers": [str(item) for item in _as_list(row.get("blockers"))],
+    }
+
+
+def _phase4_metric_criterion_row(
+    row: dict[str, Any],
+    requirement_by_criterion: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    criterion_id = str(row.get("criterion_id") or "")
+    requirement = _as_dict(requirement_by_criterion.get(criterion_id))
+    return {
+        "criterion_id": criterion_id,
+        "requirement_id": str(requirement.get("requirement_id") or ""),
+        "product_requirement": str(requirement.get("product_requirement") or ""),
+        "status": str(requirement.get("status") or row.get("status") or ""),
+        "pass": _as_bool(requirement.get("pass")),
+        "current": requirement.get("current", row.get("current")),
+        "required": requirement.get(
+            "required",
+            str(row.get("required_value_policy") or ""),
+        ),
+        "summary_field": str(requirement.get("summary_field") or ""),
+        "materialized_report_field": str(row.get("materialized_report_field") or ""),
+        "metric_id": str(row.get("metric_id") or ""),
+        "receipt_roles": [str(item) for item in _as_list(row.get("receipt_roles"))],
+        "required_row_fields": [
+            str(item) for item in _as_list(row.get("required_row_fields"))
+        ],
+        "required_value_policy": str(row.get("required_value_policy") or ""),
+        "blockers": [
+            str(item)
+            for item in (
+                _as_list(requirement.get("blockers")) or _as_list(row.get("blockers"))
+            )
+        ],
+    }
+
+
+def _phase4_candidate_slot_row(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "slot_id": str(row.get("slot_id") or ""),
+        "case_id": str(row.get("case_id") or ""),
+        "top_k_rank": _as_int(row.get("top_k_rank")),
+        "candidate_scope": str(row.get("candidate_scope") or ""),
+        "status": str(row.get("status") or ""),
+        "missing": _as_bool(row.get("missing")),
+        "closes_phase4_criteria": [
+            str(item) for item in _as_list(row.get("closes_phase4_criteria"))
+        ],
+        "required_metric_fields": [
+            str(item) for item in _as_list(row.get("required_metric_fields"))
+        ],
+        "required_receipt_roles": [
+            str(item) for item in _as_list(row.get("required_receipt_roles"))
+        ],
+        "operator_action": str(row.get("operator_action") or ""),
+    }
+
+
+def _science_phase4_gate_summary(
+    component_audit: dict[str, Any],
+    source_acquisition: dict[str, Any],
+) -> dict[str, Any]:
+    completion_audit = _as_dict(source_acquisition.get("phase4_completion_audit"))
+    metric_rows = [
+        row
+        for row in _as_list(source_acquisition.get("phase4_metric_closure_matrix"))
+        if isinstance(row, dict)
+    ]
+    candidate_rows = [
+        row
+        for row in _as_list(source_acquisition.get("phase4_candidate_slot_matrix"))
+        if isinstance(row, dict)
+    ]
+    if not completion_audit and not metric_rows and not candidate_rows:
+        return {}
+
+    requirements = [
+        _phase4_requirement_summary_row(row)
+        for row in _as_list(completion_audit.get("requirements"))
+        if isinstance(row, dict)
+    ]
+    requirement_by_criterion = {
+        row["criterion_id"]: row
+        for row in requirements
+        if row.get("criterion_id")
+        and row.get("criterion_id") != "broad_all_atom_fep_claims_locked"
+    }
+    phase4_criteria = [
+        _phase4_metric_criterion_row(row, requirement_by_criterion)
+        for row in metric_rows
+    ]
+    candidate_slot_matrix = [_phase4_candidate_slot_row(row) for row in candidate_rows]
+    missing_candidate_slots = [
+        row
+        for row in candidate_slot_matrix
+        if row["missing"] or row["status"] not in {"ready", "provided"}
+    ]
+    source_summary = _as_dict(source_acquisition.get("summary"))
+    failed_criteria = [
+        str(item) for item in _as_list(component_audit.get("failed_criteria"))
+    ]
+    remaining_blockers = _dedupe(
+        [str(item) for item in _as_list(completion_audit.get("remaining_blockers"))]
+        + [str(item) for item in _as_list(component_audit.get("blockers"))]
+    )
+    ready = _as_bool(completion_audit.get("pass")) and _as_bool(
+        component_audit.get("actual_closure_ready")
+    )
+    return {
+        "phase4_exit_gate_status": "ready" if ready else "blocked",
+        "phase4_operator_status": str(completion_audit.get("status") or ""),
+        "phase4_ready": ready,
+        "phase4_failed_criteria": failed_criteria,
+        "phase4_requirement_summary": {
+            "actual_closure_ready": _as_bool(
+                completion_audit.get("actual_closure_ready")
+            ),
+            "requirement_count": _as_int(completion_audit.get("requirement_count")),
+            "ready_requirement_count": _as_int(
+                completion_audit.get("ready_requirement_count")
+            ),
+            "blocked_requirement_count": _as_int(
+                completion_audit.get("blocked_requirement_count")
+            ),
+            "blocked_requirement_ids": [
+                str(item)
+                for item in _as_list(completion_audit.get("blocked_requirement_ids"))
+            ],
+            "remaining_row_inputs": [
+                str(item)
+                for item in _as_list(completion_audit.get("remaining_row_inputs"))
+            ],
+            "remaining_operator_action": str(
+                completion_audit.get("remaining_operator_action") or ""
+            ),
+            "remaining_blockers": remaining_blockers,
+            "phase4_actual_evidence_audit_status": str(
+                source_summary.get("phase4_actual_evidence_audit_status") or ""
+            ),
+            "phase4_actual_evidence_blocked_component_count": _as_int(
+                source_summary.get("phase4_actual_evidence_blocked_component_count")
+            ),
+            "phase4_missing_candidate_slot_count": _as_int(
+                source_summary.get("phase4_missing_candidate_slot_count")
+            ),
+            "phase4_actual_evidence_missing_metric_count": _as_int(
+                source_summary.get("phase4_actual_evidence_missing_metric_count")
+            ),
+        },
+        "phase4_exit_gate_criteria": phase4_criteria,
+        "phase4_requirements": requirements,
+        "phase4_candidate_slot_summary": {
+            "candidate_slot_count": len(candidate_slot_matrix),
+            "missing_candidate_slot_count": len(missing_candidate_slots),
+            "missing_candidate_slot_ids": [
+                str(row.get("slot_id") or "") for row in missing_candidate_slots
+            ],
+        },
+        "phase4_candidate_slot_matrix": candidate_slot_matrix,
+    }
+
+
+def _science_component_gate_summary(
+    component_audit: dict[str, Any],
+    *,
+    source_acquisition: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     if not component_audit:
         return {}
     raw_phase2_row_closure_matrix = [
@@ -547,7 +728,25 @@ def _science_component_gate_summary(component_audit: dict[str, Any]) -> dict[str
                 "phase2_row_closure_matrix": phase2_row_closure_matrix,
             }
         )
+    summary.update(
+        _science_phase4_gate_summary(
+            component_audit,
+            _as_dict(source_acquisition),
+        )
+    )
     return summary
+
+
+def _science_source_acquisition_for_component(
+    science_handoff: dict[str, Any],
+    component_id: str,
+) -> dict[str, Any]:
+    upstream = _as_dict(science_handoff.get("upstream_source_acquisition"))
+    if component_id == "public_benchmark_phase2_actual_closure":
+        return _as_dict(upstream.get("public_benchmark_phase2"))
+    if component_id == "pocketmd_lite_topk_actual_closure":
+        return _as_dict(upstream.get("pocketmd_lite"))
+    return {}
 
 
 def _science_first_blocker(
@@ -672,7 +871,14 @@ def _science_actual_closure_rows(
             science_row_audit,
             component_id,
         )
-        component_gate_summary = _science_component_gate_summary(component_audit)
+        source_acquisition = _science_source_acquisition_for_component(
+            science_handoff,
+            component_id,
+        )
+        component_gate_summary = _science_component_gate_summary(
+            component_audit,
+            source_acquisition=source_acquisition,
+        )
         actual_audit = _science_actual_audit_for_component(science_handoff, component_id)
         action = _as_dict(actions_by_component.get(component_id))
         operator_gaps = _science_operator_gap_register(
@@ -748,6 +954,23 @@ def _science_actual_closure_rows(
                                 "phase3_exit_gate_status",
                                 "phase3_exit_gate_criteria",
                                 "phase3_failed_criteria",
+                            )
+                            if key in component_gate_summary
+                        }
+                    ),
+                    "phase4_exit_gate": _as_dict(
+                        {
+                            key: component_gate_summary[key]
+                            for key in (
+                                "phase4_exit_gate_status",
+                                "phase4_operator_status",
+                                "phase4_ready",
+                                "phase4_failed_criteria",
+                                "phase4_requirement_summary",
+                                "phase4_exit_gate_criteria",
+                                "phase4_requirements",
+                                "phase4_candidate_slot_summary",
+                                "phase4_candidate_slot_matrix",
                             )
                             if key in component_gate_summary
                         }

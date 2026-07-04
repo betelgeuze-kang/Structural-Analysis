@@ -615,6 +615,133 @@ def test_goal_bottleneck_roadmap_surface_links_structural_release_bottleneck() -
     assert phase_4["summary"]["operator_evidence_gap_register"][0]["slot_id"] == (
         "pocketmd_rows"
     )
+    phase4_gate = phase_4["summary"]["phase4_exit_gate"]
+    assert phase4_gate["phase4_exit_gate_status"] == "blocked"
+    assert phase4_gate["phase4_operator_status"] == "operator_topk_rows_required"
+    assert phase4_gate["phase4_ready"] is False
+    assert phase4_gate["phase4_failed_criteria"] == [
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+    ]
+    assert phase4_gate["phase4_requirement_summary"] == {
+        "actual_closure_ready": False,
+        "blocked_requirement_count": 7,
+        "blocked_requirement_ids": [
+            "top_k_refinement_rows_present",
+            "top_k_refinement_case_coverage",
+            "local_min_survival_reported",
+            "contact_persistence_reported",
+            "h_bond_persistence_reported",
+            "clash_relief_reported",
+            "uncertainty_reported",
+        ],
+        "phase4_actual_evidence_audit_status": "operator_topk_rows_required",
+        "phase4_actual_evidence_blocked_component_count": 4,
+        "phase4_actual_evidence_missing_metric_count": 5,
+        "phase4_missing_candidate_slot_count": 6,
+        "ready_requirement_count": 2,
+        "remaining_blockers": [
+            "pocketmd_lite_topk_rows_not_acquired",
+            "pocketmd_lite_topk_candidate_rows_missing",
+            "pocketmd_lite_local_min_survival_rows_missing",
+            "pocketmd_lite_contact_persistence_rows_missing",
+            "pocketmd_lite_h_bond_persistence_rows_missing",
+            "pocketmd_lite_clash_relief_rows_missing",
+            "pocketmd_lite_uncertainty_rows_missing",
+            "pocketmd_lite_topk_rows_not_provided",
+        ],
+        "remaining_operator_action": (
+            "attach_pocketmd_rows_at_implementation/phase1/release_evidence/"
+            "productization/pocketmd_lite_topk_rows.json"
+        ),
+        "remaining_row_inputs": ["pocketmd_rows"],
+        "requirement_count": 9,
+    }
+    phase4_criteria = {
+        row["criterion_id"]: row
+        for row in phase4_gate["phase4_exit_gate_criteria"]
+    }
+    assert list(phase4_criteria) == phase4_gate["phase4_failed_criteria"]
+    assert phase4_criteria["top_k_refinement_rows_present"]["current"] == {
+        "required_candidate_slot_count": 6,
+        "row_artifact_detected": False,
+        "validated_row_count": 0,
+    }
+    assert phase4_criteria["top_k_refinement_case_coverage"]["required"] == {
+        "coverage_ready": True,
+        "min_real_refinement_case_count": 3,
+        "min_total_top_k_candidate_count": 6,
+    }
+    expected_phase4_metrics = {
+        "local_min_survival_materialized": (
+            "local_min_survival_reported",
+            "local_min_survival_rate",
+            "pocketmd_lite_local_min_survival_rows_missing",
+        ),
+        "contact_persistence_materialized": (
+            "contact_persistence_reported",
+            "contact_persistence_rate_median",
+            "pocketmd_lite_contact_persistence_rows_missing",
+        ),
+        "h_bond_persistence_materialized": (
+            "h_bond_persistence_reported",
+            "h_bond_persistence_rate_median",
+            "pocketmd_lite_h_bond_persistence_rows_missing",
+        ),
+        "clash_relief_materialized": (
+            "clash_relief_reported",
+            "clash_relief_rate",
+            "pocketmd_lite_clash_relief_rows_missing",
+        ),
+        "uncertainty_summary_materialized": (
+            "uncertainty_reported",
+            "uncertainty_width_median",
+            "pocketmd_lite_uncertainty_rows_missing",
+        ),
+    }
+    for criterion_id, (requirement_id, summary_field, blocker) in (
+        expected_phase4_metrics.items()
+    ):
+        metric = phase4_criteria[criterion_id]
+        assert metric["requirement_id"] == requirement_id
+        assert metric["summary_field"] == summary_field
+        assert metric["current"]["summary_value"] is None
+        assert metric["current"]["survival_report_contract_pass"] is False
+        assert metric["pass"] is False
+        assert blocker in metric["blockers"]
+    assert phase4_criteria["report_blockers_resolved"]["receipt_roles"] == [
+        "lite_refinement_run_receipt",
+        "interaction_persistence_receipt",
+        "uncertainty_interval_receipt",
+    ]
+    phase4_requirements = {
+        row["requirement_id"]: row
+        for row in phase4_gate["phase4_requirements"]
+    }
+    assert len(phase4_requirements) == 9
+    assert phase4_requirements["bounded_top_k_scope_contract"]["pass"] is True
+    assert phase4_requirements["broad_all_atom_fep_claims_locked"]["pass"] is True
+    assert phase4_requirements["local_min_survival_reported"]["blocker_id"] == (
+        "pocketmd_lite_local_min_survival_rows_missing"
+    )
+    assert phase4_gate["phase4_candidate_slot_summary"] == {
+        "candidate_slot_count": 6,
+        "missing_candidate_slot_count": 6,
+        "missing_candidate_slot_ids": [
+            "pocketmd_lite_case_001_rank_1",
+            "pocketmd_lite_case_001_rank_2",
+            "pocketmd_lite_case_002_rank_1",
+            "pocketmd_lite_case_002_rank_2",
+            "pocketmd_lite_case_003_rank_1",
+            "pocketmd_lite_case_003_rank_2",
+        ],
+    }
     assert surface["primary_roadmap_bottleneck"] == (
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     )

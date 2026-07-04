@@ -426,7 +426,7 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
     "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
   },
-  "generated_at": "2026-07-04T06:30:28.535796+00:00",
+  "generated_at": "2026-07-04T06:38:36.178247+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:5558e5f0d82be0cbcb22c4431c0247939a1a9f780938f6d40bcf8484561b0eed",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:fc87faa4fd9acfb4e87000f955f1086cc39a86f479b9325e30cb2864c9f19631",
@@ -437,7 +437,7 @@
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:c1af83f1b410aca8536d5ab832c0ba6a86153436844e42152860f84ec0002328",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:8adb767e05269c4063e04ca5e5060b0e94994916ccae4e9912c897c0c7fc9703",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:e8a6b5e0b8d86ef1b629c1a6d4e8caab6132dd4a3a311c64bc520c2e4e13954f",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:554681d43c0a734b12a079b7356d41254cd4e9185b59c19966c3950a0b3fb16b"
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:f388aa9be01d17472e1f41d5238163f4772a5b63456833d0f6e0779d28839284"
   },
   "mutation_allowed": false,
   "next_actions": [
@@ -3146,6 +3146,7 @@
           }
         ],
         "phase3_exit_gate": {},
+        "phase4_exit_gate": {},
         "requirement_count": 5,
         "requirement_pass_count": 4,
         "science_actual_closure_audit_summary": {
@@ -3373,6 +3374,7 @@
           "phase3_exit_gate_status": "ready",
           "phase3_failed_criteria": []
         },
+        "phase4_exit_gate": {},
         "requirement_count": 5,
         "requirement_pass_count": 5,
         "science_actual_closure_audit_summary": {
@@ -3804,6 +3806,750 @@
           "expected_rows_mode": "raw_top_k_refinement_rows",
           "materialized": false,
           "outputs": {},
+          "phase4_candidate_slot_matrix": [
+            {
+              "candidate_scope": "upstream_ranked_top_k_candidates_only",
+              "case_id": "pocketmd_lite_case_001",
+              "closes_phase4_criteria": [
+                "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage",
+                "local_min_survival_materialized",
+                "contact_persistence_materialized",
+                "h_bond_persistence_materialized",
+                "clash_relief_materialized",
+                "uncertainty_summary_materialized",
+                "report_blockers_resolved"
+              ],
+              "missing": true,
+              "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "required_metric_fields": [
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt",
+                "lite_refinement_run_receipt",
+                "interaction_persistence_receipt",
+                "uncertainty_interval_receipt"
+              ],
+              "slot_id": "pocketmd_lite_case_001_rank_1",
+              "status": "missing",
+              "top_k_rank": 1
+            },
+            {
+              "candidate_scope": "upstream_ranked_top_k_candidates_only",
+              "case_id": "pocketmd_lite_case_001",
+              "closes_phase4_criteria": [
+                "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage",
+                "local_min_survival_materialized",
+                "contact_persistence_materialized",
+                "h_bond_persistence_materialized",
+                "clash_relief_materialized",
+                "uncertainty_summary_materialized",
+                "report_blockers_resolved"
+              ],
+              "missing": true,
+              "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "required_metric_fields": [
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt",
+                "lite_refinement_run_receipt",
+                "interaction_persistence_receipt",
+                "uncertainty_interval_receipt"
+              ],
+              "slot_id": "pocketmd_lite_case_001_rank_2",
+              "status": "missing",
+              "top_k_rank": 2
+            },
+            {
+              "candidate_scope": "upstream_ranked_top_k_candidates_only",
+              "case_id": "pocketmd_lite_case_002",
+              "closes_phase4_criteria": [
+                "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage",
+                "local_min_survival_materialized",
+                "contact_persistence_materialized",
+                "h_bond_persistence_materialized",
+                "clash_relief_materialized",
+                "uncertainty_summary_materialized",
+                "report_blockers_resolved"
+              ],
+              "missing": true,
+              "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "required_metric_fields": [
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt",
+                "lite_refinement_run_receipt",
+                "interaction_persistence_receipt",
+                "uncertainty_interval_receipt"
+              ],
+              "slot_id": "pocketmd_lite_case_002_rank_1",
+              "status": "missing",
+              "top_k_rank": 1
+            },
+            {
+              "candidate_scope": "upstream_ranked_top_k_candidates_only",
+              "case_id": "pocketmd_lite_case_002",
+              "closes_phase4_criteria": [
+                "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage",
+                "local_min_survival_materialized",
+                "contact_persistence_materialized",
+                "h_bond_persistence_materialized",
+                "clash_relief_materialized",
+                "uncertainty_summary_materialized",
+                "report_blockers_resolved"
+              ],
+              "missing": true,
+              "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "required_metric_fields": [
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt",
+                "lite_refinement_run_receipt",
+                "interaction_persistence_receipt",
+                "uncertainty_interval_receipt"
+              ],
+              "slot_id": "pocketmd_lite_case_002_rank_2",
+              "status": "missing",
+              "top_k_rank": 2
+            },
+            {
+              "candidate_scope": "upstream_ranked_top_k_candidates_only",
+              "case_id": "pocketmd_lite_case_003",
+              "closes_phase4_criteria": [
+                "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage",
+                "local_min_survival_materialized",
+                "contact_persistence_materialized",
+                "h_bond_persistence_materialized",
+                "clash_relief_materialized",
+                "uncertainty_summary_materialized",
+                "report_blockers_resolved"
+              ],
+              "missing": true,
+              "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "required_metric_fields": [
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt",
+                "lite_refinement_run_receipt",
+                "interaction_persistence_receipt",
+                "uncertainty_interval_receipt"
+              ],
+              "slot_id": "pocketmd_lite_case_003_rank_1",
+              "status": "missing",
+              "top_k_rank": 1
+            },
+            {
+              "candidate_scope": "upstream_ranked_top_k_candidates_only",
+              "case_id": "pocketmd_lite_case_003",
+              "closes_phase4_criteria": [
+                "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage",
+                "local_min_survival_materialized",
+                "contact_persistence_materialized",
+                "h_bond_persistence_materialized",
+                "clash_relief_materialized",
+                "uncertainty_summary_materialized",
+                "report_blockers_resolved"
+              ],
+              "missing": true,
+              "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "required_metric_fields": [
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt",
+                "lite_refinement_run_receipt",
+                "interaction_persistence_receipt",
+                "uncertainty_interval_receipt"
+              ],
+              "slot_id": "pocketmd_lite_case_003_rank_2",
+              "status": "missing",
+              "top_k_rank": 2
+            }
+          ],
+          "phase4_candidate_slot_summary": {
+            "candidate_slot_count": 6,
+            "missing_candidate_slot_count": 6,
+            "missing_candidate_slot_ids": [
+              "pocketmd_lite_case_001_rank_1",
+              "pocketmd_lite_case_001_rank_2",
+              "pocketmd_lite_case_002_rank_1",
+              "pocketmd_lite_case_002_rank_2",
+              "pocketmd_lite_case_003_rank_1",
+              "pocketmd_lite_case_003_rank_2"
+            ]
+          },
+          "phase4_exit_gate_criteria": [
+            {
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "pocketmd_lite_topk_candidate_rows_missing"
+              ],
+              "criterion_id": "top_k_refinement_rows_present",
+              "current": {
+                "required_candidate_slot_count": 6,
+                "row_artifact_detected": false,
+                "validated_row_count": 0
+              },
+              "materialized_report_field": "",
+              "metric_id": "",
+              "pass": false,
+              "product_requirement": "top-k candidate refinement rows are present",
+              "receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt"
+              ],
+              "required": {
+                "coverage_ready": true,
+                "min_real_refinement_case_count": 3,
+                "min_total_top_k_candidate_count": 6
+              },
+              "required_row_fields": [],
+              "required_value_policy": "",
+              "requirement_id": "top_k_refinement_rows_present",
+              "status": "blocked",
+              "summary_field": ""
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "pocketmd_lite_topk_candidate_rows_missing"
+              ],
+              "criterion_id": "top_k_refinement_case_coverage",
+              "current": {
+                "coverage_ready": false,
+                "covered_required_slot_count": 0,
+                "required_candidate_slot_count": 6
+              },
+              "materialized_report_field": "",
+              "metric_id": "",
+              "pass": false,
+              "product_requirement": "top-k candidate case/rank coverage is complete",
+              "receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt"
+              ],
+              "required": {
+                "coverage_ready": true,
+                "min_real_refinement_case_count": 3,
+                "min_total_top_k_candidate_count": 6
+              },
+              "required_row_fields": [],
+              "required_value_policy": "",
+              "requirement_id": "top_k_refinement_case_coverage",
+              "status": "blocked",
+              "summary_field": ""
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_local_min_survival_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "local_min_survival_materialized",
+              "current": {
+                "summary_field": "local_min_survival_rate",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "materialized_report_field": "local_min_survival_rate",
+              "metric_id": "local_min_survival_rate",
+              "pass": false,
+              "product_requirement": "local-min survival is reported",
+              "receipt_roles": [
+                "lite_refinement_run_receipt"
+              ],
+              "required": {
+                "blocker_absent": "pocketmd_lite_local_min_survival_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "required_row_fields": [
+                "local_min_survived"
+              ],
+              "required_value_policy": "boolean per top-k candidate",
+              "requirement_id": "local_min_survival_reported",
+              "status": "blocked",
+              "summary_field": "local_min_survival_rate"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_contact_persistence_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "contact_persistence_materialized",
+              "current": {
+                "summary_field": "contact_persistence_rate_median",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "materialized_report_field": "contact_persistence_summary",
+              "metric_id": "contact_persistence_rate",
+              "pass": false,
+              "product_requirement": "contact persistence is reported",
+              "receipt_roles": [
+                "interaction_persistence_receipt"
+              ],
+              "required": {
+                "blocker_absent": "pocketmd_lite_contact_persistence_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "required_row_fields": [
+                "contact_persistence_rate"
+              ],
+              "required_value_policy": "finite fraction from 0.0 to 1.0",
+              "requirement_id": "contact_persistence_reported",
+              "status": "blocked",
+              "summary_field": "contact_persistence_rate_median"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_h_bond_persistence_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "h_bond_persistence_materialized",
+              "current": {
+                "summary_field": "h_bond_persistence_rate_median",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "materialized_report_field": "h_bond_persistence_summary",
+              "metric_id": "h_bond_persistence_rate",
+              "pass": false,
+              "product_requirement": "H-bond persistence is reported",
+              "receipt_roles": [
+                "interaction_persistence_receipt"
+              ],
+              "required": {
+                "blocker_absent": "pocketmd_lite_h_bond_persistence_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "required_row_fields": [
+                "h_bond_persistence_rate"
+              ],
+              "required_value_policy": "finite fraction from 0.0 to 1.0",
+              "requirement_id": "h_bond_persistence_reported",
+              "status": "blocked",
+              "summary_field": "h_bond_persistence_rate_median"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_clash_relief_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "clash_relief_materialized",
+              "current": {
+                "summary_field": "clash_relief_rate",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "materialized_report_field": "clash_relief_summary",
+              "metric_id": "clash_relief_rate",
+              "pass": false,
+              "product_requirement": "clash relief is reported",
+              "receipt_roles": [
+                "interaction_persistence_receipt"
+              ],
+              "required": {
+                "blocker_absent": "pocketmd_lite_clash_relief_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "required_row_fields": [
+                "clash_count_before",
+                "clash_count_after"
+              ],
+              "required_value_policy": "non-negative integer clash counts",
+              "requirement_id": "clash_relief_reported",
+              "status": "blocked",
+              "summary_field": "clash_relief_rate"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_uncertainty_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "uncertainty_summary_materialized",
+              "current": {
+                "summary_field": "uncertainty_width_median",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "materialized_report_field": "uncertainty_width_summary",
+              "metric_id": "uncertainty_width_median",
+              "pass": false,
+              "product_requirement": "uncertainty interval summary is reported",
+              "receipt_roles": [
+                "uncertainty_interval_receipt"
+              ],
+              "required": {
+                "blocker_absent": "pocketmd_lite_uncertainty_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "required_row_fields": [
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_value_policy": "finite interval with high >= low and nonblank unit",
+              "requirement_id": "uncertainty_reported",
+              "status": "blocked",
+              "summary_field": "uncertainty_width_median"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "upstream_top_k_candidate_receipts_not_attached",
+                "lite_refinement_metric_receipts_not_attached"
+              ],
+              "criterion_id": "report_blockers_resolved",
+              "current": {
+                "coverage_ready": false,
+                "covered_required_slot_count": 0,
+                "required_candidate_slot_count": 6,
+                "row_artifact_detected": false,
+                "validated_row_count": 0
+              },
+              "materialized_report_field": "",
+              "metric_id": "",
+              "pass": false,
+              "product_requirement": "",
+              "receipt_roles": [
+                "lite_refinement_run_receipt",
+                "interaction_persistence_receipt",
+                "uncertainty_interval_receipt"
+              ],
+              "required": "",
+              "required_row_fields": [],
+              "required_value_policy": "",
+              "requirement_id": "",
+              "status": "blocked",
+              "summary_field": ""
+            }
+          ],
+          "phase4_exit_gate_status": "blocked",
+          "phase4_failed_criteria": [
+            "top_k_refinement_rows_present",
+            "top_k_refinement_case_coverage",
+            "local_min_survival_materialized",
+            "contact_persistence_materialized",
+            "h_bond_persistence_materialized",
+            "clash_relief_materialized",
+            "uncertainty_summary_materialized",
+            "report_blockers_resolved"
+          ],
+          "phase4_operator_status": "operator_topk_rows_required",
+          "phase4_ready": false,
+          "phase4_requirement_summary": {
+            "actual_closure_ready": false,
+            "blocked_requirement_count": 7,
+            "blocked_requirement_ids": [
+              "top_k_refinement_rows_present",
+              "top_k_refinement_case_coverage",
+              "local_min_survival_reported",
+              "contact_persistence_reported",
+              "h_bond_persistence_reported",
+              "clash_relief_reported",
+              "uncertainty_reported"
+            ],
+            "phase4_actual_evidence_audit_status": "operator_topk_rows_required",
+            "phase4_actual_evidence_blocked_component_count": 4,
+            "phase4_actual_evidence_missing_metric_count": 5,
+            "phase4_missing_candidate_slot_count": 6,
+            "ready_requirement_count": 2,
+            "remaining_blockers": [
+              "pocketmd_lite_topk_rows_not_acquired",
+              "pocketmd_lite_topk_candidate_rows_missing",
+              "pocketmd_lite_local_min_survival_rows_missing",
+              "pocketmd_lite_contact_persistence_rows_missing",
+              "pocketmd_lite_h_bond_persistence_rows_missing",
+              "pocketmd_lite_clash_relief_rows_missing",
+              "pocketmd_lite_uncertainty_rows_missing",
+              "pocketmd_lite_topk_rows_not_provided"
+            ],
+            "remaining_operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "remaining_row_inputs": [
+              "pocketmd_rows"
+            ],
+            "requirement_count": 9
+          },
+          "phase4_requirements": [
+            {
+              "blocker_id": "",
+              "blockers": [],
+              "criterion_id": "broad_all_atom_fep_claims_locked",
+              "current": {
+                "broad_all_atom_or_fep_claims_unlocked": false,
+                "preserved_phase4_criteria": [
+                  "broad_all_atom_fep_claims_locked"
+                ],
+                "top_k_scope_policy_present": true
+              },
+              "evidence_kind": "contract_guard",
+              "pass": true,
+              "product_requirement": "PocketMD Lite applies only to upstream top-k candidates",
+              "required": {
+                "broad_all_atom_or_fep_claims_unlocked": false,
+                "preserved_phase4_criteria_contains": "broad_all_atom_fep_claims_locked",
+                "top_k_scope_policy_present": true
+              },
+              "requirement_id": "bounded_top_k_scope_contract",
+              "status": "ready",
+              "summary_field": ""
+            },
+            {
+              "blocker_id": "",
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "pocketmd_lite_topk_candidate_rows_missing"
+              ],
+              "criterion_id": "top_k_refinement_rows_present",
+              "current": {
+                "required_candidate_slot_count": 6,
+                "row_artifact_detected": false,
+                "validated_row_count": 0
+              },
+              "evidence_kind": "row_coverage",
+              "pass": false,
+              "product_requirement": "top-k candidate refinement rows are present",
+              "required": {
+                "coverage_ready": true,
+                "min_real_refinement_case_count": 3,
+                "min_total_top_k_candidate_count": 6
+              },
+              "requirement_id": "top_k_refinement_rows_present",
+              "status": "blocked",
+              "summary_field": ""
+            },
+            {
+              "blocker_id": "",
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "pocketmd_lite_topk_candidate_rows_missing"
+              ],
+              "criterion_id": "top_k_refinement_case_coverage",
+              "current": {
+                "coverage_ready": false,
+                "covered_required_slot_count": 0,
+                "required_candidate_slot_count": 6
+              },
+              "evidence_kind": "row_coverage",
+              "pass": false,
+              "product_requirement": "top-k candidate case/rank coverage is complete",
+              "required": {
+                "coverage_ready": true,
+                "min_real_refinement_case_count": 3,
+                "min_total_top_k_candidate_count": 6
+              },
+              "requirement_id": "top_k_refinement_case_coverage",
+              "status": "blocked",
+              "summary_field": ""
+            },
+            {
+              "blocker_id": "pocketmd_lite_local_min_survival_rows_missing",
+              "blockers": [
+                "pocketmd_lite_local_min_survival_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "local_min_survival_materialized",
+              "current": {
+                "summary_field": "local_min_survival_rate",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "evidence_kind": "survival_summary_metric",
+              "pass": false,
+              "product_requirement": "local-min survival is reported",
+              "required": {
+                "blocker_absent": "pocketmd_lite_local_min_survival_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "requirement_id": "local_min_survival_reported",
+              "status": "blocked",
+              "summary_field": "local_min_survival_rate"
+            },
+            {
+              "blocker_id": "pocketmd_lite_contact_persistence_rows_missing",
+              "blockers": [
+                "pocketmd_lite_contact_persistence_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "contact_persistence_materialized",
+              "current": {
+                "summary_field": "contact_persistence_rate_median",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "evidence_kind": "survival_summary_metric",
+              "pass": false,
+              "product_requirement": "contact persistence is reported",
+              "required": {
+                "blocker_absent": "pocketmd_lite_contact_persistence_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "requirement_id": "contact_persistence_reported",
+              "status": "blocked",
+              "summary_field": "contact_persistence_rate_median"
+            },
+            {
+              "blocker_id": "pocketmd_lite_h_bond_persistence_rows_missing",
+              "blockers": [
+                "pocketmd_lite_h_bond_persistence_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "h_bond_persistence_materialized",
+              "current": {
+                "summary_field": "h_bond_persistence_rate_median",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "evidence_kind": "survival_summary_metric",
+              "pass": false,
+              "product_requirement": "H-bond persistence is reported",
+              "required": {
+                "blocker_absent": "pocketmd_lite_h_bond_persistence_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "requirement_id": "h_bond_persistence_reported",
+              "status": "blocked",
+              "summary_field": "h_bond_persistence_rate_median"
+            },
+            {
+              "blocker_id": "pocketmd_lite_clash_relief_rows_missing",
+              "blockers": [
+                "pocketmd_lite_clash_relief_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "clash_relief_materialized",
+              "current": {
+                "summary_field": "clash_relief_rate",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "evidence_kind": "survival_summary_metric",
+              "pass": false,
+              "product_requirement": "clash relief is reported",
+              "required": {
+                "blocker_absent": "pocketmd_lite_clash_relief_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "requirement_id": "clash_relief_reported",
+              "status": "blocked",
+              "summary_field": "clash_relief_rate"
+            },
+            {
+              "blocker_id": "pocketmd_lite_uncertainty_rows_missing",
+              "blockers": [
+                "pocketmd_lite_uncertainty_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "uncertainty_summary_materialized",
+              "current": {
+                "summary_field": "uncertainty_width_median",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "evidence_kind": "survival_summary_metric",
+              "pass": false,
+              "product_requirement": "uncertainty interval summary is reported",
+              "required": {
+                "blocker_absent": "pocketmd_lite_uncertainty_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "requirement_id": "uncertainty_reported",
+              "status": "blocked",
+              "summary_field": "uncertainty_width_median"
+            },
+            {
+              "blocker_id": "",
+              "blockers": [],
+              "criterion_id": "broad_all_atom_fep_claims_locked",
+              "current": {
+                "broad_all_atom_or_fep_claims_unlocked": false,
+                "preserved_phase4_criteria": [
+                  "broad_all_atom_fep_claims_locked"
+                ],
+                "top_k_scope_policy_present": true
+              },
+              "evidence_kind": "contract_guard",
+              "pass": true,
+              "product_requirement": "broad all-atom MD/FEP claims remain locked",
+              "required": {
+                "broad_all_atom_or_fep_claims_unlocked": false,
+                "preserved_phase4_criteria_contains": "broad_all_atom_fep_claims_locked",
+                "top_k_scope_policy_present": true
+              },
+              "requirement_id": "broad_all_atom_fep_claims_locked",
+              "status": "ready",
+              "summary_field": ""
+            }
+          ],
           "rows_path": "",
           "target_count": 0,
           "target_pass_count": 0
@@ -4148,6 +4894,752 @@
           }
         ],
         "phase3_exit_gate": {},
+        "phase4_exit_gate": {
+          "phase4_candidate_slot_matrix": [
+            {
+              "candidate_scope": "upstream_ranked_top_k_candidates_only",
+              "case_id": "pocketmd_lite_case_001",
+              "closes_phase4_criteria": [
+                "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage",
+                "local_min_survival_materialized",
+                "contact_persistence_materialized",
+                "h_bond_persistence_materialized",
+                "clash_relief_materialized",
+                "uncertainty_summary_materialized",
+                "report_blockers_resolved"
+              ],
+              "missing": true,
+              "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "required_metric_fields": [
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt",
+                "lite_refinement_run_receipt",
+                "interaction_persistence_receipt",
+                "uncertainty_interval_receipt"
+              ],
+              "slot_id": "pocketmd_lite_case_001_rank_1",
+              "status": "missing",
+              "top_k_rank": 1
+            },
+            {
+              "candidate_scope": "upstream_ranked_top_k_candidates_only",
+              "case_id": "pocketmd_lite_case_001",
+              "closes_phase4_criteria": [
+                "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage",
+                "local_min_survival_materialized",
+                "contact_persistence_materialized",
+                "h_bond_persistence_materialized",
+                "clash_relief_materialized",
+                "uncertainty_summary_materialized",
+                "report_blockers_resolved"
+              ],
+              "missing": true,
+              "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "required_metric_fields": [
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt",
+                "lite_refinement_run_receipt",
+                "interaction_persistence_receipt",
+                "uncertainty_interval_receipt"
+              ],
+              "slot_id": "pocketmd_lite_case_001_rank_2",
+              "status": "missing",
+              "top_k_rank": 2
+            },
+            {
+              "candidate_scope": "upstream_ranked_top_k_candidates_only",
+              "case_id": "pocketmd_lite_case_002",
+              "closes_phase4_criteria": [
+                "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage",
+                "local_min_survival_materialized",
+                "contact_persistence_materialized",
+                "h_bond_persistence_materialized",
+                "clash_relief_materialized",
+                "uncertainty_summary_materialized",
+                "report_blockers_resolved"
+              ],
+              "missing": true,
+              "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "required_metric_fields": [
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt",
+                "lite_refinement_run_receipt",
+                "interaction_persistence_receipt",
+                "uncertainty_interval_receipt"
+              ],
+              "slot_id": "pocketmd_lite_case_002_rank_1",
+              "status": "missing",
+              "top_k_rank": 1
+            },
+            {
+              "candidate_scope": "upstream_ranked_top_k_candidates_only",
+              "case_id": "pocketmd_lite_case_002",
+              "closes_phase4_criteria": [
+                "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage",
+                "local_min_survival_materialized",
+                "contact_persistence_materialized",
+                "h_bond_persistence_materialized",
+                "clash_relief_materialized",
+                "uncertainty_summary_materialized",
+                "report_blockers_resolved"
+              ],
+              "missing": true,
+              "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "required_metric_fields": [
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt",
+                "lite_refinement_run_receipt",
+                "interaction_persistence_receipt",
+                "uncertainty_interval_receipt"
+              ],
+              "slot_id": "pocketmd_lite_case_002_rank_2",
+              "status": "missing",
+              "top_k_rank": 2
+            },
+            {
+              "candidate_scope": "upstream_ranked_top_k_candidates_only",
+              "case_id": "pocketmd_lite_case_003",
+              "closes_phase4_criteria": [
+                "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage",
+                "local_min_survival_materialized",
+                "contact_persistence_materialized",
+                "h_bond_persistence_materialized",
+                "clash_relief_materialized",
+                "uncertainty_summary_materialized",
+                "report_blockers_resolved"
+              ],
+              "missing": true,
+              "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "required_metric_fields": [
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt",
+                "lite_refinement_run_receipt",
+                "interaction_persistence_receipt",
+                "uncertainty_interval_receipt"
+              ],
+              "slot_id": "pocketmd_lite_case_003_rank_1",
+              "status": "missing",
+              "top_k_rank": 1
+            },
+            {
+              "candidate_scope": "upstream_ranked_top_k_candidates_only",
+              "case_id": "pocketmd_lite_case_003",
+              "closes_phase4_criteria": [
+                "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage",
+                "local_min_survival_materialized",
+                "contact_persistence_materialized",
+                "h_bond_persistence_materialized",
+                "clash_relief_materialized",
+                "uncertainty_summary_materialized",
+                "report_blockers_resolved"
+              ],
+              "missing": true,
+              "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+              "required_metric_fields": [
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt",
+                "lite_refinement_run_receipt",
+                "interaction_persistence_receipt",
+                "uncertainty_interval_receipt"
+              ],
+              "slot_id": "pocketmd_lite_case_003_rank_2",
+              "status": "missing",
+              "top_k_rank": 2
+            }
+          ],
+          "phase4_candidate_slot_summary": {
+            "candidate_slot_count": 6,
+            "missing_candidate_slot_count": 6,
+            "missing_candidate_slot_ids": [
+              "pocketmd_lite_case_001_rank_1",
+              "pocketmd_lite_case_001_rank_2",
+              "pocketmd_lite_case_002_rank_1",
+              "pocketmd_lite_case_002_rank_2",
+              "pocketmd_lite_case_003_rank_1",
+              "pocketmd_lite_case_003_rank_2"
+            ]
+          },
+          "phase4_exit_gate_criteria": [
+            {
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "pocketmd_lite_topk_candidate_rows_missing"
+              ],
+              "criterion_id": "top_k_refinement_rows_present",
+              "current": {
+                "required_candidate_slot_count": 6,
+                "row_artifact_detected": false,
+                "validated_row_count": 0
+              },
+              "materialized_report_field": "",
+              "metric_id": "",
+              "pass": false,
+              "product_requirement": "top-k candidate refinement rows are present",
+              "receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt"
+              ],
+              "required": {
+                "coverage_ready": true,
+                "min_real_refinement_case_count": 3,
+                "min_total_top_k_candidate_count": 6
+              },
+              "required_row_fields": [],
+              "required_value_policy": "",
+              "requirement_id": "top_k_refinement_rows_present",
+              "status": "blocked",
+              "summary_field": ""
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "pocketmd_lite_topk_candidate_rows_missing"
+              ],
+              "criterion_id": "top_k_refinement_case_coverage",
+              "current": {
+                "coverage_ready": false,
+                "covered_required_slot_count": 0,
+                "required_candidate_slot_count": 6
+              },
+              "materialized_report_field": "",
+              "metric_id": "",
+              "pass": false,
+              "product_requirement": "top-k candidate case/rank coverage is complete",
+              "receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt"
+              ],
+              "required": {
+                "coverage_ready": true,
+                "min_real_refinement_case_count": 3,
+                "min_total_top_k_candidate_count": 6
+              },
+              "required_row_fields": [],
+              "required_value_policy": "",
+              "requirement_id": "top_k_refinement_case_coverage",
+              "status": "blocked",
+              "summary_field": ""
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_local_min_survival_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "local_min_survival_materialized",
+              "current": {
+                "summary_field": "local_min_survival_rate",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "materialized_report_field": "local_min_survival_rate",
+              "metric_id": "local_min_survival_rate",
+              "pass": false,
+              "product_requirement": "local-min survival is reported",
+              "receipt_roles": [
+                "lite_refinement_run_receipt"
+              ],
+              "required": {
+                "blocker_absent": "pocketmd_lite_local_min_survival_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "required_row_fields": [
+                "local_min_survived"
+              ],
+              "required_value_policy": "boolean per top-k candidate",
+              "requirement_id": "local_min_survival_reported",
+              "status": "blocked",
+              "summary_field": "local_min_survival_rate"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_contact_persistence_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "contact_persistence_materialized",
+              "current": {
+                "summary_field": "contact_persistence_rate_median",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "materialized_report_field": "contact_persistence_summary",
+              "metric_id": "contact_persistence_rate",
+              "pass": false,
+              "product_requirement": "contact persistence is reported",
+              "receipt_roles": [
+                "interaction_persistence_receipt"
+              ],
+              "required": {
+                "blocker_absent": "pocketmd_lite_contact_persistence_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "required_row_fields": [
+                "contact_persistence_rate"
+              ],
+              "required_value_policy": "finite fraction from 0.0 to 1.0",
+              "requirement_id": "contact_persistence_reported",
+              "status": "blocked",
+              "summary_field": "contact_persistence_rate_median"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_h_bond_persistence_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "h_bond_persistence_materialized",
+              "current": {
+                "summary_field": "h_bond_persistence_rate_median",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "materialized_report_field": "h_bond_persistence_summary",
+              "metric_id": "h_bond_persistence_rate",
+              "pass": false,
+              "product_requirement": "H-bond persistence is reported",
+              "receipt_roles": [
+                "interaction_persistence_receipt"
+              ],
+              "required": {
+                "blocker_absent": "pocketmd_lite_h_bond_persistence_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "required_row_fields": [
+                "h_bond_persistence_rate"
+              ],
+              "required_value_policy": "finite fraction from 0.0 to 1.0",
+              "requirement_id": "h_bond_persistence_reported",
+              "status": "blocked",
+              "summary_field": "h_bond_persistence_rate_median"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_clash_relief_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "clash_relief_materialized",
+              "current": {
+                "summary_field": "clash_relief_rate",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "materialized_report_field": "clash_relief_summary",
+              "metric_id": "clash_relief_rate",
+              "pass": false,
+              "product_requirement": "clash relief is reported",
+              "receipt_roles": [
+                "interaction_persistence_receipt"
+              ],
+              "required": {
+                "blocker_absent": "pocketmd_lite_clash_relief_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "required_row_fields": [
+                "clash_count_before",
+                "clash_count_after"
+              ],
+              "required_value_policy": "non-negative integer clash counts",
+              "requirement_id": "clash_relief_reported",
+              "status": "blocked",
+              "summary_field": "clash_relief_rate"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_uncertainty_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "uncertainty_summary_materialized",
+              "current": {
+                "summary_field": "uncertainty_width_median",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "materialized_report_field": "uncertainty_width_summary",
+              "metric_id": "uncertainty_width_median",
+              "pass": false,
+              "product_requirement": "uncertainty interval summary is reported",
+              "receipt_roles": [
+                "uncertainty_interval_receipt"
+              ],
+              "required": {
+                "blocker_absent": "pocketmd_lite_uncertainty_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "required_row_fields": [
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_value_policy": "finite interval with high >= low and nonblank unit",
+              "requirement_id": "uncertainty_reported",
+              "status": "blocked",
+              "summary_field": "uncertainty_width_median"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "upstream_top_k_candidate_receipts_not_attached",
+                "lite_refinement_metric_receipts_not_attached"
+              ],
+              "criterion_id": "report_blockers_resolved",
+              "current": {
+                "coverage_ready": false,
+                "covered_required_slot_count": 0,
+                "required_candidate_slot_count": 6,
+                "row_artifact_detected": false,
+                "validated_row_count": 0
+              },
+              "materialized_report_field": "",
+              "metric_id": "",
+              "pass": false,
+              "product_requirement": "",
+              "receipt_roles": [
+                "lite_refinement_run_receipt",
+                "interaction_persistence_receipt",
+                "uncertainty_interval_receipt"
+              ],
+              "required": "",
+              "required_row_fields": [],
+              "required_value_policy": "",
+              "requirement_id": "",
+              "status": "blocked",
+              "summary_field": ""
+            }
+          ],
+          "phase4_exit_gate_status": "blocked",
+          "phase4_failed_criteria": [
+            "top_k_refinement_rows_present",
+            "top_k_refinement_case_coverage",
+            "local_min_survival_materialized",
+            "contact_persistence_materialized",
+            "h_bond_persistence_materialized",
+            "clash_relief_materialized",
+            "uncertainty_summary_materialized",
+            "report_blockers_resolved"
+          ],
+          "phase4_operator_status": "operator_topk_rows_required",
+          "phase4_ready": false,
+          "phase4_requirement_summary": {
+            "actual_closure_ready": false,
+            "blocked_requirement_count": 7,
+            "blocked_requirement_ids": [
+              "top_k_refinement_rows_present",
+              "top_k_refinement_case_coverage",
+              "local_min_survival_reported",
+              "contact_persistence_reported",
+              "h_bond_persistence_reported",
+              "clash_relief_reported",
+              "uncertainty_reported"
+            ],
+            "phase4_actual_evidence_audit_status": "operator_topk_rows_required",
+            "phase4_actual_evidence_blocked_component_count": 4,
+            "phase4_actual_evidence_missing_metric_count": 5,
+            "phase4_missing_candidate_slot_count": 6,
+            "ready_requirement_count": 2,
+            "remaining_blockers": [
+              "pocketmd_lite_topk_rows_not_acquired",
+              "pocketmd_lite_topk_candidate_rows_missing",
+              "pocketmd_lite_local_min_survival_rows_missing",
+              "pocketmd_lite_contact_persistence_rows_missing",
+              "pocketmd_lite_h_bond_persistence_rows_missing",
+              "pocketmd_lite_clash_relief_rows_missing",
+              "pocketmd_lite_uncertainty_rows_missing",
+              "pocketmd_lite_topk_rows_not_provided"
+            ],
+            "remaining_operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "remaining_row_inputs": [
+              "pocketmd_rows"
+            ],
+            "requirement_count": 9
+          },
+          "phase4_requirements": [
+            {
+              "blocker_id": "",
+              "blockers": [],
+              "criterion_id": "broad_all_atom_fep_claims_locked",
+              "current": {
+                "broad_all_atom_or_fep_claims_unlocked": false,
+                "preserved_phase4_criteria": [
+                  "broad_all_atom_fep_claims_locked"
+                ],
+                "top_k_scope_policy_present": true
+              },
+              "evidence_kind": "contract_guard",
+              "pass": true,
+              "product_requirement": "PocketMD Lite applies only to upstream top-k candidates",
+              "required": {
+                "broad_all_atom_or_fep_claims_unlocked": false,
+                "preserved_phase4_criteria_contains": "broad_all_atom_fep_claims_locked",
+                "top_k_scope_policy_present": true
+              },
+              "requirement_id": "bounded_top_k_scope_contract",
+              "status": "ready",
+              "summary_field": ""
+            },
+            {
+              "blocker_id": "",
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "pocketmd_lite_topk_candidate_rows_missing"
+              ],
+              "criterion_id": "top_k_refinement_rows_present",
+              "current": {
+                "required_candidate_slot_count": 6,
+                "row_artifact_detected": false,
+                "validated_row_count": 0
+              },
+              "evidence_kind": "row_coverage",
+              "pass": false,
+              "product_requirement": "top-k candidate refinement rows are present",
+              "required": {
+                "coverage_ready": true,
+                "min_real_refinement_case_count": 3,
+                "min_total_top_k_candidate_count": 6
+              },
+              "requirement_id": "top_k_refinement_rows_present",
+              "status": "blocked",
+              "summary_field": ""
+            },
+            {
+              "blocker_id": "",
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "pocketmd_lite_topk_candidate_rows_missing"
+              ],
+              "criterion_id": "top_k_refinement_case_coverage",
+              "current": {
+                "coverage_ready": false,
+                "covered_required_slot_count": 0,
+                "required_candidate_slot_count": 6
+              },
+              "evidence_kind": "row_coverage",
+              "pass": false,
+              "product_requirement": "top-k candidate case/rank coverage is complete",
+              "required": {
+                "coverage_ready": true,
+                "min_real_refinement_case_count": 3,
+                "min_total_top_k_candidate_count": 6
+              },
+              "requirement_id": "top_k_refinement_case_coverage",
+              "status": "blocked",
+              "summary_field": ""
+            },
+            {
+              "blocker_id": "pocketmd_lite_local_min_survival_rows_missing",
+              "blockers": [
+                "pocketmd_lite_local_min_survival_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "local_min_survival_materialized",
+              "current": {
+                "summary_field": "local_min_survival_rate",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "evidence_kind": "survival_summary_metric",
+              "pass": false,
+              "product_requirement": "local-min survival is reported",
+              "required": {
+                "blocker_absent": "pocketmd_lite_local_min_survival_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "requirement_id": "local_min_survival_reported",
+              "status": "blocked",
+              "summary_field": "local_min_survival_rate"
+            },
+            {
+              "blocker_id": "pocketmd_lite_contact_persistence_rows_missing",
+              "blockers": [
+                "pocketmd_lite_contact_persistence_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "contact_persistence_materialized",
+              "current": {
+                "summary_field": "contact_persistence_rate_median",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "evidence_kind": "survival_summary_metric",
+              "pass": false,
+              "product_requirement": "contact persistence is reported",
+              "required": {
+                "blocker_absent": "pocketmd_lite_contact_persistence_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "requirement_id": "contact_persistence_reported",
+              "status": "blocked",
+              "summary_field": "contact_persistence_rate_median"
+            },
+            {
+              "blocker_id": "pocketmd_lite_h_bond_persistence_rows_missing",
+              "blockers": [
+                "pocketmd_lite_h_bond_persistence_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "h_bond_persistence_materialized",
+              "current": {
+                "summary_field": "h_bond_persistence_rate_median",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "evidence_kind": "survival_summary_metric",
+              "pass": false,
+              "product_requirement": "H-bond persistence is reported",
+              "required": {
+                "blocker_absent": "pocketmd_lite_h_bond_persistence_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "requirement_id": "h_bond_persistence_reported",
+              "status": "blocked",
+              "summary_field": "h_bond_persistence_rate_median"
+            },
+            {
+              "blocker_id": "pocketmd_lite_clash_relief_rows_missing",
+              "blockers": [
+                "pocketmd_lite_clash_relief_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "clash_relief_materialized",
+              "current": {
+                "summary_field": "clash_relief_rate",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "evidence_kind": "survival_summary_metric",
+              "pass": false,
+              "product_requirement": "clash relief is reported",
+              "required": {
+                "blocker_absent": "pocketmd_lite_clash_relief_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "requirement_id": "clash_relief_reported",
+              "status": "blocked",
+              "summary_field": "clash_relief_rate"
+            },
+            {
+              "blocker_id": "pocketmd_lite_uncertainty_rows_missing",
+              "blockers": [
+                "pocketmd_lite_uncertainty_rows_missing",
+                "pocketmd_lite_topk_rows_not_acquired"
+              ],
+              "criterion_id": "uncertainty_summary_materialized",
+              "current": {
+                "summary_field": "uncertainty_width_median",
+                "summary_value": null,
+                "survival_report_contract_pass": false,
+                "survival_report_status": "operator_evidence_required"
+              },
+              "evidence_kind": "survival_summary_metric",
+              "pass": false,
+              "product_requirement": "uncertainty interval summary is reported",
+              "required": {
+                "blocker_absent": "pocketmd_lite_uncertainty_rows_missing",
+                "summary_field_non_null": true,
+                "survival_report_contract_pass": true
+              },
+              "requirement_id": "uncertainty_reported",
+              "status": "blocked",
+              "summary_field": "uncertainty_width_median"
+            },
+            {
+              "blocker_id": "",
+              "blockers": [],
+              "criterion_id": "broad_all_atom_fep_claims_locked",
+              "current": {
+                "broad_all_atom_or_fep_claims_unlocked": false,
+                "preserved_phase4_criteria": [
+                  "broad_all_atom_fep_claims_locked"
+                ],
+                "top_k_scope_policy_present": true
+              },
+              "evidence_kind": "contract_guard",
+              "pass": true,
+              "product_requirement": "broad all-atom MD/FEP claims remain locked",
+              "required": {
+                "broad_all_atom_or_fep_claims_unlocked": false,
+                "preserved_phase4_criteria_contains": "broad_all_atom_fep_claims_locked",
+                "top_k_scope_policy_present": true
+              },
+              "requirement_id": "broad_all_atom_fep_claims_locked",
+              "status": "ready",
+              "summary_field": ""
+            }
+          ]
+        },
         "requirement_count": 9,
         "requirement_pass_count": 1,
         "science_actual_closure_audit_summary": {
@@ -4276,7 +5768,7 @@
     ],
     "status": "operator_evidence_required"
   },
-  "source_commit_sha": "4fca30abc78bd00a39f987e99d365275cd55c9e2",
+  "source_commit_sha": "4da4a991cb08642c807cad9129e2f0d9a020ab00",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
