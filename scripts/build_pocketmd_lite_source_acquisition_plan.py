@@ -593,6 +593,27 @@ def _phase4_metric_closure_matrix(
     return rows
 
 
+def _phase4_metric_receipt_actions(
+    phase4_metric_closure_matrix: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    return [
+        {
+            "criterion_id": str(row.get("criterion_id") or ""),
+            "status": str(row.get("status") or ""),
+            "metric_id": str(row.get("metric_id") or ""),
+            "required_row_fields": list(row.get("required_row_fields") or []),
+            "required_value_policy": str(row.get("required_value_policy") or ""),
+            "receipt_roles": list(row.get("receipt_roles") or []),
+            "materialized_report_field": str(
+                row.get("materialized_report_field") or ""
+            ),
+            "blockers": list(row.get("blockers") or []),
+        }
+        for row in phase4_metric_closure_matrix
+        if isinstance(row, dict)
+    ]
+
+
 def _refinement_execution_plan_command() -> str:
     return (
         "python3 scripts/build_pocketmd_lite_refinement_execution_plan.py "
@@ -632,6 +653,7 @@ def _pocketmd_rows_operator_action(
     *,
     raw_row_candidate_status: dict[str, Any],
     minimum_rows_by_case: list[dict[str, Any]],
+    phase4_metric_closure_matrix: list[dict[str, Any]],
     required_flat_row_fields: list[str],
     commands: dict[str, str],
 ) -> dict[str, Any]:
@@ -644,6 +666,9 @@ def _pocketmd_rows_operator_action(
         "review_validated_pocketmd_lite_rows_and_attach_receipts"
         if raw_row_candidate_status.get("coverage_ready")
         else f"attach_pocketmd_rows_at_{DEFAULT_ROWS_OUT}"
+    )
+    phase4_metric_receipt_actions = _phase4_metric_receipt_actions(
+        phase4_metric_closure_matrix
     )
     return {
         "row_input_id": "pocketmd_rows",
@@ -750,6 +775,10 @@ def _pocketmd_rows_operator_action(
                 "interaction_persistence_receipt",
                 "uncertainty_interval_receipt",
             ],
+            "phase4_metric_receipt_action_count": len(
+                phase4_metric_receipt_actions
+            ),
+            "phase4_metric_receipt_actions": phase4_metric_receipt_actions,
             "template_safety_policy": {
                 "template_is_not_evidence": True,
                 "expected_rows_must_be_operator_reviewed": True,
@@ -898,6 +927,7 @@ def build_pocketmd_lite_source_acquisition_plan(
     pocketmd_rows_operator_action = _pocketmd_rows_operator_action(
         raw_row_candidate_status=raw_row_candidate_status,
         minimum_rows_by_case=minimum_rows_by_case,
+        phase4_metric_closure_matrix=phase4_metric_closure_matrix,
         required_flat_row_fields=required_flat_row_fields,
         commands=commands,
     )
@@ -1194,6 +1224,11 @@ def _markdown(payload: dict[str, Any]) -> str:
                     f"`{role}`"
                     for role in action.get("required_receipt_roles", [])
                 )
+                phase4_metric_receipt_actions = [
+                    row
+                    for row in action.get("phase4_metric_receipt_actions", [])
+                    if isinstance(row, dict)
+                ]
                 lines.extend(
                     [
                         f"- `status`: `{action.get('status')}`",
@@ -1205,11 +1240,47 @@ def _markdown(payload: dict[str, Any]) -> str:
                         f"- `verify_science_actual_closure_command`: `{action.get('verify_science_actual_closure_command')}`",
                         f"- `operator_must_fill_or_verify`: {required_fields}",
                         f"- `required_receipt_roles`: {receipt_roles}",
+                        f"- `phase4_metric_receipt_action_count`: `{action.get('phase4_metric_receipt_action_count')}`",
                         f"- `template_is_not_evidence`: `{safety_policy.get('template_is_not_evidence')}`",
                         f"- `placeholder_or_fixture_rows_do_not_promote`: `{safety_policy.get('placeholder_or_fixture_rows_do_not_promote')}`",
                         f"- `summary_only_metrics_do_not_promote`: `{safety_policy.get('summary_only_metrics_do_not_promote')}`",
                     ]
                 )
+                if phase4_metric_receipt_actions:
+                    lines.extend(
+                        [
+                            "",
+                            "#### PocketMD Phase 4 Receipt Closure Actions",
+                            "",
+                            "| Criterion | Metric | Receipt Roles | Required Row Fields | Blockers |",
+                            "|---|---|---|---|---|",
+                        ]
+                    )
+                    for metric_action in phase4_metric_receipt_actions:
+                        receipt_roles = ", ".join(
+                            f"`{role}`"
+                            for role in metric_action.get("receipt_roles", [])
+                            if str(role)
+                        )
+                        required_row_fields = ", ".join(
+                            f"`{field}`"
+                            for field in metric_action.get(
+                                "required_row_fields", []
+                            )
+                            if str(field)
+                        )
+                        blockers = ", ".join(
+                            f"`{blocker}`"
+                            for blocker in metric_action.get("blockers", [])
+                            if str(blocker)
+                        )
+                        lines.append(
+                            f"| `{metric_action.get('criterion_id', '')}` | "
+                            f"`{metric_action.get('metric_id', '')}` | "
+                            f"{receipt_roles or '`none`'} | "
+                            f"{required_row_fields or '`none`'} | "
+                            f"{blockers or '`none`'} |"
+                        )
     lines.extend(["", "## Commands", ""])
     for key, command in payload["commands"].items():
         lines.append(f"- `{key}`: `{command}`")

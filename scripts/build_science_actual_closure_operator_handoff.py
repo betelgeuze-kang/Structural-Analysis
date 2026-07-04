@@ -1312,6 +1312,11 @@ def _markdown(payload: dict[str, Any]) -> str:
                 )
             elif detail.get("kind") == "pocketmd_top_k_rows":
                 lines.extend(["", "### PocketMD Top-k Rows Action", ""])
+                phase4_metric_receipt_actions = [
+                    row
+                    for row in _as_list(action.get("phase4_metric_receipt_actions"))
+                    if isinstance(row, dict)
+                ]
                 lines.extend(
                     [
                         f"- `component_id`: `{detail.get('component_id')}`",
@@ -1324,11 +1329,31 @@ def _markdown(payload: dict[str, Any]) -> str:
                         f"- `verify_science_actual_closure_command`: `{action.get('verify_science_actual_closure_command')}`",
                         f"- `operator_must_fill_or_verify`: {_code_join(_as_list(action.get('operator_must_fill_or_verify')))}",
                         f"- `required_receipt_roles`: {_code_join(_as_list(action.get('required_receipt_roles')))}",
+                        f"- `phase4_metric_receipt_action_count`: `{action.get('phase4_metric_receipt_action_count')}`",
                         f"- `template_is_not_evidence`: `{safety_policy.get('template_is_not_evidence')}`",
                         f"- `placeholder_or_fixture_rows_do_not_promote`: `{safety_policy.get('placeholder_or_fixture_rows_do_not_promote')}`",
                         f"- `summary_only_metrics_do_not_promote`: `{safety_policy.get('summary_only_metrics_do_not_promote')}`",
                     ]
                 )
+                if phase4_metric_receipt_actions:
+                    lines.extend(
+                        [
+                            "",
+                            "#### PocketMD Phase 4 Receipt Closure Actions",
+                            "",
+                            "| Criterion | Metric | Receipt Roles | Required Row Fields | Blockers |",
+                            "|---|---|---|---|---|",
+                        ]
+                    )
+                    for metric_action in phase4_metric_receipt_actions:
+                        lines.append(
+                            "| "
+                            f"`{metric_action.get('criterion_id', '')}` | "
+                            f"`{metric_action.get('metric_id', '')}` | "
+                            f"{_code_join(_as_list(metric_action.get('receipt_roles')))} | "
+                            f"{_code_join(_as_list(metric_action.get('required_row_fields')))} | "
+                            f"{_code_join(_as_list(metric_action.get('blockers')))} |"
+                        )
     upstream_source_blockers = [
         str(item) for item in _as_list(payload.get("upstream_source_blockers"))
     ]

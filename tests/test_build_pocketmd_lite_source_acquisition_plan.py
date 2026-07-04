@@ -382,6 +382,23 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     assert "uncertainty_interval_receipt" in top_k_action[
         "required_receipt_roles"
     ]
+    assert top_k_action["phase4_metric_receipt_action_count"] == 8
+    metric_receipt_actions = {
+        row["criterion_id"]: row
+        for row in top_k_action["phase4_metric_receipt_actions"]
+    }
+    assert metric_receipt_actions["local_min_survival_materialized"][
+        "receipt_roles"
+    ] == ["lite_refinement_run_receipt"]
+    assert metric_receipt_actions["contact_persistence_materialized"][
+        "receipt_roles"
+    ] == ["interaction_persistence_receipt"]
+    assert metric_receipt_actions["uncertainty_summary_materialized"][
+        "required_row_fields"
+    ] == ["uncertainty_low", "uncertainty_high", "uncertainty_unit"]
+    assert "lite_refinement_metric_receipts_not_attached" in metric_receipt_actions[
+        "report_blockers_resolved"
+    ]["blockers"]
     assert top_k_action["template_safety_policy"] == {
         "broad_all_atom_or_fep_claims_remain_locked": True,
         "expected_rows_must_be_operator_reviewed": True,
@@ -579,6 +596,10 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert "pocketmd_lite_topk_rows.tsv" in markdown
     assert "`preflight_does_not_run_refinement`: `True`" in markdown
     assert "### PocketMD Top-k Rows Action" in markdown
+    assert "`phase4_metric_receipt_action_count`: `8`" in markdown
+    assert "#### PocketMD Phase 4 Receipt Closure Actions" in markdown
+    assert "local_min_survival_materialized" in markdown
+    assert "interaction_persistence_receipt" in markdown
     assert "`template_is_not_evidence`: `True`" in markdown
     assert "`placeholder_or_fixture_rows_do_not_promote`: `True`" in markdown
     assert "operator_input_source.source_artifact_sha256" in markdown

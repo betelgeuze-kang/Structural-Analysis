@@ -107,9 +107,23 @@
 - `verify_science_actual_closure_command`: `python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked`
 - `operator_must_fill_or_verify`: `case_id`, `source_family`, `top_k_rank`, `candidate_id`, `upstream_top_k_provenance_ref`, `upstream_top_k_source_checksum`, `pre_refinement_energy_proxy`, `post_refinement_energy_proxy`, `local_min_survived`, `contact_persistence_rate`, `h_bond_persistence_rate`, `clash_count_before`, `clash_count_after`, `uncertainty_low`, `uncertainty_high`, `uncertainty_unit`, `provenance_ref`, `source_checksum`, `operator_input_source.source_artifact`, `operator_input_source.source_artifact_sha256`, `operator_input_source.source_id`, `operator_input_source.source_url`, `operator_input_source.source_license`
 - `required_receipt_roles`: `upstream_top_k_candidate_scope_receipt`, `lite_refinement_run_receipt`, `interaction_persistence_receipt`, `uncertainty_interval_receipt`
+- `phase4_metric_receipt_action_count`: `8`
 - `template_is_not_evidence`: `True`
 - `placeholder_or_fixture_rows_do_not_promote`: `True`
 - `summary_only_metrics_do_not_promote`: `True`
+
+#### PocketMD Phase 4 Receipt Closure Actions
+
+| Criterion | Metric | Receipt Roles | Required Row Fields | Blockers |
+|---|---|---|---|---|
+| `top_k_refinement_rows_present` | `` | `upstream_top_k_candidate_scope_receipt` | `none` | `pocketmd_lite_topk_rows_not_acquired`, `upstream_top_k_candidate_receipts_not_attached`, `lite_refinement_metric_receipts_not_attached` |
+| `top_k_refinement_case_coverage` | `` | `upstream_top_k_candidate_scope_receipt` | `none` | `pocketmd_lite_topk_rows_not_acquired`, `upstream_top_k_candidate_receipts_not_attached`, `lite_refinement_metric_receipts_not_attached` |
+| `local_min_survival_materialized` | `local_min_survival_rate` | `lite_refinement_run_receipt` | `local_min_survived` | `pocketmd_lite_topk_rows_not_acquired`, `upstream_top_k_candidate_receipts_not_attached`, `lite_refinement_metric_receipts_not_attached` |
+| `contact_persistence_materialized` | `contact_persistence_rate` | `interaction_persistence_receipt` | `contact_persistence_rate` | `pocketmd_lite_topk_rows_not_acquired`, `upstream_top_k_candidate_receipts_not_attached`, `lite_refinement_metric_receipts_not_attached` |
+| `h_bond_persistence_materialized` | `h_bond_persistence_rate` | `interaction_persistence_receipt` | `h_bond_persistence_rate` | `pocketmd_lite_topk_rows_not_acquired`, `upstream_top_k_candidate_receipts_not_attached`, `lite_refinement_metric_receipts_not_attached` |
+| `clash_relief_materialized` | `clash_relief_rate` | `interaction_persistence_receipt` | `clash_count_before`, `clash_count_after` | `pocketmd_lite_topk_rows_not_acquired`, `upstream_top_k_candidate_receipts_not_attached`, `lite_refinement_metric_receipts_not_attached` |
+| `uncertainty_summary_materialized` | `uncertainty_width_median` | `uncertainty_interval_receipt` | `uncertainty_low`, `uncertainty_high`, `uncertainty_unit` | `pocketmd_lite_topk_rows_not_acquired`, `upstream_top_k_candidate_receipts_not_attached`, `lite_refinement_metric_receipts_not_attached` |
+| `report_blockers_resolved` | `` | `lite_refinement_run_receipt`, `interaction_persistence_receipt`, `uncertainty_interval_receipt` | `none` | `pocketmd_lite_topk_rows_not_acquired`, `upstream_top_k_candidate_receipts_not_attached`, `lite_refinement_metric_receipts_not_attached` |
 
 ### Vina/GNINA Input Manifest Action
 

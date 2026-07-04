@@ -274,6 +274,152 @@
                 "operator_input_source.source_url",
                 "operator_input_source.source_license"
               ],
+              "phase4_metric_receipt_action_count": 8,
+              "phase4_metric_receipt_actions": [
+                {
+                  "blockers": [
+                    "pocketmd_lite_topk_rows_not_acquired",
+                    "upstream_top_k_candidate_receipts_not_attached",
+                    "lite_refinement_metric_receipts_not_attached"
+                  ],
+                  "criterion_id": "top_k_refinement_rows_present",
+                  "materialized_report_field": "",
+                  "metric_id": "",
+                  "receipt_roles": [
+                    "upstream_top_k_candidate_scope_receipt"
+                  ],
+                  "required_row_fields": [],
+                  "required_value_policy": "",
+                  "status": "blocked"
+                },
+                {
+                  "blockers": [
+                    "pocketmd_lite_topk_rows_not_acquired",
+                    "upstream_top_k_candidate_receipts_not_attached",
+                    "lite_refinement_metric_receipts_not_attached"
+                  ],
+                  "criterion_id": "top_k_refinement_case_coverage",
+                  "materialized_report_field": "",
+                  "metric_id": "",
+                  "receipt_roles": [
+                    "upstream_top_k_candidate_scope_receipt"
+                  ],
+                  "required_row_fields": [],
+                  "required_value_policy": "",
+                  "status": "blocked"
+                },
+                {
+                  "blockers": [
+                    "pocketmd_lite_topk_rows_not_acquired",
+                    "upstream_top_k_candidate_receipts_not_attached",
+                    "lite_refinement_metric_receipts_not_attached"
+                  ],
+                  "criterion_id": "local_min_survival_materialized",
+                  "materialized_report_field": "local_min_survival_rate",
+                  "metric_id": "local_min_survival_rate",
+                  "receipt_roles": [
+                    "lite_refinement_run_receipt"
+                  ],
+                  "required_row_fields": [
+                    "local_min_survived"
+                  ],
+                  "required_value_policy": "boolean per top-k candidate",
+                  "status": "blocked"
+                },
+                {
+                  "blockers": [
+                    "pocketmd_lite_topk_rows_not_acquired",
+                    "upstream_top_k_candidate_receipts_not_attached",
+                    "lite_refinement_metric_receipts_not_attached"
+                  ],
+                  "criterion_id": "contact_persistence_materialized",
+                  "materialized_report_field": "contact_persistence_summary",
+                  "metric_id": "contact_persistence_rate",
+                  "receipt_roles": [
+                    "interaction_persistence_receipt"
+                  ],
+                  "required_row_fields": [
+                    "contact_persistence_rate"
+                  ],
+                  "required_value_policy": "finite fraction from 0.0 to 1.0",
+                  "status": "blocked"
+                },
+                {
+                  "blockers": [
+                    "pocketmd_lite_topk_rows_not_acquired",
+                    "upstream_top_k_candidate_receipts_not_attached",
+                    "lite_refinement_metric_receipts_not_attached"
+                  ],
+                  "criterion_id": "h_bond_persistence_materialized",
+                  "materialized_report_field": "h_bond_persistence_summary",
+                  "metric_id": "h_bond_persistence_rate",
+                  "receipt_roles": [
+                    "interaction_persistence_receipt"
+                  ],
+                  "required_row_fields": [
+                    "h_bond_persistence_rate"
+                  ],
+                  "required_value_policy": "finite fraction from 0.0 to 1.0",
+                  "status": "blocked"
+                },
+                {
+                  "blockers": [
+                    "pocketmd_lite_topk_rows_not_acquired",
+                    "upstream_top_k_candidate_receipts_not_attached",
+                    "lite_refinement_metric_receipts_not_attached"
+                  ],
+                  "criterion_id": "clash_relief_materialized",
+                  "materialized_report_field": "clash_relief_summary",
+                  "metric_id": "clash_relief_rate",
+                  "receipt_roles": [
+                    "interaction_persistence_receipt"
+                  ],
+                  "required_row_fields": [
+                    "clash_count_before",
+                    "clash_count_after"
+                  ],
+                  "required_value_policy": "non-negative integer clash counts",
+                  "status": "blocked"
+                },
+                {
+                  "blockers": [
+                    "pocketmd_lite_topk_rows_not_acquired",
+                    "upstream_top_k_candidate_receipts_not_attached",
+                    "lite_refinement_metric_receipts_not_attached"
+                  ],
+                  "criterion_id": "uncertainty_summary_materialized",
+                  "materialized_report_field": "uncertainty_width_summary",
+                  "metric_id": "uncertainty_width_median",
+                  "receipt_roles": [
+                    "uncertainty_interval_receipt"
+                  ],
+                  "required_row_fields": [
+                    "uncertainty_low",
+                    "uncertainty_high",
+                    "uncertainty_unit"
+                  ],
+                  "required_value_policy": "finite interval with high >= low and nonblank unit",
+                  "status": "blocked"
+                },
+                {
+                  "blockers": [
+                    "pocketmd_lite_topk_rows_not_acquired",
+                    "upstream_top_k_candidate_receipts_not_attached",
+                    "lite_refinement_metric_receipts_not_attached"
+                  ],
+                  "criterion_id": "report_blockers_resolved",
+                  "materialized_report_field": "",
+                  "metric_id": "",
+                  "receipt_roles": [
+                    "lite_refinement_run_receipt",
+                    "interaction_persistence_receipt",
+                    "uncertainty_interval_receipt"
+                  ],
+                  "required_row_fields": [],
+                  "required_value_policy": "",
+                  "status": "blocked"
+                }
+              ],
               "required_receipt_roles": [
                 "upstream_top_k_candidate_scope_receipt",
                 "lite_refinement_run_receipt",
@@ -2373,13 +2519,13 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T01:13:58.730456+00:00",
+  "generated_at": "2026-07-04T01:18:04.095214+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:9dd7c97c8a2b978436c07f11bfb088a2cef94f1fd1f33bc651ba8a4c09440b2b",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:bc734b71fe231cae6b4c1ab875507644db77164038387495a3ce904f75b43960",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:6e75a02c6b13b518bf6087e44db30b84c243e4935d2b50611e2fd0411e476118",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:b2e02cefba55fd77d199d5f4cde8e7f2ae4806f9a46aa44ed0fd03a25c5f9bc1",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:5ea3d2f182f7b416c9838060e72bf363140ed61c9ef956b62451d9b892deca0b"
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:4d467580da9a7df4606ebc0c915053d2d206f469970a05e96927d99a2ea219a5",
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:12b23db10b3230afc51e5e7921ceaf3a4feb5436aaff73d9371b7d76d928b453"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -9894,6 +10040,152 @@
             "operator_input_source.source_url",
             "operator_input_source.source_license"
           ],
+          "phase4_metric_receipt_action_count": 8,
+          "phase4_metric_receipt_actions": [
+            {
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "upstream_top_k_candidate_receipts_not_attached",
+                "lite_refinement_metric_receipts_not_attached"
+              ],
+              "criterion_id": "top_k_refinement_rows_present",
+              "materialized_report_field": "",
+              "metric_id": "",
+              "receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt"
+              ],
+              "required_row_fields": [],
+              "required_value_policy": "",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "upstream_top_k_candidate_receipts_not_attached",
+                "lite_refinement_metric_receipts_not_attached"
+              ],
+              "criterion_id": "top_k_refinement_case_coverage",
+              "materialized_report_field": "",
+              "metric_id": "",
+              "receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt"
+              ],
+              "required_row_fields": [],
+              "required_value_policy": "",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "upstream_top_k_candidate_receipts_not_attached",
+                "lite_refinement_metric_receipts_not_attached"
+              ],
+              "criterion_id": "local_min_survival_materialized",
+              "materialized_report_field": "local_min_survival_rate",
+              "metric_id": "local_min_survival_rate",
+              "receipt_roles": [
+                "lite_refinement_run_receipt"
+              ],
+              "required_row_fields": [
+                "local_min_survived"
+              ],
+              "required_value_policy": "boolean per top-k candidate",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "upstream_top_k_candidate_receipts_not_attached",
+                "lite_refinement_metric_receipts_not_attached"
+              ],
+              "criterion_id": "contact_persistence_materialized",
+              "materialized_report_field": "contact_persistence_summary",
+              "metric_id": "contact_persistence_rate",
+              "receipt_roles": [
+                "interaction_persistence_receipt"
+              ],
+              "required_row_fields": [
+                "contact_persistence_rate"
+              ],
+              "required_value_policy": "finite fraction from 0.0 to 1.0",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "upstream_top_k_candidate_receipts_not_attached",
+                "lite_refinement_metric_receipts_not_attached"
+              ],
+              "criterion_id": "h_bond_persistence_materialized",
+              "materialized_report_field": "h_bond_persistence_summary",
+              "metric_id": "h_bond_persistence_rate",
+              "receipt_roles": [
+                "interaction_persistence_receipt"
+              ],
+              "required_row_fields": [
+                "h_bond_persistence_rate"
+              ],
+              "required_value_policy": "finite fraction from 0.0 to 1.0",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "upstream_top_k_candidate_receipts_not_attached",
+                "lite_refinement_metric_receipts_not_attached"
+              ],
+              "criterion_id": "clash_relief_materialized",
+              "materialized_report_field": "clash_relief_summary",
+              "metric_id": "clash_relief_rate",
+              "receipt_roles": [
+                "interaction_persistence_receipt"
+              ],
+              "required_row_fields": [
+                "clash_count_before",
+                "clash_count_after"
+              ],
+              "required_value_policy": "non-negative integer clash counts",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "upstream_top_k_candidate_receipts_not_attached",
+                "lite_refinement_metric_receipts_not_attached"
+              ],
+              "criterion_id": "uncertainty_summary_materialized",
+              "materialized_report_field": "uncertainty_width_summary",
+              "metric_id": "uncertainty_width_median",
+              "receipt_roles": [
+                "uncertainty_interval_receipt"
+              ],
+              "required_row_fields": [
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit"
+              ],
+              "required_value_policy": "finite interval with high >= low and nonblank unit",
+              "status": "blocked"
+            },
+            {
+              "blockers": [
+                "pocketmd_lite_topk_rows_not_acquired",
+                "upstream_top_k_candidate_receipts_not_attached",
+                "lite_refinement_metric_receipts_not_attached"
+              ],
+              "criterion_id": "report_blockers_resolved",
+              "materialized_report_field": "",
+              "metric_id": "",
+              "receipt_roles": [
+                "lite_refinement_run_receipt",
+                "interaction_persistence_receipt",
+                "uncertainty_interval_receipt"
+              ],
+              "required_row_fields": [],
+              "required_value_policy": "",
+              "status": "blocked"
+            }
+          ],
           "required_receipt_roles": [
             "upstream_top_k_candidate_scope_receipt",
             "lite_refinement_run_receipt",
@@ -10180,6 +10472,152 @@
                 "operator_input_source.source_url",
                 "operator_input_source.source_license"
               ],
+              "phase4_metric_receipt_action_count": 8,
+              "phase4_metric_receipt_actions": [
+                {
+                  "blockers": [
+                    "pocketmd_lite_topk_rows_not_acquired",
+                    "upstream_top_k_candidate_receipts_not_attached",
+                    "lite_refinement_metric_receipts_not_attached"
+                  ],
+                  "criterion_id": "top_k_refinement_rows_present",
+                  "materialized_report_field": "",
+                  "metric_id": "",
+                  "receipt_roles": [
+                    "upstream_top_k_candidate_scope_receipt"
+                  ],
+                  "required_row_fields": [],
+                  "required_value_policy": "",
+                  "status": "blocked"
+                },
+                {
+                  "blockers": [
+                    "pocketmd_lite_topk_rows_not_acquired",
+                    "upstream_top_k_candidate_receipts_not_attached",
+                    "lite_refinement_metric_receipts_not_attached"
+                  ],
+                  "criterion_id": "top_k_refinement_case_coverage",
+                  "materialized_report_field": "",
+                  "metric_id": "",
+                  "receipt_roles": [
+                    "upstream_top_k_candidate_scope_receipt"
+                  ],
+                  "required_row_fields": [],
+                  "required_value_policy": "",
+                  "status": "blocked"
+                },
+                {
+                  "blockers": [
+                    "pocketmd_lite_topk_rows_not_acquired",
+                    "upstream_top_k_candidate_receipts_not_attached",
+                    "lite_refinement_metric_receipts_not_attached"
+                  ],
+                  "criterion_id": "local_min_survival_materialized",
+                  "materialized_report_field": "local_min_survival_rate",
+                  "metric_id": "local_min_survival_rate",
+                  "receipt_roles": [
+                    "lite_refinement_run_receipt"
+                  ],
+                  "required_row_fields": [
+                    "local_min_survived"
+                  ],
+                  "required_value_policy": "boolean per top-k candidate",
+                  "status": "blocked"
+                },
+                {
+                  "blockers": [
+                    "pocketmd_lite_topk_rows_not_acquired",
+                    "upstream_top_k_candidate_receipts_not_attached",
+                    "lite_refinement_metric_receipts_not_attached"
+                  ],
+                  "criterion_id": "contact_persistence_materialized",
+                  "materialized_report_field": "contact_persistence_summary",
+                  "metric_id": "contact_persistence_rate",
+                  "receipt_roles": [
+                    "interaction_persistence_receipt"
+                  ],
+                  "required_row_fields": [
+                    "contact_persistence_rate"
+                  ],
+                  "required_value_policy": "finite fraction from 0.0 to 1.0",
+                  "status": "blocked"
+                },
+                {
+                  "blockers": [
+                    "pocketmd_lite_topk_rows_not_acquired",
+                    "upstream_top_k_candidate_receipts_not_attached",
+                    "lite_refinement_metric_receipts_not_attached"
+                  ],
+                  "criterion_id": "h_bond_persistence_materialized",
+                  "materialized_report_field": "h_bond_persistence_summary",
+                  "metric_id": "h_bond_persistence_rate",
+                  "receipt_roles": [
+                    "interaction_persistence_receipt"
+                  ],
+                  "required_row_fields": [
+                    "h_bond_persistence_rate"
+                  ],
+                  "required_value_policy": "finite fraction from 0.0 to 1.0",
+                  "status": "blocked"
+                },
+                {
+                  "blockers": [
+                    "pocketmd_lite_topk_rows_not_acquired",
+                    "upstream_top_k_candidate_receipts_not_attached",
+                    "lite_refinement_metric_receipts_not_attached"
+                  ],
+                  "criterion_id": "clash_relief_materialized",
+                  "materialized_report_field": "clash_relief_summary",
+                  "metric_id": "clash_relief_rate",
+                  "receipt_roles": [
+                    "interaction_persistence_receipt"
+                  ],
+                  "required_row_fields": [
+                    "clash_count_before",
+                    "clash_count_after"
+                  ],
+                  "required_value_policy": "non-negative integer clash counts",
+                  "status": "blocked"
+                },
+                {
+                  "blockers": [
+                    "pocketmd_lite_topk_rows_not_acquired",
+                    "upstream_top_k_candidate_receipts_not_attached",
+                    "lite_refinement_metric_receipts_not_attached"
+                  ],
+                  "criterion_id": "uncertainty_summary_materialized",
+                  "materialized_report_field": "uncertainty_width_summary",
+                  "metric_id": "uncertainty_width_median",
+                  "receipt_roles": [
+                    "uncertainty_interval_receipt"
+                  ],
+                  "required_row_fields": [
+                    "uncertainty_low",
+                    "uncertainty_high",
+                    "uncertainty_unit"
+                  ],
+                  "required_value_policy": "finite interval with high >= low and nonblank unit",
+                  "status": "blocked"
+                },
+                {
+                  "blockers": [
+                    "pocketmd_lite_topk_rows_not_acquired",
+                    "upstream_top_k_candidate_receipts_not_attached",
+                    "lite_refinement_metric_receipts_not_attached"
+                  ],
+                  "criterion_id": "report_blockers_resolved",
+                  "materialized_report_field": "",
+                  "metric_id": "",
+                  "receipt_roles": [
+                    "lite_refinement_run_receipt",
+                    "interaction_persistence_receipt",
+                    "uncertainty_interval_receipt"
+                  ],
+                  "required_row_fields": [],
+                  "required_value_policy": "",
+                  "status": "blocked"
+                }
+              ],
               "required_receipt_roles": [
                 "upstream_top_k_candidate_scope_receipt",
                 "lite_refinement_run_receipt",
@@ -10268,7 +10706,7 @@
   ],
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "f7ff2620e06326480012217b60600cdf98f32960",
+  "source_commit_sha": "66d2db894bb505e8fccb46d2b987f3dd20d1e33a",
   "status": "operator_rows_required",
   "summary": {
     "blocked_component_operator_action_count": 2,
@@ -10545,6 +10983,152 @@
               "operator_input_source.source_id",
               "operator_input_source.source_url",
               "operator_input_source.source_license"
+            ],
+            "phase4_metric_receipt_action_count": 8,
+            "phase4_metric_receipt_actions": [
+              {
+                "blockers": [
+                  "pocketmd_lite_topk_rows_not_acquired",
+                  "upstream_top_k_candidate_receipts_not_attached",
+                  "lite_refinement_metric_receipts_not_attached"
+                ],
+                "criterion_id": "top_k_refinement_rows_present",
+                "materialized_report_field": "",
+                "metric_id": "",
+                "receipt_roles": [
+                  "upstream_top_k_candidate_scope_receipt"
+                ],
+                "required_row_fields": [],
+                "required_value_policy": "",
+                "status": "blocked"
+              },
+              {
+                "blockers": [
+                  "pocketmd_lite_topk_rows_not_acquired",
+                  "upstream_top_k_candidate_receipts_not_attached",
+                  "lite_refinement_metric_receipts_not_attached"
+                ],
+                "criterion_id": "top_k_refinement_case_coverage",
+                "materialized_report_field": "",
+                "metric_id": "",
+                "receipt_roles": [
+                  "upstream_top_k_candidate_scope_receipt"
+                ],
+                "required_row_fields": [],
+                "required_value_policy": "",
+                "status": "blocked"
+              },
+              {
+                "blockers": [
+                  "pocketmd_lite_topk_rows_not_acquired",
+                  "upstream_top_k_candidate_receipts_not_attached",
+                  "lite_refinement_metric_receipts_not_attached"
+                ],
+                "criterion_id": "local_min_survival_materialized",
+                "materialized_report_field": "local_min_survival_rate",
+                "metric_id": "local_min_survival_rate",
+                "receipt_roles": [
+                  "lite_refinement_run_receipt"
+                ],
+                "required_row_fields": [
+                  "local_min_survived"
+                ],
+                "required_value_policy": "boolean per top-k candidate",
+                "status": "blocked"
+              },
+              {
+                "blockers": [
+                  "pocketmd_lite_topk_rows_not_acquired",
+                  "upstream_top_k_candidate_receipts_not_attached",
+                  "lite_refinement_metric_receipts_not_attached"
+                ],
+                "criterion_id": "contact_persistence_materialized",
+                "materialized_report_field": "contact_persistence_summary",
+                "metric_id": "contact_persistence_rate",
+                "receipt_roles": [
+                  "interaction_persistence_receipt"
+                ],
+                "required_row_fields": [
+                  "contact_persistence_rate"
+                ],
+                "required_value_policy": "finite fraction from 0.0 to 1.0",
+                "status": "blocked"
+              },
+              {
+                "blockers": [
+                  "pocketmd_lite_topk_rows_not_acquired",
+                  "upstream_top_k_candidate_receipts_not_attached",
+                  "lite_refinement_metric_receipts_not_attached"
+                ],
+                "criterion_id": "h_bond_persistence_materialized",
+                "materialized_report_field": "h_bond_persistence_summary",
+                "metric_id": "h_bond_persistence_rate",
+                "receipt_roles": [
+                  "interaction_persistence_receipt"
+                ],
+                "required_row_fields": [
+                  "h_bond_persistence_rate"
+                ],
+                "required_value_policy": "finite fraction from 0.0 to 1.0",
+                "status": "blocked"
+              },
+              {
+                "blockers": [
+                  "pocketmd_lite_topk_rows_not_acquired",
+                  "upstream_top_k_candidate_receipts_not_attached",
+                  "lite_refinement_metric_receipts_not_attached"
+                ],
+                "criterion_id": "clash_relief_materialized",
+                "materialized_report_field": "clash_relief_summary",
+                "metric_id": "clash_relief_rate",
+                "receipt_roles": [
+                  "interaction_persistence_receipt"
+                ],
+                "required_row_fields": [
+                  "clash_count_before",
+                  "clash_count_after"
+                ],
+                "required_value_policy": "non-negative integer clash counts",
+                "status": "blocked"
+              },
+              {
+                "blockers": [
+                  "pocketmd_lite_topk_rows_not_acquired",
+                  "upstream_top_k_candidate_receipts_not_attached",
+                  "lite_refinement_metric_receipts_not_attached"
+                ],
+                "criterion_id": "uncertainty_summary_materialized",
+                "materialized_report_field": "uncertainty_width_summary",
+                "metric_id": "uncertainty_width_median",
+                "receipt_roles": [
+                  "uncertainty_interval_receipt"
+                ],
+                "required_row_fields": [
+                  "uncertainty_low",
+                  "uncertainty_high",
+                  "uncertainty_unit"
+                ],
+                "required_value_policy": "finite interval with high >= low and nonblank unit",
+                "status": "blocked"
+              },
+              {
+                "blockers": [
+                  "pocketmd_lite_topk_rows_not_acquired",
+                  "upstream_top_k_candidate_receipts_not_attached",
+                  "lite_refinement_metric_receipts_not_attached"
+                ],
+                "criterion_id": "report_blockers_resolved",
+                "materialized_report_field": "",
+                "metric_id": "",
+                "receipt_roles": [
+                  "lite_refinement_run_receipt",
+                  "interaction_persistence_receipt",
+                  "uncertainty_interval_receipt"
+                ],
+                "required_row_fields": [],
+                "required_value_policy": "",
+                "status": "blocked"
+              }
             ],
             "required_receipt_roles": [
               "upstream_top_k_candidate_scope_receipt",

@@ -261,6 +261,17 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert pocketmd_topk_action["expected_rows_artifact"].endswith(
         "pocketmd_lite_topk_rows.json"
     )
+    assert pocketmd_topk_action["phase4_metric_receipt_action_count"] == 8
+    metric_receipt_actions = {
+        row["criterion_id"]: row
+        for row in pocketmd_topk_action["phase4_metric_receipt_actions"]
+    }
+    assert metric_receipt_actions["local_min_survival_materialized"][
+        "receipt_roles"
+    ] == ["lite_refinement_run_receipt"]
+    assert metric_receipt_actions["uncertainty_summary_materialized"][
+        "required_row_fields"
+    ] == ["uncertainty_low", "uncertainty_high", "uncertainty_unit"]
     assert pocketmd_topk_action["template_safety_policy"][
         "placeholder_or_fixture_rows_do_not_promote"
     ] is True
@@ -637,6 +648,9 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "public_benchmark_vina_gnina_rows.csv" in markdown
     assert "`operator_rows_must_be_real_engine_outputs`: `True`" in markdown
     assert "### PocketMD Top-k Rows Action" in markdown
+    assert "`phase4_metric_receipt_action_count`: `8`" in markdown
+    assert "#### PocketMD Phase 4 Receipt Closure Actions" in markdown
+    assert "interaction_persistence_receipt" in markdown
     assert "### PocketMD Row Preflight Action" in markdown
     assert "pocketmd_lite_topk_rows.tsv" in markdown
     assert "`operator_rows_must_be_real_top_k_refinement_outputs`: `True`" in markdown
