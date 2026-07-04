@@ -35,14 +35,14 @@
     "operator_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
     "status": "blocked"
   },
-  "generated_at": "2026-07-04T11:23:45.674355+00:00",
+  "generated_at": "2026-07-04T11:43:37.377089+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json": "sha256:fadc9e5facb979740584493fa30a807a79317afcdd6e80da096013a9d46ac3ed",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv": "sha256:4fac3161714e8bf0444ee3e085a3c34d2f9841acaf9b4427bd8de2224294e196",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:dc39006a0ed93c7141d4421294cb9d47e1af8a3c6fc2fe3531aeae754de53c89",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:09354cd520764e9fb23e9a23e1eed17a38e73328687154c5d35c5411731af093",
     "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:950ae4ecdfc630bf6d2558548bd42c8ff962efa1e5db9ffdf7d78fb2a22aff30",
-    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:a41b73604b17008edd0d3c0033712f63dfb496a2cf19ef32c540a3d16113aa0f",
+    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:e1f84daf60c4c5405ecba963b67839cc0bdff075ff1a50f369be1803cfa5c8e8",
     "scripts/build_pocketmd_lite_topk_rows_template_preflight.py": "sha256:15b5808c26ccc005162e3b693f88272ddb83cd696b1f54d0005872ce20294c55",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:dad666c08fff6ec709e535de64fdc41121b7c93de5e19c42f0876d71a44a67c9",
     "scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py": "sha256:7ab6a36a6f3c3bd87aa76a4e4bbb98d646e9bec2880b35acf3f85ffe75d6bee1",
@@ -138,6 +138,7 @@
         "uncertainty_summary_materialized",
         "report_blockers_resolved"
       ],
+      "command_key": "materialize_rows_from_receipt_bundle",
       "commands": {
         "build_row_template_preflight": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
         "import_rows": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
@@ -148,6 +149,8 @@
         "science_actual_closure": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
       },
       "default_row_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+      "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+      "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
       "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
       "operator_blockers_if_missing": [
         "pocketmd_lite_topk_rows_not_acquired"
@@ -388,6 +391,7 @@
         "validation_error": "",
         "verify_science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
       },
+      "science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
       "status": "missing",
       "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
       "top_k_rows_action_packet": {
@@ -3116,6 +3120,7 @@
       "uncertainty_summary_materialized",
       "report_blockers_resolved"
     ],
+    "command_key": "materialize_rows_from_receipt_bundle",
     "commands": {
       "build_row_template_preflight": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
       "import_rows": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>",
@@ -3126,6 +3131,8 @@
       "science_actual_closure": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
     },
     "default_row_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+    "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
+    "next_action": "attach_pocketmd_lite_topk_rows_at_default_dropzone",
     "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
     "operator_blockers_if_missing": [
       "pocketmd_lite_topk_rows_not_acquired"
@@ -3366,6 +3373,7 @@
       "validation_error": "",
       "verify_science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
     },
+    "science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
     "status": "missing",
     "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
     "top_k_rows_action_packet": {
@@ -5426,7 +5434,7 @@
     ]
   },
   "schema_version": "pocketmd-lite-source-acquisition-plan.v1",
-  "source_commit_sha": "1056e2e2f52e8609c768f62d440792b25d45f2ad",
+  "source_commit_sha": "68e04d4d2dd88e3c211bcae5eead05438b447fe9",
   "source_scope": "bounded_top_k_lite_refinement_rows",
   "status": "operator_acquisition_required",
   "summary": {

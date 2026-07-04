@@ -187,9 +187,9 @@
 
 ## Missing Row Input Actions
 
-| Row Input | Action | Closes Phase 2 Criteria | Unblocks | Materialization | Direct Adapter |
-|---|---|---|---|---|---|
-| `vina_gnina_rows` | `attach_vina_gnina_rows_then_run_phase2_row_audit` | `vina_gnina_comparison_ready` | `vina_gnina_comparison_adapter` | `python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked` | `python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked` |
+| Row Input | Action | Next Action | Command Key | Closes Phase 2 Criteria | Unblocks | Materialization | Row Audit | Direct Adapter |
+|---|---|---|---|---|---|---|---|---|
+| `vina_gnina_rows` | `attach_vina_gnina_rows_then_run_phase2_row_audit` | `complete_vina_gnina_input_manifest_required_values` | `build_input_manifest_template_preflight` | `vina_gnina_comparison_ready` | `vina_gnina_comparison_adapter` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` | `python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked` | `python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked` |
 
 ### Vina/GNINA Runtime Action Packet
 

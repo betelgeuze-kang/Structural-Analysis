@@ -3019,7 +3019,10 @@ def _missing_row_input_actions(
             ),
             "closure_boundary": str(contract.get("closure_boundary") or ""),
             "operator_action": f"attach_{row_input_id}_then_run_phase2_row_audit",
+            "next_action": f"attach_{row_input_id}_then_run_phase2_row_audit",
+            "command_key": "phase2_row_audit",
             "materialization_command": str(commands.get("phase2_row_audit") or ""),
+            "phase2_row_audit_command": str(commands.get("phase2_row_audit") or ""),
             "bundle_import_command": str(commands.get("import_operator_bundle") or ""),
             "claim_boundary": (
                 "This action identifies the missing operator-attached row input. "
@@ -3036,6 +3039,16 @@ def _missing_row_input_actions(
             adapter_preflight = row_candidate_status.get("adapter_preflight")
             if not isinstance(adapter_preflight, dict):
                 adapter_preflight = {}
+            runtime_action_packet = _vina_gnina_runtime_action_packet(
+                vina_gnina_runtime_readiness_summary
+            )
+            first_operator_blocker = _as_dict(
+                runtime_action_packet.get("first_operator_blocker_family")
+            )
+            command_key = str(
+                first_operator_blocker.get("command_key")
+                or "check_vina_gnina_runtime_readiness"
+            )
             manifest_candidate_paths = [
                 str(path)
                 for path in vina_gnina_execution_plan_summary.get(
@@ -3045,12 +3058,21 @@ def _missing_row_input_actions(
             ]
             action.update(
                 {
+                    "next_action": str(
+                        first_operator_blocker.get("next_action")
+                        or "resolve_vina_gnina_actual_evidence_blockers"
+                    ),
+                    "command_key": command_key,
+                    "materialization_command": str(
+                        first_operator_blocker.get("materialization_command")
+                        or commands.get(command_key)
+                        or commands.get("check_vina_gnina_runtime_readiness")
+                        or ""
+                    ),
                     "engine_input_manifest_template": str(
                         contract.get("engine_input_manifest_template") or ""
                     ),
-                    "runtime_action_packet": _vina_gnina_runtime_action_packet(
-                        vina_gnina_runtime_readiness_summary
-                    ),
+                    "runtime_action_packet": runtime_action_packet,
                     "engine_input_manifest_expected_path": str(
                         DEFAULT_VINA_GNINA_INPUT_MANIFEST
                     ),
@@ -4241,8 +4263,8 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         lines.extend(["", "## Missing Row Input Actions", ""])
         lines.extend(
             [
-                "| Row Input | Action | Closes Phase 2 Criteria | Unblocks | Materialization | Direct Adapter |",
-                "|---|---|---|---|---|---|",
+                "| Row Input | Action | Next Action | Command Key | Closes Phase 2 Criteria | Unblocks | Materialization | Row Audit | Direct Adapter |",
+                "|---|---|---|---|---|---|---|---|---|",
             ]
         )
         for row in missing_actions:
@@ -4256,8 +4278,12 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
             )
             lines.append(
                 f"| `{row.get('row_input_id', '')}` | "
-                f"`{row.get('operator_action', '')}` | {criteria} | {unblocks} | "
+                f"`{row.get('operator_action', '')}` | "
+                f"`{row.get('next_action', '')}` | "
+                f"`{row.get('command_key', '')}` | "
+                f"{criteria} | {unblocks} | "
                 f"`{row.get('materialization_command', '')}` | "
+                f"`{row.get('phase2_row_audit_command', '')}` | "
                 f"`{row.get('direct_adapter_materialization_command', '')}` |"
             )
         runtime_actions = [

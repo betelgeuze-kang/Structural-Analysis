@@ -361,7 +361,7 @@
     ],
     "status": "operator_receipts_required"
   },
-  "generated_at": "2026-07-04T11:34:20.284481+00:00",
+  "generated_at": "2026-07-04T11:43:37.259453+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json": "sha256:cfdda113c51e3586b07f78fc10b61fd0b9936a5e7834e0ff0f44003f7a9b5c55",
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:da5301c5715cc600de7495a0d7f58f435e038ff542f4761de8893f91e7cfce22",
@@ -373,7 +373,7 @@
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv": "sha256:3a106d2aa9f456eee7238523bf090db13e35d98afefa3952352a660f5b5e36ae",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json": "sha256:c57c0ab80322e9794f7c6f61377f3afecde7c98ff886b3a07d3e11fef008c62f",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:5fbce29a20367f43cae86964e322074cc9618fe67488dd9372a78d91aa2823bf",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:df4ee6eccbc7c1d8cd0c43347d90d90cabd16544cc4ebcc105bc4299d3fc3cda",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:3f0e011a212db20b92188e1b3ea22b3509ba6e353d6799602df1f14d57e0e968",
     "scripts/build_public_benchmark_source_access_preflight_receipt.py": "sha256:af7e5ca466c5fdaa6a2100e5c0d79c438ee3f873a00f7e049c562b99ac05c823",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:19cb915b9e0926181b87e17f60ee010ed0fd4b3da6148843d1a077825e5d45bd",
     "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:0258e681ddd419d9fba1bba595ffda481b77f710b5e645ac628c5f2bf1444cee",
@@ -524,6 +524,7 @@
         "vina_gnina_comparison_ready"
       ],
       "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
+      "command_key": "build_input_manifest_template_preflight",
       "depends_on_row_inputs": [
         "subset_rows",
         "pose_rows"
@@ -585,7 +586,8 @@
       "engine_input_manifest_current_status": "ready",
       "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
       "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-      "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
+      "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+      "next_action": "complete_vina_gnina_input_manifest_required_values",
       "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
       "phase2_materialization_chain": [
         "materialize_public_benchmark_vina_gnina_comparison_adapter"
@@ -600,6 +602,7 @@
           "required_minimum_count": 1
         }
       ],
+      "phase2_row_audit_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
       "receipt_fields": [
         "source_license_or_accession",
         "source_checksum",
@@ -5868,7 +5871,7 @@
     "source_access_ready": true,
     "status": "reachable"
   },
-  "source_commit_sha": "920e29188d26ff464e849cc9c33d61581224ff89",
+  "source_commit_sha": "68e04d4d2dd88e3c211bcae5eead05438b447fe9",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,

@@ -520,6 +520,17 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "summary_field": "local_min_survival_rate",
     }
     preflight_action = row_action["row_preflight_action_packet"]
+    assert row_action["next_action"] == (
+        "attach_pocketmd_lite_topk_rows_at_default_dropzone"
+    )
+    assert row_action["command_key"] == "materialize_rows_from_receipt_bundle"
+    assert (
+        "materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py"
+        in row_action["materialization_command"]
+    )
+    assert row_action["science_actual_closure_command"] == row_action["commands"][
+        "science_actual_closure"
+    ]
     assert preflight_action["status"] == "row_artifact_missing"
     assert preflight_action["expected_rows_artifact"].endswith(
         "pocketmd_lite_topk_rows.json"

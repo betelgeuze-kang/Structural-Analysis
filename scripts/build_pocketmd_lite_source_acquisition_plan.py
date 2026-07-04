@@ -1743,6 +1743,16 @@ def _pocketmd_rows_operator_action(
         if raw_row_candidate_status.get("coverage_ready")
         else f"attach_pocketmd_rows_at_{DEFAULT_ROWS_OUT}"
     )
+    command_key = (
+        "materialize_survival"
+        if raw_row_candidate_status.get("coverage_ready")
+        else "materialize_rows_from_receipt_bundle"
+    )
+    next_action = (
+        "materialize_pocketmd_lite_survival_report_from_validated_rows"
+        if raw_row_candidate_status.get("coverage_ready")
+        else "attach_pocketmd_lite_topk_rows_at_default_dropzone"
+    )
     phase4_metric_receipt_actions = _phase4_metric_receipt_actions(
         phase4_metric_closure_matrix
     )
@@ -1750,6 +1760,10 @@ def _pocketmd_rows_operator_action(
         "row_input_id": "pocketmd_rows",
         "status": "provided" if raw_row_candidate_status.get("coverage_ready") else "missing",
         "operator_action": operator_action,
+        "next_action": next_action,
+        "command_key": command_key,
+        "materialization_command": commands[command_key],
+        "science_actual_closure_command": commands["science_actual_closure"],
         "default_row_artifact": str(DEFAULT_ROWS_OUT),
         "template_artifact": str(DEFAULT_ROWS_TEMPLATE),
         "accepted_formats": list(SUPPORTED_ROW_FORMATS),
@@ -2640,14 +2654,18 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.extend(["", "## Missing Row Input Actions", ""])
         lines.extend(
             [
-                "| Row Input | Action | Default Artifact | Required Slots |",
-                "|---|---|---|---:|",
+                "| Row Input | Action | Next Action | Command Key | Materialization | Science Closure | Default Artifact | Required Slots |",
+                "|---|---|---|---|---|---|---|---:|",
             ]
         )
         for row in missing_actions:
             lines.append(
                 f"| `{row.get('row_input_id', '')}` | "
                 f"`{row.get('operator_action', '')}` | "
+                f"`{row.get('next_action', '')}` | "
+                f"`{row.get('command_key', '')}` | "
+                f"`{row.get('materialization_command', '')}` | "
+                f"`{row.get('science_actual_closure_command', '')}` | "
                 f"`{row.get('default_row_artifact', '')}` | "
                 f"{row.get('required_candidate_slot_count', 0)} |"
             )

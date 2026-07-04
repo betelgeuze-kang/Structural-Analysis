@@ -875,6 +875,14 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert missing_action["operator_action"] == (
         "attach_vina_gnina_rows_then_run_phase2_row_audit"
     )
+    assert missing_action["next_action"] == (
+        "complete_vina_gnina_input_manifest_required_values"
+    )
+    assert missing_action["command_key"] == "build_input_manifest_template_preflight"
+    assert (
+        "build_public_benchmark_vina_gnina_input_manifest_template_preflight.py"
+        in missing_action["materialization_command"]
+    )
     assert missing_action["closes_phase2_criteria"] == [
         "vina_gnina_comparison_ready"
     ]
@@ -1081,7 +1089,7 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert "predicted_ligand_checksum" in missing_action[
         "required_engine_run_fields"
     ]
-    assert missing_action["materialization_command"] == (
+    assert missing_action["phase2_row_audit_command"] == (
         "python3 scripts/materialize_public_benchmark_phase2_from_rows.py "
         "--fail-blocked"
     )

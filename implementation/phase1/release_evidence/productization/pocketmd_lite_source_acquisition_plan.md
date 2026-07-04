@@ -137,9 +137,9 @@
 
 ## Missing Row Input Actions
 
-| Row Input | Action | Default Artifact | Required Slots |
-|---|---|---|---:|
-| `pocketmd_rows` | `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | 6 |
+| Row Input | Action | Next Action | Command Key | Materialization | Science Closure | Default Artifact | Required Slots |
+|---|---|---|---|---|---|---|---:|
+| `pocketmd_rows` | `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `attach_pocketmd_lite_topk_rows_at_default_dropzone` | `materialize_rows_from_receipt_bundle` | `python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked` | `python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | 6 |
 
 ### PocketMD Row Preflight Action
 
