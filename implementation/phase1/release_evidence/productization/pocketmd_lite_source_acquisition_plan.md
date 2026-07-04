@@ -15,6 +15,8 @@
 - `phase4_completion_audit_status`: `operator_topk_rows_required`
 - `phase4_completion_ready_requirement_count`: `2`
 - `phase4_completion_blocked_requirement_count`: `7`
+- `phase4_actual_evidence_audit_status`: `operator_topk_rows_required`
+- `phase4_actual_evidence_blocked_component_count`: `4`
 - `survival_report_status`: `operator_evidence_required`
 - `survival_report_blocker_count`: `6`
 - `template_preflight_status`: `operator_rows_completion_required`
@@ -56,6 +58,22 @@
 | `clash_relief_reported` | clash relief is reported | `blocked` | `False` | `pocketmd_lite_clash_relief_rows_missing`, `pocketmd_lite_topk_rows_not_acquired` |
 | `uncertainty_reported` | uncertainty interval summary is reported | `blocked` | `False` | `pocketmd_lite_uncertainty_rows_missing`, `pocketmd_lite_topk_rows_not_acquired` |
 | `broad_all_atom_fep_claims_locked` | broad all-atom MD/FEP claims remain locked | `ready` | `True` | `none` |
+
+## Phase 4 Actual Evidence Audit
+
+- `status`: `operator_topk_rows_required`
+- `actual_closure_ready`: `False`
+- `remaining_evidence`: `bounded_top_k_row_slots, per_candidate_role_receipts, operator_input_source_receipt, survival_metric_summary`
+- `role_receipt_blocked_count`: `24`
+- `operator_input_source_receipt_blocked_count`: `5`
+- `missing_metric_count`: `5`
+
+| Component | Status | Pass | Current | Required | Blockers |
+|---|---|---|---|---|---|
+| `bounded_top_k_row_slots` | `blocked` | `False` | `{"covered_required_slot_count": 0, "missing_required_slot_count": 6, "raw_row_candidate_status": "row_artifact_missing", "required_candidate_slot_count": 6}` | `{"coverage_ready": true, "required_candidate_slot_count": 6}` | `pocketmd_lite_topk_rows_not_acquired`, `pocketmd_lite_topk_candidate_rows_missing` |
+| `per_candidate_role_receipts` | `blocked` | `False` | `{"role_receipt_blocked_count": 24, "role_receipt_plan_count": 24, "template_preflight_status": "operator_rows_completion_required"}` | `{"role_receipt_blocked_count": 0, "role_receipt_plan_count": 24}` | `pocketmd_lite_per_candidate_role_receipts_incomplete` |
+| `operator_input_source_receipt` | `blocked` | `False` | `{"survival_report_receipt_blocker_count": 1, "survival_report_receipt_contract_pass": false, "survival_report_receipt_status": "blocked", "template_preflight_blocked_count": 5, "template_preflight_requirement_count": 5}` | `{"survival_report_receipt_contract_pass": true, "template_preflight_blocked_count": 0, "template_preflight_requirement_count": 5}` | `operator_input_source_receipt_required`, `pocketmd_lite_operator_input_source_receipt_incomplete` |
+| `survival_metric_summary` | `blocked` | `False` | `{"reported_metric_count": 0, "required_metric_count": 5, "survival_report_contract_pass": false, "survival_report_status": "operator_evidence_required"}` | `{"missing_metric_count": 0, "required_metric_count": 5, "survival_report_contract_pass": true}` | `pocketmd_lite_local_min_survival_rows_missing`, `pocketmd_lite_contact_persistence_rows_missing`, `pocketmd_lite_h_bond_persistence_rows_missing`, `pocketmd_lite_clash_relief_rows_missing`, `pocketmd_lite_uncertainty_rows_missing` |
 
 | Case | Minimum Rows | Required Rank Prefix | Scope |
 |---|---:|---|---|

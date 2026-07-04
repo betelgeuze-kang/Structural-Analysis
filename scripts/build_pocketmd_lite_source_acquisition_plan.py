@@ -702,6 +702,9 @@ def _phase4_metric_receipt_actions(
 def _survival_report_status(repo_root: Path) -> dict[str, Any]:
     report = _load_json(repo_root, DEFAULT_SURVIVAL_REPORT)
     summary = _as_dict(report.get("summary"))
+    operator_input_source_receipt = _as_dict(
+        report.get("operator_input_source_receipt")
+    )
     blockers = [
         str(row) for row in report.get("blockers", []) if str(row)
     ] if isinstance(report.get("blockers"), list) else []
@@ -715,6 +718,7 @@ def _survival_report_status(repo_root: Path) -> dict[str, Any]:
         "blocker_count": len(blockers),
         "blockers": blockers,
         "summary": summary,
+        "operator_input_source_receipt": operator_input_source_receipt,
     }
 
 
@@ -908,6 +912,341 @@ def _phase4_completion_audit(
             "state. Full closure still requires real bounded top-k rows, source "
             "receipts, local-min/contact/H-bond/clash/uncertainty metrics, and "
             "a passing survival report."
+        ),
+    }
+
+
+def _phase4_actual_evidence_audit(
+    *,
+    raw_row_candidate_status: dict[str, Any],
+    phase4_completion_audit: dict[str, Any],
+    survival_report_status: dict[str, Any],
+    template_preflight_summary: dict[str, Any],
+) -> dict[str, Any]:
+    required_slot_count = int(
+        raw_row_candidate_status.get("required_candidate_slot_count") or 0
+    )
+    covered_slot_count = int(
+        raw_row_candidate_status.get("covered_required_slot_count") or 0
+    )
+    missing_slots = [
+        row
+        for row in raw_row_candidate_status.get("missing_required_slots", [])
+        if isinstance(row, dict)
+    ]
+    row_slot_ready = bool(raw_row_candidate_status.get("coverage_ready"))
+    required_role_receipt_count = required_slot_count * len(
+        PHASE4_CRITERIA_BY_RECEIPT_ROLE
+    )
+    role_receipt_plan_count = int(
+        template_preflight_summary.get("role_receipt_plan_count") or 0
+    )
+    role_receipt_blocked_count = int(
+        template_preflight_summary.get("role_receipt_blocked_count") or 0
+    )
+    role_receipts_ready = (
+        bool(template_preflight_summary.get("present"))
+        and role_receipt_plan_count >= required_role_receipt_count
+        and role_receipt_blocked_count == 0
+    )
+
+    operator_source_receipt = _as_dict(
+        survival_report_status.get("operator_input_source_receipt")
+    )
+    operator_source_receipt_blockers = [
+        str(row)
+        for row in operator_source_receipt.get("blockers", [])
+        if str(row)
+    ] if isinstance(operator_source_receipt.get("blockers"), list) else []
+    operator_source_receipt_ready = bool(
+        operator_source_receipt.get("contract_pass")
+    )
+    template_source_requirement_count = int(
+        template_preflight_summary.get(
+            "operator_input_source_receipt_requirement_count"
+        )
+        or 0
+    )
+    required_source_receipt_field_count = len(
+        SOURCE_RECEIPT_REQUIREMENTS.get("required_fields", [])
+    )
+    template_source_blocked_count = int(
+        template_preflight_summary.get(
+            "operator_input_source_receipt_blocked_count"
+        )
+        or 0
+    )
+    template_source_receipt_ready = (
+        bool(template_preflight_summary.get("present"))
+        and template_source_requirement_count >= required_source_receipt_field_count
+        and template_source_blocked_count == 0
+    )
+
+    survival_summary = _as_dict(survival_report_status.get("summary"))
+    survival_blockers = {
+        str(row)
+        for row in survival_report_status.get("blockers", [])
+        if str(row)
+    }
+    metric_rows: list[dict[str, Any]] = []
+    for requirement in PHASE4_COMPLETION_REQUIREMENTS:
+        if requirement.get("evidence_kind") != "survival_summary_metric":
+            continue
+        summary_field = str(requirement.get("summary_field") or "")
+        blocker_id = str(requirement.get("blocker_id") or "")
+        current_value = survival_summary.get(summary_field)
+        metric_ready = (
+            current_value is not None
+            and blocker_id not in survival_blockers
+            and bool(survival_report_status.get("contract_pass"))
+        )
+        metric_rows.append(
+            {
+                "requirement_id": str(requirement["requirement_id"]),
+                "phase4_criterion_id": str(requirement["phase4_criterion_id"]),
+                "summary_field": summary_field,
+                "current": current_value,
+                "required": "present",
+                "status": "ready" if metric_ready else "blocked",
+                "pass": metric_ready,
+                "blockers": [] if metric_ready else [blocker_id],
+            }
+        )
+    missing_metric_rows = [row for row in metric_rows if not bool(row["pass"])]
+    metric_summary_ready = bool(metric_rows) and not missing_metric_rows
+
+    component_rows = [
+        {
+            "component_id": "bounded_top_k_row_slots",
+            "status": "ready" if row_slot_ready else "blocked",
+            "pass": row_slot_ready,
+            "current": {
+                "raw_row_candidate_status": str(
+                    raw_row_candidate_status.get("status") or ""
+                ),
+                "covered_required_slot_count": covered_slot_count,
+                "required_candidate_slot_count": required_slot_count,
+                "missing_required_slot_count": len(missing_slots),
+            },
+            "required": {
+                "coverage_ready": True,
+                "required_candidate_slot_count": required_slot_count,
+            },
+            "blockers": (
+                []
+                if row_slot_ready
+                else [
+                    str(raw_row_candidate_status.get("blocker") or ""),
+                    "pocketmd_lite_topk_candidate_rows_missing",
+                ]
+            ),
+        },
+        {
+            "component_id": "per_candidate_role_receipts",
+            "status": "ready" if role_receipts_ready else "blocked",
+            "pass": role_receipts_ready,
+            "current": {
+                "template_preflight_status": str(
+                    template_preflight_summary.get("status") or ""
+                ),
+                "role_receipt_plan_count": role_receipt_plan_count,
+                "role_receipt_blocked_count": role_receipt_blocked_count,
+            },
+            "required": {
+                "role_receipt_plan_count": required_role_receipt_count,
+                "role_receipt_blocked_count": 0,
+            },
+            "blockers": [] if role_receipts_ready else [
+                "pocketmd_lite_per_candidate_role_receipts_incomplete"
+            ],
+        },
+        {
+            "component_id": "operator_input_source_receipt",
+            "status": (
+                "ready"
+                if operator_source_receipt_ready and template_source_receipt_ready
+                else "blocked"
+            ),
+            "pass": operator_source_receipt_ready and template_source_receipt_ready,
+            "current": {
+                "survival_report_receipt_contract_pass": (
+                    operator_source_receipt_ready
+                ),
+                "survival_report_receipt_status": str(
+                    operator_source_receipt.get("status") or ""
+                ),
+                "survival_report_receipt_blocker_count": len(
+                    operator_source_receipt_blockers
+                ),
+                "template_preflight_requirement_count": (
+                    template_source_requirement_count
+                ),
+                "template_preflight_blocked_count": template_source_blocked_count,
+            },
+            "required": {
+                "survival_report_receipt_contract_pass": True,
+                "template_preflight_requirement_count": (
+                    required_source_receipt_field_count
+                ),
+                "template_preflight_blocked_count": 0,
+            },
+            "blockers": (
+                []
+                if operator_source_receipt_ready and template_source_receipt_ready
+                else list(
+                    dict.fromkeys(
+                        [
+                            *operator_source_receipt_blockers,
+                            "pocketmd_lite_operator_input_source_receipt_incomplete",
+                        ]
+                    )
+                )
+            ),
+        },
+        {
+            "component_id": "survival_metric_summary",
+            "status": "ready" if metric_summary_ready else "blocked",
+            "pass": metric_summary_ready,
+            "current": {
+                "survival_report_status": str(
+                    survival_report_status.get("status") or ""
+                ),
+                "survival_report_contract_pass": bool(
+                    survival_report_status.get("contract_pass")
+                ),
+                "reported_metric_count": len(metric_rows)
+                - len(missing_metric_rows),
+                "required_metric_count": len(metric_rows),
+            },
+            "required": {
+                "survival_report_contract_pass": True,
+                "required_metric_count": len(metric_rows),
+                "missing_metric_count": 0,
+            },
+            "blockers": list(
+                dict.fromkeys(
+                    str(blocker)
+                    for row in missing_metric_rows
+                    for blocker in row.get("blockers", [])
+                    if str(blocker)
+                )
+            ),
+        },
+    ]
+    component_rows = [
+        {
+            **row,
+            "blockers": list(
+                dict.fromkeys(
+                    str(blocker)
+                    for blocker in row.get("blockers", [])
+                    if str(blocker)
+                )
+            ),
+        }
+        for row in component_rows
+    ]
+    blocked_components = [row for row in component_rows if not bool(row["pass"])]
+    remaining_blockers = list(
+        dict.fromkeys(
+            [
+                *[
+                    str(blocker)
+                    for blocker in phase4_completion_audit.get(
+                        "remaining_blockers", []
+                    )
+                    if str(blocker)
+                ],
+                *[
+                    str(blocker)
+                    for row in blocked_components
+                    for blocker in row.get("blockers", [])
+                    if str(blocker)
+                ],
+            ]
+        )
+    )
+    if not blocked_components and bool(
+        phase4_completion_audit.get("actual_closure_ready")
+    ):
+        status = "ready"
+    elif not row_slot_ready:
+        status = "operator_topk_rows_required"
+    elif not role_receipts_ready or not template_source_receipt_ready:
+        status = "source_receipts_required"
+    elif not metric_summary_ready:
+        status = "metric_receipts_required"
+    else:
+        status = "survival_materializer_required"
+    return {
+        "status": status,
+        "pass": not blocked_components,
+        "actual_closure_ready": (
+            not blocked_components
+            and bool(phase4_completion_audit.get("actual_closure_ready"))
+        ),
+        "component_count": len(component_rows),
+        "ready_component_count": len(component_rows) - len(blocked_components),
+        "blocked_component_count": len(blocked_components),
+        "blocked_component_ids": [
+            str(row["component_id"]) for row in blocked_components
+        ],
+        "remaining_blockers": remaining_blockers,
+        "remaining_evidence": [
+            str(row["component_id"]) for row in blocked_components
+        ],
+        "row_slot_coverage": {
+            "status": "ready" if row_slot_ready else "blocked",
+            "pass": row_slot_ready,
+            "required_candidate_slot_count": required_slot_count,
+            "covered_required_slot_count": covered_slot_count,
+            "missing_required_slot_count": len(missing_slots),
+            "missing_required_slots": missing_slots,
+            "raw_row_candidate_status": raw_row_candidate_status,
+        },
+        "template_preflight_evidence": {
+            "present": bool(template_preflight_summary.get("present")),
+            "artifact": str(template_preflight_summary.get("artifact") or ""),
+            "status": str(template_preflight_summary.get("status") or ""),
+            "top_k_template_ready": bool(
+                template_preflight_summary.get("top_k_template_ready")
+            ),
+            "role_receipt_plan_count": role_receipt_plan_count,
+            "role_receipt_blocked_count": role_receipt_blocked_count,
+            "operator_input_source_receipt_requirement_count": (
+                template_source_requirement_count
+            ),
+            "operator_input_source_receipt_blocked_count": (
+                template_source_blocked_count
+            ),
+            "first_blocked_role_receipt": _as_dict(
+                template_preflight_summary.get("first_blocked_role_receipt")
+            ),
+            "first_blocked_operator_input_source_receipt": _as_dict(
+                template_preflight_summary.get(
+                    "first_blocked_operator_input_source_receipt"
+                )
+            ),
+        },
+        "operator_input_source_receipt": {
+            "status": str(operator_source_receipt.get("status") or "missing"),
+            "contract_pass": operator_source_receipt_ready,
+            "blocker_count": len(operator_source_receipt_blockers),
+            "blockers": operator_source_receipt_blockers,
+        },
+        "survival_metric_summary": {
+            "status": "ready" if metric_summary_ready else "blocked",
+            "pass": metric_summary_ready,
+            "reported_metric_count": len(metric_rows) - len(missing_metric_rows),
+            "required_metric_count": len(metric_rows),
+            "missing_metric_count": len(missing_metric_rows),
+            "metrics": metric_rows,
+        },
+        "components": component_rows,
+        "claim_boundary": (
+            "This audit summarizes actual PocketMD Lite closure evidence only. "
+            "It keeps top-k scope, source receipts, survival metrics, and broad "
+            "all-atom/FEP claim locks visible without fabricating operator rows."
         ),
     }
 
@@ -1314,6 +1653,12 @@ def build_pocketmd_lite_source_acquisition_plan(
         survival_report_status=survival_report_status,
     )
     template_preflight_summary = _template_preflight_summary(repo_root)
+    phase4_actual_evidence_audit = _phase4_actual_evidence_audit(
+        raw_row_candidate_status=raw_row_candidate_status,
+        phase4_completion_audit=phase4_completion_audit,
+        survival_report_status=survival_report_status,
+        template_preflight_summary=template_preflight_summary,
+    )
     refinement_execution_plan = _refinement_execution_plan_summary(
         minimum_rows_by_case,
         operator_rows_ready=operator_rows_ready,
@@ -1415,6 +1760,7 @@ def build_pocketmd_lite_source_acquisition_plan(
         "phase4_metric_closure_matrix": phase4_metric_closure_matrix,
         "phase4_metric_closure_matrix_count": len(phase4_metric_closure_matrix),
         "phase4_completion_audit": phase4_completion_audit,
+        "phase4_actual_evidence_audit": phase4_actual_evidence_audit,
         "survival_report": survival_report_status,
         "refinement_execution_plan": refinement_execution_plan,
         "template_preflight_summary": template_preflight_summary,
@@ -1494,6 +1840,20 @@ def build_pocketmd_lite_source_acquisition_plan(
             "phase4_completion_blocked_requirement_count": (
                 phase4_completion_audit["blocked_requirement_count"]
             ),
+            "phase4_actual_evidence_audit_status": (
+                phase4_actual_evidence_audit["status"]
+            ),
+            "phase4_actual_evidence_ready_component_count": (
+                phase4_actual_evidence_audit["ready_component_count"]
+            ),
+            "phase4_actual_evidence_blocked_component_count": (
+                phase4_actual_evidence_audit["blocked_component_count"]
+            ),
+            "phase4_actual_evidence_missing_metric_count": (
+                phase4_actual_evidence_audit["survival_metric_summary"][
+                    "missing_metric_count"
+                ]
+            ),
             "survival_report_status": survival_report_status["status"],
             "survival_report_blocker_count": survival_report_status[
                 "blocker_count"
@@ -1567,6 +1927,10 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"`{payload['phase4_completion_audit']['ready_requirement_count']}`",
         "- `phase4_completion_blocked_requirement_count`: "
         f"`{payload['phase4_completion_audit']['blocked_requirement_count']}`",
+        "- `phase4_actual_evidence_audit_status`: "
+        f"`{payload['phase4_actual_evidence_audit']['status']}`",
+        "- `phase4_actual_evidence_blocked_component_count`: "
+        f"`{payload['phase4_actual_evidence_audit']['blocked_component_count']}`",
         f"- `survival_report_status`: `{payload['survival_report']['status']}`",
         "- `survival_report_blocker_count`: "
         f"`{payload['survival_report']['blocker_count']}`",
@@ -1616,6 +1980,60 @@ def _markdown(payload: dict[str, Any]) -> str:
                 f"{row.get('product_requirement', '')} | "
                 f"`{row.get('status', '')}` | `{row.get('pass')}` | "
                 f"{blockers or '`none`'} |"
+            )
+    actual_evidence_audit = _as_dict(payload.get("phase4_actual_evidence_audit"))
+    evidence_components = [
+        row
+        for row in actual_evidence_audit.get("components", [])
+        if isinstance(row, dict)
+    ] if isinstance(actual_evidence_audit.get("components"), list) else []
+    if actual_evidence_audit:
+        template_evidence = _as_dict(
+            actual_evidence_audit.get("template_preflight_evidence")
+        )
+        metric_summary = _as_dict(
+            actual_evidence_audit.get("survival_metric_summary")
+        )
+        lines.extend(
+            [
+                "",
+                "## Phase 4 Actual Evidence Audit",
+                "",
+                f"- `status`: `{actual_evidence_audit.get('status')}`",
+                f"- `actual_closure_ready`: `{actual_evidence_audit.get('actual_closure_ready')}`",
+                "- `remaining_evidence`: "
+                f"`{', '.join(actual_evidence_audit.get('remaining_evidence', []))}`",
+                "- `role_receipt_blocked_count`: "
+                f"`{template_evidence.get('role_receipt_blocked_count')}`",
+                "- `operator_input_source_receipt_blocked_count`: "
+                f"`{template_evidence.get('operator_input_source_receipt_blocked_count')}`",
+                "- `missing_metric_count`: "
+                f"`{metric_summary.get('missing_metric_count')}`",
+                "",
+                "| Component | Status | Pass | Current | Required | Blockers |",
+                "|---|---|---|---|---|---|",
+            ]
+        )
+        for row in evidence_components:
+            current = json.dumps(
+                _as_dict(row.get("current")),
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+            required = json.dumps(
+                _as_dict(row.get("required")),
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+            blockers = ", ".join(
+                f"`{blocker}`"
+                for blocker in row.get("blockers", [])
+                if str(blocker)
+            )
+            lines.append(
+                f"| `{row.get('component_id', '')}` | "
+                f"`{row.get('status', '')}` | `{row.get('pass')}` | "
+                f"`{current}` | `{required}` | {blockers or '`none`'} |"
             )
     lines.extend(
         [

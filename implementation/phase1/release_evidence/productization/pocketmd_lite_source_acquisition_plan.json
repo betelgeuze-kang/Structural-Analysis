@@ -18,13 +18,13 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T05:00:04.974874+00:00",
+  "generated_at": "2026-07-04T05:58:38.859458+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv": "sha256:4fac3161714e8bf0444ee3e085a3c34d2f9841acaf9b4427bd8de2224294e196",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:1aa07a73ba0f9770659d6317d4d813eff0660669c991dd35c5b89726f4045f20",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:e3a98f7bed334c844cbb54832b9e3e2da97325597da99654985aa3bf15398508",
     "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:c4e52648fc194826a082a0816d7946350a90fe1e4eae7d31e3d6f37dd1c05148",
-    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:e62d08e0f4d026842cfdbeb7f2a3ffab29b93f53f53b419e3c0fb8911b96007f",
+    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:57f3773a03ec481e78cb8e7dd8caeaf4bbee2110aa9b9d6cb2f37620aa05af57",
     "scripts/build_pocketmd_lite_topk_rows_template_preflight.py": "sha256:bee7f8a388bcec0cf613c291afe00fe6892667bd47c1457967e14ec30d1133af",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:dad666c08fff6ec709e535de64fdc41121b7c93de5e19c42f0876d71a44a67c9",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:161673d8ff036a7a31d657fb972764eeb4b62f6d55cc0840e26f398565707c6f"
@@ -642,6 +642,344 @@
     "run_pocketmd_lite_raw_row_importer_and_survival_materializer",
     "refresh_science_actual_closure_from_rows"
   ],
+  "phase4_actual_evidence_audit": {
+    "actual_closure_ready": false,
+    "blocked_component_count": 4,
+    "blocked_component_ids": [
+      "bounded_top_k_row_slots",
+      "per_candidate_role_receipts",
+      "operator_input_source_receipt",
+      "survival_metric_summary"
+    ],
+    "claim_boundary": "This audit summarizes actual PocketMD Lite closure evidence only. It keeps top-k scope, source receipts, survival metrics, and broad all-atom/FEP claim locks visible without fabricating operator rows.",
+    "component_count": 4,
+    "components": [
+      {
+        "blockers": [
+          "pocketmd_lite_topk_rows_not_acquired",
+          "pocketmd_lite_topk_candidate_rows_missing"
+        ],
+        "component_id": "bounded_top_k_row_slots",
+        "current": {
+          "covered_required_slot_count": 0,
+          "missing_required_slot_count": 6,
+          "raw_row_candidate_status": "row_artifact_missing",
+          "required_candidate_slot_count": 6
+        },
+        "pass": false,
+        "required": {
+          "coverage_ready": true,
+          "required_candidate_slot_count": 6
+        },
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "pocketmd_lite_per_candidate_role_receipts_incomplete"
+        ],
+        "component_id": "per_candidate_role_receipts",
+        "current": {
+          "role_receipt_blocked_count": 24,
+          "role_receipt_plan_count": 24,
+          "template_preflight_status": "operator_rows_completion_required"
+        },
+        "pass": false,
+        "required": {
+          "role_receipt_blocked_count": 0,
+          "role_receipt_plan_count": 24
+        },
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "operator_input_source_receipt_required",
+          "pocketmd_lite_operator_input_source_receipt_incomplete"
+        ],
+        "component_id": "operator_input_source_receipt",
+        "current": {
+          "survival_report_receipt_blocker_count": 1,
+          "survival_report_receipt_contract_pass": false,
+          "survival_report_receipt_status": "blocked",
+          "template_preflight_blocked_count": 5,
+          "template_preflight_requirement_count": 5
+        },
+        "pass": false,
+        "required": {
+          "survival_report_receipt_contract_pass": true,
+          "template_preflight_blocked_count": 0,
+          "template_preflight_requirement_count": 5
+        },
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "pocketmd_lite_local_min_survival_rows_missing",
+          "pocketmd_lite_contact_persistence_rows_missing",
+          "pocketmd_lite_h_bond_persistence_rows_missing",
+          "pocketmd_lite_clash_relief_rows_missing",
+          "pocketmd_lite_uncertainty_rows_missing"
+        ],
+        "component_id": "survival_metric_summary",
+        "current": {
+          "reported_metric_count": 0,
+          "required_metric_count": 5,
+          "survival_report_contract_pass": false,
+          "survival_report_status": "operator_evidence_required"
+        },
+        "pass": false,
+        "required": {
+          "missing_metric_count": 0,
+          "required_metric_count": 5,
+          "survival_report_contract_pass": true
+        },
+        "status": "blocked"
+      }
+    ],
+    "operator_input_source_receipt": {
+      "blocker_count": 1,
+      "blockers": [
+        "operator_input_source_receipt_required"
+      ],
+      "contract_pass": false,
+      "status": "blocked"
+    },
+    "pass": false,
+    "ready_component_count": 0,
+    "remaining_blockers": [
+      "pocketmd_lite_topk_rows_not_acquired",
+      "pocketmd_lite_topk_candidate_rows_missing",
+      "pocketmd_lite_local_min_survival_rows_missing",
+      "pocketmd_lite_contact_persistence_rows_missing",
+      "pocketmd_lite_h_bond_persistence_rows_missing",
+      "pocketmd_lite_clash_relief_rows_missing",
+      "pocketmd_lite_uncertainty_rows_missing",
+      "pocketmd_lite_per_candidate_role_receipts_incomplete",
+      "operator_input_source_receipt_required",
+      "pocketmd_lite_operator_input_source_receipt_incomplete"
+    ],
+    "remaining_evidence": [
+      "bounded_top_k_row_slots",
+      "per_candidate_role_receipts",
+      "operator_input_source_receipt",
+      "survival_metric_summary"
+    ],
+    "row_slot_coverage": {
+      "covered_required_slot_count": 0,
+      "missing_required_slot_count": 6,
+      "missing_required_slots": [
+        {
+          "case_id": "pocketmd_lite_case_001",
+          "top_k_rank": 1
+        },
+        {
+          "case_id": "pocketmd_lite_case_001",
+          "top_k_rank": 2
+        },
+        {
+          "case_id": "pocketmd_lite_case_002",
+          "top_k_rank": 1
+        },
+        {
+          "case_id": "pocketmd_lite_case_002",
+          "top_k_rank": 2
+        },
+        {
+          "case_id": "pocketmd_lite_case_003",
+          "top_k_rank": 1
+        },
+        {
+          "case_id": "pocketmd_lite_case_003",
+          "top_k_rank": 2
+        }
+      ],
+      "pass": false,
+      "raw_row_candidate_status": {
+        "blocker": "pocketmd_lite_topk_rows_not_acquired",
+        "candidate_paths": [
+          {
+            "exists": false,
+            "is_file": false,
+            "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json"
+          },
+          {
+            "exists": false,
+            "is_file": false,
+            "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl"
+          },
+          {
+            "exists": false,
+            "is_file": false,
+            "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson"
+          },
+          {
+            "exists": false,
+            "is_file": false,
+            "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv"
+          },
+          {
+            "exists": false,
+            "is_file": false,
+            "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+          }
+        ],
+        "case_top_k_rank_prefixes": {},
+        "coverage_ready": false,
+        "covered_required_slot_count": 0,
+        "default_rows_out": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+        "detected_row_artifact_count": 0,
+        "first_detected_path": "",
+        "missing_required_slots": [
+          {
+            "case_id": "pocketmd_lite_case_001",
+            "top_k_rank": 1
+          },
+          {
+            "case_id": "pocketmd_lite_case_001",
+            "top_k_rank": 2
+          },
+          {
+            "case_id": "pocketmd_lite_case_002",
+            "top_k_rank": 1
+          },
+          {
+            "case_id": "pocketmd_lite_case_002",
+            "top_k_rank": 2
+          },
+          {
+            "case_id": "pocketmd_lite_case_003",
+            "top_k_rank": 1
+          },
+          {
+            "case_id": "pocketmd_lite_case_003",
+            "top_k_rank": 2
+          }
+        ],
+        "required_candidate_slot_count": 6,
+        "selected_path": "",
+        "selected_row_count": 0,
+        "status": "row_artifact_missing",
+        "validated_case_count": 0,
+        "validated_row_count": 0,
+        "validation_error": ""
+      },
+      "required_candidate_slot_count": 6,
+      "status": "blocked"
+    },
+    "status": "operator_topk_rows_required",
+    "survival_metric_summary": {
+      "metrics": [
+        {
+          "blockers": [
+            "pocketmd_lite_local_min_survival_rows_missing"
+          ],
+          "current": null,
+          "pass": false,
+          "phase4_criterion_id": "local_min_survival_materialized",
+          "required": "present",
+          "requirement_id": "local_min_survival_reported",
+          "status": "blocked",
+          "summary_field": "local_min_survival_rate"
+        },
+        {
+          "blockers": [
+            "pocketmd_lite_contact_persistence_rows_missing"
+          ],
+          "current": null,
+          "pass": false,
+          "phase4_criterion_id": "contact_persistence_materialized",
+          "required": "present",
+          "requirement_id": "contact_persistence_reported",
+          "status": "blocked",
+          "summary_field": "contact_persistence_rate_median"
+        },
+        {
+          "blockers": [
+            "pocketmd_lite_h_bond_persistence_rows_missing"
+          ],
+          "current": null,
+          "pass": false,
+          "phase4_criterion_id": "h_bond_persistence_materialized",
+          "required": "present",
+          "requirement_id": "h_bond_persistence_reported",
+          "status": "blocked",
+          "summary_field": "h_bond_persistence_rate_median"
+        },
+        {
+          "blockers": [
+            "pocketmd_lite_clash_relief_rows_missing"
+          ],
+          "current": null,
+          "pass": false,
+          "phase4_criterion_id": "clash_relief_materialized",
+          "required": "present",
+          "requirement_id": "clash_relief_reported",
+          "status": "blocked",
+          "summary_field": "clash_relief_rate"
+        },
+        {
+          "blockers": [
+            "pocketmd_lite_uncertainty_rows_missing"
+          ],
+          "current": null,
+          "pass": false,
+          "phase4_criterion_id": "uncertainty_summary_materialized",
+          "required": "present",
+          "requirement_id": "uncertainty_reported",
+          "status": "blocked",
+          "summary_field": "uncertainty_width_median"
+        }
+      ],
+      "missing_metric_count": 5,
+      "pass": false,
+      "reported_metric_count": 0,
+      "required_metric_count": 5,
+      "status": "blocked"
+    },
+    "template_preflight_evidence": {
+      "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json",
+      "first_blocked_operator_input_source_receipt": {
+        "blocker": "source_id_required",
+        "expected_value": "",
+        "field": "source_id",
+        "operator_action": "attach_operator_input_source_source_id",
+        "status": "operator_completion_required"
+      },
+      "first_blocked_role_receipt": {
+        "blockers": [
+          "required_role_fields_missing"
+        ],
+        "candidate_id": "pocketmd_lite_case_001_rank_01",
+        "case_id": "pocketmd_lite_case_001",
+        "closes_phase4_criteria": [
+          "top_k_refinement_rows_present",
+          "top_k_refinement_case_coverage"
+        ],
+        "invalid_fields": [],
+        "missing_fields": [
+          "upstream_top_k_provenance_ref",
+          "upstream_top_k_source_checksum"
+        ],
+        "operator_action": "attach_upstream_top_k_scope_receipt",
+        "required_fields": [
+          "case_id",
+          "candidate_id",
+          "top_k_rank",
+          "upstream_top_k_provenance_ref",
+          "upstream_top_k_source_checksum"
+        ],
+        "role_id": "upstream_top_k_candidate_scope_receipt",
+        "status": "operator_completion_required",
+        "top_k_rank": 1
+      },
+      "operator_input_source_receipt_blocked_count": 5,
+      "operator_input_source_receipt_requirement_count": 5,
+      "present": true,
+      "role_receipt_blocked_count": 24,
+      "role_receipt_plan_count": 24,
+      "status": "operator_rows_completion_required",
+      "top_k_template_ready": false
+    }
+  },
   "phase4_candidate_slot_matrix": [
     {
       "candidate_scope": "upstream_ranked_top_k_candidates_only",
@@ -1126,6 +1464,61 @@
       ],
       "contract_pass": false,
       "first_blocked_target": "top_k_refinement_operator_intake",
+      "operator_input_source_receipt": {
+        "blockers": [
+          "operator_input_source_receipt_required"
+        ],
+        "claim_boundary": "Actual PocketMD Lite top-k refinement closure requires operator rows plus a verifiable source artifact receipt. In-memory or fixture-like rows without source metadata remain non-promoting.",
+        "contract_pass": false,
+        "mode": "",
+        "source_actuality_check": {
+          "blocked_marker_policy": {
+            "text_markers": [
+              "<operator",
+              "fixture",
+              "synthetic",
+              "mock",
+              "placeholder",
+              "dummy",
+              "example",
+              "operator_supplied",
+              "unit-test",
+              "test-only"
+            ],
+            "url_markers": [
+              "://example.",
+              ".example/",
+              ".invalid",
+              ".test/",
+              "localhost",
+              "127.0.0.1",
+              "0.0.0.0"
+            ],
+            "url_prefixes": [
+              "operator://",
+              "local-evidence://",
+              "local://",
+              "fixture://",
+              "mock://",
+              "synthetic://",
+              "placeholder://",
+              "test://",
+              "unit-test://",
+              "file://"
+            ]
+          },
+          "blockers": [],
+          "contract_pass": true
+        },
+        "source_artifact": "",
+        "source_artifact_present": false,
+        "source_artifact_sha256_matches": false,
+        "source_artifact_sha256_present": false,
+        "source_id_present": false,
+        "source_license_present": false,
+        "source_url_present": false,
+        "status": "blocked"
+      },
       "present": true,
       "product_surface_ready": false,
       "status": "operator_evidence_required",
@@ -2355,7 +2748,7 @@
     "template_usage_policy": "The template enumerates required columns and minimum case/rank slots only. Operators must replace placeholder blanks with real top-k refinement rows and receipts before writing rows to the default output."
   },
   "schema_version": "pocketmd-lite-source-acquisition-plan.v1",
-  "source_commit_sha": "1127062a2f0dde484cd1e51502bdbab48e1b314c",
+  "source_commit_sha": "f638f3155b09351129c5e74e3897792aab08f6d4",
   "source_scope": "bounded_top_k_lite_refinement_rows",
   "status": "operator_acquisition_required",
   "summary": {
@@ -2367,6 +2760,10 @@
     "minimum_rows_by_case_count": 3,
     "missing_row_input_action_count": 1,
     "operator_rows_ready": false,
+    "phase4_actual_evidence_audit_status": "operator_topk_rows_required",
+    "phase4_actual_evidence_blocked_component_count": 4,
+    "phase4_actual_evidence_missing_metric_count": 5,
+    "phase4_actual_evidence_ready_component_count": 0,
     "phase4_candidate_slot_matrix_count": 6,
     "phase4_completion_audit_status": "operator_topk_rows_required",
     "phase4_completion_blocked_requirement_count": 7,
@@ -2413,6 +2810,61 @@
     ],
     "contract_pass": false,
     "first_blocked_target": "top_k_refinement_operator_intake",
+    "operator_input_source_receipt": {
+      "blockers": [
+        "operator_input_source_receipt_required"
+      ],
+      "claim_boundary": "Actual PocketMD Lite top-k refinement closure requires operator rows plus a verifiable source artifact receipt. In-memory or fixture-like rows without source metadata remain non-promoting.",
+      "contract_pass": false,
+      "mode": "",
+      "source_actuality_check": {
+        "blocked_marker_policy": {
+          "text_markers": [
+            "<operator",
+            "fixture",
+            "synthetic",
+            "mock",
+            "placeholder",
+            "dummy",
+            "example",
+            "operator_supplied",
+            "unit-test",
+            "test-only"
+          ],
+          "url_markers": [
+            "://example.",
+            ".example/",
+            ".invalid",
+            ".test/",
+            "localhost",
+            "127.0.0.1",
+            "0.0.0.0"
+          ],
+          "url_prefixes": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ]
+        },
+        "blockers": [],
+        "contract_pass": true
+      },
+      "source_artifact": "",
+      "source_artifact_present": false,
+      "source_artifact_sha256_matches": false,
+      "source_artifact_sha256_present": false,
+      "source_id_present": false,
+      "source_license_present": false,
+      "source_url_present": false,
+      "status": "blocked"
+    },
     "present": true,
     "product_surface_ready": false,
     "status": "operator_evidence_required",

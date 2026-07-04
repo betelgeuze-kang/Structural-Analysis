@@ -421,6 +421,50 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     assert completion_requirements["broad_all_atom_fep_claims_locked"][
         "pass"
     ] is True
+    actual_evidence_audit = payload["phase4_actual_evidence_audit"]
+    assert actual_evidence_audit["status"] == "operator_topk_rows_required"
+    assert actual_evidence_audit["pass"] is False
+    assert actual_evidence_audit["actual_closure_ready"] is False
+    assert actual_evidence_audit["component_count"] == 4
+    assert actual_evidence_audit["ready_component_count"] == 0
+    assert actual_evidence_audit["blocked_component_count"] == 4
+    assert actual_evidence_audit["blocked_component_ids"] == [
+        "bounded_top_k_row_slots",
+        "per_candidate_role_receipts",
+        "operator_input_source_receipt",
+        "survival_metric_summary",
+    ]
+    assert actual_evidence_audit["row_slot_coverage"][
+        "missing_required_slot_count"
+    ] == 6
+    assert actual_evidence_audit["template_preflight_evidence"][
+        "role_receipt_blocked_count"
+    ] == 24
+    assert actual_evidence_audit["template_preflight_evidence"][
+        "operator_input_source_receipt_blocked_count"
+    ] == 5
+    assert actual_evidence_audit["operator_input_source_receipt"][
+        "blockers"
+    ] == ["operator_input_source_receipt_required"]
+    actual_evidence_components = {
+        row["component_id"]: row for row in actual_evidence_audit["components"]
+    }
+    assert actual_evidence_components["operator_input_source_receipt"][
+        "required"
+    ]["template_preflight_requirement_count"] == 5
+    assert actual_evidence_audit["survival_metric_summary"][
+        "missing_metric_count"
+    ] == 5
+    assert actual_evidence_audit["survival_metric_summary"]["metrics"][0] == {
+        "blockers": ["pocketmd_lite_local_min_survival_rows_missing"],
+        "current": None,
+        "pass": False,
+        "phase4_criterion_id": "local_min_survival_materialized",
+        "required": "present",
+        "requirement_id": "local_min_survival_reported",
+        "status": "blocked",
+        "summary_field": "local_min_survival_rate",
+    }
     preflight_action = row_action["row_preflight_action_packet"]
     assert preflight_action["status"] == "row_artifact_missing"
     assert preflight_action["expected_rows_artifact"].endswith(
@@ -593,6 +637,10 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "phase4_completion_requirement_count": 9,
         "phase4_completion_ready_requirement_count": 2,
         "phase4_completion_blocked_requirement_count": 7,
+        "phase4_actual_evidence_audit_status": "operator_topk_rows_required",
+        "phase4_actual_evidence_ready_component_count": 0,
+        "phase4_actual_evidence_blocked_component_count": 4,
+        "phase4_actual_evidence_missing_metric_count": 5,
         "phase4_refinement_receipt_plan_status": "operator_receipts_required",
         "phase4_refinement_receipt_role_count": 4,
         "survival_report_status": "operator_evidence_required",
@@ -729,6 +777,22 @@ def test_pocketmd_lite_source_acquisition_plan_validates_slot_coverage(
     assert valid_completion_requirements["local_min_survival_reported"][
         "blockers"
     ] == ["pocketmd_lite_local_min_survival_rows_missing"]
+    assert payload["phase4_actual_evidence_audit"]["status"] == (
+        "source_receipts_required"
+    )
+    assert payload["phase4_actual_evidence_audit"]["ready_component_count"] == 1
+    assert payload["phase4_actual_evidence_audit"]["blocked_component_count"] == 3
+    assert payload["phase4_actual_evidence_audit"]["blocked_component_ids"] == [
+        "per_candidate_role_receipts",
+        "operator_input_source_receipt",
+        "survival_metric_summary",
+    ]
+    assert payload["phase4_actual_evidence_audit"]["row_slot_coverage"][
+        "pass"
+    ] is True
+    assert payload["phase4_actual_evidence_audit"]["row_slot_coverage"][
+        "missing_required_slot_count"
+    ] == 0
     assert payload["missing_row_input_actions"] == []
     assert payload["missing_row_input_action_count"] == 0
     assert payload["pocketmd_rows_operator_action"]["status"] == "provided"
@@ -757,6 +821,11 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert payload["summary"]["phase4_completion_audit_status"] == (
         "operator_topk_rows_required"
     )
+    assert payload["summary"]["phase4_actual_evidence_audit_status"] == (
+        "operator_topk_rows_required"
+    )
+    assert payload["summary"]["phase4_actual_evidence_blocked_component_count"] == 4
+    assert payload["summary"]["phase4_actual_evidence_missing_metric_count"] == 5
     assert payload["phase4_completion_audit"]["blocked_requirement_count"] == 7
     assert payload["survival_report"]["blocker_count"] == 6
     assert payload["phase4_refinement_receipt_plan"]["receipt_role_count"] == 4
@@ -770,11 +839,20 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert "| 1 | `review_phase4_refinement_receipt_plan` |" in markdown
     assert "| 11 | `refresh_science_actual_closure_from_rows` |" in markdown
     assert "## Phase 4 Completion Audit" in markdown
+    assert "## Phase 4 Actual Evidence Audit" in markdown
     assert "`phase4_completion_audit_status`: `operator_topk_rows_required`" in (
+        markdown
+    )
+    assert "`phase4_actual_evidence_audit_status`: `operator_topk_rows_required`" in (
         markdown
     )
     assert "`phase4_completion_ready_requirement_count`: `2`" in markdown
     assert "`phase4_completion_blocked_requirement_count`: `7`" in markdown
+    assert "`bounded_top_k_row_slots`" in markdown
+    assert "`per_candidate_role_receipts`" in markdown
+    assert "`operator_input_source_receipt`" in markdown
+    assert "`survival_metric_summary`" in markdown
+    assert "`pocketmd_lite_per_candidate_role_receipts_incomplete`" in markdown
     assert "`survival_report_status`: `operator_evidence_required`" in markdown
     assert "`survival_report_blocker_count`: `6`" in markdown
     assert "`bounded_top_k_scope_contract`" in markdown
