@@ -1018,6 +1018,388 @@ def _capability_summary_rows(product_capabilities: dict[str, Any]) -> list[dict[
     return rows
 
 
+def _roadmap_rows_by_phase(
+    roadmap_rows: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    return {
+        str(row.get("phase_id") or ""): row
+        for row in roadmap_rows
+        if str(row.get("phase_id") or "")
+    }
+
+
+def _audit_component(
+    audit: dict[str, Any],
+    component_id: str,
+) -> dict[str, Any]:
+    for row in _as_list(audit.get("components")):
+        if not isinstance(row, dict):
+            continue
+        if str(row.get("component_id") or "") == component_id:
+            return row
+    return {}
+
+
+def _goal_priority_row(
+    *,
+    priority: int,
+    priority_id: str,
+    name: str,
+    phase_id: str,
+    roadmap_row: dict[str, Any],
+    state: str,
+    pass_value: bool,
+    requirements: list[str],
+    current: dict[str, Any],
+    blockers: list[str],
+    operator_next_action: str,
+) -> dict[str, Any]:
+    return {
+        "priority": priority,
+        "priority_id": priority_id,
+        "name": name,
+        "phase_id": phase_id,
+        "state": state,
+        "pass": pass_value,
+        "requirements": requirements,
+        "current": current,
+        "blockers": blockers,
+        "operator_next_action": operator_next_action,
+        "evidence_artifacts": [
+            str(item) for item in _as_list(roadmap_row.get("evidence_artifacts"))
+        ],
+    }
+
+
+def _active_thread_goal_objective_audit(
+    *,
+    roadmap_rows: list[dict[str, Any]],
+    source_of_truth_gap_summary: dict[str, Any],
+    source_of_truth_gap_evidence_matrix: list[dict[str, Any]],
+    science_handoff: dict[str, Any],
+) -> dict[str, Any]:
+    rows_by_phase = _roadmap_rows_by_phase(roadmap_rows)
+    source_row = _as_dict(rows_by_phase.get("phase_0_source_of_truth_hardening"))
+    phase2_row = _as_dict(
+        rows_by_phase.get("phase_2_public_benchmark_actual_closure")
+    )
+    phase3_row = _as_dict(rows_by_phase.get("phase_3_gpcr_hard_decoy_actual_closure"))
+    phase4_row = _as_dict(
+        rows_by_phase.get("phase_4_pocketmd_lite_topk_actual_closure")
+    )
+
+    source_matrix = {
+        str(row.get("candidate") or ""): row
+        for row in source_of_truth_gap_evidence_matrix
+        if str(row.get("candidate") or "")
+    }
+    accuracy_row = _as_dict(source_matrix.get("accuracy_parity_scorecard"))
+
+    upstream = _as_dict(science_handoff.get("upstream_source_acquisition"))
+    public_source = _as_dict(upstream.get("public_benchmark_phase2"))
+    public_summary = _as_dict(public_source.get("summary"))
+    public_actual_audit = _as_dict(
+        public_source.get("vina_gnina_actual_evidence_audit")
+    ) or _as_dict(_as_dict(phase2_row.get("summary")).get("actual_evidence_audit"))
+    manifest_component = _audit_component(
+        public_actual_audit,
+        "engine_input_manifest",
+    )
+    runtime_component = _audit_component(public_actual_audit, "engine_runtime")
+    adapter_component = _audit_component(public_actual_audit, "adapter_rows")
+    manifest_current = _as_dict(manifest_component.get("current"))
+    runtime_current = _as_dict(runtime_component.get("current"))
+    adapter_current = _as_dict(adapter_component.get("current"))
+    phase2_summary = _as_dict(phase2_row.get("summary"))
+    phase2_gate = _as_dict(phase2_summary.get("component_gate_summary"))
+    phase2_requirement_summary = _as_dict(
+        phase2_gate.get("phase2_requirement_summary")
+    )
+
+    gpcr_summary = _as_dict(phase3_row.get("summary"))
+    gpcr_gate = _as_dict(gpcr_summary.get("phase3_exit_gate"))
+    gpcr_criteria = {
+        str(row.get("criterion_id") or ""): {
+            "pass": _as_bool(row.get("pass")),
+            "required": row.get("required"),
+            "current_by_target": _as_dict(row.get("current_by_target")),
+            "failed_targets": [
+                str(item) for item in _as_list(row.get("failed_targets"))
+            ],
+        }
+        for row in _as_list(gpcr_gate.get("phase3_exit_gate_criteria"))
+        if isinstance(row, dict) and str(row.get("criterion_id") or "")
+    }
+
+    pocketmd_source = _as_dict(upstream.get("pocketmd_lite"))
+    pocketmd_summary = _as_dict(pocketmd_source.get("summary"))
+    pocketmd_actual_audit = _as_dict(pocketmd_source.get("phase4_actual_evidence_audit"))
+    survival_component = _audit_component(
+        pocketmd_actual_audit,
+        "survival_metric_summary",
+    )
+    survival_current = _as_dict(survival_component.get("current"))
+    phase4_summary = _as_dict(phase4_row.get("summary"))
+    phase4_gate = _as_dict(phase4_summary.get("phase4_exit_gate"))
+    phase4_requirement_summary = _as_dict(
+        phase4_gate.get("phase4_requirement_summary")
+    )
+
+    priority_rows = [
+        _goal_priority_row(
+            priority=1,
+            priority_id="priority_1_source_of_truth_gap_classification",
+            name="Source-of-truth gap classification",
+            phase_id="phase_0_source_of_truth_hardening",
+            roadmap_row=source_row,
+            state="complete" if source_row.get("state") == "ready" else "blocked",
+            pass_value=source_row.get("state") == "ready",
+            requirements=[
+                "classify five remaining source-of-truth candidates",
+                "keep accuracy_parity_scorecard as a science scorecard review item",
+            ],
+            current={
+                **source_of_truth_gap_summary,
+                "accuracy_parity_scorecard_classification": str(
+                    accuracy_row.get("classification") or ""
+                ),
+                "accuracy_parity_scorecard_freshness_policy": str(
+                    accuracy_row.get("freshness_policy") or ""
+                ),
+                "accuracy_parity_scorecard_science_scorecard_priority_review": (
+                    _as_bool(accuracy_row.get("science_scorecard_priority_review"))
+                ),
+            },
+            blockers=[] if source_row.get("state") == "ready" else [
+                str(source_row.get("first_blocker") or "")
+            ],
+            operator_next_action=_first_str(
+                [str(item) for item in _as_list(source_row.get("next_actions"))]
+            ),
+        ),
+        _goal_priority_row(
+            priority=2,
+            priority_id="priority_2_public_benchmark_phase2_actual_closure",
+            name="Public benchmark Phase 2 actual closure",
+            phase_id="phase_2_public_benchmark_actual_closure",
+            roadmap_row=phase2_row,
+            state="complete" if phase2_row.get("state") == "ready" else "blocked",
+            pass_value=phase2_row.get("state") == "ready",
+            requirements=[
+                "CASF/PDBBind pose-success harness",
+                "symmetry-aware ligand RMSD",
+                "PoseBusters-style pose validity checks",
+                "Vina/GNINA comparison adapter",
+                "DUD-E or LIT-PCBA enrichment",
+            ],
+            current={
+                "requirement_count": _as_int(
+                    public_summary.get(
+                        "phase2_harness_requirement_count",
+                        phase2_requirement_summary.get("required_component_count"),
+                    )
+                ),
+                "requirement_pass_count": _as_int(
+                    public_summary.get(
+                        "phase2_harness_ready_requirement_count",
+                        phase2_requirement_summary.get("ready_component_count"),
+                    )
+                ),
+                "failed_criteria": [
+                    str(item) for item in _as_list(phase2_summary.get("failed_criteria"))
+                ],
+                "missing_row_inputs": [
+                    str(item) for item in _as_list(phase2_summary.get("missing_row_inputs"))
+                ],
+                "input_manifest_detected": _as_bool(
+                    manifest_current.get("input_manifest_detected")
+                ),
+                "input_manifest_syntax_ready": _as_bool(
+                    manifest_current.get("input_manifest_syntax_ready")
+                ),
+                "input_manifest_verification_status": str(
+                    manifest_current.get("input_manifest_verification_status") or ""
+                ),
+                "verified_case_input_count": _as_int(
+                    manifest_current.get("verified_case_input_count")
+                ),
+                "template_completion_blocked_case_count": _as_int(
+                    manifest_current.get("template_completion_blocked_case_count")
+                ),
+                "runtime_ready_for_engine_execution": _as_bool(
+                    runtime_current.get(
+                        "runtime_ready_for_engine_execution",
+                        public_summary.get(
+                            "vina_gnina_runtime_ready_for_engine_execution"
+                        ),
+                    )
+                ),
+                "missing_engine_ids": [
+                    str(item)
+                    for item in (
+                        _as_list(runtime_current.get("missing_engine_ids"))
+                        or _as_list(
+                            public_summary.get("vina_gnina_runtime_missing_engine_ids")
+                        )
+                    )
+                ],
+                "detected_row_artifact_count": _as_int(
+                    adapter_current.get(
+                        "detected_row_artifact_count",
+                        public_summary.get(
+                            "vina_gnina_runtime_detected_row_artifact_count"
+                        ),
+                    )
+                ),
+            },
+            blockers=_dedupe(
+                [str(item) for item in _as_list(phase2_summary.get("failed_criteria"))]
+                + [str(item) for item in _as_list(manifest_component.get("blockers"))]
+                + [str(item) for item in _as_list(runtime_component.get("blockers"))]
+                + [str(item) for item in _as_list(adapter_component.get("blockers"))]
+            ),
+            operator_next_action=_first_str(
+                [str(item) for item in _as_list(phase2_row.get("next_actions"))]
+            ),
+        ),
+        _goal_priority_row(
+            priority=3,
+            priority_id="priority_3_gpcr_hard_decoy_actual_closure",
+            name="GPCR hard-decoy actual closure",
+            phase_id="phase_3_gpcr_hard_decoy_actual_closure",
+            roadmap_row=phase3_row,
+            state="complete" if phase3_row.get("state") == "ready" else "blocked",
+            pass_value=phase3_row.get("state") == "ready",
+            requirements=[
+                "ranking_pr_auc_ci_low >= 0.45",
+                "top20_hit_rate >= 0.20",
+                "decoys_above_positive_count == 0",
+                "positive not out-anchored by top decoys",
+            ],
+            current={
+                "requirement_count": _as_int(gpcr_summary.get("requirement_count")),
+                "requirement_pass_count": _as_int(
+                    gpcr_summary.get("requirement_pass_count")
+                ),
+                "target_pass_count": _as_int(
+                    _as_dict(gpcr_summary.get("component_gate_summary")).get(
+                        "target_pass_count"
+                    )
+                ),
+                "criteria": gpcr_criteria,
+            },
+            blockers=[
+                str(item) for item in _as_list(gpcr_summary.get("failed_criteria"))
+            ],
+            operator_next_action=_first_str(
+                [str(item) for item in _as_list(phase3_row.get("next_actions"))]
+            ),
+        ),
+        _goal_priority_row(
+            priority=4,
+            priority_id="priority_4_pocketmd_lite_topk_refinement",
+            name="PocketMD Lite top-k refinement",
+            phase_id="phase_4_pocketmd_lite_topk_actual_closure",
+            roadmap_row=phase4_row,
+            state="complete" if phase4_row.get("state") == "ready" else "blocked",
+            pass_value=phase4_row.get("state") == "ready",
+            requirements=[
+                "PocketMD Lite is limited to upstream top-k candidates",
+                "local-min survival is reported",
+                "contact persistence is reported",
+                "H-bond persistence is reported",
+                "clash relief is reported",
+                "uncertainty is reported",
+            ],
+            current={
+                "requirement_count": _as_int(phase4_summary.get("requirement_count")),
+                "requirement_pass_count": _as_int(
+                    phase4_summary.get("requirement_pass_count")
+                ),
+                "ready_requirement_count": _as_int(
+                    phase4_requirement_summary.get("ready_requirement_count")
+                ),
+                "blocked_requirement_count": _as_int(
+                    phase4_requirement_summary.get("blocked_requirement_count")
+                ),
+                "missing_row_inputs": [
+                    str(item) for item in _as_list(phase4_summary.get("missing_row_inputs"))
+                ],
+                "missing_candidate_slot_count": _as_int(
+                    pocketmd_summary.get("phase4_missing_candidate_slot_count")
+                ),
+                "receipt_metric_family_blocked_count": _as_int(
+                    pocketmd_summary.get(
+                        "rows_from_receipt_bundle_metric_family_blocked_count"
+                    )
+                ),
+                "receipt_metric_family_missing_field_occurrence_count": _as_int(
+                    pocketmd_summary.get(
+                        "rows_from_receipt_bundle_metric_family_missing_field_occurrence_count"
+                    )
+                ),
+                "ready_receipt_count": _as_int(
+                    pocketmd_summary.get("rows_from_receipt_bundle_ready_receipt_count")
+                ),
+                "incomplete_receipt_count": _as_int(
+                    pocketmd_summary.get(
+                        "rows_from_receipt_bundle_incomplete_receipt_count"
+                    )
+                ),
+                "reported_metric_count": _as_int(
+                    survival_current.get("reported_metric_count")
+                ),
+                "required_metric_count": _as_int(
+                    survival_current.get("required_metric_count")
+                ),
+            },
+            blockers=_dedupe(
+                [str(item) for item in _as_list(phase4_summary.get("failed_criteria"))]
+                + [str(item) for item in _as_list(survival_component.get("blockers"))]
+                + [
+                    str(item)
+                    for item in _as_list(phase4_summary.get("source_acquisition_blockers"))
+                ]
+            ),
+            operator_next_action=_first_str(
+                [str(item) for item in _as_list(phase4_row.get("next_actions"))]
+            ),
+        ),
+    ]
+
+    complete_priority_ids = [
+        str(row["priority_id"]) for row in priority_rows if row["state"] == "complete"
+    ]
+    blocked_priority_ids = [
+        str(row["priority_id"]) for row in priority_rows if row["state"] != "complete"
+    ]
+    operator_row_inputs_required = _dedupe(
+        [
+            str(item)
+            for row in priority_rows
+            for item in _as_list(row.get("current", {}).get("missing_row_inputs"))
+        ]
+    )
+    return {
+        "objective_id": "current_thread_goal_objective",
+        "scope_policy": "current_thread_goal_objective_only",
+        "status": "ready" if not blocked_priority_ids else "operator_evidence_required",
+        "actual_closure_ready": not blocked_priority_ids,
+        "priority_count": len(priority_rows),
+        "complete_priority_count": len(complete_priority_ids),
+        "blocked_priority_count": len(blocked_priority_ids),
+        "complete_priority_ids": complete_priority_ids,
+        "blocked_priority_ids": blocked_priority_ids,
+        "operator_row_inputs_required": operator_row_inputs_required,
+        "priority_rows": priority_rows,
+        "claim_boundary": (
+            "This audit reflects only the active thread goal priorities. It does "
+            "not promote missing Vina/GNINA or PocketMD operator evidence into "
+            "actual closure."
+        ),
+    }
+
+
 def _operator_evidence_handoff_queue(roadmap_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     blocked_rows = [row for row in roadmap_rows if row["state"] != "ready"]
     queue: list[dict[str, Any]] = []
@@ -1599,6 +1981,12 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
             freshness_summary.get("source_of_truth_gap_aggregator_review_count")
         ),
     }
+    active_thread_goal_objective_audit = _active_thread_goal_objective_audit(
+        roadmap_rows=roadmap_rows,
+        source_of_truth_gap_summary=source_of_truth_gap_summary,
+        source_of_truth_gap_evidence_matrix=source_of_truth_gap_evidence_matrix,
+        science_handoff=science_handoff,
+    )
     handoff_source_rows = roadmap_rows
     operator_evidence_handoff_queue = _operator_evidence_handoff_queue(handoff_source_rows)
     operator_evidence_handoff_slot_queue = _operator_evidence_handoff_slot_queue(
@@ -1656,6 +2044,7 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         "source_of_truth_gap_evidence_matrix_count": len(
             source_of_truth_gap_evidence_matrix
         ),
+        "active_thread_goal_objective_audit": active_thread_goal_objective_audit,
         "science_evidence_surface_bottlenecks": science_bottlenecks,
         "science_evidence_surface_status": {
             "status": str(science_handoff.get("science_actual_closure_status") or ""),

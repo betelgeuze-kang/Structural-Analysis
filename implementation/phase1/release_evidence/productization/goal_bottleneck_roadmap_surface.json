@@ -1,4 +1,243 @@
 {
+  "active_thread_goal_objective_audit": {
+    "actual_closure_ready": false,
+    "blocked_priority_count": 2,
+    "blocked_priority_ids": [
+      "priority_2_public_benchmark_phase2_actual_closure",
+      "priority_4_pocketmd_lite_topk_refinement"
+    ],
+    "claim_boundary": "This audit reflects only the active thread goal priorities. It does not promote missing Vina/GNINA or PocketMD operator evidence into actual closure.",
+    "complete_priority_count": 2,
+    "complete_priority_ids": [
+      "priority_1_source_of_truth_gap_classification",
+      "priority_3_gpcr_hard_decoy_actual_closure"
+    ],
+    "objective_id": "current_thread_goal_objective",
+    "operator_row_inputs_required": [
+      "vina_gnina_rows",
+      "pocketmd_rows"
+    ],
+    "priority_count": 4,
+    "priority_rows": [
+      {
+        "blockers": [],
+        "current": {
+          "accuracy_parity_scorecard_classification": "fix",
+          "accuracy_parity_scorecard_freshness_policy": "direct_leaf_row",
+          "accuracy_parity_scorecard_science_scorecard_priority_review": true,
+          "aggregator_review_count": 3,
+          "candidate_count": 5,
+          "fix_count": 2,
+          "fixed_count": 2,
+          "no_op_count": 0
+        },
+        "evidence_artifacts": [
+          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+          "docs/source-of-truth-gap-classification.md"
+        ],
+        "name": "Source-of-truth gap classification",
+        "operator_next_action": "keep_aggregator_freshness_policy_visible",
+        "pass": true,
+        "phase_id": "phase_0_source_of_truth_hardening",
+        "priority": 1,
+        "priority_id": "priority_1_source_of_truth_gap_classification",
+        "requirements": [
+          "classify five remaining source-of-truth candidates",
+          "keep accuracy_parity_scorecard as a science scorecard review item"
+        ],
+        "state": "complete"
+      },
+      {
+        "blockers": [
+          "vina_gnina_comparison_ready",
+          "public_benchmark_vina_gnina_case_inputs_incomplete",
+          "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+          "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified",
+          "vina_gnina_execution_plan_not_ready",
+          "vina_binary_missing",
+          "gnina_binary_missing",
+          "public_benchmark_vina_gnina_rows_not_detected",
+          "vina_gnina_rows_not_provided"
+        ],
+        "current": {
+          "detected_row_artifact_count": 0,
+          "failed_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "input_manifest_detected": true,
+          "input_manifest_syntax_ready": true,
+          "input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
+          "missing_engine_ids": [
+            "vina",
+            "gnina"
+          ],
+          "missing_row_inputs": [
+            "vina_gnina_rows"
+          ],
+          "requirement_count": 5,
+          "requirement_pass_count": 4,
+          "runtime_ready_for_engine_execution": false,
+          "template_completion_blocked_case_count": 12,
+          "verified_case_input_count": 0
+        },
+        "evidence_artifacts": [
+          "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+          "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+          "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json"
+        ],
+        "name": "Public benchmark Phase 2 actual closure",
+        "operator_next_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "pass": false,
+        "phase_id": "phase_2_public_benchmark_actual_closure",
+        "priority": 2,
+        "priority_id": "priority_2_public_benchmark_phase2_actual_closure",
+        "requirements": [
+          "CASF/PDBBind pose-success harness",
+          "symmetry-aware ligand RMSD",
+          "PoseBusters-style pose validity checks",
+          "Vina/GNINA comparison adapter",
+          "DUD-E or LIT-PCBA enrichment"
+        ],
+        "state": "blocked"
+      },
+      {
+        "blockers": [],
+        "current": {
+          "criteria": {
+            "decoys_above_positive_count_max": {
+              "current_by_target": {
+                "DRD2": 0,
+                "HTR2A": 0,
+                "OPRM1": 0
+              },
+              "failed_targets": [],
+              "pass": true,
+              "required": "<=0"
+            },
+            "no_positive_out_anchored_by_top_decoys": {
+              "current_by_target": {
+                "DRD2": false,
+                "HTR2A": false,
+                "OPRM1": false
+              },
+              "failed_targets": [],
+              "pass": true,
+              "required": false
+            },
+            "ranking_pr_auc_ci_low_min": {
+              "current_by_target": {
+                "DRD2": 1.0,
+                "HTR2A": 1.0,
+                "OPRM1": 1.0
+              },
+              "failed_targets": [],
+              "pass": true,
+              "required": ">=0.45"
+            },
+            "raw_hard_decoy_rows_actual_closure": {
+              "current_by_target": {
+                "DRD2": "computed",
+                "HTR2A": "computed",
+                "OPRM1": "computed"
+              },
+              "failed_targets": [],
+              "pass": true,
+              "required": "computed_from_raw_hard_decoy_rows_with_quality_minimums"
+            },
+            "top20_hit_rate_min": {
+              "current_by_target": {
+                "DRD2": 0.6,
+                "HTR2A": 0.6,
+                "OPRM1": 0.6
+              },
+              "failed_targets": [],
+              "pass": true,
+              "required": ">=0.2"
+            }
+          },
+          "requirement_count": 5,
+          "requirement_pass_count": 5,
+          "target_pass_count": 3
+        },
+        "evidence_artifacts": [
+          "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+          "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+          "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json"
+        ],
+        "name": "GPCR hard-decoy actual closure",
+        "operator_next_action": "",
+        "pass": true,
+        "phase_id": "phase_3_gpcr_hard_decoy_actual_closure",
+        "priority": 3,
+        "priority_id": "priority_3_gpcr_hard_decoy_actual_closure",
+        "requirements": [
+          "ranking_pr_auc_ci_low >= 0.45",
+          "top20_hit_rate >= 0.20",
+          "decoys_above_positive_count == 0",
+          "positive not out-anchored by top decoys"
+        ],
+        "state": "complete"
+      },
+      {
+        "blockers": [
+          "top_k_refinement_rows_present",
+          "top_k_refinement_case_coverage",
+          "local_min_survival_materialized",
+          "contact_persistence_materialized",
+          "h_bond_persistence_materialized",
+          "clash_relief_materialized",
+          "uncertainty_summary_materialized",
+          "report_blockers_resolved",
+          "pocketmd_lite_local_min_survival_rows_missing",
+          "pocketmd_lite_contact_persistence_rows_missing",
+          "pocketmd_lite_h_bond_persistence_rows_missing",
+          "pocketmd_lite_clash_relief_rows_missing",
+          "pocketmd_lite_uncertainty_rows_missing",
+          "pocketmd_lite_topk_rows_not_acquired",
+          "upstream_top_k_candidate_receipts_not_attached",
+          "lite_refinement_metric_receipts_not_attached"
+        ],
+        "current": {
+          "blocked_requirement_count": 7,
+          "incomplete_receipt_count": 6,
+          "missing_candidate_slot_count": 6,
+          "missing_row_inputs": [
+            "pocketmd_rows"
+          ],
+          "ready_receipt_count": 0,
+          "ready_requirement_count": 2,
+          "receipt_metric_family_blocked_count": 5,
+          "receipt_metric_family_missing_field_occurrence_count": 54,
+          "reported_metric_count": 0,
+          "required_metric_count": 5,
+          "requirement_count": 9,
+          "requirement_pass_count": 1
+        },
+        "evidence_artifacts": [
+          "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+          "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+          "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json"
+        ],
+        "name": "PocketMD Lite top-k refinement",
+        "operator_next_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+        "pass": false,
+        "phase_id": "phase_4_pocketmd_lite_topk_actual_closure",
+        "priority": 4,
+        "priority_id": "priority_4_pocketmd_lite_topk_refinement",
+        "requirements": [
+          "PocketMD Lite is limited to upstream top-k candidates",
+          "local-min survival is reported",
+          "contact persistence is reported",
+          "H-bond persistence is reported",
+          "clash relief is reported",
+          "uncertainty is reported"
+        ],
+        "state": "blocked"
+      }
+    ],
+    "scope_policy": "current_thread_goal_objective_only",
+    "status": "operator_evidence_required"
+  },
   "blocked_roadmap_row_count": 3,
   "capability_summary_rows": [
     {

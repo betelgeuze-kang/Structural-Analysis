@@ -204,8 +204,11 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert "Bring at least one GitHub Actions self-hosted runner online" in ci_handoff[
         "owner_action"
     ]
-    assert "rerun the workflow" in ci_handoff["owner_action"]
-    assert "collect 30 additional consecutive successful CI run" in ci_handoff[
+    assert (
+        "rerun the workflow" in ci_handoff["owner_action"]
+        or "Open a pull request for this branch" in ci_handoff["owner_action"]
+    )
+    assert "collect 30 additional consecutive successful" in ci_handoff[
         "owner_action"
     ]
     assert ci_handoff["acceptance_criteria_count"] == 4
@@ -370,6 +373,92 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "uncertainty_summary_materialized",
         "report_blockers_resolved",
     ]
+
+
+def test_goal_bottleneck_surface_exposes_active_thread_goal_audit() -> None:
+    surface = module.build_goal_bottleneck_roadmap_surface(repo_root=REPO_ROOT)
+
+    audit = surface["active_thread_goal_objective_audit"]
+    assert audit["scope_policy"] == "current_thread_goal_objective_only"
+    assert audit["status"] == "operator_evidence_required"
+    assert audit["actual_closure_ready"] is False
+    assert audit["priority_count"] == 4
+    assert audit["complete_priority_count"] == 2
+    assert audit["blocked_priority_count"] == 2
+    assert audit["complete_priority_ids"] == [
+        "priority_1_source_of_truth_gap_classification",
+        "priority_3_gpcr_hard_decoy_actual_closure",
+    ]
+    assert audit["blocked_priority_ids"] == [
+        "priority_2_public_benchmark_phase2_actual_closure",
+        "priority_4_pocketmd_lite_topk_refinement",
+    ]
+    assert audit["operator_row_inputs_required"] == [
+        "vina_gnina_rows",
+        "pocketmd_rows",
+    ]
+
+    rows = {row["priority_id"]: row for row in audit["priority_rows"]}
+    source = rows["priority_1_source_of_truth_gap_classification"]
+    assert source["state"] == "complete"
+    assert source["pass"] is True
+    assert source["current"]["candidate_count"] == 5
+    assert source["current"]["fix_count"] == 2
+    assert source["current"]["aggregator_review_count"] == 3
+    assert source["current"]["accuracy_parity_scorecard_classification"] == "fix"
+    assert source["current"][
+        "accuracy_parity_scorecard_science_scorecard_priority_review"
+    ] is True
+
+    public = rows["priority_2_public_benchmark_phase2_actual_closure"]
+    assert public["state"] == "blocked"
+    assert public["current"]["requirement_count"] == 5
+    assert public["current"]["requirement_pass_count"] == 4
+    assert public["current"]["missing_row_inputs"] == ["vina_gnina_rows"]
+    assert public["current"]["input_manifest_detected"] is True
+    assert public["current"]["input_manifest_syntax_ready"] is True
+    assert public["current"]["input_manifest_verification_status"] == (
+        "syntactic_manifest_detected_but_case_inputs_unverified"
+    )
+    assert public["current"]["verified_case_input_count"] == 0
+    assert public["current"]["template_completion_blocked_case_count"] == 12
+    assert public["current"]["missing_engine_ids"] == ["vina", "gnina"]
+    assert "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified" in (
+        public["blockers"]
+    )
+    assert "vina_gnina_rows_not_provided" in public["blockers"]
+
+    gpcr = rows["priority_3_gpcr_hard_decoy_actual_closure"]
+    assert gpcr["state"] == "complete"
+    assert gpcr["current"]["requirement_pass_count"] == 5
+    assert gpcr["current"]["target_pass_count"] == 3
+    assert gpcr["current"]["criteria"]["ranking_pr_auc_ci_low_min"][
+        "required"
+    ] == ">=0.45"
+    assert gpcr["current"]["criteria"]["top20_hit_rate_min"][
+        "current_by_target"
+    ] == {"DRD2": 0.6, "HTR2A": 0.6, "OPRM1": 0.6}
+    assert gpcr["current"]["criteria"]["decoys_above_positive_count_max"][
+        "current_by_target"
+    ] == {"DRD2": 0, "HTR2A": 0, "OPRM1": 0}
+    assert gpcr["current"]["criteria"]["no_positive_out_anchored_by_top_decoys"][
+        "current_by_target"
+    ] == {"DRD2": False, "HTR2A": False, "OPRM1": False}
+
+    pocketmd = rows["priority_4_pocketmd_lite_topk_refinement"]
+    assert pocketmd["state"] == "blocked"
+    assert pocketmd["current"]["requirement_count"] == 9
+    assert pocketmd["current"]["requirement_pass_count"] == 1
+    assert pocketmd["current"]["ready_requirement_count"] == 2
+    assert pocketmd["current"]["missing_row_inputs"] == ["pocketmd_rows"]
+    assert pocketmd["current"]["missing_candidate_slot_count"] == 6
+    assert pocketmd["current"]["receipt_metric_family_blocked_count"] == 5
+    assert pocketmd["current"][
+        "receipt_metric_family_missing_field_occurrence_count"
+    ] == 54
+    assert pocketmd["current"]["ready_receipt_count"] == 0
+    assert pocketmd["current"]["incomplete_receipt_count"] == 6
+    assert "pocketmd_lite_local_min_survival_rows_missing" in pocketmd["blockers"]
 
 
 def test_goal_bottleneck_surface_uses_science_closure_aggregate_not_raw_rows(
