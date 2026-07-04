@@ -926,6 +926,12 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert runtime_action["commands"]["build_rows_template_preflight"].startswith(
         "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py"
     )
+    assert payload["commands"][
+        "materialize_input_manifest_from_casf_archive"
+    ].startswith(
+        "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py "
+        "--archive <CASF-2016.tar.gz>"
+    )
     manifest_action = missing_action["engine_input_manifest_action_packet"]
     assert manifest_action["template_artifact"].endswith(
         "public_benchmark_vina_gnina_input_manifest_template.csv"
@@ -972,6 +978,15 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert manifest_action["template_to_manifest_command"].startswith(
         "cp implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_input_manifest_template.csv"
+    )
+    assert manifest_action["source_archive_operator_artifact"] == "<CASF-2016.tar.gz>"
+    assert manifest_action["source_archive_extraction_command"].startswith(
+        "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py "
+        "--archive <CASF-2016.tar.gz>"
+    )
+    assert "--fail-blocked" in manifest_action["source_archive_extraction_command"]
+    assert manifest_action["source_archive_extraction_report_artifact"].endswith(
+        "public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json"
     )
     assert "prepared_receptor_checksum" in manifest_action[
         "operator_must_fill_or_verify"
@@ -1233,6 +1248,9 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "`recommended_template_dropzone_is_supported_candidate_path`: `True`" in markdown
     assert "`accepted_manifest_formats`: `json`, `jsonl`, `ndjson`, `csv`, `tsv`" in markdown
     assert "`input_manifest_load_errors`: `none`" in markdown
+    assert "materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py" in markdown
+    assert "`source_archive_operator_artifact`: `<CASF-2016.tar.gz>`" in markdown
+    assert "public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json" in markdown
     assert "`template_is_not_evidence`: `True`" in markdown
     assert "prepared_receptor_checksum" in markdown
     assert "## Vina/GNINA Runtime" in markdown

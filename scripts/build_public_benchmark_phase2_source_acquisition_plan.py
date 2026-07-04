@@ -95,6 +95,10 @@ DEFAULT_VINA_GNINA_INPUT_MANIFEST = (
 DEFAULT_VINA_GNINA_INPUT_MANIFEST_FROM_TEMPLATE_REPORT = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest_from_template_report.json"
 )
+DEFAULT_VINA_GNINA_INPUT_MANIFEST_FROM_CASF_ARCHIVE_REPORT = (
+    PRODUCTIZATION
+    / "public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json"
+)
 DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT = (
     PRODUCTIZATION / "public_benchmark_source_access_preflight_receipt.json"
 )
@@ -3097,6 +3101,14 @@ def _missing_row_input_actions(
                             f"{DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE} "
                             f"{DEFAULT_VINA_GNINA_INPUT_MANIFEST}"
                         ),
+                        "source_archive_operator_artifact": "<CASF-2016.tar.gz>",
+                        "source_archive_extraction_command": str(
+                            commands.get("materialize_input_manifest_from_casf_archive")
+                            or ""
+                        ),
+                        "source_archive_extraction_report_artifact": str(
+                            DEFAULT_VINA_GNINA_INPUT_MANIFEST_FROM_CASF_ARCHIVE_REPORT
+                        ),
                         "review_template_command": (
                             "sed -n '1,20p' "
                             f"{DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE}"
@@ -3313,6 +3325,13 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             f"--template {DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE} "
             f"--out-manifest {DEFAULT_VINA_GNINA_INPUT_MANIFEST} "
             f"--out-report {DEFAULT_VINA_GNINA_INPUT_MANIFEST_FROM_TEMPLATE_REPORT}"
+        ),
+        "materialize_input_manifest_from_casf_archive": (
+            "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py "
+            "--archive <CASF-2016.tar.gz> "
+            f"--out-manifest {DEFAULT_VINA_GNINA_INPUT_MANIFEST} "
+            f"--out-report {DEFAULT_VINA_GNINA_INPUT_MANIFEST_FROM_CASF_ARCHIVE_REPORT} "
+            "--fail-blocked"
         ),
         "check_vina_gnina_runtime_readiness": (
             "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py "
@@ -4344,6 +4363,9 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                         f"- `input_manifest_row_count`: `{action.get('input_manifest_row_count')}`",
                         f"- `input_manifest_load_errors`: {manifest_load_errors or '`none`'}",
                         f"- `template_to_manifest_command`: `{action.get('template_to_manifest_command')}`",
+                        f"- `source_archive_operator_artifact`: `{action.get('source_archive_operator_artifact')}`",
+                        f"- `source_archive_extraction_command`: `{action.get('source_archive_extraction_command')}`",
+                        f"- `source_archive_extraction_report_artifact`: `{action.get('source_archive_extraction_report_artifact')}`",
                         f"- `verify_execution_plan_command`: `{action.get('verify_execution_plan_command')}`",
                         f"- `verify_runtime_readiness_command`: `{action.get('verify_runtime_readiness_command')}`",
                         f"- `operator_must_fill_or_verify`: {required_fields}",

@@ -678,13 +678,13 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
     "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
   },
-  "generated_at": "2026-07-04T10:47:30.522789+00:00",
+  "generated_at": "2026-07-04T10:57:33.093645+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:be05411d7bb174d8612aaa5a6d3c2ffbace0c16d1310fc0b6897f9fd9038c6d1",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:50113b04a758c06b720aa91a3b64639e1d31ba94f35334cf21494462930a7d2f",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:69285c5dcf0a4bdc30c7a71d48b86dabde7af6e458925f250a4e3f9b9616e109",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json": "sha256:faf6bcc3f47cb5f61cbe797a7eceb8c2c7b01acbc8690eb061de2e9cf6976d79",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:31ba1567d42d3bfca2a633e63b2a22aa712db178f550132cd32c20777b91d6d9",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json": "sha256:97097916df6917d97fe62d1908f5b0e097422cc72937d586832ce0b4449f1384",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:4e470183602ab4f3bc9518e398b7a4483d0c9090c4d0737c2f0420381f08ed23",
     "implementation/phase1/release_evidence/productization/source_of_truth_gap_classification.json": "sha256:5fb3525b23f2e4bc7582cc16aace64fbb7cc506c28e086a21bede3de61ea1b3c",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:c1af83f1b410aca8536d5ab832c0ba6a86153436844e42152860f84ec0002328",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:8adb767e05269c4063e04ca5e5060b0e94994916ccae4e9912c897c0c7fc9703",
@@ -6481,7 +6481,7 @@
     ],
     "status": "operator_evidence_required"
   },
-  "source_commit_sha": "143af2bf1394350228e04bac19cbb48f57747763",
+  "source_commit_sha": "1b2dff02310ce8f73c77a3531031555b9ea57dd5",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

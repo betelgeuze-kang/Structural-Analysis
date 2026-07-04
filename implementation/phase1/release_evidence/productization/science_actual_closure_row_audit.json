@@ -1785,13 +1785,13 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T10:47:30.348921+00:00",
+  "generated_at": "2026-07-04T10:56:14.598069+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json": "sha256:98255bfca71cb82c3146a11e74e90cc338836518d93672950cbec5defd7d7147",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:460885ec3a0978fbeeffd5bc010432a0b4bf58ddf3bfc44ae4f01548f68972fc",
     "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
     "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json": "sha256:ebad77368627c20437a800eeb1bcfe1bea120acc064275665fab9b9494d9e967",
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:fe8453b58be2e78f4f28d362688ad9126a7c96c592ac89a09995959fc650fca7",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:dc8c93808a4b8c38094a61b698ea1f681a7ef68a738bb8b5342eaf9a7b7354ce",
     "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json": "sha256:8a683e65f904fe56a67e739b1e92ab837a17aa6504195e9a27460ac2b6fb33ab",
     "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
@@ -3216,7 +3216,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "143af2bf1394350228e04bac19cbb48f57747763",
+  "source_commit_sha": "1b2dff02310ce8f73c77a3531031555b9ea57dd5",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,
@@ -6127,6 +6127,9 @@
             "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
             "selected_manifest_format": "csv",
             "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+            "source_archive_extraction_command": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked",
+            "source_archive_extraction_report_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json",
+            "source_archive_operator_artifact": "<CASF-2016.tar.gz>",
             "status": "operator_manifest_required",
             "supported_manifest_candidate_paths": [
               "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",

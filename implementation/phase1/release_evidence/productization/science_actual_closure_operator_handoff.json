@@ -4598,6 +4598,9 @@
             "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
             "selected_manifest_format": "csv",
             "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+            "source_archive_extraction_command": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked",
+            "source_archive_extraction_report_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json",
+            "source_archive_operator_artifact": "<CASF-2016.tar.gz>",
             "status": "operator_manifest_required",
             "supported_manifest_candidate_paths": [
               "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
@@ -5726,6 +5729,9 @@
               "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
               "selected_manifest_format": "csv",
               "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+              "source_archive_extraction_command": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked",
+              "source_archive_extraction_report_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json",
+              "source_archive_operator_artifact": "<CASF-2016.tar.gz>",
               "status": "operator_manifest_required",
               "supported_manifest_candidate_paths": [
                 "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
@@ -12577,6 +12583,9 @@
         "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
         "selected_manifest_format": "csv",
         "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+        "source_archive_extraction_command": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked",
+        "source_archive_extraction_report_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json",
+        "source_archive_operator_artifact": "<CASF-2016.tar.gz>",
         "status": "operator_manifest_required",
         "supported_manifest_candidate_paths": [
           "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
@@ -13261,6 +13270,9 @@
             "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
             "selected_manifest_format": "csv",
             "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+            "source_archive_extraction_command": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked",
+            "source_archive_extraction_report_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json",
+            "source_archive_operator_artifact": "<CASF-2016.tar.gz>",
             "status": "operator_manifest_required",
             "supported_manifest_candidate_paths": [
               "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
@@ -14832,14 +14844,14 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T10:47:30.424932+00:00",
+  "generated_at": "2026-07-04T10:57:29.255149+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:1b528ef101a16bf3ddc59954358f5126378c4a4a035bfa33a0b6901f3582ab8f",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:31132ede1a9d42bd1eab0194ca04e24e9a4c80ac2ace134baef6e7fa48a636ef",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:a6fa0328fbbdc35c1ff47f966c085b5ae0fc5e6dfa2f1aba17e647681cdc246a",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:dc39006a0ed93c7141d4421294cb9d47e1af8a3c6fc2fe3531aeae754de53c89",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:09354cd520764e9fb23e9a23e1eed17a38e73328687154c5d35c5411731af093",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:e15efc6a12217aa96a1d26accf22fb94afa3cf03a2e8b580bd87968a4c611f6e",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:31ba1567d42d3bfca2a633e63b2a22aa712db178f550132cd32c20777b91d6d9",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:4e470183602ab4f3bc9518e398b7a4483d0c9090c4d0737c2f0420381f08ed23",
     "scripts/build_science_actual_closure_operator_handoff.py": "sha256:14846ac9d5056b548f402b1c235ee236c24049d9d6ae8d424ce49bf54d9642f7"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
@@ -19480,6 +19492,9 @@
               "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
               "selected_manifest_format": "csv",
               "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+              "source_archive_extraction_command": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked",
+              "source_archive_extraction_report_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json",
+              "source_archive_operator_artifact": "<CASF-2016.tar.gz>",
               "status": "operator_manifest_required",
               "supported_manifest_candidate_paths": [
                 "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
@@ -21384,6 +21399,9 @@
               "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
               "selected_manifest_format": "csv",
               "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+              "source_archive_extraction_command": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked",
+              "source_archive_extraction_report_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json",
+              "source_archive_operator_artifact": "<CASF-2016.tar.gz>",
               "status": "operator_manifest_required",
               "supported_manifest_candidate_paths": [
                 "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
@@ -23340,6 +23358,9 @@
               "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
               "selected_manifest_format": "csv",
               "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+              "source_archive_extraction_command": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked",
+              "source_archive_extraction_report_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json",
+              "source_archive_operator_artifact": "<CASF-2016.tar.gz>",
               "status": "operator_manifest_required",
               "supported_manifest_candidate_paths": [
                 "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
@@ -26730,6 +26751,9 @@
           "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
           "selected_manifest_format": "csv",
           "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+          "source_archive_extraction_command": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked",
+          "source_archive_extraction_report_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json",
+          "source_archive_operator_artifact": "<CASF-2016.tar.gz>",
           "status": "operator_manifest_required",
           "supported_manifest_candidate_paths": [
             "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
@@ -27414,6 +27438,9 @@
               "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
               "selected_manifest_format": "csv",
               "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+              "source_archive_extraction_command": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked",
+              "source_archive_extraction_report_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json",
+              "source_archive_operator_artifact": "<CASF-2016.tar.gz>",
               "status": "operator_manifest_required",
               "supported_manifest_candidate_paths": [
                 "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
@@ -33421,7 +33448,7 @@
   },
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "143af2bf1394350228e04bac19cbb48f57747763",
+  "source_commit_sha": "1b2dff02310ce8f73c77a3531031555b9ea57dd5",
   "status": "operator_rows_required",
   "summary": {
     "actual_closure_blocked_component_count": 2,
@@ -36325,6 +36352,9 @@
             "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
             "selected_manifest_format": "csv",
             "selected_manifest_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+            "source_archive_extraction_command": "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked",
+            "source_archive_extraction_report_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json",
+            "source_archive_operator_artifact": "<CASF-2016.tar.gz>",
             "status": "operator_manifest_required",
             "supported_manifest_candidate_paths": [
               "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json",
