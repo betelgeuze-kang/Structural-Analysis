@@ -528,6 +528,18 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert "build_source_access_preflight_receipt" in (
         payload["operator_acquisition_checklist"]
     )
+    assert payload["operator_next_actions"] == payload[
+        "operator_acquisition_checklist"
+    ]
+    assert payload["operator_next_actions"][:3] == [
+        "review_official_source_receipt_plan",
+        "attach_casf_pdbbind_subset_rows_with_local_file_checksums",
+        "attach_pose_coordinate_rows_with_symmetry_contracts",
+    ]
+    assert payload["operator_next_actions"][-2:] == [
+        "run_public_benchmark_harness_bundle_materializer",
+        "refresh_public_benchmark_source_of_truth",
+    ]
     assert payload["missing_row_input_action_count"] == 1
     missing_action = payload["missing_row_input_actions"][0]
     assert missing_action["row_input_id"] == "vina_gnina_rows"

@@ -24,14 +24,14 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T02:55:35.258450+00:00",
+  "generated_at": "2026-07-04T03:22:40.894937+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:3f53708e67d1dd76f5f313307ce46a2971b748ef1938925bc44318b40e52709d",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:d91bbc8402c86796ce3d60d0a053610cceea2dcbbb0f5faf00adeaad7698bea4",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv": "sha256:3a106d2aa9f456eee7238523bf090db13e35d98afefa3952352a660f5b5e36ae",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json": "sha256:6bec6de5e48420d37dd84ee2f8b59b890113bf094c742fe6cdb93831d2eb14f5",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:a062ca10c1b4edeb84810fb3e773212d0a378da71f8aa0a2ff3780fea839e0cf",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:ef63bd5f4e7adb30152fc29ea1cb10ed2ea8c1bbf2a175a4d65b29d6d923ae4c",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:aa4d347afef642510aa4614f29b6309da8d693aa583a3cb04c16be4814731ecf",
     "scripts/build_public_benchmark_source_access_preflight_receipt.py": "sha256:47b23a61ea7eb470f8ab4b48337b4382ad3523a646b81c8bdddedf3451d1c2d1",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1",
     "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:76416a1ee29b947fd510fc0f22f38031eeb335e1ad4a18a2c6144b42cfa50453",
@@ -754,6 +754,22 @@
     "run_public_benchmark_harness_bundle_materializer",
     "refresh_public_benchmark_source_of_truth"
   ],
+  "operator_next_actions": [
+    "review_official_source_receipt_plan",
+    "attach_casf_pdbbind_subset_rows_with_local_file_checksums",
+    "attach_pose_coordinate_rows_with_symmetry_contracts",
+    "attach_dud_e_or_lit_pcba_scored_molecule_rows",
+    "build_vina_gnina_execution_plan_from_materialized_cases",
+    "fill_public_benchmark_vina_gnina_input_manifest",
+    "run_vina_gnina_runtime_readiness_check",
+    "attach_vina_gnina_engine_run_rows",
+    "build_source_access_preflight_receipt",
+    "attach_external_source_receipts_and_license_or_accession_refs",
+    "run_public_benchmark_operator_bundle_from_rows",
+    "run_public_benchmark_phase2_row_audit",
+    "run_public_benchmark_harness_bundle_materializer",
+    "refresh_public_benchmark_source_of_truth"
+  ],
   "phase2_exit_criteria": [
     {
       "artifact_role": "pose_success_harness",
@@ -1458,7 +1474,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "e89ac04707d515f991eeb421ff64212f7da47e7d",
+  "source_commit_sha": "b3754b2d2a69915cf21220303409a574707306da",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,

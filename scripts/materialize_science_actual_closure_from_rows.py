@@ -114,6 +114,7 @@ def _source_acquisition_summary(
             "contract_pass": None,
             "blocker_count": 0,
             "blockers": [],
+            "operator_next_actions": [],
             "summary": {},
             "source_access_preflight_receipt_summary": receipt_summary,
             "external_receipts_validation_summary": external_receipts_summary,
@@ -132,6 +133,11 @@ def _source_acquisition_summary(
         for row in payload.get("missing_row_input_actions", [])
         if isinstance(row, dict)
     ] if isinstance(payload.get("missing_row_input_actions"), list) else []
+    operator_next_actions = [
+        str(row)
+        for row in payload.get("operator_next_actions", [])
+        if str(row)
+    ] if isinstance(payload.get("operator_next_actions"), list) else []
     phase2_row_closure_matrix = [
         row
         for row in payload.get("phase2_row_closure_matrix", [])
@@ -194,6 +200,7 @@ def _source_acquisition_summary(
         "contract_pass": payload.get("contract_pass"),
         "blocker_count": int(payload.get("blocker_count") or len(blockers)),
         "blockers": blockers,
+        "operator_next_actions": operator_next_actions,
         "missing_row_input_action_count": int(
             payload.get("missing_row_input_action_count")
             or len(missing_row_input_actions)

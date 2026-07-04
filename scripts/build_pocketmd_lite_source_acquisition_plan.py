@@ -962,6 +962,19 @@ def build_pocketmd_lite_source_acquisition_plan(
         if not raw_row_candidate_status.get("coverage_ready")
         else []
     )
+    operator_next_actions = [
+        "review_phase4_refinement_receipt_plan",
+        "build_pocketmd_lite_refinement_execution_plan",
+        "build_pocketmd_lite_topk_rows_template_preflight",
+        "select_upstream_ranked_top_k_candidate_sets",
+        "attach_upstream_top_k_provenance_and_checksum_for_every_candidate",
+        "run_bounded_lite_refinement_for_top_k_candidates_only",
+        "write_local_min_contact_hbond_clash_uncertainty_rows",
+        "attach_row_source_receipts_with_license_url_and_artifact_sha256",
+        "write_pocketmd_lite_topk_rows_at_default_dropzone",
+        "run_pocketmd_lite_raw_row_importer_and_survival_materializer",
+        "refresh_science_actual_closure_from_rows",
+    ]
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -1033,19 +1046,8 @@ def build_pocketmd_lite_source_acquisition_plan(
             "source_receipt_requirements": dict(SOURCE_RECEIPT_REQUIREMENTS),
         },
         "metric_receipt_contract": metric_receipt_contract,
-        "operator_acquisition_checklist": [
-            "review_phase4_refinement_receipt_plan",
-            "build_pocketmd_lite_refinement_execution_plan",
-            "build_pocketmd_lite_topk_rows_template_preflight",
-            "select_upstream_ranked_top_k_candidate_sets",
-            "attach_upstream_top_k_provenance_and_checksum_for_every_candidate",
-            "run_bounded_lite_refinement_for_top_k_candidates_only",
-            "write_local_min_contact_hbond_clash_uncertainty_rows",
-            "attach_row_source_receipts_with_license_url_and_artifact_sha256",
-            "write_pocketmd_lite_topk_rows_at_default_dropzone",
-            "run_pocketmd_lite_raw_row_importer_and_survival_materializer",
-            "refresh_science_actual_closure_from_rows",
-        ],
+        "operator_acquisition_checklist": operator_next_actions,
+        "operator_next_actions": operator_next_actions,
         "commands": commands,
         "pocketmd_rows_operator_action": pocketmd_rows_operator_action,
         "missing_row_input_actions": missing_row_input_actions,

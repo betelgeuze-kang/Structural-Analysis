@@ -164,6 +164,7 @@ def _slot_source_context(
             "contract_pass": None,
             "blocker_count": 0,
             "blockers": [],
+            "operator_next_actions": [],
             "missing_row_input_action_count": 0,
             "missing_row_input_actions": [],
             "summary": {},
@@ -219,6 +220,9 @@ def _slot_source_context(
         "contract_pass": source.get("contract_pass"),
         "blocker_count": int(source.get("blocker_count") or len(blockers)),
         "blockers": blockers,
+        "operator_next_actions": [
+            str(item) for item in _as_list(source.get("operator_next_actions"))
+        ],
         "missing_row_input_action_count": int(
             source.get("missing_row_input_action_count")
             or len(missing_row_input_actions)
@@ -670,6 +674,9 @@ def _slot(
         "upstream_source_acquisition": source_context,
         "upstream_source_blockers": source_context["blockers"],
         "source_acquisition_operator_action": source_context["operator_action"],
+        "source_acquisition_operator_next_actions": source_context[
+            "operator_next_actions"
+        ],
         "source_acquisition_row_action": source_acquisition_row_action,
         "row_input_slot_detail": row_input_slot_detail,
         "row_contract_ref": str(row.get("row_contract_ref") or ""),
@@ -925,6 +932,12 @@ def _blocked_component_operator_actions(
                 "source_acquisition_operator_action": str(
                     slot.get("source_acquisition_operator_action") or ""
                 ),
+                "source_acquisition_operator_next_actions": [
+                    str(item)
+                    for item in _as_list(
+                        slot.get("source_acquisition_operator_next_actions")
+                    )
+                ],
                 "source_acquisition_row_action": _as_dict(
                     slot.get("source_acquisition_row_action")
                 ),

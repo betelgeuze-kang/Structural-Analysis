@@ -199,6 +199,14 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert public_action["source_acquisition_operator_action"] == (
         "resolve_public_benchmark_phase2_source_acquisition_blockers"
     )
+    assert public_action["source_acquisition_operator_next_actions"][:2] == [
+        "review_official_source_receipt_plan",
+        "attach_casf_pdbbind_subset_rows_with_local_file_checksums",
+    ]
+    assert public_action["source_acquisition_operator_next_actions"][-2:] == [
+        "run_public_benchmark_harness_bundle_materializer",
+        "refresh_public_benchmark_source_of_truth",
+    ]
     assert public_action["source_acquisition_row_action"]["operator_action"] == (
         "attach_vina_gnina_rows_then_run_phase2_row_audit"
     )
@@ -279,6 +287,14 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert pocketmd_action["source_acquisition_operator_action"] == (
         "resolve_pocketmd_lite_source_acquisition_blockers"
     )
+    assert pocketmd_action["source_acquisition_operator_next_actions"][:2] == [
+        "review_phase4_refinement_receipt_plan",
+        "build_pocketmd_lite_refinement_execution_plan",
+    ]
+    assert pocketmd_action["source_acquisition_operator_next_actions"][-2:] == [
+        "run_pocketmd_lite_raw_row_importer_and_survival_materializer",
+        "refresh_science_actual_closure_from_rows",
+    ]
     assert pocketmd_action["source_acquisition_row_action"]["operator_action"] == (
         "attach_pocketmd_rows_at_implementation/phase1/release_evidence/"
         "productization/pocketmd_lite_topk_rows.json"

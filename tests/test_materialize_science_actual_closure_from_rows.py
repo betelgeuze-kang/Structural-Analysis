@@ -873,6 +873,11 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
                     "public_benchmark_vina_gnina_rows_not_acquired",
                     "public_benchmark_vina_gnina_engine_inputs_not_ready",
                 ],
+                "operator_next_actions": [
+                    "review_official_source_receipt_plan",
+                    "fill_public_benchmark_vina_gnina_input_manifest",
+                    "run_vina_gnina_runtime_readiness_check",
+                ],
                 "summary": {"vina_gnina_runtime_ready_engine_run_slot_count": 0},
                 "phase2_exit_criterion_count": 5,
                 "phase2_exit_criteria": [
@@ -1033,6 +1038,11 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
                 "contract_pass": True,
                 "blocker_count": 1,
                 "blockers": ["pocketmd_lite_topk_rows_not_acquired"],
+                "operator_next_actions": [
+                    "review_phase4_refinement_receipt_plan",
+                    "build_pocketmd_lite_refinement_execution_plan",
+                    "write_pocketmd_lite_topk_rows_at_default_dropzone",
+                ],
                 "summary": {"operator_rows_ready": False},
                 "phase4_candidate_slot_matrix_count": 6,
                 "phase4_missing_candidate_slot_count": 6,
@@ -1092,6 +1102,13 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
     assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
         "missing_row_input_actions"
     ][0]["operator_action"] == "attach_vina_gnina_rows_then_run_phase2_row_audit"
+    assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
+        "operator_next_actions"
+    ] == [
+        "review_official_source_receipt_plan",
+        "fill_public_benchmark_vina_gnina_input_manifest",
+        "run_vina_gnina_runtime_readiness_check",
+    ]
     assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
         "phase2_row_closure_matrix_count"
     ] == 4
@@ -1165,6 +1182,13 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
     ][0]["operator_action"] == (
         "attach_pocketmd_rows_at_pocketmd_lite_topk_rows.json"
     )
+    assert audit["upstream_source_acquisition"]["pocketmd_lite"][
+        "operator_next_actions"
+    ] == [
+        "review_phase4_refinement_receipt_plan",
+        "build_pocketmd_lite_refinement_execution_plan",
+        "write_pocketmd_lite_topk_rows_at_default_dropzone",
+    ]
     assert audit["upstream_source_acquisition"]["pocketmd_lite"][
         "phase4_candidate_slot_matrix_count"
     ] == 6

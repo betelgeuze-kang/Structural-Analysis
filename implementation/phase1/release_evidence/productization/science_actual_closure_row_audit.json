@@ -1785,13 +1785,13 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T03:14:33.010021+00:00",
+  "generated_at": "2026-07-04T03:22:47.043319+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json": "sha256:98255bfca71cb82c3146a11e74e90cc338836518d93672950cbec5defd7d7147",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:5ac30dc65391072e1c085180d4698bedb00d1f1f6af862371088104b013eb8ed",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:dc1079f8b105412e7839633a1cf3ee9e277893fa1a78367cfd9da4d9ad252091",
     "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
     "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json": "sha256:ebad77368627c20437a800eeb1bcfe1bea120acc064275665fab9b9494d9e967",
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:452b144b3182389f51334dd7799a5e02b8b9f960ad37c25fc4baf64b77a46d46",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:63b44850a061182564c5bf117e160273ccc2534d6c087fb308e77e01ee50ec19",
     "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json": "sha256:c3d8772c577c40903ac1656ef8d7474695cb374c3e60de312ffe0d37985483ff",
     "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
@@ -1802,7 +1802,7 @@
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
     "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:cea647619944140048844f8c2efc475f47008bbd55333cd276673bb56f80d192",
-    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:df17ec1a016fa78586530f48f842b558da397ba182c576fac400c747c9c99f91"
+    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:4dbab11bd730f0bdc5dcb70b44e2435b4bc0b95c72d3440e9b5715e7541b38c7"
   },
   "missing_row_inputs": [
     "vina_gnina_rows",
@@ -3216,7 +3216,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "81d5b99d1dfbec6f8fc653e76fcfa707f5c03538",
+  "source_commit_sha": "b3754b2d2a69915cf21220303409a574707306da",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,
@@ -3686,6 +3686,19 @@
             "verify_science_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked"
           }
         }
+      ],
+      "operator_next_actions": [
+        "review_phase4_refinement_receipt_plan",
+        "build_pocketmd_lite_refinement_execution_plan",
+        "build_pocketmd_lite_topk_rows_template_preflight",
+        "select_upstream_ranked_top_k_candidate_sets",
+        "attach_upstream_top_k_provenance_and_checksum_for_every_candidate",
+        "run_bounded_lite_refinement_for_top_k_candidates_only",
+        "write_local_min_contact_hbond_clash_uncertainty_rows",
+        "attach_row_source_receipts_with_license_url_and_artifact_sha256",
+        "write_pocketmd_lite_topk_rows_at_default_dropzone",
+        "run_pocketmd_lite_raw_row_importer_and_survival_materializer",
+        "refresh_science_actual_closure_from_rows"
       ],
       "phase2_exit_criteria": [],
       "phase2_exit_criterion_count": 0,
@@ -4408,6 +4421,22 @@
             "vina_gnina_comparison_adapter"
           ]
         }
+      ],
+      "operator_next_actions": [
+        "review_official_source_receipt_plan",
+        "attach_casf_pdbbind_subset_rows_with_local_file_checksums",
+        "attach_pose_coordinate_rows_with_symmetry_contracts",
+        "attach_dud_e_or_lit_pcba_scored_molecule_rows",
+        "build_vina_gnina_execution_plan_from_materialized_cases",
+        "fill_public_benchmark_vina_gnina_input_manifest",
+        "run_vina_gnina_runtime_readiness_check",
+        "attach_vina_gnina_engine_run_rows",
+        "build_source_access_preflight_receipt",
+        "attach_external_source_receipts_and_license_or_accession_refs",
+        "run_public_benchmark_operator_bundle_from_rows",
+        "run_public_benchmark_phase2_row_audit",
+        "run_public_benchmark_harness_bundle_materializer",
+        "refresh_public_benchmark_source_of_truth"
       ],
       "phase2_exit_criteria": [
         {

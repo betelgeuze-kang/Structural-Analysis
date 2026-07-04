@@ -180,6 +180,18 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "status": "operator_refinement_rows_required",
         "survival_report_ready": False,
     }
+    assert payload["operator_next_actions"] == payload[
+        "operator_acquisition_checklist"
+    ]
+    assert payload["operator_next_actions"][:3] == [
+        "review_phase4_refinement_receipt_plan",
+        "build_pocketmd_lite_refinement_execution_plan",
+        "build_pocketmd_lite_topk_rows_template_preflight",
+    ]
+    assert payload["operator_next_actions"][-2:] == [
+        "run_pocketmd_lite_raw_row_importer_and_survival_materializer",
+        "refresh_science_actual_closure_from_rows",
+    ]
     assert payload["minimum_rows_by_case"] == [
         {
             "case_id": "pocketmd_lite_case_001",
