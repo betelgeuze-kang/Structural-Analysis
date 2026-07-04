@@ -66,6 +66,7 @@ DEFAULT_VINA_GNINA_EXECUTION_PLAN = (
 DEFAULT_VINA_GNINA_RUNTIME_READINESS = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_runtime_readiness.json"
 )
+DEFAULT_VINA_GNINA_ROWS = PRODUCTIZATION / "public_benchmark_vina_gnina_rows.json"
 DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest_template.csv"
 )
@@ -472,6 +473,12 @@ def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, 
     row_candidate_status = payload.get("row_candidate_status")
     if not isinstance(row_candidate_status, dict):
         row_candidate_status = {}
+    row_candidate_paths = row_candidate_status.get("candidate_paths")
+    if not isinstance(row_candidate_paths, list):
+        row_candidate_paths = []
+    adapter_preflight = row_candidate_status.get("adapter_preflight")
+    if not isinstance(adapter_preflight, dict):
+        adapter_preflight = {}
     container_runtime_status = payload.get("container_runtime_status")
     if not isinstance(container_runtime_status, dict):
         container_runtime_status = {}
@@ -513,6 +520,47 @@ def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, 
         "adapter_row_preflight_blocker": str(
             row_candidate_status.get("blocker") or ""
         ),
+        "row_candidate_status": {
+            "status": str(row_candidate_status.get("status") or ""),
+            "default_rows_path": str(row_candidate_status.get("default_rows_path") or ""),
+            "candidate_paths": [
+                {
+                    "path": str(row.get("path") or ""),
+                    "exists": bool(row.get("exists")),
+                    "is_file": bool(row.get("is_file")),
+                }
+                for row in row_candidate_paths
+                if isinstance(row, dict)
+            ],
+            "detected_row_artifact_count": int(
+                row_candidate_status.get("detected_row_artifact_count") or 0
+            ),
+            "selected_path": str(row_candidate_status.get("selected_path") or ""),
+            "selected_row_count": int(
+                row_candidate_status.get("selected_row_count") or 0
+            ),
+            "adapter_case_count": int(
+                row_candidate_status.get("adapter_case_count") or 0
+            ),
+            "adapter_rows_ready": bool(row_candidate_status.get("adapter_rows_ready")),
+            "adapter_preflight": {
+                "status": str(adapter_preflight.get("status") or ""),
+                "contract_pass": bool(adapter_preflight.get("contract_pass")),
+                "blocker_count": int(adapter_preflight.get("blocker_count") or 0),
+                "first_blocked_target": str(
+                    adapter_preflight.get("first_blocked_target") or ""
+                ),
+                "blockers": [
+                    str(row)
+                    for row in adapter_preflight.get("blockers", [])
+                    if str(row)
+                ]
+                if isinstance(adapter_preflight.get("blockers"), list)
+                else [],
+            },
+            "load_error": str(row_candidate_status.get("load_error") or ""),
+            "blocker": str(row_candidate_status.get("blocker") or ""),
+        },
         "missing_engine_ids": [
             str(row) for row in payload.get("missing_engine_ids", []) if str(row)
         ]
@@ -919,6 +967,7 @@ def _missing_row_input_actions(
     row_input_contracts: list[dict[str, Any]],
     commands: dict[str, str],
     vina_gnina_execution_plan_summary: dict[str, Any],
+    vina_gnina_runtime_readiness_summary: dict[str, Any],
 ) -> list[dict[str, Any]]:
     contracts = _row_input_contract_map(row_input_contracts)
     actions: list[dict[str, Any]] = []
@@ -946,6 +995,14 @@ def _missing_row_input_actions(
             ),
         }
         if row_input_id == "vina_gnina_rows":
+            row_candidate_status = vina_gnina_runtime_readiness_summary.get(
+                "row_candidate_status"
+            )
+            if not isinstance(row_candidate_status, dict):
+                row_candidate_status = {}
+            adapter_preflight = row_candidate_status.get("adapter_preflight")
+            if not isinstance(adapter_preflight, dict):
+                adapter_preflight = {}
             action.update(
                 {
                     "engine_input_manifest_template": str(
@@ -1032,6 +1089,64 @@ def _missing_row_input_actions(
                     "direct_adapter_materialization_command": str(
                         commands.get("materialize_vina_gnina_adapter") or ""
                     ),
+                    "adapter_row_preflight_action_packet": {
+                        "status": str(
+                            row_candidate_status.get("status")
+                            or "row_artifact_missing"
+                        ),
+                        "expected_rows_artifact": str(DEFAULT_VINA_GNINA_ROWS),
+                        "supported_candidate_paths": [
+                            str(row.get("path") or "")
+                            for row in row_candidate_status.get(
+                                "candidate_paths", []
+                            )
+                            if isinstance(row, dict)
+                        ],
+                        "detected_row_artifact_count": int(
+                            row_candidate_status.get(
+                                "detected_row_artifact_count"
+                            )
+                            or 0
+                        ),
+                        "selected_path": str(
+                            row_candidate_status.get("selected_path") or ""
+                        ),
+                        "selected_row_count": int(
+                            row_candidate_status.get("selected_row_count") or 0
+                        ),
+                        "adapter_case_count": int(
+                            row_candidate_status.get("adapter_case_count") or 0
+                        ),
+                        "adapter_rows_ready": bool(
+                            row_candidate_status.get("adapter_rows_ready")
+                        ),
+                        "adapter_preflight_status": str(
+                            adapter_preflight.get("status") or ""
+                        ),
+                        "adapter_preflight_contract_pass": bool(
+                            adapter_preflight.get("contract_pass")
+                        ),
+                        "adapter_preflight_blockers": [
+                            str(row)
+                            for row in adapter_preflight.get("blockers", [])
+                            if str(row)
+                        ]
+                        if isinstance(adapter_preflight.get("blockers"), list)
+                        else [],
+                        "load_error": str(
+                            row_candidate_status.get("load_error") or ""
+                        ),
+                        "blocker": str(row_candidate_status.get("blocker") or ""),
+                        "direct_adapter_materialization_command": str(
+                            commands.get("materialize_vina_gnina_adapter") or ""
+                        ),
+                        "template_safety_policy": {
+                            "template_is_not_evidence": True,
+                            "operator_rows_must_be_real_engine_outputs": True,
+                            "placeholder_or_fixture_rows_do_not_promote": True,
+                            "preflight_does_not_run_engines": True,
+                        },
+                    },
                 }
             )
         actions.append(action)
@@ -1111,6 +1226,7 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         row_input_contracts=row_input_contracts,
         commands=commands,
         vina_gnina_execution_plan_summary=vina_gnina_execution_plan_summary,
+        vina_gnina_runtime_readiness_summary=vina_gnina_runtime_readiness_summary,
     )
     return {
         "schema_version": SCHEMA_VERSION,
@@ -1375,6 +1491,43 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                         f"- `operator_must_fill_or_verify`: {required_fields}",
                         f"- `template_is_not_evidence`: `{safety_policy.get('template_is_not_evidence')}`",
                         f"- `do_not_treat_blank_prepared_checksums_as_ready`: `{safety_policy.get('do_not_treat_blank_prepared_checksums_as_ready')}`",
+                    ]
+                )
+        adapter_preflight_actions = [
+            row.get("adapter_row_preflight_action_packet")
+            for row in missing_actions
+            if isinstance(row.get("adapter_row_preflight_action_packet"), dict)
+        ]
+        if adapter_preflight_actions:
+            lines.extend(["", "### Vina/GNINA Adapter Row Preflight Action", ""])
+            for action in adapter_preflight_actions:
+                if not isinstance(action, dict):
+                    continue
+                safety_policy = action.get("template_safety_policy")
+                if not isinstance(safety_policy, dict):
+                    safety_policy = {}
+                supported_paths = ", ".join(
+                    f"`{path}`"
+                    for path in action.get("supported_candidate_paths", [])
+                    if str(path)
+                )
+                preflight_blockers = ", ".join(
+                    f"`{blocker}`"
+                    for blocker in action.get("adapter_preflight_blockers", [])
+                    if str(blocker)
+                )
+                lines.extend(
+                    [
+                        f"- `status`: `{action.get('status')}`",
+                        f"- `expected_rows_artifact`: `{action.get('expected_rows_artifact')}`",
+                        f"- `supported_candidate_paths`: {supported_paths}",
+                        f"- `detected_row_artifact_count`: `{action.get('detected_row_artifact_count')}`",
+                        f"- `selected_path`: `{action.get('selected_path')}`",
+                        f"- `adapter_preflight_status`: `{action.get('adapter_preflight_status')}`",
+                        f"- `adapter_preflight_blockers`: {preflight_blockers or '`none`'}",
+                        f"- `direct_adapter_materialization_command`: `{action.get('direct_adapter_materialization_command')}`",
+                        f"- `operator_rows_must_be_real_engine_outputs`: `{safety_policy.get('operator_rows_must_be_real_engine_outputs')}`",
+                        f"- `preflight_does_not_run_engines`: `{safety_policy.get('preflight_does_not_run_engines')}`",
                     ]
                 )
     lines.extend(["", "## Vina/GNINA Runtime", ""])

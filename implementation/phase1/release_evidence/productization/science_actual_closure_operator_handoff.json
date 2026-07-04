@@ -295,6 +295,33 @@
               "ndjson",
               "csv"
             ],
+            "adapter_row_preflight_action_packet": {
+              "adapter_case_count": 0,
+              "adapter_preflight_blockers": [],
+              "adapter_preflight_contract_pass": false,
+              "adapter_preflight_status": "missing",
+              "adapter_rows_ready": false,
+              "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+              "detected_row_artifact_count": 0,
+              "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+              "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+              "load_error": "",
+              "selected_path": "",
+              "selected_row_count": 0,
+              "status": "row_artifact_missing",
+              "supported_candidate_paths": [
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl",
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson",
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+              ],
+              "template_safety_policy": {
+                "operator_rows_must_be_real_engine_outputs": true,
+                "placeholder_or_fixture_rows_do_not_promote": true,
+                "preflight_does_not_run_engines": true,
+                "template_is_not_evidence": true
+              }
+            },
             "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
             "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
             "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
@@ -1832,6 +1859,33 @@
         "ndjson",
         "csv"
       ],
+      "adapter_row_preflight_action_packet": {
+        "adapter_case_count": 0,
+        "adapter_preflight_blockers": [],
+        "adapter_preflight_contract_pass": false,
+        "adapter_preflight_status": "missing",
+        "adapter_rows_ready": false,
+        "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+        "detected_row_artifact_count": 0,
+        "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+        "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "load_error": "",
+        "selected_path": "",
+        "selected_row_count": 0,
+        "status": "row_artifact_missing",
+        "supported_candidate_paths": [
+          "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+          "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl",
+          "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson",
+          "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+        ],
+        "template_safety_policy": {
+          "operator_rows_must_be_real_engine_outputs": true,
+          "placeholder_or_fixture_rows_do_not_promote": true,
+          "preflight_does_not_run_engines": true,
+          "template_is_not_evidence": true
+        }
+      },
       "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
       "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
       "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
@@ -1952,6 +2006,33 @@
             "ndjson",
             "csv"
           ],
+          "adapter_row_preflight_action_packet": {
+            "adapter_case_count": 0,
+            "adapter_preflight_blockers": [],
+            "adapter_preflight_contract_pass": false,
+            "adapter_preflight_status": "missing",
+            "adapter_rows_ready": false,
+            "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+            "detected_row_artifact_count": 0,
+            "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+            "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+            "load_error": "",
+            "selected_path": "",
+            "selected_row_count": 0,
+            "status": "row_artifact_missing",
+            "supported_candidate_paths": [
+              "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+              "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl",
+              "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson",
+              "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+            ],
+            "template_safety_policy": {
+              "operator_rows_must_be_real_engine_outputs": true,
+              "placeholder_or_fixture_rows_do_not_promote": true,
+              "preflight_does_not_run_engines": true,
+              "template_is_not_evidence": true
+            }
+          },
           "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
           "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
           "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
@@ -2105,13 +2186,13 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T00:22:44.282532+00:00",
+  "generated_at": "2026-07-04T00:34:29.105818+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:9dd7c97c8a2b978436c07f11bfb088a2cef94f1fd1f33bc651ba8a4c09440b2b",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:bc734b71fe231cae6b4c1ab875507644db77164038387495a3ce904f75b43960",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:6e75a02c6b13b518bf6087e44db30b84c243e4935d2b50611e2fd0411e476118",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:b752730c01334881217f694ad6a65d75e1597325e00698504bf8baba6fb297d5",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:800b9012cd22c5cd68fb6590da46e672beb79564d36ec35091a228b3ff5405b5"
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:ad97fbc9bbca6bd8861c8a0f1659aff10c50a51dfd0be1c7c7e66ed8be0705b7",
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:06f1bc24e8920dcd8919bd5f10180841de02a9e8089d7784191e8fe04a3e27ea"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -5841,6 +5922,33 @@
               "ndjson",
               "csv"
             ],
+            "adapter_row_preflight_action_packet": {
+              "adapter_case_count": 0,
+              "adapter_preflight_blockers": [],
+              "adapter_preflight_contract_pass": false,
+              "adapter_preflight_status": "missing",
+              "adapter_rows_ready": false,
+              "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+              "detected_row_artifact_count": 0,
+              "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+              "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+              "load_error": "",
+              "selected_path": "",
+              "selected_row_count": 0,
+              "status": "row_artifact_missing",
+              "supported_candidate_paths": [
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl",
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson",
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+              ],
+              "template_safety_policy": {
+                "operator_rows_must_be_real_engine_outputs": true,
+                "placeholder_or_fixture_rows_do_not_promote": true,
+                "preflight_does_not_run_engines": true,
+                "template_is_not_evidence": true
+              }
+            },
             "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
             "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
             "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
@@ -6137,6 +6245,33 @@
               "ndjson",
               "csv"
             ],
+            "adapter_row_preflight_action_packet": {
+              "adapter_case_count": 0,
+              "adapter_preflight_blockers": [],
+              "adapter_preflight_contract_pass": false,
+              "adapter_preflight_status": "missing",
+              "adapter_rows_ready": false,
+              "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+              "detected_row_artifact_count": 0,
+              "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+              "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+              "load_error": "",
+              "selected_path": "",
+              "selected_row_count": 0,
+              "status": "row_artifact_missing",
+              "supported_candidate_paths": [
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl",
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson",
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+              ],
+              "template_safety_policy": {
+                "operator_rows_must_be_real_engine_outputs": true,
+                "placeholder_or_fixture_rows_do_not_promote": true,
+                "preflight_does_not_run_engines": true,
+                "template_is_not_evidence": true
+              }
+            },
             "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
             "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
             "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
@@ -6485,6 +6620,33 @@
               "ndjson",
               "csv"
             ],
+            "adapter_row_preflight_action_packet": {
+              "adapter_case_count": 0,
+              "adapter_preflight_blockers": [],
+              "adapter_preflight_contract_pass": false,
+              "adapter_preflight_status": "missing",
+              "adapter_rows_ready": false,
+              "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+              "detected_row_artifact_count": 0,
+              "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+              "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+              "load_error": "",
+              "selected_path": "",
+              "selected_row_count": 0,
+              "status": "row_artifact_missing",
+              "supported_candidate_paths": [
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl",
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson",
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+              ],
+              "template_safety_policy": {
+                "operator_rows_must_be_real_engine_outputs": true,
+                "placeholder_or_fixture_rows_do_not_promote": true,
+                "preflight_does_not_run_engines": true,
+                "template_is_not_evidence": true
+              }
+            },
             "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
             "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
             "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
@@ -7985,6 +8147,33 @@
           "ndjson",
           "csv"
         ],
+        "adapter_row_preflight_action_packet": {
+          "adapter_case_count": 0,
+          "adapter_preflight_blockers": [],
+          "adapter_preflight_contract_pass": false,
+          "adapter_preflight_status": "missing",
+          "adapter_rows_ready": false,
+          "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+          "detected_row_artifact_count": 0,
+          "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+          "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+          "load_error": "",
+          "selected_path": "",
+          "selected_row_count": 0,
+          "status": "row_artifact_missing",
+          "supported_candidate_paths": [
+            "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+            "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl",
+            "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson",
+            "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+          ],
+          "template_safety_policy": {
+            "operator_rows_must_be_real_engine_outputs": true,
+            "placeholder_or_fixture_rows_do_not_promote": true,
+            "preflight_does_not_run_engines": true,
+            "template_is_not_evidence": true
+          }
+        },
         "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
         "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
         "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
@@ -8105,6 +8294,33 @@
               "ndjson",
               "csv"
             ],
+            "adapter_row_preflight_action_packet": {
+              "adapter_case_count": 0,
+              "adapter_preflight_blockers": [],
+              "adapter_preflight_contract_pass": false,
+              "adapter_preflight_status": "missing",
+              "adapter_rows_ready": false,
+              "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+              "detected_row_artifact_count": 0,
+              "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+              "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+              "load_error": "",
+              "selected_path": "",
+              "selected_row_count": 0,
+              "status": "row_artifact_missing",
+              "supported_candidate_paths": [
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl",
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson",
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+              ],
+              "template_safety_policy": {
+                "operator_rows_must_be_real_engine_outputs": true,
+                "placeholder_or_fixture_rows_do_not_promote": true,
+                "preflight_does_not_run_engines": true,
+                "template_is_not_evidence": true
+              }
+            },
             "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
             "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
             "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
@@ -9483,7 +9699,7 @@
   ],
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "8aff0a9f188b786275f877423b26c4ee282337ec",
+  "source_commit_sha": "45dcb3a51cd4dffa7803648aab06535b298fe4c6",
   "status": "operator_rows_required",
   "summary": {
     "blocked_component_operator_action_count": 2,
@@ -9782,6 +9998,33 @@
             "ndjson",
             "csv"
           ],
+          "adapter_row_preflight_action_packet": {
+            "adapter_case_count": 0,
+            "adapter_preflight_blockers": [],
+            "adapter_preflight_contract_pass": false,
+            "adapter_preflight_status": "missing",
+            "adapter_rows_ready": false,
+            "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+            "detected_row_artifact_count": 0,
+            "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+            "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+            "load_error": "",
+            "selected_path": "",
+            "selected_row_count": 0,
+            "status": "row_artifact_missing",
+            "supported_candidate_paths": [
+              "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+              "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl",
+              "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson",
+              "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+            ],
+            "template_safety_policy": {
+              "operator_rows_must_be_real_engine_outputs": true,
+              "placeholder_or_fixture_rows_do_not_promote": true,
+              "preflight_does_not_run_engines": true,
+              "template_is_not_evidence": true
+            }
+          },
           "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
           "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
           "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",

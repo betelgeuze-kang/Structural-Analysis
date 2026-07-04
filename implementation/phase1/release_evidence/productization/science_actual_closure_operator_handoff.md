@@ -106,6 +106,21 @@
 - `template_is_not_evidence`: `True`
 - `do_not_treat_blank_prepared_checksums_as_ready`: `True`
 
+### Vina/GNINA Adapter Row Preflight Action
+
+- `component_id`: `public_benchmark_phase2_actual_closure`
+- `row_input_id`: `vina_gnina_rows`
+- `status`: `row_artifact_missing`
+- `expected_rows_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json`
+- `supported_candidate_paths`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv`
+- `detected_row_artifact_count`: `0`
+- `selected_path`: ``
+- `adapter_preflight_status`: `missing`
+- `adapter_preflight_blockers`: `none`
+- `direct_adapter_materialization_command`: `python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked`
+- `operator_rows_must_be_real_engine_outputs`: `True`
+- `preflight_does_not_run_engines`: `True`
+
 ## Provided Closure Evidence
 
 ### GPCR Phase 3 Gate

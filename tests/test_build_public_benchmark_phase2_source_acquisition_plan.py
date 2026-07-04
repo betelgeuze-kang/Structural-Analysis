@@ -430,6 +430,30 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py "
         "--intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson>"
     )
+    preflight_action = missing_action["adapter_row_preflight_action_packet"]
+    assert preflight_action["status"] == "row_artifact_missing"
+    assert preflight_action["expected_rows_artifact"].endswith(
+        "public_benchmark_vina_gnina_rows.json"
+    )
+    assert preflight_action["supported_candidate_paths"] == [
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_rows.json",
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_rows.csv",
+    ]
+    assert preflight_action["detected_row_artifact_count"] == 0
+    assert preflight_action["adapter_preflight_status"] == "missing"
+    assert preflight_action["adapter_preflight_blockers"] == []
+    assert preflight_action["template_safety_policy"] == {
+        "operator_rows_must_be_real_engine_outputs": True,
+        "placeholder_or_fixture_rows_do_not_promote": True,
+        "preflight_does_not_run_engines": True,
+        "template_is_not_evidence": True,
+    }
     assert "predicted_ligand_checksum" in missing_action[
         "required_engine_run_fields"
     ]
@@ -472,6 +496,9 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "attach_vina_gnina_rows_then_run_phase2_row_audit" in markdown
     assert "materialize_public_benchmark_vina_gnina_comparison_adapter.py" in markdown
     assert "<operator-vina-gnina-run-rows.csv|json|jsonl|ndjson>" in markdown
+    assert "### Vina/GNINA Adapter Row Preflight Action" in markdown
+    assert "public_benchmark_vina_gnina_rows.ndjson" in markdown
+    assert "`preflight_does_not_run_engines`: `True`" in markdown
     assert "### Vina/GNINA Input Manifest Action" in markdown
     assert "public_benchmark_vina_gnina_input_manifest_template.csv" in markdown
     assert "public_benchmark_vina_gnina_input_manifest.csv" in markdown

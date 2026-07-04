@@ -1117,6 +1117,18 @@ def _markdown(payload: dict[str, Any]) -> str:
                             "action": manifest_action,
                         }
                     )
+                adapter_preflight_action = _as_dict(
+                    source_action.get("adapter_row_preflight_action_packet")
+                )
+                if adapter_preflight_action:
+                    detailed_actions.append(
+                        {
+                            "kind": "vina_gnina_adapter_preflight",
+                            "component_id": str(component.get("component_id") or ""),
+                            "row_input_id": str(action.get("row_input_id") or ""),
+                            "action": adapter_preflight_action,
+                        }
+                    )
                 top_k_action = _as_dict(
                     source_action.get("top_k_rows_action_packet")
                 )
@@ -1147,6 +1159,24 @@ def _markdown(payload: dict[str, Any]) -> str:
                         f"- `operator_must_fill_or_verify`: {_code_join(_as_list(action.get('operator_must_fill_or_verify')))}",
                         f"- `template_is_not_evidence`: `{safety_policy.get('template_is_not_evidence')}`",
                         f"- `do_not_treat_blank_prepared_checksums_as_ready`: `{safety_policy.get('do_not_treat_blank_prepared_checksums_as_ready')}`",
+                    ]
+                )
+            elif detail.get("kind") == "vina_gnina_adapter_preflight":
+                lines.extend(["", "### Vina/GNINA Adapter Row Preflight Action", ""])
+                lines.extend(
+                    [
+                        f"- `component_id`: `{detail.get('component_id')}`",
+                        f"- `row_input_id`: `{detail.get('row_input_id')}`",
+                        f"- `status`: `{action.get('status')}`",
+                        f"- `expected_rows_artifact`: `{action.get('expected_rows_artifact')}`",
+                        f"- `supported_candidate_paths`: {_code_join(_as_list(action.get('supported_candidate_paths')))}",
+                        f"- `detected_row_artifact_count`: `{action.get('detected_row_artifact_count')}`",
+                        f"- `selected_path`: `{action.get('selected_path')}`",
+                        f"- `adapter_preflight_status`: `{action.get('adapter_preflight_status')}`",
+                        f"- `adapter_preflight_blockers`: {_code_join(_as_list(action.get('adapter_preflight_blockers')))}",
+                        f"- `direct_adapter_materialization_command`: `{action.get('direct_adapter_materialization_command')}`",
+                        f"- `operator_rows_must_be_real_engine_outputs`: `{safety_policy.get('operator_rows_must_be_real_engine_outputs')}`",
+                        f"- `preflight_does_not_run_engines`: `{safety_policy.get('preflight_does_not_run_engines')}`",
                     ]
                 )
             elif detail.get("kind") == "pocketmd_top_k_rows":

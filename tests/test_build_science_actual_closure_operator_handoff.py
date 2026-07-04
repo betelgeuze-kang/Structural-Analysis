@@ -175,6 +175,16 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert public_manifest_action["template_safety_policy"][
         "template_is_not_evidence"
     ] is True
+    public_adapter_preflight_action = public_action["source_acquisition_row_action"][
+        "adapter_row_preflight_action_packet"
+    ]
+    assert public_adapter_preflight_action["status"] == "row_artifact_missing"
+    assert public_adapter_preflight_action["supported_candidate_paths"][3].endswith(
+        "public_benchmark_vina_gnina_rows.csv"
+    )
+    assert public_adapter_preflight_action["template_safety_policy"][
+        "preflight_does_not_run_engines"
+    ] is True
     assert "public_benchmark_vina_gnina_engine_runtime_not_ready" in public_action[
         "upstream_source_blockers"
     ]
@@ -555,6 +565,9 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "### Vina/GNINA Input Manifest Action" in markdown
     assert "public_benchmark_vina_gnina_input_manifest.csv" in markdown
     assert "`do_not_treat_blank_prepared_checksums_as_ready`: `True`" in markdown
+    assert "### Vina/GNINA Adapter Row Preflight Action" in markdown
+    assert "public_benchmark_vina_gnina_rows.csv" in markdown
+    assert "`operator_rows_must_be_real_engine_outputs`: `True`" in markdown
     assert "### PocketMD Top-k Rows Action" in markdown
     assert "operator_input_source.source_artifact_sha256" in markdown
     assert "`placeholder_or_fixture_rows_do_not_promote`: `True`" in markdown

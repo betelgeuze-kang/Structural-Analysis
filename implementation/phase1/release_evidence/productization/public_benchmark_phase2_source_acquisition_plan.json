@@ -21,12 +21,12 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T00:14:02.990237+00:00",
+  "generated_at": "2026-07-04T00:32:57.300750+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:3f53708e67d1dd76f5f313307ce46a2971b748ef1938925bc44318b40e52709d",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:d91bbc8402c86796ce3d60d0a053610cceea2dcbbb0f5faf00adeaad7698bea4",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:6e75a02c6b13b518bf6087e44db30b84c243e4935d2b50611e2fd0411e476118",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:cd18cc2676e90cf3b400192a385f738e74ef71f6bc49ac43043d48f2afc9be96",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:e3c805412341ff47fc5953dac7d090cf2879ba588638f5cd1cab320583e1b5a9",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1",
     "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:895f52a4b9383625534767806ab373c4e33d70287a52ca65f9090b0d0e1e593a",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
@@ -56,6 +56,33 @@
         "ndjson",
         "csv"
       ],
+      "adapter_row_preflight_action_packet": {
+        "adapter_case_count": 0,
+        "adapter_preflight_blockers": [],
+        "adapter_preflight_contract_pass": false,
+        "adapter_preflight_status": "missing",
+        "adapter_rows_ready": false,
+        "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+        "detected_row_artifact_count": 0,
+        "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+        "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "load_error": "",
+        "selected_path": "",
+        "selected_row_count": 0,
+        "status": "row_artifact_missing",
+        "supported_candidate_paths": [
+          "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+          "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl",
+          "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson",
+          "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+        ],
+        "template_safety_policy": {
+          "operator_rows_must_be_real_engine_outputs": true,
+          "placeholder_or_fixture_rows_do_not_promote": true,
+          "preflight_does_not_run_engines": true,
+          "template_is_not_evidence": true
+        }
+      },
       "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
       "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
       "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
@@ -892,7 +919,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "e338a0082807eb9e166e02a0af103af530ec8feb",
+  "source_commit_sha": "45dcb3a51cd4dffa7803648aab06535b298fe4c6",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
@@ -1270,6 +1297,46 @@
     },
     "ready_engine_run_slot_count": 0,
     "required_engine_run_count": 24,
+    "row_candidate_status": {
+      "adapter_case_count": 0,
+      "adapter_preflight": {
+        "blocker_count": 0,
+        "blockers": [],
+        "contract_pass": false,
+        "first_blocked_target": "",
+        "status": "missing"
+      },
+      "adapter_rows_ready": false,
+      "blocker": "public_benchmark_vina_gnina_rows_not_detected",
+      "candidate_paths": [
+        {
+          "exists": false,
+          "is_file": false,
+          "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
+        },
+        {
+          "exists": false,
+          "is_file": false,
+          "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl"
+        },
+        {
+          "exists": false,
+          "is_file": false,
+          "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson"
+        },
+        {
+          "exists": false,
+          "is_file": false,
+          "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+        }
+      ],
+      "default_rows_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+      "detected_row_artifact_count": 0,
+      "load_error": "",
+      "selected_path": "",
+      "selected_row_count": 0,
+      "status": "row_artifact_missing"
+    },
     "runtime_ready_for_engine_execution": false,
     "selected_row_count": 0,
     "status": "execution_plan_blocked"
