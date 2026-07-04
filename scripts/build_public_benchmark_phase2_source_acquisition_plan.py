@@ -1490,6 +1490,63 @@ def _official_source_receipt_plan(
     }
 
 
+def _source_access_preflight_receipt_summary(repo_root: Path) -> dict[str, Any]:
+    payload = _load_json(repo_root, DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT)
+    summary = _as_dict(payload.get("summary"))
+    probe_rows = [
+        row
+        for row in payload.get("source_access_probe_rows", [])
+        if isinstance(row, dict)
+    ] if isinstance(payload.get("source_access_probe_rows"), list) else []
+    row_statuses = [
+        {
+            "source_id": str(row.get("source_id") or ""),
+            "source_family": str(row.get("source_family") or ""),
+            "status": str(row.get("status") or ""),
+            "blockers": [
+                str(blocker)
+                for blocker in row.get("blockers", [])
+                if str(blocker)
+            ]
+            if isinstance(row.get("blockers"), list)
+            else [],
+            "primary_http_status": int(
+                _as_dict(row.get("primary_probe")).get("http_status") or 0
+            ),
+            "fallback_http_status": int(
+                _as_dict(row.get("fallback_probe")).get("http_status") or 0
+            ),
+        }
+        for row in probe_rows
+    ]
+    blocked_rows = [
+        row for row in row_statuses if row["status"] not in {
+            "primary_reachable",
+            "fallback_reachable",
+        }
+    ]
+    return {
+        "artifact": str(DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT),
+        "markdown_artifact": str(DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT_MD),
+        "present": bool(payload),
+        "status": str(payload.get("status") or "missing"),
+        "contract_pass": bool(payload.get("contract_pass")),
+        "network_probe_performed": bool(payload.get("network_probe_performed")),
+        "source_access_ready": bool(payload.get("source_access_ready")),
+        "source_access_probe_row_count": int(
+            summary.get("source_access_probe_row_count") or len(probe_rows)
+        ),
+        "reachable_count": int(summary.get("reachable_count") or 0),
+        "blocked_count": int(summary.get("blocked_count") or len(blocked_rows)),
+        "not_run_count": int(summary.get("not_run_count") or 0),
+        "blocked_source_ids": [
+            str(row["source_id"]) for row in blocked_rows if row["source_id"]
+        ],
+        "row_statuses": row_statuses,
+        "claim_boundary": str(payload.get("claim_boundary") or ""),
+    }
+
+
 def _row_input_contract_map(
     row_input_contracts: list[dict[str, Any]],
 ) -> dict[str, dict[str, Any]]:
@@ -1976,6 +2033,9 @@ def build_public_benchmark_phase2_source_acquisition_plan(
     official_source_receipt_plan = _official_source_receipt_plan(
         row_input_contracts
     )
+    source_access_preflight_receipt_summary = (
+        _source_access_preflight_receipt_summary(repo_root)
+    )
     phase2_row_audit = _load_json(repo_root, DEFAULT_PHASE2_ROW_AUDIT)
     phase2_row_audit_summary = _phase2_row_audit_summary(phase2_row_audit)
     phase2_row_closure_matrix = _phase2_row_closure_matrix(phase2_row_audit)
@@ -2133,6 +2193,9 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         "required_row_inputs": list(REQUIRED_ROW_INPUTS),
         "row_input_contracts": row_input_contracts,
         "official_source_receipt_plan": official_source_receipt_plan,
+        "source_access_preflight_receipt": (
+            source_access_preflight_receipt_summary
+        ),
         "receipt_promotion_policy": dict(RECEIPT_PROMOTION_POLICY),
         "phase2_row_audit": phase2_row_audit_summary,
         "phase2_exit_criteria": phase2_exit_criteria,
@@ -2170,6 +2233,23 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "official_source_access_preflight_count": official_source_receipt_plan[
                 "source_access_preflight_count"
             ],
+            "source_access_preflight_receipt_status": (
+                source_access_preflight_receipt_summary["status"]
+            ),
+            "source_access_preflight_receipt_ready": (
+                source_access_preflight_receipt_summary["source_access_ready"]
+            ),
+            "source_access_preflight_reachable_count": (
+                source_access_preflight_receipt_summary["reachable_count"]
+            ),
+            "source_access_preflight_blocked_count": (
+                source_access_preflight_receipt_summary["blocked_count"]
+            ),
+            "source_access_preflight_network_probe_performed": (
+                source_access_preflight_receipt_summary[
+                    "network_probe_performed"
+                ]
+            ),
             "phase2_row_audit_status": phase2_row_audit_summary["status"],
             "phase2_exit_criterion_count": len(phase2_exit_criteria),
             "phase2_passing_exit_criterion_count": len(
@@ -2333,6 +2413,14 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `official_source_receipt_role_count`: `{payload['official_source_receipt_plan']['receipt_role_count']}`",
         f"- `official_source_catalog_count`: `{payload['official_source_receipt_plan']['source_catalog_count']}`",
         f"- `official_source_access_preflight_count`: `{payload['official_source_receipt_plan']['source_access_preflight_count']}`",
+        "- `source_access_preflight_receipt_status`: "
+        f"`{payload['source_access_preflight_receipt']['status']}`",
+        "- `source_access_preflight_receipt_ready`: "
+        f"`{payload['source_access_preflight_receipt']['source_access_ready']}`",
+        "- `source_access_preflight_reachable_count`: "
+        f"`{payload['source_access_preflight_receipt']['reachable_count']}`",
+        "- `source_access_preflight_blocked_count`: "
+        f"`{payload['source_access_preflight_receipt']['blocked_count']}`",
         f"- `phase2_row_audit`: `{payload['phase2_row_audit']['artifact']}`",
         f"- `phase2_row_audit_status`: `{payload['phase2_row_audit']['status']}`",
         f"- `phase2_row_audit_missing_row_inputs`: `{', '.join(payload['phase2_row_audit']['missing_row_inputs'])}`",
@@ -2376,6 +2464,45 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
     ]
     for index, action in enumerate(payload.get("operator_next_actions", []), start=1):
         lines.append(f"| {index} | `{action}` |")
+    source_access_receipt = _as_dict(
+        payload.get("source_access_preflight_receipt")
+    )
+    source_access_rows = [
+        row
+        for row in source_access_receipt.get("row_statuses", [])
+        if isinstance(row, dict)
+    ] if isinstance(source_access_receipt.get("row_statuses"), list) else []
+    if source_access_receipt:
+        lines.extend(
+            [
+                "",
+                "## Source Access Preflight Receipt",
+                "",
+                f"- `artifact`: `{source_access_receipt.get('artifact')}`",
+                f"- `status`: `{source_access_receipt.get('status')}`",
+                f"- `network_probe_performed`: `{source_access_receipt.get('network_probe_performed')}`",
+                f"- `source_access_ready`: `{source_access_receipt.get('source_access_ready')}`",
+                f"- `reachable_count`: `{source_access_receipt.get('reachable_count')}`",
+                f"- `blocked_count`: `{source_access_receipt.get('blocked_count')}`",
+                "",
+                "| Source | Family | Status | Primary HTTP | Fallback HTTP | Blockers |",
+                "|---|---|---|---:|---:|---|",
+            ]
+        )
+        for row in source_access_rows:
+            blockers = ", ".join(
+                f"`{blocker}`"
+                for blocker in row.get("blockers", [])
+                if str(blocker)
+            )
+            lines.append(
+                f"| `{row.get('source_id', '')}` | "
+                f"`{row.get('source_family', '')}` | "
+                f"`{row.get('status', '')}` | "
+                f"{row.get('primary_http_status', 0)} | "
+                f"{row.get('fallback_http_status', 0)} | "
+                f"{blockers or '`none`'} |"
+            )
     harness_audit = _as_dict(payload.get("phase2_harness_completion_audit"))
     harness_requirements = [
         row for row in harness_audit.get("requirements", []) if isinstance(row, dict)

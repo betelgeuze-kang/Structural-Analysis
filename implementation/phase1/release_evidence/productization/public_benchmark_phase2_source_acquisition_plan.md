@@ -9,6 +9,10 @@
 - `official_source_receipt_role_count`: `4`
 - `official_source_catalog_count`: `6`
 - `official_source_access_preflight_count`: `6`
+- `source_access_preflight_receipt_status`: `reachable`
+- `source_access_preflight_receipt_ready`: `True`
+- `source_access_preflight_reachable_count`: `6`
+- `source_access_preflight_blocked_count`: `0`
 - `phase2_row_audit`: `implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json`
 - `phase2_row_audit_status`: `operator_evidence_required`
 - `phase2_row_audit_missing_row_inputs`: `vina_gnina_rows`
@@ -56,6 +60,24 @@
 | 12 | `run_public_benchmark_phase2_row_audit` |
 | 13 | `run_public_benchmark_harness_bundle_materializer` |
 | 14 | `refresh_public_benchmark_source_of_truth` |
+
+## Source Access Preflight Receipt
+
+- `artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json`
+- `status`: `reachable`
+- `network_probe_performed`: `True`
+- `source_access_ready`: `True`
+- `reachable_count`: `6`
+- `blocked_count`: `0`
+
+| Source | Family | Status | Primary HTTP | Fallback HTTP | Blockers |
+|---|---|---|---:|---:|---|
+| `pdbbind_plus_casf` | `CASF/PDBBind` | `primary_reachable` | 200 | 200 | `none` |
+| `dud_e` | `DUD-E` | `primary_reachable` | 200 | 200 | `none` |
+| `lit_pcba` | `LIT-PCBA` | `primary_reachable` | 200 | 200 | `none` |
+| `autodock_vina` | `Vina` | `primary_reachable` | 200 | 200 | `none` |
+| `gnina` | `GNINA` | `primary_reachable` | 200 | 200 | `none` |
+| `posebusters` | `PoseBusters` | `primary_reachable` | 200 | 200 | `none` |
 
 ## Phase 2 Harness Completion Audit
 

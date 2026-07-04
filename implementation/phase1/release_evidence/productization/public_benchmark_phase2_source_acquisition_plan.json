@@ -24,14 +24,14 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T04:54:44.903933+00:00",
+  "generated_at": "2026-07-04T05:07:15.080405+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:3f53708e67d1dd76f5f313307ce46a2971b748ef1938925bc44318b40e52709d",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:d91bbc8402c86796ce3d60d0a053610cceea2dcbbb0f5faf00adeaad7698bea4",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv": "sha256:3a106d2aa9f456eee7238523bf090db13e35d98afefa3952352a660f5b5e36ae",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json": "sha256:029bfc660060a50fe54ed88fa29dd99dd623967a80f36e772f969d82bc40428d",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:a0c748515aefbeb496ab253028a3b13b4df4b2844ae88e1ef394a0e1d12e4f1d",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:cf050c45df574e17193f2dae557e2d99572bd17369daddce86cb10702529b37d",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:3de91028228d12349d281dde97e6f8b42f4083eae26ae8c5459df66cfdab1eac",
     "scripts/build_public_benchmark_source_access_preflight_receipt.py": "sha256:47b23a61ea7eb470f8ab4b48337b4382ad3523a646b81c8bdddedf3451d1c2d1",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1",
     "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:69b0ce594558bad457b052be33865b0abf90e8b4779dc31ff3a987b1eea7ef72",
@@ -1785,7 +1785,72 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "e006758217ab0fccac1c37ca23f4cf2ffafa1cb7",
+  "source_access_preflight_receipt": {
+    "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json",
+    "blocked_count": 0,
+    "blocked_source_ids": [],
+    "claim_boundary": "This receipt performs HEAD-only source access preflight checks. It does not download, redistribute, checksum, license, or prove raw benchmark payloads, and it does not close Public Benchmark Phase 2.",
+    "contract_pass": true,
+    "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md",
+    "network_probe_performed": true,
+    "not_run_count": 0,
+    "present": true,
+    "reachable_count": 6,
+    "row_statuses": [
+      {
+        "blockers": [],
+        "fallback_http_status": 200,
+        "primary_http_status": 200,
+        "source_family": "CASF/PDBBind",
+        "source_id": "pdbbind_plus_casf",
+        "status": "primary_reachable"
+      },
+      {
+        "blockers": [],
+        "fallback_http_status": 200,
+        "primary_http_status": 200,
+        "source_family": "DUD-E",
+        "source_id": "dud_e",
+        "status": "primary_reachable"
+      },
+      {
+        "blockers": [],
+        "fallback_http_status": 200,
+        "primary_http_status": 200,
+        "source_family": "LIT-PCBA",
+        "source_id": "lit_pcba",
+        "status": "primary_reachable"
+      },
+      {
+        "blockers": [],
+        "fallback_http_status": 200,
+        "primary_http_status": 200,
+        "source_family": "Vina",
+        "source_id": "autodock_vina",
+        "status": "primary_reachable"
+      },
+      {
+        "blockers": [],
+        "fallback_http_status": 200,
+        "primary_http_status": 200,
+        "source_family": "GNINA",
+        "source_id": "gnina",
+        "status": "primary_reachable"
+      },
+      {
+        "blockers": [],
+        "fallback_http_status": 200,
+        "primary_http_status": 200,
+        "source_family": "PoseBusters",
+        "source_id": "posebusters",
+        "status": "primary_reachable"
+      }
+    ],
+    "source_access_probe_row_count": 6,
+    "source_access_ready": true,
+    "status": "reachable"
+  },
+  "source_commit_sha": "3bc8f9bd5e0ccbf58e8dd360413eff189c01f371",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
@@ -1823,6 +1888,11 @@
     "phase2_row_closure_matrix_count": 4,
     "required_component_count": 5,
     "required_row_input_count": 4,
+    "source_access_preflight_blocked_count": 0,
+    "source_access_preflight_network_probe_performed": true,
+    "source_access_preflight_reachable_count": 6,
+    "source_access_preflight_receipt_ready": true,
+    "source_access_preflight_receipt_status": "reachable",
     "vina_gnina_execution_plan_ready": false,
     "vina_gnina_execution_plan_status": "engine_input_blocked",
     "vina_gnina_input_manifest_detected": false,

@@ -102,6 +102,42 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert receipt_plan["source_access_network_probe_command"].endswith(
         "--probe-network"
     )
+    source_access_receipt = payload["source_access_preflight_receipt"]
+    assert source_access_receipt["artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_source_access_preflight_receipt.json"
+    )
+    assert source_access_receipt["markdown_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_source_access_preflight_receipt.md"
+    )
+    assert source_access_receipt["present"] is True
+    assert source_access_receipt["status"] == "reachable"
+    assert source_access_receipt["contract_pass"] is True
+    assert source_access_receipt["network_probe_performed"] is True
+    assert source_access_receipt["source_access_ready"] is True
+    assert source_access_receipt["source_access_probe_row_count"] == 6
+    assert source_access_receipt["reachable_count"] == 6
+    assert source_access_receipt["blocked_count"] == 0
+    assert source_access_receipt["not_run_count"] == 0
+    assert source_access_receipt["blocked_source_ids"] == []
+    source_access_rows = {
+        row["source_id"]: row for row in source_access_receipt["row_statuses"]
+    }
+    assert set(source_access_rows) == {
+        "autodock_vina",
+        "dud_e",
+        "gnina",
+        "lit_pcba",
+        "pdbbind_plus_casf",
+        "posebusters",
+    }
+    assert source_access_rows["pdbbind_plus_casf"]["status"] == (
+        "primary_reachable"
+    )
+    assert source_access_rows["gnina"]["source_family"] == "GNINA"
+    assert source_access_rows["autodock_vina"]["primary_http_status"] == 200
+    assert source_access_rows["posebusters"]["blockers"] == []
     assert receipt_plan["operator_review_order"] == [
         "casf_pdbbind_subset_source_receipt",
         "casf_pdbbind_pose_coordinate_receipt",
@@ -521,6 +557,11 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "official_source_receipt_role_count": 4,
         "official_source_catalog_count": 6,
         "official_source_access_preflight_count": 6,
+        "source_access_preflight_receipt_status": "reachable",
+        "source_access_preflight_receipt_ready": True,
+        "source_access_preflight_reachable_count": 6,
+        "source_access_preflight_blocked_count": 0,
+        "source_access_preflight_network_probe_performed": True,
         "phase2_exit_criterion_count": 5,
         "phase2_passing_exit_criterion_count": 4,
         "phase2_blocked_exit_criterion_count": 1,
@@ -814,6 +855,9 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert payload["official_source_receipt_plan"][
         "source_access_preflight_count"
     ] == 6
+    assert payload["source_access_preflight_receipt"]["status"] == "reachable"
+    assert payload["source_access_preflight_receipt"]["reachable_count"] == 6
+    assert payload["source_access_preflight_receipt"]["blocked_count"] == 0
     assert payload["phase2_exit_criterion_count"] == 5
     assert payload["phase2_harness_completion_audit"]["status"] == (
         "ready_except_vina_gnina_actual_rows"
@@ -839,6 +883,13 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "`vina_gnina_runtime_case_input_slot_count`: `12`" in markdown
     assert "`vina_gnina_runtime_blocked_engine_run_slot_count`: `24`" in markdown
     assert "`vina_gnina_rows_template_role_receipt_blocked_count`: `72`" in markdown
+    assert "## Source Access Preflight Receipt" in markdown
+    assert "`source_access_preflight_receipt_status`: `reachable`" in markdown
+    assert "`source_access_preflight_receipt_ready`: `True`" in markdown
+    assert "`source_access_preflight_reachable_count`: `6`" in markdown
+    assert "`source_access_preflight_blocked_count`: `0`" in markdown
+    assert "| `pdbbind_plus_casf` | `CASF/PDBBind` | `primary_reachable` |" in markdown
+    assert "| `gnina` | `GNINA` | `primary_reachable` |" in markdown
     assert "`phase2_exit_criterion_count`: `5`" in markdown
     assert "## Phase 2 Harness Completion Audit" in markdown
     assert (

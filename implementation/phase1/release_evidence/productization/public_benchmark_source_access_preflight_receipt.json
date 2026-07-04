@@ -2,9 +2,9 @@
   "claim_boundary": "This receipt performs HEAD-only source access preflight checks. It does not download, redistribute, checksum, license, or prove raw benchmark payloads, and it does not close Public Benchmark Phase 2.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T01:37:43.995999+00:00",
+  "generated_at": "2026-07-04T05:07:26.482241+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:0050d5def428952494dcce36669825278bf268df9f6a2c8107e2d010df64e51b",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:c69517da37e510f3e75216e0eda967777abb5bf15db5e24e88ec404b1dc2e8d1",
     "scripts/build_public_benchmark_source_access_preflight_receipt.py": "sha256:47b23a61ea7eb470f8ab4b48337b4382ad3523a646b81c8bdddedf3451d1c2d1"
   },
   "network_probe_command": "python3 scripts/build_public_benchmark_source_access_preflight_receipt.py --source-plan implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json --out implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md --probe-network",
@@ -269,7 +269,7 @@
     }
   ],
   "source_access_ready": true,
-  "source_commit_sha": "87ef745c9330988590ab7eb52a52c640d581a739",
+  "source_commit_sha": "3bc8f9bd5e0ccbf58e8dd360413eff189c01f371",
   "source_plan_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
   "status": "reachable",
   "summary": {
