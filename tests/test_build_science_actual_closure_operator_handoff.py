@@ -220,6 +220,17 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert pocketmd_topk_action["template_safety_policy"][
         "placeholder_or_fixture_rows_do_not_promote"
     ] is True
+    pocketmd_rows_arg = (
+        "--pocketmd-rows implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows.json"
+    )
+    assert (
+        pocketmd_rows_arg
+        in pocketmd_topk_action["verify_science_actual_closure_command"]
+    )
+    assert "--source-url <source-url>" in pocketmd_topk_action[
+        "verify_science_actual_closure_command"
+    ]
     assert "pocketmd_lite_topk_rows_not_acquired" in pocketmd_action[
         "upstream_source_blockers"
     ]
@@ -572,4 +583,9 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "public_benchmark_subset_rows_template.csv" in markdown
     assert "gpcr_hard_decoy_rows_template.csv" in markdown
     assert "pocketmd_lite_topk_rows_template.csv" in markdown
+    assert (
+        "--pocketmd-rows implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows.json"
+    ) in markdown
+    assert "--source-license <license>" in markdown
     assert "materialize_science_actual_closure_from_rows.py --fail-blocked" in markdown

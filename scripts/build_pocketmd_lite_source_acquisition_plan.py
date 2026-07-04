@@ -597,6 +597,9 @@ def build_pocketmd_lite_source_acquisition_plan(
         ),
         "science_actual_closure": (
             "python3 scripts/materialize_science_actual_closure_from_rows.py "
+            f"--pocketmd-rows {DEFAULT_ROWS_OUT} "
+            "--source-id <source-id> --source-url <source-url> "
+            "--source-license <license> "
             "--fail-blocked"
         ),
     }

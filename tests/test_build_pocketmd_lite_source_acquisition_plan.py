@@ -301,6 +301,14 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     assert top_k_action["verify_science_actual_closure_command"] == row_action[
         "commands"
     ]["science_actual_closure"]
+    pocketmd_rows_arg = (
+        "--pocketmd-rows implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows.json"
+    )
+    assert pocketmd_rows_arg in top_k_action["verify_science_actual_closure_command"]
+    assert "--source-id <source-id>" in top_k_action[
+        "verify_science_actual_closure_command"
+    ]
     assert "operator_input_source.source_artifact_sha256" in top_k_action[
         "operator_must_fill_or_verify"
     ]
@@ -381,6 +389,12 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     ]
     assert payload["commands"]["import_rows"].startswith(
         "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py"
+    )
+    assert payload["commands"]["science_actual_closure"] == (
+        "python3 scripts/materialize_science_actual_closure_from_rows.py "
+        "--pocketmd-rows implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows.json --source-id <source-id> "
+        "--source-url <source-url> --source-license <license> --fail-blocked"
     )
     assert payload["commands"]["build_refinement_execution_plan"].startswith(
         "python3 scripts/build_pocketmd_lite_refinement_execution_plan.py"
@@ -484,6 +498,11 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert "`placeholder_or_fixture_rows_do_not_promote`: `True`" in markdown
     assert "operator_input_source.source_artifact_sha256" in markdown
     assert "verify_science_actual_closure_command" in markdown
+    assert (
+        "--pocketmd-rows implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows.json"
+    ) in markdown
+    assert "--source-license <license>" in markdown
     assert "`pocketmd_lite_case_001` | 2 | `1,2`" in markdown
     assert "## Phase 4 Receipt Roles" in markdown
     assert "upstream_top_k_candidate_scope_receipt" in markdown
