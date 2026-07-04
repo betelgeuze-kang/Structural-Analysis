@@ -82,6 +82,39 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert "not_closure_evidence_without_owner_receipts" in classification[
         "goal_operator_action_board"
     ]["validation_basis"]
+    assert surface["source_of_truth_gap_evidence_matrix_count"] == 5
+    evidence_matrix = {
+        row["candidate"]: row
+        for row in surface["source_of_truth_gap_evidence_matrix"]
+    }
+    assert set(evidence_matrix) == set(classification)
+    assert evidence_matrix["accuracy_parity_scorecard"] == {
+        "candidate": "accuracy_parity_scorecard",
+        "classification": "fix",
+        "contract_pass": True,
+        "current_repo_paths": [
+            "implementation/phase1/real_accuracy_validation_report.json"
+        ],
+        "failed_live_checks": [],
+        "freshness_label": "accuracy_parity_scorecard",
+        "freshness_policy": "direct_leaf_row",
+        "operator_action": (
+            "keep_accuracy_parity_scorecard_as_direct_freshness_leaf"
+        ),
+        "science_scorecard_priority_review": True,
+        "source_tracking_mode": "direct_freshness_leaf",
+        "source_tracking_verified": True,
+        "status": "classified",
+    }
+    assert evidence_matrix["goal_operator_action_board"]["classification"] == (
+        "aggregator-review"
+    )
+    assert evidence_matrix["goal_operator_action_board"][
+        "source_tracking_mode"
+    ] == "aggregator_upstream_source_tracking"
+    assert evidence_matrix["goal_operator_action_board"][
+        "source_tracking_verified"
+    ] is True
 
     kpis = surface["release_decision_kpis"]
     pm_report = json.loads(

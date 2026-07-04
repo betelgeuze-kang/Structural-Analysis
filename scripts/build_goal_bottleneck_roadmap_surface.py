@@ -23,6 +23,9 @@ SURFACE_DIR = Path("implementation/phase1/release_evidence/surface")
 DEFAULT_PM_REPORT = PRODUCTIZATION / "pm_release_gate_report.json"
 DEFAULT_ACTION_REGISTER = PRODUCTIZATION / "pm_release_blocker_action_register.json"
 DEFAULT_FRESHNESS_REPORT = PRODUCTIZATION / "release_evidence_freshness_report.json"
+DEFAULT_SOURCE_OF_TRUTH_GAP_CLASSIFICATION = (
+    PRODUCTIZATION / "source_of_truth_gap_classification.json"
+)
 DEFAULT_PRODUCT_CAPABILITIES = SURFACE_DIR / "product_capabilities_surface.json"
 DEFAULT_UX_OBSERVATION_REPORT = PRODUCTIZATION / "ux_new_user_observation_report.json"
 DEFAULT_UX_OBSERVATION_INTAKE_PACKET = (
@@ -75,6 +78,7 @@ def _input_paths() -> list[Path]:
         DEFAULT_PM_REPORT,
         DEFAULT_ACTION_REGISTER,
         DEFAULT_FRESHNESS_REPORT,
+        DEFAULT_SOURCE_OF_TRUTH_GAP_CLASSIFICATION,
         DEFAULT_PRODUCT_CAPABILITIES,
         DEFAULT_UX_OBSERVATION_REPORT,
         DEFAULT_UX_OBSERVATION_INTAKE_PACKET,
@@ -704,6 +708,10 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
     pm_report = _load_json(repo_root, DEFAULT_PM_REPORT)
     action_register = _load_json(repo_root, DEFAULT_ACTION_REGISTER)
     freshness = _load_json(repo_root, DEFAULT_FRESHNESS_REPORT)
+    source_of_truth_gap = _load_json(
+        repo_root,
+        DEFAULT_SOURCE_OF_TRUTH_GAP_CLASSIFICATION,
+    )
     product_capabilities = _load_json(repo_root, DEFAULT_PRODUCT_CAPABILITIES)
     ux_observation_report = _load_json(repo_root, DEFAULT_UX_OBSERVATION_REPORT)
     ux_observation_intake_packet = _load_json(
@@ -754,6 +762,32 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
             ],
         }
         for row in _as_list(freshness.get("source_of_truth_gap_classification"))
+        if isinstance(row, dict)
+    ]
+    source_of_truth_gap_evidence_matrix = [
+        {
+            "candidate": str(row.get("candidate") or ""),
+            "classification": str(row.get("classification") or ""),
+            "status": str(row.get("status") or ""),
+            "contract_pass": bool(row.get("contract_pass")),
+            "freshness_policy": str(row.get("freshness_policy") or ""),
+            "freshness_label": str(row.get("freshness_label") or ""),
+            "source_tracking_mode": str(row.get("source_tracking_mode") or ""),
+            "source_tracking_verified": bool(
+                row.get("source_tracking_verified")
+            ),
+            "operator_action": str(row.get("operator_action") or ""),
+            "current_repo_paths": [
+                str(item) for item in _as_list(row.get("current_repo_paths"))
+            ],
+            "failed_live_checks": [
+                str(item) for item in _as_list(row.get("failed_live_checks"))
+            ],
+            "science_scorecard_priority_review": bool(
+                row.get("science_scorecard_priority_review")
+            ),
+        }
+        for row in _as_list(source_of_truth_gap.get("classification_evidence_matrix"))
         if isinstance(row, dict)
     ]
     freshness_summary = _as_dict(freshness.get("summary"))
@@ -833,6 +867,10 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         "release_decision_kpis": release_decision_kpis,
         "source_of_truth_gap_summary": source_of_truth_gap_summary,
         "source_of_truth_gap_classification": source_of_truth_gap_classification,
+        "source_of_truth_gap_evidence_matrix": source_of_truth_gap_evidence_matrix,
+        "source_of_truth_gap_evidence_matrix_count": len(
+            source_of_truth_gap_evidence_matrix
+        ),
         "science_evidence_surface_bottlenecks": science_bottlenecks,
         "science_evidence_surface_status": {},
         "capability_summary_rows": _capability_summary_rows(product_capabilities),

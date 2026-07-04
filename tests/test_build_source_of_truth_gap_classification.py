@@ -36,6 +36,8 @@ def test_source_of_truth_gap_classification_materializes_live_scan() -> None:
         "blocker_count": 0,
         "candidate_count": 5,
         "classification_bucket_count": 3,
+        "classification_evidence_matrix_count": 5,
+        "classification_evidence_matrix_pass_count": 5,
         "classification_index_candidate_count": 5,
         "expected_candidate_count": 5,
         "fix_count": 2,
@@ -48,6 +50,10 @@ def test_source_of_truth_gap_classification_materializes_live_scan() -> None:
     assert payload["classification_rows"] == payload["rows"]
     assert set(payload["classification_by_candidate"]) == module.EXPECTED_CANDIDATES
     assert set(payload["classification_index"]) == module.EXPECTED_CANDIDATES
+    evidence_matrix = {
+        row["candidate"]: row for row in payload["classification_evidence_matrix"]
+    }
+    assert set(evidence_matrix) == module.EXPECTED_CANDIDATES
     assert len(payload["operator_actions"]) == 5
     assert payload["operator_action_index"] == {
         "accuracy_parity_scorecard": (
@@ -116,6 +122,51 @@ def test_source_of_truth_gap_classification_materializes_live_scan() -> None:
         "science_scorecard_priority_review": True,
         "status": "classified",
     }
+    assert evidence_matrix["accuracy_parity_scorecard"] == {
+        "candidate": "accuracy_parity_scorecard",
+        "claim_boundary": (
+            "This matrix row is classification evidence only. It does not "
+            "replace the referenced leaf validation, aggregator receipt, "
+            "or owner review."
+        ),
+        "classification": "fix",
+        "contract_pass": True,
+        "current_repo_path_presence": {
+            "implementation/phase1/real_accuracy_validation_report.json": True
+        },
+        "current_repo_paths": [
+            "implementation/phase1/real_accuracy_validation_report.json"
+        ],
+        "failed_live_checks": [],
+        "freshness_label": "accuracy_parity_scorecard",
+        "freshness_policy": "direct_leaf_row",
+        "live_check_keys": [
+            "accuracy_scorecard_science_checks",
+            "accuracy_scorecard_science_contract_pass",
+            "candidate_expected",
+            "current_repo_match_present",
+            "freshness_leaf_presence_matches",
+            "metadata_present_on_current_matches",
+        ],
+        "operator_action": (
+            "keep_accuracy_parity_scorecard_as_direct_freshness_leaf"
+        ),
+        "science_scorecard_priority_review": True,
+        "source_tracking_mode": "direct_freshness_leaf",
+        "source_tracking_requirement": (
+            "candidate must be present in release freshness leaf rows and "
+            "the matched artifact must expose source tracking metadata"
+        ),
+        "source_tracking_verified": True,
+        "status": "classified",
+        "validation_basis": [
+            "leaf_artifact_in_default_freshness_rows",
+            "science_scorecard_overall_pass_field",
+            "benchmark_contract_and_kpi_fields",
+            "public_hf_and_source_family_checks",
+            "stability_suite_pass_field",
+        ],
+    }
     assert payload["accuracy_parity_scorecard_priority_review"] == {
         "candidate": "accuracy_parity_scorecard",
         "claim_boundary": (
@@ -171,6 +222,11 @@ def test_source_of_truth_gap_classification_materializes_live_scan() -> None:
         assert row["freshness_label"] == ""
         assert row["live_checks"]["freshness_leaf_presence_matches"] is True
         assert row["live_checks"]["aggregator_source_tracking_present"] is True
+        assert evidence_matrix[candidate]["source_tracking_mode"] == (
+            "aggregator_upstream_source_tracking"
+        )
+        assert evidence_matrix[candidate]["source_tracking_verified"] is True
+        assert evidence_matrix[candidate]["failed_live_checks"] == []
         assert payload["classification_index"][candidate]["operator_action"] == (
             f"review_{candidate}_upstream_source_tracking"
         )
@@ -186,9 +242,14 @@ def test_source_of_truth_gap_classification_cli_writes_artifact(tmp_path: Path) 
     assert payload["summary"]["candidate_count"] == 5
     assert payload["classification_by_bucket"]["fix"]["count"] == 2
     assert payload["classification_by_bucket"]["aggregator-review"]["count"] == 3
+    assert payload["summary"]["classification_evidence_matrix_count"] == 5
+    assert payload["summary"]["classification_evidence_matrix_pass_count"] == 5
     assert payload["classification_index"]["accuracy_parity_scorecard"][
         "science_scorecard_priority_review"
     ] is True
+    assert payload["classification_evidence_matrix"][0]["candidate"] == (
+        "accuracy_parity_scorecard"
+    )
     assert payload["operator_actions"][0]["candidate"] == "accuracy_parity_scorecard"
     assert payload["input_checksums"][
         "scripts/build_source_of_truth_gap_classification.py"

@@ -222,6 +222,73 @@ def _operator_actions(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     ]
 
 
+def _classification_evidence_matrix(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    matrix: list[dict[str, Any]] = []
+    for row in rows:
+        candidate = str(row.get("candidate") or "")
+        classification = str(row.get("classification") or "")
+        live_checks = _as_dict(row.get("live_checks"))
+        failed_live_checks = [
+            key
+            for key, value in live_checks.items()
+            if isinstance(value, bool) and not value
+        ]
+        if classification == "fix":
+            source_tracking_mode = "direct_freshness_leaf"
+            source_tracking_requirement = (
+                "candidate must be present in release freshness leaf rows and "
+                "the matched artifact must expose source tracking metadata"
+            )
+        elif classification == "aggregator-review":
+            source_tracking_mode = "aggregator_upstream_source_tracking"
+            source_tracking_requirement = (
+                "candidate must stay out of direct freshness leaf rows while its "
+                "matched rollup artifact exposes upstream source tracking metadata"
+            )
+        else:
+            source_tracking_mode = "no_op_record"
+            source_tracking_requirement = (
+                "candidate must be recorded as intentionally not requiring a "
+                "freshness leaf or aggregator source-tracking action"
+            )
+        matrix.append(
+            {
+                "candidate": candidate,
+                "classification": classification,
+                "status": str(row.get("status") or ""),
+                "contract_pass": bool(row.get("contract_pass")),
+                "freshness_policy": str(row.get("freshness_policy") or ""),
+                "freshness_label": str(row.get("freshness_label") or ""),
+                "current_repo_paths": [
+                    str(item) for item in row.get("current_repo_paths", [])
+                ],
+                "current_repo_path_presence": _as_dict(
+                    row.get("current_repo_path_presence")
+                ),
+                "source_tracking_mode": source_tracking_mode,
+                "source_tracking_requirement": source_tracking_requirement,
+                "source_tracking_verified": bool(
+                    live_checks.get("metadata_present_on_current_matches")
+                    and live_checks.get("freshness_leaf_presence_matches")
+                ),
+                "operator_action": _operator_action(row),
+                "validation_basis": [
+                    str(item) for item in row.get("validation_basis", [])
+                ],
+                "live_check_keys": sorted(live_checks),
+                "failed_live_checks": failed_live_checks,
+                "science_scorecard_priority_review": candidate
+                == "accuracy_parity_scorecard",
+                "claim_boundary": (
+                    "This matrix row is classification evidence only. It does not "
+                    "replace the referenced leaf validation, aggregator receipt, "
+                    "or owner review."
+                ),
+            }
+        )
+    return matrix
+
+
 def _accuracy_priority_review(rows: list[dict[str, Any]]) -> dict[str, Any]:
     by_candidate = _classification_by_candidate(rows)
     row = _as_dict(by_candidate.get("accuracy_parity_scorecard"))
@@ -292,6 +359,7 @@ def build_source_of_truth_gap_classification(
     classification_by_bucket = _classification_by_bucket(rows)
     classification_index = _classification_index(rows)
     operator_actions = _operator_actions(rows)
+    classification_evidence_matrix = _classification_evidence_matrix(rows)
     accuracy_priority_review = _accuracy_priority_review(rows)
     return {
         "schema_version": SCHEMA_VERSION,
@@ -320,6 +388,7 @@ def build_source_of_truth_gap_classification(
         "classification_by_candidate": _classification_by_candidate(rows),
         "classification_by_bucket": classification_by_bucket,
         "classification_index": classification_index,
+        "classification_evidence_matrix": classification_evidence_matrix,
         "operator_actions": operator_actions,
         "operator_action_index": {
             str(row["candidate"]): _operator_action(row)
@@ -345,6 +414,12 @@ def build_source_of_truth_gap_classification(
                 and row["contract_pass"]
             ),
             "classification_index_candidate_count": len(classification_index),
+            "classification_evidence_matrix_count": len(
+                classification_evidence_matrix
+            ),
+            "classification_evidence_matrix_pass_count": sum(
+                1 for row in classification_evidence_matrix if row["contract_pass"]
+            ),
             "operator_action_count": len(operator_actions),
             "accuracy_parity_scorecard_science_contract_pass": bool(
                 accuracy_priority_review.get("science_contract_pass")
