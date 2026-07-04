@@ -6,6 +6,8 @@
 - `first_blocked_target`: `top_k_refinement_operator_intake`
 - `source_acquisition_plan`: `implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json`
 - `source_acquisition_plan_status`: `operator_acquisition_required`
+- `template_preflight_role_receipt_blocked_count`: `24`
+- `template_preflight_operator_input_source_receipt_blocked_count`: `5`
 - `refinement_execution_plan`: `implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json`
 - `refinement_execution_plan_status`: `operator_refinement_rows_required`
 - `claim_boundary`: This packet is an owner-facing intake contract for bounded PocketMD Lite top-k refinement rows. It does not run MD, infer missing metrics, or unlock broad all-atom MD/FEP claims.
@@ -19,6 +21,13 @@
 | Row Input | Action | Expected Rows | Missing Slots | Template Preflight | Import | Survival |
 |---|---|---|---|---|---|---|
 | `pocketmd_rows` | `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `6` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json` | `python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>` | `python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked` |
+
+### PocketMD Receipt Blockers
+
+- `template_preflight_role_receipt_blocked_count`: `24`
+- `first_blocked_role_receipt`: `upstream_top_k_candidate_scope_receipt` / `pocketmd_lite_case_001_rank_01`
+- `template_preflight_operator_input_source_receipt_blocked_count`: `5`
+- `first_blocked_operator_input_source_receipt`: `source_id`
 
 ## Gate Unblock Plan
 
