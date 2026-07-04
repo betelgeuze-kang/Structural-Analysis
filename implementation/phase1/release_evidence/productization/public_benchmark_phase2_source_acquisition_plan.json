@@ -21,12 +21,12 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T00:32:57.300750+00:00",
+  "generated_at": "2026-07-04T00:49:44.044557+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:3f53708e67d1dd76f5f313307ce46a2971b748ef1938925bc44318b40e52709d",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:d91bbc8402c86796ce3d60d0a053610cceea2dcbbb0f5faf00adeaad7698bea4",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:6e75a02c6b13b518bf6087e44db30b84c243e4935d2b50611e2fd0411e476118",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:e3c805412341ff47fc5953dac7d090cf2879ba588638f5cd1cab320583e1b5a9",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:2f93c15c3299b80bc7da6d72571a6724a078bc2c479e31ff89251591e68cdbeb",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1",
     "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:895f52a4b9383625534767806ab373c4e33d70287a52ca65f9090b0d0e1e593a",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
@@ -86,6 +86,9 @@
       "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
       "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
       "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
       "closure_boundary": "Vina and GNINA rows must describe comparable engine runs over the same benchmark cases with receipts and computed pose-success fields; adapter shape alone is not an engine comparison result.",
       "depends_on_row_inputs": [
         "subset_rows",
@@ -127,6 +130,19 @@
       "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
       "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
       "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
+      "phase2_materialization_chain": [
+        "materialize_public_benchmark_vina_gnina_comparison_adapter"
+      ],
+      "phase2_required_by_components": [
+        {
+          "artifact_role": "vina_gnina_comparison_adapter",
+          "component_id": "vina_gnina_comparison_adapter",
+          "count_field": "real_comparison_case_count",
+          "criterion_id": "vina_gnina_comparison_ready",
+          "ready_field": "public_benchmark_engine_comparison_ready",
+          "required_minimum_count": 1
+        }
+      ],
       "receipt_fields": [
         "source_license_or_accession",
         "source_checksum",
@@ -517,6 +533,96 @@
     "run_public_benchmark_harness_bundle_materializer",
     "refresh_public_benchmark_source_of_truth"
   ],
+  "phase2_exit_criteria": [
+    {
+      "artifact_role": "pose_success_harness",
+      "blockers": [],
+      "component_id": "casf_pdbbind_pose_success_harness",
+      "criterion_id": "casf_pdbbind_pose_success_harness_ready",
+      "current": {
+        "contract_pass": true,
+        "ready": true,
+        "real_benchmark_case_count": 12
+      },
+      "pass": true,
+      "required": {
+        "contract_pass": true,
+        "ready": true,
+        "real_benchmark_case_count": 12
+      }
+    },
+    {
+      "artifact_role": "rmsd_scorecard",
+      "blockers": [],
+      "component_id": "symmetry_aware_ligand_rmsd",
+      "criterion_id": "symmetry_aware_ligand_rmsd_ready",
+      "current": {
+        "contract_pass": true,
+        "ready": true,
+        "real_benchmark_case_count": 12
+      },
+      "pass": true,
+      "required": {
+        "contract_pass": true,
+        "ready": true,
+        "real_benchmark_case_count": 12
+      }
+    },
+    {
+      "artifact_role": "pose_validity_packet",
+      "blockers": [],
+      "component_id": "posebusters_style_pose_validity",
+      "criterion_id": "posebusters_style_pose_validity_ready",
+      "current": {
+        "contract_pass": true,
+        "ready": true,
+        "real_benchmark_case_count": 12
+      },
+      "pass": true,
+      "required": {
+        "contract_pass": true,
+        "ready": true,
+        "real_benchmark_case_count": 12
+      }
+    },
+    {
+      "artifact_role": "vina_gnina_comparison_adapter",
+      "blockers": [
+        "vina_gnina_rows_not_provided"
+      ],
+      "component_id": "vina_gnina_comparison_adapter",
+      "criterion_id": "vina_gnina_comparison_ready",
+      "current": {
+        "contract_pass": false,
+        "ready": false,
+        "real_comparison_case_count": 0
+      },
+      "pass": false,
+      "required": {
+        "contract_pass": true,
+        "ready": true,
+        "real_comparison_case_count": 1
+      }
+    },
+    {
+      "artifact_role": "enrichment_scorecard",
+      "blockers": [],
+      "component_id": "dud_e_or_lit_pcba_enrichment",
+      "criterion_id": "dud_e_or_lit_pcba_enrichment_ready",
+      "current": {
+        "contract_pass": true,
+        "ready": true,
+        "real_enrichment_target_count": 1
+      },
+      "pass": true,
+      "required": {
+        "contract_pass": true,
+        "ready": true,
+        "real_enrichment_target_count": 1
+      }
+    }
+  ],
+  "phase2_exit_criterion_count": 5,
   "phase2_ready": false,
   "phase2_row_audit": {
     "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
@@ -556,6 +662,218 @@
     "source_actuality_scope_complete": false,
     "status": "operator_evidence_required"
   },
+  "phase2_row_closure_matrix": [
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "auto_detected": true,
+      "claim_boundary": "This row documents which Phase 2 readiness criteria a real operator-attached row file can unblock; it is not evidence by itself.",
+      "closes_phase2_criteria": [
+        "casf_pdbbind_pose_success_harness_ready"
+      ],
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.csv"
+      ],
+      "description": "CASF/PDBBind subset rows",
+      "feeds_components": [
+        "casf_pdbbind_pose_success_harness"
+      ],
+      "materialization_chain": [
+        "materialize_public_benchmark_subset_manifest",
+        "validate_public_benchmark_subset_manifest",
+        "materialize_public_benchmark_pose_validity_input",
+        "materialize_public_benchmark_pose_success_harness"
+      ],
+      "missing": false,
+      "operator_blockers_if_missing": [
+        "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
+      ],
+      "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+      "required_by_components": [
+        {
+          "artifact_role": "pose_success_harness",
+          "component_id": "casf_pdbbind_pose_success_harness",
+          "count_field": "real_benchmark_case_count",
+          "criterion_id": "casf_pdbbind_pose_success_harness_ready",
+          "ready_field": "pose_success_harness_ready",
+          "required_minimum_count": 12
+        }
+      ],
+      "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+      "row_contract_ref": "row_intake_contracts.subset_rows",
+      "row_input_id": "subset_rows",
+      "status": "provided"
+    },
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "auto_detected": true,
+      "claim_boundary": "This row documents which Phase 2 readiness criteria a real operator-attached row file can unblock; it is not evidence by itself.",
+      "closes_phase2_criteria": [
+        "casf_pdbbind_pose_success_harness_ready",
+        "symmetry_aware_ligand_rmsd_ready",
+        "posebusters_style_pose_validity_ready"
+      ],
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.csv"
+      ],
+      "description": "CASF/PDBBind pose-coordinate rows",
+      "feeds_components": [
+        "symmetry_aware_ligand_rmsd",
+        "posebusters_style_pose_validity",
+        "casf_pdbbind_pose_success_harness"
+      ],
+      "materialization_chain": [
+        "materialize_public_benchmark_pose_validity_input",
+        "validate_public_benchmark_pose_validity",
+        "materialize_public_benchmark_posebusters_validity_packet",
+        "materialize_public_benchmark_rmsd_scorecard",
+        "materialize_public_benchmark_pose_success_harness"
+      ],
+      "missing": false,
+      "operator_blockers_if_missing": [
+        "casf_pdbbind_pose_success_harness::pose_rows_not_provided",
+        "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
+        "posebusters_style_pose_validity::pose_rows_not_provided"
+      ],
+      "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+      "required_by_components": [
+        {
+          "artifact_role": "pose_success_harness",
+          "component_id": "casf_pdbbind_pose_success_harness",
+          "count_field": "real_benchmark_case_count",
+          "criterion_id": "casf_pdbbind_pose_success_harness_ready",
+          "ready_field": "pose_success_harness_ready",
+          "required_minimum_count": 12
+        },
+        {
+          "artifact_role": "rmsd_scorecard",
+          "component_id": "symmetry_aware_ligand_rmsd",
+          "count_field": "real_benchmark_case_count",
+          "criterion_id": "symmetry_aware_ligand_rmsd_ready",
+          "ready_field": "scorecard_ready",
+          "required_minimum_count": 12
+        },
+        {
+          "artifact_role": "pose_validity_packet",
+          "component_id": "posebusters_style_pose_validity",
+          "count_field": "real_benchmark_case_count",
+          "criterion_id": "posebusters_style_pose_validity_ready",
+          "ready_field": "posebusters_validity_ready",
+          "required_minimum_count": 12
+        }
+      ],
+      "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+      "row_contract_ref": "row_intake_contracts.pose_rows",
+      "row_input_id": "pose_rows",
+      "status": "provided"
+    },
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "auto_detected": true,
+      "claim_boundary": "This row documents which Phase 2 readiness criteria a real operator-attached row file can unblock; it is not evidence by itself.",
+      "closes_phase2_criteria": [
+        "dud_e_or_lit_pcba_enrichment_ready"
+      ],
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.csv"
+      ],
+      "description": "DUD-E/LIT-PCBA enrichment rows",
+      "feeds_components": [
+        "dud_e_or_lit_pcba_enrichment"
+      ],
+      "materialization_chain": [
+        "materialize_public_benchmark_enrichment_scorecard"
+      ],
+      "missing": false,
+      "operator_blockers_if_missing": [
+        "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
+      ],
+      "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+      "required_by_components": [
+        {
+          "artifact_role": "enrichment_scorecard",
+          "component_id": "dud_e_or_lit_pcba_enrichment",
+          "count_field": "real_enrichment_target_count",
+          "criterion_id": "dud_e_or_lit_pcba_enrichment_ready",
+          "ready_field": "public_benchmark_enrichment_ready",
+          "required_minimum_count": 1
+        }
+      ],
+      "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+      "row_contract_ref": "row_intake_contracts.enrichment_rows",
+      "row_input_id": "enrichment_rows",
+      "status": "provided"
+    },
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "auto_detected": false,
+      "claim_boundary": "This row documents which Phase 2 readiness criteria a real operator-attached row file can unblock; it is not evidence by itself.",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+      ],
+      "description": "Vina/GNINA engine comparison rows",
+      "feeds_components": [
+        "vina_gnina_comparison_adapter"
+      ],
+      "materialization_chain": [
+        "materialize_public_benchmark_vina_gnina_comparison_adapter"
+      ],
+      "missing": true,
+      "operator_blockers_if_missing": [
+        "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
+      ],
+      "provided_path": "",
+      "required_by_components": [
+        {
+          "artifact_role": "vina_gnina_comparison_adapter",
+          "component_id": "vina_gnina_comparison_adapter",
+          "count_field": "real_comparison_case_count",
+          "criterion_id": "vina_gnina_comparison_ready",
+          "ready_field": "public_benchmark_engine_comparison_ready",
+          "required_minimum_count": 1
+        }
+      ],
+      "resolved_path": "",
+      "row_contract_ref": "row_intake_contracts.vina_gnina_rows",
+      "row_input_id": "vina_gnina_rows",
+      "status": "missing"
+    }
+  ],
+  "phase2_row_closure_matrix_count": 4,
   "receipt_promotion_policy": {
     "external_source_receipts_required": true,
     "license_or_accession_reference_required": true,
@@ -919,7 +1237,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "45dcb3a51cd4dffa7803648aab06535b298fe4c6",
+  "source_commit_sha": "027ca2fd60c06ab641ae0a72074f3c6a00dc5748",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
@@ -931,6 +1249,9 @@
     "official_source_catalog_count": 6,
     "official_source_receipt_plan_status": "operator_receipts_required",
     "official_source_receipt_role_count": 4,
+    "phase2_blocked_exit_criterion_count": 1,
+    "phase2_exit_criterion_count": 5,
+    "phase2_passing_exit_criterion_count": 4,
     "phase2_ready": false,
     "phase2_row_audit_blocker_count": 1,
     "phase2_row_audit_failed_criteria": [
@@ -945,6 +1266,7 @@
     "phase2_row_audit_source_actuality_scope": "provided_row_inputs_only",
     "phase2_row_audit_source_actuality_scope_complete": false,
     "phase2_row_audit_status": "operator_evidence_required",
+    "phase2_row_closure_matrix_count": 4,
     "required_component_count": 5,
     "required_row_input_count": 4,
     "vina_gnina_execution_plan_ready": false,

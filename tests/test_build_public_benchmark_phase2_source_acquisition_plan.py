@@ -156,6 +156,47 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert payload["phase2_row_audit"]["phase2_failed_criteria"] == [
         "vina_gnina_comparison_ready",
     ]
+    assert payload["phase2_exit_criterion_count"] == 5
+    exit_criteria = {
+        row["criterion_id"]: row for row in payload["phase2_exit_criteria"]
+    }
+    assert exit_criteria["casf_pdbbind_pose_success_harness_ready"]["pass"] is True
+    assert exit_criteria["symmetry_aware_ligand_rmsd_ready"]["pass"] is True
+    assert exit_criteria["posebusters_style_pose_validity_ready"]["pass"] is True
+    assert exit_criteria["dud_e_or_lit_pcba_enrichment_ready"]["pass"] is True
+    assert exit_criteria["vina_gnina_comparison_ready"]["pass"] is False
+    assert exit_criteria["vina_gnina_comparison_ready"]["blockers"] == [
+        "vina_gnina_rows_not_provided"
+    ]
+    assert payload["phase2_row_closure_matrix_count"] == 4
+    closure_matrix = {
+        row["row_input_id"]: row for row in payload["phase2_row_closure_matrix"]
+    }
+    assert closure_matrix["subset_rows"]["closes_phase2_criteria"] == [
+        "casf_pdbbind_pose_success_harness_ready"
+    ]
+    assert closure_matrix["pose_rows"]["closes_phase2_criteria"] == [
+        "casf_pdbbind_pose_success_harness_ready",
+        "symmetry_aware_ligand_rmsd_ready",
+        "posebusters_style_pose_validity_ready",
+    ]
+    assert closure_matrix["enrichment_rows"]["closes_phase2_criteria"] == [
+        "dud_e_or_lit_pcba_enrichment_ready"
+    ]
+    assert closure_matrix["vina_gnina_rows"]["status"] == "missing"
+    assert closure_matrix["vina_gnina_rows"]["closes_phase2_criteria"] == [
+        "vina_gnina_comparison_ready"
+    ]
+    assert closure_matrix["vina_gnina_rows"]["required_by_components"] == [
+        {
+            "artifact_role": "vina_gnina_comparison_adapter",
+            "component_id": "vina_gnina_comparison_adapter",
+            "count_field": "real_comparison_case_count",
+            "criterion_id": "vina_gnina_comparison_ready",
+            "ready_field": "public_benchmark_engine_comparison_ready",
+            "required_minimum_count": 1,
+        }
+    ]
     assert payload["phase2_row_audit"]["source_actuality_scope"] == (
         "provided_row_inputs_only"
     )
@@ -342,6 +383,10 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "official_source_receipt_plan_status": "operator_receipts_required",
         "official_source_receipt_role_count": 4,
         "official_source_catalog_count": 6,
+        "phase2_exit_criterion_count": 5,
+        "phase2_passing_exit_criterion_count": 4,
+        "phase2_blocked_exit_criterion_count": 1,
+        "phase2_row_closure_matrix_count": 4,
         "phase2_row_audit_blocker_count": 1,
         "phase2_row_audit_failed_criteria": [
             "vina_gnina_comparison_ready",
@@ -389,6 +434,15 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert missing_action["operator_action"] == (
         "attach_vina_gnina_rows_then_run_phase2_row_audit"
     )
+    assert missing_action["closes_phase2_criteria"] == [
+        "vina_gnina_comparison_ready"
+    ]
+    assert missing_action["phase2_materialization_chain"] == [
+        "materialize_public_benchmark_vina_gnina_comparison_adapter"
+    ]
+    assert missing_action["phase2_required_by_components"][0][
+        "required_minimum_count"
+    ] == 1
     assert missing_action["engine_input_manifest_template"].endswith(
         "public_benchmark_vina_gnina_input_manifest_template.csv"
     )
@@ -478,6 +532,8 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert payload["required_row_input_count"] == 4
     assert payload["official_source_receipt_plan"]["receipt_role_count"] == 4
     assert payload["official_source_receipt_plan"]["source_catalog_count"] == 6
+    assert payload["phase2_exit_criterion_count"] == 5
+    assert payload["phase2_row_closure_matrix_count"] == 4
     assert payload["vina_gnina_execution_plan"]["required_engine_run_count"] == 24
     assert payload["vina_gnina_runtime_readiness"]["status"] == (
         "execution_plan_blocked"
@@ -489,11 +545,19 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "`vina_gnina_required_engine_run_count`: `24`" in markdown
     assert "`vina_gnina_input_manifest_status`: `not_detected`" in markdown
     assert "`vina_gnina_runtime_ready_engine_run_slot_count`: `0`" in markdown
+    assert "`phase2_exit_criterion_count`: `5`" in markdown
+    assert "`phase2_row_closure_matrix_count`: `4`" in markdown
+    assert "## Phase 2 Exit Criteria" in markdown
+    assert "`posebusters_style_pose_validity_ready`" in markdown
+    assert "`vina_gnina_rows_not_provided`" in markdown
+    assert "## Phase 2 Row Closure Matrix" in markdown
+    assert "`materialize_public_benchmark_vina_gnina_comparison_adapter`" in markdown
     assert "`operator_unblock_status`: `engine_inputs_required`" in markdown
     assert "`blocked_case_input_slot_count`: `12`" in markdown
     assert "`blocked_engine_run_slot_count`: `24`" in markdown
     assert "## Missing Row Input Actions" in markdown
     assert "attach_vina_gnina_rows_then_run_phase2_row_audit" in markdown
+    assert "`vina_gnina_comparison_ready`" in markdown
     assert "materialize_public_benchmark_vina_gnina_comparison_adapter.py" in markdown
     assert "<operator-vina-gnina-run-rows.csv|json|jsonl|ndjson>" in markdown
     assert "### Vina/GNINA Adapter Row Preflight Action" in markdown

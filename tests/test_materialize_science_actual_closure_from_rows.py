@@ -840,6 +840,24 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
                     "public_benchmark_vina_gnina_engine_inputs_not_ready",
                 ],
                 "summary": {"vina_gnina_runtime_ready_engine_run_slot_count": 0},
+                "phase2_exit_criterion_count": 5,
+                "phase2_exit_criteria": [
+                    {
+                        "component_id": "vina_gnina_comparison_adapter",
+                        "criterion_id": "vina_gnina_comparison_ready",
+                        "pass": False,
+                    }
+                ],
+                "phase2_row_closure_matrix_count": 4,
+                "phase2_row_closure_matrix": [
+                    {
+                        "row_input_id": "vina_gnina_rows",
+                        "status": "missing",
+                        "closes_phase2_criteria": [
+                            "vina_gnina_comparison_ready",
+                        ],
+                    }
+                ],
                 "missing_row_input_action_count": 1,
                 "missing_row_input_actions": [
                     {
@@ -901,6 +919,15 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
     assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
         "missing_row_input_actions"
     ][0]["operator_action"] == "attach_vina_gnina_rows_then_run_phase2_row_audit"
+    assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
+        "phase2_row_closure_matrix_count"
+    ] == 4
+    assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
+        "phase2_row_closure_matrix"
+    ][0]["closes_phase2_criteria"] == ["vina_gnina_comparison_ready"]
+    assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
+        "phase2_exit_criterion_count"
+    ] == 5
     assert audit["upstream_source_acquisition"]["pocketmd_lite"][
         "missing_row_input_actions"
     ][0]["operator_action"] == (

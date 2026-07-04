@@ -161,6 +161,9 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "attach_vina_gnina_rows_then_run_phase2_row_audit"
     )
     assert public_action["source_acquisition_row_action"][
+        "closes_phase2_criteria"
+    ] == ["vina_gnina_comparison_ready"]
+    assert public_action["source_acquisition_row_action"][
         "runtime_readiness_command"
     ].startswith("python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py")
     assert "engine_config_checksum" in public_action["source_acquisition_row_action"][
@@ -326,6 +329,12 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert vina_gnina["status"] == "operator_input_required"
     assert vina_gnina["missing"] is True
     assert vina_gnina["upstream_source_id"] == "public_benchmark_phase2"
+    assert vina_gnina["upstream_source_acquisition"][
+        "phase2_row_closure_matrix_count"
+    ] == 4
+    assert vina_gnina["upstream_source_acquisition"][
+        "phase2_exit_criterion_count"
+    ] == 5
     assert vina_gnina["source_acquisition_operator_action"] == (
         "resolve_public_benchmark_phase2_source_acquisition_blockers"
     )
@@ -568,7 +577,9 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "Source Row Action" in markdown
     assert "Source Command" in markdown
     assert "Required Receipts" in markdown
+    assert "Source Phase 2 Criteria" in markdown
     assert "attach_vina_gnina_rows_then_run_phase2_row_audit" in markdown
+    assert "vina_gnina_comparison_ready" in markdown
     assert "build_public_benchmark_vina_gnina_runtime_readiness.py" in markdown
     assert "engine_config_checksum" in markdown
     assert "materialize_pocketmd_lite_operator_intake_from_rows.py" in markdown

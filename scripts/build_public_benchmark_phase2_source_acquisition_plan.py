@@ -381,6 +381,117 @@ def _phase2_row_audit_summary(audit: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _phase2_row_closure_matrix(audit: dict[str, Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    raw_rows = audit.get("phase2_row_closure_matrix")
+    if not isinstance(raw_rows, list):
+        raw_rows = []
+    for row in raw_rows:
+        if not isinstance(row, dict):
+            continue
+        required_by_components = [
+            {
+                "component_id": str(item.get("component_id") or ""),
+                "criterion_id": str(item.get("criterion_id") or ""),
+                "artifact_role": str(item.get("artifact_role") or ""),
+                "ready_field": str(item.get("ready_field") or ""),
+                "count_field": str(item.get("count_field") or ""),
+                "required_minimum_count": int(
+                    item.get("required_minimum_count") or 0
+                ),
+            }
+            for item in row.get("required_by_components", [])
+            if isinstance(item, dict)
+        ]
+        rows.append(
+            {
+                "row_input_id": str(row.get("row_input_id") or ""),
+                "description": str(row.get("description") or ""),
+                "status": str(row.get("status") or ""),
+                "missing": bool(row.get("missing")),
+                "auto_detected": bool(row.get("auto_detected")),
+                "resolved_path": str(row.get("resolved_path") or ""),
+                "provided_path": str(row.get("provided_path") or ""),
+                "default_row_path_candidates": [
+                    str(item)
+                    for item in row.get("default_row_path_candidates", [])
+                    if str(item)
+                ]
+                if isinstance(row.get("default_row_path_candidates"), list)
+                else [],
+                "accepted_formats": [
+                    str(item) for item in row.get("accepted_formats", []) if str(item)
+                ]
+                if isinstance(row.get("accepted_formats"), list)
+                else [],
+                "feeds_components": [
+                    str(item) for item in row.get("feeds_components", []) if str(item)
+                ]
+                if isinstance(row.get("feeds_components"), list)
+                else [],
+                "closes_phase2_criteria": [
+                    str(item)
+                    for item in row.get("closes_phase2_criteria", [])
+                    if str(item)
+                ]
+                if isinstance(row.get("closes_phase2_criteria"), list)
+                else [],
+                "required_by_components": required_by_components,
+                "operator_blockers_if_missing": [
+                    str(item)
+                    for item in row.get("operator_blockers_if_missing", [])
+                    if str(item)
+                ]
+                if isinstance(row.get("operator_blockers_if_missing"), list)
+                else [],
+                "materialization_chain": [
+                    str(item)
+                    for item in row.get("materialization_chain", [])
+                    if str(item)
+                ]
+                if isinstance(row.get("materialization_chain"), list)
+                else [],
+                "row_contract_ref": str(row.get("row_contract_ref") or ""),
+                "claim_boundary": str(row.get("claim_boundary") or ""),
+            }
+        )
+    return rows
+
+
+def _phase2_exit_criteria(audit: dict[str, Any]) -> list[dict[str, Any]]:
+    phase2_exit_gate = audit.get("phase2_exit_gate")
+    if not isinstance(phase2_exit_gate, dict):
+        phase2_exit_gate = {}
+    raw_criteria = phase2_exit_gate.get("criteria")
+    if not isinstance(raw_criteria, list):
+        raw_criteria = []
+    criteria: list[dict[str, Any]] = []
+    for row in raw_criteria:
+        if not isinstance(row, dict):
+            continue
+        blockers = row.get("blockers")
+        if not isinstance(blockers, list):
+            blockers = []
+        current = row.get("current")
+        if not isinstance(current, dict):
+            current = {}
+        required = row.get("required")
+        if not isinstance(required, dict):
+            required = {}
+        criteria.append(
+            {
+                "criterion_id": str(row.get("criterion_id") or ""),
+                "component_id": str(row.get("component_id") or ""),
+                "artifact_role": str(row.get("artifact_role") or ""),
+                "pass": bool(row.get("pass")),
+                "current": current,
+                "required": required,
+                "blockers": [str(item) for item in blockers if str(item)],
+            }
+        )
+    return criteria
+
+
 def _vina_gnina_execution_plan_summary(payload: dict[str, Any]) -> dict[str, Any]:
     summary = payload.get("summary")
     if not isinstance(summary, dict):
@@ -965,14 +1076,21 @@ def _missing_row_input_actions(
     *,
     missing_row_inputs: list[str],
     row_input_contracts: list[dict[str, Any]],
+    phase2_row_closure_matrix: list[dict[str, Any]],
     commands: dict[str, str],
     vina_gnina_execution_plan_summary: dict[str, Any],
     vina_gnina_runtime_readiness_summary: dict[str, Any],
 ) -> list[dict[str, Any]]:
     contracts = _row_input_contract_map(row_input_contracts)
+    closure_by_row_input = {
+        str(row.get("row_input_id") or ""): row
+        for row in phase2_row_closure_matrix
+        if isinstance(row, dict)
+    }
     actions: list[dict[str, Any]] = []
     for row_input_id in missing_row_inputs:
         contract = contracts.get(row_input_id, {})
+        row_closure = closure_by_row_input.get(row_input_id, {})
         action = {
             "row_input_id": row_input_id,
             "status": "operator_input_required",
@@ -980,6 +1098,15 @@ def _missing_row_input_actions(
             "accepted_formats": list(contract.get("accepted_formats") or []),
             "depends_on_row_inputs": list(contract.get("depends_on_row_inputs") or []),
             "unblocks_components": list(contract.get("unblocks_components") or []),
+            "closes_phase2_criteria": list(
+                row_closure.get("closes_phase2_criteria") or []
+            ),
+            "phase2_required_by_components": list(
+                row_closure.get("required_by_components") or []
+            ),
+            "phase2_materialization_chain": list(
+                row_closure.get("materialization_chain") or []
+            ),
             "receipt_fields": list(contract.get("receipt_fields") or []),
             "source_checksum_policy": dict(
                 contract.get("source_checksum_policy") or {}
@@ -1163,6 +1290,8 @@ def build_public_benchmark_phase2_source_acquisition_plan(
     )
     phase2_row_audit = _load_json(repo_root, DEFAULT_PHASE2_ROW_AUDIT)
     phase2_row_audit_summary = _phase2_row_audit_summary(phase2_row_audit)
+    phase2_row_closure_matrix = _phase2_row_closure_matrix(phase2_row_audit)
+    phase2_exit_criteria = _phase2_exit_criteria(phase2_row_audit)
     vina_gnina_execution_plan = _load_json(repo_root, DEFAULT_VINA_GNINA_EXECUTION_PLAN)
     vina_gnina_execution_plan_summary = _vina_gnina_execution_plan_summary(
         vina_gnina_execution_plan
@@ -1224,6 +1353,7 @@ def build_public_benchmark_phase2_source_acquisition_plan(
     missing_row_input_actions = _missing_row_input_actions(
         missing_row_inputs=phase2_row_audit_summary["missing_row_inputs"],
         row_input_contracts=row_input_contracts,
+        phase2_row_closure_matrix=phase2_row_closure_matrix,
         commands=commands,
         vina_gnina_execution_plan_summary=vina_gnina_execution_plan_summary,
         vina_gnina_runtime_readiness_summary=vina_gnina_runtime_readiness_summary,
@@ -1266,6 +1396,10 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         "official_source_receipt_plan": official_source_receipt_plan,
         "receipt_promotion_policy": dict(RECEIPT_PROMOTION_POLICY),
         "phase2_row_audit": phase2_row_audit_summary,
+        "phase2_exit_criteria": phase2_exit_criteria,
+        "phase2_exit_criterion_count": len(phase2_exit_criteria),
+        "phase2_row_closure_matrix": phase2_row_closure_matrix,
+        "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
         "vina_gnina_execution_plan": vina_gnina_execution_plan_summary,
         "vina_gnina_runtime_readiness": vina_gnina_runtime_readiness_summary,
         "missing_row_input_actions": missing_row_input_actions,
@@ -1304,6 +1438,14 @@ def build_public_benchmark_phase2_source_acquisition_plan(
                 "source_catalog_count"
             ],
             "phase2_row_audit_status": phase2_row_audit_summary["status"],
+            "phase2_exit_criterion_count": len(phase2_exit_criteria),
+            "phase2_passing_exit_criterion_count": len(
+                [row for row in phase2_exit_criteria if row["pass"]]
+            ),
+            "phase2_blocked_exit_criterion_count": len(
+                [row for row in phase2_exit_criteria if not row["pass"]]
+            ),
+            "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
             "phase2_row_audit_blocker_count": phase2_row_audit_summary[
                 "blocker_count"
             ],
@@ -1417,6 +1559,8 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `phase2_row_audit_source_actuality_scope`: `{payload['phase2_row_audit']['source_actuality_scope']}`",
         f"- `phase2_row_audit_source_actuality_contract_pass`: `{payload['phase2_row_audit']['source_actuality_contract_pass']}`",
         f"- `phase2_row_audit_source_actuality_blocker_count`: `{payload['phase2_row_audit']['source_actuality_blocker_count']}`",
+        f"- `phase2_exit_criterion_count`: `{payload['phase2_exit_criterion_count']}`",
+        f"- `phase2_row_closure_matrix_count`: `{payload['phase2_row_closure_matrix_count']}`",
         f"- `missing_row_input_action_count`: `{payload['missing_row_input_action_count']}`",
         f"- `vina_gnina_execution_plan`: `{payload['vina_gnina_execution_plan']['artifact']}`",
         f"- `vina_gnina_execution_plan_status`: `{payload['vina_gnina_execution_plan']['status']}`",
@@ -1440,6 +1584,69 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
             f"| `{row['row_input_id']}` | `{row['source_family']}` | "
             f"`{row['status']}` | {unblocks} |"
         )
+    phase2_exit_criteria = [
+        row
+        for row in payload.get("phase2_exit_criteria", [])
+        if isinstance(row, dict)
+    ]
+    if phase2_exit_criteria:
+        lines.extend(
+            [
+                "",
+                "## Phase 2 Exit Criteria",
+                "",
+                "| Criterion | Component | Pass | Current | Required | Blockers |",
+                "|---|---|---|---|---|---|",
+            ]
+        )
+        for row in phase2_exit_criteria:
+            blockers = ", ".join(
+                f"`{blocker}`" for blocker in row.get("blockers", []) if str(blocker)
+            )
+            lines.append(
+                f"| `{row.get('criterion_id', '')}` | "
+                f"`{row.get('component_id', '')}` | "
+                f"`{row.get('pass')}` | "
+                f"`{json.dumps(row.get('current', {}), ensure_ascii=False, sort_keys=True)}` | "
+                f"`{json.dumps(row.get('required', {}), ensure_ascii=False, sort_keys=True)}` | "
+                f"{blockers or '`none`'} |"
+            )
+    phase2_row_closure_matrix = [
+        row
+        for row in payload.get("phase2_row_closure_matrix", [])
+        if isinstance(row, dict)
+    ]
+    if phase2_row_closure_matrix:
+        lines.extend(
+            [
+                "",
+                "## Phase 2 Row Closure Matrix",
+                "",
+                "| Row Input | Status | Closes Criteria | Components | Materialization Chain |",
+                "|---|---|---|---|---|",
+            ]
+        )
+        for row in phase2_row_closure_matrix:
+            criteria = ", ".join(
+                f"`{criterion}`"
+                for criterion in row.get("closes_phase2_criteria", [])
+                if str(criterion)
+            )
+            components = ", ".join(
+                f"`{component}`"
+                for component in row.get("feeds_components", [])
+                if str(component)
+            )
+            chain = ", ".join(
+                f"`{step}`"
+                for step in row.get("materialization_chain", [])
+                if str(step)
+            )
+            lines.append(
+                f"| `{row.get('row_input_id', '')}` | "
+                f"`{row.get('status', '')}` | {criteria} | {components} | "
+                f"{chain} |"
+            )
     missing_actions = [
         row
         for row in payload.get("missing_row_input_actions", [])
@@ -1449,17 +1656,22 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         lines.extend(["", "## Missing Row Input Actions", ""])
         lines.extend(
             [
-                "| Row Input | Action | Unblocks | Materialization | Direct Adapter |",
-                "|---|---|---|---|---|",
+                "| Row Input | Action | Closes Phase 2 Criteria | Unblocks | Materialization | Direct Adapter |",
+                "|---|---|---|---|---|---|",
             ]
         )
         for row in missing_actions:
             unblocks = ", ".join(
                 f"`{component}`" for component in row.get("unblocks_components", [])
             )
+            criteria = ", ".join(
+                f"`{criterion}`"
+                for criterion in row.get("closes_phase2_criteria", [])
+                if str(criterion)
+            )
             lines.append(
                 f"| `{row.get('row_input_id', '')}` | "
-                f"`{row.get('operator_action', '')}` | {unblocks} | "
+                f"`{row.get('operator_action', '')}` | {criteria} | {unblocks} | "
                 f"`{row.get('materialization_command', '')}` | "
                 f"`{row.get('direct_adapter_materialization_command', '')}` |"
             )

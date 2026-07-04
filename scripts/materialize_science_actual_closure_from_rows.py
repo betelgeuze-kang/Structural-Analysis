@@ -112,6 +112,16 @@ def _source_acquisition_summary(
         for row in payload.get("missing_row_input_actions", [])
         if isinstance(row, dict)
     ] if isinstance(payload.get("missing_row_input_actions"), list) else []
+    phase2_row_closure_matrix = [
+        row
+        for row in payload.get("phase2_row_closure_matrix", [])
+        if isinstance(row, dict)
+    ] if isinstance(payload.get("phase2_row_closure_matrix"), list) else []
+    phase2_exit_criteria = [
+        row
+        for row in payload.get("phase2_exit_criteria", [])
+        if isinstance(row, dict)
+    ] if isinstance(payload.get("phase2_exit_criteria"), list) else []
     return {
         "artifact": str(artifact),
         "present": True,
@@ -124,6 +134,16 @@ def _source_acquisition_summary(
             or len(missing_row_input_actions)
         ),
         "missing_row_input_actions": missing_row_input_actions,
+        "phase2_row_closure_matrix_count": int(
+            payload.get("phase2_row_closure_matrix_count")
+            or len(phase2_row_closure_matrix)
+        ),
+        "phase2_row_closure_matrix": phase2_row_closure_matrix,
+        "phase2_exit_criterion_count": int(
+            payload.get("phase2_exit_criterion_count")
+            or len(phase2_exit_criteria)
+        ),
+        "phase2_exit_criteria": phase2_exit_criteria,
         "summary": summary,
     }
 

@@ -173,6 +173,16 @@ def _slot_source_context(
         for row in _as_list(source.get("missing_row_input_actions"))
         if isinstance(row, dict)
     ]
+    phase2_row_closure_matrix = [
+        row
+        for row in _as_list(source.get("phase2_row_closure_matrix"))
+        if isinstance(row, dict)
+    ]
+    phase2_exit_criteria = [
+        row
+        for row in _as_list(source.get("phase2_exit_criteria"))
+        if isinstance(row, dict)
+    ]
     return {
         "source_id": source_id,
         "present": bool(source.get("present")),
@@ -186,6 +196,14 @@ def _slot_source_context(
             or len(missing_row_input_actions)
         ),
         "missing_row_input_actions": missing_row_input_actions,
+        "phase2_row_closure_matrix_count": int(
+            source.get("phase2_row_closure_matrix_count")
+            or len(phase2_row_closure_matrix)
+        ),
+        "phase2_exit_criterion_count": int(
+            source.get("phase2_exit_criterion_count")
+            or len(phase2_exit_criteria)
+        ),
         "summary": _as_dict(source.get("summary")),
         "operator_action": (
             f"resolve_{source_id}_source_acquisition_blockers"
@@ -1065,8 +1083,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.extend(["", "## Blocked Component Actions", ""])
         lines.extend(
             [
-                "| Component | Row Input | Action | Default Artifact | Source Action | Source Row Action | Source Command | Required Receipts |",
-                "| --- | --- | --- | --- | --- | --- | --- | --- |",
+                "| Component | Row Input | Action | Default Artifact | Source Action | Source Row Action | Source Command | Required Receipts | Source Phase 2 Criteria |",
+                "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
             ]
         )
         for component in blocked_component_actions:
@@ -1088,6 +1106,9 @@ def _markdown(payload: dict[str, Any]) -> str:
                         *_as_list(source_action.get("required_receipt_roles")),
                     ]
                 )
+                source_phase2_criteria = _comma(
+                    _as_list(source_action.get("closes_phase2_criteria"))
+                )
                 lines.append(
                     "| "
                     f"`{component.get('component_id')}` | "
@@ -1097,7 +1118,8 @@ def _markdown(payload: dict[str, Any]) -> str:
                     f"`{action.get('source_acquisition_operator_action')}` | "
                     f"`{source_action.get('operator_action') or ''}` | "
                     f"`{source_command}` | "
-                    f"`{required_receipts}` |"
+                    f"`{required_receipts}` | "
+                    f"`{source_phase2_criteria}` |"
                 )
         detailed_actions: list[dict[str, Any]] = []
         for component in blocked_component_actions:
