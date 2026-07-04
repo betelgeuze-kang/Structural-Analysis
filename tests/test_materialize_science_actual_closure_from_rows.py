@@ -858,6 +858,27 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
                         ],
                     }
                 ],
+                "vina_gnina_runtime_readiness": {
+                    "case_input_slot_matrix_count": 12,
+                    "blocked_case_input_slot_count": 12,
+                    "case_input_slot_matrix": [
+                        {
+                            "slot_id": "casf2016_4llx_case_inputs",
+                            "case_id": "casf2016_4llx",
+                            "status": "blocked",
+                        }
+                    ],
+                    "engine_run_slot_matrix_count": 24,
+                    "blocked_engine_run_slot_count": 24,
+                    "engine_run_slot_matrix": [
+                        {
+                            "slot_id": "casf2016_4llx_vina",
+                            "case_id": "casf2016_4llx",
+                            "engine_id": "vina",
+                            "status": "blocked",
+                        }
+                    ],
+                },
                 "missing_row_input_action_count": 1,
                 "missing_row_input_actions": [
                     {
@@ -947,6 +968,24 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
     assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
         "phase2_exit_criterion_count"
     ] == 5
+    assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
+        "vina_gnina_case_input_slot_matrix_count"
+    ] == 12
+    assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
+        "vina_gnina_blocked_case_input_slot_count"
+    ] == 12
+    assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
+        "vina_gnina_case_input_slot_matrix"
+    ][0]["slot_id"] == "casf2016_4llx_case_inputs"
+    assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
+        "vina_gnina_engine_run_slot_matrix_count"
+    ] == 24
+    assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
+        "vina_gnina_blocked_engine_run_slot_count"
+    ] == 24
+    assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
+        "vina_gnina_engine_run_slot_matrix"
+    ][0]["slot_id"] == "casf2016_4llx_vina"
     assert audit["upstream_source_acquisition"]["pocketmd_lite"][
         "missing_row_input_actions"
     ][0]["operator_action"] == (

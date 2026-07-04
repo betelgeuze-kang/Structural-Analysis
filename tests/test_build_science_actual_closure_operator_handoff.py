@@ -338,6 +338,18 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert vina_gnina["upstream_source_acquisition"][
         "phase2_exit_criterion_count"
     ] == 5
+    assert vina_gnina["upstream_source_acquisition"][
+        "vina_gnina_case_input_slot_matrix_count"
+    ] == 12
+    assert vina_gnina["upstream_source_acquisition"][
+        "vina_gnina_blocked_case_input_slot_count"
+    ] == 12
+    assert vina_gnina["upstream_source_acquisition"][
+        "vina_gnina_engine_run_slot_matrix_count"
+    ] == 24
+    assert vina_gnina["upstream_source_acquisition"][
+        "vina_gnina_blocked_engine_run_slot_count"
+    ] == 24
     assert vina_gnina["source_acquisition_operator_action"] == (
         "resolve_public_benchmark_phase2_source_acquisition_blockers"
     )

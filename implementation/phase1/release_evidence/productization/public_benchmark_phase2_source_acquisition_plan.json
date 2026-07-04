@@ -21,12 +21,12 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T00:49:44.044557+00:00",
+  "generated_at": "2026-07-04T01:07:01.544742+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:3f53708e67d1dd76f5f313307ce46a2971b748ef1938925bc44318b40e52709d",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:d91bbc8402c86796ce3d60d0a053610cceea2dcbbb0f5faf00adeaad7698bea4",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:6e75a02c6b13b518bf6087e44db30b84c243e4935d2b50611e2fd0411e476118",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:2f93c15c3299b80bc7da6d72571a6724a078bc2c479e31ff89251591e68cdbeb",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:cbda6f126867baad5828dad1dc4b3bc591bb740b0bfbf4add10169cf2f09fcf4",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1",
     "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:895f52a4b9383625534767806ab373c4e33d70287a52ca65f9090b0d0e1e593a",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
@@ -1237,7 +1237,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "027ca2fd60c06ab641ae0a72074f3c6a00dc5748",
+  "source_commit_sha": "80a12dbebe9d61d107af43da352590c335833963",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
@@ -1278,8 +1278,12 @@
     "vina_gnina_required_engine_run_count": 24,
     "vina_gnina_runtime_adapter_case_count": 0,
     "vina_gnina_runtime_adapter_row_preflight_status": "row_artifact_missing",
+    "vina_gnina_runtime_blocked_case_input_slot_count": 12,
+    "vina_gnina_runtime_blocked_engine_run_slot_count": 24,
+    "vina_gnina_runtime_case_input_slot_count": 12,
     "vina_gnina_runtime_container_daemon_available": true,
     "vina_gnina_runtime_detected_row_artifact_count": 0,
+    "vina_gnina_runtime_engine_run_slot_count": 24,
     "vina_gnina_runtime_missing_engine_ids": [
       "vina",
       "gnina"
@@ -1333,6 +1337,8 @@
     "adapter_rows_ready": false,
     "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
     "available_engine_count": 0,
+    "blocked_case_input_slot_count": 12,
+    "blocked_engine_run_slot_count": 24,
     "blocker_count": 124,
     "blockers": [
       "vina_gnina_execution_plan_not_ready",
@@ -1461,6 +1467,345 @@
       "casf2016_4m0y::gnina::gnina_binary_missing"
     ],
     "case_count": 12,
+    "case_input_slot_matrix": [
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing"
+        ],
+        "case_id": "casf2016_2v00",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one CASF/PDBBind case to the local source and prepared input paths required before Vina/GNINA execution. It does not prove engine execution or adapter rows.",
+        "complex_id": "2v00",
+        "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_2v00",
+        "required_engine_input_fields": [
+          "case_id",
+          "complex_id",
+          "protein_structure_path",
+          "protein_structure_checksum",
+          "reference_ligand_path",
+          "reference_ligand_checksum",
+          "prepared_receptor_path",
+          "prepared_receptor_checksum",
+          "prepared_ligand_path",
+          "prepared_ligand_checksum"
+        ],
+        "slot_id": "casf2016_2v00_case_inputs",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing"
+        ],
+        "case_id": "casf2016_3prs",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one CASF/PDBBind case to the local source and prepared input paths required before Vina/GNINA execution. It does not prove engine execution or adapter rows.",
+        "complex_id": "3prs",
+        "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_3prs",
+        "required_engine_input_fields": [
+          "case_id",
+          "complex_id",
+          "protein_structure_path",
+          "protein_structure_checksum",
+          "reference_ligand_path",
+          "reference_ligand_checksum",
+          "prepared_receptor_path",
+          "prepared_receptor_checksum",
+          "prepared_ligand_path",
+          "prepared_ligand_checksum"
+        ],
+        "slot_id": "casf2016_3prs_case_inputs",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing"
+        ],
+        "case_id": "casf2016_3pww",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one CASF/PDBBind case to the local source and prepared input paths required before Vina/GNINA execution. It does not prove engine execution or adapter rows.",
+        "complex_id": "3pww",
+        "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_3pww",
+        "required_engine_input_fields": [
+          "case_id",
+          "complex_id",
+          "protein_structure_path",
+          "protein_structure_checksum",
+          "reference_ligand_path",
+          "reference_ligand_checksum",
+          "prepared_receptor_path",
+          "prepared_receptor_checksum",
+          "prepared_ligand_path",
+          "prepared_ligand_checksum"
+        ],
+        "slot_id": "casf2016_3pww_case_inputs",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing"
+        ],
+        "case_id": "casf2016_3ui7",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one CASF/PDBBind case to the local source and prepared input paths required before Vina/GNINA execution. It does not prove engine execution or adapter rows.",
+        "complex_id": "3ui7",
+        "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_3ui7",
+        "required_engine_input_fields": [
+          "case_id",
+          "complex_id",
+          "protein_structure_path",
+          "protein_structure_checksum",
+          "reference_ligand_path",
+          "reference_ligand_checksum",
+          "prepared_receptor_path",
+          "prepared_receptor_checksum",
+          "prepared_ligand_path",
+          "prepared_ligand_checksum"
+        ],
+        "slot_id": "casf2016_3ui7_case_inputs",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing"
+        ],
+        "case_id": "casf2016_3uri",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one CASF/PDBBind case to the local source and prepared input paths required before Vina/GNINA execution. It does not prove engine execution or adapter rows.",
+        "complex_id": "3uri",
+        "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_3uri",
+        "required_engine_input_fields": [
+          "case_id",
+          "complex_id",
+          "protein_structure_path",
+          "protein_structure_checksum",
+          "reference_ligand_path",
+          "reference_ligand_checksum",
+          "prepared_receptor_path",
+          "prepared_receptor_checksum",
+          "prepared_ligand_path",
+          "prepared_ligand_checksum"
+        ],
+        "slot_id": "casf2016_3uri_case_inputs",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing"
+        ],
+        "case_id": "casf2016_3uuo",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one CASF/PDBBind case to the local source and prepared input paths required before Vina/GNINA execution. It does not prove engine execution or adapter rows.",
+        "complex_id": "3uuo",
+        "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_3uuo",
+        "required_engine_input_fields": [
+          "case_id",
+          "complex_id",
+          "protein_structure_path",
+          "protein_structure_checksum",
+          "reference_ligand_path",
+          "reference_ligand_checksum",
+          "prepared_receptor_path",
+          "prepared_receptor_checksum",
+          "prepared_ligand_path",
+          "prepared_ligand_checksum"
+        ],
+        "slot_id": "casf2016_3uuo_case_inputs",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing"
+        ],
+        "case_id": "casf2016_3wz8",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one CASF/PDBBind case to the local source and prepared input paths required before Vina/GNINA execution. It does not prove engine execution or adapter rows.",
+        "complex_id": "3wz8",
+        "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_3wz8",
+        "required_engine_input_fields": [
+          "case_id",
+          "complex_id",
+          "protein_structure_path",
+          "protein_structure_checksum",
+          "reference_ligand_path",
+          "reference_ligand_checksum",
+          "prepared_receptor_path",
+          "prepared_receptor_checksum",
+          "prepared_ligand_path",
+          "prepared_ligand_checksum"
+        ],
+        "slot_id": "casf2016_3wz8_case_inputs",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing"
+        ],
+        "case_id": "casf2016_4llx",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one CASF/PDBBind case to the local source and prepared input paths required before Vina/GNINA execution. It does not prove engine execution or adapter rows.",
+        "complex_id": "4llx",
+        "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_4llx",
+        "required_engine_input_fields": [
+          "case_id",
+          "complex_id",
+          "protein_structure_path",
+          "protein_structure_checksum",
+          "reference_ligand_path",
+          "reference_ligand_checksum",
+          "prepared_receptor_path",
+          "prepared_receptor_checksum",
+          "prepared_ligand_path",
+          "prepared_ligand_checksum"
+        ],
+        "slot_id": "casf2016_4llx_case_inputs",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing"
+        ],
+        "case_id": "casf2016_4m0y",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one CASF/PDBBind case to the local source and prepared input paths required before Vina/GNINA execution. It does not prove engine execution or adapter rows.",
+        "complex_id": "4m0y",
+        "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_4m0y",
+        "required_engine_input_fields": [
+          "case_id",
+          "complex_id",
+          "protein_structure_path",
+          "protein_structure_checksum",
+          "reference_ligand_path",
+          "reference_ligand_checksum",
+          "prepared_receptor_path",
+          "prepared_receptor_checksum",
+          "prepared_ligand_path",
+          "prepared_ligand_checksum"
+        ],
+        "slot_id": "casf2016_4m0y_case_inputs",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing"
+        ],
+        "case_id": "casf2016_4m0z",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one CASF/PDBBind case to the local source and prepared input paths required before Vina/GNINA execution. It does not prove engine execution or adapter rows.",
+        "complex_id": "4m0z",
+        "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_4m0z",
+        "required_engine_input_fields": [
+          "case_id",
+          "complex_id",
+          "protein_structure_path",
+          "protein_structure_checksum",
+          "reference_ligand_path",
+          "reference_ligand_checksum",
+          "prepared_receptor_path",
+          "prepared_receptor_checksum",
+          "prepared_ligand_path",
+          "prepared_ligand_checksum"
+        ],
+        "slot_id": "casf2016_4m0z_case_inputs",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing"
+        ],
+        "case_id": "casf2016_5c28",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one CASF/PDBBind case to the local source and prepared input paths required before Vina/GNINA execution. It does not prove engine execution or adapter rows.",
+        "complex_id": "5c28",
+        "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_5c28",
+        "required_engine_input_fields": [
+          "case_id",
+          "complex_id",
+          "protein_structure_path",
+          "protein_structure_checksum",
+          "reference_ligand_path",
+          "reference_ligand_checksum",
+          "prepared_receptor_path",
+          "prepared_receptor_checksum",
+          "prepared_ligand_path",
+          "prepared_ligand_checksum"
+        ],
+        "slot_id": "casf2016_5c28_case_inputs",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing"
+        ],
+        "case_id": "casf2016_5c2h",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one CASF/PDBBind case to the local source and prepared input paths required before Vina/GNINA execution. It does not prove engine execution or adapter rows.",
+        "complex_id": "5c2h",
+        "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_5c2h",
+        "required_engine_input_fields": [
+          "case_id",
+          "complex_id",
+          "protein_structure_path",
+          "protein_structure_checksum",
+          "reference_ligand_path",
+          "reference_ligand_checksum",
+          "prepared_receptor_path",
+          "prepared_receptor_checksum",
+          "prepared_ligand_path",
+          "prepared_ligand_checksum"
+        ],
+        "slot_id": "casf2016_5c2h_case_inputs",
+        "status": "blocked"
+      }
+    ],
+    "case_input_slot_matrix_count": 12,
     "command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
     "container_runtime_status": {
       "available": true,
@@ -1496,6 +1841,969 @@
         "status": "container_image_not_configured"
       }
     ],
+    "engine_run_slot_matrix": [
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "vina_binary_missing"
+        ],
+        "case_id": "casf2016_4llx",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "4llx",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_4llx_vina_run",
+        "engine_available": false,
+        "engine_id": "vina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_4llx",
+          "configure_vina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_4llx_vina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_4llx_vina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "gnina_binary_missing"
+        ],
+        "case_id": "casf2016_4llx",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "4llx",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_4llx_gnina_run",
+        "engine_available": false,
+        "engine_id": "gnina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_4llx",
+          "configure_gnina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_4llx_gnina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_4llx_gnina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "vina_binary_missing"
+        ],
+        "case_id": "casf2016_5c28",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "5c28",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_5c28_vina_run",
+        "engine_available": false,
+        "engine_id": "vina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_5c28",
+          "configure_vina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_5c28_vina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_5c28_vina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "gnina_binary_missing"
+        ],
+        "case_id": "casf2016_5c28",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "5c28",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_5c28_gnina_run",
+        "engine_available": false,
+        "engine_id": "gnina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_5c28",
+          "configure_gnina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_5c28_gnina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_5c28_gnina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "vina_binary_missing"
+        ],
+        "case_id": "casf2016_3uuo",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "3uuo",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_3uuo_vina_run",
+        "engine_available": false,
+        "engine_id": "vina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_3uuo",
+          "configure_vina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_3uuo_vina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_3uuo_vina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "gnina_binary_missing"
+        ],
+        "case_id": "casf2016_3uuo",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "3uuo",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_3uuo_gnina_run",
+        "engine_available": false,
+        "engine_id": "gnina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_3uuo",
+          "configure_gnina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_3uuo_gnina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_3uuo_gnina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "vina_binary_missing"
+        ],
+        "case_id": "casf2016_3ui7",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "3ui7",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_3ui7_vina_run",
+        "engine_available": false,
+        "engine_id": "vina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_3ui7",
+          "configure_vina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_3ui7_vina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_3ui7_vina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "gnina_binary_missing"
+        ],
+        "case_id": "casf2016_3ui7",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "3ui7",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_3ui7_gnina_run",
+        "engine_available": false,
+        "engine_id": "gnina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_3ui7",
+          "configure_gnina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_3ui7_gnina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_3ui7_gnina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "vina_binary_missing"
+        ],
+        "case_id": "casf2016_5c2h",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "5c2h",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_5c2h_vina_run",
+        "engine_available": false,
+        "engine_id": "vina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_5c2h",
+          "configure_vina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_5c2h_vina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_5c2h_vina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "gnina_binary_missing"
+        ],
+        "case_id": "casf2016_5c2h",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "5c2h",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_5c2h_gnina_run",
+        "engine_available": false,
+        "engine_id": "gnina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_5c2h",
+          "configure_gnina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_5c2h_gnina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_5c2h_gnina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "vina_binary_missing"
+        ],
+        "case_id": "casf2016_2v00",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "2v00",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_2v00_vina_run",
+        "engine_available": false,
+        "engine_id": "vina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_2v00",
+          "configure_vina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_2v00_vina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_2v00_vina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "gnina_binary_missing"
+        ],
+        "case_id": "casf2016_2v00",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "2v00",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_2v00_gnina_run",
+        "engine_available": false,
+        "engine_id": "gnina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_2v00",
+          "configure_gnina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_2v00_gnina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_2v00_gnina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "vina_binary_missing"
+        ],
+        "case_id": "casf2016_3wz8",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "3wz8",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_3wz8_vina_run",
+        "engine_available": false,
+        "engine_id": "vina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_3wz8",
+          "configure_vina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_3wz8_vina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_3wz8_vina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "gnina_binary_missing"
+        ],
+        "case_id": "casf2016_3wz8",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "3wz8",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_3wz8_gnina_run",
+        "engine_available": false,
+        "engine_id": "gnina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_3wz8",
+          "configure_gnina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_3wz8_gnina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_3wz8_gnina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "vina_binary_missing"
+        ],
+        "case_id": "casf2016_3pww",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "3pww",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_3pww_vina_run",
+        "engine_available": false,
+        "engine_id": "vina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_3pww",
+          "configure_vina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_3pww_vina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_3pww_vina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "gnina_binary_missing"
+        ],
+        "case_id": "casf2016_3pww",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "3pww",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_3pww_gnina_run",
+        "engine_available": false,
+        "engine_id": "gnina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_3pww",
+          "configure_gnina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_3pww_gnina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_3pww_gnina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "vina_binary_missing"
+        ],
+        "case_id": "casf2016_3prs",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "3prs",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_3prs_vina_run",
+        "engine_available": false,
+        "engine_id": "vina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_3prs",
+          "configure_vina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_3prs_vina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_3prs_vina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "gnina_binary_missing"
+        ],
+        "case_id": "casf2016_3prs",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "3prs",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_3prs_gnina_run",
+        "engine_available": false,
+        "engine_id": "gnina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_3prs",
+          "configure_gnina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_3prs_gnina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_3prs_gnina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "vina_binary_missing"
+        ],
+        "case_id": "casf2016_3uri",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "3uri",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_3uri_vina_run",
+        "engine_available": false,
+        "engine_id": "vina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_3uri",
+          "configure_vina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_3uri_vina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_3uri_vina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "gnina_binary_missing"
+        ],
+        "case_id": "casf2016_3uri",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "3uri",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_3uri_gnina_run",
+        "engine_available": false,
+        "engine_id": "gnina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_3uri",
+          "configure_gnina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_3uri_gnina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_3uri_gnina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "vina_binary_missing"
+        ],
+        "case_id": "casf2016_4m0z",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "4m0z",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_4m0z_vina_run",
+        "engine_available": false,
+        "engine_id": "vina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_4m0z",
+          "configure_vina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_4m0z_vina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_4m0z_vina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "gnina_binary_missing"
+        ],
+        "case_id": "casf2016_4m0z",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "4m0z",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_4m0z_gnina_run",
+        "engine_available": false,
+        "engine_id": "gnina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_4m0z",
+          "configure_gnina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_4m0z_gnina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_4m0z_gnina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "vina_binary_missing"
+        ],
+        "case_id": "casf2016_4m0y",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "4m0y",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_4m0y_vina_run",
+        "engine_available": false,
+        "engine_id": "vina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_4m0y",
+          "configure_vina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_4m0y_vina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_4m0y_vina",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "protein_structure_path_missing",
+          "reference_ligand_path_missing",
+          "prepared_receptor_path_missing",
+          "prepared_ligand_path_missing",
+          "gnina_binary_missing"
+        ],
+        "case_id": "casf2016_4m0y",
+        "case_inputs_ready": false,
+        "claim_boundary": "This slot maps one required Vina/GNINA engine run to the operator inputs and adapter row fields it must produce. It does not prove engine execution or synthesize adapter rows.",
+        "complex_id": "4m0y",
+        "docking_box_ready": true,
+        "docking_run_id": "casf2016_4m0y_gnina_run",
+        "engine_available": false,
+        "engine_id": "gnina",
+        "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_config.json",
+        "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_run_receipt.json",
+        "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_pose.sdf",
+        "operator_actions": [
+          "resolve_vina_gnina_case_inputs_for_casf2016_4m0y",
+          "configure_gnina_runtime",
+          "attach_vina_gnina_adapter_row_for_casf2016_4m0y_gnina"
+        ],
+        "required_adapter_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "slot_id": "casf2016_4m0y_gnina",
+        "status": "blocked"
+      }
+    ],
+    "engine_run_slot_matrix_count": 24,
     "execution_plan_ready": false,
     "missing_engine_count": 2,
     "missing_engine_ids": [

@@ -269,6 +269,41 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert payload["vina_gnina_runtime_readiness"][
         "detected_row_artifact_count"
     ] == 0
+    assert payload["vina_gnina_runtime_readiness"][
+        "case_input_slot_matrix_count"
+    ] == 12
+    assert payload["vina_gnina_runtime_readiness"][
+        "blocked_case_input_slot_count"
+    ] == 12
+    assert payload["vina_gnina_runtime_readiness"][
+        "engine_run_slot_matrix_count"
+    ] == 24
+    assert payload["vina_gnina_runtime_readiness"][
+        "blocked_engine_run_slot_count"
+    ] == 24
+    case_slots = {
+        row["case_id"]: row
+        for row in payload["vina_gnina_runtime_readiness"][
+            "case_input_slot_matrix"
+        ]
+    }
+    first_case_slot = case_slots["casf2016_4llx"]
+    assert first_case_slot["slot_id"] == "casf2016_4llx_case_inputs"
+    assert first_case_slot["status"] == "blocked"
+    assert "prepared_receptor_path" in first_case_slot[
+        "required_engine_input_fields"
+    ]
+    first_engine_slot = payload["vina_gnina_runtime_readiness"][
+        "engine_run_slot_matrix"
+    ][0]
+    assert first_engine_slot["slot_id"] == "casf2016_4llx_vina"
+    assert first_engine_slot["engine_id"] == "vina"
+    assert "vina_binary_missing" in first_engine_slot["blockers"]
+    assert first_engine_slot["operator_actions"] == [
+        "resolve_vina_gnina_case_inputs_for_casf2016_4llx",
+        "configure_vina_runtime",
+        "attach_vina_gnina_adapter_row_for_casf2016_4llx_vina",
+    ]
     assert payload["vina_gnina_runtime_readiness"]["missing_engine_ids"] == [
         "vina",
         "gnina",
@@ -411,6 +446,10 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "vina_gnina_runtime_readiness_status": "execution_plan_blocked",
         "vina_gnina_runtime_ready_for_engine_execution": False,
         "vina_gnina_runtime_ready_engine_run_slot_count": 0,
+        "vina_gnina_runtime_case_input_slot_count": 12,
+        "vina_gnina_runtime_blocked_case_input_slot_count": 12,
+        "vina_gnina_runtime_engine_run_slot_count": 24,
+        "vina_gnina_runtime_blocked_engine_run_slot_count": 24,
         "vina_gnina_runtime_detected_row_artifact_count": 0,
         "vina_gnina_runtime_adapter_case_count": 0,
         "vina_gnina_runtime_adapter_row_preflight_status": "row_artifact_missing",
@@ -545,6 +584,8 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "`vina_gnina_required_engine_run_count`: `24`" in markdown
     assert "`vina_gnina_input_manifest_status`: `not_detected`" in markdown
     assert "`vina_gnina_runtime_ready_engine_run_slot_count`: `0`" in markdown
+    assert "`vina_gnina_runtime_case_input_slot_count`: `12`" in markdown
+    assert "`vina_gnina_runtime_blocked_engine_run_slot_count`: `24`" in markdown
     assert "`phase2_exit_criterion_count`: `5`" in markdown
     assert "`phase2_row_closure_matrix_count`: `4`" in markdown
     assert "## Phase 2 Exit Criteria" in markdown
@@ -569,6 +610,12 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "`template_is_not_evidence`: `True`" in markdown
     assert "prepared_receptor_checksum" in markdown
     assert "## Vina/GNINA Runtime" in markdown
+    assert "### Vina/GNINA Case Input Slots" in markdown
+    assert "casf2016_4llx_case_inputs" in markdown
+    assert "fill_vina_gnina_input_manifest_row_for_casf2016_4llx" in markdown
+    assert "### Vina/GNINA Engine Run Slots" in markdown
+    assert "casf2016_4llx_vina" in markdown
+    assert "attach_vina_gnina_adapter_row_for_casf2016_4llx_vina" in markdown
     assert "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE" in markdown
     assert "container_image_not_configured" in markdown
     assert "`subset_rows` | `CASF/PDBBind`" in markdown

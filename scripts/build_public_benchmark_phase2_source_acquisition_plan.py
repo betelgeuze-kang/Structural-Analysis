@@ -574,6 +574,111 @@ def _vina_gnina_execution_plan_summary(payload: dict[str, Any]) -> dict[str, Any
     }
 
 
+def _vina_gnina_engine_run_slot_matrix(
+    engine_run_slots: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for slot in engine_run_slots:
+        if not isinstance(slot, dict):
+            continue
+        case_id = str(slot.get("case_id") or "")
+        engine_id = str(slot.get("engine_id") or "")
+        blockers = [
+            str(row) for row in slot.get("blockers", []) if str(row)
+        ] if isinstance(slot.get("blockers"), list) else []
+        rows.append(
+            {
+                "slot_id": f"{case_id}_{engine_id}" if case_id and engine_id else "",
+                "case_id": case_id,
+                "complex_id": str(slot.get("complex_id") or ""),
+                "engine_id": engine_id,
+                "status": str(slot.get("status") or ""),
+                "case_inputs_ready": bool(slot.get("case_inputs_ready")),
+                "engine_available": bool(slot.get("engine_available")),
+                "docking_box_ready": bool(slot.get("docking_box_ready")),
+                "blockers": blockers,
+                "docking_run_id": str(slot.get("docking_run_id") or ""),
+                "expected_predicted_ligand_path_or_pose_ref": str(
+                    slot.get("expected_predicted_ligand_path_or_pose_ref") or ""
+                ),
+                "expected_engine_config_ref": str(
+                    slot.get("expected_engine_config_ref") or ""
+                ),
+                "expected_engine_run_provenance_ref": str(
+                    slot.get("expected_engine_run_provenance_ref") or ""
+                ),
+                "required_adapter_engine_run_fields": [
+                    str(row)
+                    for row in slot.get("required_adapter_engine_run_fields", [])
+                    if str(row)
+                ]
+                if isinstance(slot.get("required_adapter_engine_run_fields"), list)
+                else [],
+                "operator_actions": [
+                    f"resolve_vina_gnina_case_inputs_for_{case_id}",
+                    f"configure_{engine_id}_runtime",
+                    f"attach_vina_gnina_adapter_row_for_{case_id}_{engine_id}",
+                ],
+                "claim_boundary": (
+                    "This slot maps one required Vina/GNINA engine run to the "
+                    "operator inputs and adapter row fields it must produce. It "
+                    "does not prove engine execution or synthesize adapter rows."
+                ),
+            }
+        )
+    return rows
+
+
+def _vina_gnina_case_input_slot_matrix(
+    engine_run_slot_matrix: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    rows_by_case: dict[str, dict[str, Any]] = {}
+    for slot in engine_run_slot_matrix:
+        case_id = str(slot.get("case_id") or "")
+        if not case_id or case_id in rows_by_case:
+            continue
+        case_blockers = [
+            str(blocker)
+            for blocker in slot.get("blockers", [])
+            if str(blocker).endswith("_path_missing")
+            or str(blocker).endswith("_checksum_missing")
+        ]
+        rows_by_case[case_id] = {
+            "slot_id": f"{case_id}_case_inputs",
+            "case_id": case_id,
+            "complex_id": str(slot.get("complex_id") or ""),
+            "status": "ready" if bool(slot.get("case_inputs_ready")) else "blocked",
+            "case_inputs_ready": bool(slot.get("case_inputs_ready")),
+            "input_manifest_template_artifact": str(
+                DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE
+            ),
+            "required_engine_input_fields": [
+                "case_id",
+                "complex_id",
+                "protein_structure_path",
+                "protein_structure_checksum",
+                "reference_ligand_path",
+                "reference_ligand_checksum",
+                "prepared_receptor_path",
+                "prepared_receptor_checksum",
+                "prepared_ligand_path",
+                "prepared_ligand_checksum",
+            ],
+            "blockers": case_blockers,
+            "operator_action": (
+                f"review_vina_gnina_case_inputs_for_{case_id}"
+                if bool(slot.get("case_inputs_ready"))
+                else f"fill_vina_gnina_input_manifest_row_for_{case_id}"
+            ),
+            "claim_boundary": (
+                "This slot maps one CASF/PDBBind case to the local source and "
+                "prepared input paths required before Vina/GNINA execution. It "
+                "does not prove engine execution or adapter rows."
+            ),
+        }
+    return [rows_by_case[key] for key in sorted(rows_by_case)]
+
+
 def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, Any]:
     summary = payload.get("summary")
     if not isinstance(summary, dict):
@@ -599,6 +704,19 @@ def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, 
     operator_unblock_packet = payload.get("operator_unblock_packet")
     if not isinstance(operator_unblock_packet, dict):
         operator_unblock_packet = {}
+    engine_run_slots = payload.get("engine_run_slots")
+    if not isinstance(engine_run_slots, list):
+        engine_run_slots = []
+    engine_run_slot_matrix = _vina_gnina_engine_run_slot_matrix(engine_run_slots)
+    case_input_slot_matrix = _vina_gnina_case_input_slot_matrix(
+        engine_run_slot_matrix
+    )
+    blocked_case_input_slot_count = sum(
+        1 for row in case_input_slot_matrix if row["status"] != "ready"
+    )
+    blocked_engine_run_slot_count = sum(
+        1 for row in engine_run_slot_matrix if row["status"] != "ready_for_engine_execution"
+    )
     return {
         "artifact": str(DEFAULT_VINA_GNINA_RUNTIME_READINESS),
         "status": str(payload.get("status") or "missing"),
@@ -700,6 +818,12 @@ def _vina_gnina_runtime_readiness_summary(payload: dict[str, Any]) -> dict[str, 
             if isinstance(row, dict)
         ],
         "operator_unblock_packet": operator_unblock_packet,
+        "case_input_slot_matrix": case_input_slot_matrix,
+        "case_input_slot_matrix_count": len(case_input_slot_matrix),
+        "blocked_case_input_slot_count": blocked_case_input_slot_count,
+        "engine_run_slot_matrix": engine_run_slot_matrix,
+        "engine_run_slot_matrix_count": len(engine_run_slot_matrix),
+        "blocked_engine_run_slot_count": blocked_engine_run_slot_count,
         "blocker_count": len(blockers),
         "blockers": [str(row) for row in blockers],
         "command": (
@@ -1503,6 +1627,22 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "vina_gnina_runtime_ready_engine_run_slot_count": (
                 vina_gnina_runtime_readiness_summary["ready_engine_run_slot_count"]
             ),
+            "vina_gnina_runtime_case_input_slot_count": (
+                vina_gnina_runtime_readiness_summary["case_input_slot_matrix_count"]
+            ),
+            "vina_gnina_runtime_blocked_case_input_slot_count": (
+                vina_gnina_runtime_readiness_summary[
+                    "blocked_case_input_slot_count"
+                ]
+            ),
+            "vina_gnina_runtime_engine_run_slot_count": (
+                vina_gnina_runtime_readiness_summary["engine_run_slot_matrix_count"]
+            ),
+            "vina_gnina_runtime_blocked_engine_run_slot_count": (
+                vina_gnina_runtime_readiness_summary[
+                    "blocked_engine_run_slot_count"
+                ]
+            ),
             "vina_gnina_runtime_detected_row_artifact_count": (
                 vina_gnina_runtime_readiness_summary[
                     "detected_row_artifact_count"
@@ -1570,6 +1710,10 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `vina_gnina_runtime_readiness`: `{payload['vina_gnina_runtime_readiness']['artifact']}`",
         f"- `vina_gnina_runtime_readiness_status`: `{payload['vina_gnina_runtime_readiness']['status']}`",
         f"- `vina_gnina_runtime_ready_engine_run_slot_count`: `{payload['vina_gnina_runtime_readiness']['ready_engine_run_slot_count']}`",
+        f"- `vina_gnina_runtime_case_input_slot_count`: `{payload['vina_gnina_runtime_readiness']['case_input_slot_matrix_count']}`",
+        f"- `vina_gnina_runtime_blocked_case_input_slot_count`: `{payload['vina_gnina_runtime_readiness']['blocked_case_input_slot_count']}`",
+        f"- `vina_gnina_runtime_engine_run_slot_count`: `{payload['vina_gnina_runtime_readiness']['engine_run_slot_matrix_count']}`",
+        f"- `vina_gnina_runtime_blocked_engine_run_slot_count`: `{payload['vina_gnina_runtime_readiness']['blocked_engine_run_slot_count']}`",
         f"- `vina_gnina_adapter_row_preflight_status`: `{payload['vina_gnina_runtime_readiness']['adapter_row_preflight_status']}`",
         f"- `vina_gnina_runtime_missing_engine_ids`: `{', '.join(payload['vina_gnina_runtime_readiness']['missing_engine_ids'])}`",
         "",
@@ -1757,6 +1901,63 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                 "",
             ]
         )
+    case_input_slot_matrix = [
+        row
+        for row in payload["vina_gnina_runtime_readiness"].get(
+            "case_input_slot_matrix", []
+        )
+        if isinstance(row, dict)
+    ]
+    if case_input_slot_matrix:
+        lines.extend(
+            [
+                "### Vina/GNINA Case Input Slots",
+                "",
+                "| Slot | Case | Complex | Status | Action | Blockers |",
+                "|---|---|---|---|---|---|",
+            ]
+        )
+        for row in case_input_slot_matrix:
+            blockers = ", ".join(
+                f"`{blocker}`" for blocker in row.get("blockers", []) if str(blocker)
+            )
+            lines.append(
+                f"| `{row.get('slot_id', '')}` | `{row.get('case_id', '')}` | "
+                f"`{row.get('complex_id', '')}` | `{row.get('status', '')}` | "
+                f"`{row.get('operator_action', '')}` | {blockers or '`none`'} |"
+            )
+        lines.append("")
+    engine_run_slot_matrix = [
+        row
+        for row in payload["vina_gnina_runtime_readiness"].get(
+            "engine_run_slot_matrix", []
+        )
+        if isinstance(row, dict)
+    ]
+    if engine_run_slot_matrix:
+        lines.extend(
+            [
+                "### Vina/GNINA Engine Run Slots",
+                "",
+                "| Slot | Case | Engine | Status | Actions | Blockers |",
+                "|---|---|---|---|---|---|",
+            ]
+        )
+        for row in engine_run_slot_matrix:
+            actions = ", ".join(
+                f"`{action}`"
+                for action in row.get("operator_actions", [])
+                if str(action)
+            )
+            blockers = ", ".join(
+                f"`{blocker}`" for blocker in row.get("blockers", []) if str(blocker)
+            )
+            lines.append(
+                f"| `{row.get('slot_id', '')}` | `{row.get('case_id', '')}` | "
+                f"`{row.get('engine_id', '')}` | `{row.get('status', '')}` | "
+                f"{actions} | {blockers or '`none`'} |"
+            )
+        lines.append("")
     lines.extend(
         [
             "| Engine | Container Status | Docker Daemon | Image Env Var | Image Present |",

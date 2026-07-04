@@ -132,6 +132,25 @@ def _source_acquisition_summary(
         for row in payload.get("phase4_metric_closure_matrix", [])
         if isinstance(row, dict)
     ] if isinstance(payload.get("phase4_metric_closure_matrix"), list) else []
+    vina_gnina_runtime_readiness = payload.get("vina_gnina_runtime_readiness")
+    if not isinstance(vina_gnina_runtime_readiness, dict):
+        vina_gnina_runtime_readiness = {}
+    vina_gnina_case_input_slot_matrix = [
+        row
+        for row in vina_gnina_runtime_readiness.get("case_input_slot_matrix", [])
+        if isinstance(row, dict)
+    ] if isinstance(
+        vina_gnina_runtime_readiness.get("case_input_slot_matrix"),
+        list,
+    ) else []
+    vina_gnina_engine_run_slot_matrix = [
+        row
+        for row in vina_gnina_runtime_readiness.get("engine_run_slot_matrix", [])
+        if isinstance(row, dict)
+    ] if isinstance(
+        vina_gnina_runtime_readiness.get("engine_run_slot_matrix"),
+        list,
+    ) else []
     return {
         "artifact": str(artifact),
         "present": True,
@@ -168,6 +187,32 @@ def _source_acquisition_summary(
             or len(phase4_metric_closure_matrix)
         ),
         "phase4_metric_closure_matrix": phase4_metric_closure_matrix,
+        "vina_gnina_case_input_slot_matrix_count": int(
+            vina_gnina_runtime_readiness.get("case_input_slot_matrix_count")
+            or len(vina_gnina_case_input_slot_matrix)
+        ),
+        "vina_gnina_blocked_case_input_slot_count": int(
+            vina_gnina_runtime_readiness.get("blocked_case_input_slot_count")
+            or sum(
+                1
+                for row in vina_gnina_case_input_slot_matrix
+                if row.get("status") != "ready"
+            )
+        ),
+        "vina_gnina_case_input_slot_matrix": vina_gnina_case_input_slot_matrix,
+        "vina_gnina_engine_run_slot_matrix_count": int(
+            vina_gnina_runtime_readiness.get("engine_run_slot_matrix_count")
+            or len(vina_gnina_engine_run_slot_matrix)
+        ),
+        "vina_gnina_blocked_engine_run_slot_count": int(
+            vina_gnina_runtime_readiness.get("blocked_engine_run_slot_count")
+            or sum(
+                1
+                for row in vina_gnina_engine_run_slot_matrix
+                if row.get("status") != "ready_for_engine_execution"
+            )
+        ),
+        "vina_gnina_engine_run_slot_matrix": vina_gnina_engine_run_slot_matrix,
         "summary": summary,
     }
 
