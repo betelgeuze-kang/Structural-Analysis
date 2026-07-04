@@ -506,6 +506,58 @@ def test_goal_bottleneck_roadmap_surface_links_structural_release_bottleneck() -
     assert phase_2["summary"]["operator_evidence_gap_register"][0]["slot_id"] == (
         "vina_gnina_rows"
     )
+    phase2_gate = phase_2["summary"]["component_gate_summary"]
+    assert phase2_gate["phase2_exit_gate_status"] == "blocked"
+    assert phase2_gate["phase2_ready"] is False
+    assert phase2_gate["phase2_failed_criteria"] == ["vina_gnina_comparison_ready"]
+    assert phase2_gate["phase2_requirement_summary"] == {
+        "blocked_component_count": 1,
+        "blocked_component_ids": ["vina_gnina_comparison_adapter"],
+        "materialized_component_count": 4,
+        "missing_row_input_count": 1,
+        "missing_row_inputs": ["vina_gnina_rows"],
+        "operator_evidence_required_count": 1,
+        "phase2_ready": False,
+        "ready_component_count": 4,
+        "required_component_count": 5,
+    }
+    phase2_requirements = {
+        row["component_id"]: row
+        for row in phase2_gate["phase2_requirements"]
+    }
+    assert phase2_requirements["casf_pdbbind_pose_success_harness"][
+        "requirement"
+    ] == "CASF/PDBBind pose-success harness"
+    assert phase2_requirements["casf_pdbbind_pose_success_harness"]["ready"] is True
+    assert phase2_requirements["symmetry_aware_ligand_rmsd"][
+        "requirement"
+    ] == "Symmetry-aware ligand RMSD scorecard"
+    assert phase2_requirements["symmetry_aware_ligand_rmsd"]["ready"] is True
+    assert phase2_requirements["posebusters_style_pose_validity"][
+        "requirement"
+    ] == "PoseBusters-style pose validity packet"
+    assert phase2_requirements["posebusters_style_pose_validity"]["ready"] is True
+    assert phase2_requirements["dud_e_or_lit_pcba_enrichment"][
+        "requirement"
+    ] == "DUD-E or LIT-PCBA enrichment scorecard"
+    assert phase2_requirements["dud_e_or_lit_pcba_enrichment"]["ready"] is True
+    vina_requirement = phase2_requirements["vina_gnina_comparison_adapter"]
+    assert vina_requirement["requirement"] == "Vina/GNINA comparison adapter"
+    assert vina_requirement["ready"] is False
+    assert vina_requirement["operator_evidence_required"] is True
+    assert vina_requirement["row_input_status"] == {"vina_gnina_rows": "missing"}
+    assert vina_requirement["blockers"] == ["vina_gnina_rows_not_provided"]
+    phase2_row_inputs = {
+        row["row_input_id"]: row
+        for row in phase2_gate["phase2_row_closure_matrix"]
+    }
+    assert phase2_row_inputs["subset_rows"]["status"] == "provided"
+    assert phase2_row_inputs["pose_rows"]["status"] == "provided"
+    assert phase2_row_inputs["enrichment_rows"]["status"] == "provided"
+    assert phase2_row_inputs["vina_gnina_rows"]["status"] == "missing"
+    assert phase2_row_inputs["vina_gnina_rows"]["operator_blockers_if_missing"] == [
+        "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
+    ]
     phase_3 = rows["phase_3_gpcr_hard_decoy_actual_closure"]
     assert phase_3["state"] == "ready"
     assert phase_3["summary"]["actual_closure_ready"] is True

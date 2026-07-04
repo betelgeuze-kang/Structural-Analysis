@@ -426,7 +426,7 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
     "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
   },
-  "generated_at": "2026-07-04T06:25:17.936549+00:00",
+  "generated_at": "2026-07-04T06:30:28.535796+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:5558e5f0d82be0cbcb22c4431c0247939a1a9f780938f6d40bcf8484561b0eed",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:fc87faa4fd9acfb4e87000f955f1086cc39a86f479b9325e30cb2864c9f19631",
@@ -437,7 +437,7 @@
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:c1af83f1b410aca8536d5ab832c0ba6a86153436844e42152860f84ec0002328",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:8adb767e05269c4063e04ca5e5060b0e94994916ccae4e9912c897c0c7fc9703",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:e8a6b5e0b8d86ef1b629c1a6d4e8caab6132dd4a3a311c64bc520c2e4e13954f",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:8d3b91e5cd4521c3407e60777eb03c9fb3acd2172f70ead3325f837f397498fa"
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:554681d43c0a734b12a079b7356d41254cd4e9185b59c19966c3950a0b3fb16b"
   },
   "mutation_allowed": false,
   "next_actions": [
@@ -2462,6 +2462,307 @@
             "rmsd_scorecard": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
             "subset_manifest": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
           },
+          "phase2_exit_gate_criteria": [
+            {
+              "artifact_role": "pose_success_harness",
+              "blockers": [],
+              "component_id": "casf_pdbbind_pose_success_harness",
+              "criterion_id": "casf_pdbbind_pose_success_harness_ready",
+              "current": {
+                "contract_pass": true,
+                "ready": true,
+                "real_benchmark_case_count": 12
+              },
+              "pass": true,
+              "required": {
+                "contract_pass": true,
+                "ready": true,
+                "real_benchmark_case_count": 12
+              }
+            },
+            {
+              "artifact_role": "rmsd_scorecard",
+              "blockers": [],
+              "component_id": "symmetry_aware_ligand_rmsd",
+              "criterion_id": "symmetry_aware_ligand_rmsd_ready",
+              "current": {
+                "contract_pass": true,
+                "ready": true,
+                "real_benchmark_case_count": 12
+              },
+              "pass": true,
+              "required": {
+                "contract_pass": true,
+                "ready": true,
+                "real_benchmark_case_count": 12
+              }
+            },
+            {
+              "artifact_role": "pose_validity_packet",
+              "blockers": [],
+              "component_id": "posebusters_style_pose_validity",
+              "criterion_id": "posebusters_style_pose_validity_ready",
+              "current": {
+                "contract_pass": true,
+                "ready": true,
+                "real_benchmark_case_count": 12
+              },
+              "pass": true,
+              "required": {
+                "contract_pass": true,
+                "ready": true,
+                "real_benchmark_case_count": 12
+              }
+            },
+            {
+              "artifact_role": "vina_gnina_comparison_adapter",
+              "blockers": [
+                "vina_gnina_rows_not_provided"
+              ],
+              "component_id": "vina_gnina_comparison_adapter",
+              "criterion_id": "vina_gnina_comparison_ready",
+              "current": {
+                "contract_pass": false,
+                "ready": false,
+                "real_comparison_case_count": 0
+              },
+              "pass": false,
+              "required": {
+                "contract_pass": true,
+                "ready": true,
+                "real_comparison_case_count": 1
+              }
+            },
+            {
+              "artifact_role": "enrichment_scorecard",
+              "blockers": [],
+              "component_id": "dud_e_or_lit_pcba_enrichment",
+              "criterion_id": "dud_e_or_lit_pcba_enrichment_ready",
+              "current": {
+                "contract_pass": true,
+                "ready": true,
+                "real_enrichment_target_count": 1
+              },
+              "pass": true,
+              "required": {
+                "contract_pass": true,
+                "ready": true,
+                "real_enrichment_target_count": 1
+              }
+            }
+          ],
+          "phase2_exit_gate_status": "blocked",
+          "phase2_failed_criteria": [
+            "vina_gnina_comparison_ready"
+          ],
+          "phase2_ready": false,
+          "phase2_requirement_summary": {
+            "blocked_component_count": 1,
+            "blocked_component_ids": [
+              "vina_gnina_comparison_adapter"
+            ],
+            "materialized_component_count": 4,
+            "missing_row_input_count": 1,
+            "missing_row_inputs": [
+              "vina_gnina_rows"
+            ],
+            "operator_evidence_required_count": 1,
+            "phase2_ready": false,
+            "ready_component_count": 4,
+            "required_component_count": 5
+          },
+          "phase2_requirements": [
+            {
+              "blockers": [],
+              "component_id": "casf_pdbbind_pose_success_harness",
+              "criterion_id": "casf_pdbbind_pose_success_harness_ready",
+              "current_count": 12,
+              "operator_evidence_required": false,
+              "pass": false,
+              "ready": true,
+              "required_minimum_count": 12,
+              "requirement": "CASF/PDBBind pose-success harness",
+              "requirement_id": "",
+              "row_input_status": {
+                "pose_rows": "provided",
+                "subset_rows": "provided"
+              },
+              "row_inputs": [
+                "subset_rows",
+                "pose_rows"
+              ],
+              "status": "ready"
+            },
+            {
+              "blockers": [],
+              "component_id": "symmetry_aware_ligand_rmsd",
+              "criterion_id": "symmetry_aware_ligand_rmsd_ready",
+              "current_count": 12,
+              "operator_evidence_required": false,
+              "pass": false,
+              "ready": true,
+              "required_minimum_count": 12,
+              "requirement": "Symmetry-aware ligand RMSD scorecard",
+              "requirement_id": "",
+              "row_input_status": {
+                "pose_rows": "provided"
+              },
+              "row_inputs": [
+                "pose_rows"
+              ],
+              "status": "ready"
+            },
+            {
+              "blockers": [],
+              "component_id": "posebusters_style_pose_validity",
+              "criterion_id": "posebusters_style_pose_validity_ready",
+              "current_count": 12,
+              "operator_evidence_required": false,
+              "pass": false,
+              "ready": true,
+              "required_minimum_count": 12,
+              "requirement": "PoseBusters-style pose validity packet",
+              "requirement_id": "",
+              "row_input_status": {
+                "pose_rows": "provided"
+              },
+              "row_inputs": [
+                "pose_rows"
+              ],
+              "status": "ready"
+            },
+            {
+              "blockers": [
+                "vina_gnina_rows_not_provided"
+              ],
+              "component_id": "vina_gnina_comparison_adapter",
+              "criterion_id": "vina_gnina_comparison_ready",
+              "current_count": 0,
+              "operator_evidence_required": true,
+              "pass": false,
+              "ready": false,
+              "required_minimum_count": 1,
+              "requirement": "Vina/GNINA comparison adapter",
+              "requirement_id": "",
+              "row_input_status": {
+                "vina_gnina_rows": "missing"
+              },
+              "row_inputs": [
+                "vina_gnina_rows"
+              ],
+              "status": "operator_evidence_required"
+            },
+            {
+              "blockers": [],
+              "component_id": "dud_e_or_lit_pcba_enrichment",
+              "criterion_id": "dud_e_or_lit_pcba_enrichment_ready",
+              "current_count": 1,
+              "operator_evidence_required": false,
+              "pass": false,
+              "ready": true,
+              "required_minimum_count": 1,
+              "requirement": "DUD-E or LIT-PCBA enrichment scorecard",
+              "requirement_id": "",
+              "row_input_status": {
+                "enrichment_rows": "provided"
+              },
+              "row_inputs": [
+                "enrichment_rows"
+              ],
+              "status": "ready"
+            }
+          ],
+          "phase2_row_closure_matrix": [
+            {
+              "closes_phase2_criteria": [
+                "casf_pdbbind_pose_success_harness_ready"
+              ],
+              "feeds_components": [
+                "casf_pdbbind_pose_success_harness"
+              ],
+              "materialization_chain": [
+                "materialize_public_benchmark_subset_manifest",
+                "validate_public_benchmark_subset_manifest",
+                "materialize_public_benchmark_pose_validity_input",
+                "materialize_public_benchmark_pose_success_harness"
+              ],
+              "missing": false,
+              "operator_blockers_if_missing": [
+                "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
+              ],
+              "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+              "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+              "row_input_id": "subset_rows",
+              "status": "provided"
+            },
+            {
+              "closes_phase2_criteria": [
+                "casf_pdbbind_pose_success_harness_ready",
+                "symmetry_aware_ligand_rmsd_ready",
+                "posebusters_style_pose_validity_ready"
+              ],
+              "feeds_components": [
+                "symmetry_aware_ligand_rmsd",
+                "posebusters_style_pose_validity",
+                "casf_pdbbind_pose_success_harness"
+              ],
+              "materialization_chain": [
+                "materialize_public_benchmark_pose_validity_input",
+                "validate_public_benchmark_pose_validity",
+                "materialize_public_benchmark_posebusters_validity_packet",
+                "materialize_public_benchmark_rmsd_scorecard",
+                "materialize_public_benchmark_pose_success_harness"
+              ],
+              "missing": false,
+              "operator_blockers_if_missing": [
+                "casf_pdbbind_pose_success_harness::pose_rows_not_provided",
+                "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
+                "posebusters_style_pose_validity::pose_rows_not_provided"
+              ],
+              "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+              "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+              "row_input_id": "pose_rows",
+              "status": "provided"
+            },
+            {
+              "closes_phase2_criteria": [
+                "dud_e_or_lit_pcba_enrichment_ready"
+              ],
+              "feeds_components": [
+                "dud_e_or_lit_pcba_enrichment"
+              ],
+              "materialization_chain": [
+                "materialize_public_benchmark_enrichment_scorecard"
+              ],
+              "missing": false,
+              "operator_blockers_if_missing": [
+                "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
+              ],
+              "provided_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+              "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+              "row_input_id": "enrichment_rows",
+              "status": "provided"
+            },
+            {
+              "closes_phase2_criteria": [
+                "vina_gnina_comparison_ready"
+              ],
+              "feeds_components": [
+                "vina_gnina_comparison_adapter"
+              ],
+              "materialization_chain": [
+                "materialize_public_benchmark_vina_gnina_comparison_adapter"
+              ],
+              "missing": true,
+              "operator_blockers_if_missing": [
+                "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
+              ],
+              "provided_path": "",
+              "resolved_path": "",
+              "row_input_id": "vina_gnina_rows",
+              "status": "missing"
+            }
+          ],
           "rows_path": "",
           "target_count": 0,
           "target_pass_count": 0
@@ -3975,7 +4276,7 @@
     ],
     "status": "operator_evidence_required"
   },
-  "source_commit_sha": "4746286599f95498da6ddcbc19e6a937383826ed",
+  "source_commit_sha": "4fca30abc78bd00a39f987e99d365275cd55c9e2",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

@@ -400,9 +400,96 @@ def _science_row_audit_component(
     return {}
 
 
+def _phase2_requirement_summary_row(
+    row: dict[str, Any],
+    phase2_row_input_status: dict[str, str],
+) -> dict[str, Any]:
+    row_inputs = [
+        str(item)
+        for item in (
+            _as_list(row.get("row_inputs"))
+            or _as_list(row.get("required_row_inputs"))
+        )
+    ]
+    row_input_status = _as_dict(row.get("row_input_status"))
+    if not row_input_status:
+        row_input_status = {
+            row_input_id: phase2_row_input_status.get(row_input_id, "")
+            for row_input_id in row_inputs
+        }
+    return {
+        "requirement": str(row.get("requirement") or ""),
+        "requirement_id": str(row.get("requirement_id") or ""),
+        "component_id": str(row.get("component_id") or ""),
+        "criterion_id": str(row.get("criterion_id") or ""),
+        "status": str(row.get("status") or ""),
+        "ready": _as_bool(row.get("ready")),
+        "pass": _as_bool(row.get("pass")),
+        "operator_evidence_required": _as_bool(
+            row.get("operator_evidence_required")
+        ),
+        "current_count": _as_int(row.get("current_count")),
+        "required_minimum_count": _as_int(row.get("required_minimum_count")),
+        "row_inputs": row_inputs,
+        "row_input_status": row_input_status,
+        "blockers": [str(item) for item in _as_list(row.get("blockers"))],
+    }
+
+
 def _science_component_gate_summary(component_audit: dict[str, Any]) -> dict[str, Any]:
     if not component_audit:
         return {}
+    raw_phase2_row_closure_matrix = [
+        row
+        for row in _as_list(component_audit.get("phase2_row_closure_matrix"))
+        if isinstance(row, dict)
+    ]
+    phase2_row_input_status = {
+        str(row.get("row_input_id") or ""): str(row.get("status") or "")
+        for row in raw_phase2_row_closure_matrix
+        if str(row.get("row_input_id") or "")
+    }
+    phase2_criteria = [
+        {
+            "criterion_id": str(row.get("criterion_id") or ""),
+            "component_id": str(row.get("component_id") or ""),
+            "artifact_role": str(row.get("artifact_role") or ""),
+            "pass": _as_bool(row.get("pass")),
+            "current": _as_dict(row.get("current")),
+            "required": _as_dict(row.get("required")),
+            "blockers": [str(item) for item in _as_list(row.get("blockers"))],
+        }
+        for row in _as_list(component_audit.get("phase2_exit_gate_criteria"))
+        if isinstance(row, dict)
+    ]
+    phase2_requirements = [
+        _phase2_requirement_summary_row(row, phase2_row_input_status)
+        for row in _as_list(component_audit.get("phase2_requirements"))
+        if isinstance(row, dict)
+    ]
+    phase2_row_closure_matrix = [
+        {
+            "row_input_id": str(row.get("row_input_id") or ""),
+            "status": str(row.get("status") or ""),
+            "missing": _as_bool(row.get("missing")),
+            "resolved_path": str(row.get("resolved_path") or ""),
+            "provided_path": str(row.get("provided_path") or ""),
+            "closes_phase2_criteria": [
+                str(item) for item in _as_list(row.get("closes_phase2_criteria"))
+            ],
+            "feeds_components": [
+                str(item) for item in _as_list(row.get("feeds_components"))
+            ],
+            "materialization_chain": [
+                str(item) for item in _as_list(row.get("materialization_chain"))
+            ],
+            "operator_blockers_if_missing": [
+                str(item)
+                for item in _as_list(row.get("operator_blockers_if_missing"))
+            ],
+        }
+        for row in raw_phase2_row_closure_matrix
+    ]
     phase3_criteria = [
         {
             "criterion_id": str(row.get("criterion_id") or ""),
@@ -438,6 +525,26 @@ def _science_component_gate_summary(component_audit: dict[str, Any]) -> dict[str
                     str(item)
                     for item in _as_list(component_audit.get("phase3_failed_criteria"))
                 ],
+            }
+        )
+    if phase2_criteria or phase2_requirements:
+        phase2_requirement_summary = _as_dict(
+            component_audit.get("phase2_requirement_summary")
+        )
+        summary.update(
+            {
+                "phase2_exit_gate_status": str(
+                    component_audit.get("phase2_exit_gate_status") or ""
+                ),
+                "phase2_ready": _as_bool(component_audit.get("phase2_ready")),
+                "phase2_failed_criteria": [
+                    str(item)
+                    for item in _as_list(component_audit.get("phase2_failed_criteria"))
+                ],
+                "phase2_requirement_summary": phase2_requirement_summary,
+                "phase2_exit_gate_criteria": phase2_criteria,
+                "phase2_requirements": phase2_requirements,
+                "phase2_row_closure_matrix": phase2_row_closure_matrix,
             }
         )
     return summary
