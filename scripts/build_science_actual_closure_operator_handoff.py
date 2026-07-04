@@ -172,6 +172,8 @@ def _slot_source_context(
             "missing_row_input_actions": [],
             "summary": {},
             "phase4_completion_audit": {},
+            "phase4_actual_evidence_audit": {},
+            "vina_gnina_actual_evidence_audit": {},
             "operator_action": "",
         }
     source = _as_dict(upstream_source_acquisition.get(source_id))
@@ -202,6 +204,12 @@ def _slot_source_context(
         if isinstance(row, dict)
     ]
     phase4_completion_audit = _as_dict(source.get("phase4_completion_audit"))
+    phase4_actual_evidence_audit = _as_dict(
+        source.get("phase4_actual_evidence_audit")
+    )
+    vina_gnina_actual_evidence_audit = _as_dict(
+        source.get("vina_gnina_actual_evidence_audit")
+    )
     vina_gnina_case_input_slot_matrix = [
         row
         for row in _as_list(source.get("vina_gnina_case_input_slot_matrix"))
@@ -277,6 +285,20 @@ def _slot_source_context(
             or len(phase4_metric_closure_matrix)
         ),
         "phase4_completion_audit": phase4_completion_audit,
+        "phase4_actual_evidence_audit": phase4_actual_evidence_audit,
+        "phase4_actual_evidence_audit_status": str(
+            phase4_actual_evidence_audit.get("status") or ""
+        ),
+        "phase4_actual_evidence_blocked_component_count": _as_int(
+            phase4_actual_evidence_audit.get("blocked_component_count")
+        ),
+        "vina_gnina_actual_evidence_audit": vina_gnina_actual_evidence_audit,
+        "vina_gnina_actual_evidence_audit_status": str(
+            vina_gnina_actual_evidence_audit.get("status") or ""
+        ),
+        "vina_gnina_actual_evidence_blocked_component_count": _as_int(
+            vina_gnina_actual_evidence_audit.get("blocked_component_count")
+        ),
         "phase4_completion_audit_status": str(
             phase4_completion_audit.get("status") or ""
         ),
@@ -1228,6 +1250,16 @@ def _blocked_component_operator_actions(
                         "phase4_completion_audit"
                     )
                 ),
+                "source_acquisition_phase4_actual_evidence_audit": _as_dict(
+                    _as_dict(slot.get("upstream_source_acquisition")).get(
+                        "phase4_actual_evidence_audit"
+                    )
+                ),
+                "source_acquisition_vina_gnina_actual_evidence_audit": _as_dict(
+                    _as_dict(slot.get("upstream_source_acquisition")).get(
+                        "vina_gnina_actual_evidence_audit"
+                    )
+                ),
                 "upstream_source_blockers": [
                     str(item) for item in _as_list(slot.get("upstream_source_blockers"))
                 ],
@@ -1326,6 +1358,51 @@ def _science_completion_progress(audit: dict[str, Any]) -> dict[str, Any]:
         "component_progress": component_progress,
         "claim_boundary": str(completion.get("claim_boundary") or ""),
     }
+
+
+def _actual_evidence_audit_lines(title: str, audit: dict[str, Any]) -> list[str]:
+    if not audit:
+        return []
+    components = [
+        row for row in _as_list(audit.get("components")) if isinstance(row, dict)
+    ]
+    lines = [
+        "",
+        f"### {title}",
+        "",
+        f"- `status`: `{audit.get('status')}`",
+        f"- `actual_closure_ready`: `{audit.get('actual_closure_ready')}`",
+        "- `ready_component_count`: "
+        f"`{audit.get('ready_component_count')}`",
+        "- `blocked_component_count`: "
+        f"`{audit.get('blocked_component_count')}`",
+        "- `remaining_evidence`: "
+        f"{_code_join(_as_list(audit.get('remaining_evidence')))}",
+        "",
+        "| Component | Status | Pass | Current | Required | Blockers |",
+        "|---|---|---|---|---|---|",
+    ]
+    for row in components:
+        current = json.dumps(
+            _as_dict(row.get("current")),
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+        required = json.dumps(
+            _as_dict(row.get("required")),
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+        lines.append(
+            "| "
+            f"`{row.get('component_id', '')}` | "
+            f"`{row.get('status', '')}` | "
+            f"`{row.get('pass')}` | "
+            f"`{current}` | "
+            f"`{required}` | "
+            f"{_code_join(_as_list(row.get('blockers')))} |"
+        )
+    return lines
 
 
 def build_science_actual_closure_operator_handoff(
@@ -2250,9 +2327,23 @@ def _markdown(payload: dict[str, Any]) -> str:
                     f"{row.get('product_requirement', '')} | "
                     f"{_code_join(_as_list(row.get('blockers')))} |"
                 )
+        lines.extend(
+            _actual_evidence_audit_lines(
+                "PocketMD Actual Evidence Audit",
+                _as_dict(pocketmd_source_context.get("phase4_actual_evidence_audit")),
+            )
+        )
         public_source_context = _as_dict(
             _as_dict(payload.get("upstream_source_acquisition")).get(
                 "public_benchmark_phase2"
+            )
+        )
+        lines.extend(
+            _actual_evidence_audit_lines(
+                "Public Benchmark Vina/GNINA Actual Evidence Audit",
+                _as_dict(
+                    public_source_context.get("vina_gnina_actual_evidence_audit")
+                ),
             )
         )
         source_access_preflight_rows = [

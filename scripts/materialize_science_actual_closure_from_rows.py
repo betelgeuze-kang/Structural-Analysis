@@ -176,6 +176,14 @@ def _source_acquisition_summary(
     phase4_completion_audit = payload.get("phase4_completion_audit")
     if not isinstance(phase4_completion_audit, dict):
         phase4_completion_audit = {}
+    phase4_actual_evidence_audit = payload.get("phase4_actual_evidence_audit")
+    if not isinstance(phase4_actual_evidence_audit, dict):
+        phase4_actual_evidence_audit = {}
+    vina_gnina_actual_evidence_audit = payload.get(
+        "vina_gnina_actual_evidence_audit"
+    )
+    if not isinstance(vina_gnina_actual_evidence_audit, dict):
+        vina_gnina_actual_evidence_audit = {}
     vina_gnina_runtime_readiness = payload.get("vina_gnina_runtime_readiness")
     if not isinstance(vina_gnina_runtime_readiness, dict):
         vina_gnina_runtime_readiness = {}
@@ -278,6 +286,8 @@ def _source_acquisition_summary(
         ),
         "phase4_metric_closure_matrix": phase4_metric_closure_matrix,
         "phase4_completion_audit": phase4_completion_audit,
+        "phase4_actual_evidence_audit": phase4_actual_evidence_audit,
+        "vina_gnina_actual_evidence_audit": vina_gnina_actual_evidence_audit,
         "vina_gnina_case_input_slot_matrix_count": int(
             vina_gnina_runtime_readiness.get("case_input_slot_matrix_count")
             or len(vina_gnina_case_input_slot_matrix)

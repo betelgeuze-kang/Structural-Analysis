@@ -966,6 +966,39 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
                         }
                     ],
                 },
+                "vina_gnina_actual_evidence_audit": {
+                    "status": "engine_input_manifest_required",
+                    "actual_closure_ready": False,
+                    "component_count": 2,
+                    "ready_component_count": 0,
+                    "blocked_component_count": 2,
+                    "remaining_evidence": [
+                        "engine_input_manifest",
+                        "adapter_rows",
+                    ],
+                    "components": [
+                        {
+                            "component_id": "engine_input_manifest",
+                            "status": "blocked",
+                            "pass": False,
+                            "current": {"input_manifest_detected": False},
+                            "required": {"input_manifest_detected": True},
+                            "blockers": [
+                                "public_benchmark_vina_gnina_input_manifest_not_detected"
+                            ],
+                        },
+                        {
+                            "component_id": "adapter_rows",
+                            "status": "blocked",
+                            "pass": False,
+                            "current": {"detected_row_artifact_count": 0},
+                            "required": {"detected_row_artifact_count": ">=1"},
+                            "blockers": [
+                                "public_benchmark_vina_gnina_rows_not_detected"
+                            ],
+                        },
+                    ],
+                },
                 "missing_row_input_action_count": 1,
                 "missing_row_input_actions": [
                     {
@@ -1063,6 +1096,37 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
                         "status": "blocked",
                     }
                 ],
+                "phase4_actual_evidence_audit": {
+                    "status": "operator_topk_rows_required",
+                    "actual_closure_ready": False,
+                    "component_count": 2,
+                    "ready_component_count": 0,
+                    "blocked_component_count": 2,
+                    "remaining_evidence": [
+                        "bounded_top_k_row_slots",
+                        "survival_metric_summary",
+                    ],
+                    "components": [
+                        {
+                            "component_id": "bounded_top_k_row_slots",
+                            "status": "blocked",
+                            "pass": False,
+                            "current": {"missing_required_slot_count": 6},
+                            "required": {"missing_required_slot_count": 0},
+                            "blockers": ["pocketmd_lite_topk_rows_not_acquired"],
+                        },
+                        {
+                            "component_id": "survival_metric_summary",
+                            "status": "blocked",
+                            "pass": False,
+                            "current": {"missing_metric_count": 5},
+                            "required": {"missing_metric_count": 0},
+                            "blockers": [
+                                "pocketmd_lite_local_min_survival_rows_missing"
+                            ],
+                        },
+                    ],
+                },
                 "missing_row_input_action_count": 1,
                 "missing_row_input_actions": [
                     {
@@ -1177,6 +1241,14 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
     assert runtime_summary["operator_unblock_packet"][
         "input_manifest_template_preflight_artifact"
     ].endswith("public_benchmark_vina_gnina_input_manifest_template_preflight.json")
+    vina_gnina_actual = audit["upstream_source_acquisition"][
+        "public_benchmark_phase2"
+    ]["vina_gnina_actual_evidence_audit"]
+    assert vina_gnina_actual["status"] == "engine_input_manifest_required"
+    assert vina_gnina_actual["blocked_component_count"] == 2
+    assert vina_gnina_actual["components"][0]["component_id"] == (
+        "engine_input_manifest"
+    )
     assert audit["upstream_source_acquisition"]["pocketmd_lite"][
         "missing_row_input_actions"
     ][0]["operator_action"] == (
@@ -1204,6 +1276,14 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
     assert audit["upstream_source_acquisition"]["pocketmd_lite"][
         "phase4_metric_closure_matrix"
     ][0]["criterion_id"] == "local_min_survival_materialized"
+    pocketmd_actual = audit["upstream_source_acquisition"]["pocketmd_lite"][
+        "phase4_actual_evidence_audit"
+    ]
+    assert pocketmd_actual["status"] == "operator_topk_rows_required"
+    assert pocketmd_actual["blocked_component_count"] == 2
+    assert pocketmd_actual["components"][0]["component_id"] == (
+        "bounded_top_k_row_slots"
+    )
     assert audit["operator_next_actions"] == [
         "attach_subset_rows",
         "attach_pose_rows",

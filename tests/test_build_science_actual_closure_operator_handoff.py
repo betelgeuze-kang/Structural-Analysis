@@ -664,6 +664,14 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert upstream_runtime["operator_unblock_packet"]["operator_sequence"][0] == (
         "review_public_benchmark_vina_gnina_input_manifest_template_preflight"
     )
+    vina_gnina_actual = vina_gnina["upstream_source_acquisition"][
+        "vina_gnina_actual_evidence_audit"
+    ]
+    assert vina_gnina_actual["status"] == "engine_input_manifest_required"
+    assert vina_gnina_actual["blocked_component_count"] == 6
+    assert vina_gnina_actual["components"][0]["component_id"] == (
+        "engine_input_manifest"
+    )
     assert vina_gnina["source_acquisition_operator_action"] == (
         "resolve_public_benchmark_phase2_source_acquisition_blockers"
     )
@@ -821,6 +829,14 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     ]
     assert pocketmd["source_acquisition_operator_action"] == (
         "resolve_pocketmd_lite_source_acquisition_blockers"
+    )
+    pocketmd_actual = pocketmd["upstream_source_acquisition"][
+        "phase4_actual_evidence_audit"
+    ]
+    assert pocketmd_actual["status"] == "operator_topk_rows_required"
+    assert pocketmd_actual["blocked_component_count"] == 4
+    assert pocketmd_actual["components"][0]["component_id"] == (
+        "bounded_top_k_row_slots"
     )
     assert "pocketmd_lite_topk_rows_not_acquired" in pocketmd[
         "upstream_source_blockers"
@@ -1021,6 +1037,13 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     ) in markdown
     assert "public_benchmark_vina_gnina_rows.csv" in markdown
     assert "`operator_rows_must_be_real_engine_outputs`: `True`" in markdown
+    assert "### Public Benchmark Vina/GNINA Actual Evidence Audit" in markdown
+    assert "`engine_input_manifest`" in markdown
+    assert "`per_engine_run_receipts`" in markdown
+    assert "`public_benchmark_vina_gnina_case_inputs_incomplete`" in markdown
+    assert "`public_benchmark_vina_gnina_engine_run_receipts_incomplete`" in (
+        markdown
+    )
     assert "### Public Benchmark Source Access Preflight" in markdown
     assert "`receipt_status`: `reachable`" in markdown
     assert "`receipt_reachable_count`: `6`" in markdown
@@ -1028,6 +1051,10 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "`external_receipts_complete_roles`: `2/3`" in markdown
     assert "curl --head --location --max-time 20" in markdown
     assert "### PocketMD Top-k Rows Action" in markdown
+    assert "### PocketMD Actual Evidence Audit" in markdown
+    assert "`bounded_top_k_row_slots`" in markdown
+    assert "`survival_metric_summary`" in markdown
+    assert "`pocketmd_lite_operator_input_source_receipt_incomplete`" in markdown
     assert "`role_receipt_blocked_count`: `24`" in markdown
     assert (
         "`first_blocked_role_receipt`: "
