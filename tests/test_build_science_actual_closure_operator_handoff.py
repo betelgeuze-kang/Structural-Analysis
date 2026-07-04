@@ -202,6 +202,12 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert public_adapter_preflight_action["supported_candidate_paths"][3].endswith(
         "public_benchmark_vina_gnina_rows.csv"
     )
+    assert public_adapter_preflight_action["row_template_preflight_artifact"].endswith(
+        "public_benchmark_vina_gnina_rows_template_preflight.json"
+    )
+    assert "build_public_benchmark_vina_gnina_rows_template_preflight.py" in public_adapter_preflight_action[
+        "build_row_template_preflight_command"
+    ]
     assert public_adapter_preflight_action["template_safety_policy"][
         "preflight_does_not_run_engines"
     ] is True
@@ -707,6 +713,8 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "`input_manifest_load_errors`: `none`" in markdown
     assert "`do_not_treat_blank_prepared_checksums_as_ready`: `True`" in markdown
     assert "### Vina/GNINA Adapter Row Preflight Action" in markdown
+    assert "public_benchmark_vina_gnina_rows_template_preflight.json" in markdown
+    assert "build_public_benchmark_vina_gnina_rows_template_preflight.py" in markdown
     assert "public_benchmark_vina_gnina_rows.csv" in markdown
     assert "`operator_rows_must_be_real_engine_outputs`: `True`" in markdown
     assert "### Public Benchmark Source Access Preflight" in markdown

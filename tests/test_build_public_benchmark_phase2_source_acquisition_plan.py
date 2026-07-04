@@ -624,6 +624,15 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert preflight_action["expected_rows_artifact"].endswith(
         "public_benchmark_vina_gnina_rows.json"
     )
+    assert preflight_action["row_template_artifact"].endswith(
+        "public_benchmark_vina_gnina_rows_template.csv"
+    )
+    assert preflight_action["row_template_preflight_artifact"].endswith(
+        "public_benchmark_vina_gnina_rows_template_preflight.json"
+    )
+    assert "build_public_benchmark_vina_gnina_rows_template_preflight.py" in preflight_action[
+        "build_row_template_preflight_command"
+    ]
     assert preflight_action["supported_candidate_paths"] == [
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_rows.json",
@@ -701,6 +710,8 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "materialize_public_benchmark_vina_gnina_comparison_adapter.py" in markdown
     assert "<operator-vina-gnina-run-rows.csv|json|jsonl|ndjson>" in markdown
     assert "### Vina/GNINA Adapter Row Preflight Action" in markdown
+    assert "public_benchmark_vina_gnina_rows_template_preflight.json" in markdown
+    assert "build_public_benchmark_vina_gnina_rows_template_preflight.py" in markdown
     assert "public_benchmark_vina_gnina_rows.ndjson" in markdown
     assert "`preflight_does_not_run_engines`: `True`" in markdown
     assert "### Vina/GNINA Input Manifest Action" in markdown

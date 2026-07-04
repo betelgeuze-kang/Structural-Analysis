@@ -91,6 +91,9 @@
 
 - `status`: `row_artifact_missing`
 - `expected_rows_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json`
+- `row_template_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv`
+- `row_template_preflight_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json`
+- `build_row_template_preflight_command`: `python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md`
 - `supported_candidate_paths`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv`
 - `detected_row_artifact_count`: `0`
 - `selected_path`: ``
@@ -201,6 +204,7 @@
 - `phase2_row_audit`: `python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked`
 - `build_vina_gnina_execution_plan`: `python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json`
 - `check_vina_gnina_runtime_readiness`: `python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json`
+- `build_vina_gnina_rows_template_preflight`: `python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md`
 - `build_source_access_preflight_receipt`: `python3 scripts/build_public_benchmark_source_access_preflight_receipt.py --out implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md`
 - `probe_source_access_preflight`: `python3 scripts/build_public_benchmark_source_access_preflight_receipt.py --out implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md --probe-network`
 - `materialize_vina_gnina_adapter`: `python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked`

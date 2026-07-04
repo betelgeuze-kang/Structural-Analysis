@@ -67,6 +67,15 @@ DEFAULT_VINA_GNINA_RUNTIME_READINESS = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_runtime_readiness.json"
 )
 DEFAULT_VINA_GNINA_ROWS = PRODUCTIZATION / "public_benchmark_vina_gnina_rows.json"
+DEFAULT_VINA_GNINA_ROWS_TEMPLATE = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_rows_template.csv"
+)
+DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_rows_template_preflight.json"
+)
+DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT_MD = (
+    DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT.with_suffix(".md")
+)
 DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest_template.csv"
 )
@@ -1518,6 +1527,19 @@ def _missing_row_input_actions(
                             or "row_artifact_missing"
                         ),
                         "expected_rows_artifact": str(DEFAULT_VINA_GNINA_ROWS),
+                        "row_template_artifact": str(
+                            DEFAULT_VINA_GNINA_ROWS_TEMPLATE
+                        ),
+                        "row_template_preflight_artifact": str(
+                            DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT
+                        ),
+                        "row_template_preflight_markdown_artifact": str(
+                            DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT_MD
+                        ),
+                        "build_row_template_preflight_command": str(
+                            commands.get("build_vina_gnina_rows_template_preflight")
+                            or ""
+                        ),
                         "supported_candidate_paths": [
                             str(row.get("path") or "")
                             for row in row_candidate_status.get(
@@ -1629,6 +1651,11 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py "
             f"--out {DEFAULT_VINA_GNINA_RUNTIME_READINESS}"
         ),
+        "build_vina_gnina_rows_template_preflight": (
+            "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py "
+            f"--out {DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT} "
+            f"--out-md {DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT_MD}"
+        ),
         "build_source_access_preflight_receipt": (
             "python3 scripts/build_public_benchmark_source_access_preflight_receipt.py "
             f"--out {DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT} "
@@ -1683,6 +1710,9 @@ def build_public_benchmark_phase2_source_acquisition_plan(
                 Path("scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"),
                 Path("scripts/build_public_benchmark_vina_gnina_execution_plan.py"),
                 Path("scripts/build_public_benchmark_vina_gnina_runtime_readiness.py"),
+                Path("scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py"),
+                DEFAULT_VINA_GNINA_ROWS_TEMPLATE,
+                DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT,
                 Path("scripts/build_public_benchmark_source_access_preflight_receipt.py"),
                 DEFAULT_VINA_GNINA_EXECUTION_PLAN,
                 DEFAULT_VINA_GNINA_RUNTIME_READINESS,
@@ -2092,6 +2122,9 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                     [
                         f"- `status`: `{action.get('status')}`",
                         f"- `expected_rows_artifact`: `{action.get('expected_rows_artifact')}`",
+                        f"- `row_template_artifact`: `{action.get('row_template_artifact')}`",
+                        f"- `row_template_preflight_artifact`: `{action.get('row_template_preflight_artifact')}`",
+                        f"- `build_row_template_preflight_command`: `{action.get('build_row_template_preflight_command')}`",
                         f"- `supported_candidate_paths`: {supported_paths}",
                         f"- `detected_row_artifact_count`: `{action.get('detected_row_artifact_count')}`",
                         f"- `selected_path`: `{action.get('selected_path')}`",

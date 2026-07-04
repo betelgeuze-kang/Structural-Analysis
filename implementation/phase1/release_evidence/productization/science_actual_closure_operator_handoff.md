@@ -164,6 +164,9 @@
 - `row_input_id`: `vina_gnina_rows`
 - `status`: `row_artifact_missing`
 - `expected_rows_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json`
+- `row_template_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv`
+- `row_template_preflight_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json`
+- `build_row_template_preflight_command`: `python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md`
 - `supported_candidate_paths`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv`
 - `detected_row_artifact_count`: `0`
 - `selected_path`: ``
