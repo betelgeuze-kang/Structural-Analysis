@@ -18,12 +18,13 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T04:15:41.769982+00:00",
+  "generated_at": "2026-07-04T05:00:04.974874+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv": "sha256:4fac3161714e8bf0444ee3e085a3c34d2f9841acaf9b4427bd8de2224294e196",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:1aa07a73ba0f9770659d6317d4d813eff0660669c991dd35c5b89726f4045f20",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:e3a98f7bed334c844cbb54832b9e3e2da97325597da99654985aa3bf15398508",
     "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:c4e52648fc194826a082a0816d7946350a90fe1e4eae7d31e3d6f37dd1c05148",
-    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:eec4f06f8d8664a57b0510dba0a3733aea26a0f0454eef338c6f143e0140109e",
+    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:e62d08e0f4d026842cfdbeb7f2a3ffab29b93f53f53b419e3c0fb8911b96007f",
     "scripts/build_pocketmd_lite_topk_rows_template_preflight.py": "sha256:bee7f8a388bcec0cf613c291afe00fe6892667bd47c1457967e14ec30d1133af",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:dad666c08fff6ec709e535de64fdc41121b7c93de5e19c42f0876d71a44a67c9",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:161673d8ff036a7a31d657fb972764eeb4b62f6d55cc0840e26f398565707c6f"
@@ -860,6 +861,305 @@
     }
   ],
   "phase4_candidate_slot_matrix_count": 6,
+  "phase4_completion_audit": {
+    "actual_closure_ready": false,
+    "blocked_requirement_count": 7,
+    "blocked_requirement_ids": [
+      "top_k_refinement_rows_present",
+      "top_k_refinement_case_coverage",
+      "local_min_survival_reported",
+      "contact_persistence_reported",
+      "h_bond_persistence_reported",
+      "clash_relief_reported",
+      "uncertainty_reported"
+    ],
+    "claim_boundary": "This audit proves only the PocketMD Lite top-k refinement closure state. Full closure still requires real bounded top-k rows, source receipts, local-min/contact/H-bond/clash/uncertainty metrics, and a passing survival report.",
+    "pass": false,
+    "ready_requirement_count": 2,
+    "remaining_blockers": [
+      "pocketmd_lite_topk_rows_not_acquired",
+      "pocketmd_lite_topk_candidate_rows_missing",
+      "pocketmd_lite_local_min_survival_rows_missing",
+      "pocketmd_lite_contact_persistence_rows_missing",
+      "pocketmd_lite_h_bond_persistence_rows_missing",
+      "pocketmd_lite_clash_relief_rows_missing",
+      "pocketmd_lite_uncertainty_rows_missing"
+    ],
+    "remaining_operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+    "remaining_row_inputs": [
+      "pocketmd_rows"
+    ],
+    "requirement_count": 9,
+    "requirements": [
+      {
+        "blockers": [],
+        "claim_boundary": "This audit row records whether the PocketMD Lite Phase 4 requirement is closed by live row/source evidence. It does not synthesize refinement metrics.",
+        "current": {
+          "broad_all_atom_or_fep_claims_unlocked": false,
+          "preserved_phase4_criteria": [
+            "broad_all_atom_fep_claims_locked"
+          ],
+          "top_k_scope_policy_present": true
+        },
+        "evidence_kind": "contract_guard",
+        "pass": true,
+        "phase4_criterion_id": "broad_all_atom_fep_claims_locked",
+        "product_requirement": "PocketMD Lite applies only to upstream top-k candidates",
+        "required": {
+          "broad_all_atom_or_fep_claims_unlocked": false,
+          "preserved_phase4_criteria_contains": "broad_all_atom_fep_claims_locked",
+          "top_k_scope_policy_present": true
+        },
+        "requirement_id": "bounded_top_k_scope_contract",
+        "status": "ready"
+      },
+      {
+        "blockers": [
+          "pocketmd_lite_topk_rows_not_acquired",
+          "pocketmd_lite_topk_candidate_rows_missing"
+        ],
+        "claim_boundary": "This audit row records whether the PocketMD Lite Phase 4 requirement is closed by live row/source evidence. It does not synthesize refinement metrics.",
+        "current": {
+          "required_candidate_slot_count": 6,
+          "row_artifact_detected": false,
+          "validated_row_count": 0
+        },
+        "evidence_kind": "row_coverage",
+        "pass": false,
+        "phase4_criterion_id": "top_k_refinement_rows_present",
+        "product_requirement": "top-k candidate refinement rows are present",
+        "required": {
+          "coverage_ready": true,
+          "min_real_refinement_case_count": 3,
+          "min_total_top_k_candidate_count": 6
+        },
+        "requirement_id": "top_k_refinement_rows_present",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "pocketmd_lite_topk_rows_not_acquired",
+          "pocketmd_lite_topk_candidate_rows_missing"
+        ],
+        "claim_boundary": "This audit row records whether the PocketMD Lite Phase 4 requirement is closed by live row/source evidence. It does not synthesize refinement metrics.",
+        "current": {
+          "coverage_ready": false,
+          "covered_required_slot_count": 0,
+          "required_candidate_slot_count": 6
+        },
+        "evidence_kind": "row_coverage",
+        "pass": false,
+        "phase4_criterion_id": "top_k_refinement_case_coverage",
+        "product_requirement": "top-k candidate case/rank coverage is complete",
+        "required": {
+          "coverage_ready": true,
+          "min_real_refinement_case_count": 3,
+          "min_total_top_k_candidate_count": 6
+        },
+        "requirement_id": "top_k_refinement_case_coverage",
+        "status": "blocked"
+      },
+      {
+        "blocker_id": "pocketmd_lite_local_min_survival_rows_missing",
+        "blockers": [
+          "pocketmd_lite_local_min_survival_rows_missing",
+          "pocketmd_lite_topk_rows_not_acquired"
+        ],
+        "claim_boundary": "This audit row records whether the PocketMD Lite Phase 4 requirement is closed by live row/source evidence. It does not synthesize refinement metrics.",
+        "current": {
+          "summary_field": "local_min_survival_rate",
+          "summary_value": null,
+          "survival_report_contract_pass": false,
+          "survival_report_status": "operator_evidence_required"
+        },
+        "evidence_kind": "survival_summary_metric",
+        "pass": false,
+        "phase4_criterion_id": "local_min_survival_materialized",
+        "product_requirement": "local-min survival is reported",
+        "required": {
+          "blocker_absent": "pocketmd_lite_local_min_survival_rows_missing",
+          "summary_field_non_null": true,
+          "survival_report_contract_pass": true
+        },
+        "requirement_id": "local_min_survival_reported",
+        "status": "blocked",
+        "summary_field": "local_min_survival_rate"
+      },
+      {
+        "blocker_id": "pocketmd_lite_contact_persistence_rows_missing",
+        "blockers": [
+          "pocketmd_lite_contact_persistence_rows_missing",
+          "pocketmd_lite_topk_rows_not_acquired"
+        ],
+        "claim_boundary": "This audit row records whether the PocketMD Lite Phase 4 requirement is closed by live row/source evidence. It does not synthesize refinement metrics.",
+        "current": {
+          "summary_field": "contact_persistence_rate_median",
+          "summary_value": null,
+          "survival_report_contract_pass": false,
+          "survival_report_status": "operator_evidence_required"
+        },
+        "evidence_kind": "survival_summary_metric",
+        "pass": false,
+        "phase4_criterion_id": "contact_persistence_materialized",
+        "product_requirement": "contact persistence is reported",
+        "required": {
+          "blocker_absent": "pocketmd_lite_contact_persistence_rows_missing",
+          "summary_field_non_null": true,
+          "survival_report_contract_pass": true
+        },
+        "requirement_id": "contact_persistence_reported",
+        "status": "blocked",
+        "summary_field": "contact_persistence_rate_median"
+      },
+      {
+        "blocker_id": "pocketmd_lite_h_bond_persistence_rows_missing",
+        "blockers": [
+          "pocketmd_lite_h_bond_persistence_rows_missing",
+          "pocketmd_lite_topk_rows_not_acquired"
+        ],
+        "claim_boundary": "This audit row records whether the PocketMD Lite Phase 4 requirement is closed by live row/source evidence. It does not synthesize refinement metrics.",
+        "current": {
+          "summary_field": "h_bond_persistence_rate_median",
+          "summary_value": null,
+          "survival_report_contract_pass": false,
+          "survival_report_status": "operator_evidence_required"
+        },
+        "evidence_kind": "survival_summary_metric",
+        "pass": false,
+        "phase4_criterion_id": "h_bond_persistence_materialized",
+        "product_requirement": "H-bond persistence is reported",
+        "required": {
+          "blocker_absent": "pocketmd_lite_h_bond_persistence_rows_missing",
+          "summary_field_non_null": true,
+          "survival_report_contract_pass": true
+        },
+        "requirement_id": "h_bond_persistence_reported",
+        "status": "blocked",
+        "summary_field": "h_bond_persistence_rate_median"
+      },
+      {
+        "blocker_id": "pocketmd_lite_clash_relief_rows_missing",
+        "blockers": [
+          "pocketmd_lite_clash_relief_rows_missing",
+          "pocketmd_lite_topk_rows_not_acquired"
+        ],
+        "claim_boundary": "This audit row records whether the PocketMD Lite Phase 4 requirement is closed by live row/source evidence. It does not synthesize refinement metrics.",
+        "current": {
+          "summary_field": "clash_relief_rate",
+          "summary_value": null,
+          "survival_report_contract_pass": false,
+          "survival_report_status": "operator_evidence_required"
+        },
+        "evidence_kind": "survival_summary_metric",
+        "pass": false,
+        "phase4_criterion_id": "clash_relief_materialized",
+        "product_requirement": "clash relief is reported",
+        "required": {
+          "blocker_absent": "pocketmd_lite_clash_relief_rows_missing",
+          "summary_field_non_null": true,
+          "survival_report_contract_pass": true
+        },
+        "requirement_id": "clash_relief_reported",
+        "status": "blocked",
+        "summary_field": "clash_relief_rate"
+      },
+      {
+        "blocker_id": "pocketmd_lite_uncertainty_rows_missing",
+        "blockers": [
+          "pocketmd_lite_uncertainty_rows_missing",
+          "pocketmd_lite_topk_rows_not_acquired"
+        ],
+        "claim_boundary": "This audit row records whether the PocketMD Lite Phase 4 requirement is closed by live row/source evidence. It does not synthesize refinement metrics.",
+        "current": {
+          "summary_field": "uncertainty_width_median",
+          "summary_value": null,
+          "survival_report_contract_pass": false,
+          "survival_report_status": "operator_evidence_required"
+        },
+        "evidence_kind": "survival_summary_metric",
+        "pass": false,
+        "phase4_criterion_id": "uncertainty_summary_materialized",
+        "product_requirement": "uncertainty interval summary is reported",
+        "required": {
+          "blocker_absent": "pocketmd_lite_uncertainty_rows_missing",
+          "summary_field_non_null": true,
+          "survival_report_contract_pass": true
+        },
+        "requirement_id": "uncertainty_reported",
+        "status": "blocked",
+        "summary_field": "uncertainty_width_median"
+      },
+      {
+        "blockers": [],
+        "claim_boundary": "This audit row records whether the PocketMD Lite Phase 4 requirement is closed by live row/source evidence. It does not synthesize refinement metrics.",
+        "current": {
+          "broad_all_atom_or_fep_claims_unlocked": false,
+          "preserved_phase4_criteria": [
+            "broad_all_atom_fep_claims_locked"
+          ],
+          "top_k_scope_policy_present": true
+        },
+        "evidence_kind": "contract_guard",
+        "pass": true,
+        "phase4_criterion_id": "broad_all_atom_fep_claims_locked",
+        "product_requirement": "broad all-atom MD/FEP claims remain locked",
+        "required": {
+          "broad_all_atom_or_fep_claims_unlocked": false,
+          "preserved_phase4_criteria_contains": "broad_all_atom_fep_claims_locked",
+          "top_k_scope_policy_present": true
+        },
+        "requirement_id": "broad_all_atom_fep_claims_locked",
+        "status": "ready"
+      }
+    ],
+    "status": "operator_topk_rows_required",
+    "survival_report": {
+      "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+      "blocker_count": 6,
+      "blockers": [
+        "pocketmd_lite_topk_candidate_rows_missing",
+        "pocketmd_lite_local_min_survival_rows_missing",
+        "pocketmd_lite_contact_persistence_rows_missing",
+        "pocketmd_lite_h_bond_persistence_rows_missing",
+        "pocketmd_lite_clash_relief_rows_missing",
+        "pocketmd_lite_uncertainty_rows_missing"
+      ],
+      "contract_pass": false,
+      "first_blocked_target": "top_k_refinement_operator_intake",
+      "present": true,
+      "product_surface_ready": false,
+      "status": "operator_evidence_required",
+      "summary": {
+        "blocker_count": 6,
+        "clash_relief_rate": null,
+        "contact_persistence_rate_median": null,
+        "h_bond_persistence_rate_median": null,
+        "local_min_survival_rate": null,
+        "real_refinement_case_count": 0,
+        "top_k_candidate_count": 0,
+        "top_k_row_quality": {
+          "blockers": [],
+          "case_candidate_counts": {},
+          "case_rank_coverage": {},
+          "contract_pass": false,
+          "minimums": {
+            "min_candidate_count_per_case": 2,
+            "min_real_refinement_case_count": 3,
+            "min_top_k_rank_coverage_per_case": 2,
+            "min_total_top_k_candidate_count": 6
+          },
+          "real_refinement_case_count": 0,
+          "required_rank_span_per_case": [
+            1,
+            2
+          ],
+          "root_cause_tags": [],
+          "top_k_candidate_count": 0
+        },
+        "uncertainty_width_median": null
+      }
+    }
+  },
   "phase4_metric_closure_matrix": [
     {
       "blockers": [
@@ -2055,7 +2355,7 @@
     "template_usage_policy": "The template enumerates required columns and minimum case/rank slots only. Operators must replace placeholder blanks with real top-k refinement rows and receipts before writing rows to the default output."
   },
   "schema_version": "pocketmd-lite-source-acquisition-plan.v1",
-  "source_commit_sha": "fbb69945e6e2386ccec1980c0c089549da656e0c",
+  "source_commit_sha": "1127062a2f0dde484cd1e51502bdbab48e1b314c",
   "source_scope": "bounded_top_k_lite_refinement_rows",
   "status": "operator_acquisition_required",
   "summary": {
@@ -2068,6 +2368,10 @@
     "missing_row_input_action_count": 1,
     "operator_rows_ready": false,
     "phase4_candidate_slot_matrix_count": 6,
+    "phase4_completion_audit_status": "operator_topk_rows_required",
+    "phase4_completion_blocked_requirement_count": 7,
+    "phase4_completion_ready_requirement_count": 2,
+    "phase4_completion_requirement_count": 9,
     "phase4_metric_closure_matrix_count": 8,
     "phase4_missing_candidate_slot_count": 6,
     "phase4_refinement_receipt_plan_status": "operator_receipts_required",
@@ -2080,6 +2384,8 @@
     "required_candidate_slot_count": 6,
     "required_case_count": 3,
     "required_total_candidate_rows": 6,
+    "survival_report_blocker_count": 6,
+    "survival_report_status": "operator_evidence_required",
     "template_preflight_operator_input_source_receipt_blocked_count": 5,
     "template_preflight_operator_input_source_receipt_requirement_count": 5,
     "template_preflight_role_receipt_blocked_count": 24,
@@ -2094,6 +2400,52 @@
     "jsonl",
     "ndjson"
   ],
+  "survival_report": {
+    "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+    "blocker_count": 6,
+    "blockers": [
+      "pocketmd_lite_topk_candidate_rows_missing",
+      "pocketmd_lite_local_min_survival_rows_missing",
+      "pocketmd_lite_contact_persistence_rows_missing",
+      "pocketmd_lite_h_bond_persistence_rows_missing",
+      "pocketmd_lite_clash_relief_rows_missing",
+      "pocketmd_lite_uncertainty_rows_missing"
+    ],
+    "contract_pass": false,
+    "first_blocked_target": "top_k_refinement_operator_intake",
+    "present": true,
+    "product_surface_ready": false,
+    "status": "operator_evidence_required",
+    "summary": {
+      "blocker_count": 6,
+      "clash_relief_rate": null,
+      "contact_persistence_rate_median": null,
+      "h_bond_persistence_rate_median": null,
+      "local_min_survival_rate": null,
+      "real_refinement_case_count": 0,
+      "top_k_candidate_count": 0,
+      "top_k_row_quality": {
+        "blockers": [],
+        "case_candidate_counts": {},
+        "case_rank_coverage": {},
+        "contract_pass": false,
+        "minimums": {
+          "min_candidate_count_per_case": 2,
+          "min_real_refinement_case_count": 3,
+          "min_top_k_rank_coverage_per_case": 2,
+          "min_total_top_k_candidate_count": 6
+        },
+        "real_refinement_case_count": 0,
+        "required_rank_span_per_case": [
+          1,
+          2
+        ],
+        "root_cause_tags": [],
+        "top_k_candidate_count": 0
+      },
+      "uncertainty_width_median": null
+    }
+  },
   "template_preflight_summary": {
     "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json",
     "expected_rows_detected": false,

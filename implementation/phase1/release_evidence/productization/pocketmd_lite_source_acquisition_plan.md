@@ -12,6 +12,11 @@
 - `phase4_candidate_slot_matrix_count`: `6`
 - `phase4_missing_candidate_slot_count`: `6`
 - `phase4_metric_closure_matrix_count`: `8`
+- `phase4_completion_audit_status`: `operator_topk_rows_required`
+- `phase4_completion_ready_requirement_count`: `2`
+- `phase4_completion_blocked_requirement_count`: `7`
+- `survival_report_status`: `operator_evidence_required`
+- `survival_report_blocker_count`: `6`
 - `template_preflight_status`: `operator_rows_completion_required`
 - `template_preflight_role_receipt_blocked_count`: `24`
 - `template_preflight_operator_input_source_receipt_blocked_count`: `5`
@@ -32,6 +37,25 @@
 | 9 | `write_pocketmd_lite_topk_rows_at_default_dropzone` |
 | 10 | `run_pocketmd_lite_raw_row_importer_and_survival_materializer` |
 | 11 | `refresh_science_actual_closure_from_rows` |
+
+## Phase 4 Completion Audit
+
+- `status`: `operator_topk_rows_required`
+- `actual_closure_ready`: `False`
+- `remaining_row_inputs`: `pocketmd_rows`
+- `remaining_operator_action`: `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json`
+
+| Requirement | Product Requirement | Status | Pass | Blockers |
+|---|---|---|---|---|
+| `bounded_top_k_scope_contract` | PocketMD Lite applies only to upstream top-k candidates | `ready` | `True` | `none` |
+| `top_k_refinement_rows_present` | top-k candidate refinement rows are present | `blocked` | `False` | `pocketmd_lite_topk_rows_not_acquired`, `pocketmd_lite_topk_candidate_rows_missing` |
+| `top_k_refinement_case_coverage` | top-k candidate case/rank coverage is complete | `blocked` | `False` | `pocketmd_lite_topk_rows_not_acquired`, `pocketmd_lite_topk_candidate_rows_missing` |
+| `local_min_survival_reported` | local-min survival is reported | `blocked` | `False` | `pocketmd_lite_local_min_survival_rows_missing`, `pocketmd_lite_topk_rows_not_acquired` |
+| `contact_persistence_reported` | contact persistence is reported | `blocked` | `False` | `pocketmd_lite_contact_persistence_rows_missing`, `pocketmd_lite_topk_rows_not_acquired` |
+| `h_bond_persistence_reported` | H-bond persistence is reported | `blocked` | `False` | `pocketmd_lite_h_bond_persistence_rows_missing`, `pocketmd_lite_topk_rows_not_acquired` |
+| `clash_relief_reported` | clash relief is reported | `blocked` | `False` | `pocketmd_lite_clash_relief_rows_missing`, `pocketmd_lite_topk_rows_not_acquired` |
+| `uncertainty_reported` | uncertainty interval summary is reported | `blocked` | `False` | `pocketmd_lite_uncertainty_rows_missing`, `pocketmd_lite_topk_rows_not_acquired` |
+| `broad_all_atom_fep_claims_locked` | broad all-atom MD/FEP claims remain locked | `ready` | `True` | `none` |
 
 | Case | Minimum Rows | Required Rank Prefix | Scope |
 |---|---:|---|---|

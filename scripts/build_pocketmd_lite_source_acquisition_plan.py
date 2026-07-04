@@ -109,6 +109,72 @@ PHASE4_METRIC_CRITERIA = {
         "materialized_report_field": "uncertainty_width_summary",
     },
 }
+PHASE4_COMPLETION_REQUIREMENTS = [
+    {
+        "requirement_id": "bounded_top_k_scope_contract",
+        "product_requirement": "PocketMD Lite applies only to upstream top-k candidates",
+        "phase4_criterion_id": "broad_all_atom_fep_claims_locked",
+        "evidence_kind": "contract_guard",
+    },
+    {
+        "requirement_id": "top_k_refinement_rows_present",
+        "product_requirement": "top-k candidate refinement rows are present",
+        "phase4_criterion_id": "top_k_refinement_rows_present",
+        "evidence_kind": "row_coverage",
+    },
+    {
+        "requirement_id": "top_k_refinement_case_coverage",
+        "product_requirement": "top-k candidate case/rank coverage is complete",
+        "phase4_criterion_id": "top_k_refinement_case_coverage",
+        "evidence_kind": "row_coverage",
+    },
+    {
+        "requirement_id": "local_min_survival_reported",
+        "product_requirement": "local-min survival is reported",
+        "phase4_criterion_id": "local_min_survival_materialized",
+        "evidence_kind": "survival_summary_metric",
+        "summary_field": "local_min_survival_rate",
+        "blocker_id": "pocketmd_lite_local_min_survival_rows_missing",
+    },
+    {
+        "requirement_id": "contact_persistence_reported",
+        "product_requirement": "contact persistence is reported",
+        "phase4_criterion_id": "contact_persistence_materialized",
+        "evidence_kind": "survival_summary_metric",
+        "summary_field": "contact_persistence_rate_median",
+        "blocker_id": "pocketmd_lite_contact_persistence_rows_missing",
+    },
+    {
+        "requirement_id": "h_bond_persistence_reported",
+        "product_requirement": "H-bond persistence is reported",
+        "phase4_criterion_id": "h_bond_persistence_materialized",
+        "evidence_kind": "survival_summary_metric",
+        "summary_field": "h_bond_persistence_rate_median",
+        "blocker_id": "pocketmd_lite_h_bond_persistence_rows_missing",
+    },
+    {
+        "requirement_id": "clash_relief_reported",
+        "product_requirement": "clash relief is reported",
+        "phase4_criterion_id": "clash_relief_materialized",
+        "evidence_kind": "survival_summary_metric",
+        "summary_field": "clash_relief_rate",
+        "blocker_id": "pocketmd_lite_clash_relief_rows_missing",
+    },
+    {
+        "requirement_id": "uncertainty_reported",
+        "product_requirement": "uncertainty interval summary is reported",
+        "phase4_criterion_id": "uncertainty_summary_materialized",
+        "evidence_kind": "survival_summary_metric",
+        "summary_field": "uncertainty_width_median",
+        "blocker_id": "pocketmd_lite_uncertainty_rows_missing",
+    },
+    {
+        "requirement_id": "broad_all_atom_fep_claims_locked",
+        "product_requirement": "broad all-atom MD/FEP claims remain locked",
+        "phase4_criterion_id": "broad_all_atom_fep_claims_locked",
+        "evidence_kind": "contract_guard",
+    },
+]
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -633,6 +699,219 @@ def _phase4_metric_receipt_actions(
     ]
 
 
+def _survival_report_status(repo_root: Path) -> dict[str, Any]:
+    report = _load_json(repo_root, DEFAULT_SURVIVAL_REPORT)
+    summary = _as_dict(report.get("summary"))
+    blockers = [
+        str(row) for row in report.get("blockers", []) if str(row)
+    ] if isinstance(report.get("blockers"), list) else []
+    return {
+        "artifact": str(DEFAULT_SURVIVAL_REPORT),
+        "present": bool(report),
+        "status": str(report.get("status") or "missing"),
+        "contract_pass": bool(report.get("contract_pass")),
+        "product_surface_ready": bool(report.get("product_surface_ready")),
+        "first_blocked_target": str(report.get("first_blocked_target") or ""),
+        "blocker_count": len(blockers),
+        "blockers": blockers,
+        "summary": summary,
+    }
+
+
+def _phase4_completion_audit(
+    *,
+    raw_row_candidate_status: dict[str, Any],
+    phase4_refinement_receipt_plan: dict[str, Any],
+    survival_report_status: dict[str, Any],
+) -> dict[str, Any]:
+    survival_summary = _as_dict(survival_report_status.get("summary"))
+    survival_blockers = set(
+        str(row)
+        for row in survival_report_status.get("blockers", [])
+        if str(row)
+    )
+    rows_present = (
+        int(raw_row_candidate_status.get("detected_row_artifact_count") or 0) > 0
+    )
+    coverage_ready = bool(raw_row_candidate_status.get("coverage_ready"))
+    raw_row_blocker = str(raw_row_candidate_status.get("blocker") or "")
+    guard_pass = (
+        TOP_K_SCOPE_POLICY.startswith("PocketMD Lite refinement rows are bounded")
+        and PHASE4_REFINEMENT_RECEIPT_PROMOTION_POLICY[
+            "broad_all_atom_or_fep_claims_unlocked"
+        ]
+        is False
+        and "broad_all_atom_fep_claims_locked"
+        in phase4_refinement_receipt_plan.get("preserved_phase4_criteria", [])
+    )
+    requirement_rows: list[dict[str, Any]] = []
+    for requirement in PHASE4_COMPLETION_REQUIREMENTS:
+        evidence_kind = str(requirement["evidence_kind"])
+        blockers: list[str] = []
+        current: dict[str, Any]
+        required: dict[str, Any]
+        requirement_pass = False
+        if evidence_kind == "contract_guard":
+            requirement_pass = guard_pass
+            current = {
+                "top_k_scope_policy_present": bool(TOP_K_SCOPE_POLICY),
+                "broad_all_atom_or_fep_claims_unlocked": (
+                    PHASE4_REFINEMENT_RECEIPT_PROMOTION_POLICY[
+                        "broad_all_atom_or_fep_claims_unlocked"
+                    ]
+                ),
+                "preserved_phase4_criteria": list(
+                    phase4_refinement_receipt_plan.get(
+                        "preserved_phase4_criteria", []
+                    )
+                ),
+            }
+            required = {
+                "top_k_scope_policy_present": True,
+                "broad_all_atom_or_fep_claims_unlocked": False,
+                "preserved_phase4_criteria_contains": (
+                    "broad_all_atom_fep_claims_locked"
+                ),
+            }
+            if not requirement_pass:
+                blockers.append("pocketmd_lite_top_k_scope_contract_not_enforced")
+        elif evidence_kind == "row_coverage":
+            if requirement["requirement_id"] == "top_k_refinement_rows_present":
+                requirement_pass = rows_present and coverage_ready
+                current = {
+                    "row_artifact_detected": rows_present,
+                    "validated_row_count": int(
+                        raw_row_candidate_status.get("validated_row_count") or 0
+                    ),
+                    "required_candidate_slot_count": int(
+                        raw_row_candidate_status.get(
+                            "required_candidate_slot_count"
+                        )
+                        or 0
+                    ),
+                }
+            else:
+                requirement_pass = coverage_ready
+                current = {
+                    "coverage_ready": coverage_ready,
+                    "covered_required_slot_count": int(
+                        raw_row_candidate_status.get("covered_required_slot_count")
+                        or 0
+                    ),
+                    "required_candidate_slot_count": int(
+                        raw_row_candidate_status.get(
+                            "required_candidate_slot_count"
+                        )
+                        or 0
+                    ),
+                }
+            required = {
+                "coverage_ready": True,
+                "min_real_refinement_case_count": int(
+                    TOPK_ROW_QUALITY_CRITERIA["min_real_refinement_case_count"]
+                ),
+                "min_total_top_k_candidate_count": int(
+                    TOPK_ROW_QUALITY_CRITERIA["min_total_top_k_candidate_count"]
+                ),
+            }
+            if not requirement_pass:
+                blockers.extend(
+                    [
+                        raw_row_blocker
+                        or "pocketmd_lite_topk_candidate_rows_missing",
+                        "pocketmd_lite_topk_candidate_rows_missing",
+                    ]
+                )
+        else:
+            summary_field = str(requirement.get("summary_field") or "")
+            blocker_id = str(requirement.get("blocker_id") or "")
+            metric_value = survival_summary.get(summary_field)
+            requirement_pass = (
+                metric_value is not None
+                and blocker_id not in survival_blockers
+                and bool(survival_report_status.get("contract_pass"))
+            )
+            current = {
+                "survival_report_status": str(
+                    survival_report_status.get("status") or ""
+                ),
+                "survival_report_contract_pass": bool(
+                    survival_report_status.get("contract_pass")
+                ),
+                "summary_field": summary_field,
+                "summary_value": metric_value,
+            }
+            required = {
+                "survival_report_contract_pass": True,
+                "summary_field_non_null": True,
+                "blocker_absent": blocker_id,
+            }
+            if not requirement_pass:
+                blockers.append(blocker_id)
+                if raw_row_blocker:
+                    blockers.append(raw_row_blocker)
+        blockers = list(dict.fromkeys(row for row in blockers if row))
+        requirement_rows.append(
+            {
+                **requirement,
+                "status": "ready" if requirement_pass else "blocked",
+                "pass": requirement_pass,
+                "current": current,
+                "required": required,
+                "blockers": blockers,
+                "claim_boundary": (
+                    "This audit row records whether the PocketMD Lite Phase 4 "
+                    "requirement is closed by live row/source evidence. It does "
+                    "not synthesize refinement metrics."
+                ),
+            }
+        )
+    blocked_rows = [row for row in requirement_rows if not bool(row["pass"])]
+    remaining_blockers = list(
+        dict.fromkeys(
+            str(blocker)
+            for row in blocked_rows
+            for blocker in row.get("blockers", [])
+            if str(blocker)
+        )
+    )
+    if not blocked_rows:
+        status = "ready"
+    elif not coverage_ready:
+        status = "operator_topk_rows_required"
+    else:
+        status = "metric_receipts_required"
+    return {
+        "status": status,
+        "pass": not blocked_rows,
+        "actual_closure_ready": (
+            not blocked_rows
+            and bool(survival_report_status.get("product_surface_ready"))
+        ),
+        "requirement_count": len(requirement_rows),
+        "ready_requirement_count": len(requirement_rows) - len(blocked_rows),
+        "blocked_requirement_count": len(blocked_rows),
+        "blocked_requirement_ids": [
+            str(row["requirement_id"]) for row in blocked_rows
+        ],
+        "remaining_row_inputs": [] if coverage_ready else ["pocketmd_rows"],
+        "remaining_blockers": remaining_blockers,
+        "remaining_operator_action": (
+            "run_pocketmd_lite_raw_row_importer_and_survival_materializer"
+            if coverage_ready
+            else f"attach_pocketmd_rows_at_{DEFAULT_ROWS_OUT}"
+        ),
+        "survival_report": survival_report_status,
+        "requirements": requirement_rows,
+        "claim_boundary": (
+            "This audit proves only the PocketMD Lite top-k refinement closure "
+            "state. Full closure still requires real bounded top-k rows, source "
+            "receipts, local-min/contact/H-bond/clash/uncertainty metrics, and "
+            "a passing survival report."
+        ),
+    }
+
+
 def _first_blocked_row(rows: list[Any]) -> dict[str, Any]:
     for row in rows:
         if isinstance(row, dict) and row.get("status") != "ready":
@@ -1028,6 +1307,12 @@ def build_pocketmd_lite_source_acquisition_plan(
         phase4_refinement_receipt_plan=phase4_refinement_receipt_plan,
         raw_row_candidate_status=raw_row_candidate_status,
     )
+    survival_report_status = _survival_report_status(repo_root)
+    phase4_completion_audit = _phase4_completion_audit(
+        raw_row_candidate_status=raw_row_candidate_status,
+        phase4_refinement_receipt_plan=phase4_refinement_receipt_plan,
+        survival_report_status=survival_report_status,
+    )
     template_preflight_summary = _template_preflight_summary(repo_root)
     refinement_execution_plan = _refinement_execution_plan_summary(
         minimum_rows_by_case,
@@ -1102,6 +1387,7 @@ def build_pocketmd_lite_source_acquisition_plan(
                 Path("scripts/materialize_pocketmd_lite_topk_survival_report.py"),
                 DEFAULT_ROWS_TEMPLATE,
                 DEFAULT_ROWS_TEMPLATE_PREFLIGHT,
+                DEFAULT_SURVIVAL_REPORT,
             ],
             reused_evidence=False,
             reuse_policy="pocketmd_lite_source_acquisition_plan",
@@ -1128,6 +1414,8 @@ def build_pocketmd_lite_source_acquisition_plan(
         ),
         "phase4_metric_closure_matrix": phase4_metric_closure_matrix,
         "phase4_metric_closure_matrix_count": len(phase4_metric_closure_matrix),
+        "phase4_completion_audit": phase4_completion_audit,
+        "survival_report": survival_report_status,
         "refinement_execution_plan": refinement_execution_plan,
         "template_preflight_summary": template_preflight_summary,
         "phase4_refinement_receipt_promotion_policy": dict(
@@ -1196,6 +1484,20 @@ def build_pocketmd_lite_source_acquisition_plan(
             "phase4_metric_closure_matrix_count": len(
                 phase4_metric_closure_matrix
             ),
+            "phase4_completion_audit_status": phase4_completion_audit["status"],
+            "phase4_completion_requirement_count": (
+                phase4_completion_audit["requirement_count"]
+            ),
+            "phase4_completion_ready_requirement_count": (
+                phase4_completion_audit["ready_requirement_count"]
+            ),
+            "phase4_completion_blocked_requirement_count": (
+                phase4_completion_audit["blocked_requirement_count"]
+            ),
+            "survival_report_status": survival_report_status["status"],
+            "survival_report_blocker_count": survival_report_status[
+                "blocker_count"
+            ],
             "template_preflight_status": template_preflight_summary["status"],
             "template_preflight_role_receipt_plan_count": (
                 template_preflight_summary["role_receipt_plan_count"]
@@ -1259,6 +1561,15 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `phase4_candidate_slot_matrix_count`: `{payload['phase4_candidate_slot_matrix_count']}`",
         f"- `phase4_missing_candidate_slot_count`: `{payload['phase4_missing_candidate_slot_count']}`",
         f"- `phase4_metric_closure_matrix_count`: `{payload['phase4_metric_closure_matrix_count']}`",
+        "- `phase4_completion_audit_status`: "
+        f"`{payload['phase4_completion_audit']['status']}`",
+        "- `phase4_completion_ready_requirement_count`: "
+        f"`{payload['phase4_completion_audit']['ready_requirement_count']}`",
+        "- `phase4_completion_blocked_requirement_count`: "
+        f"`{payload['phase4_completion_audit']['blocked_requirement_count']}`",
+        f"- `survival_report_status`: `{payload['survival_report']['status']}`",
+        "- `survival_report_blocker_count`: "
+        f"`{payload['survival_report']['blocker_count']}`",
         f"- `template_preflight_status`: `{payload['template_preflight_summary']['status']}`",
         "- `template_preflight_role_receipt_blocked_count`: "
         f"`{payload['template_preflight_summary']['role_receipt_blocked_count']}`",
@@ -1273,6 +1584,39 @@ def _markdown(payload: dict[str, Any]) -> str:
     ]
     for index, action in enumerate(payload.get("operator_next_actions", []), start=1):
         lines.append(f"| {index} | `{action}` |")
+    completion_audit = _as_dict(payload.get("phase4_completion_audit"))
+    completion_requirements = [
+        row
+        for row in completion_audit.get("requirements", [])
+        if isinstance(row, dict)
+    ] if isinstance(completion_audit.get("requirements"), list) else []
+    if completion_audit:
+        lines.extend(
+            [
+                "",
+                "## Phase 4 Completion Audit",
+                "",
+                f"- `status`: `{completion_audit.get('status')}`",
+                f"- `actual_closure_ready`: `{completion_audit.get('actual_closure_ready')}`",
+                f"- `remaining_row_inputs`: `{', '.join(completion_audit.get('remaining_row_inputs', []))}`",
+                f"- `remaining_operator_action`: `{completion_audit.get('remaining_operator_action')}`",
+                "",
+                "| Requirement | Product Requirement | Status | Pass | Blockers |",
+                "|---|---|---|---|---|",
+            ]
+        )
+        for row in completion_requirements:
+            blockers = ", ".join(
+                f"`{blocker}`"
+                for blocker in row.get("blockers", [])
+                if str(blocker)
+            )
+            lines.append(
+                f"| `{row.get('requirement_id', '')}` | "
+                f"{row.get('product_requirement', '')} | "
+                f"`{row.get('status', '')}` | `{row.get('pass')}` | "
+                f"{blockers or '`none`'} |"
+            )
     lines.extend(
         [
             "",

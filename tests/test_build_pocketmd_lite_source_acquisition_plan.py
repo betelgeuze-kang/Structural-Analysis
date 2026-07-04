@@ -353,6 +353,74 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     assert metric_matrix["uncertainty_summary_materialized"][
         "required_row_fields"
     ] == ["uncertainty_low", "uncertainty_high", "uncertainty_unit"]
+    completion_audit = payload["phase4_completion_audit"]
+    assert completion_audit["status"] == "operator_topk_rows_required"
+    assert completion_audit["pass"] is False
+    assert completion_audit["actual_closure_ready"] is False
+    assert completion_audit["requirement_count"] == 9
+    assert completion_audit["ready_requirement_count"] == 2
+    assert completion_audit["blocked_requirement_count"] == 7
+    assert completion_audit["blocked_requirement_ids"] == [
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "local_min_survival_reported",
+        "contact_persistence_reported",
+        "h_bond_persistence_reported",
+        "clash_relief_reported",
+        "uncertainty_reported",
+    ]
+    assert completion_audit["remaining_row_inputs"] == ["pocketmd_rows"]
+    assert completion_audit["remaining_operator_action"] == (
+        "attach_pocketmd_rows_at_implementation/phase1/release_evidence/"
+        "productization/pocketmd_lite_topk_rows.json"
+    )
+    assert completion_audit["remaining_blockers"] == [
+        "pocketmd_lite_topk_rows_not_acquired",
+        "pocketmd_lite_topk_candidate_rows_missing",
+        "pocketmd_lite_local_min_survival_rows_missing",
+        "pocketmd_lite_contact_persistence_rows_missing",
+        "pocketmd_lite_h_bond_persistence_rows_missing",
+        "pocketmd_lite_clash_relief_rows_missing",
+        "pocketmd_lite_uncertainty_rows_missing",
+    ]
+    assert completion_audit["survival_report"]["status"] == (
+        "operator_evidence_required"
+    )
+    assert completion_audit["survival_report"]["blocker_count"] == 6
+    completion_requirements = {
+        row["requirement_id"]: row for row in completion_audit["requirements"]
+    }
+    assert list(completion_requirements) == [
+        "bounded_top_k_scope_contract",
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "local_min_survival_reported",
+        "contact_persistence_reported",
+        "h_bond_persistence_reported",
+        "clash_relief_reported",
+        "uncertainty_reported",
+        "broad_all_atom_fep_claims_locked",
+    ]
+    assert completion_requirements["bounded_top_k_scope_contract"][
+        "product_requirement"
+    ] == "PocketMD Lite applies only to upstream top-k candidates"
+    assert completion_requirements["bounded_top_k_scope_contract"]["pass"] is True
+    assert completion_requirements["top_k_refinement_rows_present"]["blockers"] == [
+        "pocketmd_lite_topk_rows_not_acquired",
+        "pocketmd_lite_topk_candidate_rows_missing",
+    ]
+    assert completion_requirements["local_min_survival_reported"]["current"] == {
+        "summary_field": "local_min_survival_rate",
+        "summary_value": None,
+        "survival_report_contract_pass": False,
+        "survival_report_status": "operator_evidence_required",
+    }
+    assert completion_requirements["h_bond_persistence_reported"][
+        "summary_field"
+    ] == "h_bond_persistence_rate_median"
+    assert completion_requirements["broad_all_atom_fep_claims_locked"][
+        "pass"
+    ] is True
     preflight_action = row_action["row_preflight_action_packet"]
     assert preflight_action["status"] == "row_artifact_missing"
     assert preflight_action["expected_rows_artifact"].endswith(
@@ -521,8 +589,14 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "phase4_candidate_slot_matrix_count": 6,
         "phase4_metric_closure_matrix_count": 8,
         "phase4_missing_candidate_slot_count": 6,
+        "phase4_completion_audit_status": "operator_topk_rows_required",
+        "phase4_completion_requirement_count": 9,
+        "phase4_completion_ready_requirement_count": 2,
+        "phase4_completion_blocked_requirement_count": 7,
         "phase4_refinement_receipt_plan_status": "operator_receipts_required",
         "phase4_refinement_receipt_role_count": 4,
+        "survival_report_status": "operator_evidence_required",
+        "survival_report_blocker_count": 6,
         "template_preflight_status": "operator_rows_completion_required",
         "template_preflight_role_receipt_plan_count": 24,
         "template_preflight_role_receipt_blocked_count": 24,
@@ -628,6 +702,33 @@ def test_pocketmd_lite_source_acquisition_plan_validates_slot_coverage(
         row["status"] == "provided"
         for row in payload["phase4_candidate_slot_matrix"]
     )
+    assert payload["phase4_completion_audit"]["status"] == "metric_receipts_required"
+    assert payload["phase4_completion_audit"]["ready_requirement_count"] == 4
+    assert payload["phase4_completion_audit"]["blocked_requirement_count"] == 5
+    assert payload["phase4_completion_audit"]["remaining_row_inputs"] == []
+    assert payload["phase4_completion_audit"]["remaining_operator_action"] == (
+        "run_pocketmd_lite_raw_row_importer_and_survival_materializer"
+    )
+    assert payload["phase4_completion_audit"]["blocked_requirement_ids"] == [
+        "local_min_survival_reported",
+        "contact_persistence_reported",
+        "h_bond_persistence_reported",
+        "clash_relief_reported",
+        "uncertainty_reported",
+    ]
+    valid_completion_requirements = {
+        row["requirement_id"]: row
+        for row in payload["phase4_completion_audit"]["requirements"]
+    }
+    assert valid_completion_requirements["top_k_refinement_rows_present"][
+        "pass"
+    ] is True
+    assert valid_completion_requirements["top_k_refinement_case_coverage"][
+        "pass"
+    ] is True
+    assert valid_completion_requirements["local_min_survival_reported"][
+        "blockers"
+    ] == ["pocketmd_lite_local_min_survival_rows_missing"]
     assert payload["missing_row_input_actions"] == []
     assert payload["missing_row_input_action_count"] == 0
     assert payload["pocketmd_rows_operator_action"]["status"] == "provided"
@@ -653,6 +754,11 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert payload["summary"]["required_candidate_slot_count"] == 6
     assert payload["summary"]["phase4_candidate_slot_matrix_count"] == 6
     assert payload["summary"]["phase4_metric_closure_matrix_count"] == 8
+    assert payload["summary"]["phase4_completion_audit_status"] == (
+        "operator_topk_rows_required"
+    )
+    assert payload["phase4_completion_audit"]["blocked_requirement_count"] == 7
+    assert payload["survival_report"]["blocker_count"] == 6
     assert payload["phase4_refinement_receipt_plan"]["receipt_role_count"] == 4
     assert payload["refinement_execution_plan"]["execution_plan_ready"] is True
     assert "# PocketMD Lite Source Acquisition Plan" in markdown
@@ -663,6 +769,20 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert "## Operator Next Actions" in markdown
     assert "| 1 | `review_phase4_refinement_receipt_plan` |" in markdown
     assert "| 11 | `refresh_science_actual_closure_from_rows` |" in markdown
+    assert "## Phase 4 Completion Audit" in markdown
+    assert "`phase4_completion_audit_status`: `operator_topk_rows_required`" in (
+        markdown
+    )
+    assert "`phase4_completion_ready_requirement_count`: `2`" in markdown
+    assert "`phase4_completion_blocked_requirement_count`: `7`" in markdown
+    assert "`survival_report_status`: `operator_evidence_required`" in markdown
+    assert "`survival_report_blocker_count`: `6`" in markdown
+    assert "`bounded_top_k_scope_contract`" in markdown
+    assert "PocketMD Lite applies only to upstream top-k candidates" in markdown
+    assert "`local_min_survival_reported`" in markdown
+    assert "`contact_persistence_reported`" in markdown
+    assert "`uncertainty_reported`" in markdown
+    assert "`pocketmd_lite_uncertainty_rows_missing`" in markdown
     assert "## Phase 4 Candidate Slot Matrix" in markdown
     assert "pocketmd_lite_case_001_rank_1" in markdown
     assert "## Phase 4 Metric Closure Matrix" in markdown
