@@ -84,8 +84,18 @@ def test_current_vina_gnina_input_manifest_template_preflight_surfaces_gaps() ->
     assert first_source_file["file_role"] == "source_protein_structure"
     assert first_source_file["path"] == "CASF-2016/coreset/4llx/4llx_protein.pdb"
     assert first_source_file["operator_action"] == (
-        "acquire_from_official_casf_archive_and_verify_checksum"
+        "materialize_source_files_from_casf_archive_and_verify_checksum"
     )
+    assert payload["source_file_materialization_helper"]["archive_argument"] == (
+        "--archive <CASF-2016.tar.gz>"
+    )
+    assert payload["source_file_materialization_helper"]["raw_payload_committed_by_helper"] is False
+    assert payload["commands"]["materialize_input_manifest_from_casf_archive"].startswith(
+        "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py"
+    )
+    assert "materialize_source_files_from_local_casf_archive" in payload[
+        "operator_actions"
+    ]
     first_prepared_file = payload["prepared_input_plan"][0]
     assert first_prepared_file["file_role"] == "prepared_receptor"
     assert first_prepared_file["operator_action"] == (

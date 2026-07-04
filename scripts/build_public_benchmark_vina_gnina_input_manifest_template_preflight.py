@@ -38,6 +38,15 @@ DEFAULT_OUT = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest_template_preflight.json"
 )
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+DEFAULT_CASF_ARCHIVE_EXTRACT_DIR = Path(
+    "tmp/public_benchmark_vina_gnina/casf2016_source_files"
+)
+DEFAULT_CASF_ARCHIVE_OUT_MANIFEST = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest.csv"
+)
+DEFAULT_CASF_ARCHIVE_SOURCE_REPORT = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json"
+)
 SCHEMA_VERSION = "public-benchmark-vina-gnina-input-manifest-template-preflight.v1"
 DEFAULT_TIMEOUT_SECONDS = 20
 USER_AGENT = "codex-public-benchmark-vina-gnina-input-preflight/1.0"
@@ -573,7 +582,7 @@ def _row_preflight(repo_root: Path, row: dict[str, str]) -> dict[str, Any]:
                 "operator_action": (
                     "verify_local_source_file_checksum"
                     if is_source_file and not blocker
-                    else "acquire_from_official_casf_archive_and_verify_checksum"
+                    else "materialize_source_files_from_casf_archive_and_verify_checksum"
                     if is_source_file
                     else "verify_prepared_input_file_checksum"
                     if not blocker
@@ -784,12 +793,27 @@ def build_public_benchmark_vina_gnina_input_manifest_template_preflight(
             "raw_payload_downloaded_by_plan": False,
             "raw_payload_committed_by_plan": False,
         },
+        "source_file_materialization_helper": {
+            "script": "scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py",
+            "archive_argument": "--archive <CASF-2016.tar.gz>",
+            "extract_dir": str(DEFAULT_CASF_ARCHIVE_EXTRACT_DIR),
+            "out_manifest_artifact": str(DEFAULT_CASF_ARCHIVE_OUT_MANIFEST),
+            "out_report_artifact": str(DEFAULT_CASF_ARCHIVE_SOURCE_REPORT),
+            "raw_payload_downloaded_by_helper": False,
+            "raw_payload_committed_by_helper": False,
+            "claim_boundary": (
+                "The helper extracts only the source protein/ligand files named "
+                "by this template from an operator-supplied local CASF archive. "
+                "It does not prepare docking inputs, run engines, or close Phase 2."
+            ),
+        },
         "operator_actions": [
             "do_not_commit_template_as_actual_manifest_evidence",
             "review_source_file_acquisition_plan",
             "review_prepared_input_plan",
             "review_receipt_ref_plan",
             "review_source_url_probe_plan",
+            "materialize_source_files_from_local_casf_archive",
             "copy_template_to_expected_manifest_only_after_operator_completion",
             "attach_local_source_and_prepared_input_files",
             "fill_missing_prepared_input_checksums_and_preparation_receipts",
@@ -803,6 +827,12 @@ def build_public_benchmark_vina_gnina_input_manifest_template_preflight(
             "probe_source_urls": (
                 "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py "
                 f"--out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --probe-source-urls"
+            ),
+            "materialize_input_manifest_from_casf_archive": (
+                "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py "
+                f"--archive <CASF-2016.tar.gz> --extract-dir {DEFAULT_CASF_ARCHIVE_EXTRACT_DIR} "
+                f"--out-manifest {DEFAULT_CASF_ARCHIVE_OUT_MANIFEST} "
+                f"--out-report {DEFAULT_CASF_ARCHIVE_SOURCE_REPORT}"
             ),
             "rerun_execution_plan": (
                 "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "

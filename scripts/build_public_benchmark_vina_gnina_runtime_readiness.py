@@ -808,6 +808,13 @@ def _operator_unblock_packet(
                 f"--out {DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT} "
                 f"--out-md {DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT_MD}"
             ),
+            "materialize_input_manifest_from_casf_archive": (
+                "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py "
+                "--archive <CASF-2016.tar.gz> "
+                f"--out-manifest {PRODUCTIZATION / 'public_benchmark_vina_gnina_input_manifest.csv'} "
+                "--out-report "
+                f"{PRODUCTIZATION / 'public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json'}"
+            ),
             "rerun_execution_plan": (
                 "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
                 f"--out {DEFAULT_EXECUTION_PLAN}"
@@ -1014,6 +1021,13 @@ def build_vina_gnina_runtime_readiness(
                 "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py "
                 f"--out {DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT} "
                 f"--out-md {DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT_MD}"
+            ),
+            "materialize_input_manifest_from_casf_archive": (
+                "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py "
+                "--archive <CASF-2016.tar.gz> "
+                f"--out-manifest {PRODUCTIZATION / 'public_benchmark_vina_gnina_input_manifest.csv'} "
+                "--out-report "
+                f"{PRODUCTIZATION / 'public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json'}"
             ),
             "set_binary_overrides": (
                 "export PUBLIC_BENCHMARK_VINA_BIN=<path-to-vina> "
