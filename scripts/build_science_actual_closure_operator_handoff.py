@@ -24,6 +24,9 @@ DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_POCKETMD_REFINEMENT_PLAN = (
     PRODUCTIZATION / "pocketmd_lite_refinement_execution_plan.json"
 )
+DEFAULT_POCKETMD_TOPK_ROWS_TEMPLATE_PREFLIGHT = (
+    PRODUCTIZATION / "pocketmd_lite_topk_rows_template_preflight.json"
+)
 DEFAULT_VINA_GNINA_RUNTIME_READINESS = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_runtime_readiness.json"
 )
@@ -335,6 +338,8 @@ def _pocketmd_top_k_slot_detail(
     refinement_plan: dict[str, Any],
     *,
     artifact: Path,
+    template_preflight: dict[str, Any],
+    template_preflight_artifact: Path,
 ) -> dict[str, Any]:
     if not refinement_plan:
         return {}
@@ -344,6 +349,7 @@ def _pocketmd_top_k_slot_detail(
         if isinstance(row, dict)
     ]
     summary = _as_dict(refinement_plan.get("top_k_slot_status_summary"))
+    template_preflight_summary = _as_dict(template_preflight.get("summary"))
     return {
         "artifact": str(artifact),
         "status": str(refinement_plan.get("status") or ""),
@@ -365,6 +371,34 @@ def _pocketmd_top_k_slot_detail(
         "operator_unblock_packet": _as_dict(
             refinement_plan.get("operator_unblock_packet")
         ),
+        "row_template_preflight": {
+            "artifact": str(template_preflight_artifact),
+            "status": str(template_preflight.get("status") or ""),
+            "contract_pass": bool(template_preflight.get("contract_pass")),
+            "top_k_template_ready": bool(
+                template_preflight.get("top_k_template_ready")
+            ),
+            "template_row_count": _as_int(
+                template_preflight_summary.get("template_row_count")
+            ),
+            "expected_slot_count": _as_int(
+                template_preflight_summary.get("expected_slot_count")
+            ),
+            "missing_required_value_count": _as_int(
+                template_preflight_summary.get("missing_required_value_count")
+            ),
+            "missing_metric_value_count": _as_int(
+                template_preflight_summary.get("missing_metric_value_count")
+            ),
+            "missing_receipt_value_count": _as_int(
+                template_preflight_summary.get("missing_receipt_value_count")
+            ),
+            "expected_rows_detected": bool(
+                template_preflight_summary.get("expected_rows_detected")
+            ),
+            "commands": _as_dict(template_preflight.get("commands")),
+            "claim_boundary": str(template_preflight.get("claim_boundary") or ""),
+        },
         "first_missing_candidate_slot": _as_dict(
             summary.get("first_missing_candidate_slot")
         ),
@@ -877,6 +911,10 @@ def build_science_actual_closure_operator_handoff(
         repo_root,
         DEFAULT_POCKETMD_REFINEMENT_PLAN,
     )
+    pocketmd_template_preflight = _load_json(
+        repo_root,
+        DEFAULT_POCKETMD_TOPK_ROWS_TEMPLATE_PREFLIGHT,
+    )
     vina_gnina_runtime_readiness = _load_json(
         repo_root,
         DEFAULT_VINA_GNINA_RUNTIME_READINESS,
@@ -890,6 +928,8 @@ def build_science_actual_closure_operator_handoff(
         "pocketmd_rows": _pocketmd_top_k_slot_detail(
             pocketmd_refinement_plan,
             artifact=DEFAULT_POCKETMD_REFINEMENT_PLAN,
+            template_preflight=pocketmd_template_preflight,
+            template_preflight_artifact=DEFAULT_POCKETMD_TOPK_ROWS_TEMPLATE_PREFLIGHT,
         ),
         "vina_gnina_rows": _vina_gnina_engine_run_slot_detail(
             vina_gnina_runtime_readiness,
@@ -949,6 +989,7 @@ def build_science_actual_closure_operator_handoff(
                 Path("scripts/build_science_actual_closure_operator_handoff.py"),
                 audit_path,
                 DEFAULT_POCKETMD_REFINEMENT_PLAN,
+                DEFAULT_POCKETMD_TOPK_ROWS_TEMPLATE_PREFLIGHT,
                 DEFAULT_VINA_GNINA_RUNTIME_READINESS,
                 DEFAULT_GPCR_SUITE_REPORT,
             ],
@@ -1092,12 +1133,35 @@ def _markdown(payload: dict[str, Any]) -> str:
                 operator_unblock = _as_dict(
                     row_input_detail.get("operator_unblock_packet")
                 )
+                template_preflight = _as_dict(
+                    row_input_detail.get("row_template_preflight")
+                )
+                template_preflight_commands = _as_dict(
+                    template_preflight.get("commands")
+                )
                 lines.extend(["", "### PocketMD Top-k Candidate Slots", ""])
                 if operator_unblock:
                     lines.extend(
                         [
                             f"- `operator_unblock_status`: `{operator_unblock.get('status')}`",
                             f"- `row_template_artifact`: `{operator_unblock.get('row_template_artifact')}`",
+                            "- `row_template_preflight_artifact`: "
+                            f"`{operator_unblock.get('row_template_preflight_artifact')}`",
+                            "- `row_template_preflight_command`: "
+                            f"`{_as_dict(operator_unblock.get('commands')).get('build_row_template_preflight', '')}`",
+                        ]
+                    )
+                if template_preflight:
+                    lines.extend(
+                        [
+                            f"- `row_template_preflight_status`: `{template_preflight.get('status')}`",
+                            f"- `row_template_preflight_ready`: `{template_preflight.get('top_k_template_ready')}`",
+                            "- `row_template_preflight_missing_metric_value_count`: "
+                            f"`{template_preflight.get('missing_metric_value_count')}`",
+                            "- `row_template_preflight_missing_receipt_value_count`: "
+                            f"`{template_preflight.get('missing_receipt_value_count')}`",
+                            "- `row_template_preflight_write_command`: "
+                            f"`{template_preflight_commands.get('write_preflight', '')}`",
                         ]
                     )
                 lines.extend(

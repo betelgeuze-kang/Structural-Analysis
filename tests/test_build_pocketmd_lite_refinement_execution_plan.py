@@ -321,9 +321,15 @@ def test_refinement_execution_plan_enumerates_candidate_slots(
     assert unblock["missing_candidate_slot_count"] == 6
     assert unblock["first_missing_candidate_slot"]["slot_id"] == "case_a_rank_01"
     assert unblock["operator_sequence"][:2] == [
+        "preflight_pocketmd_lite_topk_rows_template",
         "fill_pocketmd_lite_topk_rows_from_template",
-        "materialize_pocketmd_lite_operator_intake_from_rows",
     ]
+    assert unblock["row_template_preflight_artifact"].endswith(
+        "pocketmd_lite_topk_rows_template_preflight.json"
+    )
+    assert "build_pocketmd_lite_topk_rows_template_preflight.py" in unblock[
+        "commands"
+    ]["build_row_template_preflight"]
     assert "materialize_pocketmd_lite_operator_intake_from_rows.py" in payload[
         "operator_commands"
     ]["import_rows"]

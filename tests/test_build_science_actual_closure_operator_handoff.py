@@ -577,6 +577,15 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert pocketmd["row_input_slot_detail"]["operator_unblock_packet"][
         "row_template_artifact"
     ].endswith("pocketmd_lite_topk_rows_template.csv")
+    assert pocketmd["row_input_slot_detail"]["operator_unblock_packet"][
+        "row_template_preflight_artifact"
+    ].endswith("pocketmd_lite_topk_rows_template_preflight.json")
+    assert pocketmd["row_input_slot_detail"]["row_template_preflight"][
+        "status"
+    ] == "operator_rows_completion_required"
+    assert pocketmd["row_input_slot_detail"]["row_template_preflight"][
+        "missing_metric_value_count"
+    ] > 0
     assert pocketmd["row_input_slot_detail"]["candidate_slot_statuses"][0] == {
         "case_id": "pocketmd_lite_case_001",
         "expected_rows_artifact": (
@@ -660,6 +669,10 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     ].startswith("sha256:")
     assert payload["input_checksums"][
         "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows_template_preflight.json"
+    ].startswith("sha256:")
+    assert payload["input_checksums"][
+        "implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_runtime_readiness.json"
     ].startswith("sha256:")
     assert payload["input_checksums"][
@@ -731,6 +744,10 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "pocketmd_lite_topk_rows_not_acquired" in markdown
     assert "### PocketMD Top-k Candidate Slots" in markdown
     assert "`operator_unblock_status`: `operator_refinement_rows_required`" in markdown
+    assert "pocketmd_lite_topk_rows_template_preflight.json" in markdown
+    assert "build_pocketmd_lite_topk_rows_template_preflight.py" in markdown
+    assert "`row_template_preflight_status`: `operator_rows_completion_required`" in markdown
+    assert "`row_template_preflight_ready`: `False`" in markdown
     assert "pocketmd_lite_case_001_rank_01" in markdown
     assert "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01" in markdown
     assert "public_benchmark_subset_rows_template.csv" in markdown

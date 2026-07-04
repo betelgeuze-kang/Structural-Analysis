@@ -62,6 +62,13 @@
 
 - `operator_unblock_status`: `operator_refinement_rows_required`
 - `row_template_artifact`: `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv`
+- `row_template_preflight_artifact`: `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json`
+- `row_template_preflight_command`: `python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md`
+- `row_template_preflight_status`: `operator_rows_completion_required`
+- `row_template_preflight_ready`: `False`
+- `row_template_preflight_missing_metric_value_count`: `42`
+- `row_template_preflight_missing_receipt_value_count`: `24`
+- `row_template_preflight_write_command`: `python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md`
 | Slot | Case | Rank | Status | Action |
 | --- | --- | --- | --- | --- |
 | `pocketmd_lite_case_001_rank_01` | `pocketmd_lite_case_001` | `1` | `missing` | `attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01` |

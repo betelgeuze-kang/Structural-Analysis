@@ -34,6 +34,10 @@ DEFAULT_SOURCE_ACQUISITION_PLAN = PRODUCTIZATION / "pocketmd_lite_source_acquisi
 DEFAULT_SURVIVAL_REPORT = PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json"
 DEFAULT_ROWS_OUT = PRODUCTIZATION / "pocketmd_lite_topk_rows.json"
 DEFAULT_ROWS_TEMPLATE = PRODUCTIZATION / "pocketmd_lite_topk_rows_template.csv"
+DEFAULT_ROWS_TEMPLATE_PREFLIGHT = (
+    PRODUCTIZATION / "pocketmd_lite_topk_rows_template_preflight.json"
+)
+DEFAULT_ROWS_TEMPLATE_PREFLIGHT_MD = DEFAULT_ROWS_TEMPLATE_PREFLIGHT.with_suffix(".md")
 DEFAULT_OPERATOR_INTAKE = PRODUCTIZATION / "pocketmd_lite_operator_intake.json"
 DEFAULT_OUT = PRODUCTIZATION / "pocketmd_lite_refinement_execution_plan.json"
 SCHEMA_VERSION = "pocketmd-lite-refinement-execution-plan.v1"
@@ -260,12 +264,17 @@ def _operator_unblock_packet(
             top_k_slot_status_summary.get("first_missing_candidate_slot") or {}
         ),
         "operator_sequence": [
+            "preflight_pocketmd_lite_topk_rows_template",
             "fill_pocketmd_lite_topk_rows_from_template",
             "materialize_pocketmd_lite_operator_intake_from_rows",
             "materialize_pocketmd_lite_topk_survival_report",
             "refresh_pocketmd_lite_refinement_execution_plan",
             "rerun_science_actual_closure_row_audit",
         ],
+        "row_template_preflight_artifact": str(DEFAULT_ROWS_TEMPLATE_PREFLIGHT),
+        "row_template_preflight_markdown_artifact": str(
+            DEFAULT_ROWS_TEMPLATE_PREFLIGHT_MD
+        ),
         "commands": dict(operator_commands),
         "claim_boundary": (
             "This packet lists the bounded top-k refinement rows required by "
@@ -314,6 +323,11 @@ def build_pocketmd_lite_refinement_execution_plan(
     blockers.extend(survival_blockers)
     blockers = list(dict.fromkeys(blockers))
     operator_commands = {
+        "build_row_template_preflight": (
+            "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py "
+            f"--out {DEFAULT_ROWS_TEMPLATE_PREFLIGHT} "
+            f"--out-md {DEFAULT_ROWS_TEMPLATE_PREFLIGHT_MD}"
+        ),
         "import_rows": (
             "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
             f"--rows {rows_out} --out {operator_intake_out} "
