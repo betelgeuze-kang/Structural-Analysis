@@ -906,6 +906,80 @@ def _unblock_plan_runtime_action_packet(
     }
 
 
+def _unblock_plan_refinement_action_packet(
+    slot: dict[str, Any],
+    unblock: dict[str, Any],
+) -> dict[str, Any]:
+    source_action = _as_dict(slot.get("source_acquisition_row_action"))
+    top_k_action = _as_dict(source_action.get("top_k_rows_action_packet"))
+    row_preflight_action = _as_dict(source_action.get("row_preflight_action_packet"))
+    detail = _as_dict(slot.get("row_input_slot_detail"))
+    top_k_summary = _as_dict(detail.get("top_k_slot_status_summary"))
+    first_missing_candidate_slot = _as_dict(
+        unblock.get("first_missing_candidate_slot")
+        or detail.get("first_missing_candidate_slot")
+        or top_k_summary.get("first_missing_candidate_slot")
+    )
+    role_receipt_summary = _as_dict(top_k_action.get("role_receipt_plan_summary"))
+    input_source_receipt_summary = _as_dict(
+        top_k_action.get("operator_input_source_receipt_plan_summary")
+    )
+    first_blocked_role_receipt = _as_dict(
+        role_receipt_summary.get("first_blocked_role_receipt")
+    )
+    first_blocked_source_receipt = _as_dict(
+        input_source_receipt_summary.get("first_blocked_receipt")
+    )
+    if (
+        not first_missing_candidate_slot
+        and not first_blocked_role_receipt
+        and not first_blocked_source_receipt
+        and not top_k_action
+        and not row_preflight_action
+    ):
+        return {}
+
+    return {
+        "status": str(
+            top_k_action.get("status")
+            or unblock.get("status")
+            or detail.get("status")
+            or ""
+        ),
+        "expected_rows_artifact": str(
+            top_k_action.get("expected_rows_artifact")
+            or unblock.get("expected_rows_artifact")
+            or slot.get("preferred_default_row_path")
+            or ""
+        ),
+        "required_candidate_slot_count": _as_int(
+            unblock.get("required_candidate_slot_count")
+            or row_preflight_action.get("required_candidate_slot_count")
+        ),
+        "provided_candidate_slot_count": _as_int(
+            unblock.get("provided_candidate_slot_count")
+        ),
+        "missing_candidate_slot_count": _as_int(
+            unblock.get("missing_candidate_slot_count")
+        ),
+        "first_missing_candidate_slot": first_missing_candidate_slot,
+        "role_receipt_blocked_count": _as_int(
+            role_receipt_summary.get("role_receipt_blocked_count")
+        ),
+        "first_blocked_role_receipt": first_blocked_role_receipt,
+        "operator_input_source_receipt_blocked_count": _as_int(
+            input_source_receipt_summary.get("blocked_count")
+        ),
+        "first_blocked_operator_input_source_receipt": (
+            first_blocked_source_receipt
+        ),
+        "commands": _as_dict(unblock.get("commands")),
+        "claim_boundary": str(
+            top_k_action.get("claim_boundary") or unblock.get("claim_boundary") or ""
+        ),
+    }
+
+
 def _blocking_input_unblock_plan(
     missing_slots: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
@@ -920,6 +994,10 @@ def _blocking_input_unblock_plan(
         ]
         artifacts = _unblock_plan_artifacts(unblock)
         runtime_action_packet = _unblock_plan_runtime_action_packet(slot, unblock)
+        refinement_action_packet = _unblock_plan_refinement_action_packet(
+            slot,
+            unblock,
+        )
         row_payload = {
             "row_input_id": str(slot.get("row_input_id") or ""),
             "component_id": str(slot.get("actual_closure_component_id") or ""),
@@ -959,6 +1037,27 @@ def _blocking_input_unblock_plan(
                 row_payload["first_blocked_case_input_slot"] = first_case_slot
             if first_engine_slot:
                 row_payload["first_blocked_engine_run_slot"] = first_engine_slot
+        if refinement_action_packet:
+            row_payload["refinement_action_packet"] = refinement_action_packet
+            first_candidate_slot = _as_dict(
+                refinement_action_packet.get("first_missing_candidate_slot")
+            )
+            first_role_receipt = _as_dict(
+                refinement_action_packet.get("first_blocked_role_receipt")
+            )
+            first_source_receipt = _as_dict(
+                refinement_action_packet.get(
+                    "first_blocked_operator_input_source_receipt"
+                )
+            )
+            if first_candidate_slot:
+                row_payload["first_missing_candidate_slot"] = first_candidate_slot
+            if first_role_receipt:
+                row_payload["first_blocked_role_receipt"] = first_role_receipt
+            if first_source_receipt:
+                row_payload["first_blocked_operator_input_source_receipt"] = (
+                    first_source_receipt
+                )
         rows.append(row_payload)
     return rows
 
@@ -1299,6 +1398,18 @@ def _markdown(payload: dict[str, Any]) -> str:
             first_engine_slot = _as_dict(
                 runtime_action.get("first_blocked_engine_run_slot")
             )
+            refinement_action = _as_dict(row.get("refinement_action_packet"))
+            first_candidate_slot = _as_dict(
+                refinement_action.get("first_missing_candidate_slot")
+            )
+            first_role_receipt = _as_dict(
+                refinement_action.get("first_blocked_role_receipt")
+            )
+            first_source_receipt = _as_dict(
+                refinement_action.get(
+                    "first_blocked_operator_input_source_receipt"
+                )
+            )
             first_blocked_slot_refs = []
             if first_case_slot:
                 first_blocked_slot_refs.append(
@@ -1312,6 +1423,24 @@ def _markdown(payload: dict[str, Any]) -> str:
                     f"{first_engine_slot.get('case_id', '')}/"
                     f"{first_engine_slot.get('engine_id', '')}/"
                     f"{first_engine_slot.get('docking_run_id', '')}"
+                )
+            if first_candidate_slot:
+                first_blocked_slot_refs.append(
+                    "candidate:"
+                    f"{first_candidate_slot.get('slot_id', '')}/"
+                    f"{first_candidate_slot.get('operator_action', '')}"
+                )
+            if first_role_receipt:
+                first_blocked_slot_refs.append(
+                    "role:"
+                    f"{first_role_receipt.get('role_id', '')}/"
+                    f"{first_role_receipt.get('candidate_id', '')}"
+                )
+            if first_source_receipt:
+                first_blocked_slot_refs.append(
+                    "source:"
+                    f"{first_source_receipt.get('field', '')}/"
+                    f"{first_source_receipt.get('operator_action', '')}"
                 )
             preflight_refs = [
                 artifacts[key] for key in preflight_keys if str(artifacts.get(key) or "")

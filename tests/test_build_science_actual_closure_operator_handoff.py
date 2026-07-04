@@ -159,6 +159,33 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert unblock_plan["pocketmd_rows"]["counts"][
         "missing_candidate_slot_count"
     ] == 6
+    pocketmd_refinement_action = unblock_plan["pocketmd_rows"][
+        "refinement_action_packet"
+    ]
+    assert pocketmd_refinement_action["missing_candidate_slot_count"] == 6
+    assert pocketmd_refinement_action["first_missing_candidate_slot"] == {
+        "case_id": "pocketmd_lite_case_001",
+        "operator_action": (
+            "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01"
+        ),
+        "slot_id": "pocketmd_lite_case_001_rank_01",
+        "top_k_rank": 1,
+    }
+    assert pocketmd_refinement_action["first_blocked_role_receipt"][
+        "role_id"
+    ] == "upstream_top_k_candidate_scope_receipt"
+    assert pocketmd_refinement_action["first_blocked_role_receipt"][
+        "candidate_id"
+    ] == "pocketmd_lite_case_001_rank_01"
+    assert pocketmd_refinement_action[
+        "first_blocked_operator_input_source_receipt"
+    ]["field"] == "source_id"
+    assert unblock_plan["pocketmd_rows"][
+        "first_missing_candidate_slot"
+    ] == pocketmd_refinement_action["first_missing_candidate_slot"]
+    assert unblock_plan["pocketmd_rows"][
+        "first_blocked_role_receipt"
+    ] == pocketmd_refinement_action["first_blocked_role_receipt"]
     assert unblock_plan["pocketmd_rows"]["commands"][
         "materialize_survival_report"
     ].startswith("python3 scripts/materialize_pocketmd_lite_topk_survival_report.py")
@@ -805,6 +832,15 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
         "fill_vina_gnina_input_manifest_row_for_casf2016_4llx"
     ) in markdown
     assert "engine:casf2016_4llx/vina/casf2016_4llx_vina_run" in markdown
+    assert (
+        "candidate:pocketmd_lite_case_001_rank_01/"
+        "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01"
+    ) in markdown
+    assert (
+        "role:upstream_top_k_candidate_scope_receipt/"
+        "pocketmd_lite_case_001_rank_01"
+    ) in markdown
+    assert "source:source_id/attach_operator_input_source_source_id" in markdown
     assert "## Blocked Component Actions" in markdown
     assert "public_benchmark_phase2_actual_closure" in markdown
     assert "pocketmd_lite_topk_actual_closure" in markdown
