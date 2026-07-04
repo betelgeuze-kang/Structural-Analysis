@@ -392,6 +392,33 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert missing_action["engine_input_manifest_template"].endswith(
         "public_benchmark_vina_gnina_input_manifest_template.csv"
     )
+    assert missing_action["engine_input_manifest_expected_path"].endswith(
+        "public_benchmark_vina_gnina_input_manifest.csv"
+    )
+    assert missing_action["engine_input_manifest_current_status"] == "not_detected"
+    assert missing_action["engine_input_manifest_current_blockers"] == [
+        "public_benchmark_vina_gnina_input_manifest_not_detected"
+    ]
+    manifest_action = missing_action["engine_input_manifest_action_packet"]
+    assert manifest_action["template_artifact"].endswith(
+        "public_benchmark_vina_gnina_input_manifest_template.csv"
+    )
+    assert manifest_action["expected_manifest_artifact"].endswith(
+        "public_benchmark_vina_gnina_input_manifest.csv"
+    )
+    assert manifest_action["template_to_manifest_command"].startswith(
+        "cp implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_input_manifest_template.csv"
+    )
+    assert "prepared_receptor_checksum" in manifest_action[
+        "operator_must_fill_or_verify"
+    ]
+    assert manifest_action["template_safety_policy"] == {
+        "do_not_treat_blank_prepared_checksums_as_ready": True,
+        "expected_manifest_must_be_operator_reviewed": True,
+        "no_engine_rows_are_synthesized_by_manifest": True,
+        "template_is_not_evidence": True,
+    }
     assert missing_action["required_engines"] == ["vina", "gnina"]
     assert "predicted_ligand_checksum" in missing_action[
         "required_engine_run_fields"
@@ -433,6 +460,11 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "`blocked_engine_run_slot_count`: `24`" in markdown
     assert "## Missing Row Input Actions" in markdown
     assert "attach_vina_gnina_rows_then_run_phase2_row_audit" in markdown
+    assert "### Vina/GNINA Input Manifest Action" in markdown
+    assert "public_benchmark_vina_gnina_input_manifest_template.csv" in markdown
+    assert "public_benchmark_vina_gnina_input_manifest.csv" in markdown
+    assert "`template_is_not_evidence`: `True`" in markdown
+    assert "prepared_receptor_checksum" in markdown
     assert "## Vina/GNINA Runtime" in markdown
     assert "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE" in markdown
     assert "container_image_not_configured" in markdown

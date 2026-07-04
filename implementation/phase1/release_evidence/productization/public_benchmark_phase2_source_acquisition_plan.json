@@ -20,12 +20,12 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T23:31:05.423562+00:00",
+  "generated_at": "2026-07-03T23:59:45.788456+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:00d15d8668340de41ef36275a9b2f5601639e7197c0ce83a7aafda63cc0cb188",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:3f53708e67d1dd76f5f313307ce46a2971b748ef1938925bc44318b40e52709d",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:d91bbc8402c86796ce3d60d0a053610cceea2dcbbb0f5faf00adeaad7698bea4",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:6e75a02c6b13b518bf6087e44db30b84c243e4935d2b50611e2fd0411e476118",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:4acacfc65c70a8b52f02a183bc829ce139247e7a4eda72ad618c4dfbc0774fbb",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:e1f14ebdb63bfb08070ce50e0816831a6db9ff750d0c9ae5367a62777401bc68",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1",
     "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:895f52a4b9383625534767806ab373c4e33d70287a52ca65f9090b0d0e1e593a",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
@@ -57,6 +57,38 @@
         "subset_rows",
         "pose_rows"
       ],
+      "engine_input_manifest_action_packet": {
+        "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
+        "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+        "operator_must_fill_or_verify": [
+          "prepared_receptor_path",
+          "prepared_receptor_checksum",
+          "prepared_ligand_path",
+          "prepared_ligand_checksum",
+          "vina_config_ref",
+          "gnina_config_ref",
+          "vina_run_receipt_ref",
+          "gnina_run_receipt_ref",
+          "input_preparation_provenance_ref"
+        ],
+        "review_template_command": "sed -n '1,20p' implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "status": "operator_manifest_required",
+        "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "template_safety_policy": {
+          "do_not_treat_blank_prepared_checksums_as_ready": true,
+          "expected_manifest_must_be_operator_reviewed": true,
+          "no_engine_rows_are_synthesized_by_manifest": true,
+          "template_is_not_evidence": true
+        },
+        "template_to_manifest_command": "cp implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+        "verify_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+        "verify_runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
+      },
+      "engine_input_manifest_current_blockers": [
+        "public_benchmark_vina_gnina_input_manifest_not_detected"
+      ],
+      "engine_input_manifest_current_status": "not_detected",
+      "engine_input_manifest_expected_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
       "engine_input_manifest_template": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
       "materialization_command": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked",
       "operator_action": "attach_vina_gnina_rows_then_run_phase2_row_audit",
@@ -852,7 +884,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
+  "source_commit_sha": "af9bbf907a4c2c1a4b4c429b1e1f66d0872b978d",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,

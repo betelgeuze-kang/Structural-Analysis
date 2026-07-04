@@ -68,6 +68,9 @@ DEFAULT_VINA_GNINA_RUNTIME_READINESS = (
 DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest_template.csv"
 )
+DEFAULT_VINA_GNINA_INPUT_MANIFEST = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest.csv"
+)
 
 SCHEMA_VERSION = "public-benchmark-phase2-source-acquisition-plan.v1"
 TIER_BETA_MINIMUM_SUBSET_CASE_COUNT = 12
@@ -914,6 +917,7 @@ def _missing_row_input_actions(
     missing_row_inputs: list[str],
     row_input_contracts: list[dict[str, Any]],
     commands: dict[str, str],
+    vina_gnina_execution_plan_summary: dict[str, Any],
 ) -> list[dict[str, Any]]:
     contracts = _row_input_contract_map(row_input_contracts)
     actions: list[dict[str, Any]] = []
@@ -946,6 +950,68 @@ def _missing_row_input_actions(
                     "engine_input_manifest_template": str(
                         contract.get("engine_input_manifest_template") or ""
                     ),
+                    "engine_input_manifest_expected_path": str(
+                        DEFAULT_VINA_GNINA_INPUT_MANIFEST
+                    ),
+                    "engine_input_manifest_current_status": str(
+                        vina_gnina_execution_plan_summary.get(
+                            "input_manifest_status"
+                        )
+                        or ""
+                    ),
+                    "engine_input_manifest_current_blockers": list(
+                        vina_gnina_execution_plan_summary.get(
+                            "input_manifest_blockers"
+                        )
+                        or []
+                    ),
+                    "engine_input_manifest_action_packet": {
+                        "status": "operator_manifest_required",
+                        "template_artifact": str(
+                            contract.get("engine_input_manifest_template") or ""
+                        ),
+                        "expected_manifest_artifact": str(
+                            DEFAULT_VINA_GNINA_INPUT_MANIFEST
+                        ),
+                        "template_to_manifest_command": (
+                            "cp "
+                            f"{DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE} "
+                            f"{DEFAULT_VINA_GNINA_INPUT_MANIFEST}"
+                        ),
+                        "review_template_command": (
+                            "sed -n '1,20p' "
+                            f"{DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE}"
+                        ),
+                        "verify_execution_plan_command": str(
+                            commands.get("build_vina_gnina_execution_plan") or ""
+                        ),
+                        "verify_runtime_readiness_command": str(
+                            commands.get("check_vina_gnina_runtime_readiness") or ""
+                        ),
+                        "operator_must_fill_or_verify": [
+                            "prepared_receptor_path",
+                            "prepared_receptor_checksum",
+                            "prepared_ligand_path",
+                            "prepared_ligand_checksum",
+                            "vina_config_ref",
+                            "gnina_config_ref",
+                            "vina_run_receipt_ref",
+                            "gnina_run_receipt_ref",
+                            "input_preparation_provenance_ref",
+                        ],
+                        "template_safety_policy": {
+                            "template_is_not_evidence": True,
+                            "expected_manifest_must_be_operator_reviewed": True,
+                            "do_not_treat_blank_prepared_checksums_as_ready": True,
+                            "no_engine_rows_are_synthesized_by_manifest": True,
+                        },
+                        "claim_boundary": (
+                            "The scaffold manifest is an operator checklist for "
+                            "case inputs. It does not prove engine execution or "
+                            "Vina/GNINA adapter row actuality until the execution "
+                            "plan, runtime readiness, and adapter rows pass."
+                        ),
+                    },
                     "required_engine_input_fields": list(
                         contract.get("required_engine_input_fields") or []
                     ),
@@ -1030,6 +1096,7 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         missing_row_inputs=phase2_row_audit_summary["missing_row_inputs"],
         row_input_contracts=row_input_contracts,
         commands=commands,
+        vina_gnina_execution_plan_summary=vina_gnina_execution_plan_summary,
     )
     return {
         "schema_version": SCHEMA_VERSION,
@@ -1265,6 +1332,36 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                 f"`{row.get('operator_action', '')}` | {unblocks} | "
                 f"`{row.get('materialization_command', '')}` |"
             )
+        manifest_actions = [
+            row.get("engine_input_manifest_action_packet")
+            for row in missing_actions
+            if isinstance(row.get("engine_input_manifest_action_packet"), dict)
+        ]
+        if manifest_actions:
+            lines.extend(["", "### Vina/GNINA Input Manifest Action", ""])
+            for action in manifest_actions:
+                if not isinstance(action, dict):
+                    continue
+                safety_policy = action.get("template_safety_policy")
+                if not isinstance(safety_policy, dict):
+                    safety_policy = {}
+                required_fields = ", ".join(
+                    f"`{field}`"
+                    for field in action.get("operator_must_fill_or_verify", [])
+                )
+                lines.extend(
+                    [
+                        f"- `status`: `{action.get('status')}`",
+                        f"- `template_artifact`: `{action.get('template_artifact')}`",
+                        f"- `expected_manifest_artifact`: `{action.get('expected_manifest_artifact')}`",
+                        f"- `template_to_manifest_command`: `{action.get('template_to_manifest_command')}`",
+                        f"- `verify_execution_plan_command`: `{action.get('verify_execution_plan_command')}`",
+                        f"- `verify_runtime_readiness_command`: `{action.get('verify_runtime_readiness_command')}`",
+                        f"- `operator_must_fill_or_verify`: {required_fields}",
+                        f"- `template_is_not_evidence`: `{safety_policy.get('template_is_not_evidence')}`",
+                        f"- `do_not_treat_blank_prepared_checksums_as_ready`: `{safety_policy.get('do_not_treat_blank_prepared_checksums_as_ready')}`",
+                    ]
+                )
     lines.extend(["", "## Vina/GNINA Runtime", ""])
     runtime_unblock = payload["vina_gnina_runtime_readiness"].get(
         "operator_unblock_packet"
