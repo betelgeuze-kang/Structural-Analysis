@@ -875,6 +875,23 @@ def _science_operator_gap_register(
         first_metric_family_action = _as_dict(
             unblock_plan.get("first_refinement_metric_family_action")
         )
+        runtime_blocker_family_actions = [
+            _as_dict(row)
+            for row in _as_list(unblock_plan.get("runtime_blocker_family_actions"))
+            if isinstance(row, dict)
+        ]
+        refinement_receipt_completion_actions = [
+            _as_dict(row)
+            for row in _as_list(
+                unblock_plan.get("refinement_receipt_completion_actions")
+            )
+            if isinstance(row, dict)
+        ]
+        refinement_metric_family_actions = [
+            _as_dict(row)
+            for row in _as_list(unblock_plan.get("refinement_metric_family_actions"))
+            if isinstance(row, dict)
+        ]
         materialization_command = str(
             unblock_plan.get("materialization_command")
             or contract.get("materialization_command")
@@ -894,6 +911,20 @@ def _science_operator_gap_register(
                 "command_key": str(unblock_plan.get("command_key") or ""),
                 "first_unblock_action": first_unblock_action,
                 "first_metric_family_action": first_metric_family_action,
+                "runtime_blocker_family_action_count": len(
+                    runtime_blocker_family_actions
+                ),
+                "runtime_blocker_family_actions": runtime_blocker_family_actions,
+                "refinement_receipt_completion_action_count": len(
+                    refinement_receipt_completion_actions
+                ),
+                "refinement_receipt_completion_actions": (
+                    refinement_receipt_completion_actions
+                ),
+                "refinement_metric_family_action_count": len(
+                    refinement_metric_family_actions
+                ),
+                "refinement_metric_family_actions": refinement_metric_family_actions,
                 "template_artifact": str(contract.get("row_template_artifact") or ""),
                 "minimum_evidence": {
                     "accepted_formats": [
@@ -1560,6 +1591,36 @@ def _operator_evidence_handoff_queue(roadmap_rows: list[dict[str, Any]]) -> list
                 "first_metric_family_action": _as_dict(
                     first_gap.get("first_metric_family_action")
                 ),
+                "runtime_blocker_family_action_count": _as_int(
+                    first_gap.get("runtime_blocker_family_action_count")
+                ),
+                "runtime_blocker_family_actions": [
+                    _as_dict(item)
+                    for item in _as_list(
+                        first_gap.get("runtime_blocker_family_actions")
+                    )
+                    if isinstance(item, dict)
+                ],
+                "refinement_receipt_completion_action_count": _as_int(
+                    first_gap.get("refinement_receipt_completion_action_count")
+                ),
+                "refinement_receipt_completion_actions": [
+                    _as_dict(item)
+                    for item in _as_list(
+                        first_gap.get("refinement_receipt_completion_actions")
+                    )
+                    if isinstance(item, dict)
+                ],
+                "refinement_metric_family_action_count": _as_int(
+                    first_gap.get("refinement_metric_family_action_count")
+                ),
+                "refinement_metric_family_actions": [
+                    _as_dict(item)
+                    for item in _as_list(
+                        first_gap.get("refinement_metric_family_actions")
+                    )
+                    if isinstance(item, dict)
+                ],
                 "template_artifact": str(first_gap.get("template_artifact") or ""),
                 "minimum_evidence": _as_dict(first_gap.get("minimum_evidence")),
                 "materialization_steps": [
@@ -1657,6 +1718,36 @@ def _operator_evidence_handoff_slot_queue(
                     "first_metric_family_action": _as_dict(
                         slot.get("first_metric_family_action")
                     ),
+                    "runtime_blocker_family_action_count": _as_int(
+                        slot.get("runtime_blocker_family_action_count")
+                    ),
+                    "runtime_blocker_family_actions": [
+                        _as_dict(item)
+                        for item in _as_list(
+                            slot.get("runtime_blocker_family_actions")
+                        )
+                        if isinstance(item, dict)
+                    ],
+                    "refinement_receipt_completion_action_count": _as_int(
+                        slot.get("refinement_receipt_completion_action_count")
+                    ),
+                    "refinement_receipt_completion_actions": [
+                        _as_dict(item)
+                        for item in _as_list(
+                            slot.get("refinement_receipt_completion_actions")
+                        )
+                        if isinstance(item, dict)
+                    ],
+                    "refinement_metric_family_action_count": _as_int(
+                        slot.get("refinement_metric_family_action_count")
+                    ),
+                    "refinement_metric_family_actions": [
+                        _as_dict(item)
+                        for item in _as_list(
+                            slot.get("refinement_metric_family_actions")
+                        )
+                        if isinstance(item, dict)
+                    ],
                     "template_artifact": str(slot.get("template_artifact") or ""),
                     "minimum_evidence": _as_dict(slot.get("minimum_evidence")),
                     "materialization_steps": [

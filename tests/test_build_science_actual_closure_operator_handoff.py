@@ -264,6 +264,26 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert unblock_plan["vina_gnina_rows"]["first_runtime_action"][
         "first_missing_item"
     ]["field"] == "prepared_receptor_checksum"
+    assert unblock_plan["vina_gnina_rows"][
+        "runtime_blocker_family_action_count"
+    ] == 7
+    assert [
+        row["family_id"]
+        for row in unblock_plan["vina_gnina_rows"][
+            "runtime_blocker_family_actions"
+        ]
+    ] == [
+        "manifest_required_values",
+        "official_source_files",
+        "prepared_input_files",
+        "input_and_engine_receipt_refs",
+        "engine_runtime",
+        "engine_run_slots",
+        "adapter_rows",
+    ]
+    assert unblock_plan["vina_gnina_rows"]["runtime_blocker_family_actions"][0][
+        "first_missing_item"
+    ]["field"] == "prepared_receptor_checksum"
     assert unblock_plan["vina_gnina_rows"]["next_action"] == (
         "complete_vina_gnina_input_manifest_required_values"
     )
@@ -393,6 +413,30 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     first_metric_family = receipt_bundle_report[
         "receipt_metric_family_completion_plan"
     ][0]
+    assert unblock_plan["pocketmd_rows"][
+        "refinement_receipt_completion_action_count"
+    ] == 6
+    assert unblock_plan["pocketmd_rows"]["refinement_receipt_completion_actions"][0][
+        "receipt_ref"
+    ] == first_incomplete_receipt["receipt_ref"]
+    assert unblock_plan["pocketmd_rows"]["refinement_receipt_completion_actions"][0][
+        "missing_receipt_field_count"
+    ] == 18
+    assert unblock_plan["pocketmd_rows"][
+        "refinement_metric_family_action_count"
+    ] == 5
+    assert [
+        row["metric_family_id"]
+        for row in unblock_plan["pocketmd_rows"][
+            "refinement_metric_family_actions"
+        ]
+    ] == [
+        "local_min_survival",
+        "contact_persistence",
+        "h_bond_persistence",
+        "clash_relief",
+        "uncertainty",
+    ]
     assert unblock_plan["pocketmd_rows"][
         "first_refinement_metric_family_action"
     ] == {

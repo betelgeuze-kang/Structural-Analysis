@@ -1468,6 +1468,36 @@ def _first_runtime_blocker_action(
     }
 
 
+def _runtime_blocker_family_actions(
+    runtime_action_packet: dict[str, Any],
+) -> list[dict[str, Any]]:
+    actions: list[dict[str, Any]] = []
+    commands = _as_dict(runtime_action_packet.get("commands"))
+    for row in _as_list(runtime_action_packet.get("operator_blocker_family_plan")):
+        if not isinstance(row, dict):
+            continue
+        next_action = str(row.get("next_action") or row.get("operator_action") or "")
+        command_key = str(row.get("command_key") or "")
+        materialization_command = str(
+            row.get("materialization_command")
+            or commands.get(command_key)
+            or ""
+        )
+        actions.append(
+            {
+                "family_id": str(row.get("family_id") or ""),
+                "status": str(row.get("status") or ""),
+                "next_action": next_action,
+                "command_key": command_key,
+                "materialization_command": materialization_command,
+                "missing_item_count": _as_int(row.get("missing_item_count")),
+                "blocked_case_count": _as_int(row.get("blocked_case_count")),
+                "first_missing_item": _as_dict(row.get("first_missing_item")),
+            }
+        )
+    return actions
+
+
 def _first_refinement_receipt_action(
     refinement_action_packet: dict[str, Any],
 ) -> dict[str, Any]:
@@ -1527,52 +1557,102 @@ def _first_refinement_receipt_action(
     return {}
 
 
+def _refinement_receipt_completion_actions(
+    refinement_action_packet: dict[str, Any],
+) -> list[dict[str, Any]]:
+    report = _as_dict(refinement_action_packet.get("rows_from_receipt_bundle_report"))
+    actions: list[dict[str, Any]] = []
+    for row in _as_list(report.get("receipt_completion_action_plan")):
+        if not isinstance(row, dict):
+            continue
+        next_action = str(
+            row.get("next_action")
+            or row.get("operator_completion_action")
+            or row.get("operator_action")
+            or ""
+        )
+        command_key = str(row.get("command_key") or "")
+        if not command_key and next_action:
+            command_key = "rerun_rows_materialization"
+        actions.append(
+            {
+                "case_id": str(row.get("case_id") or ""),
+                "run_key": str(row.get("run_key") or ""),
+                "top_k_rank": row.get("top_k_rank"),
+                "receipt_ref": str(row.get("receipt_ref") or ""),
+                "status": str(row.get("status") or ""),
+                "receipt_status": str(row.get("receipt_status") or ""),
+                "next_action": next_action,
+                "command_key": command_key,
+                "missing_receipt_field_count": _as_int(
+                    row.get("completion_missing_required_field_count")
+                ),
+            }
+        )
+    return actions
+
+
 def _first_refinement_metric_family_action(
     refinement_action_packet: dict[str, Any],
 ) -> dict[str, Any]:
+    actions = _refinement_metric_family_actions(refinement_action_packet)
+    return actions[0] if actions else {}
+
+
+def _refinement_metric_family_actions(
+    refinement_action_packet: dict[str, Any],
+) -> list[dict[str, Any]]:
     report = _as_dict(refinement_action_packet.get("rows_from_receipt_bundle_report"))
     commands = _as_dict(report.get("commands"))
-    family_plan = [
-        row
-        for row in _as_list(report.get("receipt_metric_family_completion_plan"))
-        if isinstance(row, dict)
-    ]
-    if not family_plan:
-        return {}
-    row = family_plan[0]
-    next_action = str(
-        row.get("next_action")
-        or row.get("operator_completion_action")
-        or row.get("operator_action")
-        or ""
-    )
-    command_key = str(row.get("command_key") or "")
-    if not command_key and next_action:
-        command_key = "rerun_rows_materialization"
-    materialization_command = str(
-        row.get("materialization_command")
-        or commands.get(command_key)
-        or ""
-    )
-    if not (next_action or command_key or materialization_command):
-        return {}
-    return {
-        "action_source": "first_metric_family_blocker",
-        "metric_family_id": str(row.get("metric_family_id") or ""),
-        "phase4_criterion_id": str(row.get("phase4_criterion_id") or ""),
-        "product_requirement": str(row.get("product_requirement") or ""),
-        "next_action": next_action,
-        "command_key": command_key,
-        "materialization_command": materialization_command,
-        "required_receipt_fields": [
-            str(item) for item in _as_list(row.get("required_receipt_fields")) if str(item)
-        ],
-        "missing_field_occurrence_count": _as_int(
-            row.get("missing_field_occurrence_count")
-        ),
-        "blocked_receipt_count": _as_int(row.get("blocked_receipt_count")),
-        "first_blocked_receipt": _as_dict(row.get("first_blocked_receipt")),
-    }
+    actions: list[dict[str, Any]] = []
+    for index, row in enumerate(
+        _as_list(report.get("receipt_metric_family_completion_plan")),
+        start=1,
+    ):
+        if not isinstance(row, dict):
+            continue
+        next_action = str(
+            row.get("next_action")
+            or row.get("operator_completion_action")
+            or row.get("operator_action")
+            or ""
+        )
+        command_key = str(row.get("command_key") or "")
+        if not command_key and next_action:
+            command_key = "rerun_rows_materialization"
+        materialization_command = str(
+            row.get("materialization_command")
+            or commands.get(command_key)
+            or ""
+        )
+        if not (next_action or command_key or materialization_command):
+            continue
+        actions.append(
+            {
+                "action_source": (
+                    "first_metric_family_blocker"
+                    if index == 1
+                    else "metric_family_blocker"
+                ),
+                "metric_family_id": str(row.get("metric_family_id") or ""),
+                "phase4_criterion_id": str(row.get("phase4_criterion_id") or ""),
+                "product_requirement": str(row.get("product_requirement") or ""),
+                "next_action": next_action,
+                "command_key": command_key,
+                "materialization_command": materialization_command,
+                "required_receipt_fields": [
+                    str(item)
+                    for item in _as_list(row.get("required_receipt_fields"))
+                    if str(item)
+                ],
+                "missing_field_occurrence_count": _as_int(
+                    row.get("missing_field_occurrence_count")
+                ),
+                "blocked_receipt_count": _as_int(row.get("blocked_receipt_count")),
+                "first_blocked_receipt": _as_dict(row.get("first_blocked_receipt")),
+            }
+        )
+    return actions
 
 
 def _blocking_input_unblock_plan(
@@ -1622,6 +1702,16 @@ def _blocking_input_unblock_plan(
         }
         if runtime_action_packet:
             row_payload["runtime_action_packet"] = runtime_action_packet
+            runtime_blocker_family_actions = _runtime_blocker_family_actions(
+                runtime_action_packet
+            )
+            if runtime_blocker_family_actions:
+                row_payload["runtime_blocker_family_actions"] = (
+                    runtime_blocker_family_actions
+                )
+                row_payload["runtime_blocker_family_action_count"] = len(
+                    runtime_blocker_family_actions
+                )
             first_runtime_action = _first_runtime_blocker_action(
                 runtime_action_packet
             )
@@ -1651,6 +1741,26 @@ def _blocking_input_unblock_plan(
                 row_payload["first_blocked_engine_run_slot"] = first_engine_slot
         if refinement_action_packet:
             row_payload["refinement_action_packet"] = refinement_action_packet
+            refinement_receipt_completion_actions = (
+                _refinement_receipt_completion_actions(refinement_action_packet)
+            )
+            if refinement_receipt_completion_actions:
+                row_payload["refinement_receipt_completion_actions"] = (
+                    refinement_receipt_completion_actions
+                )
+                row_payload["refinement_receipt_completion_action_count"] = len(
+                    refinement_receipt_completion_actions
+                )
+            refinement_metric_family_actions = _refinement_metric_family_actions(
+                refinement_action_packet
+            )
+            if refinement_metric_family_actions:
+                row_payload["refinement_metric_family_actions"] = (
+                    refinement_metric_family_actions
+                )
+                row_payload["refinement_metric_family_action_count"] = len(
+                    refinement_metric_family_actions
+                )
             first_refinement_receipt_action = _first_refinement_receipt_action(
                 refinement_action_packet
             )

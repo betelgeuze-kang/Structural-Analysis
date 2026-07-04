@@ -355,6 +355,21 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "first_missing_item"
     ]["field"] == "prepared_receptor_checksum"
     assert handoffs["vina_gnina_rows"][
+        "runtime_blocker_family_action_count"
+    ] == 7
+    assert [
+        row["family_id"]
+        for row in handoffs["vina_gnina_rows"]["runtime_blocker_family_actions"]
+    ] == [
+        "manifest_required_values",
+        "official_source_files",
+        "prepared_input_files",
+        "input_and_engine_receipt_refs",
+        "engine_runtime",
+        "engine_run_slots",
+        "adapter_rows",
+    ]
+    assert handoffs["vina_gnina_rows"][
         "actual_evidence_audit_status"
     ] == "engine_input_manifest_required"
     assert handoffs["vina_gnina_rows"][
@@ -396,6 +411,22 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "pocketmd_lite_case_001/rank_01_refinement_receipt.json"
     )
     assert handoffs["pocketmd_rows"][
+        "refinement_receipt_completion_action_count"
+    ] == 6
+    assert handoffs["pocketmd_rows"][
+        "refinement_metric_family_action_count"
+    ] == 5
+    assert [
+        row["metric_family_id"]
+        for row in handoffs["pocketmd_rows"]["refinement_metric_family_actions"]
+    ] == [
+        "local_min_survival",
+        "contact_persistence",
+        "h_bond_persistence",
+        "clash_relief",
+        "uncertainty",
+    ]
+    assert handoffs["pocketmd_rows"][
         "actual_evidence_audit_status"
     ] == "operator_topk_rows_required"
     assert handoffs["pocketmd_rows"]["actual_evidence_blocked_component_count"] == 4
@@ -413,10 +444,12 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert slots["vina_gnina_rows"]["command_key"] == (
         "build_input_manifest_template_preflight"
     )
+    assert slots["vina_gnina_rows"]["runtime_blocker_family_action_count"] == 7
     assert slots["pocketmd_rows"]["first_next_action"] == (
         "fill_completion_missing_required_fields_and_set_status_complete"
     )
     assert slots["pocketmd_rows"]["command_key"] == "rerun_rows_materialization"
+    assert slots["pocketmd_rows"]["refinement_metric_family_action_count"] == 5
     assert slots["pocketmd_rows"]["blocked_criteria"] == [
         "top_k_refinement_rows_present",
         "top_k_refinement_case_coverage",
