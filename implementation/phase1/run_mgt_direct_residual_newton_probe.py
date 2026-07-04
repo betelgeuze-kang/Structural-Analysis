@@ -1297,6 +1297,65 @@ def _row_tangent_refresh_closes_global_defer(row_correction: dict[str, Any]) -> 
     )
 
 
+def _select_global_deferred_refresh_support_columns(
+    *,
+    current_free: np.ndarray,
+    current_residual: np.ndarray,
+    row_correction: dict[str, Any],
+    fd_max_support_columns: int,
+) -> list[int]:
+    candidates: list[int] = []
+    best_gate = row_correction.get("best_gate_eligible_candidate")
+    best_gate = best_gate if isinstance(best_gate, dict) else {}
+    best_candidate = row_correction.get("best_candidate")
+    best_candidate = best_candidate if isinstance(best_candidate, dict) else {}
+    candidate_indices = [
+        int(value)
+        for value in (
+            best_gate.get("candidate_row_index"),
+            best_candidate.get("candidate_row_index"),
+        )
+        if value is not None
+    ]
+    passes = row_correction.get("passes")
+    passes = passes if isinstance(passes, list) else []
+    for row_pass in reversed(passes):
+        if not isinstance(row_pass, dict):
+            continue
+        candidate_rows = row_pass.get("candidate_rows")
+        candidate_rows = candidate_rows if isinstance(candidate_rows, list) else []
+        selected_rows = [
+            row
+            for row in candidate_rows
+            if isinstance(row, dict)
+            and int(row.get("candidate_row_index", -1)) in candidate_indices
+        ]
+        for row in selected_rows or list(reversed(candidate_rows)):
+            support_columns = row.get("support_columns")
+            if not isinstance(support_columns, list):
+                continue
+            for value in support_columns:
+                col = int(value)
+                if 0 <= col < int(current_free.size) and col not in candidates:
+                    candidates.append(col)
+            if candidates:
+                break
+        if candidates:
+            break
+    if not candidates and current_residual.size:
+        take = min(
+            max(int(fd_max_support_columns), 1),
+            int(current_residual.size),
+        )
+        top_rows = np.argpartition(np.abs(current_residual), -take)[-take:]
+        top_rows = top_rows[np.argsort(-np.abs(current_residual[top_rows]), kind="stable")]
+        candidates = [int(row) for row in top_rows.tolist()]
+    limit = max(int(fd_max_support_columns), 0)
+    if limit > 0:
+        candidates = candidates[:limit]
+    return candidates
+
+
 def _component_tangent_refresh_missing(
     component: dict[str, Any],
     *,
@@ -6895,7 +6954,15 @@ def run_mgt_direct_residual_newton_probe(
                             "accepted_row_candidate_hip_batch_replay"
                         ),
                     }
-                    if terminal_row_promotion and not terminal_row_tangent_refresh_required:
+                    terminal_row_can_skip_tangent_refresh = bool(
+                        terminal_row_promotion
+                        and not terminal_row_tangent_refresh_required
+                        and not (
+                            row_require_hip_batch_replay
+                            and jacobian_mode == "finite_difference"
+                        )
+                    )
+                    if terminal_row_can_skip_tangent_refresh:
                         row_acceptance_refresh_meta.update(
                             {
                                 "accepted_state_tangent_refresh_backend": (
@@ -7204,6 +7271,134 @@ def run_mgt_direct_residual_newton_probe(
                     ),
                 }
             )
+            if (
+                row_require_hip_batch_replay
+                and row_batch_fd_replay
+                and matrix_free_global_krylov.get(
+                    "accepted_state_tangent_refresh_deferred_to"
+                )
+                == GLOBAL_TANGENT_REFRESH_DEFERRED_TO_ROW
+                and not _row_tangent_refresh_closes_global_defer(
+                    current_tangent_residual_row_correction
+                )
+                and not current_tangent_residual_row_correction.get(
+                    "accepted_state_tangent_refresh_cpu_used"
+                )
+            ):
+                refresh_support_cols = _select_global_deferred_refresh_support_columns(
+                    current_free=current_free,
+                    current_residual=current_residual,
+                    row_correction=current_tangent_residual_row_correction,
+                    fd_max_support_columns=fd_max_support_columns,
+                )
+                refresh_meta_rows: list[dict[str, Any]] = []
+                refresh_jvp_norms: list[float] = []
+                refresh_stable = bool(refresh_support_cols)
+                refresh_reason = ""
+                if refresh_stable:
+                    refresh_entries: list[tuple[int, float, np.ndarray]] = []
+                    for support_col in refresh_support_cols:
+                        global_dof = int(current_free[int(support_col)])
+                        epsilon = fd_epsilon_base * max(
+                            abs(float(current_u[global_dof])),
+                            1.0,
+                        )
+                        probe_u = np.asarray(current_u, dtype=np.float64).copy()
+                        probe_u[global_dof] += float(epsilon)
+                        refresh_entries.append(
+                            (int(support_col), float(epsilon), probe_u)
+                        )
+                    refresh_results = evaluate_row_candidates_batch(
+                        [
+                            np.asarray(probe_u, dtype=np.float64)
+                            for _support_col, _epsilon, probe_u in refresh_entries
+                        ],
+                        replay_role="finite_difference",
+                    )
+                    if len(refresh_results) != len(refresh_entries):
+                        refresh_stable = False
+                        refresh_reason = "hip_fd_refresh_result_count_mismatch"
+                    for (support_col, epsilon, _probe_u), refresh_result in zip(
+                        refresh_entries,
+                        refresh_results,
+                    ):
+                        (
+                            _refresh_k,
+                            _refresh_f,
+                            refresh_free,
+                            refresh_residual,
+                            _refresh_rhs,
+                            refresh_meta,
+                        ) = refresh_result
+                        refresh_meta_rows.append(dict(refresh_meta))
+                        if not (
+                            refresh_free.shape == current_free.shape
+                            and np.array_equal(refresh_free, current_free)
+                        ):
+                            refresh_stable = False
+                            refresh_reason = "global_deferred_hip_fd_refresh_free_dof_changed"
+                            break
+                        if not refresh_meta.get("hip_full_residual_batch_replay"):
+                            refresh_stable = False
+                            refresh_reason = "global_deferred_hip_fd_refresh_non_hip_backend"
+                            break
+                        full_jvp = (
+                            np.asarray(refresh_residual, dtype=np.float64)
+                            - np.asarray(current_residual, dtype=np.float64)
+                        ) / float(epsilon)
+                        refresh_jvp_norms.append(float(np.linalg.norm(full_jvp)))
+                else:
+                    refresh_reason = "global_deferred_hip_fd_refresh_support_unavailable"
+                if refresh_stable:
+                    current_tangent_residual_row_correction.update(
+                        {
+                            "accepted_state_tangent_refresh_backend": (
+                                "global_deferred_hip_finite_difference_residual_jvp"
+                            ),
+                            "accepted_state_tangent_refresh_hip_used": True,
+                            "accepted_state_tangent_refresh_cpu_used": False,
+                            "accepted_state_tangent_refresh_column_count": int(
+                                len(refresh_support_cols)
+                            ),
+                            "accepted_state_tangent_refresh_support_source": (
+                                "global_deferred_row_support_columns"
+                            ),
+                            "accepted_state_tangent_refresh_residual_batch_backends": sorted(
+                                {
+                                    str(meta.get("residual_batch_backend"))
+                                    for meta in refresh_meta_rows
+                                    if meta.get("residual_batch_backend")
+                                }
+                            ),
+                            "accepted_state_tangent_refresh_jvp_l2_min": float(
+                                min(refresh_jvp_norms)
+                            )
+                            if refresh_jvp_norms
+                            else 0.0,
+                            "accepted_state_tangent_refresh_jvp_l2_max": float(
+                                max(refresh_jvp_norms)
+                            )
+                            if refresh_jvp_norms
+                            else 0.0,
+                            "global_deferred_tangent_refresh_performed": True,
+                            "global_deferred_tangent_refresh_reason": (
+                                "global_krylov_accepted_state_required_hip_fd_jvp"
+                            ),
+                        }
+                    )
+                else:
+                    current_tangent_residual_row_correction.update(
+                        {
+                            "accepted_state_tangent_refresh_backend": (
+                                "global_deferred_hip_finite_difference_residual_jvp_unavailable"
+                            ),
+                            "accepted_state_tangent_refresh_cpu_used": False,
+                            "accepted_state_tangent_refresh_closure_blocked": True,
+                            "accepted_state_tangent_refresh_closure_blocker": (
+                                refresh_reason
+                            ),
+                        }
+                    )
 
     if (
         matrix_free_global_krylov.get("accepted_state_tangent_refresh_deferred_to")

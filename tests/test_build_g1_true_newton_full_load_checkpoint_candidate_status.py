@@ -134,3 +134,30 @@ def test_full_load_checkpoint_candidate_status_records_initial_checkpoint(
     assert payload["initial_checkpoint_npz"].endswith("initial.npz")
     assert payload["initial_state"]["source"] == "checkpoint"
     assert payload["initial_state"]["initial_iteration_count"] == 36
+
+
+def test_full_load_checkpoint_candidate_status_forwards_regularization(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    calls: list[dict[str, object]] = []
+
+    def fake_candidate(**kwargs: object) -> dict:
+        calls.append(dict(kwargs))
+        return _fake_candidate(**kwargs)
+
+    monkeypatch.setattr(module, "run_g1_true_newton_reference_candidate", fake_candidate)
+
+    payload = module.build_g1_true_newton_full_load_checkpoint_candidate_status(
+        repo_root=REPO_ROOT,
+        checkpoint_npz=tmp_path / "candidate.npz",
+        regularization_mode="absolute_diagonal_shift",
+        regularization_mu=0.03,
+    )
+
+    assert calls[-1]["regularization_mode"] == "absolute_diagonal_shift"
+    assert calls[-1]["regularization_mu"] == 0.03
+    assert payload["regularization"] == {
+        "mode": "absolute_diagonal_shift",
+        "mu": 0.03,
+    }

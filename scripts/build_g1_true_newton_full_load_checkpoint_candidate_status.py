@@ -33,6 +33,8 @@ DEFAULT_INITIAL_CHECKPOINT_NPZ: Path | None = None
 DEFAULT_LOAD_SCALE = 1.0
 DEFAULT_MAX_NEWTON_STEPS = 36
 DEFAULT_RESIDUAL_GATE_N = 5.0e-4
+DEFAULT_REGULARIZATION_MODE = "relative_diagonal_shift"
+DEFAULT_REGULARIZATION_MU = 0.1
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -74,12 +76,16 @@ def build_g1_true_newton_full_load_checkpoint_candidate_status(
     load_scale: float = DEFAULT_LOAD_SCALE,
     max_newton_steps: int = DEFAULT_MAX_NEWTON_STEPS,
     residual_gate_n: float = DEFAULT_RESIDUAL_GATE_N,
+    regularization_mode: str = DEFAULT_REGULARIZATION_MODE,
+    regularization_mu: float = DEFAULT_REGULARIZATION_MU,
 ) -> dict[str, Any]:
     resolved_checkpoint = _resolve(repo_root, checkpoint_npz)
     candidate = run_g1_true_newton_reference_candidate(
         load_scale=float(load_scale),
         max_newton_steps=int(max_newton_steps),
         residual_gate_n=float(residual_gate_n),
+        regularization_mode=str(regularization_mode),
+        regularization_mu=float(regularization_mu),
         initial_checkpoint_npz=(
             _resolve(repo_root, initial_checkpoint_npz)
             if initial_checkpoint_npz is not None
@@ -156,6 +162,10 @@ def build_g1_true_newton_full_load_checkpoint_candidate_status(
         "required_load_scale": float(load_scale),
         "max_newton_steps": int(max_newton_steps),
         "residual_gate_n": float(residual_gate_n),
+        "regularization": {
+            "mode": str(regularization_mode),
+            "mu": float(regularization_mu),
+        },
         "initial_checkpoint_npz": (
             _repo_relative_string(repo_root, str(_resolve(repo_root, initial_checkpoint_npz)))
             if initial_checkpoint_npz is not None
@@ -229,6 +239,8 @@ def write_g1_true_newton_full_load_checkpoint_candidate_status(
     load_scale: float = DEFAULT_LOAD_SCALE,
     max_newton_steps: int = DEFAULT_MAX_NEWTON_STEPS,
     residual_gate_n: float = DEFAULT_RESIDUAL_GATE_N,
+    regularization_mode: str = DEFAULT_REGULARIZATION_MODE,
+    regularization_mu: float = DEFAULT_REGULARIZATION_MU,
 ) -> dict[str, Any]:
     payload = build_g1_true_newton_full_load_checkpoint_candidate_status(
         repo_root=repo_root,
@@ -237,6 +249,8 @@ def write_g1_true_newton_full_load_checkpoint_candidate_status(
         load_scale=load_scale,
         max_newton_steps=max_newton_steps,
         residual_gate_n=residual_gate_n,
+        regularization_mode=regularization_mode,
+        regularization_mu=regularization_mu,
     )
     resolved_out = _resolve(repo_root, out)
     resolved_out_md = _resolve(repo_root, out_md)
@@ -257,6 +271,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--load-scale", type=float, default=DEFAULT_LOAD_SCALE)
     parser.add_argument("--max-newton-steps", type=int, default=DEFAULT_MAX_NEWTON_STEPS)
     parser.add_argument("--residual-gate-n", type=float, default=DEFAULT_RESIDUAL_GATE_N)
+    parser.add_argument("--regularization-mode", default=DEFAULT_REGULARIZATION_MODE)
+    parser.add_argument("--regularization-mu", type=float, default=DEFAULT_REGULARIZATION_MU)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     return parser
@@ -273,6 +289,8 @@ def main(argv: list[str] | None = None) -> int:
         load_scale=args.load_scale,
         max_newton_steps=args.max_newton_steps,
         residual_gate_n=args.residual_gate_n,
+        regularization_mode=args.regularization_mode,
+        regularization_mu=args.regularization_mu,
     )
     if args.json:
         print(_json_text(payload), end="")

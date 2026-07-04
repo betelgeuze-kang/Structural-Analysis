@@ -7,14 +7,14 @@
   ],
   "checkpoint_candidate": {
     "accepted_history_count": 0,
-    "accepted_iteration_count": 60,
+    "accepted_iteration_count": 348,
     "claim_boundary": "This is a loadable true-Newton full-load checkpoint candidate only. It does not close G1 unless direct residual, increment, full-mesh, material breadth, and production ROCm/HIP gates also pass.",
-    "direct_relative_residual_inf": 0.0906908660025376,
-    "direct_residual_inf_n": 1199.4612345738556,
+    "direct_relative_residual_inf": 0.05651210341217708,
+    "direct_residual_inf_n": 747.4190104793868,
     "dof_count": 78282,
     "free_dof_count": 58998,
     "load_scale": 1.0,
-    "max_translation_m": 6.135334128804857e-05,
+    "max_translation_m": 0.00024213115996014724,
     "path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
     "promotes_g1_closure": false,
     "residual_gate_n": 0.0005,
@@ -31,20 +31,20 @@
   "evidence_closure_pass": false,
   "full_load_true_newton_residual_descent_observed": true,
   "full_load_true_newton_residual_gate_passed": false,
-  "generated_at": "2026-07-04T11:13:11.189481+00:00",
+  "generated_at": "2026-07-04T15:13:51.596247+00:00",
   "initial_checkpoint_npz": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
   "initial_state": {
     "checkpoint": {
-      "accepted_iteration_count": 48,
-      "content_sha256": "sha256:3f535c060ea56ab5002edbb447106d250d940931baf80cd830ec04a4bdf51339",
-      "direct_residual_inf_n": 1276.8372378967738,
+      "accepted_iteration_count": 324,
+      "content_sha256": "sha256:05b2219ab2f3ad9d1ad56c86e8155ac6118728c0481dcd1dd47d093ec3fb1c23",
+      "direct_residual_inf_n": 771.4110742905287,
       "dof_count": 78282,
       "free_dof_count": 58998,
       "load_scale": 1.0,
       "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
       "schema": "mgt-direct-residual-newton-state.v1"
     },
-    "initial_iteration_count": 48,
+    "initial_iteration_count": 324,
     "source": "checkpoint"
   },
   "input_checksums": {
@@ -53,32 +53,36 @@
     "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py": "sha256:e5f293f9995f4660bbe58bde5f094502de615dc1e7ec8f6466dea6a86e7034ac",
     "implementation/phase1/run_g1_regularized_reference_newton_candidate.py": "sha256:49da44c26ece7744a70eb2095767fa08d9ea7e7732f100b8a6e50ed01c8675c9",
     "implementation/phase1/run_g1_true_newton_reference_candidate.py": "sha256:17c9d460fd8911b264cc0075cd25c591fbfa94143bd6f633daeca76e7a752fb2",
-    "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py": "sha256:d7d67b343dd5ff1fdce8adb913f26ae4d0a61d08e6178d8bc3eccaced018b9f8"
+    "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py": "sha256:205e8164278f8d8d3af706ad4013dd4c874034e4bd9ae833ed5b1c1534616cc2"
   },
-  "max_newton_steps": 12,
+  "max_newton_steps": 24,
   "next_actions": [
     "run_full_load_direct_residual_probe_against_true_newton_checkpoint_candidate",
     "run_hip_required_residual_jvp_probe_against_true_newton_checkpoint_candidate",
     "replace_candidate_with_gate_passing_checkpoint_after_residual_increment_material_hip_pass"
   ],
   "promotes_g1_closure": false,
+  "regularization": {
+    "mode": "relative_diagonal_shift",
+    "mu": 0.24
+  },
   "required_load_scale": 1.0,
   "residual_gate_n": 0.0005,
   "reuse_policy": "executes_true_newton_full_load_probe_and_writes_non_promoting_checkpoint_candidate",
   "reused_evidence": false,
   "schema_version": "g1-true-newton-full-load-checkpoint-candidate-status.v1",
-  "source_commit_sha": "d20c0ced6b8327ff0eb5aa858a7e7f49faa0981a",
+  "source_commit_sha": "7e55995966b73245f5cc5269f4d23ca14560c57c",
   "status": "candidate_created",
-  "summary_line": "G1 true-Newton full-load checkpoint candidate: CANDIDATE_CREATED | checkpoint_written=True | final_residual=1199.4612345738556 | residual_gate=False",
+  "summary_line": "G1 true-Newton full-load checkpoint candidate: CANDIDATE_CREATED | checkpoint_written=True | final_residual=747.4190104793868 | residual_gate=False",
   "true_newton_candidate": {
-    "final_residual_n": 1199.4612345738556,
-    "initial_residual_n": 1276.8372378967738,
+    "final_residual_n": 747.4190104793868,
+    "initial_residual_n": 771.4110742905287,
     "monotonic_residual_decrease": true,
     "reason_code": "max_steps",
     "residual_gate_passed": false,
     "status": "ready",
-    "steps": 12,
+    "steps": 24,
     "stop_reason": "max_steps",
-    "total_reduction_ratio": 0.06059973896937184
+    "total_reduction_ratio": 0.03110152888744515
   }
 }

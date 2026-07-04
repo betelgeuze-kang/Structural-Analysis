@@ -1127,6 +1127,163 @@ def test_hip_required_probe_separates_worker_path_from_consistent_newton_gate(
     )
 
 
+def test_hip_required_probe_accepts_row_promoted_hip_tangent_refresh(
+    monkeypatch,
+) -> None:
+    def build_direct_residual_assembler(**_kwargs):
+        raise AssertionError(
+            "HIP-required proof must not use the CPU diagnostic assembler"
+        )
+
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+    monkeypatch.setattr(probe_module, "_git_head", lambda: "fixture-commit")
+    monkeypatch.setattr(
+        probe_module,
+        "_rocm_hip_runtime_preflight",
+        lambda: {
+            "checked_at": "fixture-time",
+            "hip_available": True,
+            "torch_importable": True,
+            "torch_rocm_build": True,
+            "torch_hip_device_available": True,
+            "runtime_blockers": [],
+        },
+    )
+    monkeypatch.setattr(
+        probe_module,
+        "run_mgt_direct_residual_newton_probe",
+        lambda **_kwargs: {
+            "schema_version": "mgt-direct-residual-newton-probe.v1",
+            "source_commit_sha": "fixture-commit",
+            "reused_evidence": False,
+            "status": "partial",
+            "direct_residual_newton_ready": False,
+            "checkpoint": {"load_scale": 1.0},
+            "residual_contract": {
+                "hip_residual_engine_required": True,
+                "hip_residual_engine_contract_passed": True,
+                "hip_residual_engine_required_lane_count": 2,
+                "hip_residual_engine_passed_lane_count": 2,
+                "hip_residual_engine_backends": [
+                    "hip_full_residual",
+                    "hip_full_residual_resident",
+                ],
+                "hip_residual_engine_blockers": [],
+                "hip_residual_engine_rows": [
+                    {
+                        "component": "matrix_free_global_krylov",
+                        "active": True,
+                        "attempted": True,
+                        "promoted_to_final_state": False,
+                        "passed": True,
+                    },
+                    {
+                        "component": "current_tangent_residual_row_correction",
+                        "active": True,
+                        "attempted": True,
+                        "promoted_to_final_state": True,
+                        "passed": True,
+                    },
+                ],
+                "consistent_residual_jacobian_newton_blockers": [
+                    "consistent_residual_jacobian_newton_not_proven",
+                ],
+            },
+            "gate_assessment": {
+                "direct_residual_gate_passed": False,
+                "relative_increment_gate_passed": True,
+                "full_load_closure_passed": True,
+                "consistent_residual_jacobian_newton_passed": False,
+                "consistent_residual_jacobian_newton_blockers": [
+                    "consistent_residual_jacobian_newton_not_proven",
+                ],
+                "material_newton_breadth_passed": False,
+                "material_newton_breadth_blockers": [
+                    "material_newton_breadth_not_proven",
+                ],
+                "fallback_zero_passed": True,
+                "fallback_zero_audit": {
+                    "fallback_zero_boundary_count": 0,
+                    "fallback_zero_boundaries": [],
+                },
+            },
+            "matrix_free_global_krylov": {
+                "enabled": True,
+                "attempted": True,
+                "batch_replay_backend": "hip_full_residual_resident",
+                "require_hip_batch_replay": True,
+                "require_hip_krylov_solver": True,
+                "hip_krylov_solver_used": True,
+                "promoted_to_final_state": False,
+                "accepted_state_refresh_cpu_used": False,
+                "accepted_state_tangent_refresh_backend": "",
+                "accepted_state_tangent_refresh_cpu_used": False,
+                "accepted_state_tangent_refresh_hip_used": False,
+                "jvp_rows": [
+                    {
+                        "direction": "fixture_global_jvp",
+                        "hip_full_residual_batch_replay": True,
+                        "jacobian_action_inf_n": 1.0,
+                    }
+                ],
+            },
+            "current_tangent_residual_row_correction": {
+                "enabled": True,
+                "attempted": True,
+                "batch_replay_backend": "hip_full_residual",
+                "require_hip_batch_replay": True,
+                "promoted_to_final_state": True,
+                "accepted_state_refresh_cpu_used": False,
+                "accepted_state_tangent_refresh_cpu_used": False,
+                "accepted_state_tangent_refresh_backend": (
+                    "hip_finite_difference_residual_jvp"
+                ),
+                "accepted_state_tangent_refresh_hip_used": True,
+                "accepted_state_tangent_refresh_column_count": 2,
+            },
+            "blockers": [
+                "consistent_jacobian_or_globalization_required",
+                "direct_residual_gate_not_closed",
+            ],
+        },
+    )
+
+    payload = probe_module.run_mgt_residual_jacobian_consistency_probe(
+        output_json=None,
+        require_hip_residual_engine=True,
+    )
+
+    worker = payload["production_rocm_hip_residual_jvp_worker"]
+    assert worker["ready"] is False
+    assert worker["residual_jvp_worker_path_ready"] is True
+    assert worker["residual_jvp_worker_path_blockers"] == []
+    assert worker["g1_closure_gate_ready"] is False
+    assert worker["g1_closure_gate_blockers"] == [
+        "consistent_residual_jacobian_newton_gate_not_passed"
+    ]
+    assert worker["matrix_free_global_krylov"]["proof"][
+        "promoted_to_final_state"
+    ] is False
+    row_proof = worker["current_tangent_residual_row_correction"]["proof"]
+    assert row_proof["promoted_to_final_state"] is True
+    assert row_proof["accepted_state_tangent_refresh_hip_used"] is True
+    assert row_proof["accepted_state_tangent_refresh_cpu_used"] is False
+    assert (
+        "production_rocm_hip_residual_jvp_worker::"
+        "global_krylov_accepted_state_tangent_refresh_hip_not_proven"
+        not in payload["blockers"]
+    )
+    assert (
+        "production_rocm_hip_residual_jvp_worker::"
+        "consistent_residual_jacobian_newton_gate_not_passed"
+        in payload["blockers"]
+    )
+
+
 def test_hip_required_cli_does_not_pass_component_only_without_hip(
     monkeypatch,
     tmp_path,

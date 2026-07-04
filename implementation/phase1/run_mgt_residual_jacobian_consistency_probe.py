@@ -330,6 +330,9 @@ def _assess_hip_required_direct_probe_payload(
             "hip_krylov_solver_used": bool(
                 global_krylov.get("hip_krylov_solver_used")
             ),
+            "promoted_to_final_state": bool(
+                global_krylov.get("promoted_to_final_state")
+            ),
             "accepted_state_refresh_cpu_used": bool(
                 global_krylov.get("accepted_state_refresh_cpu_used")
             ),
@@ -387,6 +390,9 @@ def _assess_hip_required_direct_probe_payload(
             "accepted_state_tangent_refresh_column_count": int(
                 row_correction.get("accepted_state_tangent_refresh_column_count", 0)
                 or 0
+            ),
+            "promoted_to_final_state": bool(
+                row_correction.get("promoted_to_final_state")
             ),
         },
     }
@@ -497,6 +503,20 @@ def _hip_runtime_blocker_names(hip_preflight: dict[str, Any]) -> list[str]:
     return [item for item in runtime_blockers if isinstance(item, str) and item]
 
 
+def _hip_residual_engine_contract_row(
+    proof: dict[str, Any],
+    component: str,
+) -> dict[str, Any]:
+    contract = proof.get("hip_residual_engine_contract")
+    contract = contract if isinstance(contract, dict) else {}
+    rows = contract.get("rows")
+    rows = rows if isinstance(rows, list) else []
+    for row in rows:
+        if isinstance(row, dict) and row.get("component") == component:
+            return row
+    return {}
+
+
 def _production_rocm_hip_residual_jvp_worker_contract(
     *,
     source_commit_sha: str,
@@ -512,6 +532,12 @@ def _production_rocm_hip_residual_jvp_worker_contract(
     global_krylov = global_krylov if isinstance(global_krylov, dict) else {}
     row_correction = proof.get("current_tangent_residual_row_correction")
     row_correction = row_correction if isinstance(row_correction, dict) else {}
+    global_contract_row = _hip_residual_engine_contract_row(
+        proof, "matrix_free_global_krylov"
+    )
+    row_contract_row = _hip_residual_engine_contract_row(
+        proof, "current_tangent_residual_row_correction"
+    )
     runtime_blockers = _hip_runtime_blocker_names(hip_preflight)
 
     global_plan = {
@@ -563,6 +589,25 @@ def _production_rocm_hip_residual_jvp_worker_contract(
             ).startswith("hip")
         )
     )
+    global_promoted_to_final_state = bool(
+        global_krylov.get("promoted_to_final_state")
+        or global_contract_row.get("promoted_to_final_state")
+    )
+    row_promoted_to_final_state = bool(
+        row_correction.get("promoted_to_final_state")
+        or row_contract_row.get("promoted_to_final_state")
+    )
+    row_tangent_refresh_hip_proven = bool(
+        row_correction.get("accepted_state_tangent_refresh_hip_used")
+        and not row_correction.get("accepted_state_tangent_refresh_cpu_used")
+        and str(
+            row_correction.get("accepted_state_tangent_refresh_backend", "") or ""
+        ).startswith("hip")
+    )
+    accepted_state_tangent_refresh_hip_proven = bool(
+        global_tangent_refresh_hip_proven
+        or (row_promoted_to_final_state and row_tangent_refresh_hip_proven)
+    )
     blockers: list[str] = []
     if not bool(hip_preflight.get("hip_available")):
         blockers.append("rocm_hip_runtime_unavailable")
@@ -588,8 +633,15 @@ def _production_rocm_hip_residual_jvp_worker_contract(
         blockers.append("global_krylov_jvp_rows_not_retained")
     if global_krylov.get("hip_krylov_solver_used") is not True:
         blockers.append("global_krylov_hip_solver_not_proven")
-    if global_tangent_refresh_hip_proven is not True:
+    if accepted_state_tangent_refresh_hip_proven is not True:
         blockers.append("global_krylov_accepted_state_tangent_refresh_hip_not_proven")
+    if (
+        row_promoted_to_final_state
+        and row_tangent_refresh_hip_proven is not True
+    ):
+        blockers.append(
+            "current_tangent_residual_row_accepted_state_tangent_refresh_hip_not_proven"
+        )
     if global_krylov.get("accepted_state_tangent_refresh_cpu_used") is True:
         blockers.append("global_krylov_accepted_state_tangent_refresh_cpu_used")
     if row_plan["enabled"] is not True:
@@ -674,6 +726,7 @@ def _production_rocm_hip_residual_jvp_worker_contract(
                     )
                     or ""
                 ),
+                "promoted_to_final_state": global_promoted_to_final_state,
             },
         },
         "current_tangent_residual_row_correction": {
@@ -687,6 +740,18 @@ def _production_rocm_hip_residual_jvp_worker_contract(
                 "accepted_state_tangent_refresh_cpu_used": bool(
                     row_correction.get("accepted_state_tangent_refresh_cpu_used")
                 ),
+                "accepted_state_tangent_refresh_backend": str(
+                    row_correction.get("accepted_state_tangent_refresh_backend", "")
+                    or ""
+                ),
+                "accepted_state_tangent_refresh_hip_used": bool(
+                    row_correction.get("accepted_state_tangent_refresh_hip_used")
+                ),
+                "accepted_state_tangent_refresh_column_count": int(
+                    row_correction.get("accepted_state_tangent_refresh_column_count", 0)
+                    or 0
+                ),
+                "promoted_to_final_state": row_promoted_to_final_state,
             },
         },
         "claim_boundary": (
