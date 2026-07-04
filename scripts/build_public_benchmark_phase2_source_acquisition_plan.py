@@ -2113,6 +2113,420 @@ def _vina_gnina_rows_template_preflight_summary(repo_root: Path) -> dict[str, An
     }
 
 
+def _vina_gnina_actual_evidence_audit(
+    *,
+    phase2_row_audit_summary: dict[str, Any],
+    vina_gnina_execution_plan_summary: dict[str, Any],
+    vina_gnina_runtime_readiness_summary: dict[str, Any],
+    vina_gnina_rows_template_preflight_summary: dict[str, Any],
+    external_receipt_completion_audit: dict[str, Any],
+) -> dict[str, Any]:
+    runtime_unblock = _as_dict(
+        vina_gnina_runtime_readiness_summary.get("operator_unblock_packet")
+    )
+    input_manifest_preflight = _as_dict(
+        runtime_unblock.get("input_manifest_template_preflight_summary")
+    )
+    row_candidate_status = _as_dict(
+        vina_gnina_runtime_readiness_summary.get("row_candidate_status")
+    )
+    adapter_preflight = _as_dict(row_candidate_status.get("adapter_preflight"))
+    required_case_count = _as_int(vina_gnina_runtime_readiness_summary.get("case_count"))
+    required_engine_run_count = _as_int(
+        vina_gnina_runtime_readiness_summary.get("required_engine_run_count")
+    )
+    if required_engine_run_count == 0:
+        required_engine_run_count = _as_int(
+            vina_gnina_execution_plan_summary.get("required_engine_run_count")
+        )
+    minimum_comparison_case_count = 1
+    input_manifest_ready = (
+        bool(vina_gnina_execution_plan_summary.get("input_manifest_detected"))
+        and _as_int(vina_gnina_execution_plan_summary.get("input_manifest_row_count"))
+        >= required_case_count
+        and _as_int(
+            vina_gnina_runtime_readiness_summary.get("blocked_case_input_slot_count")
+        )
+        == 0
+    )
+    runtime_ready = bool(
+        vina_gnina_runtime_readiness_summary.get(
+            "runtime_ready_for_engine_execution"
+        )
+    )
+    engine_slots_ready = (
+        required_engine_run_count > 0
+        and _as_int(
+            vina_gnina_runtime_readiness_summary.get("ready_engine_run_slot_count")
+        )
+        >= required_engine_run_count
+        and _as_int(
+            vina_gnina_runtime_readiness_summary.get("blocked_engine_run_slot_count")
+        )
+        == 0
+    )
+    adapter_rows_ready = (
+        bool(vina_gnina_runtime_readiness_summary.get("adapter_rows_ready"))
+        and _as_int(vina_gnina_runtime_readiness_summary.get("adapter_case_count"))
+        >= minimum_comparison_case_count
+        and bool(adapter_preflight.get("contract_pass"))
+    )
+    row_receipts_ready = (
+        bool(vina_gnina_rows_template_preflight_summary.get("expected_rows_detected"))
+        and bool(
+            vina_gnina_rows_template_preflight_summary.get("adapter_template_ready")
+        )
+        and _as_int(
+            vina_gnina_rows_template_preflight_summary.get(
+                "role_receipt_blocked_count"
+            )
+        )
+        == 0
+    )
+    external_receipts_ready = bool(
+        external_receipt_completion_audit.get("all_expected_artifact_roles_complete")
+    )
+    missing_row_inputs = [
+        str(row)
+        for row in phase2_row_audit_summary.get("missing_row_inputs", [])
+        if str(row)
+    ]
+    external_receipt_blockers = [
+        str(blocker)
+        for blocker in external_receipt_completion_audit.get(
+            "remaining_blockers", []
+        )
+        if str(blocker)
+    ]
+    components = [
+        {
+            "component_id": "engine_input_manifest",
+            "status": "ready" if input_manifest_ready else "blocked",
+            "pass": input_manifest_ready,
+            "current": {
+                "input_manifest_status": str(
+                    vina_gnina_execution_plan_summary.get("input_manifest_status")
+                    or ""
+                ),
+                "input_manifest_detected": bool(
+                    vina_gnina_execution_plan_summary.get(
+                        "input_manifest_detected"
+                    )
+                ),
+                "input_manifest_row_count": _as_int(
+                    vina_gnina_execution_plan_summary.get(
+                        "input_manifest_row_count"
+                    )
+                ),
+                "required_case_count": required_case_count,
+                "blocked_case_input_slot_count": _as_int(
+                    vina_gnina_runtime_readiness_summary.get(
+                        "blocked_case_input_slot_count"
+                    )
+                ),
+                "template_preflight_status": str(
+                    input_manifest_preflight.get("status") or ""
+                ),
+                "template_manifest_ready": bool(
+                    input_manifest_preflight.get("manifest_ready")
+                ),
+                "template_missing_local_file_count": _as_int(
+                    input_manifest_preflight.get("missing_local_file_count")
+                ),
+                "template_missing_receipt_ref_count": _as_int(
+                    input_manifest_preflight.get("missing_receipt_ref_count")
+                ),
+            },
+            "required": {
+                "input_manifest_detected": True,
+                "input_manifest_row_count": f">={required_case_count}",
+                "blocked_case_input_slot_count": 0,
+            },
+            "blockers": list(
+                dict.fromkeys(
+                    [
+                        *[
+                            str(row)
+                            for row in vina_gnina_execution_plan_summary.get(
+                                "input_manifest_blockers", []
+                            )
+                            if str(row)
+                        ],
+                        *(
+                            ["public_benchmark_vina_gnina_case_inputs_incomplete"]
+                            if not input_manifest_ready
+                            else []
+                        ),
+                    ]
+                )
+            ),
+        },
+        {
+            "component_id": "engine_runtime",
+            "status": "ready" if runtime_ready else "blocked",
+            "pass": runtime_ready,
+            "current": {
+                "runtime_status": str(
+                    vina_gnina_runtime_readiness_summary.get("status") or ""
+                ),
+                "runtime_ready_for_engine_execution": runtime_ready,
+                "available_engine_count": _as_int(
+                    vina_gnina_runtime_readiness_summary.get(
+                        "available_engine_count"
+                    )
+                ),
+                "missing_engine_count": _as_int(
+                    vina_gnina_runtime_readiness_summary.get("missing_engine_count")
+                ),
+                "missing_engine_ids": [
+                    str(row)
+                    for row in vina_gnina_runtime_readiness_summary.get(
+                        "missing_engine_ids", []
+                    )
+                    if str(row)
+                ],
+            },
+            "required": {
+                "runtime_ready_for_engine_execution": True,
+                "missing_engine_count": 0,
+            },
+            "blockers": [
+                str(row)
+                for row in vina_gnina_runtime_readiness_summary.get("blockers", [])
+                if "::" not in str(row)
+                and (
+                    str(row).endswith("_binary_missing")
+                    or "container_image" in str(row)
+                    or str(row) == "vina_gnina_execution_plan_not_ready"
+                )
+            ],
+        },
+        {
+            "component_id": "engine_run_slots",
+            "status": "ready" if engine_slots_ready else "blocked",
+            "pass": engine_slots_ready,
+            "current": {
+                "ready_engine_run_slot_count": _as_int(
+                    vina_gnina_runtime_readiness_summary.get(
+                        "ready_engine_run_slot_count"
+                    )
+                ),
+                "required_engine_run_count": required_engine_run_count,
+                "blocked_engine_run_slot_count": _as_int(
+                    vina_gnina_runtime_readiness_summary.get(
+                        "blocked_engine_run_slot_count"
+                    )
+                ),
+            },
+            "required": {
+                "ready_engine_run_slot_count": required_engine_run_count,
+                "blocked_engine_run_slot_count": 0,
+            },
+            "blockers": (
+                []
+                if engine_slots_ready
+                else ["public_benchmark_vina_gnina_engine_run_slots_incomplete"]
+            ),
+        },
+        {
+            "component_id": "adapter_rows",
+            "status": "ready" if adapter_rows_ready else "blocked",
+            "pass": adapter_rows_ready,
+            "current": {
+                "row_candidate_status": str(row_candidate_status.get("status") or ""),
+                "detected_row_artifact_count": _as_int(
+                    row_candidate_status.get("detected_row_artifact_count")
+                ),
+                "selected_row_count": _as_int(
+                    row_candidate_status.get("selected_row_count")
+                ),
+                "adapter_case_count": _as_int(
+                    vina_gnina_runtime_readiness_summary.get("adapter_case_count")
+                ),
+                "adapter_rows_ready": bool(
+                    vina_gnina_runtime_readiness_summary.get("adapter_rows_ready")
+                ),
+                "adapter_preflight_status": str(
+                    adapter_preflight.get("status") or ""
+                ),
+                "adapter_preflight_contract_pass": bool(
+                    adapter_preflight.get("contract_pass")
+                ),
+            },
+            "required": {
+                "detected_row_artifact_count": ">=1",
+                "adapter_case_count": f">={minimum_comparison_case_count}",
+                "adapter_preflight_contract_pass": True,
+            },
+            "blockers": list(
+                dict.fromkeys(
+                    [
+                        str(row_candidate_status.get("blocker") or ""),
+                        *[
+                            str(row)
+                            for row in adapter_preflight.get("blockers", [])
+                            if str(row)
+                        ],
+                        *(
+                            ["vina_gnina_rows_not_provided"]
+                            if "vina_gnina_rows" in missing_row_inputs
+                            else []
+                        ),
+                    ]
+                )
+            ),
+        },
+        {
+            "component_id": "per_engine_run_receipts",
+            "status": "ready" if row_receipts_ready else "blocked",
+            "pass": row_receipts_ready,
+            "current": {
+                "rows_template_preflight_status": str(
+                    vina_gnina_rows_template_preflight_summary.get("status") or ""
+                ),
+                "expected_rows_detected": bool(
+                    vina_gnina_rows_template_preflight_summary.get(
+                        "expected_rows_detected"
+                    )
+                ),
+                "adapter_template_ready": bool(
+                    vina_gnina_rows_template_preflight_summary.get(
+                        "adapter_template_ready"
+                    )
+                ),
+                "role_receipt_plan_count": _as_int(
+                    vina_gnina_rows_template_preflight_summary.get(
+                        "role_receipt_plan_count"
+                    )
+                ),
+                "role_receipt_blocked_count": _as_int(
+                    vina_gnina_rows_template_preflight_summary.get(
+                        "role_receipt_blocked_count"
+                    )
+                ),
+                "missing_engine_run_receipt_value_count": _as_int(
+                    vina_gnina_rows_template_preflight_summary.get(
+                        "missing_engine_run_receipt_value_count"
+                    )
+                ),
+            },
+            "required": {
+                "expected_rows_detected": True,
+                "adapter_template_ready": True,
+                "role_receipt_blocked_count": 0,
+            },
+            "blockers": (
+                []
+                if row_receipts_ready
+                else ["public_benchmark_vina_gnina_engine_run_receipts_incomplete"]
+            ),
+        },
+        {
+            "component_id": "external_receipts",
+            "status": "ready" if external_receipts_ready else "blocked",
+            "pass": external_receipts_ready,
+            "current": {
+                "external_receipt_completion_status": str(
+                    external_receipt_completion_audit.get("status") or ""
+                ),
+                "all_expected_artifact_roles_complete": external_receipts_ready,
+                "missing_expected_artifact_roles": [
+                    str(role)
+                    for role in external_receipt_completion_audit.get(
+                        "missing_expected_artifact_roles", []
+                    )
+                    if str(role)
+                ],
+                "blocked_official_receipt_role_count": _as_int(
+                    external_receipt_completion_audit.get(
+                        "blocked_official_receipt_role_count"
+                    )
+                ),
+            },
+            "required": {
+                "all_expected_artifact_roles_complete": True,
+                "blocked_official_receipt_role_count": 0,
+            },
+            "blockers": external_receipt_blockers,
+        },
+    ]
+    components = [
+        {
+            **row,
+            "blockers": list(
+                dict.fromkeys(
+                    str(blocker)
+                    for blocker in row.get("blockers", [])
+                    if str(blocker)
+                )
+            ),
+        }
+        for row in components
+    ]
+    blocked_components = [row for row in components if not bool(row["pass"])]
+    if not blocked_components:
+        status = "ready"
+    elif not input_manifest_ready:
+        status = "engine_input_manifest_required"
+    elif not runtime_ready:
+        status = "engine_runtime_required"
+    elif not adapter_rows_ready:
+        status = "adapter_rows_required"
+    elif not row_receipts_ready or not external_receipts_ready:
+        status = "external_receipts_required"
+    else:
+        status = "operator_evidence_required"
+    remaining_blockers = list(
+        dict.fromkeys(
+            str(blocker)
+            for row in blocked_components
+            for blocker in row.get("blockers", [])
+            if str(blocker)
+        )
+    )
+    return {
+        "status": status,
+        "pass": not blocked_components,
+        "actual_closure_ready": not blocked_components,
+        "component_count": len(components),
+        "ready_component_count": len(components) - len(blocked_components),
+        "blocked_component_count": len(blocked_components),
+        "blocked_component_ids": [
+            str(row["component_id"]) for row in blocked_components
+        ],
+        "remaining_blockers": remaining_blockers,
+        "remaining_evidence": [
+            str(row["component_id"]) for row in blocked_components
+        ],
+        "required_case_count": required_case_count,
+        "required_engine_run_count": required_engine_run_count,
+        "minimum_comparison_case_count": minimum_comparison_case_count,
+        "first_blocked_case_input_slot": _as_dict(
+            vina_gnina_runtime_readiness_summary.get("operator_unblock_packet")
+        ).get("first_blocked_case_input_slot")
+        or _as_dict(
+            vina_gnina_runtime_readiness_summary.get("first_blocked_case_input_slot")
+        ),
+        "first_blocked_engine_run_slot": _as_dict(
+            vina_gnina_runtime_readiness_summary.get("operator_unblock_packet")
+        ).get("first_blocked_engine_run_slot")
+        or _as_dict(
+            vina_gnina_runtime_readiness_summary.get("first_blocked_engine_run_slot")
+        ),
+        "first_blocked_role_receipt": _as_dict(
+            vina_gnina_rows_template_preflight_summary.get(
+                "first_blocked_role_receipt"
+            )
+        ),
+        "components": components,
+        "claim_boundary": (
+            "This audit summarizes actual Vina/GNINA Phase 2 closure evidence. "
+            "It does not run docking engines, fill manifests, synthesize adapter "
+            "rows, or replace external source receipts."
+        ),
+    }
+
+
 def _missing_row_input_actions(
     *,
     missing_row_inputs: list[str],
@@ -2548,6 +2962,15 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             vina_gnina_runtime_readiness_summary
         ),
     )
+    vina_gnina_actual_evidence_audit = _vina_gnina_actual_evidence_audit(
+        phase2_row_audit_summary=phase2_row_audit_summary,
+        vina_gnina_execution_plan_summary=vina_gnina_execution_plan_summary,
+        vina_gnina_runtime_readiness_summary=vina_gnina_runtime_readiness_summary,
+        vina_gnina_rows_template_preflight_summary=(
+            vina_gnina_rows_template_preflight_summary
+        ),
+        external_receipt_completion_audit=external_receipt_completion_audit,
+    )
     operator_next_actions = [
         "review_official_source_receipt_plan",
         "attach_casf_pdbbind_subset_rows_with_local_file_checksums",
@@ -2621,6 +3044,7 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         "phase2_harness_completion_audit": phase2_harness_completion_audit,
         "phase2_row_closure_matrix": phase2_row_closure_matrix,
         "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
+        "vina_gnina_actual_evidence_audit": vina_gnina_actual_evidence_audit,
         "vina_gnina_execution_plan": vina_gnina_execution_plan_summary,
         "vina_gnina_runtime_readiness": vina_gnina_runtime_readiness_summary,
         "vina_gnina_rows_template_preflight_summary": (
@@ -2760,6 +3184,18 @@ def build_public_benchmark_phase2_source_acquisition_plan(
                 phase2_row_audit_summary["source_actuality_blocker_count"]
             ),
             "missing_row_input_action_count": len(missing_row_input_actions),
+            "vina_gnina_actual_evidence_audit_status": (
+                vina_gnina_actual_evidence_audit["status"]
+            ),
+            "vina_gnina_actual_evidence_ready_component_count": (
+                vina_gnina_actual_evidence_audit["ready_component_count"]
+            ),
+            "vina_gnina_actual_evidence_blocked_component_count": (
+                vina_gnina_actual_evidence_audit["blocked_component_count"]
+            ),
+            "vina_gnina_actual_evidence_required_engine_run_count": (
+                vina_gnina_actual_evidence_audit["required_engine_run_count"]
+            ),
             "vina_gnina_execution_plan_status": vina_gnina_execution_plan_summary[
                 "status"
             ],
@@ -2908,6 +3344,10 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"{payload['phase2_harness_completion_audit']['harness_contract_complete_except_vina_gnina_actual_rows']}"
         "`",
         f"- `missing_row_input_action_count`: `{payload['missing_row_input_action_count']}`",
+        "- `vina_gnina_actual_evidence_audit_status`: "
+        f"`{payload['vina_gnina_actual_evidence_audit']['status']}`",
+        "- `vina_gnina_actual_evidence_blocked_component_count`: "
+        f"`{payload['vina_gnina_actual_evidence_audit']['blocked_component_count']}`",
         f"- `vina_gnina_execution_plan`: `{payload['vina_gnina_execution_plan']['artifact']}`",
         f"- `vina_gnina_execution_plan_status`: `{payload['vina_gnina_execution_plan']['status']}`",
         f"- `vina_gnina_required_engine_run_count`: `{payload['vina_gnina_execution_plan']['required_engine_run_count']}`",
@@ -3070,6 +3510,55 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                 f"`{row.get('pass')}` | "
                 f"{row_inputs or '`none`'} | "
                 f"{blockers or '`none`'} |"
+            )
+    vina_gnina_actual_audit = _as_dict(
+        payload.get("vina_gnina_actual_evidence_audit")
+    )
+    vina_gnina_actual_components = [
+        row
+        for row in vina_gnina_actual_audit.get("components", [])
+        if isinstance(row, dict)
+    ] if isinstance(vina_gnina_actual_audit.get("components"), list) else []
+    if vina_gnina_actual_audit:
+        lines.extend(
+            [
+                "",
+                "## Vina/GNINA Actual Evidence Audit",
+                "",
+                f"- `status`: `{vina_gnina_actual_audit.get('status')}`",
+                "- `actual_closure_ready`: "
+                f"`{vina_gnina_actual_audit.get('actual_closure_ready')}`",
+                "- `ready_component_count`: "
+                f"`{vina_gnina_actual_audit.get('ready_component_count')}`",
+                "- `blocked_component_count`: "
+                f"`{vina_gnina_actual_audit.get('blocked_component_count')}`",
+                "- `remaining_evidence`: "
+                f"`{', '.join(vina_gnina_actual_audit.get('remaining_evidence', []))}`",
+                "",
+                "| Component | Status | Pass | Current | Required | Blockers |",
+                "|---|---|---|---|---|---|",
+            ]
+        )
+        for row in vina_gnina_actual_components:
+            current = json.dumps(
+                _as_dict(row.get("current")),
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+            required = json.dumps(
+                _as_dict(row.get("required")),
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+            blockers = ", ".join(
+                f"`{blocker}`"
+                for blocker in row.get("blockers", [])
+                if str(blocker)
+            )
+            lines.append(
+                f"| `{row.get('component_id', '')}` | "
+                f"`{row.get('status', '')}` | `{row.get('pass')}` | "
+                f"`{current}` | `{required}` | {blockers or '`none`'} |"
             )
     lines.extend(
         [

@@ -362,17 +362,17 @@
     ],
     "status": "operator_receipts_required"
   },
-  "generated_at": "2026-07-04T05:40:35.641814+00:00",
+  "generated_at": "2026-07-04T06:06:12.713233+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json": "sha256:e8f6054b62035675070a6d3f7ba3462da86062f29c15e5ce696c50c75a9fae1a",
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:ec57a35c927f8a52dc4926b6fd6d3884c889a5247b64ba3c1c95c6a53d89f183",
-    "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json": "sha256:5c0a4687145ea8322eedf7be604503a083eaa19402594bad1847cf3a4f740311",
+    "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json": "sha256:fb432b5dbd35a0ff8b74362392ace31104966e2005843b6bed58066088e006e9",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:54e4023c2a9e45ed011cd780499f6aca1cfbee084a1e29e683e9ed8f3b17fa98",
+    "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json": "sha256:3b243067678510790ee714a5927a6967f9dd9971726b9580ca905d4d5e6712ce",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json": "sha256:2ddba4e6302a1c9eafe7fa2a10828923d69994295ee9e027353447445e34408a",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:d91bbc8402c86796ce3d60d0a053610cceea2dcbbb0f5faf00adeaad7698bea4",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv": "sha256:3a106d2aa9f456eee7238523bf090db13e35d98afefa3952352a660f5b5e36ae",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json": "sha256:029bfc660060a50fe54ed88fa29dd99dd623967a80f36e772f969d82bc40428d",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:c3382754f0caec3c66af44c9542f3cf9d98c498a4577c7d4bb49fa1252c456f9",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:ac190bfed70aa7dbf0319fa448d225944637c262dec433b3cc123c4753bd0847",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:ad1c4b6973ce2dbe5acb20c79ccc9570a7f439e4b7a876e2fe4898e7a73e939d",
     "scripts/build_public_benchmark_source_access_preflight_receipt.py": "sha256:47b23a61ea7eb470f8ab4b48337b4382ad3523a646b81c8bdddedf3451d1c2d1",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1",
     "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:69b0ce594558bad457b052be33865b0abf90e8b4779dc31ff3a987b1eea7ef72",
@@ -2238,7 +2238,7 @@
     "source_access_ready": true,
     "status": "reachable"
   },
-  "source_commit_sha": "f120648bc76e8380b38532b7baa1ea74ac444f98",
+  "source_commit_sha": "afd233b47af7113eba7b664e6a4b03d5d93b06ec",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
@@ -2292,6 +2292,10 @@
     "source_access_preflight_reachable_count": 6,
     "source_access_preflight_receipt_ready": true,
     "source_access_preflight_receipt_status": "reachable",
+    "vina_gnina_actual_evidence_audit_status": "engine_input_manifest_required",
+    "vina_gnina_actual_evidence_blocked_component_count": 6,
+    "vina_gnina_actual_evidence_ready_component_count": 0,
+    "vina_gnina_actual_evidence_required_engine_run_count": 24,
     "vina_gnina_execution_plan_ready": false,
     "vina_gnina_execution_plan_status": "engine_input_blocked",
     "vina_gnina_input_manifest_detected": false,
@@ -2317,6 +2321,281 @@
     "vina_gnina_runtime_readiness_status": "execution_plan_blocked",
     "vina_gnina_runtime_ready_engine_run_slot_count": 0,
     "vina_gnina_runtime_ready_for_engine_execution": false
+  },
+  "vina_gnina_actual_evidence_audit": {
+    "actual_closure_ready": false,
+    "blocked_component_count": 6,
+    "blocked_component_ids": [
+      "engine_input_manifest",
+      "engine_runtime",
+      "engine_run_slots",
+      "adapter_rows",
+      "per_engine_run_receipts",
+      "external_receipts"
+    ],
+    "claim_boundary": "This audit summarizes actual Vina/GNINA Phase 2 closure evidence. It does not run docking engines, fill manifests, synthesize adapter rows, or replace external source receipts.",
+    "component_count": 6,
+    "components": [
+      {
+        "blockers": [
+          "public_benchmark_vina_gnina_input_manifest_not_detected",
+          "public_benchmark_vina_gnina_case_inputs_incomplete"
+        ],
+        "component_id": "engine_input_manifest",
+        "current": {
+          "blocked_case_input_slot_count": 12,
+          "input_manifest_detected": false,
+          "input_manifest_row_count": 0,
+          "input_manifest_status": "not_detected",
+          "required_case_count": 12,
+          "template_manifest_ready": false,
+          "template_missing_local_file_count": 48,
+          "template_missing_receipt_ref_count": 60,
+          "template_preflight_status": "operator_manifest_completion_required"
+        },
+        "pass": false,
+        "required": {
+          "blocked_case_input_slot_count": 0,
+          "input_manifest_detected": true,
+          "input_manifest_row_count": ">=12"
+        },
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "vina_gnina_execution_plan_not_ready",
+          "vina_binary_missing",
+          "gnina_binary_missing"
+        ],
+        "component_id": "engine_runtime",
+        "current": {
+          "available_engine_count": 0,
+          "missing_engine_count": 2,
+          "missing_engine_ids": [
+            "vina",
+            "gnina"
+          ],
+          "runtime_ready_for_engine_execution": false,
+          "runtime_status": "execution_plan_blocked"
+        },
+        "pass": false,
+        "required": {
+          "missing_engine_count": 0,
+          "runtime_ready_for_engine_execution": true
+        },
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "public_benchmark_vina_gnina_engine_run_slots_incomplete"
+        ],
+        "component_id": "engine_run_slots",
+        "current": {
+          "blocked_engine_run_slot_count": 24,
+          "ready_engine_run_slot_count": 0,
+          "required_engine_run_count": 24
+        },
+        "pass": false,
+        "required": {
+          "blocked_engine_run_slot_count": 0,
+          "ready_engine_run_slot_count": 24
+        },
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "public_benchmark_vina_gnina_rows_not_detected",
+          "vina_gnina_rows_not_provided"
+        ],
+        "component_id": "adapter_rows",
+        "current": {
+          "adapter_case_count": 0,
+          "adapter_preflight_contract_pass": false,
+          "adapter_preflight_status": "missing",
+          "adapter_rows_ready": false,
+          "detected_row_artifact_count": 0,
+          "row_candidate_status": "row_artifact_missing",
+          "selected_row_count": 0
+        },
+        "pass": false,
+        "required": {
+          "adapter_case_count": ">=1",
+          "adapter_preflight_contract_pass": true,
+          "detected_row_artifact_count": ">=1"
+        },
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "public_benchmark_vina_gnina_engine_run_receipts_incomplete"
+        ],
+        "component_id": "per_engine_run_receipts",
+        "current": {
+          "adapter_template_ready": false,
+          "expected_rows_detected": false,
+          "missing_engine_run_receipt_value_count": 72,
+          "role_receipt_blocked_count": 72,
+          "role_receipt_plan_count": 96,
+          "rows_template_preflight_status": "operator_rows_completion_required"
+        },
+        "pass": false,
+        "required": {
+          "adapter_template_ready": true,
+          "expected_rows_detected": true,
+          "role_receipt_blocked_count": 0
+        },
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "vina_gnina_rows_not_provided",
+          "public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter",
+          "public_benchmark_vina_gnina_input_manifest_not_detected",
+          "public_benchmark_vina_gnina_engine_runtime_not_ready"
+        ],
+        "component_id": "external_receipts",
+        "current": {
+          "all_expected_artifact_roles_complete": false,
+          "blocked_official_receipt_role_count": 1,
+          "external_receipt_completion_status": "blocked_pending_vina_gnina_receipts",
+          "missing_expected_artifact_roles": [
+            "vina_gnina_comparison_adapter"
+          ]
+        },
+        "pass": false,
+        "required": {
+          "all_expected_artifact_roles_complete": true,
+          "blocked_official_receipt_role_count": 0
+        },
+        "status": "blocked"
+      }
+    ],
+    "first_blocked_case_input_slot": {
+      "blockers": [
+        "protein_structure_path_missing",
+        "reference_ligand_path_missing",
+        "prepared_receptor_path_missing",
+        "prepared_ligand_path_missing"
+      ],
+      "case_id": "casf2016_4llx",
+      "case_inputs_ready": false,
+      "complex_id": "4llx",
+      "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+      "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_4llx",
+      "status": "blocked"
+    },
+    "first_blocked_engine_run_slot": {
+      "blockers": [
+        "protein_structure_path_missing",
+        "reference_ligand_path_missing",
+        "prepared_receptor_path_missing",
+        "prepared_ligand_path_missing",
+        "vina_binary_missing"
+      ],
+      "case_blockers": [
+        "protein_structure_path_missing",
+        "reference_ligand_path_missing",
+        "prepared_receptor_path_missing",
+        "prepared_ligand_path_missing"
+      ],
+      "case_id": "casf2016_4llx",
+      "case_inputs_ready": false,
+      "command_template": "<vina> --receptor <prepared/4llx_receptor> --ligand <prepared/4llx_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+      "complex_id": "4llx",
+      "docking_box_ready": true,
+      "docking_run_id": "casf2016_4llx_vina_run",
+      "engine_available": false,
+      "engine_command_prefix": "",
+      "engine_container_image": "",
+      "engine_executable": "",
+      "engine_execution_source": "",
+      "engine_id": "vina",
+      "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+      "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+      "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+      "required_adapter_case_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "engine_runs",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "required_adapter_engine_run_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_version",
+        "engine_config_checksum",
+        "engine_run_provenance_ref",
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "status": "blocked"
+    },
+    "first_blocked_role_receipt": {
+      "blockers": [
+        "required_role_fields_missing",
+        "required_role_fields_invalid"
+      ],
+      "case_id": "casf2016_4llx",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "docking_run_id": "casf2016_4llx_vina_run",
+      "engine_id": "vina",
+      "invalid_fields": [
+        "engine_run_provenance_ref",
+        "predicted_ligand_path_or_pose_ref"
+      ],
+      "missing_fields": [
+        "predicted_ligand_checksum"
+      ],
+      "operator_action": "attach_vina_gnina_engine_run_artifact_receipt",
+      "required_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_run_provenance_ref"
+      ],
+      "role_id": "engine_run_artifact_receipt",
+      "slot_id": "casf2016_4llx_vina_casf2016_4llx_vina_run",
+      "status": "operator_completion_required"
+    },
+    "minimum_comparison_case_count": 1,
+    "pass": false,
+    "ready_component_count": 0,
+    "remaining_blockers": [
+      "public_benchmark_vina_gnina_input_manifest_not_detected",
+      "public_benchmark_vina_gnina_case_inputs_incomplete",
+      "vina_gnina_execution_plan_not_ready",
+      "vina_binary_missing",
+      "gnina_binary_missing",
+      "public_benchmark_vina_gnina_engine_run_slots_incomplete",
+      "public_benchmark_vina_gnina_rows_not_detected",
+      "vina_gnina_rows_not_provided",
+      "public_benchmark_vina_gnina_engine_run_receipts_incomplete",
+      "public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter",
+      "public_benchmark_vina_gnina_engine_runtime_not_ready"
+    ],
+    "remaining_evidence": [
+      "engine_input_manifest",
+      "engine_runtime",
+      "engine_run_slots",
+      "adapter_rows",
+      "per_engine_run_receipts",
+      "external_receipts"
+    ],
+    "required_case_count": 12,
+    "required_engine_run_count": 24,
+    "status": "engine_input_manifest_required"
   },
   "vina_gnina_execution_plan": {
     "adapter_rows_ready": false,
