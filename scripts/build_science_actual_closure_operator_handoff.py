@@ -114,6 +114,16 @@ def _as_int(value: Any) -> int:
         return 0
 
 
+def _dedupe(values: list[str]) -> list[str]:
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for value in values:
+        if value and value not in seen:
+            seen.add(value)
+            deduped.append(value)
+    return deduped
+
+
 def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
     resolved = path if path.is_absolute() else repo_root / path
     if not resolved.exists():
@@ -1395,22 +1405,48 @@ def _blocked_component_operator_actions(
             }
             for slot in component_slots
         ]
+        operator_actions = _dedupe(
+            [str(slot.get("operator_action") or "") for slot in component_slots]
+        )
+        source_acquisition_operator_actions = sorted(
+            {
+                str(slot.get("source_acquisition_operator_action") or "")
+                for slot in component_slots
+                if str(slot.get("source_acquisition_operator_action") or "")
+            }
+        )
+        upstream_source_blockers = _dedupe(
+            [
+                str(blocker)
+                for slot in component_slots
+                for blocker in _as_list(slot.get("upstream_source_blockers"))
+            ]
+        )
+        operator_blockers_if_missing = _dedupe(
+            [
+                str(blocker)
+                for slot in component_slots
+                for blocker in _as_list(slot.get("operator_blockers_if_missing"))
+            ]
+        )
+        first_action = missing_row_input_actions[0] if missing_row_input_actions else {}
         rows.append(
             {
                 "component_id": str(summary.get("component_id") or ""),
                 "missing_row_input_ids": missing_ids,
-                "operator_actions": [
-                    str(slot.get("operator_action") or "") for slot in component_slots
-                ],
+                "operator_action": str(first_action.get("operator_action") or ""),
+                "operator_actions": operator_actions,
                 "missing_row_input_actions": missing_row_input_actions,
                 "missing_row_input_action_count": len(missing_row_input_actions),
-                "source_acquisition_operator_actions": sorted(
-                    {
-                        str(slot.get("source_acquisition_operator_action") or "")
-                        for slot in component_slots
-                        if str(slot.get("source_acquisition_operator_action") or "")
-                    }
+                "first_missing_row_input_action": first_action,
+                "source_acquisition_operator_action": str(
+                    first_action.get("source_acquisition_operator_action") or ""
                 ),
+                "source_acquisition_operator_actions": (
+                    source_acquisition_operator_actions
+                ),
+                "upstream_source_blockers": upstream_source_blockers,
+                "operator_blockers_if_missing": operator_blockers_if_missing,
                 "closes_actual_closure_criteria": [
                     str(item)
                     for item in _as_list(
