@@ -373,6 +373,12 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "source_access_preflight_rows"
     ][0]["source_id"] == "pdbbind_plus_casf"
     assert vina_gnina["upstream_source_acquisition"][
+        "source_access_preflight_receipt_artifact"
+    ].endswith("public_benchmark_source_access_preflight_receipt.json")
+    assert vina_gnina["upstream_source_acquisition"][
+        "source_access_network_probe_command"
+    ].endswith("--probe-network")
+    assert vina_gnina["upstream_source_acquisition"][
         "vina_gnina_case_input_slot_matrix_count"
     ] == 12
     assert vina_gnina["upstream_source_acquisition"][

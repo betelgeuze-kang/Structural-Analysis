@@ -234,6 +234,18 @@ def _slot_source_context(
             or len(source_access_preflight_rows)
         ),
         "source_access_preflight_rows": source_access_preflight_rows,
+        "source_access_preflight_receipt_artifact": str(
+            source.get("source_access_preflight_receipt_artifact") or ""
+        ),
+        "source_access_preflight_receipt_markdown_artifact": str(
+            source.get("source_access_preflight_receipt_markdown_artifact") or ""
+        ),
+        "source_access_preflight_receipt_command": str(
+            source.get("source_access_preflight_receipt_command") or ""
+        ),
+        "source_access_network_probe_command": str(
+            source.get("source_access_network_probe_command") or ""
+        ),
         "phase4_candidate_slot_matrix_count": int(
             source.get("phase4_candidate_slot_matrix_count")
             or len(phase4_candidate_slot_matrix)
@@ -1378,6 +1390,31 @@ def _markdown(payload: dict[str, Any]) -> str:
         ]
         if source_access_preflight_rows:
             lines.extend(["", "### Public Benchmark Source Access Preflight", ""])
+            receipt_artifact = str(
+                public_source_context.get(
+                    "source_access_preflight_receipt_artifact"
+                )
+                or ""
+            )
+            receipt_command = str(
+                public_source_context.get(
+                    "source_access_preflight_receipt_command"
+                )
+                or ""
+            )
+            network_probe_command = str(
+                public_source_context.get("source_access_network_probe_command")
+                or ""
+            )
+            if receipt_artifact or receipt_command or network_probe_command:
+                lines.extend(
+                    [
+                        f"- `receipt_artifact`: `{receipt_artifact}`",
+                        f"- `receipt_command`: `{receipt_command}`",
+                        f"- `network_probe_command`: `{network_probe_command}`",
+                        "",
+                    ]
+                )
             lines.extend(
                 [
                     "| Source | Access Mode | Primary Probe |",

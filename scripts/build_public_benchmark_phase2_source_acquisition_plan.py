@@ -73,6 +73,12 @@ DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE = (
 DEFAULT_VINA_GNINA_INPUT_MANIFEST = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_input_manifest.csv"
 )
+DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT = (
+    PRODUCTIZATION / "public_benchmark_source_access_preflight_receipt.json"
+)
+DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT_MD = (
+    DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT.with_suffix(".md")
+)
 
 SCHEMA_VERSION = "public-benchmark-phase2-source-acquisition-plan.v1"
 TIER_BETA_MINIMUM_SUBSET_CASE_COUNT = 12
@@ -1240,6 +1246,11 @@ def _official_source_receipt_plan(
     receipt_rows = _official_source_receipt_rows(row_input_contracts)
     source_catalog = [dict(row) for row in OFFICIAL_SOURCE_CATALOG]
     source_access_preflight_rows = _source_access_preflight_rows(source_catalog)
+    source_access_preflight_receipt_command = (
+        "python3 scripts/build_public_benchmark_source_access_preflight_receipt.py "
+        f"--out {DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT} "
+        f"--out-md {DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT_MD}"
+    )
     return {
         "plan_id": "public_benchmark_phase2_official_source_receipt_plan",
         "status": "operator_receipts_required",
@@ -1249,6 +1260,18 @@ def _official_source_receipt_plan(
         "official_source_catalog": source_catalog,
         "source_access_preflight_rows": source_access_preflight_rows,
         "source_access_preflight_policy": dict(SOURCE_ACCESS_PREFLIGHT_POLICY),
+        "source_access_preflight_receipt_artifact": str(
+            DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT
+        ),
+        "source_access_preflight_receipt_markdown_artifact": str(
+            DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT_MD
+        ),
+        "source_access_preflight_receipt_command": (
+            source_access_preflight_receipt_command
+        ),
+        "source_access_network_probe_command": (
+            f"{source_access_preflight_receipt_command} --probe-network"
+        ),
         "row_input_count": len(REQUIRED_ROW_INPUTS),
         "row_input_receipt_roles": receipt_rows,
         "receipt_promotion_policy": dict(RECEIPT_PROMOTION_POLICY),
@@ -1606,6 +1629,17 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py "
             f"--out {DEFAULT_VINA_GNINA_RUNTIME_READINESS}"
         ),
+        "build_source_access_preflight_receipt": (
+            "python3 scripts/build_public_benchmark_source_access_preflight_receipt.py "
+            f"--out {DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT} "
+            f"--out-md {DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT_MD}"
+        ),
+        "probe_source_access_preflight": (
+            "python3 scripts/build_public_benchmark_source_access_preflight_receipt.py "
+            f"--out {DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT} "
+            f"--out-md {DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT_MD} "
+            "--probe-network"
+        ),
         "materialize_vina_gnina_adapter": (
             "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py "
             "--intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> "
@@ -1649,6 +1683,7 @@ def build_public_benchmark_phase2_source_acquisition_plan(
                 Path("scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"),
                 Path("scripts/build_public_benchmark_vina_gnina_execution_plan.py"),
                 Path("scripts/build_public_benchmark_vina_gnina_runtime_readiness.py"),
+                Path("scripts/build_public_benchmark_source_access_preflight_receipt.py"),
                 DEFAULT_VINA_GNINA_EXECUTION_PLAN,
                 DEFAULT_VINA_GNINA_RUNTIME_READINESS,
                 Path("scripts/validate_public_benchmark_external_receipts.py"),
@@ -1686,6 +1721,7 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "fill_public_benchmark_vina_gnina_input_manifest",
             "run_vina_gnina_runtime_readiness_check",
             "attach_vina_gnina_engine_run_rows",
+            "build_source_access_preflight_receipt",
             "attach_external_source_receipts_and_license_or_accession_refs",
             "run_public_benchmark_operator_bundle_from_rows",
             "run_public_benchmark_phase2_row_audit",
@@ -2175,6 +2211,17 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
             f"{feeds} | {row['primary_url']} |"
         )
     lines.extend(["", "## Source Access Preflight", ""])
+    lines.extend(
+        [
+            "- `receipt_artifact`: "
+            f"`{payload['official_source_receipt_plan']['source_access_preflight_receipt_artifact']}`",
+            "- `receipt_command`: "
+            f"`{payload['official_source_receipt_plan']['source_access_preflight_receipt_command']}`",
+            "- `network_probe_command`: "
+            f"`{payload['official_source_receipt_plan']['source_access_network_probe_command']}`",
+            "",
+        ]
+    )
     lines.extend(
         [
             "| Source | Access Mode | Primary Probe | Fallback Probe |",

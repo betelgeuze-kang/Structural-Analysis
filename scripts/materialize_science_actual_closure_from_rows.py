@@ -191,6 +191,28 @@ def _source_acquisition_summary(
             or len(source_access_preflight_rows)
         ),
         "source_access_preflight_rows": source_access_preflight_rows,
+        "source_access_preflight_receipt_artifact": str(
+            official_source_receipt_plan.get(
+                "source_access_preflight_receipt_artifact"
+            )
+            or ""
+        ),
+        "source_access_preflight_receipt_markdown_artifact": str(
+            official_source_receipt_plan.get(
+                "source_access_preflight_receipt_markdown_artifact"
+            )
+            or ""
+        ),
+        "source_access_preflight_receipt_command": str(
+            official_source_receipt_plan.get(
+                "source_access_preflight_receipt_command"
+            )
+            or ""
+        ),
+        "source_access_network_probe_command": str(
+            official_source_receipt_plan.get("source_access_network_probe_command")
+            or ""
+        ),
         "phase4_candidate_slot_matrix_count": int(
             payload.get("phase4_candidate_slot_matrix_count")
             or len(phase4_candidate_slot_matrix)

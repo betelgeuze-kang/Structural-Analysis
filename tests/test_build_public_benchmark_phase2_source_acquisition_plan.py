@@ -84,6 +84,24 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "raw_payload_downloaded_by_plan": False,
         "source_checksum_required_after_operator_acquisition": True,
     }
+    assert receipt_plan["source_access_preflight_receipt_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_source_access_preflight_receipt.json"
+    )
+    assert receipt_plan["source_access_preflight_receipt_markdown_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_source_access_preflight_receipt.md"
+    )
+    assert receipt_plan["source_access_preflight_receipt_command"] == (
+        "python3 scripts/build_public_benchmark_source_access_preflight_receipt.py "
+        "--out implementation/phase1/release_evidence/productization/"
+        "public_benchmark_source_access_preflight_receipt.json "
+        "--out-md implementation/phase1/release_evidence/productization/"
+        "public_benchmark_source_access_preflight_receipt.md"
+    )
+    assert receipt_plan["source_access_network_probe_command"].endswith(
+        "--probe-network"
+    )
     assert receipt_plan["operator_review_order"] == [
         "casf_pdbbind_subset_source_receipt",
         "casf_pdbbind_pose_coordinate_receipt",
@@ -487,6 +505,19 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
         "public_benchmark_external_receipts_not_attached",
     ]
+    assert payload["commands"]["build_source_access_preflight_receipt"] == (
+        "python3 scripts/build_public_benchmark_source_access_preflight_receipt.py "
+        "--out implementation/phase1/release_evidence/productization/"
+        "public_benchmark_source_access_preflight_receipt.json "
+        "--out-md implementation/phase1/release_evidence/productization/"
+        "public_benchmark_source_access_preflight_receipt.md"
+    )
+    assert payload["commands"]["probe_source_access_preflight"].endswith(
+        "--probe-network"
+    )
+    assert "build_source_access_preflight_receipt" in (
+        payload["operator_acquisition_checklist"]
+    )
     assert payload["missing_row_input_action_count"] == 1
     missing_action = payload["missing_row_input_actions"][0]
     assert missing_action["row_input_id"] == "vina_gnina_rows"

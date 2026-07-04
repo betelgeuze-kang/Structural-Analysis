@@ -860,6 +860,20 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
                 ],
                 "official_source_receipt_plan": {
                     "source_access_preflight_count": 1,
+                    "source_access_preflight_receipt_artifact": (
+                        "implementation/phase1/release_evidence/productization/"
+                        "public_benchmark_source_access_preflight_receipt.json"
+                    ),
+                    "source_access_preflight_receipt_command": (
+                        "python3 scripts/"
+                        "build_public_benchmark_source_access_preflight_receipt.py "
+                        "--probe-network"
+                    ),
+                    "source_access_network_probe_command": (
+                        "python3 scripts/"
+                        "build_public_benchmark_source_access_preflight_receipt.py "
+                        "--probe-network"
+                    ),
                     "source_access_preflight_rows": [
                         {
                             "source_id": "pdbbind_plus_casf",
@@ -990,6 +1004,12 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
     assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
         "source_access_preflight_rows"
     ][0]["source_id"] == "pdbbind_plus_casf"
+    assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
+        "source_access_preflight_receipt_artifact"
+    ].endswith("public_benchmark_source_access_preflight_receipt.json")
+    assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
+        "source_access_network_probe_command"
+    ].endswith("--probe-network")
     assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
         "vina_gnina_case_input_slot_matrix_count"
     ] == 12
