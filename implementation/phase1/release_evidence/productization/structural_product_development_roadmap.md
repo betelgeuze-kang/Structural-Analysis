@@ -12,7 +12,7 @@ Structural product roadmap: BLOCKED | evidence_progress=50.9% | stage_average=40
 - `pm_milestones`: `4/5`
 - `pm_release_areas`: `10/16`
 - `release_ready`: `False`
-- `snapshot_blocker_count`: `75`
+- `snapshot_blocker_count`: `74`
 - `snapshot_status`: `stale_or_inconsistent`
 - `structural_scope_owner_decisions`: `0/86`
 - `structural_scope_release_surface_cleanup_decisions`: `0/3`
@@ -34,7 +34,7 @@ Structural product roadmap: BLOCKED | evidence_progress=50.9% | stage_average=40
   - first blocker: `selected_medium_models_pass_or_approved_review::medium_structural_models_current_below_required:3/5`
   - next action: `close_medium_model_pass_or_approved_review_gate`
 - `g1_solver_closure`: partial (1/2, 50.0%)
-  - first blocker: `checkpoint_load_scale_below_required_full_load`
+  - first blocker: `hip_consistency_proof_gate_not_passed`
   - next action: `promote_g1_assembly_contract_to_live_runner`
 - `paid_pilot_readiness`: blocked (0/4, 0.0%)
   - first blocker: `customer_shadow_below_required:0/3`
@@ -59,7 +59,7 @@ Structural product roadmap: BLOCKED | evidence_progress=50.9% | stage_average=40
   - current `developer_preview_final_gates`: `6/9`
 - `continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path`
   - exit condition: full-load 1.0 checkpoint passes residual and increment gates
-  - current `active_terminal_requirement`: `full_load_checkpoint_1p0`
+  - current `active_terminal_requirement`: `hip_consistent_residual_jacobian_newton_proof`
 - `collect_customer_shadow_and_external_benchmark_terminal_receipts`
   - exit condition: three customer shadow cases have reviewed terminal rows
   - current `completed_shadow_case_count`: `0`

@@ -238,6 +238,17 @@ def _write_minimal_inputs(repo_root: Path) -> None:
                 "required_load_scale": 1.0,
                 "highest_observed_load_scale": 0.656,
             },
+            "true_newton_full_load_checkpoint_candidate": {
+                "present": True,
+                "status": "candidate_created",
+                "checkpoint_written": True,
+                "checkpoint_path": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "g1_true_newton_full_load_checkpoint_candidate.npz"
+                ),
+                "checkpoint_direct_residual_inf_n": 464.56223807569995,
+                "true_newton_residual_gate_passed": False,
+            },
             "worker_path_repair_plan": {
                 "schema_version": "g1-production-rocm-hip-worker-path-repair-plan.v1",
                 "status": "blocked",
@@ -448,6 +459,18 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
         is True
     )
     assert (
+        stages["g1_solver_closure"]["summary"][
+            "true_newton_full_load_checkpoint_candidate_written"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "true_newton_full_load_checkpoint_candidate_residual_n"
+        ]
+        == 464.56223807569995
+    )
+    assert (
         stages["g1_solver_closure"]["summary"]["rocm_worker_path_repair_status"]
         == "blocked"
     )
@@ -502,6 +525,10 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
     )
     assert (
         "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
+        in stages["g1_solver_closure"]["evidence_artifacts"]
+    )
+    assert (
+        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json"
         in stages["g1_solver_closure"]["evidence_artifacts"]
     )
     assert (

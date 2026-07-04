@@ -201,6 +201,52 @@ def _true_newton_load_sweep_payload() -> dict:
     }
 
 
+def _true_newton_checkpoint_candidate_payload() -> dict:
+    return {
+        "schema_version": "g1-true-newton-full-load-checkpoint-candidate-status.v1",
+        "status": "candidate_created",
+        "contract_pass": True,
+        "evidence_closure_pass": False,
+        "promotes_g1_closure": False,
+        "required_load_scale": 1.0,
+        "max_newton_steps": 12,
+        "residual_gate_n": 5.0e-4,
+        "true_newton_candidate": {
+            "status": "ready",
+            "reason_code": "max_steps",
+            "steps": 12,
+            "initial_residual_n": 22323.093943383923,
+            "final_residual_n": 464.56223807569995,
+            "total_reduction_ratio": 0.9791882547360113,
+            "monotonic_residual_decrease": True,
+            "residual_gate_passed": False,
+            "stop_reason": "max_steps",
+        },
+        "checkpoint_candidate": {
+            "written": True,
+            "path": "implementation/phase1/release_evidence/productization/"
+            "g1_true_newton_full_load_checkpoint_candidate.npz",
+            "schema": "mgt-direct-residual-newton-state.v1",
+            "load_scale": 1.0,
+            "dof_count": 78282,
+            "free_dof_count": 39141,
+            "direct_residual_inf_n": 464.56223807569995,
+            "residual_gate_passed": False,
+            "promotes_g1_closure": False,
+        },
+        "checkpoint_written": True,
+        "checkpoint_schema_pass": True,
+        "checkpoint_load_scale_pass": True,
+        "full_load_true_newton_residual_descent_observed": True,
+        "full_load_true_newton_residual_gate_passed": False,
+        "blockers": [
+            "full_load_true_newton_checkpoint_residual_gate_not_passed",
+            "production_rocm_hip_not_executed_by_true_newton_checkpoint_candidate",
+        ],
+        "claim_boundary": "checkpoint candidate fixture; not a G1 closure",
+    }
+
+
 def _global_connectivity_payload() -> dict:
     return {
         "schema_version": "g1-global-connectivity-load-path-audit.v1",
@@ -220,6 +266,9 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
         "global": tmp_path / "g1_global_connectivity_load_path_audit.json",
         "assembly": tmp_path / "g1_assembly_contract_seed_report.json",
         "sweep": tmp_path / "g1_true_newton_load_sweep_status.json",
+        "checkpoint_candidate": (
+            tmp_path / "g1_true_newton_full_load_checkpoint_candidate_status.json"
+        ),
     }
     _write_json(paths["g1_lane"], _g1_lane_payload(action_id=action_id))
     _write_json(paths["cause"], _cause_narrowing_payload())
@@ -227,6 +276,7 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
     _write_json(paths["global"], _global_connectivity_payload())
     _write_json(paths["assembly"], _assembly_contract_seed_payload())
     _write_json(paths["sweep"], _true_newton_load_sweep_payload())
+    _write_json(paths["checkpoint_candidate"], _true_newton_checkpoint_candidate_payload())
     return paths
 
 
@@ -243,6 +293,7 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
         global_connectivity_path=paths["global"],
         assembly_contract_seed_path=paths["assembly"],
         true_newton_load_sweep_path=paths["sweep"],
+        true_newton_full_load_checkpoint_candidate_path=paths["checkpoint_candidate"],
     )
 
     assert payload["status"] == "ready_for_runner_implementation"
@@ -282,6 +333,24 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     assert payload["true_newton_load_sweep"]["present"] is True
     assert payload["true_newton_load_sweep"]["promotes_g1_closure"] is False
     assert payload["true_newton_load_sweep"]["full_load_row"]["load_scale"] == 1.0
+    assert (
+        payload["summary"]["true_newton_full_load_checkpoint_candidate_present"]
+        is True
+    )
+    assert (
+        payload["summary"]["true_newton_full_load_checkpoint_candidate_written"]
+        is True
+    )
+    assert payload["summary"][
+        "true_newton_full_load_checkpoint_candidate_direct_residual_n"
+    ] == 464.56223807569995
+    assert payload["true_newton_full_load_checkpoint_candidate"]["present"] is True
+    assert payload["true_newton_full_load_checkpoint_candidate"][
+        "checkpoint_written"
+    ] is True
+    assert payload["true_newton_full_load_checkpoint_candidate"][
+        "checkpoint_schema"
+    ] == "mgt-direct-residual-newton-state.v1"
     assert payload["assembly_contract_seed"] == {
         "path": paths["assembly"].as_posix(),
         "status": "ready",
@@ -358,6 +427,39 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     ]
 
 
+def test_runner_packet_accepts_missing_generator_action_after_full_load_checkpoint_ready(
+    tmp_path: Path,
+) -> None:
+    paths = _write_inputs(tmp_path, action_id=None)
+    lane = _g1_lane_payload(action_id=None)
+    lane["blockers"] = ["hip_consistency_proof_gate_not_passed"]
+    lane["checkpoint_resolution_gate"] = {
+        "mode": "explicit",
+        "passed": True,
+        "required_load_scale": 1.0,
+        "highest_observed_load_scale": 1.0,
+        "highest_observed_gap_to_required_load_scale": 0.0,
+        "full_load_candidate_count": 1,
+    }
+    _write_json(paths["g1_lane"], lane)
+
+    payload = runner.build_runner_packet(
+        repo_root=tmp_path,
+        g1_lane_path=paths["g1_lane"],
+        cause_narrowing_path=paths["cause"],
+        hip_probe_path=paths["hip"],
+        global_connectivity_path=paths["global"],
+        assembly_contract_seed_path=paths["assembly"],
+        true_newton_load_sweep_path=paths["sweep"],
+        true_newton_full_load_checkpoint_candidate_path=paths["checkpoint_candidate"],
+    )
+
+    assert payload["contract_pass"] is True
+    assert payload["summary"]["highest_observed_load_scale"] == 1.0
+    assert payload["summary"]["full_load_candidate_count"] == 1
+    assert "consistent_newton_runner_next_action_missing" not in payload["blockers"]
+
+
 def test_runner_packet_classifies_blocked_worker_path_repair_plan(tmp_path: Path) -> None:
     paths = _write_inputs(tmp_path)
     hip_payload = json.loads(paths["hip"].read_text(encoding="utf-8"))
@@ -382,6 +484,7 @@ def test_runner_packet_classifies_blocked_worker_path_repair_plan(tmp_path: Path
         global_connectivity_path=paths["global"],
         assembly_contract_seed_path=paths["assembly"],
         true_newton_load_sweep_path=paths["sweep"],
+        true_newton_full_load_checkpoint_candidate_path=paths["checkpoint_candidate"],
     )
 
     assert payload["status"] == "blocked_runner_contract"
@@ -431,6 +534,7 @@ def test_runner_packet_blocks_when_lane_does_not_route_to_runner(tmp_path: Path)
         global_connectivity_path=paths["global"],
         assembly_contract_seed_path=paths["assembly"],
         true_newton_load_sweep_path=paths["sweep"],
+        true_newton_full_load_checkpoint_candidate_path=paths["checkpoint_candidate"],
     )
 
     assert payload["status"] == "blocked_runner_contract"
@@ -451,6 +555,7 @@ def test_runner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
         global_connectivity_path=paths["global"],
         assembly_contract_seed_path=paths["assembly"],
         true_newton_load_sweep_path=paths["sweep"],
+        true_newton_full_load_checkpoint_candidate_path=paths["checkpoint_candidate"],
         out=out,
         out_md=out_md,
     )
@@ -467,5 +572,7 @@ def test_runner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
     assert "## Worker Path Operator Sequence" in markdown
     assert "run_hip_required_direct_probe" in markdown
     assert "## True-Newton Load Sweep" in markdown
+    assert "## True-Newton Checkpoint Candidate" in markdown
+    assert "checkpoint_direct_residual_inf_n" in markdown
     assert "full_load_true_newton_residual_descent_observed" in markdown
     assert payload["status"] == "ready_for_runner_implementation"

@@ -31,6 +31,9 @@ G1_FULL_LOAD_HIP = PRODUCTIZATION / "g1_full_load_hip_newton_lane_report.json"
 G1_CONSISTENT_NEWTON_RUNNER = (
     PRODUCTIZATION / "g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
 )
+G1_TRUE_NEWTON_FULL_LOAD_CHECKPOINT_CANDIDATE = (
+    PRODUCTIZATION / "g1_true_newton_full_load_checkpoint_candidate_status.json"
+)
 G1_GLOBAL_CONNECTIVITY = PRODUCTIZATION / "g1_global_connectivity_load_path_audit.json"
 G1_F2G_F2H_CAUSE_NARROWING = PRODUCTIZATION / "g1_f2g_f2h_cause_narrowing_status.json"
 G1_LOAD_DEPENDENT_COMPARISON = (
@@ -234,6 +237,7 @@ def _source_paths() -> list[Path]:
         G1_DIRECT_RESIDUAL,
         G1_FULL_LOAD_HIP,
         G1_CONSISTENT_NEWTON_RUNNER,
+        G1_TRUE_NEWTON_FULL_LOAD_CHECKPOINT_CANDIDATE,
         G1_GLOBAL_CONNECTIVITY,
         G1_F2G_F2H_CAUSE_NARROWING,
         G1_LOAD_DEPENDENT_COMPARISON,
@@ -439,6 +443,11 @@ def build_structural_product_development_roadmap(
     g1_true_newton_load_sweep = _as_dict(
         g1_consistent_newton_runner.get("true_newton_load_sweep")
     )
+    g1_true_newton_checkpoint_candidate = _as_dict(
+        g1_consistent_newton_runner.get(
+            "true_newton_full_load_checkpoint_candidate"
+        )
+    )
     g1_global_summary = _as_dict(g1_global_connectivity.get("summary"))
     g1_global_decision = _as_dict(g1_global_connectivity.get("decision_record"))
     g1_cause_signals = _as_dict(g1_cause_narrowing.get("evidence_signals"))
@@ -641,6 +650,7 @@ def build_structural_product_development_roadmap(
                 G1_DIRECT_RESIDUAL,
                 G1_FULL_LOAD_HIP,
                 G1_CONSISTENT_NEWTON_RUNNER,
+                G1_TRUE_NEWTON_FULL_LOAD_CHECKPOINT_CANDIDATE,
                 G1_GLOBAL_CONNECTIVITY,
                 G1_F2G_F2H_CAUSE_NARROWING,
                 G1_LOAD_DEPENDENT_COMPARISON,
@@ -683,6 +693,17 @@ def build_structural_product_development_roadmap(
                 "true_newton_full_load_final_residual_n": (
                     g1_true_newton_load_sweep.get(
                         "full_load_true_newton_final_residual_n"
+                    )
+                ),
+                "true_newton_full_load_checkpoint_candidate_written": _as_bool(
+                    g1_true_newton_checkpoint_candidate.get("checkpoint_written")
+                ),
+                "true_newton_full_load_checkpoint_candidate_path": str(
+                    g1_true_newton_checkpoint_candidate.get("checkpoint_path") or ""
+                ),
+                "true_newton_full_load_checkpoint_candidate_residual_n": (
+                    g1_true_newton_checkpoint_candidate.get(
+                        "checkpoint_direct_residual_inf_n"
                     )
                 ),
                 "rocm_worker_path_repair_status": str(
@@ -946,6 +967,17 @@ def build_structural_product_development_roadmap(
                         "full_load_true_newton_final_residual_n"
                     )
                 ),
+                "true_newton_full_load_checkpoint_candidate_written": _as_bool(
+                    g1_true_newton_checkpoint_candidate.get("checkpoint_written")
+                ),
+                "true_newton_full_load_checkpoint_candidate_path": str(
+                    g1_true_newton_checkpoint_candidate.get("checkpoint_path") or ""
+                ),
+                "true_newton_full_load_checkpoint_candidate_residual_n": (
+                    g1_true_newton_checkpoint_candidate.get(
+                        "checkpoint_direct_residual_inf_n"
+                    )
+                ),
                 "rocm_worker_path_repair_status": str(
                     g1_worker_repair_plan.get("status") or "missing"
                 ),
@@ -990,6 +1022,7 @@ def build_structural_product_development_roadmap(
                 str(G1_DIRECT_RESIDUAL),
                 str(G1_FULL_LOAD_HIP),
                 str(G1_CONSISTENT_NEWTON_RUNNER),
+                str(G1_TRUE_NEWTON_FULL_LOAD_CHECKPOINT_CANDIDATE),
                 str(G1_GLOBAL_CONNECTIVITY),
                 str(G1_F2G_F2H_CAUSE_NARROWING),
                 str(G1_LOAD_DEPENDENT_COMPARISON),

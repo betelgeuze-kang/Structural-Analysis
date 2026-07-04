@@ -25,6 +25,9 @@ DEFAULT_HIP_PROBE = PRODUCTIZATION / "mgt_residual_jacobian_consistency_hip_requ
 DEFAULT_GLOBAL_CONNECTIVITY = PRODUCTIZATION / "g1_global_connectivity_load_path_audit.json"
 DEFAULT_ASSEMBLY_CONTRACT_SEED = PRODUCTIZATION / "g1_assembly_contract_seed_report.json"
 DEFAULT_TRUE_NEWTON_LOAD_SWEEP = PRODUCTIZATION / "g1_true_newton_load_sweep_status.json"
+DEFAULT_TRUE_NEWTON_FULL_LOAD_CHECKPOINT_CANDIDATE = (
+    PRODUCTIZATION / "g1_true_newton_full_load_checkpoint_candidate_status.json"
+)
 DEFAULT_OUT = PRODUCTIZATION / "g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_SOLVER_HIP_E2E = Path(
@@ -168,13 +171,19 @@ def _routing_blockers(
     *,
     action: dict[str, Any],
     cause_narrowing: dict[str, Any],
+    checkpoint_gate: dict[str, Any] | None = None,
 ) -> list[str]:
     blockers: list[str] = []
+    checkpoint_gate = checkpoint_gate if isinstance(checkpoint_gate, dict) else {}
+    checkpoint_ready = bool(checkpoint_gate.get("passed") is True)
     if not action:
-        blockers.append("consistent_newton_runner_next_action_missing")
-        return blockers
+        if not checkpoint_ready:
+            blockers.append("consistent_newton_runner_next_action_missing")
+            return blockers
+        action = {}
     if action.get("preferred_candidate_generator") != PREFERRED_GENERATOR:
-        blockers.append("consistent_newton_preferred_candidate_generator_missing")
+        if not checkpoint_ready:
+            blockers.append("consistent_newton_preferred_candidate_generator_missing")
     if _cause_primary_next_lane(cause_narrowing, action) != PRIMARY_NEXT_LANE:
         blockers.append("cause_narrowing_primary_next_lane_not_consistent_newton_rocm")
     if not _row_only_loop_stopped(cause_narrowing, action):
@@ -183,7 +192,7 @@ def _routing_blockers(
         blockers.append("support_or_link_row_gap_not_disfavored")
     suppressed = set(_strings(action.get("suppressed_retry_action_ids")))
     for retry_id in DISALLOWED_RETRY_ACTION_IDS:
-        if retry_id not in suppressed:
+        if retry_id not in suppressed and not checkpoint_ready:
             blockers.append(f"disallowed_retry_not_suppressed:{retry_id}")
     return blockers
 
@@ -485,6 +494,38 @@ def _true_newton_load_sweep_summary(
     }
 
 
+def _true_newton_full_load_checkpoint_candidate_summary(
+    *,
+    payload: dict[str, Any],
+    path: Path,
+) -> dict[str, Any]:
+    checkpoint = _as_dict(payload.get("checkpoint_candidate"))
+    candidate = _as_dict(payload.get("true_newton_candidate"))
+    return {
+        "path": path.as_posix(),
+        "present": bool(payload),
+        "status": str(payload.get("status") or "missing"),
+        "contract_pass": payload.get("contract_pass") is True,
+        "promotes_g1_closure": payload.get("promotes_g1_closure") is True,
+        "checkpoint_written": payload.get("checkpoint_written") is True,
+        "checkpoint_path": str(checkpoint.get("path") or ""),
+        "checkpoint_schema": str(checkpoint.get("schema") or ""),
+        "checkpoint_load_scale": _as_float(checkpoint.get("load_scale")),
+        "checkpoint_direct_residual_inf_n": _as_float(
+            checkpoint.get("direct_residual_inf_n")
+        ),
+        "true_newton_steps": _as_int(candidate.get("steps")),
+        "true_newton_final_residual_n": _as_float(
+            candidate.get("final_residual_n")
+        ),
+        "true_newton_residual_gate_passed": bool(
+            candidate.get("residual_gate_passed") is True
+        ),
+        "blockers": _strings(payload.get("blockers")),
+        "claim_boundary": str(payload.get("claim_boundary") or ""),
+    }
+
+
 def _next_actions(
     *,
     required_load_scale: float,
@@ -570,6 +611,9 @@ def build_runner_packet(
     global_connectivity_path: Path = DEFAULT_GLOBAL_CONNECTIVITY,
     assembly_contract_seed_path: Path = DEFAULT_ASSEMBLY_CONTRACT_SEED,
     true_newton_load_sweep_path: Path = DEFAULT_TRUE_NEWTON_LOAD_SWEEP,
+    true_newton_full_load_checkpoint_candidate_path: Path = (
+        DEFAULT_TRUE_NEWTON_FULL_LOAD_CHECKPOINT_CANDIDATE
+    ),
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     g1_lane = _load_json(repo_root, g1_lane_path)
@@ -578,6 +622,9 @@ def build_runner_packet(
     global_connectivity = _load_json(repo_root, global_connectivity_path)
     assembly_contract_seed = _load_json(repo_root, assembly_contract_seed_path)
     true_newton_load_sweep = _load_json(repo_root, true_newton_load_sweep_path)
+    true_newton_full_load_checkpoint_candidate = _load_json(
+        repo_root, true_newton_full_load_checkpoint_candidate_path
+    )
     action = _find_runner_action(g1_lane)
     checkpoint_gate = _as_dict(g1_lane.get("checkpoint_resolution_gate"))
     worker = _as_dict(hip_probe.get("production_rocm_hip_residual_jvp_worker"))
@@ -591,7 +638,11 @@ def build_runner_packet(
         g1_lane_path=g1_lane_path,
     )
     terminal_partition = _as_dict(worker.get("terminal_gate_partition"))
-    routing_blockers = _routing_blockers(action=action, cause_narrowing=cause_narrowing)
+    routing_blockers = _routing_blockers(
+        action=action,
+        cause_narrowing=cause_narrowing,
+        checkpoint_gate=checkpoint_gate,
+    )
     contract_blockers = [
         *_missing_artifact_blockers(
             g1_lane=g1_lane,
@@ -646,6 +697,12 @@ def build_runner_packet(
         path=true_newton_load_sweep_path,
         required_load_scale=required_load_scale,
     )
+    true_newton_full_load_checkpoint_candidate_summary = (
+        _true_newton_full_load_checkpoint_candidate_summary(
+            payload=true_newton_full_load_checkpoint_candidate,
+            path=true_newton_full_load_checkpoint_candidate_path,
+        )
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -657,6 +714,7 @@ def build_runner_packet(
                 hip_probe_path,
                 global_connectivity_path,
                 true_newton_load_sweep_path,
+                true_newton_full_load_checkpoint_candidate_path,
             ],
             reused_evidence=True,
             reuse_policy=(
@@ -691,6 +749,24 @@ def build_runner_packet(
                 or action.get("workspace_full_load_candidate_count")
             ),
             "true_newton_load_sweep_present": bool(true_newton_load_sweep),
+            "true_newton_full_load_checkpoint_candidate_present": bool(
+                true_newton_full_load_checkpoint_candidate
+            ),
+            "true_newton_full_load_checkpoint_candidate_written": (
+                true_newton_full_load_checkpoint_candidate_summary[
+                    "checkpoint_written"
+                ]
+            ),
+            "true_newton_full_load_checkpoint_candidate_path": (
+                true_newton_full_load_checkpoint_candidate_summary[
+                    "checkpoint_path"
+                ]
+            ),
+            "true_newton_full_load_checkpoint_candidate_direct_residual_n": (
+                true_newton_full_load_checkpoint_candidate_summary[
+                    "checkpoint_direct_residual_inf_n"
+                ]
+            ),
             "full_load_true_newton_attempted": true_newton_load_sweep_summary[
                 "full_load_attempted"
             ],
@@ -827,6 +903,9 @@ def build_runner_packet(
             "workspace_scan_root": str(action.get("workspace_scan_root") or ""),
         },
         "true_newton_load_sweep": true_newton_load_sweep_summary,
+        "true_newton_full_load_checkpoint_candidate": (
+            true_newton_full_load_checkpoint_candidate_summary
+        ),
         "hip_worker_contract": {
             "worker_id": str(worker.get("worker_id") or ""),
             "residual_jvp_worker_path_ready": worker.get(
@@ -905,6 +984,9 @@ def build_runner_packet(
             "g1_global_connectivity_load_path_audit": global_connectivity_path.as_posix(),
             "g1_assembly_contract_seed_report": assembly_contract_seed_path.as_posix(),
             "g1_true_newton_load_sweep_status": true_newton_load_sweep_path.as_posix(),
+            "g1_true_newton_full_load_checkpoint_candidate_status": (
+                true_newton_full_load_checkpoint_candidate_path.as_posix()
+            ),
         },
         "claim_boundary": (
             "This packet defines the next G1 runner contract for generating a "
@@ -920,6 +1002,9 @@ def _markdown(payload: dict[str, Any]) -> str:
     contract = _as_dict(payload.get("runner_contract"))
     checkpoint = _as_dict(payload.get("checkpoint_gap"))
     true_newton = _as_dict(payload.get("true_newton_load_sweep"))
+    true_newton_checkpoint = _as_dict(
+        payload.get("true_newton_full_load_checkpoint_candidate")
+    )
     hip = _as_dict(payload.get("hip_worker_contract"))
     assembly = _as_dict(payload.get("assembly_contract_seed"))
     lines = [
@@ -935,6 +1020,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `true_newton_full_load_descent`: `{true_newton.get('full_load_true_newton_residual_descent_observed')}`",
         f"- `true_newton_full_load_gate`: `{true_newton.get('full_load_true_newton_residual_gate_passed')}`",
         f"- `true_newton_full_load_final_residual_n`: `{true_newton.get('full_load_true_newton_final_residual_n')}`",
+        f"- `true_newton_checkpoint_candidate_written`: `{true_newton_checkpoint.get('checkpoint_written')}`",
+        f"- `true_newton_checkpoint_candidate_residual_n`: `{true_newton_checkpoint.get('checkpoint_direct_residual_inf_n')}`",
         f"- `worker_path_ready`: `{hip.get('residual_jvp_worker_path_ready')}`",
         f"- `worker_g1_closure_gate_ready`: `{hip.get('g1_closure_gate_ready')}`",
         f"- `assembly_contract_seed_ready`: `{assembly.get('contract_pass')}`",
@@ -959,6 +1046,20 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.append(
             "- `full_load_true_newton_residual_gate_passed`: "
             f"`{true_newton.get('full_load_true_newton_residual_gate_passed')}`"
+        )
+    if true_newton_checkpoint:
+        lines.extend(["", "## True-Newton Checkpoint Candidate", ""])
+        lines.append(f"- `present`: `{true_newton_checkpoint.get('present')}`")
+        lines.append(f"- `status`: `{true_newton_checkpoint.get('status')}`")
+        lines.append(
+            f"- `checkpoint_written`: `{true_newton_checkpoint.get('checkpoint_written')}`"
+        )
+        lines.append(
+            f"- `checkpoint_path`: `{true_newton_checkpoint.get('checkpoint_path')}`"
+        )
+        lines.append(
+            "- `checkpoint_direct_residual_inf_n`: "
+            f"`{true_newton_checkpoint.get('checkpoint_direct_residual_inf_n')}`"
         )
     if payload.get("next_actions"):
         lines.extend(["", "## Next Actions", ""])
@@ -1008,6 +1109,9 @@ def write_runner_packet(
     global_connectivity_path: Path = DEFAULT_GLOBAL_CONNECTIVITY,
     assembly_contract_seed_path: Path = DEFAULT_ASSEMBLY_CONTRACT_SEED,
     true_newton_load_sweep_path: Path = DEFAULT_TRUE_NEWTON_LOAD_SWEEP,
+    true_newton_full_load_checkpoint_candidate_path: Path = (
+        DEFAULT_TRUE_NEWTON_FULL_LOAD_CHECKPOINT_CANDIDATE
+    ),
     out: Path = DEFAULT_OUT,
     out_md: Path = DEFAULT_OUT_MD,
 ) -> dict[str, Any]:
@@ -1019,6 +1123,9 @@ def write_runner_packet(
         global_connectivity_path=global_connectivity_path,
         assembly_contract_seed_path=assembly_contract_seed_path,
         true_newton_load_sweep_path=true_newton_load_sweep_path,
+        true_newton_full_load_checkpoint_candidate_path=(
+            true_newton_full_load_checkpoint_candidate_path
+        ),
     )
     resolved_out = _resolve(repo_root, out)
     resolved_out_md = _resolve(repo_root, out_md)
@@ -1046,6 +1153,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_TRUE_NEWTON_LOAD_SWEEP,
     )
+    parser.add_argument(
+        "--true-newton-full-load-checkpoint-candidate",
+        type=Path,
+        default=DEFAULT_TRUE_NEWTON_FULL_LOAD_CHECKPOINT_CANDIDATE,
+    )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
     parser.add_argument("--json", action="store_true")
@@ -1063,6 +1175,9 @@ def main(argv: list[str] | None = None) -> int:
         global_connectivity_path=args.global_connectivity,
         assembly_contract_seed_path=args.assembly_contract_seed,
         true_newton_load_sweep_path=args.true_newton_load_sweep,
+        true_newton_full_load_checkpoint_candidate_path=(
+            args.true_newton_full_load_checkpoint_candidate
+        ),
         out=args.out,
         out_md=args.out_md,
     )

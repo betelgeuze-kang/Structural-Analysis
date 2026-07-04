@@ -23,6 +23,7 @@ import argparse
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import tempfile
 from typing import Any, Callable
 
 import numpy as np
@@ -296,7 +297,6 @@ def build_mgt_physical_residual_closure(
     from mgt_frame_force_based_assembly import prepack_frame_force_based_assembly
     from mgt_shell_load_path import surface_pressure_load_path_filter
 
-    roundtrip_npz = roundtrip_npz or mgt_path.with_suffix(".roundtrip.npz")
     text = mgt_path.read_text(encoding="utf-8", errors="ignore")
     constraints = parse_mgt_support_constraints(text)
     elastic_links = parse_mgt_elastic_links(text)
@@ -306,21 +306,39 @@ def build_mgt_physical_residual_closure(
     plate_thickness_props = props.get("plate_thicknesses") or {}
     beam_end_offsets = _beam_end_offset_lookup(props.get("beam_end_offsets"))
 
-    with np.load(roundtrip_npz, allow_pickle=False) as ar:
-        node_id = np.asarray(ar["node_id"], dtype=np.int64)
-        node_xyz = np.asarray(ar["node_xyz"], dtype=np.float64)
-        edge_index = np.asarray(ar["edge_index"], dtype=np.int64)
-        elem_id = np.asarray(ar["elem_id"], dtype=np.int64)
-        elem_type_code = np.asarray(ar["elem_type_code"], dtype=np.int32)
-        elem_section_id = np.asarray(ar["elem_section_id"], dtype=np.int32)
-        elem_material_id = np.asarray(ar["elem_material_id"], dtype=np.int32)
-        elem_angle_deg = (
-            np.asarray(ar["elem_angle_deg"], dtype=np.float64)
-            if "elem_angle_deg" in ar.files
-            else _element_angle_array_from_props(props, elem_id)
+    parser_source = "explicit_roundtrip_npz"
+    parser_report_path: str | None = None
+    temp_context: tempfile.TemporaryDirectory[str] | None = None
+    if roundtrip_npz is None:
+        from run_mgt_uncoarsened_boundary_global_equilibrium import (
+            _run_uncoarsened_parser,
         )
-        conn_ptr = np.asarray(ar["elem_conn_ptr"], dtype=np.int64)
-        conn_idx = np.asarray(ar["elem_conn_idx"], dtype=np.int64)
+
+        temp_context = tempfile.TemporaryDirectory(prefix="g1-mgt-physical-")
+        _roundtrip_json, roundtrip_npz, parser_report, _parser_run = (
+            _run_uncoarsened_parser(mgt_path=mgt_path, work_dir=Path(temp_context.name))
+        )
+        parser_source = "current_mgt_uncoarsened_parser"
+        parser_report_path = str(parser_report)
+    try:
+        with np.load(roundtrip_npz, allow_pickle=False) as ar:
+            node_id = np.asarray(ar["node_id"], dtype=np.int64)
+            node_xyz = np.asarray(ar["node_xyz"], dtype=np.float64)
+            edge_index = np.asarray(ar["edge_index"], dtype=np.int64)
+            elem_id = np.asarray(ar["elem_id"], dtype=np.int64)
+            elem_type_code = np.asarray(ar["elem_type_code"], dtype=np.int32)
+            elem_section_id = np.asarray(ar["elem_section_id"], dtype=np.int32)
+            elem_material_id = np.asarray(ar["elem_material_id"], dtype=np.int32)
+            elem_angle_deg = (
+                np.asarray(ar["elem_angle_deg"], dtype=np.float64)
+                if "elem_angle_deg" in ar.files
+                else _element_angle_array_from_props(props, elem_id)
+            )
+            conn_ptr = np.asarray(ar["elem_conn_ptr"], dtype=np.int64)
+            conn_idx = np.asarray(ar["elem_conn_idx"], dtype=np.int64)
+    finally:
+        if temp_context is not None:
+            temp_context.cleanup()
 
     frame_elements, _ = _select_frame_elements(
         node_xyz=node_xyz, edge_index=edge_index, elem_id=elem_id,
@@ -478,6 +496,9 @@ def build_mgt_physical_residual_closure(
             "u0": u0,
         },
         "frame_service_tangent_source": service_tangent_source,
+        "roundtrip_npz": str(roundtrip_npz),
+        "parser_source": parser_source,
+        "parser_report_path": parser_report_path,
         "node_id": node_id,
         "free": free,
         "dof_per_node": int(DOF_PER_NODE),

@@ -155,6 +155,47 @@ def test_report_caveat_and_non_promoting(tmp_path):
     assert str(drv.DEFAULT_OUTPUT_JSON).endswith(".local.json")
 
 
+def test_true_newton_checkpoint_writer_is_loadable_and_non_promoting(tmp_path):
+    drv = _load("run_g1_true_newton_reference_candidate")
+    out = tmp_path / "candidate_checkpoint.npz"
+    u0 = np.zeros(12, dtype=np.float64)
+    free = np.asarray([0, 1, 6, 7], dtype=np.int64)
+    final_free_state = np.asarray([0.10, -0.20, 0.30, -0.40], dtype=np.float64)
+    residual = np.asarray([2.0, -5.0, 1.5, 0.5], dtype=np.float64)
+
+    meta = {
+        "free": free,
+        "frame_inputs": {"u0": u0},
+        "external_load_inf_n": 10.0,
+    }
+    checkpoint = drv._write_true_newton_checkpoint(
+        path=out,
+        load_scale=1.0,
+        final_free_state=final_free_state,
+        final_residual=residual,
+        meta=meta,
+        residual_gate_n=5.0e-4,
+        steps_taken=8,
+        residual_gate_passed=False,
+    )
+
+    assert checkpoint["written"] is True
+    assert checkpoint["schema"] == "mgt-direct-residual-newton-state.v1"
+    assert checkpoint["load_scale"] == 1.0
+    assert checkpoint["direct_residual_inf_n"] == 5.0
+    assert checkpoint["residual_gate_passed"] is False
+    assert checkpoint["promotes_g1_closure"] is False
+    with np.load(out, allow_pickle=False) as archive:
+        assert str(np.asarray(archive["checkpoint_schema"]).item()) == (
+            "mgt-direct-residual-newton-state.v1"
+        )
+        assert float(np.asarray(archive["load_scale"]).item()) == 1.0
+        displacement = np.asarray(archive["displacement_u"], dtype=np.float64)
+        assert displacement.shape == (12,)
+        np.testing.assert_allclose(displacement[free], final_free_state)
+        assert bool(np.asarray(archive["promotes_g1_closure"]).item()) is False
+
+
 def test_candidate_defaults():
     drv = _load("run_g1_true_newton_reference_candidate")
     sig = inspect.signature(drv.run_g1_true_newton_reference_candidate)
@@ -163,6 +204,7 @@ def test_candidate_defaults():
     assert sig.parameters["frame_service_tangent_source"].default == "real_per_element"
     assert sig.parameters["max_newton_steps"].default == 12
     assert sig.parameters["load_scale"].default == 0.1
+    assert sig.parameters["output_final_checkpoint_npz"].default is None
 
 
 # ---------------------------------------------------------------------------

@@ -77,6 +77,7 @@ def run_multistep_newton(
     residual_gate_n: float = 5.0e-4,
     min_reduction_per_step: float = 1.0e-6,
     alphas: tuple[float, ...] = DEFAULT_ALPHAS,
+    return_final_state: bool = False,
 ) -> dict[str, Any]:
     """Testable multi-step Newton loop on a physical residual with line-search.
 
@@ -85,10 +86,13 @@ def run_multistep_newton(
     x = np.asarray(x0, dtype=np.float64).copy()
     r = np.asarray(residual_fn(x), dtype=np.float64)
     if not _finite(r):
-        return {"newton_history": [],
-                "summary": {"initial_residual_n": None, "final_residual_n": None,
-                            "total_reduction_ratio": None, "monotonic_residual_decrease": False,
-                            "residual_gate_passed": False, "stop_reason": STOP_NAN}}
+        result = {"newton_history": [],
+                  "summary": {"initial_residual_n": None, "final_residual_n": None,
+                              "total_reduction_ratio": None, "monotonic_residual_decrease": False,
+                              "residual_gate_passed": False, "stop_reason": STOP_NAN}}
+        if return_final_state:
+            result["final_state"] = x.copy()
+        return result
     initial = _inf_norm(r)
     history: list[dict[str, Any]] = []
     monotonic = True
@@ -148,7 +152,10 @@ def run_multistep_newton(
         "stop_reason": stop_reason,
         "steps_taken": len(history),
     }
-    return {"newton_history": history, "summary": summary}
+    result = {"newton_history": history, "summary": summary}
+    if return_final_state:
+        result["final_state"] = x.copy()
+    return result
 
 
 def run_g1_regularized_reference_newton_candidate(

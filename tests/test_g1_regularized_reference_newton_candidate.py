@@ -92,6 +92,35 @@ def test_gate_pass_no_g1_closure():
     assert "promotes_g1_closure" not in flat
 
 
+def test_multistep_can_return_final_state_without_changing_default():
+    drv = _load("run_g1_regularized_reference_newton_candidate")
+    n = 4
+    a = _spd(n)
+    f = np.arange(1.0, n + 1.0)
+
+    def residual_fn(x):
+        return a @ np.asarray(x, dtype=np.float64) - f
+
+    lu_a = np.linalg.inv(a)
+
+    def direction_fn(x, r):
+        return -lu_a @ r, {"reason_code": "ok"}
+
+    default = drv.run_multistep_newton(
+        residual_fn, np.zeros(n), direction_fn, max_newton_steps=2
+    )
+    with_state = drv.run_multistep_newton(
+        residual_fn,
+        np.zeros(n),
+        direction_fn,
+        max_newton_steps=2,
+        return_final_state=True,
+    )
+    assert "final_state" not in default
+    assert with_state["final_state"].shape == (n,)
+    assert np.max(np.abs(residual_fn(with_state["final_state"]))) <= 1.0e-6
+
+
 # ---------------------------------------------------------------------------
 # 5. line-search no descent
 # ---------------------------------------------------------------------------
