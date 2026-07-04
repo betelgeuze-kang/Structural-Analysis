@@ -529,21 +529,26 @@ def test_goal_bottleneck_roadmap_surface_links_structural_release_bottleneck() -
         "requirement"
     ] == "CASF/PDBBind pose-success harness"
     assert phase2_requirements["casf_pdbbind_pose_success_harness"]["ready"] is True
+    assert phase2_requirements["casf_pdbbind_pose_success_harness"]["pass"] is True
     assert phase2_requirements["symmetry_aware_ligand_rmsd"][
         "requirement"
     ] == "Symmetry-aware ligand RMSD scorecard"
     assert phase2_requirements["symmetry_aware_ligand_rmsd"]["ready"] is True
+    assert phase2_requirements["symmetry_aware_ligand_rmsd"]["pass"] is True
     assert phase2_requirements["posebusters_style_pose_validity"][
         "requirement"
     ] == "PoseBusters-style pose validity packet"
     assert phase2_requirements["posebusters_style_pose_validity"]["ready"] is True
+    assert phase2_requirements["posebusters_style_pose_validity"]["pass"] is True
     assert phase2_requirements["dud_e_or_lit_pcba_enrichment"][
         "requirement"
     ] == "DUD-E or LIT-PCBA enrichment scorecard"
     assert phase2_requirements["dud_e_or_lit_pcba_enrichment"]["ready"] is True
+    assert phase2_requirements["dud_e_or_lit_pcba_enrichment"]["pass"] is True
     vina_requirement = phase2_requirements["vina_gnina_comparison_adapter"]
     assert vina_requirement["requirement"] == "Vina/GNINA comparison adapter"
     assert vina_requirement["ready"] is False
+    assert vina_requirement["pass"] is False
     assert vina_requirement["operator_evidence_required"] is True
     assert vina_requirement["row_input_status"] == {"vina_gnina_rows": "missing"}
     assert vina_requirement["blockers"] == ["vina_gnina_rows_not_provided"]

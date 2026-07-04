@@ -426,7 +426,7 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
     "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
   },
-  "generated_at": "2026-07-04T06:38:36.178247+00:00",
+  "generated_at": "2026-07-04T06:43:20.169368+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:5558e5f0d82be0cbcb22c4431c0247939a1a9f780938f6d40bcf8484561b0eed",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:fc87faa4fd9acfb4e87000f955f1086cc39a86f479b9325e30cb2864c9f19631",
@@ -437,7 +437,7 @@
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:c1af83f1b410aca8536d5ab832c0ba6a86153436844e42152860f84ec0002328",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:8adb767e05269c4063e04ca5e5060b0e94994916ccae4e9912c897c0c7fc9703",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:e8a6b5e0b8d86ef1b629c1a6d4e8caab6132dd4a3a311c64bc520c2e4e13954f",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:f388aa9be01d17472e1f41d5238163f4772a5b63456833d0f6e0779d28839284"
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:4162076ef9d20dee9cc9b62455aed9ca13e9e81888009fc07ead3155cefec4c6"
   },
   "mutation_allowed": false,
   "next_actions": [
@@ -2578,7 +2578,7 @@
               "criterion_id": "casf_pdbbind_pose_success_harness_ready",
               "current_count": 12,
               "operator_evidence_required": false,
-              "pass": false,
+              "pass": true,
               "ready": true,
               "required_minimum_count": 12,
               "requirement": "CASF/PDBBind pose-success harness",
@@ -2599,7 +2599,7 @@
               "criterion_id": "symmetry_aware_ligand_rmsd_ready",
               "current_count": 12,
               "operator_evidence_required": false,
-              "pass": false,
+              "pass": true,
               "ready": true,
               "required_minimum_count": 12,
               "requirement": "Symmetry-aware ligand RMSD scorecard",
@@ -2618,7 +2618,7 @@
               "criterion_id": "posebusters_style_pose_validity_ready",
               "current_count": 12,
               "operator_evidence_required": false,
-              "pass": false,
+              "pass": true,
               "ready": true,
               "required_minimum_count": 12,
               "requirement": "PoseBusters-style pose validity packet",
@@ -2658,7 +2658,7 @@
               "criterion_id": "dud_e_or_lit_pcba_enrichment_ready",
               "current_count": 1,
               "operator_evidence_required": false,
-              "pass": false,
+              "pass": true,
               "ready": true,
               "required_minimum_count": 1,
               "requirement": "DUD-E or LIT-PCBA enrichment scorecard",
@@ -5768,7 +5768,7 @@
     ],
     "status": "operator_evidence_required"
   },
-  "source_commit_sha": "4da4a991cb08642c807cad9129e2f0d9a020ab00",
+  "source_commit_sha": "87977bbcf6387cd5990290fa4cbf2d531211dcc9",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

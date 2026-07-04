@@ -417,14 +417,21 @@ def _phase2_requirement_summary_row(
             row_input_id: phase2_row_input_status.get(row_input_id, "")
             for row_input_id in row_inputs
         }
+    ready = _as_bool(row.get("ready"))
+    if "pass" in row:
+        pass_value = _as_bool(row.get("pass"))
+    elif "contract_pass" in row:
+        pass_value = ready and _as_bool(row.get("contract_pass"))
+    else:
+        pass_value = ready
     return {
         "requirement": str(row.get("requirement") or ""),
         "requirement_id": str(row.get("requirement_id") or ""),
         "component_id": str(row.get("component_id") or ""),
         "criterion_id": str(row.get("criterion_id") or ""),
         "status": str(row.get("status") or ""),
-        "ready": _as_bool(row.get("ready")),
-        "pass": _as_bool(row.get("pass")),
+        "ready": ready,
+        "pass": pass_value,
         "operator_evidence_required": _as_bool(
             row.get("operator_evidence_required")
         ),
