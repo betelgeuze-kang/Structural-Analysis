@@ -91,6 +91,10 @@
 - `expected_rows_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json`
 - `input_manifest_template_preflight_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json`
 - `rows_template_preflight_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json`
+- `blocked_case_input_slot_count`: `12`
+- `first_blocked_case_input_slot`: `casf2016_4llx` / `fill_vina_gnina_input_manifest_row_for_casf2016_4llx`
+- `blocked_engine_run_slot_count`: `24`
+- `first_blocked_engine_run_slot`: `casf2016_4llx` / `vina` / `casf2016_4llx_vina_run`
 - `first_operator_sequence_step`: `review_public_benchmark_vina_gnina_input_manifest_template_preflight`
 - `operator_sequence`: `review_public_benchmark_vina_gnina_input_manifest_template_preflight`, `fill_public_benchmark_vina_gnina_input_manifest_from_template`, `rerun_public_benchmark_vina_gnina_execution_plan`, `configure_vina_gnina_binary_or_container_runtime`, `rerun_public_benchmark_vina_gnina_runtime_readiness`, `review_public_benchmark_vina_gnina_rows_template_preflight`, `attach_public_benchmark_vina_gnina_rows`, `materialize_public_benchmark_vina_gnina_comparison_adapter`
 - `build_input_manifest_template_preflight_command`: `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md`

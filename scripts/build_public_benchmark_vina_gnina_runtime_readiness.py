@@ -765,6 +765,22 @@ def build_vina_gnina_runtime_readiness(
         runtime_ready=runtime_ready,
         adapter_rows_ready=adapter_rows_ready,
     )
+    blocked_case_input_slot_count = int(
+        operator_unblock_packet.get("blocked_case_input_slot_count") or 0
+    )
+    blocked_engine_run_slot_count = int(
+        operator_unblock_packet.get("blocked_engine_run_slot_count") or 0
+    )
+    first_blocked_case_input_slot = operator_unblock_packet.get(
+        "first_blocked_case_input_slot"
+    )
+    if not isinstance(first_blocked_case_input_slot, dict):
+        first_blocked_case_input_slot = {}
+    first_blocked_engine_run_slot = operator_unblock_packet.get(
+        "first_blocked_engine_run_slot"
+    )
+    if not isinstance(first_blocked_engine_run_slot, dict):
+        first_blocked_engine_run_slot = {}
     if not execution_plan_ready:
         status = "execution_plan_blocked"
     elif not all_engines_available:
@@ -812,6 +828,10 @@ def build_vina_gnina_runtime_readiness(
         "operator_unblock_packet": operator_unblock_packet,
         "required_engine_run_count": required_engine_run_count,
         "ready_engine_run_slot_count": ready_engine_run_slot_count,
+        "blocked_case_input_slot_count": blocked_case_input_slot_count,
+        "blocked_engine_run_slot_count": blocked_engine_run_slot_count,
+        "first_blocked_case_input_slot": first_blocked_case_input_slot,
+        "first_blocked_engine_run_slot": first_blocked_engine_run_slot,
         "operator_commands": {
             "build_execution_plan": (
                 "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py "
@@ -869,6 +889,17 @@ def build_vina_gnina_runtime_readiness(
                 or len(engine_run_slots)
             ),
             "ready_engine_run_slot_count": ready_engine_run_slot_count,
+            "blocked_case_input_slot_count": blocked_case_input_slot_count,
+            "blocked_engine_run_slot_count": blocked_engine_run_slot_count,
+            "first_blocked_case_input_case_id": str(
+                first_blocked_case_input_slot.get("case_id") or ""
+            ),
+            "first_blocked_engine_run_case_id": str(
+                first_blocked_engine_run_slot.get("case_id") or ""
+            ),
+            "first_blocked_engine_run_engine_id": str(
+                first_blocked_engine_run_slot.get("engine_id") or ""
+            ),
             "available_engine_count": sum(
                 1 for row in current_engine_execution_statuses if row.get("available")
             ),

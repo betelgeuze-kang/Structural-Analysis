@@ -638,6 +638,19 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert row_matrix["vina_gnina_rows"]["runtime_action_packet"][
         "rows_template_role_receipt_blocked_count"
     ] == 72
+    assert row_matrix["vina_gnina_rows"]["runtime_action_packet"][
+        "first_blocked_case_input_slot"
+    ] == {
+        "case_id": "casf2016_4llx",
+        "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_4llx",
+    }
+    assert row_matrix["vina_gnina_rows"]["runtime_action_packet"][
+        "first_blocked_engine_run_slot"
+    ] == {
+        "case_id": "casf2016_4llx",
+        "engine_id": "vina",
+        "docking_run_id": "casf2016_4llx_vina_run",
+    }
 
     gap_register = {
         row["slot_id"]: row for row in packet["operator_evidence_gap_register"]
@@ -992,6 +1005,17 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
     )
     assert (
         "- `vina_gnina_rows_template_role_receipt_blocked_count`: `72`"
+        in markdown
+    )
+    assert (
+        "- `vina_gnina_first_blocked_case_input_slot`: "
+        "`casf2016_4llx` / "
+        "`fill_vina_gnina_input_manifest_row_for_casf2016_4llx`"
+        in markdown
+    )
+    assert (
+        "- `vina_gnina_first_blocked_engine_run_slot`: "
+        "`casf2016_4llx` / `vina` / `casf2016_4llx_vina_run`"
         in markdown
     )
     assert (

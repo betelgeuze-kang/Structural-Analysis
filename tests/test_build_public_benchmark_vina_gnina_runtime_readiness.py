@@ -325,10 +325,15 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "adapter_case_count": 0,
         "adapter_row_preflight_status": "row_artifact_missing",
         "available_engine_count": 0,
+        "blocked_case_input_slot_count": 0,
+        "blocked_engine_run_slot_count": 2,
         "blocker_count": 5,
         "case_count": 1,
         "detected_row_artifact_count": 0,
         "execution_plan_ready": True,
+        "first_blocked_case_input_case_id": "",
+        "first_blocked_engine_run_case_id": "casf2016_1abc",
+        "first_blocked_engine_run_engine_id": "vina",
         "missing_engine_count": 2,
         "operator_execution_ready": False,
         "ready_engine_run_slot_count": 0,
@@ -336,6 +341,11 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "runtime_ready_for_engine_execution": False,
         "selected_row_count": 0,
     }
+    assert payload["blocked_case_input_slot_count"] == 0
+    assert payload["blocked_engine_run_slot_count"] == 2
+    assert payload["first_blocked_case_input_slot"] == {}
+    assert payload["first_blocked_engine_run_slot"]["case_id"] == "casf2016_1abc"
+    assert payload["first_blocked_engine_run_slot"]["engine_id"] == "vina"
     assert payload["engine_run_slots"][0]["status"] == "blocked"
     assert payload["engine_run_slots"][0]["engine_execution_source"] == ""
     assert payload["engine_run_slots"][0]["required_adapter_engine_run_fields"] == [
@@ -599,6 +609,16 @@ def test_runtime_readiness_blocks_case_input_blockers_with_available_engines(
     ]
     assert payload["engine_run_slots"][0]["case_inputs_ready"] is False
     assert payload["engine_run_slots"][0]["status"] == "blocked"
+    assert payload["blocked_case_input_slot_count"] == 1
+    assert payload["blocked_engine_run_slot_count"] == 2
+    assert payload["first_blocked_case_input_slot"]["case_id"] == "casf2016_1abc"
+    assert payload["first_blocked_engine_run_slot"]["case_id"] == "casf2016_1abc"
+    assert payload["first_blocked_engine_run_slot"]["engine_id"] == "vina"
+    assert payload["summary"]["blocked_case_input_slot_count"] == 1
+    assert payload["summary"]["blocked_engine_run_slot_count"] == 2
+    assert payload["summary"]["first_blocked_case_input_case_id"] == "casf2016_1abc"
+    assert payload["summary"]["first_blocked_engine_run_case_id"] == "casf2016_1abc"
+    assert payload["summary"]["first_blocked_engine_run_engine_id"] == "vina"
     unblock = payload["operator_unblock_packet"]
     assert unblock["status"] == "engine_inputs_required"
     assert unblock["blocked_case_input_slot_count"] == 1

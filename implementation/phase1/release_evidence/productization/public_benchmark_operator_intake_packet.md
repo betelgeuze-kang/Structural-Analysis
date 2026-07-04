@@ -35,6 +35,8 @@
 | `pose_rows` | `pose_coordinate_intake` | `casf_pdbbind_pose_success_harness_ready`, `symmetry_aware_ligand_rmsd_ready`, `posebusters_style_pose_validity_ready` | `implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json` | `implementation/phase1/release_evidence/productization/public_benchmark_pose_rows_template.csv` |
 | `enrichment_rows` | `dud_e_lit_pcba_enrichment_intake` | `dud_e_or_lit_pcba_enrichment_ready` | `implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json` | `implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows_template.csv` |
 - `vina_gnina_rows_template_role_receipt_blocked_count`: `72`
+- `vina_gnina_first_blocked_case_input_slot`: `casf2016_4llx` / `fill_vina_gnina_input_manifest_row_for_casf2016_4llx`
+- `vina_gnina_first_blocked_engine_run_slot`: `casf2016_4llx` / `vina` / `casf2016_4llx_vina_run`
 - `vina_gnina_first_blocked_role_receipt`: `engine_run_artifact_receipt` / `casf2016_4llx_vina_casf2016_4llx_vina_run`
 | `vina_gnina_rows` | `vina_gnina_comparison_intake` | `vina_gnina_comparison_ready` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv` |
 

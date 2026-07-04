@@ -1376,6 +1376,12 @@ def _vina_gnina_runtime_action_packet(
                 "blocked_case_input_slot_count"
             )
         ),
+        "first_blocked_case_input_slot": _as_dict(
+            unblock.get("first_blocked_case_input_slot")
+            or vina_gnina_runtime_readiness_summary.get(
+                "first_blocked_case_input_slot"
+            )
+        ),
         "required_engine_run_count": _as_int(
             unblock.get("required_engine_run_count")
             or vina_gnina_runtime_readiness_summary.get(
@@ -1392,6 +1398,12 @@ def _vina_gnina_runtime_action_packet(
             unblock.get("blocked_engine_run_slot_count")
             or vina_gnina_runtime_readiness_summary.get(
                 "blocked_engine_run_slot_count"
+            )
+        ),
+        "first_blocked_engine_run_slot": _as_dict(
+            unblock.get("first_blocked_engine_run_slot")
+            or vina_gnina_runtime_readiness_summary.get(
+                "first_blocked_engine_run_slot"
             )
         ),
         "expected_rows_artifact": str(
@@ -2286,12 +2298,22 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                     for step in action.get("operator_sequence", [])
                     if str(step)
                 )
+                first_case_slot = _as_dict(
+                    action.get("first_blocked_case_input_slot")
+                )
+                first_engine_slot = _as_dict(
+                    action.get("first_blocked_engine_run_slot")
+                )
                 lines.extend(
                     [
                         f"- `status`: `{action.get('status')}`",
                         f"- `expected_rows_artifact`: `{action.get('expected_rows_artifact')}`",
                         f"- `input_manifest_template_preflight_artifact`: `{action.get('input_manifest_template_preflight_artifact')}`",
                         f"- `rows_template_preflight_artifact`: `{action.get('rows_template_preflight_artifact')}`",
+                        f"- `blocked_case_input_slot_count`: `{action.get('blocked_case_input_slot_count')}`",
+                        f"- `first_blocked_case_input_slot`: `{first_case_slot.get('case_id', '')}` / `{first_case_slot.get('operator_action', '')}`",
+                        f"- `blocked_engine_run_slot_count`: `{action.get('blocked_engine_run_slot_count')}`",
+                        f"- `first_blocked_engine_run_slot`: `{first_engine_slot.get('case_id', '')}` / `{first_engine_slot.get('engine_id', '')}` / `{first_engine_slot.get('docking_run_id', '')}`",
                         f"- `first_operator_sequence_step`: `{(action.get('operator_sequence') or [''])[0]}`",
                         f"- `operator_sequence`: {operator_sequence or '`none`'}",
                         f"- `build_input_manifest_template_preflight_command`: `{commands.get('build_input_manifest_template_preflight', '')}`",

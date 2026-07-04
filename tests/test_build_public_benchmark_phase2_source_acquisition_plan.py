@@ -595,7 +595,21 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "review_public_benchmark_vina_gnina_input_manifest_template_preflight"
     )
     assert runtime_action["case_input_slot_count"] == 12
+    assert runtime_action["blocked_case_input_slot_count"] == 12
+    assert runtime_action["first_blocked_case_input_slot"]["case_id"] == (
+        "casf2016_4llx"
+    )
+    assert runtime_action["first_blocked_case_input_slot"]["operator_action"] == (
+        "fill_vina_gnina_input_manifest_row_for_casf2016_4llx"
+    )
     assert runtime_action["blocked_engine_run_slot_count"] == 24
+    assert runtime_action["first_blocked_engine_run_slot"]["case_id"] == (
+        "casf2016_4llx"
+    )
+    assert runtime_action["first_blocked_engine_run_slot"]["engine_id"] == "vina"
+    assert runtime_action["first_blocked_engine_run_slot"]["docking_run_id"] == (
+        "casf2016_4llx_vina_run"
+    )
     assert runtime_action["commands"]["build_rows_template_preflight"].startswith(
         "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py"
     )
@@ -777,6 +791,11 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "review_public_benchmark_vina_gnina_input_manifest_template_preflight" in (
         markdown
     )
+    assert "`first_blocked_case_input_slot`: `casf2016_4llx` /" in markdown
+    assert (
+        "`first_blocked_engine_run_slot`: `casf2016_4llx` / `vina` / "
+        "`casf2016_4llx_vina_run`"
+    ) in markdown
     assert "`first_operator_sequence_step`: `review_public_benchmark_vina_gnina_input_manifest_template_preflight`" in markdown
     assert "### Vina/GNINA Adapter Row Preflight Action" in markdown
     assert "public_benchmark_vina_gnina_rows_template_preflight.json" in markdown

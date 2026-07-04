@@ -373,6 +373,14 @@ def _vina_gnina_runtime_action_packet(
     first_blocked_role = _as_dict(
         rows_template_preflight.get("first_blocked_role_receipt")
     )
+    first_blocked_case_input_slot = _as_dict(
+        runtime.get("first_blocked_case_input_slot")
+        or unblock.get("first_blocked_case_input_slot")
+    )
+    first_blocked_engine_run_slot = _as_dict(
+        runtime.get("first_blocked_engine_run_slot")
+        or unblock.get("first_blocked_engine_run_slot")
+    )
     if not runtime and not unblock:
         return {}
     return {
@@ -403,11 +411,24 @@ def _vina_gnina_runtime_action_packet(
             or unblock.get("blocked_case_input_slot_count")
             or 0
         ),
+        "first_blocked_case_input_slot": {
+            "case_id": str(first_blocked_case_input_slot.get("case_id") or ""),
+            "operator_action": str(
+                first_blocked_case_input_slot.get("operator_action") or ""
+            ),
+        },
         "blocked_engine_run_slot_count": int(
             runtime.get("blocked_engine_run_slot_count")
             or unblock.get("blocked_engine_run_slot_count")
             or 0
         ),
+        "first_blocked_engine_run_slot": {
+            "case_id": str(first_blocked_engine_run_slot.get("case_id") or ""),
+            "engine_id": str(first_blocked_engine_run_slot.get("engine_id") or ""),
+            "docking_run_id": str(
+                first_blocked_engine_run_slot.get("docking_run_id") or ""
+            ),
+        },
         "expected_rows_artifact": str(unblock.get("expected_rows_artifact") or ""),
         "input_manifest_template_artifact": str(
             unblock.get("input_manifest_template_artifact") or ""
@@ -2208,9 +2229,26 @@ def _markdown(payload: dict[str, Any]) -> str:
         runtime_action = _as_dict(row.get("runtime_action_packet"))
         if runtime_action and row["row_input_id"] == "vina_gnina_rows":
             first_role = _as_dict(runtime_action.get("first_blocked_role_receipt"))
+            first_case_slot = _as_dict(
+                runtime_action.get("first_blocked_case_input_slot")
+            )
+            first_engine_slot = _as_dict(
+                runtime_action.get("first_blocked_engine_run_slot")
+            )
             lines.append(
                 "- `vina_gnina_rows_template_role_receipt_blocked_count`: "
                 f"`{runtime_action.get('rows_template_role_receipt_blocked_count')}`"
+            )
+            lines.append(
+                "- `vina_gnina_first_blocked_case_input_slot`: "
+                f"`{first_case_slot.get('case_id', '')}` / "
+                f"`{first_case_slot.get('operator_action', '')}`"
+            )
+            lines.append(
+                "- `vina_gnina_first_blocked_engine_run_slot`: "
+                f"`{first_engine_slot.get('case_id', '')}` / "
+                f"`{first_engine_slot.get('engine_id', '')}` / "
+                f"`{first_engine_slot.get('docking_run_id', '')}`"
             )
             lines.append(
                 "- `vina_gnina_first_blocked_role_receipt`: "

@@ -24,18 +24,18 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T04:03:40.929806+00:00",
+  "generated_at": "2026-07-04T04:22:10.658898+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:3f53708e67d1dd76f5f313307ce46a2971b748ef1938925bc44318b40e52709d",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:d91bbc8402c86796ce3d60d0a053610cceea2dcbbb0f5faf00adeaad7698bea4",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv": "sha256:3a106d2aa9f456eee7238523bf090db13e35d98afefa3952352a660f5b5e36ae",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json": "sha256:029bfc660060a50fe54ed88fa29dd99dd623967a80f36e772f969d82bc40428d",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:5eaa0791cbcbc2b19bbd06c01fcddd636026dcf2b1316447e044d463e4cf97c2",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:a5f4150a55d8efdbc48bdf17fd487a8f1ed83a4adaafd142c6d98e376d1c7fd0",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:a0c748515aefbeb496ab253028a3b13b4df4b2844ae88e1ef394a0e1d12e4f1d",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:452c5481e58e928deebb82227ba646775b7ac1613debc4d2ce239ab8b3d93f85",
     "scripts/build_public_benchmark_source_access_preflight_receipt.py": "sha256:47b23a61ea7eb470f8ab4b48337b4382ad3523a646b81c8bdddedf3451d1c2d1",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1",
     "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:69b0ce594558bad457b052be33865b0abf90e8b4779dc31ff3a987b1eea7ef72",
-    "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:45bc0cb054326cc00c62fb6ac269c7319120f4d8aaebc6a5685821e42a4e658f",
+    "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py": "sha256:af8ef136253af786aef448edfdcf6f6b6a559f75d91cdfccd0f17e059b2004d3",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
@@ -309,6 +309,75 @@
           "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
         },
         "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "first_blocked_case_input_slot": {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing"
+          ],
+          "case_id": "casf2016_4llx",
+          "case_inputs_ready": false,
+          "complex_id": "4llx",
+          "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+          "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_4llx",
+          "status": "blocked"
+        },
+        "first_blocked_engine_run_slot": {
+          "blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing",
+            "vina_binary_missing"
+          ],
+          "case_blockers": [
+            "protein_structure_path_missing",
+            "reference_ligand_path_missing",
+            "prepared_receptor_path_missing",
+            "prepared_ligand_path_missing"
+          ],
+          "case_id": "casf2016_4llx",
+          "case_inputs_ready": false,
+          "command_template": "<vina> --receptor <prepared/4llx_receptor> --ligand <prepared/4llx_ligand> --center_x {center[x]} --center_y {center[y]} --center_z {center[z]} --size_x {size[x]} --size_y {size[y]} --size_z {size[z]} --out operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+          "complex_id": "4llx",
+          "docking_box_ready": true,
+          "docking_run_id": "casf2016_4llx_vina_run",
+          "engine_available": false,
+          "engine_command_prefix": "",
+          "engine_container_image": "",
+          "engine_executable": "",
+          "engine_execution_source": "",
+          "engine_id": "vina",
+          "expected_engine_config_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+          "expected_engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+          "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+          "required_adapter_case_fields": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "engine_runs",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "required_adapter_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "status": "blocked"
+        },
         "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
         "input_manifest_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json",
         "operator_execution_ready": false,
@@ -1554,7 +1623,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "17833231fa88003ad3988e3e8b624343eeb14555",
+  "source_commit_sha": "4d44696bedfc80038d1d4024580c0722b8d759fb",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
