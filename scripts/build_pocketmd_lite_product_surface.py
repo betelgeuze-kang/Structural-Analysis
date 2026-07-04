@@ -22,6 +22,7 @@ from materialize_pocketmd_lite_topk_survival_report import (  # noqa: E402
     TOPK_ROW_QUALITY_CRITERIA,
     UPSTREAM_TOP_K_RECEIPT_FIELDS,
     build_operator_input_source_receipt,
+    build_phase4_completion_audit,
     build_phase4_exit_gate,
     render_pocketmd_lite_topk_survival_markdown,
 )
@@ -1459,6 +1460,12 @@ def build_topk_survival_report(
         {"cases": []},
         repo_root=repo_root,
     )
+    topk_refinement_completion_audit = build_phase4_completion_audit(
+        summary=summary,
+        phase4_exit_gate=phase4_exit_gate,
+        operator_input_source_receipt=operator_input_source_receipt,
+        product_surface_ready=False,
+    )
     return {
         "schema_version": SURVIVAL_REPORT_SCHEMA_VERSION,
         **_metadata(
@@ -1486,6 +1493,7 @@ def build_topk_survival_report(
         "required_metrics": [row["metric_id"] for row in _metric_contracts()],
         "required_case_fields": required_case_fields,
         "phase4_exit_gate": phase4_exit_gate,
+        "topk_refinement_completion_audit": topk_refinement_completion_audit,
         "operator_input_source_receipt": operator_input_source_receipt,
         "operator_intake_route": POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
         "operator_intake_packet": handoff_context["operator_intake_packet"],
@@ -1511,6 +1519,15 @@ def build_topk_survival_report(
             "phase4_failed_criterion_count": phase4_exit_gate[
                 "failed_criterion_count"
             ],
+            "topk_refinement_completion_audit_status": (
+                topk_refinement_completion_audit["status"]
+            ),
+            "topk_refinement_completion_requirement_count": (
+                topk_refinement_completion_audit["requirement_count"]
+            ),
+            "topk_refinement_completion_requirement_pass_count": (
+                topk_refinement_completion_audit["requirement_pass_count"]
+            ),
         },
         "blockers": blockers,
         "next_actions": [
@@ -2161,6 +2178,17 @@ def build_surface(
             {"cases": []},
             repo_root=repo_root,
         )
+    topk_refinement_completion_audit = topk_survival_report.get(
+        "topk_refinement_completion_audit"
+    )
+    if not isinstance(topk_refinement_completion_audit, dict):
+        report_summary = topk_survival_report.get("summary")
+        topk_refinement_completion_audit = build_phase4_completion_audit(
+            summary=report_summary if isinstance(report_summary, dict) else {},
+            phase4_exit_gate=phase4_exit_gate,
+            operator_input_source_receipt=operator_input_source_receipt,
+            product_surface_ready=False,
+        )
     refinement_execution_plan = build_pocketmd_lite_refinement_execution_plan(
         repo_root=repo_root
     )
@@ -2190,6 +2218,7 @@ def build_surface(
         "root_cause_tags": ["operator_refinement_rows_required"],
         "blockers": blockers,
         "phase4_exit_gate": phase4_exit_gate,
+        "topk_refinement_completion_audit": topk_refinement_completion_audit,
         "operator_input_source_receipt": operator_input_source_receipt,
         "operator_intake_route": POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
         "operator_intake_required_slot_count": 1,
@@ -2256,6 +2285,15 @@ def build_surface(
             ),
             "operator_input_source_receipt_contract_pass": bool(
                 operator_input_source_receipt.get("contract_pass")
+            ),
+            "topk_refinement_completion_audit_status": str(
+                topk_refinement_completion_audit.get("status") or ""
+            ),
+            "topk_refinement_completion_requirement_count": int(
+                topk_refinement_completion_audit.get("requirement_count") or 0
+            ),
+            "topk_refinement_completion_requirement_pass_count": int(
+                topk_refinement_completion_audit.get("requirement_pass_count") or 0
             ),
         },
         "goal_roadmap_linkage": {

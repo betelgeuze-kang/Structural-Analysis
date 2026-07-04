@@ -625,13 +625,13 @@
   "execution_plan_ready": true,
   "expected_operator_intake_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json",
   "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
-  "generated_at": "2026-07-04T08:22:15.945485+00:00",
+  "generated_at": "2026-07-04T13:19:47.654548+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:cd1d354e04bcb8f1f197b2ef587bc8c5662e576e5e60500360e63e32232d604f",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:09354cd520764e9fb23e9a23e1eed17a38e73328687154c5d35c5411731af093",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:20ec81d14950c985d217f9bdf657ab59f04d837a332cbe3bc71ed5e2c562c268",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:03fd1523adcfed47c63c7403259425bcb03d91049b4e9d39dec970989d1731aa",
     "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:950ae4ecdfc630bf6d2558548bd42c8ff962efa1e5db9ffdf7d78fb2a22aff30",
     "scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py": "sha256:98b64ccda7f42657a1be21b7e2917948e9e11275fb86da9221b89e10a988604f",
-    "scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py": "sha256:d3d0d11ba7657d4c78921168dc3d9e95a6ebd0be3c54f45fa83553f42b88b89b"
+    "scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py": "sha256:d92f21fd1e872e3d85096bfde29b4a0f557f91cfe2f467ba69497999882123ad"
   },
   "operator_commands": {
     "build_row_template_preflight": "python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
@@ -818,7 +818,7 @@
     "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
   },
   "schema_version": "pocketmd-lite-refinement-execution-plan.v1",
-  "source_commit_sha": "fa32ae270001380d06a740bdbc98af4d082e6b6d",
+  "source_commit_sha": "8f5bd084a34757f547fadff9365e8c7b5f86482e",
   "source_receipt_requirements": {
     "mode": "raw_top_k_refinement_rows",
     "placeholder_block_policy": {

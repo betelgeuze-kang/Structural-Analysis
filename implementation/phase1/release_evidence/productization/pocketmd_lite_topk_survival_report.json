@@ -331,13 +331,14 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
   },
-  "generated_at": "2026-07-04T06:48:09.863256+00:00",
+  "generated_at": "2026-07-04T13:19:47.608907+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:4b31dabcd04793e8f2737651638d67e4bbbf2108619b910a7b5a60fffc5f600b",
-    "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:c4e52648fc194826a082a0816d7946350a90fe1e4eae7d31e3d6f37dd1c05148",
-    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:57f3773a03ec481e78cb8e7dd8caeaf4bbee2110aa9b9d6cb2f37620aa05af57",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json": "sha256:2107e7c456fc6e1113f0b662abe0239c5e28b5281813d159d223df5d93df6688",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:737a48166c968882fa2a2f4ed91e51c9e5f48236469c910332754527a85f5854",
+    "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:950ae4ecdfc630bf6d2558548bd42c8ff962efa1e5db9ffdf7d78fb2a22aff30",
+    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:f96cb98685938f086f3db1cd81ed4ec3a49c42f731f41a340c4a6f51c7108ac4",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:dad666c08fff6ec709e535de64fdc41121b7c93de5e19c42f0876d71a44a67c9",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:24aba7d75e0de5a6e62416cdbbab5980d231dee7030b2718c2f37f59d8437366"
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:31242962ee8d3689edaf88ce8d3a05059340d618a45a2259c8ca8180badd6f4c"
   },
   "materialization_report": {
     "blocker_count": 6,
@@ -356,7 +357,10 @@
       "min_real_refinement_case_count": 3,
       "min_top_k_rank_coverage_per_case": 2,
       "min_total_top_k_candidate_count": 6
-    }
+    },
+    "topk_refinement_completion_audit_status": "blocked",
+    "topk_refinement_completion_requirement_count": 10,
+    "topk_refinement_completion_requirement_pass_count": 1
   },
   "materializer": {
     "command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
@@ -1894,7 +1898,7 @@
   ],
   "rows": [],
   "schema_version": "pocketmd-lite-topk-survival-report.v1",
-  "source_commit_sha": "c0ca3eae63cb81d0a6a8d37936166ba2ec0e5666",
+  "source_commit_sha": "8f5bd084a34757f547fadff9365e8c7b5f86482e",
   "status": "operator_evidence_required",
   "summary": {
     "blocker_count": 6,
@@ -1926,5 +1930,202 @@
     "uncertainty_width_median": null
   },
   "summary_line": "PocketMD Lite top-k survival report: LOCKED | first_blocked_target=top_k_refinement_operator_intake | blockers=6",
-  "top_k_candidate_count": 0
+  "top_k_candidate_count": 0,
+  "topk_refinement_completion_audit": {
+    "blockers": [
+      "operator_input_source_receipt_pass::operator_input_source_receipt_required",
+      "top_k_refinement_rows_present::pocketmd_lite_topk_candidate_rows_missing",
+      "top_k_refinement_case_coverage::pocketmd_lite_topk_candidate_rows_missing",
+      "local_min_survival_materialized::pocketmd_lite_local_min_survival_rows_missing",
+      "contact_persistence_materialized::pocketmd_lite_contact_persistence_rows_missing",
+      "h_bond_persistence_materialized::pocketmd_lite_h_bond_persistence_rows_missing",
+      "clash_relief_materialized::pocketmd_lite_clash_relief_rows_missing",
+      "uncertainty_summary_materialized::pocketmd_lite_uncertainty_rows_missing",
+      "report_blockers_resolved::pocketmd_lite_topk_candidate_rows_missing",
+      "report_blockers_resolved::pocketmd_lite_local_min_survival_rows_missing",
+      "report_blockers_resolved::pocketmd_lite_contact_persistence_rows_missing",
+      "report_blockers_resolved::pocketmd_lite_h_bond_persistence_rows_missing",
+      "report_blockers_resolved::pocketmd_lite_clash_relief_rows_missing",
+      "report_blockers_resolved::pocketmd_lite_uncertainty_rows_missing"
+    ],
+    "claim": "pocketmd_lite_top_k_refinement",
+    "claim_boundary": "This audit proves only bounded PocketMD Lite top-k refinement from operator-attached rows and their source receipt. It does not prove broad all-atom MD, FEP, long-timescale dynamics, or autonomous docking accuracy.",
+    "pass": false,
+    "requirement_count": 10,
+    "requirement_pass_count": 1,
+    "requirements": [
+      {
+        "blockers": [
+          "operator_input_source_receipt_required"
+        ],
+        "evidence": {
+          "mode": "",
+          "source_artifact": "",
+          "source_artifact_present": false,
+          "source_artifact_sha256_matches": false,
+          "status": "blocked"
+        },
+        "pass": false,
+        "requirement_id": "operator_input_source_receipt_pass",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "pocketmd_lite_topk_candidate_rows_missing"
+        ],
+        "evidence": {
+          "current": 0,
+          "metric_key": "",
+          "required": ">=6",
+          "summary": {
+            "real_refinement_case_count": 0,
+            "top_k_candidate_count": 0
+          }
+        },
+        "pass": false,
+        "requirement_id": "top_k_refinement_rows_present",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "pocketmd_lite_topk_candidate_rows_missing"
+        ],
+        "evidence": {
+          "current": false,
+          "metric_key": "",
+          "required": true,
+          "summary": {
+            "real_refinement_case_count": 0,
+            "top_k_candidate_count": 0
+          }
+        },
+        "pass": false,
+        "requirement_id": "top_k_refinement_case_coverage",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "pocketmd_lite_local_min_survival_rows_missing"
+        ],
+        "evidence": {
+          "current": null,
+          "metric_key": "local_min_survival_rate",
+          "required": "present",
+          "summary": {
+            "real_refinement_case_count": 0,
+            "top_k_candidate_count": 0
+          }
+        },
+        "pass": false,
+        "requirement_id": "local_min_survival_materialized",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "pocketmd_lite_contact_persistence_rows_missing"
+        ],
+        "evidence": {
+          "current": null,
+          "metric_key": "contact_persistence_rate_median",
+          "required": "present",
+          "summary": {
+            "real_refinement_case_count": 0,
+            "top_k_candidate_count": 0
+          }
+        },
+        "pass": false,
+        "requirement_id": "contact_persistence_materialized",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "pocketmd_lite_h_bond_persistence_rows_missing"
+        ],
+        "evidence": {
+          "current": null,
+          "metric_key": "h_bond_persistence_rate_median",
+          "required": "present",
+          "summary": {
+            "real_refinement_case_count": 0,
+            "top_k_candidate_count": 0
+          }
+        },
+        "pass": false,
+        "requirement_id": "h_bond_persistence_materialized",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "pocketmd_lite_clash_relief_rows_missing"
+        ],
+        "evidence": {
+          "current": null,
+          "metric_key": "clash_relief_rate",
+          "required": "present",
+          "summary": {
+            "real_refinement_case_count": 0,
+            "top_k_candidate_count": 0
+          }
+        },
+        "pass": false,
+        "requirement_id": "clash_relief_materialized",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "pocketmd_lite_uncertainty_rows_missing"
+        ],
+        "evidence": {
+          "current": null,
+          "metric_key": "uncertainty_width_median",
+          "required": "present",
+          "summary": {
+            "real_refinement_case_count": 0,
+            "top_k_candidate_count": 0
+          }
+        },
+        "pass": false,
+        "requirement_id": "uncertainty_summary_materialized",
+        "status": "blocked"
+      },
+      {
+        "blockers": [
+          "pocketmd_lite_topk_candidate_rows_missing",
+          "pocketmd_lite_local_min_survival_rows_missing",
+          "pocketmd_lite_contact_persistence_rows_missing",
+          "pocketmd_lite_h_bond_persistence_rows_missing",
+          "pocketmd_lite_clash_relief_rows_missing",
+          "pocketmd_lite_uncertainty_rows_missing"
+        ],
+        "evidence": {
+          "current": false,
+          "metric_key": "",
+          "required": true,
+          "summary": {
+            "real_refinement_case_count": 0,
+            "top_k_candidate_count": 0
+          }
+        },
+        "pass": false,
+        "requirement_id": "report_blockers_resolved",
+        "status": "blocked"
+      },
+      {
+        "blockers": [],
+        "evidence": {
+          "current": true,
+          "metric_key": "",
+          "required": true,
+          "summary": {
+            "real_refinement_case_count": 0,
+            "top_k_candidate_count": 0
+          }
+        },
+        "pass": true,
+        "requirement_id": "broad_all_atom_fep_claims_locked",
+        "status": "pass"
+      }
+    ],
+    "status": "blocked"
+  }
 }

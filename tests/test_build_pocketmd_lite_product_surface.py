@@ -299,6 +299,17 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "uncertainty_summary_materialized",
         "report_blockers_resolved",
     ]
+    assert survival["topk_refinement_completion_audit"]["status"] == "blocked"
+    assert survival["topk_refinement_completion_audit"]["pass"] is False
+    assert survival["topk_refinement_completion_audit"]["requirement_count"] == 10
+    assert (
+        survival["topk_refinement_completion_audit"]["requirement_pass_count"]
+        == 1
+    )
+    assert (
+        "operator_input_source_receipt_pass::operator_input_source_receipt_required"
+        in survival["topk_refinement_completion_audit"]["blockers"]
+    )
     assert survival["operator_input_source_receipt"]["status"] == "blocked"
     assert survival["operator_input_source_receipt"]["contract_pass"] is False
     assert survival["operator_input_source_receipt"]["blockers"] == [
@@ -1123,8 +1134,23 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert surface["operator_input_source_receipt"] == survival[
         "operator_input_source_receipt"
     ]
+    assert surface["topk_refinement_completion_audit"] == survival[
+        "topk_refinement_completion_audit"
+    ]
     assert surface["readiness_summary"]["phase4_exit_gate_status"] == "blocked"
     assert surface["readiness_summary"]["phase4_failed_criterion_count"] == 8
+    assert (
+        surface["readiness_summary"][
+            "topk_refinement_completion_requirement_count"
+        ]
+        == 10
+    )
+    assert (
+        surface["readiness_summary"][
+            "topk_refinement_completion_requirement_pass_count"
+        ]
+        == 1
+    )
     assert surface["readiness_summary"]["operator_input_source_receipt_status"] == (
         "blocked"
     )
@@ -1245,6 +1271,9 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
             "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py"
         ].startswith("sha256:")
     source_plan_payload = json.loads(source_plan_out.read_text(encoding="utf-8"))
+    survival_payload = json.loads(survival_out.read_text(encoding="utf-8"))
+    survival_markdown = survival_md_out.read_text(encoding="utf-8")
+    surface_payload = json.loads(surface_out.read_text(encoding="utf-8"))
     assert source_plan_payload["summary"]["required_total_candidate_rows"] == 6
     assert source_plan_payload["summary"]["required_candidate_slot_count"] == 6
     assert source_plan_payload["input_checksums"][
@@ -1258,6 +1287,16 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
     )
     assert refinement_execution_plan_payload["required_candidate_slot_count"] == 6
     assert refinement_execution_plan_payload["operator_rows_ready"] is False
+    assert survival_payload["topk_refinement_completion_audit"]["status"] == "blocked"
+    assert (
+        survival_payload["topk_refinement_completion_audit"][
+            "requirement_pass_count"
+        ]
+        == 1
+    )
+    assert "## Top-K Refinement Completion Audit" in survival_markdown
+    assert "`requirement_pass_count`: `1/10`" in survival_markdown
+    assert surface_payload["topk_refinement_completion_audit"]["status"] == "blocked"
     assert "# PocketMD Lite Source Acquisition Plan" in source_plan_md_out.read_text(
         encoding="utf-8"
     )

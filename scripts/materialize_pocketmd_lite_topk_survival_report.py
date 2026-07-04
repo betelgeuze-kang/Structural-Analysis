@@ -839,6 +839,132 @@ def _boolean_gate(
     }
 
 
+def _phase4_completion_requirement(
+    *,
+    requirement_id: str,
+    pass_value: bool,
+    evidence: dict[str, Any] | None = None,
+    blockers: list[str] | None = None,
+) -> dict[str, Any]:
+    return {
+        "requirement_id": requirement_id,
+        "status": "pass" if pass_value else "blocked",
+        "pass": bool(pass_value),
+        "evidence": evidence or {},
+        "blockers": blockers or [],
+    }
+
+
+def _criterion_by_id(phase4_exit_gate: dict[str, Any], criterion_id: str) -> dict[str, Any]:
+    return next(
+        (
+            row
+            for row in _as_list(phase4_exit_gate.get("criteria"))
+            if isinstance(row, dict) and str(row.get("criterion_id") or "") == criterion_id
+        ),
+        {},
+    )
+
+
+def build_phase4_completion_audit(
+    *,
+    summary: dict[str, Any],
+    phase4_exit_gate: dict[str, Any],
+    operator_input_source_receipt: dict[str, Any],
+    product_surface_ready: bool,
+) -> dict[str, Any]:
+    requirements = [
+        _phase4_completion_requirement(
+            requirement_id="operator_input_source_receipt_pass",
+            pass_value=bool(operator_input_source_receipt.get("contract_pass")),
+            evidence={
+                "status": str(operator_input_source_receipt.get("status") or ""),
+                "mode": str(operator_input_source_receipt.get("mode") or ""),
+                "source_artifact": str(
+                    operator_input_source_receipt.get("source_artifact") or ""
+                ),
+                "source_artifact_present": bool(
+                    operator_input_source_receipt.get("source_artifact_present")
+                ),
+                "source_artifact_sha256_matches": bool(
+                    operator_input_source_receipt.get(
+                        "source_artifact_sha256_matches"
+                    )
+                ),
+            },
+            blockers=[
+                str(item)
+                for item in _as_list(operator_input_source_receipt.get("blockers"))
+            ],
+        ),
+    ]
+    for criterion_id in (
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+        "broad_all_atom_fep_claims_locked",
+    ):
+        criterion = _criterion_by_id(phase4_exit_gate, criterion_id)
+        requirements.append(
+            _phase4_completion_requirement(
+                requirement_id=criterion_id,
+                pass_value=bool(criterion.get("pass")),
+                evidence={
+                    "metric_key": str(criterion.get("metric_key") or ""),
+                    "current": criterion.get("current"),
+                    "required": criterion.get("required"),
+                    "summary": {
+                        "real_refinement_case_count": int(
+                            summary.get("real_refinement_case_count") or 0
+                        ),
+                        "top_k_candidate_count": int(
+                            summary.get("top_k_candidate_count") or 0
+                        ),
+                    },
+                },
+                blockers=[
+                    str(item) for item in _as_list(criterion.get("blockers"))
+                ],
+            )
+        )
+    pass_count = sum(1 for row in requirements if bool(row.get("pass")))
+    blockers = [
+        f"{row['requirement_id']}::{blocker}"
+        for row in requirements
+        for blocker in _as_list(row.get("blockers"))
+    ]
+    blockers.extend(
+        str(row["requirement_id"])
+        for row in requirements
+        if not bool(row.get("pass")) and not _as_list(row.get("blockers"))
+    )
+    blockers = list(dict.fromkeys(blockers))
+    return {
+        "status": (
+            "pass"
+            if product_surface_ready and pass_count == len(requirements)
+            else "blocked"
+        ),
+        "pass": bool(product_surface_ready and pass_count == len(requirements)),
+        "claim": "pocketmd_lite_top_k_refinement",
+        "requirement_count": len(requirements),
+        "requirement_pass_count": pass_count,
+        "requirements": requirements,
+        "blockers": blockers,
+        "claim_boundary": (
+            "This audit proves only bounded PocketMD Lite top-k refinement from "
+            "operator-attached rows and their source receipt. It does not prove "
+            "broad all-atom MD, FEP, long-timescale dynamics, or autonomous "
+            "docking accuracy."
+        ),
+    }
+
+
 def build_phase4_exit_gate(
     *,
     summary: dict[str, Any],
@@ -949,6 +1075,7 @@ def _markdown_value(value: Any) -> str:
 def render_pocketmd_lite_topk_survival_markdown(payload: dict[str, Any]) -> str:
     summary = _as_dict(payload.get("summary"))
     gate = _as_dict(payload.get("phase4_exit_gate"))
+    completion_audit = _as_dict(payload.get("topk_refinement_completion_audit"))
     row_quality = _as_dict(payload.get("top_k_row_quality"))
     lines = [
         "# PocketMD Lite Top-K Survival Report",
@@ -985,6 +1112,31 @@ def render_pocketmd_lite_topk_survival_markdown(payload: dict[str, Any]) -> str:
             f"`{_markdown_value(criterion.get('required'))}` | "
             f"`{_comma_join(_as_list(criterion.get('blockers')))}` |"
         )
+    if completion_audit:
+        lines.extend(
+            [
+                "",
+                "## Top-K Refinement Completion Audit",
+                "",
+                f"- `status`: `{completion_audit.get('status', '')}`",
+                f"- `pass`: `{completion_audit.get('pass', False)}`",
+                "- `requirement_pass_count`: "
+                f"`{completion_audit.get('requirement_pass_count', 0)}/"
+                f"{completion_audit.get('requirement_count', 0)}`",
+                "",
+                "| Requirement | Status | Blockers |",
+                "|---|---|---|",
+            ]
+        )
+        for requirement in _as_list(completion_audit.get("requirements")):
+            if not isinstance(requirement, dict):
+                continue
+            lines.append(
+                "| "
+                f"`{requirement.get('requirement_id', '')}` | "
+                f"`{requirement.get('status', '')}` | "
+                f"`{_comma_join(_as_list(requirement.get('blockers')))}` |"
+            )
     lines.extend(
         [
             "",
@@ -1107,6 +1259,12 @@ def materialize_pocketmd_lite_topk_survival_report(
         first_blocked_target=first_blocked_target,
         blocked_claims=list(BLOCKED_CLAIMS),
     )
+    topk_refinement_completion_audit = build_phase4_completion_audit(
+        summary=summary,
+        phase4_exit_gate=phase4_exit_gate,
+        operator_input_source_receipt=operator_input_source_receipt,
+        product_surface_ready=product_surface_ready,
+    )
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -1135,6 +1293,7 @@ def materialize_pocketmd_lite_topk_survival_report(
         "operator_input_source_receipt": operator_input_source_receipt,
         "blocked_claims": list(BLOCKED_CLAIMS),
         "phase4_exit_gate": phase4_exit_gate,
+        "topk_refinement_completion_audit": topk_refinement_completion_audit,
         "next_actions": (
             [
                 "review_pocketmd_lite_topk_survival_report",
@@ -1162,6 +1321,15 @@ def materialize_pocketmd_lite_topk_survival_report(
             "product_surface_ready": product_surface_ready,
             "phase4_exit_gate_status": phase4_exit_gate["status"],
             "phase4_failed_criterion_count": phase4_exit_gate["failed_criterion_count"],
+            "topk_refinement_completion_audit_status": (
+                topk_refinement_completion_audit["status"]
+            ),
+            "topk_refinement_completion_requirement_count": (
+                topk_refinement_completion_audit["requirement_count"]
+            ),
+            "topk_refinement_completion_requirement_pass_count": (
+                topk_refinement_completion_audit["requirement_pass_count"]
+            ),
         },
         "summary_line": (
             "PocketMD Lite top-k survival report: PASS | "
@@ -1207,6 +1375,19 @@ def build_pocketmd_lite_science_product_surface(
             first_blocked_target=first_blocked_target,
             blocked_claims=[str(row) for row in _as_list(report.get("blocked_claims"))],
         )
+    operator_input_source_receipt = _as_dict(
+        report.get("operator_input_source_receipt")
+    )
+    topk_refinement_completion_audit = _as_dict(
+        report.get("topk_refinement_completion_audit")
+    )
+    if not topk_refinement_completion_audit:
+        topk_refinement_completion_audit = build_phase4_completion_audit(
+            summary=report.get("summary", {}) if isinstance(report.get("summary"), dict) else {},
+            phase4_exit_gate=phase4_exit_gate,
+            operator_input_source_receipt=operator_input_source_receipt,
+            product_surface_ready=product_surface_ready,
+        )
 
     return {
         "schema_version": SURFACE_SCHEMA_VERSION,
@@ -1232,9 +1413,8 @@ def build_pocketmd_lite_science_product_surface(
         "blockers": [] if product_surface_ready else blockers,
         "blocked_claims": list(BLOCKED_CLAIMS),
         "phase4_exit_gate": phase4_exit_gate,
-        "operator_input_source_receipt": _as_dict(
-            report.get("operator_input_source_receipt")
-        ),
+        "topk_refinement_completion_audit": topk_refinement_completion_audit,
+        "operator_input_source_receipt": operator_input_source_receipt,
         "required_receipts": [
             "top_k_candidate_refinement_rows",
             "local_min_survival_report",
@@ -1269,6 +1449,15 @@ def build_pocketmd_lite_science_product_surface(
             "phase4_failed_criteria": [
                 str(row) for row in _as_list(phase4_exit_gate.get("failed_criteria"))
             ],
+            "topk_refinement_completion_audit_status": str(
+                topk_refinement_completion_audit.get("status") or ""
+            ),
+            "topk_refinement_completion_requirement_count": int(
+                topk_refinement_completion_audit.get("requirement_count") or 0
+            ),
+            "topk_refinement_completion_requirement_pass_count": int(
+                topk_refinement_completion_audit.get("requirement_pass_count") or 0
+            ),
         },
         "materializer": {
             "schema_version": MATERIALIZATION_SCHEMA_VERSION,

@@ -268,6 +268,23 @@ def test_pocketmd_lite_materializer_computes_topk_survival_summary(
     assert report["phase4_exit_gate"]["status"] == "ready"
     assert report["phase4_exit_gate"]["failed_criterion_count"] == 0
     assert report["phase4_exit_gate"]["failed_criteria"] == []
+    completion_audit = report["topk_refinement_completion_audit"]
+    assert completion_audit["status"] == "pass"
+    assert completion_audit["pass"] is True
+    assert completion_audit["requirement_count"] == 10
+    assert completion_audit["requirement_pass_count"] == 10
+    assert [row["requirement_id"] for row in completion_audit["requirements"]] == [
+        "operator_input_source_receipt_pass",
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+        "broad_all_atom_fep_claims_locked",
+    ]
     assert report["materialization_report"]["case_refinement_summary_count"] == 3
     assert report["case_refinement_summaries"][0] == {
         "candidate_ids": ["pose_1", "pose_2"],
@@ -340,7 +357,14 @@ def test_pocketmd_lite_materializer_surface_unlocks_only_bounded_claim(
     assert surface["operator_input_source_receipt"]["contract_pass"] is True
     assert "broad_all_atom_md_claim" in surface["blocked_claims"]
     assert surface["phase4_exit_gate"]["status"] == "ready"
+    assert surface["topk_refinement_completion_audit"]["status"] == "pass"
     assert surface["readiness_summary"]["phase4_exit_gate_status"] == "ready"
+    assert (
+        surface["readiness_summary"][
+            "topk_refinement_completion_requirement_pass_count"
+        ]
+        == 10
+    )
     assert surface["readiness_summary"]["phase4_failed_criterion_count"] == 0
     assert len(surface["readiness_summary"]["case_refinement_summaries"]) == 3
     assert surface["goal_roadmap_linkage"]["bottleneck"] == (
@@ -716,9 +740,22 @@ def test_pocketmd_lite_materializer_blocks_empty_intake() -> None:
     ]
     assert report["phase4_exit_gate"]["status"] == "blocked"
     assert report["phase4_exit_gate"]["failed_criterion_count"] == 8
+    assert report["topk_refinement_completion_audit"]["status"] == "blocked"
+    assert report["topk_refinement_completion_audit"]["pass"] is False
+    assert report["topk_refinement_completion_audit"]["requirement_count"] == 10
+    assert report["topk_refinement_completion_audit"]["requirement_pass_count"] == 1
+    assert (
+        "operator_input_source_receipt_pass::operator_input_source_receipt_required"
+        in report["topk_refinement_completion_audit"]["blockers"]
+    )
+    assert (
+        "top_k_refinement_rows_present::pocketmd_lite_topk_candidate_rows_missing"
+        in report["topk_refinement_completion_audit"]["blockers"]
+    )
     assert surface["status"] == "locked"
     assert surface["locked"] is True
     assert surface["first_blocked_target"] == "top_k_refinement_operator_intake"
+    assert surface["topk_refinement_completion_audit"]["status"] == "blocked"
     assert surface["phase4_exit_gate"]["failed_criteria"] == [
         "top_k_refinement_rows_present",
         "top_k_refinement_case_coverage",
@@ -769,6 +806,9 @@ def test_pocketmd_lite_materializer_cli_writes_report_and_surface(tmp_path: Path
     assert "`clash_relief_rate`" in markdown
     assert "`uncertainty_width_median`" in markdown
     assert "`broad_all_atom_fep_claims_locked`" in markdown
+    assert "## Top-K Refinement Completion Audit" in markdown
+    assert "`requirement_pass_count`: `10/10`" in markdown
+    assert "`operator_input_source_receipt_pass`" in markdown
     assert surface["locked"] is False
     assert report["input_checksums"][
         "scripts/materialize_pocketmd_lite_topk_survival_report.py"
@@ -813,6 +853,9 @@ def test_pocketmd_lite_materializer_cli_fail_blocked_returns_one(tmp_path: Path)
     assert "`h_bond_persistence_materialized`" in markdown
     assert "`clash_relief_materialized`" in markdown
     assert "`uncertainty_summary_materialized`" in markdown
+    assert "## Top-K Refinement Completion Audit" in markdown
+    assert "`requirement_pass_count`: `1/10`" in markdown
+    assert "`operator_input_source_receipt_pass`" in markdown
     assert "`attach_top_k_candidate_refinement_rows`" in markdown
     assert report["blockers"] == [
         "pocketmd_lite_topk_candidate_rows_missing",

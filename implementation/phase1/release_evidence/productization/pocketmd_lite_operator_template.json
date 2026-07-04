@@ -3,13 +3,14 @@
   "claim_boundary": "This is a fillable operator template seed for bounded PocketMD Lite top-k refinement rows. It is not refinement evidence and does not unlock broad all-atom MD, FEP, long-timescale dynamics, or de novo binding claims.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T06:48:09.860869+00:00",
+  "generated_at": "2026-07-04T13:19:47.606724+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:4b31dabcd04793e8f2737651638d67e4bbbf2108619b910a7b5a60fffc5f600b",
-    "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:c4e52648fc194826a082a0816d7946350a90fe1e4eae7d31e3d6f37dd1c05148",
-    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:57f3773a03ec481e78cb8e7dd8caeaf4bbee2110aa9b9d6cb2f37620aa05af57",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json": "sha256:2107e7c456fc6e1113f0b662abe0239c5e28b5281813d159d223df5d93df6688",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:737a48166c968882fa2a2f4ed91e51c9e5f48236469c910332754527a85f5854",
+    "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:950ae4ecdfc630bf6d2558548bd42c8ff962efa1e5db9ffdf7d78fb2a22aff30",
+    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:f96cb98685938f086f3db1cd81ed4ec3a49c42f731f41a340c4a6f51c7108ac4",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:dad666c08fff6ec709e535de64fdc41121b7c93de5e19c42f0876d71a44a67c9",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:24aba7d75e0de5a6e62416cdbbab5980d231dee7030b2718c2f37f59d8437366"
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:31242962ee8d3689edaf88ce8d3a05059340d618a45a2259c8ca8180badd6f4c"
   },
   "intake_artifact": "<operator-pocketmd-lite-intake.json>",
   "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
@@ -173,7 +174,7 @@
   "reused_evidence": false,
   "schema_version": "pocketmd-lite-operator-template.v1",
   "slot_id": "top_k_refinement_rows",
-  "source_commit_sha": "c0ca3eae63cb81d0a6a8d37936166ba2ec0e5666",
+  "source_commit_sha": "8f5bd084a34757f547fadff9365e8c7b5f86482e",
   "status": "operator_template_seed",
   "template": {
     "cases": [

@@ -30,6 +30,25 @@
 | `report_blockers_resolved` | `False` | `False` | `True` | `pocketmd_lite_topk_candidate_rows_missing, pocketmd_lite_local_min_survival_rows_missing, pocketmd_lite_contact_persistence_rows_missing, pocketmd_lite_h_bond_persistence_rows_missing, pocketmd_lite_clash_relief_rows_missing, pocketmd_lite_uncertainty_rows_missing` |
 | `broad_all_atom_fep_claims_locked` | `True` | `True` | `True` | `none` |
 
+## Top-K Refinement Completion Audit
+
+- `status`: `blocked`
+- `pass`: `False`
+- `requirement_pass_count`: `1/10`
+
+| Requirement | Status | Blockers |
+|---|---|---|
+| `operator_input_source_receipt_pass` | `blocked` | `operator_input_source_receipt_required` |
+| `top_k_refinement_rows_present` | `blocked` | `pocketmd_lite_topk_candidate_rows_missing` |
+| `top_k_refinement_case_coverage` | `blocked` | `pocketmd_lite_topk_candidate_rows_missing` |
+| `local_min_survival_materialized` | `blocked` | `pocketmd_lite_local_min_survival_rows_missing` |
+| `contact_persistence_materialized` | `blocked` | `pocketmd_lite_contact_persistence_rows_missing` |
+| `h_bond_persistence_materialized` | `blocked` | `pocketmd_lite_h_bond_persistence_rows_missing` |
+| `clash_relief_materialized` | `blocked` | `pocketmd_lite_clash_relief_rows_missing` |
+| `uncertainty_summary_materialized` | `blocked` | `pocketmd_lite_uncertainty_rows_missing` |
+| `report_blockers_resolved` | `blocked` | `pocketmd_lite_topk_candidate_rows_missing, pocketmd_lite_local_min_survival_rows_missing, pocketmd_lite_contact_persistence_rows_missing, pocketmd_lite_h_bond_persistence_rows_missing, pocketmd_lite_clash_relief_rows_missing, pocketmd_lite_uncertainty_rows_missing` |
+| `broad_all_atom_fep_claims_locked` | `pass` | `none` |
+
 | Case | Candidates | Top-K Ranks | Local-Min Survival | Contact Median | H-Bond Median | Clash Relief | Uncertainty Median |
 |---|---|---|---|---|---|---|---|
 
