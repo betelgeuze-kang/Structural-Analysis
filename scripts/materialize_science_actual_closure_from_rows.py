@@ -40,6 +40,9 @@ DEFAULT_PUBLIC_SOURCE_ACQUISITION_PLAN = (
 DEFAULT_PUBLIC_SOURCE_ACCESS_PREFLIGHT_RECEIPT = (
     PRODUCTIZATION / "public_benchmark_source_access_preflight_receipt.json"
 )
+DEFAULT_PUBLIC_EXTERNAL_RECEIPTS_VALIDATION = (
+    PRODUCTIZATION / "public_benchmark_external_receipts_validation.json"
+)
 DEFAULT_POCKETMD_SOURCE_ACQUISITION_PLAN = (
     PRODUCTIZATION / "pocketmd_lite_source_acquisition_plan.json"
 )
@@ -92,10 +95,16 @@ def _source_acquisition_summary(
     artifact: Path,
     source_access_receipt: dict[str, Any] | None = None,
     source_access_receipt_artifact: Path | None = None,
+    external_receipts_validation: dict[str, Any] | None = None,
+    external_receipts_validation_artifact: Path | None = None,
 ) -> dict[str, Any]:
     receipt_summary = _source_access_receipt_summary(
         source_access_receipt or {},
         artifact=source_access_receipt_artifact,
+    )
+    external_receipts_summary = _external_receipts_validation_summary(
+        external_receipts_validation or {},
+        artifact=external_receipts_validation_artifact,
     )
     if not payload:
         return {
@@ -107,6 +116,7 @@ def _source_acquisition_summary(
             "blockers": [],
             "summary": {},
             "source_access_preflight_receipt_summary": receipt_summary,
+            "external_receipts_validation_summary": external_receipts_summary,
         }
     raw_blockers = payload.get("blockers", [])
     blockers = (
@@ -227,6 +237,7 @@ def _source_acquisition_summary(
             or ""
         ),
         "source_access_preflight_receipt_summary": receipt_summary,
+        "external_receipts_validation_summary": external_receipts_summary,
         "phase4_candidate_slot_matrix_count": int(
             payload.get("phase4_candidate_slot_matrix_count")
             or len(phase4_candidate_slot_matrix)
@@ -365,6 +376,63 @@ def _compact_vina_gnina_unblock_packet(payload: dict[str, Any]) -> dict[str, Any
     }
 
 
+def _external_receipts_validation_summary(
+    payload: dict[str, Any],
+    *,
+    artifact: Path | None,
+) -> dict[str, Any]:
+    if not artifact:
+        return {}
+    if not payload:
+        return {
+            "artifact": str(artifact),
+            "present": False,
+            "status": "missing",
+            "public_benchmark_external_receipts_ready": False,
+            "summary": {},
+        }
+    receipt_coverage = payload.get("receipt_coverage")
+    if not isinstance(receipt_coverage, dict):
+        receipt_coverage = {}
+    return {
+        "artifact": str(artifact),
+        "present": True,
+        "status": str(payload.get("status") or ""),
+        "contract_pass": payload.get("contract_pass"),
+        "public_benchmark_external_receipts_ready": bool(
+            payload.get("public_benchmark_external_receipts_ready")
+        ),
+        "materialized_row_count": int(payload.get("materialized_row_count") or 0),
+        "receipt_complete_row_count": int(
+            payload.get("receipt_complete_row_count") or 0
+        ),
+        "receipt_blocked_row_count": int(
+            payload.get("receipt_blocked_row_count") or 0
+        ),
+        "blocker_count": int(payload.get("blocker_count") or 0),
+        "blockers": [
+            str(row) for row in payload.get("blockers", []) if str(row)
+        ] if isinstance(payload.get("blockers"), list) else [],
+        "expected_artifact_role_count": int(
+            receipt_coverage.get("expected_artifact_role_count") or 0
+        ),
+        "materialized_artifact_role_count": int(
+            receipt_coverage.get("materialized_artifact_role_count") or 0
+        ),
+        "receipt_complete_artifact_role_count": int(
+            receipt_coverage.get("receipt_complete_artifact_role_count") or 0
+        ),
+        "missing_expected_artifact_roles": [
+            str(row)
+            for row in receipt_coverage.get("missing_expected_artifact_roles", [])
+            if str(row)
+        ] if isinstance(
+            receipt_coverage.get("missing_expected_artifact_roles"), list
+        ) else [],
+        "claim_boundary": str(payload.get("claim_boundary") or ""),
+    }
+
+
 def _source_access_receipt_summary(
     payload: dict[str, Any],
     *,
@@ -413,6 +481,10 @@ def _upstream_source_acquisition_context(repo_root: Path) -> dict[str, Any]:
         repo_root,
         DEFAULT_PUBLIC_SOURCE_ACCESS_PREFLIGHT_RECEIPT,
     )
+    public_external_receipts_validation = _load_optional_json(
+        repo_root,
+        DEFAULT_PUBLIC_EXTERNAL_RECEIPTS_VALIDATION,
+    )
     pocketmd_plan = _load_optional_json(
         repo_root,
         DEFAULT_POCKETMD_SOURCE_ACQUISITION_PLAN,
@@ -424,6 +496,10 @@ def _upstream_source_acquisition_context(repo_root: Path) -> dict[str, Any]:
             source_access_receipt=public_source_access_receipt,
             source_access_receipt_artifact=(
                 DEFAULT_PUBLIC_SOURCE_ACCESS_PREFLIGHT_RECEIPT
+            ),
+            external_receipts_validation=public_external_receipts_validation,
+            external_receipts_validation_artifact=(
+                DEFAULT_PUBLIC_EXTERNAL_RECEIPTS_VALIDATION
             ),
         ),
         "pocketmd_lite": _source_acquisition_summary(
@@ -1765,6 +1841,7 @@ def build_science_actual_closure_audit(
     for path in (
         DEFAULT_PUBLIC_SOURCE_ACQUISITION_PLAN,
         DEFAULT_PUBLIC_SOURCE_ACCESS_PREFLIGHT_RECEIPT,
+        DEFAULT_PUBLIC_EXTERNAL_RECEIPTS_VALIDATION,
         DEFAULT_POCKETMD_SOURCE_ACQUISITION_PLAN,
     ):
         if _resolve(repo_root, path).exists():

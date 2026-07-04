@@ -2273,6 +2273,29 @@
         "public_benchmark_external_receipts_not_attached"
       ],
       "contract_pass": true,
+      "external_receipts_validation_summary": {
+        "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json",
+        "blocker_count": 1,
+        "blockers": [
+          "public_benchmark_external_receipts_missing"
+        ],
+        "claim_boundary": "This validator checks operator-attached license/accession, checksum, and provenance receipt fields already present in materialized benchmark rows. It does not fetch public data, approve licenses, or claim Tier beta without materialized benchmark evidence.",
+        "contract_pass": true,
+        "expected_artifact_role_count": 3,
+        "materialized_artifact_role_count": 0,
+        "materialized_row_count": 0,
+        "missing_expected_artifact_roles": [
+          "casf_pdbbind_subset_manifest",
+          "dud_e_lit_pcba_enrichment_scorecard",
+          "vina_gnina_comparison_adapter"
+        ],
+        "present": true,
+        "public_benchmark_external_receipts_ready": false,
+        "receipt_blocked_row_count": 0,
+        "receipt_complete_artifact_role_count": 0,
+        "receipt_complete_row_count": 0,
+        "status": "operator_receipts_required"
+      },
       "missing_row_input_action_count": 1,
       "missing_row_input_actions": [
         {
@@ -2747,13 +2770,13 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T01:57:28.599255+00:00",
+  "generated_at": "2026-07-04T02:01:24.784350+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:9dd7c97c8a2b978436c07f11bfb088a2cef94f1fd1f33bc651ba8a4c09440b2b",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:bc734b71fe231cae6b4c1ab875507644db77164038387495a3ce904f75b43960",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:c8c3ede3ae3e12b7b06c1dd51c7b6e612f81109c784d57150252a419063ec38c",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:89c503da528115d11f49f913ecd82232431a0557ef794539f7fd3e9ef2d0b027",
-    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:fef8d4958913c7a50db84e9ff80397a9f0e5a3d556d9b5cab1cb877ea5048fc3"
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:68e1e2136843d17c967dd19e133a5eeaadb369b5aacc468346837ae8bd31d52c",
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:94e88f32810859f1a13e8d0ef14dc5852cb521bae77c0f1b5feb9f9045edca2b"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
   "missing_row_inputs": [
@@ -6476,6 +6499,29 @@
           "public_benchmark_external_receipts_not_attached"
         ],
         "contract_pass": true,
+        "external_receipts_validation_summary": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json",
+          "blocker_count": 1,
+          "blockers": [
+            "public_benchmark_external_receipts_missing"
+          ],
+          "claim_boundary": "This validator checks operator-attached license/accession, checksum, and provenance receipt fields already present in materialized benchmark rows. It does not fetch public data, approve licenses, or claim Tier beta without materialized benchmark evidence.",
+          "contract_pass": true,
+          "expected_artifact_role_count": 3,
+          "materialized_artifact_role_count": 0,
+          "materialized_row_count": 0,
+          "missing_expected_artifact_roles": [
+            "casf_pdbbind_subset_manifest",
+            "dud_e_lit_pcba_enrichment_scorecard",
+            "vina_gnina_comparison_adapter"
+          ],
+          "present": true,
+          "public_benchmark_external_receipts_ready": false,
+          "receipt_blocked_row_count": 0,
+          "receipt_complete_artifact_role_count": 0,
+          "receipt_complete_row_count": 0,
+          "status": "operator_receipts_required"
+        },
         "missing_row_input_action_count": 1,
         "missing_row_input_actions": [
           {
@@ -7078,6 +7124,29 @@
           "public_benchmark_external_receipts_not_attached"
         ],
         "contract_pass": true,
+        "external_receipts_validation_summary": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json",
+          "blocker_count": 1,
+          "blockers": [
+            "public_benchmark_external_receipts_missing"
+          ],
+          "claim_boundary": "This validator checks operator-attached license/accession, checksum, and provenance receipt fields already present in materialized benchmark rows. It does not fetch public data, approve licenses, or claim Tier beta without materialized benchmark evidence.",
+          "contract_pass": true,
+          "expected_artifact_role_count": 3,
+          "materialized_artifact_role_count": 0,
+          "materialized_row_count": 0,
+          "missing_expected_artifact_roles": [
+            "casf_pdbbind_subset_manifest",
+            "dud_e_lit_pcba_enrichment_scorecard",
+            "vina_gnina_comparison_adapter"
+          ],
+          "present": true,
+          "public_benchmark_external_receipts_ready": false,
+          "receipt_blocked_row_count": 0,
+          "receipt_complete_artifact_role_count": 0,
+          "receipt_complete_row_count": 0,
+          "status": "operator_receipts_required"
+        },
         "missing_row_input_action_count": 1,
         "missing_row_input_actions": [
           {
@@ -7732,6 +7801,29 @@
           "public_benchmark_external_receipts_not_attached"
         ],
         "contract_pass": true,
+        "external_receipts_validation_summary": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json",
+          "blocker_count": 1,
+          "blockers": [
+            "public_benchmark_external_receipts_missing"
+          ],
+          "claim_boundary": "This validator checks operator-attached license/accession, checksum, and provenance receipt fields already present in materialized benchmark rows. It does not fetch public data, approve licenses, or claim Tier beta without materialized benchmark evidence.",
+          "contract_pass": true,
+          "expected_artifact_role_count": 3,
+          "materialized_artifact_role_count": 0,
+          "materialized_row_count": 0,
+          "missing_expected_artifact_roles": [
+            "casf_pdbbind_subset_manifest",
+            "dud_e_lit_pcba_enrichment_scorecard",
+            "vina_gnina_comparison_adapter"
+          ],
+          "present": true,
+          "public_benchmark_external_receipts_ready": false,
+          "receipt_blocked_row_count": 0,
+          "receipt_complete_artifact_role_count": 0,
+          "receipt_complete_row_count": 0,
+          "status": "operator_receipts_required"
+        },
         "missing_row_input_action_count": 1,
         "missing_row_input_actions": [
           {
@@ -9727,6 +9819,29 @@
           "public_benchmark_external_receipts_not_attached"
         ],
         "contract_pass": true,
+        "external_receipts_validation_summary": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json",
+          "blocker_count": 1,
+          "blockers": [
+            "public_benchmark_external_receipts_missing"
+          ],
+          "claim_boundary": "This validator checks operator-attached license/accession, checksum, and provenance receipt fields already present in materialized benchmark rows. It does not fetch public data, approve licenses, or claim Tier beta without materialized benchmark evidence.",
+          "contract_pass": true,
+          "expected_artifact_role_count": 3,
+          "materialized_artifact_role_count": 0,
+          "materialized_row_count": 0,
+          "missing_expected_artifact_roles": [
+            "casf_pdbbind_subset_manifest",
+            "dud_e_lit_pcba_enrichment_scorecard",
+            "vina_gnina_comparison_adapter"
+          ],
+          "present": true,
+          "public_benchmark_external_receipts_ready": false,
+          "receipt_blocked_row_count": 0,
+          "receipt_complete_artifact_role_count": 0,
+          "receipt_complete_row_count": 0,
+          "status": "operator_receipts_required"
+        },
         "missing_row_input_action_count": 1,
         "missing_row_input_actions": [
           {
@@ -11358,6 +11473,7 @@
           "lite_refinement_metric_receipts_not_attached"
         ],
         "contract_pass": true,
+        "external_receipts_validation_summary": {},
         "missing_row_input_action_count": 1,
         "missing_row_input_actions": [
           {
@@ -11850,7 +11966,7 @@
   ],
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "7ea495bf170270c8727ca97f35ea5cd05428105c",
+  "source_commit_sha": "3ac5938c514368e1df97813eb9ce2958ac646fd7",
   "status": "operator_rows_required",
   "summary": {
     "blocked_component_operator_action_count": 2,
@@ -11878,6 +11994,7 @@
         "lite_refinement_metric_receipts_not_attached"
       ],
       "contract_pass": true,
+      "external_receipts_validation_summary": {},
       "missing_row_input_action_count": 1,
       "missing_row_input_actions": [
         {
@@ -12787,6 +12904,29 @@
         "public_benchmark_external_receipts_not_attached"
       ],
       "contract_pass": true,
+      "external_receipts_validation_summary": {
+        "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json",
+        "blocker_count": 1,
+        "blockers": [
+          "public_benchmark_external_receipts_missing"
+        ],
+        "claim_boundary": "This validator checks operator-attached license/accession, checksum, and provenance receipt fields already present in materialized benchmark rows. It does not fetch public data, approve licenses, or claim Tier beta without materialized benchmark evidence.",
+        "contract_pass": true,
+        "expected_artifact_role_count": 3,
+        "materialized_artifact_role_count": 0,
+        "materialized_row_count": 0,
+        "missing_expected_artifact_roles": [
+          "casf_pdbbind_subset_manifest",
+          "dud_e_lit_pcba_enrichment_scorecard",
+          "vina_gnina_comparison_adapter"
+        ],
+        "present": true,
+        "public_benchmark_external_receipts_ready": false,
+        "receipt_blocked_row_count": 0,
+        "receipt_complete_artifact_role_count": 0,
+        "receipt_complete_row_count": 0,
+        "status": "operator_receipts_required"
+      },
       "missing_row_input_action_count": 1,
       "missing_row_input_actions": [
         {

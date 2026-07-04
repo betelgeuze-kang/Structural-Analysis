@@ -386,6 +386,18 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert receipt_summary["source_access_ready"] is True
     assert receipt_summary["reachable_count"] == 6
     assert receipt_summary["blocked_count"] == 0
+    external_receipts = vina_gnina["upstream_source_acquisition"][
+        "external_receipts_validation_summary"
+    ]
+    assert external_receipts["status"] == "operator_receipts_required"
+    assert external_receipts["public_benchmark_external_receipts_ready"] is False
+    assert external_receipts["receipt_complete_artifact_role_count"] == 0
+    assert external_receipts["expected_artifact_role_count"] == 3
+    assert external_receipts["missing_expected_artifact_roles"] == [
+        "casf_pdbbind_subset_manifest",
+        "dud_e_lit_pcba_enrichment_scorecard",
+        "vina_gnina_comparison_adapter",
+    ]
     assert vina_gnina["upstream_source_acquisition"][
         "vina_gnina_case_input_slot_matrix_count"
     ] == 12
@@ -687,6 +699,8 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "### Public Benchmark Source Access Preflight" in markdown
     assert "`receipt_status`: `reachable`" in markdown
     assert "`receipt_reachable_count`: `6`" in markdown
+    assert "`external_receipts_status`: `operator_receipts_required`" in markdown
+    assert "`external_receipts_complete_roles`: `0/3`" in markdown
     assert "curl --head --location --max-time 20" in markdown
     assert "### PocketMD Top-k Rows Action" in markdown
     assert "`phase4_metric_receipt_action_count`: `8`" in markdown

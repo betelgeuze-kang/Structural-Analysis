@@ -965,6 +965,33 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
         ),
         encoding="utf-8",
     )
+    (productization / "public_benchmark_external_receipts_validation.json").write_text(
+        json.dumps(
+            {
+                "status": "operator_receipts_required",
+                "contract_pass": True,
+                "public_benchmark_external_receipts_ready": False,
+                "materialized_row_count": 0,
+                "receipt_complete_row_count": 0,
+                "receipt_blocked_row_count": 0,
+                "blocker_count": 1,
+                "blockers": ["public_benchmark_external_receipts_missing"],
+                "receipt_coverage": {
+                    "expected_artifact_role_count": 3,
+                    "materialized_artifact_role_count": 0,
+                    "receipt_complete_artifact_role_count": 0,
+                    "missing_expected_artifact_roles": [
+                        "casf_pdbbind_subset_manifest",
+                        "dud_e_lit_pcba_enrichment_scorecard",
+                        "vina_gnina_comparison_adapter",
+                    ],
+                },
+                "claim_boundary": "External receipt validation test fixture.",
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
     (productization / "pocketmd_lite_source_acquisition_plan.json").write_text(
         json.dumps(
             {
@@ -1059,6 +1086,18 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
     assert receipt_summary["source_access_ready"] is True
     assert receipt_summary["network_probe_performed"] is True
     assert receipt_summary["reachable_count"] == 1
+    external_receipts = audit["upstream_source_acquisition"][
+        "public_benchmark_phase2"
+    ]["external_receipts_validation_summary"]
+    assert external_receipts["status"] == "operator_receipts_required"
+    assert external_receipts["public_benchmark_external_receipts_ready"] is False
+    assert external_receipts["receipt_complete_artifact_role_count"] == 0
+    assert external_receipts["expected_artifact_role_count"] == 3
+    assert external_receipts["missing_expected_artifact_roles"] == [
+        "casf_pdbbind_subset_manifest",
+        "dud_e_lit_pcba_enrichment_scorecard",
+        "vina_gnina_comparison_adapter",
+    ]
     assert audit["upstream_source_acquisition"]["public_benchmark_phase2"][
         "vina_gnina_case_input_slot_matrix_count"
     ] == 12

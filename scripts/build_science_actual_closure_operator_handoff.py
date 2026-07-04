@@ -249,6 +249,9 @@ def _slot_source_context(
         "source_access_preflight_receipt_summary": _as_dict(
             source.get("source_access_preflight_receipt_summary")
         ),
+        "external_receipts_validation_summary": _as_dict(
+            source.get("external_receipts_validation_summary")
+        ),
         "phase4_candidate_slot_matrix_count": int(
             source.get("phase4_candidate_slot_matrix_count")
             or len(phase4_candidate_slot_matrix)
@@ -1421,6 +1424,9 @@ def _markdown(payload: dict[str, Any]) -> str:
                     "source_access_preflight_receipt_summary"
                 )
             )
+            external_receipts_summary = _as_dict(
+                public_source_context.get("external_receipts_validation_summary")
+            )
             if receipt_artifact or receipt_command or network_probe_command:
                 lines.extend(
                     [
@@ -1431,6 +1437,11 @@ def _markdown(payload: dict[str, Any]) -> str:
                         f"`{receipt_summary.get('status', '')}`",
                         "- `receipt_reachable_count`: "
                         f"`{receipt_summary.get('reachable_count', 0)}`",
+                        "- `external_receipts_status`: "
+                        f"`{external_receipts_summary.get('status', '')}`",
+                        "- `external_receipts_complete_roles`: "
+                        f"`{external_receipts_summary.get('receipt_complete_artifact_role_count', 0)}/"
+                        f"{external_receipts_summary.get('expected_artifact_role_count', 0)}`",
                         "",
                     ]
                 )

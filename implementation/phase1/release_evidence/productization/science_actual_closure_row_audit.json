@@ -1440,11 +1440,12 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T01:57:04.634637+00:00",
+  "generated_at": "2026-07-04T02:01:06.407440+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json": "sha256:98255bfca71cb82c3146a11e74e90cc338836518d93672950cbec5defd7d7147",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:256d47d3e96c9a5e358d96c8bb0f8e19f8131f14986af5c7f4e7d009315860c3",
     "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
+    "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json": "sha256:ebad77368627c20437a800eeb1bcfe1bea120acc064275665fab9b9494d9e967",
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:8c50ea98b71555f652fff3c16a564b95a9b5d7dcf2a8a207680511e70fc0f1d2",
     "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json": "sha256:c3d8772c577c40903ac1656ef8d7474695cb374c3e60de312ffe0d37985483ff",
@@ -1456,7 +1457,7 @@
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
     "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:cea647619944140048844f8c2efc475f47008bbd55333cd276673bb56f80d192",
-    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:5e871d2195aca4a194f5b457974a1058d6d932f2ee81528ef2383b13bc20d657"
+    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:812d882ad278be5ff26cff56390192deec46bc205d692cd43aac1fc18b60092e"
   },
   "missing_row_inputs": [
     "vina_gnina_rows",
@@ -2870,7 +2871,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "7ea495bf170270c8727ca97f35ea5cd05428105c",
+  "source_commit_sha": "3ac5938c514368e1df97813eb9ce2958ac646fd7",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,
@@ -2910,6 +2911,7 @@
         "lite_refinement_metric_receipts_not_attached"
       ],
       "contract_pass": true,
+      "external_receipts_validation_summary": {},
       "missing_row_input_action_count": 1,
       "missing_row_input_actions": [
         {
@@ -3819,6 +3821,29 @@
         "public_benchmark_external_receipts_not_attached"
       ],
       "contract_pass": true,
+      "external_receipts_validation_summary": {
+        "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json",
+        "blocker_count": 1,
+        "blockers": [
+          "public_benchmark_external_receipts_missing"
+        ],
+        "claim_boundary": "This validator checks operator-attached license/accession, checksum, and provenance receipt fields already present in materialized benchmark rows. It does not fetch public data, approve licenses, or claim Tier beta without materialized benchmark evidence.",
+        "contract_pass": true,
+        "expected_artifact_role_count": 3,
+        "materialized_artifact_role_count": 0,
+        "materialized_row_count": 0,
+        "missing_expected_artifact_roles": [
+          "casf_pdbbind_subset_manifest",
+          "dud_e_lit_pcba_enrichment_scorecard",
+          "vina_gnina_comparison_adapter"
+        ],
+        "present": true,
+        "public_benchmark_external_receipts_ready": false,
+        "receipt_blocked_row_count": 0,
+        "receipt_complete_artifact_role_count": 0,
+        "receipt_complete_row_count": 0,
+        "status": "operator_receipts_required"
+      },
       "missing_row_input_action_count": 1,
       "missing_row_input_actions": [
         {

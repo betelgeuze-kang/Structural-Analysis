@@ -173,6 +173,8 @@
 - `network_probe_command`: `python3 scripts/build_public_benchmark_source_access_preflight_receipt.py --out implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md --probe-network`
 - `receipt_status`: `reachable`
 - `receipt_reachable_count`: `6`
+- `external_receipts_status`: `operator_receipts_required`
+- `external_receipts_complete_roles`: `0/3`
 
 | Source | Access Mode | Primary Probe |
 | --- | --- | --- |
