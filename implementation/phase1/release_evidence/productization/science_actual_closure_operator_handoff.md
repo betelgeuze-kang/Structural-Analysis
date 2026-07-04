@@ -227,6 +227,27 @@
 - `operator_rows_must_be_real_engine_outputs`: `True`
 - `preflight_does_not_run_engines`: `True`
 
+### PocketMD Phase 4 Completion Audit
+
+- `status`: `operator_topk_rows_required`
+- `requirements_ready`: `2/9`
+- `blocked_requirement_count`: `7`
+- `remaining_row_inputs`: `pocketmd_rows`
+- `remaining_operator_action`: `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json`
+- `remaining_blockers`: `pocketmd_lite_topk_rows_not_acquired`, `pocketmd_lite_topk_candidate_rows_missing`, `pocketmd_lite_local_min_survival_rows_missing`, `pocketmd_lite_contact_persistence_rows_missing`, `pocketmd_lite_h_bond_persistence_rows_missing`, `pocketmd_lite_clash_relief_rows_missing`, `pocketmd_lite_uncertainty_rows_missing`
+
+| Requirement | Status | Product Requirement | Blockers |
+|---|---|---|---|
+| `bounded_top_k_scope_contract` | `ready` | PocketMD Lite applies only to upstream top-k candidates | `none` |
+| `top_k_refinement_rows_present` | `blocked` | top-k candidate refinement rows are present | `pocketmd_lite_topk_rows_not_acquired`, `pocketmd_lite_topk_candidate_rows_missing` |
+| `top_k_refinement_case_coverage` | `blocked` | top-k candidate case/rank coverage is complete | `pocketmd_lite_topk_rows_not_acquired`, `pocketmd_lite_topk_candidate_rows_missing` |
+| `local_min_survival_reported` | `blocked` | local-min survival is reported | `pocketmd_lite_local_min_survival_rows_missing`, `pocketmd_lite_topk_rows_not_acquired` |
+| `contact_persistence_reported` | `blocked` | contact persistence is reported | `pocketmd_lite_contact_persistence_rows_missing`, `pocketmd_lite_topk_rows_not_acquired` |
+| `h_bond_persistence_reported` | `blocked` | H-bond persistence is reported | `pocketmd_lite_h_bond_persistence_rows_missing`, `pocketmd_lite_topk_rows_not_acquired` |
+| `clash_relief_reported` | `blocked` | clash relief is reported | `pocketmd_lite_clash_relief_rows_missing`, `pocketmd_lite_topk_rows_not_acquired` |
+| `uncertainty_reported` | `blocked` | uncertainty interval summary is reported | `pocketmd_lite_uncertainty_rows_missing`, `pocketmd_lite_topk_rows_not_acquired` |
+| `broad_all_atom_fep_claims_locked` | `ready` | broad all-atom MD/FEP claims remain locked | `none` |
+
 ### Public Benchmark Source Access Preflight
 
 - `receipt_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json`
@@ -235,7 +256,7 @@
 - `receipt_status`: `reachable`
 - `receipt_reachable_count`: `6`
 - `external_receipts_status`: `operator_receipts_required`
-- `external_receipts_complete_roles`: `0/3`
+- `external_receipts_complete_roles`: `2/3`
 
 | Source | Access Mode | Primary Probe |
 | --- | --- | --- |

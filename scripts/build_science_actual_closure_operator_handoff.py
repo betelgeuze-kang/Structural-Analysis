@@ -171,6 +171,7 @@ def _slot_source_context(
             "missing_row_input_action_count": 0,
             "missing_row_input_actions": [],
             "summary": {},
+            "phase4_completion_audit": {},
             "operator_action": "",
         }
     source = _as_dict(upstream_source_acquisition.get(source_id))
@@ -200,6 +201,7 @@ def _slot_source_context(
         for row in _as_list(source.get("phase4_metric_closure_matrix"))
         if isinstance(row, dict)
     ]
+    phase4_completion_audit = _as_dict(source.get("phase4_completion_audit"))
     vina_gnina_case_input_slot_matrix = [
         row
         for row in _as_list(source.get("vina_gnina_case_input_slot_matrix"))
@@ -274,6 +276,18 @@ def _slot_source_context(
             source.get("phase4_metric_closure_matrix_count")
             or len(phase4_metric_closure_matrix)
         ),
+        "phase4_completion_audit": phase4_completion_audit,
+        "phase4_completion_audit_status": str(
+            phase4_completion_audit.get("status") or ""
+        ),
+        "phase4_completion_blocked_requirement_count": _as_int(
+            phase4_completion_audit.get("blocked_requirement_count")
+        ),
+        "phase4_completion_remaining_blockers": [
+            str(item)
+            for item in _as_list(phase4_completion_audit.get("remaining_blockers"))
+            if str(item)
+        ],
         "vina_gnina_case_input_slot_matrix_count": int(
             source.get("vina_gnina_case_input_slot_matrix_count")
             or len(vina_gnina_case_input_slot_matrix)
@@ -1208,6 +1222,11 @@ def _blocked_component_operator_actions(
                 ],
                 "source_acquisition_row_action": _as_dict(
                     slot.get("source_acquisition_row_action")
+                ),
+                "source_acquisition_completion_audit": _as_dict(
+                    _as_dict(slot.get("upstream_source_acquisition")).get(
+                        "phase4_completion_audit"
+                    )
                 ),
                 "upstream_source_blockers": [
                     str(item) for item in _as_list(slot.get("upstream_source_blockers"))
@@ -2183,6 +2202,54 @@ def _markdown(payload: dict[str, Any]) -> str:
                             f"{_code_join(_as_list(metric_action.get('required_row_fields')))} | "
                             f"{_code_join(_as_list(metric_action.get('blockers')))} |"
                         )
+        pocketmd_source_context = _as_dict(
+            _as_dict(payload.get("upstream_source_acquisition")).get(
+                "pocketmd_lite"
+            )
+        )
+        phase4_completion_audit = _as_dict(
+            pocketmd_source_context.get("phase4_completion_audit")
+        )
+        if phase4_completion_audit:
+            remaining_blockers = [
+                str(item)
+                for item in _as_list(phase4_completion_audit.get("remaining_blockers"))
+                if str(item)
+            ]
+            requirement_rows = [
+                row
+                for row in _as_list(phase4_completion_audit.get("requirements"))
+                if isinstance(row, dict)
+            ]
+            lines.extend(
+                [
+                    "",
+                    "### PocketMD Phase 4 Completion Audit",
+                    "",
+                    f"- `status`: `{phase4_completion_audit.get('status')}`",
+                    "- `requirements_ready`: "
+                    f"`{phase4_completion_audit.get('ready_requirement_count')}/"
+                    f"{phase4_completion_audit.get('requirement_count')}`",
+                    "- `blocked_requirement_count`: "
+                    f"`{phase4_completion_audit.get('blocked_requirement_count')}`",
+                    "- `remaining_row_inputs`: "
+                    f"{_code_join(_as_list(phase4_completion_audit.get('remaining_row_inputs')))}",
+                    "- `remaining_operator_action`: "
+                    f"`{phase4_completion_audit.get('remaining_operator_action')}`",
+                    f"- `remaining_blockers`: {_code_join(remaining_blockers)}",
+                    "",
+                    "| Requirement | Status | Product Requirement | Blockers |",
+                    "|---|---|---|---|",
+                ]
+            )
+            for row in requirement_rows:
+                lines.append(
+                    "| "
+                    f"`{row.get('requirement_id', '')}` | "
+                    f"`{row.get('status', '')}` | "
+                    f"{row.get('product_requirement', '')} | "
+                    f"{_code_join(_as_list(row.get('blockers')))} |"
+                )
         public_source_context = _as_dict(
             _as_dict(payload.get("upstream_source_acquisition")).get(
                 "public_benchmark_phase2"

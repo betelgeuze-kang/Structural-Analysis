@@ -438,6 +438,15 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "attach_pocketmd_rows_at_implementation/phase1/release_evidence/"
         "productization/pocketmd_lite_topk_rows.json"
     )
+    assert pocketmd_action["source_acquisition_completion_audit"]["status"] == (
+        "operator_topk_rows_required"
+    )
+    assert pocketmd_action["source_acquisition_completion_audit"][
+        "ready_requirement_count"
+    ] == 2
+    assert pocketmd_action["source_acquisition_completion_audit"][
+        "blocked_requirement_count"
+    ] == 7
     assert "uncertainty_summary_materialized" in pocketmd_action[
         "source_acquisition_row_action"
     ]["closes_phase4_criteria"]
@@ -610,13 +619,14 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     external_receipts = vina_gnina["upstream_source_acquisition"][
         "external_receipts_validation_summary"
     ]
+    assert external_receipts["summary_source"] == "source_acquisition_plan"
     assert external_receipts["status"] == "operator_receipts_required"
     assert external_receipts["public_benchmark_external_receipts_ready"] is False
-    assert external_receipts["receipt_complete_artifact_role_count"] == 0
+    assert external_receipts["materialized_row_count"] == 13
+    assert external_receipts["receipt_complete_row_count"] == 13
+    assert external_receipts["receipt_complete_artifact_role_count"] == 2
     assert external_receipts["expected_artifact_role_count"] == 3
     assert external_receipts["missing_expected_artifact_roles"] == [
-        "casf_pdbbind_subset_manifest",
-        "dud_e_lit_pcba_enrichment_scorecard",
         "vina_gnina_comparison_adapter",
     ]
     assert vina_gnina["upstream_source_acquisition"][
@@ -772,6 +782,30 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert pocketmd["upstream_source_acquisition"][
         "phase4_metric_closure_matrix_count"
     ] == 8
+    phase4_audit = pocketmd["upstream_source_acquisition"][
+        "phase4_completion_audit"
+    ]
+    assert pocketmd["upstream_source_acquisition"][
+        "phase4_completion_audit_status"
+    ] == "operator_topk_rows_required"
+    assert pocketmd["upstream_source_acquisition"][
+        "phase4_completion_blocked_requirement_count"
+    ] == 7
+    assert phase4_audit["ready_requirement_count"] == 2
+    assert phase4_audit["requirement_count"] == 9
+    assert phase4_audit["remaining_row_inputs"] == ["pocketmd_rows"]
+    assert phase4_audit["remaining_operator_action"].endswith(
+        "pocketmd_lite_topk_rows.json"
+    )
+    assert phase4_audit["blocked_requirement_ids"] == [
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "local_min_survival_reported",
+        "contact_persistence_reported",
+        "h_bond_persistence_reported",
+        "clash_relief_reported",
+        "uncertainty_reported",
+    ]
     assert pocketmd["source_acquisition_operator_action"] == (
         "resolve_pocketmd_lite_source_acquisition_blockers"
     )
@@ -978,7 +1012,7 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "`receipt_status`: `reachable`" in markdown
     assert "`receipt_reachable_count`: `6`" in markdown
     assert "`external_receipts_status`: `operator_receipts_required`" in markdown
-    assert "`external_receipts_complete_roles`: `0/3`" in markdown
+    assert "`external_receipts_complete_roles`: `2/3`" in markdown
     assert "curl --head --location --max-time 20" in markdown
     assert "### PocketMD Top-k Rows Action" in markdown
     assert "`role_receipt_blocked_count`: `24`" in markdown
@@ -992,6 +1026,12 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "`phase4_metric_receipt_action_count`: `8`" in markdown
     assert "#### PocketMD Phase 4 Receipt Closure Actions" in markdown
     assert "interaction_persistence_receipt" in markdown
+    assert "### PocketMD Phase 4 Completion Audit" in markdown
+    assert "`requirements_ready`: `2/9`" in markdown
+    assert "`blocked_requirement_count`: `7`" in markdown
+    assert "`remaining_row_inputs`: `pocketmd_rows`" in markdown
+    assert "`top_k_refinement_case_coverage` | `blocked`" in markdown
+    assert "`local_min_survival_reported` | `blocked`" in markdown
     assert "### PocketMD Row Preflight Action" in markdown
     assert "`template_preflight_role_receipt_blocked_count`: `24`" in markdown
     assert (

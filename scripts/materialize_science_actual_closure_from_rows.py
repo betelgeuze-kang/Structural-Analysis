@@ -118,6 +118,7 @@ def _source_acquisition_summary(
             "summary": {},
             "source_access_preflight_receipt_summary": receipt_summary,
             "external_receipts_validation_summary": external_receipts_summary,
+            "phase4_completion_audit": {},
         }
     raw_blockers = payload.get("blockers", [])
     blockers = (
@@ -125,6 +126,20 @@ def _source_acquisition_summary(
         if isinstance(raw_blockers, list)
         else []
     )
+    embedded_external_receipts = payload.get("external_receipts_validation")
+    if isinstance(embedded_external_receipts, dict) and embedded_external_receipts:
+        external_receipts_summary = _external_receipts_validation_summary(
+            {
+                **embedded_external_receipts,
+                "summary_source": "source_acquisition_plan",
+            },
+            artifact=external_receipts_validation_artifact,
+        )
+    else:
+        external_receipts_summary = {
+            **external_receipts_summary,
+            "summary_source": "external_validation_artifact",
+        }
     summary = payload.get("summary")
     if not isinstance(summary, dict):
         summary = {}
@@ -158,6 +173,9 @@ def _source_acquisition_summary(
         for row in payload.get("phase4_metric_closure_matrix", [])
         if isinstance(row, dict)
     ] if isinstance(payload.get("phase4_metric_closure_matrix"), list) else []
+    phase4_completion_audit = payload.get("phase4_completion_audit")
+    if not isinstance(phase4_completion_audit, dict):
+        phase4_completion_audit = {}
     vina_gnina_runtime_readiness = payload.get("vina_gnina_runtime_readiness")
     if not isinstance(vina_gnina_runtime_readiness, dict):
         vina_gnina_runtime_readiness = {}
@@ -259,6 +277,7 @@ def _source_acquisition_summary(
             or len(phase4_metric_closure_matrix)
         ),
         "phase4_metric_closure_matrix": phase4_metric_closure_matrix,
+        "phase4_completion_audit": phase4_completion_audit,
         "vina_gnina_case_input_slot_matrix_count": int(
             vina_gnina_runtime_readiness.get("case_input_slot_matrix_count")
             or len(vina_gnina_case_input_slot_matrix)
@@ -401,9 +420,32 @@ def _external_receipts_validation_summary(
     receipt_coverage = payload.get("receipt_coverage")
     if not isinstance(receipt_coverage, dict):
         receipt_coverage = {}
+    expected_artifact_role_count = int(
+        receipt_coverage.get("expected_artifact_role_count")
+        or payload.get("expected_artifact_role_count")
+        or 0
+    )
+    materialized_artifact_role_count = int(
+        receipt_coverage.get("materialized_artifact_role_count")
+        or payload.get("materialized_artifact_role_count")
+        or 0
+    )
+    receipt_complete_artifact_role_count = int(
+        receipt_coverage.get("receipt_complete_artifact_role_count")
+        or payload.get("receipt_complete_artifact_role_count")
+        or 0
+    )
+    missing_expected_artifact_roles = receipt_coverage.get(
+        "missing_expected_artifact_roles"
+    )
+    if not isinstance(missing_expected_artifact_roles, list):
+        missing_expected_artifact_roles = payload.get(
+            "missing_expected_artifact_roles", []
+        )
     return {
         "artifact": str(artifact),
         "present": True,
+        "summary_source": str(payload.get("summary_source") or ""),
         "status": str(payload.get("status") or ""),
         "contract_pass": payload.get("contract_pass"),
         "public_benchmark_external_receipts_ready": bool(
@@ -420,22 +462,14 @@ def _external_receipts_validation_summary(
         "blockers": [
             str(row) for row in payload.get("blockers", []) if str(row)
         ] if isinstance(payload.get("blockers"), list) else [],
-        "expected_artifact_role_count": int(
-            receipt_coverage.get("expected_artifact_role_count") or 0
-        ),
-        "materialized_artifact_role_count": int(
-            receipt_coverage.get("materialized_artifact_role_count") or 0
-        ),
-        "receipt_complete_artifact_role_count": int(
-            receipt_coverage.get("receipt_complete_artifact_role_count") or 0
-        ),
+        "expected_artifact_role_count": expected_artifact_role_count,
+        "materialized_artifact_role_count": materialized_artifact_role_count,
+        "receipt_complete_artifact_role_count": receipt_complete_artifact_role_count,
         "missing_expected_artifact_roles": [
             str(row)
-            for row in receipt_coverage.get("missing_expected_artifact_roles", [])
+            for row in missing_expected_artifact_roles
             if str(row)
-        ] if isinstance(
-            receipt_coverage.get("missing_expected_artifact_roles"), list
-        ) else [],
+        ] if isinstance(missing_expected_artifact_roles, list) else [],
         "claim_boundary": str(payload.get("claim_boundary") or ""),
     }
 
