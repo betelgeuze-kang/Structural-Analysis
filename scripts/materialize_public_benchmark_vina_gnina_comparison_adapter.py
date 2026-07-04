@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import math
 from pathlib import Path
@@ -32,6 +33,7 @@ SUPPORTED_BENCHMARK_SPLITS = (
     "PDBBind-refined",
     "PDBBind-general",
 )
+SUPPORTED_INTAKE_FORMATS = ("json", "jsonl", "ndjson", "csv")
 REQUIRED_CASE_FIELDS = (
     "case_id",
     "source_family",
@@ -160,6 +162,53 @@ def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+def _parse_scalar(value: str) -> Any:
+    text = value.strip()
+    if text == "":
+        return ""
+    lowered = text.lower()
+    if lowered == "true":
+        return True
+    if lowered == "false":
+        return False
+    if lowered == "null":
+        return None
+    try:
+        if any(token in text for token in (".", "e", "E")):
+            parsed = float(text)
+            return parsed if math.isfinite(parsed) else text
+        return int(text)
+    except ValueError:
+        return text
+
+
+def _normalize_input_value(value: Any) -> Any:
+    if isinstance(value, str):
+        return _parse_scalar(value)
+    if isinstance(value, bool) or value is None:
+        return value
+    if isinstance(value, (int, float)):
+        parsed = float(value) if isinstance(value, float) else value
+        return value if not isinstance(parsed, float) or math.isfinite(parsed) else str(value)
+    if isinstance(value, list):
+        return [_normalize_input_value(item) for item in value]
+    if isinstance(value, dict):
+        return {
+            str(key): _normalize_input_value(item)
+            for key, item in value.items()
+            if key is not None
+        }
+    return value
+
+
+def _normalize_input_row(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        str(key): _normalize_input_value(value)
+        for key, value in row.items()
+        if key is not None
+    }
+
+
 def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
@@ -237,6 +286,96 @@ def _counts_by_key(rows: list[dict[str, Any]], key: str) -> dict[str, int]:
 
 def _case_key(row: dict[str, Any], index: int) -> str:
     return _string(row.get("case_id")) or f"case_{index + 1}"
+
+
+def _engine_run_from_flat_row(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        field: row.get(field, "")
+        for field in REQUIRED_ENGINE_RUN_FIELDS
+        if field in row and row.get(field, "") != ""
+    }
+
+
+def _case_key_from_flat_row(row: dict[str, Any]) -> tuple[str, ...]:
+    return tuple(str(row.get(field) or "") for field in REQUIRED_CASE_FIELDS if field != "engine_runs")
+
+
+def _cases_from_flat_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    grouped: dict[tuple[str, ...], dict[str, Any]] = {}
+    direct_cases: list[dict[str, Any]] = []
+    for row in rows:
+        if isinstance(row.get("engine_runs"), list):
+            direct_cases.append(row)
+            continue
+        key = _case_key_from_flat_row(row)
+        case = grouped.setdefault(
+            key,
+            {
+                field: row.get(field, "")
+                for field in REQUIRED_CASE_FIELDS
+                if field != "engine_runs"
+            }
+            | {"engine_runs": []},
+        )
+        case["engine_runs"].append(_engine_run_from_flat_row(row))
+    return [*direct_cases, *grouped.values()]
+
+
+def _rows_from_json_payload(payload: Any) -> list[dict[str, Any]]:
+    if isinstance(payload, list):
+        rows = payload
+    elif isinstance(payload, dict):
+        rows = []
+        for key in ("rows", "cases", "vina_gnina_rows"):
+            value = payload.get(key)
+            if isinstance(value, list):
+                rows = value
+                break
+        if not rows and payload.get("case_id"):
+            rows = [payload]
+    else:
+        rows = []
+    return [_normalize_input_row(row) for row in rows if isinstance(row, dict)]
+
+
+def _load_jsonl_rows(path: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        value = json.loads(stripped)
+        if not isinstance(value, dict):
+            raise ValueError(f"line_{line_number}:jsonl_row_must_be_object")
+        rows.append(_normalize_input_row(value))
+    return rows
+
+
+def _load_csv_rows(path: Path) -> list[dict[str, Any]]:
+    with path.open("r", encoding="utf-8", newline="") as handle:
+        return [_normalize_input_row(row) for row in csv.DictReader(handle)]
+
+
+def load_vina_gnina_intake_payload(path: Path) -> dict[str, Any]:
+    suffix = path.suffix.lower()
+    if suffix == ".json":
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(payload, dict):
+            cases = payload.get("cases")
+            if isinstance(cases, list) and any(
+                isinstance(row, dict) and isinstance(row.get("engine_runs"), list)
+                for row in cases
+            ):
+                return {"cases": [_normalize_input_row(row) for row in cases if isinstance(row, dict)]}
+        rows = _rows_from_json_payload(payload)
+    elif suffix in {".jsonl", ".ndjson"}:
+        rows = _load_jsonl_rows(path)
+    elif suffix == ".csv":
+        rows = _load_csv_rows(path)
+    else:
+        supported = ", ".join(f".{suffix}" for suffix in SUPPORTED_INTAKE_FORMATS)
+        raise ValueError(f"unsupported_vina_gnina_intake_format:{suffix}; expected {supported}")
+    return {"cases": _cases_from_flat_rows(rows)}
 
 
 def _normalize_engine_run(
@@ -649,6 +788,7 @@ def materialize_vina_gnina_comparison_adapter(
         "blockers": blockers,
         "materialization_report": {
             "schema_version": SCHEMA_VERSION,
+            "supported_intake_formats": list(SUPPORTED_INTAKE_FORMATS),
             "operator_case_count": len(raw_cases),
             "materialized_case_count": len(case_rows),
             "ready_case_count": sum(1 for row in case_rows if row["contract_pass"]),
@@ -676,7 +816,12 @@ def materialize_vina_gnina_comparison_adapter(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--intake", type=Path, required=True)
+    parser.add_argument(
+        "--intake",
+        type=Path,
+        required=True,
+        help="Vina/GNINA intake as JSON cases, flat JSON/JSONL/NDJSON rows, or CSV rows.",
+    )
     parser.add_argument("--out-adapter", type=Path, default=DEFAULT_ADAPTER_OUT)
     parser.add_argument("--out-report", type=Path)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
@@ -686,7 +831,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    intake_payload = json.loads(args.intake.read_text(encoding="utf-8"))
+    intake_payload = load_vina_gnina_intake_payload(args.intake)
     adapter = materialize_vina_gnina_comparison_adapter(
         intake_payload,
         repo_root=args.repo_root,

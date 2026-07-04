@@ -42,6 +42,7 @@ from materialize_public_benchmark_vina_gnina_comparison_adapter import (  # noqa
     SCORE_DIRECTION_POLICY as VINA_GNINA_SCORE_DIRECTION_POLICY,
     SUPPORTED_BENCHMARK_SPLITS as VINA_GNINA_SUPPORTED_BENCHMARK_SPLITS,
     SUPPORTED_ENGINES as VINA_GNINA_SUPPORTED_ENGINES,
+    SUPPORTED_INTAKE_FORMATS as VINA_GNINA_SUPPORTED_INTAKE_FORMATS,
 )
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 from validate_public_benchmark_pose_validity import REQUIRED_POSE_FIELDS  # noqa: E402
@@ -1025,6 +1026,12 @@ def _missing_row_input_actions(
                     "runtime_readiness_command": str(
                         commands.get("check_vina_gnina_runtime_readiness") or ""
                     ),
+                    "adapter_intake_formats": list(
+                        VINA_GNINA_SUPPORTED_INTAKE_FORMATS
+                    ),
+                    "direct_adapter_materialization_command": str(
+                        commands.get("materialize_vina_gnina_adapter") or ""
+                    ),
                 }
             )
         actions.append(action)
@@ -1081,6 +1088,13 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         "check_vina_gnina_runtime_readiness": (
             "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py "
             f"--out {DEFAULT_VINA_GNINA_RUNTIME_READINESS}"
+        ),
+        "materialize_vina_gnina_adapter": (
+            "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py "
+            "--intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> "
+            f"--out-adapter {PRODUCTIZATION / 'public_benchmark_vina_gnina_comparison_adapter.json'} "
+            f"--out-report {PRODUCTIZATION / 'public_benchmark_vina_gnina_materialization_report.json'} "
+            "--fail-blocked"
         ),
         "materialize_harness_bundle": (
             "python3 scripts/materialize_public_benchmark_harness_bundle.py "
@@ -1319,8 +1333,8 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         lines.extend(["", "## Missing Row Input Actions", ""])
         lines.extend(
             [
-                "| Row Input | Action | Unblocks | Materialization |",
-                "|---|---|---|---|",
+                "| Row Input | Action | Unblocks | Materialization | Direct Adapter |",
+                "|---|---|---|---|---|",
             ]
         )
         for row in missing_actions:
@@ -1330,7 +1344,8 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
             lines.append(
                 f"| `{row.get('row_input_id', '')}` | "
                 f"`{row.get('operator_action', '')}` | {unblocks} | "
-                f"`{row.get('materialization_command', '')}` |"
+                f"`{row.get('materialization_command', '')}` | "
+                f"`{row.get('direct_adapter_materialization_command', '')}` |"
             )
         manifest_actions = [
             row.get("engine_input_manifest_action_packet")

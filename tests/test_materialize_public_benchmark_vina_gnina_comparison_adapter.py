@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import hashlib
 import importlib.util
 import json
@@ -449,6 +450,107 @@ def test_vina_gnina_comparison_adapter_cli_writes_adapter_and_report(
     assert adapter["input_checksums"][
         "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"
     ].startswith("sha256:")
+    assert adapter["input_checksums"][str(intake)].startswith("sha256:")
+
+
+def test_vina_gnina_comparison_adapter_cli_accepts_flat_csv_rows(
+    tmp_path: Path,
+) -> None:
+    intake = tmp_path / "vina_gnina_rows.csv"
+    fieldnames = [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_version",
+        "engine_config_checksum",
+        "engine_run_provenance_ref",
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction",
+    ]
+    case_fields = {
+        "case_id": "case_csv",
+        "source_family": "CASF/PDBBind",
+        "benchmark_split": "CASF-core",
+        "complex_id": "case_csv_complex",
+        "reference_pose_id": "case_csv_reference",
+        "source_license_or_accession": "PDBBind-CASF-2016-core:case_csv",
+        "source_checksum": _checksum("case_csv"),
+        "provenance_ref": _provenance_ref(
+            "public-benchmark",
+            "vina-gnina",
+            "case_csv.json",
+        ),
+    }
+    with intake.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        for engine_id, rmsd in (("vina", 1.3), ("gnina", 1.8)):
+            writer.writerow(
+                {
+                    **case_fields,
+                    "engine_id": engine_id,
+                    "docking_run_id": f"case_csv_{engine_id}_run",
+                    "predicted_ligand_path_or_pose_ref": _provenance_ref(
+                        "public-benchmark",
+                        "vina-gnina",
+                        f"case_csv_{engine_id}.sdf",
+                    ),
+                    "predicted_ligand_checksum": _checksum(
+                        f"case_csv:{engine_id}:pose"
+                    ),
+                    "engine_version": f"{engine_id} 1.2.3",
+                    "engine_config_checksum": _checksum(
+                        f"case_csv:{engine_id}:config"
+                    ),
+                    "engine_run_provenance_ref": _provenance_ref(
+                        "public-benchmark",
+                        "vina-gnina",
+                        f"case_csv_{engine_id}_run.json",
+                    ),
+                    "symmetry_aware_rmsd_angstrom": rmsd,
+                    "pose_success": "true",
+                    "score": -7.4,
+                    "score_direction": "lower_is_better",
+                }
+            )
+    out_adapter = tmp_path / "adapter.json"
+
+    assert (
+        module.main(
+            [
+                "--intake",
+                str(intake),
+                "--out-adapter",
+                str(out_adapter),
+                "--repo-root",
+                str(REPO_ROOT),
+                "--fail-blocked",
+            ]
+        )
+        == 0
+    )
+
+    adapter = json.loads(out_adapter.read_text(encoding="utf-8"))
+    assert adapter["public_benchmark_engine_comparison_ready"] is True
+    assert adapter["real_comparison_case_count"] == 1
+    assert adapter["case_rows"][0]["present_engines"] == ["gnina", "vina"]
+    assert adapter["materialization_report"]["supported_intake_formats"] == [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv",
+    ]
     assert adapter["input_checksums"][str(intake)].startswith("sha256:")
 
 

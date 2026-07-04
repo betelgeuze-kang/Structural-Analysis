@@ -289,6 +289,12 @@
               "jsonl",
               "ndjson"
             ],
+            "adapter_intake_formats": [
+              "json",
+              "jsonl",
+              "ndjson",
+              "csv"
+            ],
             "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
             "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
             "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
@@ -297,6 +303,7 @@
               "subset_rows",
               "pose_rows"
             ],
+            "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
             "engine_input_manifest_action_packet": {
               "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
               "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
@@ -1819,6 +1826,12 @@
         "jsonl",
         "ndjson"
       ],
+      "adapter_intake_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
       "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
       "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
       "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
@@ -1827,6 +1840,7 @@
         "subset_rows",
         "pose_rows"
       ],
+      "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
       "engine_input_manifest_action_packet": {
         "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
         "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
@@ -1932,6 +1946,12 @@
             "jsonl",
             "ndjson"
           ],
+          "adapter_intake_formats": [
+            "json",
+            "jsonl",
+            "ndjson",
+            "csv"
+          ],
           "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
           "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
           "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
@@ -1940,6 +1960,7 @@
             "subset_rows",
             "pose_rows"
           ],
+          "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
           "engine_input_manifest_action_packet": {
             "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
             "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
@@ -2084,12 +2105,12 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T00:08:00.477428+00:00",
+  "generated_at": "2026-07-04T00:14:49.007423+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:9dd7c97c8a2b978436c07f11bfb088a2cef94f1fd1f33bc651ba8a4c09440b2b",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:bc734b71fe231cae6b4c1ab875507644db77164038387495a3ce904f75b43960",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:6e75a02c6b13b518bf6087e44db30b84c243e4935d2b50611e2fd0411e476118",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:27728fcf49355b9a47594ce95a8d53c193e2e847d51694eb20effa4628cabfc0",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:fa5876987d57eaf43d1cfde2c576b47a9b6ea5a6d271667c8fcfbe08d291d038",
     "scripts/build_science_actual_closure_operator_handoff.py": "sha256:800b9012cd22c5cd68fb6590da46e672beb79564d36ec35091a228b3ff5405b5"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
@@ -5814,6 +5835,12 @@
               "jsonl",
               "ndjson"
             ],
+            "adapter_intake_formats": [
+              "json",
+              "jsonl",
+              "ndjson",
+              "csv"
+            ],
             "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
             "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
             "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
@@ -5822,6 +5849,7 @@
               "subset_rows",
               "pose_rows"
             ],
+            "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
             "engine_input_manifest_action_packet": {
               "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
               "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
@@ -6103,6 +6131,12 @@
               "jsonl",
               "ndjson"
             ],
+            "adapter_intake_formats": [
+              "json",
+              "jsonl",
+              "ndjson",
+              "csv"
+            ],
             "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
             "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
             "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
@@ -6111,6 +6145,7 @@
               "subset_rows",
               "pose_rows"
             ],
+            "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
             "engine_input_manifest_action_packet": {
               "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
               "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
@@ -6444,6 +6479,12 @@
               "jsonl",
               "ndjson"
             ],
+            "adapter_intake_formats": [
+              "json",
+              "jsonl",
+              "ndjson",
+              "csv"
+            ],
             "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
             "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
             "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
@@ -6452,6 +6493,7 @@
               "subset_rows",
               "pose_rows"
             ],
+            "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
             "engine_input_manifest_action_packet": {
               "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
               "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
@@ -7937,6 +7979,12 @@
           "jsonl",
           "ndjson"
         ],
+        "adapter_intake_formats": [
+          "json",
+          "jsonl",
+          "ndjson",
+          "csv"
+        ],
         "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
         "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
         "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
@@ -7945,6 +7993,7 @@
           "subset_rows",
           "pose_rows"
         ],
+        "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
         "engine_input_manifest_action_packet": {
           "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
           "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
@@ -8050,6 +8099,12 @@
               "jsonl",
               "ndjson"
             ],
+            "adapter_intake_formats": [
+              "json",
+              "jsonl",
+              "ndjson",
+              "csv"
+            ],
             "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
             "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
             "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
@@ -8058,6 +8113,7 @@
               "subset_rows",
               "pose_rows"
             ],
+            "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
             "engine_input_manifest_action_packet": {
               "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
               "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
@@ -9427,7 +9483,7 @@
   ],
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "d41bbbfbca2b43a82bd00cc97172fea8be5e5885",
+  "source_commit_sha": "e338a0082807eb9e166e02a0af103af530ec8feb",
   "status": "operator_rows_required",
   "summary": {
     "blocked_component_operator_action_count": 2,
@@ -9720,6 +9776,12 @@
             "jsonl",
             "ndjson"
           ],
+          "adapter_intake_formats": [
+            "json",
+            "jsonl",
+            "ndjson",
+            "csv"
+          ],
           "build_execution_plan_command": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
           "bundle_import_command": "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py --subset-rows <operator-casf-pdbbind-subset-rows.jsonl> --pose-rows <operator-pose-coordinate-rows.jsonl> --enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> --vina-gnina-rows <operator-vina-gnina-run-rows.csv> --target-subset-case-count 12 --out implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
           "claim_boundary": "This action identifies the missing operator-attached row input. It is not benchmark evidence until the materializer validates the row file and receipts.",
@@ -9728,6 +9790,7 @@
             "subset_rows",
             "pose_rows"
           ],
+          "direct_adapter_materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
           "engine_input_manifest_action_packet": {
             "claim_boundary": "The scaffold manifest is an operator checklist for case inputs. It does not prove engine execution or Vina/GNINA adapter row actuality until the execution plan, runtime readiness, and adapter rows pass.",
             "expected_manifest_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",

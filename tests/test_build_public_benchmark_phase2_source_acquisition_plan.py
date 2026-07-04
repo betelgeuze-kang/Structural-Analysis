@@ -420,6 +420,16 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "template_is_not_evidence": True,
     }
     assert missing_action["required_engines"] == ["vina", "gnina"]
+    assert missing_action["adapter_intake_formats"] == [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv",
+    ]
+    assert missing_action["direct_adapter_materialization_command"].startswith(
+        "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py "
+        "--intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson>"
+    )
     assert "predicted_ligand_checksum" in missing_action[
         "required_engine_run_fields"
     ]
@@ -460,6 +470,8 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "`blocked_engine_run_slot_count`: `24`" in markdown
     assert "## Missing Row Input Actions" in markdown
     assert "attach_vina_gnina_rows_then_run_phase2_row_audit" in markdown
+    assert "materialize_public_benchmark_vina_gnina_comparison_adapter.py" in markdown
+    assert "<operator-vina-gnina-run-rows.csv|json|jsonl|ndjson>" in markdown
     assert "### Vina/GNINA Input Manifest Action" in markdown
     assert "public_benchmark_vina_gnina_input_manifest_template.csv" in markdown
     assert "public_benchmark_vina_gnina_input_manifest.csv" in markdown
