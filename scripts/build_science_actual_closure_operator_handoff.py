@@ -88,6 +88,11 @@ def _comma(values: list[Any]) -> str:
     return ", ".join(rendered) if rendered else ""
 
 
+def _code_join(values: list[Any]) -> str:
+    rendered = [f"`{str(item)}`" for item in values if str(item)]
+    return ", ".join(rendered) if rendered else "`none`"
+
+
 def _as_dict(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
@@ -1093,6 +1098,75 @@ def _markdown(payload: dict[str, Any]) -> str:
                     f"`{source_action.get('operator_action') or ''}` | "
                     f"`{source_command}` | "
                     f"`{required_receipts}` |"
+                )
+        detailed_actions: list[dict[str, Any]] = []
+        for component in blocked_component_actions:
+            for action in _as_list(component.get("missing_row_input_actions")):
+                if not isinstance(action, dict):
+                    continue
+                source_action = _as_dict(action.get("source_acquisition_row_action"))
+                manifest_action = _as_dict(
+                    source_action.get("engine_input_manifest_action_packet")
+                )
+                if manifest_action:
+                    detailed_actions.append(
+                        {
+                            "kind": "vina_gnina_manifest",
+                            "component_id": str(component.get("component_id") or ""),
+                            "row_input_id": str(action.get("row_input_id") or ""),
+                            "action": manifest_action,
+                        }
+                    )
+                top_k_action = _as_dict(
+                    source_action.get("top_k_rows_action_packet")
+                )
+                if top_k_action:
+                    detailed_actions.append(
+                        {
+                            "kind": "pocketmd_top_k_rows",
+                            "component_id": str(component.get("component_id") or ""),
+                            "row_input_id": str(action.get("row_input_id") or ""),
+                            "action": top_k_action,
+                        }
+                    )
+        for detail in detailed_actions:
+            action = _as_dict(detail.get("action"))
+            safety_policy = _as_dict(action.get("template_safety_policy"))
+            if detail.get("kind") == "vina_gnina_manifest":
+                lines.extend(["", "### Vina/GNINA Input Manifest Action", ""])
+                lines.extend(
+                    [
+                        f"- `component_id`: `{detail.get('component_id')}`",
+                        f"- `row_input_id`: `{detail.get('row_input_id')}`",
+                        f"- `status`: `{action.get('status')}`",
+                        f"- `template_artifact`: `{action.get('template_artifact')}`",
+                        f"- `expected_manifest_artifact`: `{action.get('expected_manifest_artifact')}`",
+                        f"- `template_to_manifest_command`: `{action.get('template_to_manifest_command')}`",
+                        f"- `verify_execution_plan_command`: `{action.get('verify_execution_plan_command')}`",
+                        f"- `verify_runtime_readiness_command`: `{action.get('verify_runtime_readiness_command')}`",
+                        f"- `operator_must_fill_or_verify`: {_code_join(_as_list(action.get('operator_must_fill_or_verify')))}",
+                        f"- `template_is_not_evidence`: `{safety_policy.get('template_is_not_evidence')}`",
+                        f"- `do_not_treat_blank_prepared_checksums_as_ready`: `{safety_policy.get('do_not_treat_blank_prepared_checksums_as_ready')}`",
+                    ]
+                )
+            elif detail.get("kind") == "pocketmd_top_k_rows":
+                lines.extend(["", "### PocketMD Top-k Rows Action", ""])
+                lines.extend(
+                    [
+                        f"- `component_id`: `{detail.get('component_id')}`",
+                        f"- `row_input_id`: `{detail.get('row_input_id')}`",
+                        f"- `status`: `{action.get('status')}`",
+                        f"- `template_artifact`: `{action.get('template_artifact')}`",
+                        f"- `expected_rows_artifact`: `{action.get('expected_rows_artifact')}`",
+                        f"- `import_rows_command`: `{action.get('import_rows_command')}`",
+                        f"- `materialize_survival_command`: `{action.get('materialize_survival_command')}`",
+                        f"- `verify_science_actual_closure_command`: `{action.get('verify_science_actual_closure_command')}`",
+                        f"- `operator_must_fill_or_verify`: {_code_join(_as_list(action.get('operator_must_fill_or_verify')))}",
+                        f"- `required_receipt_roles`: {_code_join(_as_list(action.get('required_receipt_roles')))}",
+                        f"- `template_is_not_evidence`: `{safety_policy.get('template_is_not_evidence')}`",
+                        f"- `placeholder_or_fixture_rows_do_not_promote`: `{safety_policy.get('placeholder_or_fixture_rows_do_not_promote')}`",
+                        f"- `summary_only_metrics_do_not_promote`: `{safety_policy.get('summary_only_metrics_do_not_promote')}`",
+                    ]
                 )
     upstream_source_blockers = [
         str(item) for item in _as_list(payload.get("upstream_source_blockers"))

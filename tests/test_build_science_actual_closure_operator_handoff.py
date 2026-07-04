@@ -166,6 +166,15 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert "engine_config_checksum" in public_action["source_acquisition_row_action"][
         "receipt_fields"
     ]
+    public_manifest_action = public_action["source_acquisition_row_action"][
+        "engine_input_manifest_action_packet"
+    ]
+    assert public_manifest_action["expected_manifest_artifact"].endswith(
+        "public_benchmark_vina_gnina_input_manifest.csv"
+    )
+    assert public_manifest_action["template_safety_policy"][
+        "template_is_not_evidence"
+    ] is True
     assert "public_benchmark_vina_gnina_engine_runtime_not_ready" in public_action[
         "upstream_source_blockers"
     ]
@@ -202,6 +211,15 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert "uncertainty_interval_receipt" in pocketmd_action[
         "source_acquisition_row_action"
     ]["required_receipt_roles"]
+    pocketmd_topk_action = pocketmd_action["source_acquisition_row_action"][
+        "top_k_rows_action_packet"
+    ]
+    assert pocketmd_topk_action["expected_rows_artifact"].endswith(
+        "pocketmd_lite_topk_rows.json"
+    )
+    assert pocketmd_topk_action["template_safety_policy"][
+        "placeholder_or_fixture_rows_do_not_promote"
+    ] is True
     assert "pocketmd_lite_topk_rows_not_acquired" in pocketmd_action[
         "upstream_source_blockers"
     ]
@@ -523,6 +541,12 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "engine_config_checksum" in markdown
     assert "materialize_pocketmd_lite_operator_intake_from_rows.py" in markdown
     assert "uncertainty_interval_receipt" in markdown
+    assert "### Vina/GNINA Input Manifest Action" in markdown
+    assert "public_benchmark_vina_gnina_input_manifest.csv" in markdown
+    assert "`do_not_treat_blank_prepared_checksums_as_ready`: `True`" in markdown
+    assert "### PocketMD Top-k Rows Action" in markdown
+    assert "operator_input_source.source_artifact_sha256" in markdown
+    assert "`placeholder_or_fixture_rows_do_not_promote`: `True`" in markdown
     assert "attach_pocketmd_rows_at_" in markdown
     assert "CSV Starter" in markdown
     assert "## Upstream Source Blockers" in markdown

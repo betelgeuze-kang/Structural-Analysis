@@ -76,6 +76,36 @@
 | `pocketmd_lite_topk_actual_closure` | `pocketmd_rows` | `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `resolve_pocketmd_lite_source_acquisition_blockers` | `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>` | `upstream_top_k_candidate_scope_receipt, lite_refinement_run_receipt, interaction_persistence_receipt, uncertainty_interval_receipt` |
 | `public_benchmark_phase2_actual_closure` | `vina_gnina_rows` | `attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `resolve_public_benchmark_phase2_source_acquisition_blockers` | `attach_vina_gnina_rows_then_run_phase2_row_audit` | `python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json` | `source_license_or_accession, source_checksum, provenance_ref, predicted_ligand_checksum, engine_config_checksum, engine_run_provenance_ref` |
 
+### PocketMD Top-k Rows Action
+
+- `component_id`: `pocketmd_lite_topk_actual_closure`
+- `row_input_id`: `pocketmd_rows`
+- `status`: `operator_rows_required`
+- `template_artifact`: `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv`
+- `expected_rows_artifact`: `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json`
+- `import_rows_command`: `python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>`
+- `materialize_survival_command`: `python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked`
+- `verify_science_actual_closure_command`: `python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked`
+- `operator_must_fill_or_verify`: `case_id`, `source_family`, `top_k_rank`, `candidate_id`, `upstream_top_k_provenance_ref`, `upstream_top_k_source_checksum`, `pre_refinement_energy_proxy`, `post_refinement_energy_proxy`, `local_min_survived`, `contact_persistence_rate`, `h_bond_persistence_rate`, `clash_count_before`, `clash_count_after`, `uncertainty_low`, `uncertainty_high`, `uncertainty_unit`, `provenance_ref`, `source_checksum`, `operator_input_source.source_artifact`, `operator_input_source.source_artifact_sha256`, `operator_input_source.source_id`, `operator_input_source.source_url`, `operator_input_source.source_license`
+- `required_receipt_roles`: `upstream_top_k_candidate_scope_receipt`, `lite_refinement_run_receipt`, `interaction_persistence_receipt`, `uncertainty_interval_receipt`
+- `template_is_not_evidence`: `True`
+- `placeholder_or_fixture_rows_do_not_promote`: `True`
+- `summary_only_metrics_do_not_promote`: `True`
+
+### Vina/GNINA Input Manifest Action
+
+- `component_id`: `public_benchmark_phase2_actual_closure`
+- `row_input_id`: `vina_gnina_rows`
+- `status`: `operator_manifest_required`
+- `template_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv`
+- `expected_manifest_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv`
+- `template_to_manifest_command`: `cp implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv`
+- `verify_execution_plan_command`: `python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json`
+- `verify_runtime_readiness_command`: `python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json`
+- `operator_must_fill_or_verify`: `prepared_receptor_path`, `prepared_receptor_checksum`, `prepared_ligand_path`, `prepared_ligand_checksum`, `vina_config_ref`, `gnina_config_ref`, `vina_run_receipt_ref`, `gnina_run_receipt_ref`, `input_preparation_provenance_ref`
+- `template_is_not_evidence`: `True`
+- `do_not_treat_blank_prepared_checksums_as_ready`: `True`
+
 ## Provided Closure Evidence
 
 ### GPCR Phase 3 Gate
