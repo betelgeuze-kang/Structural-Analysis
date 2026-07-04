@@ -360,11 +360,11 @@
     ],
     "status": "operator_receipts_required"
   },
-  "generated_at": "2026-07-04T09:31:03.397823+00:00",
+  "generated_at": "2026-07-04T09:35:57.988273+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json": "sha256:a154eb8997c7da14e9a627e2b12c9b23ca9e1bfd34b4b40c956782bd408329b4",
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:e20bed28f4f5c0703fa5ca33f9251b0839b6d983c065084d2ada2769f9096226",
-    "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json": "sha256:7b30ba2dbed6ef443b77810b6416661e30433199945eab464ae603592bd852b4",
+    "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json": "sha256:79d4299caf415a3be54c18faa02e4ed518875658ee59af48f4681ce2adc578f9",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:ad34732dfb58e940d476032c24ea11eb9b992f4742280bf9455f68fff7c98ad1",
+    "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json": "sha256:9740b3596084c0390f7b43de33266f8b04f47080e6e7d4754b388b1b3a083b43",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json": "sha256:2ddba4e6302a1c9eafe7fa2a10828923d69994295ee9e027353447445e34408a",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:30cea0a365c966479ebe1e3b48f0b2b99ba6358c8434f9b1e64d51e4d1329aba",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv": "sha256:ff3afa49ab7c79ed82a78f1755272ecc13ca7f6b6e01ef2b35ea5d58b12d3611",
@@ -372,7 +372,7 @@
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv": "sha256:3a106d2aa9f456eee7238523bf090db13e35d98afefa3952352a660f5b5e36ae",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json": "sha256:c57c0ab80322e9794f7c6f61377f3afecde7c98ff886b3a07d3e11fef008c62f",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:65177d59f3dc1803c067329c3726b5528235c66a0448ce1ceb809bb811afbee9",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:241ba8cc85dd123e988335652c4c98115415ab3aeebe0a543b965bbd63747805",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:1117a5b242cf7c3f963de58c7d801732ff034d788fdbf4744001ac33a7c8cda9",
     "scripts/build_public_benchmark_source_access_preflight_receipt.py": "sha256:af7e5ca466c5fdaa6a2100e5c0d79c438ee3f873a00f7e049c562b99ac05c823",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:19cb915b9e0926181b87e17f60ee010ed0fd4b3da6148843d1a077825e5d45bd",
     "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:0258e681ddd419d9fba1bba595ffda481b77f710b5e645ac628c5f2bf1444cee",
@@ -5690,7 +5690,7 @@
     "source_access_ready": true,
     "status": "reachable"
   },
-  "source_commit_sha": "c271cced050b34f96ae74a02ef48dec0ea685fc5",
+  "source_commit_sha": "5b90248442a65329e7584fa10f47b6bf3f47aff6",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,
@@ -5755,6 +5755,11 @@
     "vina_gnina_input_manifest_detected": true,
     "vina_gnina_input_manifest_row_count": 12,
     "vina_gnina_input_manifest_status": "ready",
+    "vina_gnina_input_manifest_syntax_ready": true,
+    "vina_gnina_input_manifest_template_completion_blocked_case_count": 12,
+    "vina_gnina_input_manifest_template_manifest_ready": false,
+    "vina_gnina_input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
+    "vina_gnina_input_manifest_verified_case_input_count": 0,
     "vina_gnina_missing_engine_count": 2,
     "vina_gnina_required_engine_run_count": 24,
     "vina_gnina_rows_from_engine_run_bundle_materialized": false,
@@ -5794,25 +5799,35 @@
     "components": [
       {
         "blockers": [
-          "public_benchmark_vina_gnina_case_inputs_incomplete"
+          "public_benchmark_vina_gnina_case_inputs_incomplete",
+          "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+          "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified"
         ],
         "component_id": "engine_input_manifest",
         "current": {
           "blocked_case_input_slot_count": 12,
+          "case_input_slot_count": 12,
           "input_manifest_detected": true,
           "input_manifest_row_count": 12,
           "input_manifest_status": "ready",
+          "input_manifest_syntax_ready": true,
+          "input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
           "required_case_count": 12,
+          "template_completion_blocked_case_count": 12,
           "template_manifest_ready": false,
           "template_missing_local_file_count": 48,
           "template_missing_receipt_ref_count": 60,
-          "template_preflight_status": "operator_manifest_completion_required"
+          "template_preflight_status": "operator_manifest_completion_required",
+          "verified_case_input_count": 0
         },
         "pass": false,
         "required": {
           "blocked_case_input_slot_count": 0,
           "input_manifest_detected": true,
-          "input_manifest_row_count": ">=12"
+          "input_manifest_row_count": ">=12",
+          "input_manifest_syntax_ready": true,
+          "template_manifest_ready": true,
+          "verified_case_input_count": ">=12"
         },
         "status": "blocked"
       },
@@ -6028,6 +6043,8 @@
     "ready_component_count": 0,
     "remaining_blockers": [
       "public_benchmark_vina_gnina_case_inputs_incomplete",
+      "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+      "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified",
       "vina_gnina_execution_plan_not_ready",
       "vina_binary_missing",
       "gnina_binary_missing",

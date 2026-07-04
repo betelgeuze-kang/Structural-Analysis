@@ -2103,25 +2103,35 @@
             "components": [
               {
                 "blockers": [
-                  "public_benchmark_vina_gnina_case_inputs_incomplete"
+                  "public_benchmark_vina_gnina_case_inputs_incomplete",
+                  "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+                  "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified"
                 ],
                 "component_id": "engine_input_manifest",
                 "current": {
                   "blocked_case_input_slot_count": 12,
+                  "case_input_slot_count": 12,
                   "input_manifest_detected": true,
                   "input_manifest_row_count": 12,
                   "input_manifest_status": "ready",
+                  "input_manifest_syntax_ready": true,
+                  "input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
                   "required_case_count": 12,
+                  "template_completion_blocked_case_count": 12,
                   "template_manifest_ready": false,
                   "template_missing_local_file_count": 48,
                   "template_missing_receipt_ref_count": 60,
-                  "template_preflight_status": "operator_manifest_completion_required"
+                  "template_preflight_status": "operator_manifest_completion_required",
+                  "verified_case_input_count": 0
                 },
                 "pass": false,
                 "required": {
                   "blocked_case_input_slot_count": 0,
                   "input_manifest_detected": true,
-                  "input_manifest_row_count": ">=12"
+                  "input_manifest_row_count": ">=12",
+                  "input_manifest_syntax_ready": true,
+                  "template_manifest_ready": true,
+                  "verified_case_input_count": ">=12"
                 },
                 "status": "blocked"
               },
@@ -2337,6 +2347,8 @@
             "ready_component_count": 0,
             "remaining_blockers": [
               "public_benchmark_vina_gnina_case_inputs_incomplete",
+              "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+              "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified",
               "vina_gnina_execution_plan_not_ready",
               "vina_binary_missing",
               "gnina_binary_missing",
@@ -8144,6 +8156,11 @@
         "vina_gnina_input_manifest_detected": true,
         "vina_gnina_input_manifest_row_count": 12,
         "vina_gnina_input_manifest_status": "ready",
+        "vina_gnina_input_manifest_syntax_ready": true,
+        "vina_gnina_input_manifest_template_completion_blocked_case_count": 12,
+        "vina_gnina_input_manifest_template_manifest_ready": false,
+        "vina_gnina_input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
+        "vina_gnina_input_manifest_verified_case_input_count": 0,
         "vina_gnina_missing_engine_count": 2,
         "vina_gnina_required_engine_run_count": 24,
         "vina_gnina_rows_from_engine_run_bundle_materialized": false,
@@ -8183,25 +8200,35 @@
         "components": [
           {
             "blockers": [
-              "public_benchmark_vina_gnina_case_inputs_incomplete"
+              "public_benchmark_vina_gnina_case_inputs_incomplete",
+              "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+              "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified"
             ],
             "component_id": "engine_input_manifest",
             "current": {
               "blocked_case_input_slot_count": 12,
+              "case_input_slot_count": 12,
               "input_manifest_detected": true,
               "input_manifest_row_count": 12,
               "input_manifest_status": "ready",
+              "input_manifest_syntax_ready": true,
+              "input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
               "required_case_count": 12,
+              "template_completion_blocked_case_count": 12,
               "template_manifest_ready": false,
               "template_missing_local_file_count": 48,
               "template_missing_receipt_ref_count": 60,
-              "template_preflight_status": "operator_manifest_completion_required"
+              "template_preflight_status": "operator_manifest_completion_required",
+              "verified_case_input_count": 0
             },
             "pass": false,
             "required": {
               "blocked_case_input_slot_count": 0,
               "input_manifest_detected": true,
-              "input_manifest_row_count": ">=12"
+              "input_manifest_row_count": ">=12",
+              "input_manifest_syntax_ready": true,
+              "template_manifest_ready": true,
+              "verified_case_input_count": ">=12"
             },
             "status": "blocked"
           },
@@ -8417,6 +8444,8 @@
         "ready_component_count": 0,
         "remaining_blockers": [
           "public_benchmark_vina_gnina_case_inputs_incomplete",
+          "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+          "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified",
           "vina_gnina_execution_plan_not_ready",
           "vina_binary_missing",
           "gnina_binary_missing",
@@ -8626,14 +8655,14 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T09:31:09.916447+00:00",
+  "generated_at": "2026-07-04T09:36:05.707268+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:2cded93f9979342dce37f6a227b6dc0e5794c7f73dd2a24b3067bdead737c714",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:eb1f39be27a649df1e694d07b036df3c853c02c74f20830faa8d20539dd8b2b6",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:a6fa0328fbbdc35c1ff47f966c085b5ae0fc5e6dfa2f1aba17e647681cdc246a",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:dc39006a0ed93c7141d4421294cb9d47e1af8a3c6fc2fe3531aeae754de53c89",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:09354cd520764e9fb23e9a23e1eed17a38e73328687154c5d35c5411731af093",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:65177d59f3dc1803c067329c3726b5528235c66a0448ce1ceb809bb811afbee9",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:0724ac909865df2a035bdc006a0c0253b5dc3d877987efd6a9dd8302681f0454",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:a6a2936396869070510ca50f2346a00be41a335cfaa94e6b7385c20a331acf0a",
     "scripts/build_science_actual_closure_operator_handoff.py": "sha256:0fe9f406081332c6a4303d035a9d933dcd2bedbec0a66cbb72c1c382a6061b98"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
@@ -13551,6 +13580,11 @@
           "vina_gnina_input_manifest_detected": true,
           "vina_gnina_input_manifest_row_count": 12,
           "vina_gnina_input_manifest_status": "ready",
+          "vina_gnina_input_manifest_syntax_ready": true,
+          "vina_gnina_input_manifest_template_completion_blocked_case_count": 12,
+          "vina_gnina_input_manifest_template_manifest_ready": false,
+          "vina_gnina_input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
+          "vina_gnina_input_manifest_verified_case_input_count": 0,
           "vina_gnina_missing_engine_count": 2,
           "vina_gnina_required_engine_run_count": 24,
           "vina_gnina_rows_from_engine_run_bundle_materialized": false,
@@ -13590,25 +13624,35 @@
           "components": [
             {
               "blockers": [
-                "public_benchmark_vina_gnina_case_inputs_incomplete"
+                "public_benchmark_vina_gnina_case_inputs_incomplete",
+                "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+                "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified"
               ],
               "component_id": "engine_input_manifest",
               "current": {
                 "blocked_case_input_slot_count": 12,
+                "case_input_slot_count": 12,
                 "input_manifest_detected": true,
                 "input_manifest_row_count": 12,
                 "input_manifest_status": "ready",
+                "input_manifest_syntax_ready": true,
+                "input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
                 "required_case_count": 12,
+                "template_completion_blocked_case_count": 12,
                 "template_manifest_ready": false,
                 "template_missing_local_file_count": 48,
                 "template_missing_receipt_ref_count": 60,
-                "template_preflight_status": "operator_manifest_completion_required"
+                "template_preflight_status": "operator_manifest_completion_required",
+                "verified_case_input_count": 0
               },
               "pass": false,
               "required": {
                 "blocked_case_input_slot_count": 0,
                 "input_manifest_detected": true,
-                "input_manifest_row_count": ">=12"
+                "input_manifest_row_count": ">=12",
+                "input_manifest_syntax_ready": true,
+                "template_manifest_ready": true,
+                "verified_case_input_count": ">=12"
               },
               "status": "blocked"
             },
@@ -13824,6 +13868,8 @@
           "ready_component_count": 0,
           "remaining_blockers": [
             "public_benchmark_vina_gnina_case_inputs_incomplete",
+            "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+            "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified",
             "vina_gnina_execution_plan_not_ready",
             "vina_binary_missing",
             "gnina_binary_missing",
@@ -14961,6 +15007,11 @@
           "vina_gnina_input_manifest_detected": true,
           "vina_gnina_input_manifest_row_count": 12,
           "vina_gnina_input_manifest_status": "ready",
+          "vina_gnina_input_manifest_syntax_ready": true,
+          "vina_gnina_input_manifest_template_completion_blocked_case_count": 12,
+          "vina_gnina_input_manifest_template_manifest_ready": false,
+          "vina_gnina_input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
+          "vina_gnina_input_manifest_verified_case_input_count": 0,
           "vina_gnina_missing_engine_count": 2,
           "vina_gnina_required_engine_run_count": 24,
           "vina_gnina_rows_from_engine_run_bundle_materialized": false,
@@ -15000,25 +15051,35 @@
           "components": [
             {
               "blockers": [
-                "public_benchmark_vina_gnina_case_inputs_incomplete"
+                "public_benchmark_vina_gnina_case_inputs_incomplete",
+                "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+                "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified"
               ],
               "component_id": "engine_input_manifest",
               "current": {
                 "blocked_case_input_slot_count": 12,
+                "case_input_slot_count": 12,
                 "input_manifest_detected": true,
                 "input_manifest_row_count": 12,
                 "input_manifest_status": "ready",
+                "input_manifest_syntax_ready": true,
+                "input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
                 "required_case_count": 12,
+                "template_completion_blocked_case_count": 12,
                 "template_manifest_ready": false,
                 "template_missing_local_file_count": 48,
                 "template_missing_receipt_ref_count": 60,
-                "template_preflight_status": "operator_manifest_completion_required"
+                "template_preflight_status": "operator_manifest_completion_required",
+                "verified_case_input_count": 0
               },
               "pass": false,
               "required": {
                 "blocked_case_input_slot_count": 0,
                 "input_manifest_detected": true,
-                "input_manifest_row_count": ">=12"
+                "input_manifest_row_count": ">=12",
+                "input_manifest_syntax_ready": true,
+                "template_manifest_ready": true,
+                "verified_case_input_count": ">=12"
               },
               "status": "blocked"
             },
@@ -15234,6 +15295,8 @@
           "ready_component_count": 0,
           "remaining_blockers": [
             "public_benchmark_vina_gnina_case_inputs_incomplete",
+            "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+            "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified",
             "vina_gnina_execution_plan_not_ready",
             "vina_binary_missing",
             "gnina_binary_missing",
@@ -16423,6 +16486,11 @@
           "vina_gnina_input_manifest_detected": true,
           "vina_gnina_input_manifest_row_count": 12,
           "vina_gnina_input_manifest_status": "ready",
+          "vina_gnina_input_manifest_syntax_ready": true,
+          "vina_gnina_input_manifest_template_completion_blocked_case_count": 12,
+          "vina_gnina_input_manifest_template_manifest_ready": false,
+          "vina_gnina_input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
+          "vina_gnina_input_manifest_verified_case_input_count": 0,
           "vina_gnina_missing_engine_count": 2,
           "vina_gnina_required_engine_run_count": 24,
           "vina_gnina_rows_from_engine_run_bundle_materialized": false,
@@ -16462,25 +16530,35 @@
           "components": [
             {
               "blockers": [
-                "public_benchmark_vina_gnina_case_inputs_incomplete"
+                "public_benchmark_vina_gnina_case_inputs_incomplete",
+                "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+                "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified"
               ],
               "component_id": "engine_input_manifest",
               "current": {
                 "blocked_case_input_slot_count": 12,
+                "case_input_slot_count": 12,
                 "input_manifest_detected": true,
                 "input_manifest_row_count": 12,
                 "input_manifest_status": "ready",
+                "input_manifest_syntax_ready": true,
+                "input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
                 "required_case_count": 12,
+                "template_completion_blocked_case_count": 12,
                 "template_manifest_ready": false,
                 "template_missing_local_file_count": 48,
                 "template_missing_receipt_ref_count": 60,
-                "template_preflight_status": "operator_manifest_completion_required"
+                "template_preflight_status": "operator_manifest_completion_required",
+                "verified_case_input_count": 0
               },
               "pass": false,
               "required": {
                 "blocked_case_input_slot_count": 0,
                 "input_manifest_detected": true,
-                "input_manifest_row_count": ">=12"
+                "input_manifest_row_count": ">=12",
+                "input_manifest_syntax_ready": true,
+                "template_manifest_ready": true,
+                "verified_case_input_count": ">=12"
               },
               "status": "blocked"
             },
@@ -16696,6 +16774,8 @@
           "ready_component_count": 0,
           "remaining_blockers": [
             "public_benchmark_vina_gnina_case_inputs_incomplete",
+            "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+            "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified",
             "vina_gnina_execution_plan_not_ready",
             "vina_binary_missing",
             "gnina_binary_missing",
@@ -19686,6 +19766,11 @@
           "vina_gnina_input_manifest_detected": true,
           "vina_gnina_input_manifest_row_count": 12,
           "vina_gnina_input_manifest_status": "ready",
+          "vina_gnina_input_manifest_syntax_ready": true,
+          "vina_gnina_input_manifest_template_completion_blocked_case_count": 12,
+          "vina_gnina_input_manifest_template_manifest_ready": false,
+          "vina_gnina_input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
+          "vina_gnina_input_manifest_verified_case_input_count": 0,
           "vina_gnina_missing_engine_count": 2,
           "vina_gnina_required_engine_run_count": 24,
           "vina_gnina_rows_from_engine_run_bundle_materialized": false,
@@ -19725,25 +19810,35 @@
           "components": [
             {
               "blockers": [
-                "public_benchmark_vina_gnina_case_inputs_incomplete"
+                "public_benchmark_vina_gnina_case_inputs_incomplete",
+                "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+                "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified"
               ],
               "component_id": "engine_input_manifest",
               "current": {
                 "blocked_case_input_slot_count": 12,
+                "case_input_slot_count": 12,
                 "input_manifest_detected": true,
                 "input_manifest_row_count": 12,
                 "input_manifest_status": "ready",
+                "input_manifest_syntax_ready": true,
+                "input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
                 "required_case_count": 12,
+                "template_completion_blocked_case_count": 12,
                 "template_manifest_ready": false,
                 "template_missing_local_file_count": 48,
                 "template_missing_receipt_ref_count": 60,
-                "template_preflight_status": "operator_manifest_completion_required"
+                "template_preflight_status": "operator_manifest_completion_required",
+                "verified_case_input_count": 0
               },
               "pass": false,
               "required": {
                 "blocked_case_input_slot_count": 0,
                 "input_manifest_detected": true,
-                "input_manifest_row_count": ">=12"
+                "input_manifest_row_count": ">=12",
+                "input_manifest_syntax_ready": true,
+                "template_manifest_ready": true,
+                "verified_case_input_count": ">=12"
               },
               "status": "blocked"
             },
@@ -19959,6 +20054,8 @@
           "ready_component_count": 0,
           "remaining_blockers": [
             "public_benchmark_vina_gnina_case_inputs_incomplete",
+            "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+            "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified",
             "vina_gnina_execution_plan_not_ready",
             "vina_binary_missing",
             "gnina_binary_missing",
@@ -23482,7 +23579,7 @@
   },
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "c271cced050b34f96ae74a02ef48dec0ea685fc5",
+  "source_commit_sha": "5b90248442a65329e7584fa10f47b6bf3f47aff6",
   "status": "operator_rows_required",
   "summary": {
     "actual_closure_blocked_component_count": 2,
@@ -26621,6 +26718,11 @@
         "vina_gnina_input_manifest_detected": true,
         "vina_gnina_input_manifest_row_count": 12,
         "vina_gnina_input_manifest_status": "ready",
+        "vina_gnina_input_manifest_syntax_ready": true,
+        "vina_gnina_input_manifest_template_completion_blocked_case_count": 12,
+        "vina_gnina_input_manifest_template_manifest_ready": false,
+        "vina_gnina_input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
+        "vina_gnina_input_manifest_verified_case_input_count": 0,
         "vina_gnina_missing_engine_count": 2,
         "vina_gnina_required_engine_run_count": 24,
         "vina_gnina_rows_from_engine_run_bundle_materialized": false,
@@ -26660,25 +26762,35 @@
         "components": [
           {
             "blockers": [
-              "public_benchmark_vina_gnina_case_inputs_incomplete"
+              "public_benchmark_vina_gnina_case_inputs_incomplete",
+              "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+              "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified"
             ],
             "component_id": "engine_input_manifest",
             "current": {
               "blocked_case_input_slot_count": 12,
+              "case_input_slot_count": 12,
               "input_manifest_detected": true,
               "input_manifest_row_count": 12,
               "input_manifest_status": "ready",
+              "input_manifest_syntax_ready": true,
+              "input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
               "required_case_count": 12,
+              "template_completion_blocked_case_count": 12,
               "template_manifest_ready": false,
               "template_missing_local_file_count": 48,
               "template_missing_receipt_ref_count": 60,
-              "template_preflight_status": "operator_manifest_completion_required"
+              "template_preflight_status": "operator_manifest_completion_required",
+              "verified_case_input_count": 0
             },
             "pass": false,
             "required": {
               "blocked_case_input_slot_count": 0,
               "input_manifest_detected": true,
-              "input_manifest_row_count": ">=12"
+              "input_manifest_row_count": ">=12",
+              "input_manifest_syntax_ready": true,
+              "template_manifest_ready": true,
+              "verified_case_input_count": ">=12"
             },
             "status": "blocked"
           },
@@ -26894,6 +27006,8 @@
         "ready_component_count": 0,
         "remaining_blockers": [
           "public_benchmark_vina_gnina_case_inputs_incomplete",
+          "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+          "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified",
           "vina_gnina_execution_plan_not_ready",
           "vina_binary_missing",
           "gnina_binary_missing",

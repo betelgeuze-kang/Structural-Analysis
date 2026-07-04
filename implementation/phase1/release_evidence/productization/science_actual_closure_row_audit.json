@@ -1785,13 +1785,13 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T09:31:06.786547+00:00",
+  "generated_at": "2026-07-04T09:36:05.631556+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json": "sha256:98255bfca71cb82c3146a11e74e90cc338836518d93672950cbec5defd7d7147",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:4de837dd2b2688b5777fd73160bfaac0e26354d0a1b194f983cf892f703ba6f1",
     "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
     "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json": "sha256:ebad77368627c20437a800eeb1bcfe1bea120acc064275665fab9b9494d9e967",
-    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:69b3dc7fb0ea5dbafa2de15a3ed09f553c14e9555f388852a0a33d5d4b6d1bb1",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:34d6c64024d9c492273cbc2fd357d9d72d8d8b564dfa7667b4fd732b746abd84",
     "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json": "sha256:8a683e65f904fe56a67e739b1e92ab837a17aa6504195e9a27460ac2b6fb33ab",
     "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json": "sha256:b8c999b53256f4e952491e19346513cdeefb9aeb729352c05afd449b8a37bea1",
@@ -3216,7 +3216,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "c271cced050b34f96ae74a02ef48dec0ea685fc5",
+  "source_commit_sha": "5b90248442a65329e7584fa10f47b6bf3f47aff6",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,
@@ -9728,6 +9728,11 @@
         "vina_gnina_input_manifest_detected": true,
         "vina_gnina_input_manifest_row_count": 12,
         "vina_gnina_input_manifest_status": "ready",
+        "vina_gnina_input_manifest_syntax_ready": true,
+        "vina_gnina_input_manifest_template_completion_blocked_case_count": 12,
+        "vina_gnina_input_manifest_template_manifest_ready": false,
+        "vina_gnina_input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
+        "vina_gnina_input_manifest_verified_case_input_count": 0,
         "vina_gnina_missing_engine_count": 2,
         "vina_gnina_required_engine_run_count": 24,
         "vina_gnina_rows_from_engine_run_bundle_materialized": false,
@@ -9767,25 +9772,35 @@
         "components": [
           {
             "blockers": [
-              "public_benchmark_vina_gnina_case_inputs_incomplete"
+              "public_benchmark_vina_gnina_case_inputs_incomplete",
+              "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+              "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified"
             ],
             "component_id": "engine_input_manifest",
             "current": {
               "blocked_case_input_slot_count": 12,
+              "case_input_slot_count": 12,
               "input_manifest_detected": true,
               "input_manifest_row_count": 12,
               "input_manifest_status": "ready",
+              "input_manifest_syntax_ready": true,
+              "input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified",
               "required_case_count": 12,
+              "template_completion_blocked_case_count": 12,
               "template_manifest_ready": false,
               "template_missing_local_file_count": 48,
               "template_missing_receipt_ref_count": 60,
-              "template_preflight_status": "operator_manifest_completion_required"
+              "template_preflight_status": "operator_manifest_completion_required",
+              "verified_case_input_count": 0
             },
             "pass": false,
             "required": {
               "blocked_case_input_slot_count": 0,
               "input_manifest_detected": true,
-              "input_manifest_row_count": ">=12"
+              "input_manifest_row_count": ">=12",
+              "input_manifest_syntax_ready": true,
+              "template_manifest_ready": true,
+              "verified_case_input_count": ">=12"
             },
             "status": "blocked"
           },
@@ -10001,6 +10016,8 @@
         "ready_component_count": 0,
         "remaining_blockers": [
           "public_benchmark_vina_gnina_case_inputs_incomplete",
+          "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+          "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified",
           "vina_gnina_execution_plan_not_ready",
           "vina_binary_missing",
           "gnina_binary_missing",

@@ -2218,15 +2218,43 @@ def _vina_gnina_actual_evidence_audit(
             vina_gnina_execution_plan_summary.get("required_engine_run_count")
         )
     minimum_comparison_case_count = 1
-    input_manifest_ready = (
-        bool(vina_gnina_execution_plan_summary.get("input_manifest_detected"))
-        and _as_int(vina_gnina_execution_plan_summary.get("input_manifest_row_count"))
-        >= required_case_count
-        and _as_int(
-            vina_gnina_runtime_readiness_summary.get("blocked_case_input_slot_count")
-        )
-        == 0
+    input_manifest_detected = bool(
+        vina_gnina_execution_plan_summary.get("input_manifest_detected")
     )
+    input_manifest_row_count = _as_int(
+        vina_gnina_execution_plan_summary.get("input_manifest_row_count")
+    )
+    blocked_case_input_slot_count = _as_int(
+        vina_gnina_runtime_readiness_summary.get("blocked_case_input_slot_count")
+    )
+    case_input_slot_count = _as_int(
+        vina_gnina_runtime_readiness_summary.get("case_input_slot_matrix_count")
+    )
+    verified_case_input_count = max(
+        0,
+        case_input_slot_count - blocked_case_input_slot_count,
+    )
+    input_manifest_syntax_ready = (
+        input_manifest_detected and input_manifest_row_count >= required_case_count
+    )
+    input_manifest_template_ready = bool(
+        input_manifest_preflight.get("manifest_ready")
+    )
+    input_manifest_ready = (
+        input_manifest_syntax_ready
+        and input_manifest_template_ready
+        and blocked_case_input_slot_count == 0
+    )
+    if input_manifest_ready:
+        input_manifest_verification_status = "case_inputs_verified"
+    elif input_manifest_syntax_ready:
+        input_manifest_verification_status = (
+            "syntactic_manifest_detected_but_case_inputs_unverified"
+        )
+    else:
+        input_manifest_verification_status = (
+            "input_manifest_missing_or_case_coverage_incomplete"
+        )
     runtime_ready = bool(
         vina_gnina_runtime_readiness_summary.get(
             "runtime_ready_for_engine_execution"
@@ -2286,38 +2314,38 @@ def _vina_gnina_actual_evidence_audit(
                     vina_gnina_execution_plan_summary.get("input_manifest_status")
                     or ""
                 ),
-                "input_manifest_detected": bool(
-                    vina_gnina_execution_plan_summary.get(
-                        "input_manifest_detected"
-                    )
-                ),
-                "input_manifest_row_count": _as_int(
-                    vina_gnina_execution_plan_summary.get(
-                        "input_manifest_row_count"
-                    )
+                "input_manifest_detected": input_manifest_detected,
+                "input_manifest_row_count": input_manifest_row_count,
+                "input_manifest_syntax_ready": input_manifest_syntax_ready,
+                "input_manifest_verification_status": (
+                    input_manifest_verification_status
                 ),
                 "required_case_count": required_case_count,
-                "blocked_case_input_slot_count": _as_int(
-                    vina_gnina_runtime_readiness_summary.get(
-                        "blocked_case_input_slot_count"
-                    )
-                ),
+                "case_input_slot_count": case_input_slot_count,
+                "verified_case_input_count": verified_case_input_count,
+                "blocked_case_input_slot_count": blocked_case_input_slot_count,
                 "template_preflight_status": str(
                     input_manifest_preflight.get("status") or ""
                 ),
-                "template_manifest_ready": bool(
-                    input_manifest_preflight.get("manifest_ready")
-                ),
+                "template_manifest_ready": input_manifest_template_ready,
                 "template_missing_local_file_count": _as_int(
                     input_manifest_preflight.get("missing_local_file_count")
                 ),
                 "template_missing_receipt_ref_count": _as_int(
                     input_manifest_preflight.get("missing_receipt_ref_count")
                 ),
+                "template_completion_blocked_case_count": _as_int(
+                    input_manifest_preflight.get(
+                        "input_manifest_completion_blocked_case_count"
+                    )
+                ),
             },
             "required": {
                 "input_manifest_detected": True,
                 "input_manifest_row_count": f">={required_case_count}",
+                "input_manifest_syntax_ready": True,
+                "template_manifest_ready": True,
+                "verified_case_input_count": f">={required_case_count}",
                 "blocked_case_input_slot_count": 0,
             },
             "blockers": list(
@@ -2333,6 +2361,21 @@ def _vina_gnina_actual_evidence_audit(
                         *(
                             ["public_benchmark_vina_gnina_case_inputs_incomplete"]
                             if not input_manifest_ready
+                            else []
+                        ),
+                        *(
+                            [
+                                "public_benchmark_vina_gnina_input_manifest_template_completion_required"
+                            ]
+                            if input_manifest_syntax_ready
+                            and not input_manifest_template_ready
+                            else []
+                        ),
+                        *(
+                            [
+                                "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified"
+                            ]
+                            if blocked_case_input_slot_count > 0
                             else []
                         ),
                     ]
@@ -3071,6 +3114,17 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         "run_public_benchmark_harness_bundle_materializer",
         "refresh_public_benchmark_source_of_truth",
     ]
+    vina_gnina_input_manifest_component = next(
+        (
+            row
+            for row in vina_gnina_actual_evidence_audit["components"]
+            if row.get("component_id") == "engine_input_manifest"
+        ),
+        {},
+    )
+    vina_gnina_input_manifest_current = _as_dict(
+        vina_gnina_input_manifest_component.get("current")
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -3303,6 +3357,27 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "vina_gnina_input_manifest_row_count": (
                 vina_gnina_execution_plan_summary["input_manifest_row_count"]
             ),
+            "vina_gnina_input_manifest_syntax_ready": (
+                vina_gnina_input_manifest_current.get(
+                    "input_manifest_syntax_ready"
+                )
+            ),
+            "vina_gnina_input_manifest_verification_status": (
+                vina_gnina_input_manifest_current.get(
+                    "input_manifest_verification_status"
+                )
+            ),
+            "vina_gnina_input_manifest_verified_case_input_count": (
+                vina_gnina_input_manifest_current.get("verified_case_input_count")
+            ),
+            "vina_gnina_input_manifest_template_manifest_ready": (
+                vina_gnina_input_manifest_current.get("template_manifest_ready")
+            ),
+            "vina_gnina_input_manifest_template_completion_blocked_case_count": (
+                vina_gnina_input_manifest_current.get(
+                    "template_completion_blocked_case_count"
+                )
+            ),
             "vina_gnina_missing_engine_count": vina_gnina_execution_plan_summary[
                 "missing_engine_count"
             ],
@@ -3470,6 +3545,12 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"- `vina_gnina_required_engine_run_count`: `{payload['vina_gnina_execution_plan']['required_engine_run_count']}`",
         f"- `vina_gnina_input_manifest_status`: `{payload['vina_gnina_execution_plan']['input_manifest_status']}`",
         f"- `vina_gnina_input_manifest_row_count`: `{payload['vina_gnina_execution_plan']['input_manifest_row_count']}`",
+        "- `vina_gnina_input_manifest_verification_status`: "
+        f"`{payload['summary'].get('vina_gnina_input_manifest_verification_status')}`",
+        "- `vina_gnina_input_manifest_verified_case_input_count`: "
+        f"`{payload['summary'].get('vina_gnina_input_manifest_verified_case_input_count')}`",
+        "- `vina_gnina_input_manifest_template_completion_blocked_case_count`: "
+        f"`{payload['summary'].get('vina_gnina_input_manifest_template_completion_blocked_case_count')}`",
         f"- `vina_gnina_runtime_readiness`: `{payload['vina_gnina_runtime_readiness']['artifact']}`",
         f"- `vina_gnina_runtime_readiness_status`: `{payload['vina_gnina_runtime_readiness']['status']}`",
         f"- `vina_gnina_runtime_ready_engine_run_slot_count`: `{payload['vina_gnina_runtime_readiness']['ready_engine_run_slot_count']}`",

@@ -393,15 +393,35 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     }
     assert actual_components["engine_input_manifest"]["current"] == {
         "blocked_case_input_slot_count": 12,
+        "case_input_slot_count": 12,
         "input_manifest_detected": True,
         "input_manifest_row_count": 12,
+        "input_manifest_syntax_ready": True,
         "input_manifest_status": "ready",
+        "input_manifest_verification_status": (
+            "syntactic_manifest_detected_but_case_inputs_unverified"
+        ),
         "required_case_count": 12,
+        "template_completion_blocked_case_count": 12,
         "template_manifest_ready": False,
         "template_missing_local_file_count": 48,
         "template_missing_receipt_ref_count": 60,
         "template_preflight_status": "operator_manifest_completion_required",
+        "verified_case_input_count": 0,
     }
+    assert actual_components["engine_input_manifest"]["required"] == {
+        "blocked_case_input_slot_count": 0,
+        "input_manifest_detected": True,
+        "input_manifest_row_count": ">=12",
+        "input_manifest_syntax_ready": True,
+        "template_manifest_ready": True,
+        "verified_case_input_count": ">=12",
+    }
+    assert actual_components["engine_input_manifest"]["blockers"] == [
+        "public_benchmark_vina_gnina_case_inputs_incomplete",
+        "public_benchmark_vina_gnina_input_manifest_template_completion_required",
+        "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified",
+    ]
     assert actual_components["engine_runtime"]["blockers"] == [
         "vina_gnina_execution_plan_not_ready",
         "vina_binary_missing",
@@ -729,6 +749,13 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "vina_gnina_input_manifest_status": "ready",
         "vina_gnina_input_manifest_detected": True,
         "vina_gnina_input_manifest_row_count": 12,
+        "vina_gnina_input_manifest_syntax_ready": True,
+        "vina_gnina_input_manifest_verification_status": (
+            "syntactic_manifest_detected_but_case_inputs_unverified"
+        ),
+        "vina_gnina_input_manifest_verified_case_input_count": 0,
+        "vina_gnina_input_manifest_template_manifest_ready": False,
+        "vina_gnina_input_manifest_template_completion_blocked_case_count": 12,
         "vina_gnina_missing_engine_count": 2,
         "vina_gnina_runtime_readiness_status": "execution_plan_blocked",
         "vina_gnina_runtime_ready_for_engine_execution": False,
