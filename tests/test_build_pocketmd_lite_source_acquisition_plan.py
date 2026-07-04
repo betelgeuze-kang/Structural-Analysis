@@ -562,6 +562,18 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
     assert top_k_action["operator_input_source_receipt_plan_summary"][
         "first_blocked_receipt"
     ]["field"] == "source_id"
+    receipt_bundle_report = top_k_action["rows_from_receipt_bundle_report"]
+    assert receipt_bundle_report["status"] == (
+        "operator_receipts_completion_required"
+    )
+    assert receipt_bundle_report["receipt_count"] == 6
+    assert receipt_bundle_report["ready_receipt_count"] == 0
+    assert receipt_bundle_report["first_incomplete_receipt"][
+        "completion_missing_required_field_count"
+    ] == 18
+    assert "upstream_top_k_provenance_ref" in receipt_bundle_report[
+        "first_incomplete_receipt"
+    ]["completion_missing_required_fields"]
     assert top_k_action["phase4_metric_receipt_action_count"] == 8
     metric_receipt_actions = {
         row["criterion_id"]: row
@@ -653,6 +665,11 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "template_preflight_role_receipt_blocked_count": 24,
         "template_preflight_operator_input_source_receipt_requirement_count": 5,
         "template_preflight_operator_input_source_receipt_blocked_count": 5,
+        "rows_from_receipt_bundle_report_status": (
+            "operator_receipts_completion_required"
+        ),
+        "rows_from_receipt_bundle_ready_receipt_count": 0,
+        "rows_from_receipt_bundle_missing_required_field_count": 18,
         "raw_row_artifact_detected": False,
         "raw_row_candidate_status": "row_artifact_missing",
         "validated_row_count": 0,

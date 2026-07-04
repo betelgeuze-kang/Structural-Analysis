@@ -249,4 +249,32 @@ def test_pocketmd_topk_rows_from_receipt_bundle_reports_incomplete_templates(
     assert "receipt_file_missing" not in blockers_text
     assert "operator_input_source" not in blockers_text
     assert "row_normalization_failed" not in blockers_text
+    first_status = report["row_statuses"][0]
+    assert first_status["receipt_complete"] is False
+    assert first_status["completion_required_field_count"] == 23
+    assert first_status["completion_filled_required_field_count"] == 5
+    assert first_status["completion_missing_required_field_count"] == 18
+    assert first_status["operator_completion_action"] == (
+        "fill_completion_missing_required_fields_and_set_status_complete"
+    )
+    assert first_status["completion_missing_required_fields"] == [
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum",
+        "pre_refinement_energy_proxy",
+        "post_refinement_energy_proxy",
+        "local_min_survived",
+        "contact_persistence_rate",
+        "h_bond_persistence_rate",
+        "clash_count_before",
+        "clash_count_after",
+        "uncertainty_low",
+        "uncertainty_high",
+        "provenance_ref",
+        "source_checksum",
+        "operator_input_source.source_id",
+        "operator_input_source.source_url",
+        "operator_input_source.source_license",
+        "operator_input_source.source_artifact",
+        "operator_input_source.source_artifact_sha256",
+    ]
     assert not out_rows.exists()

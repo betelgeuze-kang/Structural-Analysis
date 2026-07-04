@@ -68,6 +68,13 @@ TOPK_ROW_FIELDS = (
     "provenance_ref",
     "source_checksum",
 )
+DEFAULT_OPERATOR_REQUIRED_FIELDS = (
+    *TOPK_ROW_FIELDS,
+    *(
+        f"operator_input_source.{field}"
+        for field in OPERATOR_INPUT_SOURCE_FIELDS
+    ),
+)
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -105,6 +112,63 @@ def _as_dict(value: Any) -> dict[str, Any]:
 
 def _text(value: Any) -> str:
     return str(value or "").strip()
+
+
+def _nested_text(payload: dict[str, Any], field: str) -> str:
+    current: Any = payload
+    for part in field.split("."):
+        if not isinstance(current, dict):
+            return ""
+        current = current.get(part)
+    return _text(current)
+
+
+def _receipt_completion_status(
+    *,
+    receipt: dict[str, Any],
+    bundle_row: dict[str, Any],
+) -> dict[str, Any]:
+    required_fields = [
+        _text(field)
+        for field in _as_list(receipt.get("operator_required_fields"))
+        if _text(field)
+    ] or list(DEFAULT_OPERATOR_REQUIRED_FIELDS)
+    row_payload = _receipt_row_payload(receipt) if receipt else {}
+    completion_payload = {
+        **_as_dict(row_payload),
+        **{
+            key: value
+            for key, value in receipt.items()
+            if key != "top_k_refinement_row"
+        },
+    }
+    completion_payload.setdefault("case_id", bundle_row.get("case_id"))
+    completion_payload.setdefault("source_family", bundle_row.get("source_family"))
+    completion_payload.setdefault("top_k_rank", bundle_row.get("top_k_rank"))
+    completion_payload.setdefault(
+        "candidate_id",
+        bundle_row.get("candidate_id_placeholder"),
+    )
+    missing_fields = [
+        field
+        for field in required_fields
+        if not _nested_text(completion_payload, field)
+    ]
+    return {
+        "completion_required_statuses": sorted(COMPLETED_RECEIPT_STATUSES),
+        "completion_required_fields": required_fields,
+        "completion_required_field_count": len(required_fields),
+        "completion_filled_required_field_count": (
+            len(required_fields) - len(missing_fields)
+        ),
+        "completion_missing_required_fields": missing_fields,
+        "completion_missing_required_field_count": len(missing_fields),
+        "operator_completion_action": (
+            "fill_completion_missing_required_fields_and_set_status_complete"
+            if missing_fields
+            else "set_status_complete_after_operator_review"
+        ),
+    }
 
 
 def _load_required_receipt(
@@ -183,6 +247,10 @@ def _row_from_bundle_receipt(
     receipt_complete = bool(receipt) and receipt_status in COMPLETED_RECEIPT_STATUSES
     if receipt and not receipt_complete:
         blockers.append("receipt_not_complete")
+    completion_status = _receipt_completion_status(
+        receipt=receipt or _as_dict(bundle_row.get("receipt_template_payload")),
+        bundle_row=bundle_row,
+    )
     operator_input_source = {field: "" for field in OPERATOR_INPUT_SOURCE_FIELDS}
     if receipt_complete:
         operator_input_source, source_blockers = _operator_input_source_status(receipt)
@@ -213,8 +281,10 @@ def _row_from_bundle_receipt(
         "top_k_rank": bundle_row.get("top_k_rank"),
         "receipt_ref": _text(bundle_row.get("receipt_ref")),
         "receipt_status": receipt_status,
+        "receipt_complete": receipt_complete,
         "status": "ready" if not blockers else "operator_completion_required",
         "operator_input_source": operator_input_source,
+        **completion_status,
         "blockers": list(dict.fromkeys(blockers)),
     }
     return normalized_row, row_status

@@ -46,6 +46,9 @@ DEFAULT_OPERATOR_TEMPLATE = PRODUCTIZATION / "pocketmd_lite_operator_template.js
 DEFAULT_REFINEMENT_EXECUTION_PLAN = (
     PRODUCTIZATION / "pocketmd_lite_refinement_execution_plan.json"
 )
+DEFAULT_ROWS_FROM_RECEIPT_BUNDLE_REPORT = (
+    PRODUCTIZATION / "pocketmd_lite_topk_rows_from_receipt_bundle_report.json"
+)
 DEFAULT_SURVIVAL_REPORT = PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json"
 DEFAULT_SURFACE = (
     Path("implementation/phase1/release_evidence/surface")
@@ -1324,6 +1327,39 @@ def _refinement_execution_plan_command() -> str:
     )
 
 
+def _rows_from_receipt_bundle_report_summary(repo_root: Path) -> dict[str, Any]:
+    payload = _load_json(repo_root, DEFAULT_ROWS_FROM_RECEIPT_BUNDLE_REPORT)
+    if not payload:
+        return {
+            "present": False,
+            "artifact": str(DEFAULT_ROWS_FROM_RECEIPT_BUNDLE_REPORT),
+            "status": "missing",
+            "rows_materialized": False,
+            "receipt_count": 0,
+            "ready_receipt_count": 0,
+            "row_count": 0,
+            "blocker_count": 0,
+            "first_incomplete_receipt": {},
+        }
+    row_statuses = [
+        row for row in payload.get("row_statuses", []) if isinstance(row, dict)
+    ]
+    summary = payload.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+    return {
+        "present": True,
+        "artifact": str(DEFAULT_ROWS_FROM_RECEIPT_BUNDLE_REPORT),
+        "status": str(payload.get("status") or ""),
+        "rows_materialized": bool(payload.get("rows_materialized")),
+        "receipt_count": int(payload.get("receipt_count") or 0),
+        "ready_receipt_count": int(payload.get("ready_receipt_count") or 0),
+        "row_count": int(payload.get("row_count") or 0),
+        "blocker_count": int(summary.get("blocker_count") or 0),
+        "first_incomplete_receipt": _first_blocked_row(row_statuses),
+    }
+
+
 def _refinement_execution_plan_summary(
     minimum_rows_by_case: list[dict[str, Any]],
     *,
@@ -1359,6 +1395,7 @@ def _pocketmd_rows_operator_action(
     phase4_metric_closure_matrix: list[dict[str, Any]],
     required_flat_row_fields: list[str],
     template_preflight_summary: dict[str, Any],
+    rows_from_receipt_bundle_report_summary: dict[str, Any],
     commands: dict[str, str],
 ) -> dict[str, Any]:
     row_blocker = str(raw_row_candidate_status.get("blocker") or "")
@@ -1500,6 +1537,9 @@ def _pocketmd_rows_operator_action(
                     or {}
                 ),
             },
+            "rows_from_receipt_bundle_report": (
+                rows_from_receipt_bundle_report_summary
+            ),
             "supported_candidate_paths": [
                 str(row.get("path") or "")
                 for row in raw_row_candidate_status.get("candidate_paths", [])
@@ -1511,6 +1551,9 @@ def _pocketmd_rows_operator_action(
             ],
             "materialize_rows_from_template_command": commands[
                 "materialize_rows_from_template"
+            ],
+            "materialize_rows_from_receipt_bundle_command": commands[
+                "materialize_rows_from_receipt_bundle"
             ],
             "import_rows_command": commands["import_rows"],
             "materialize_survival_command": commands["materialize_survival"],
@@ -1573,6 +1616,9 @@ def _pocketmd_rows_operator_action(
             ],
             "materialize_rows_from_template": commands[
                 "materialize_rows_from_template"
+            ],
+            "materialize_rows_from_receipt_bundle": commands[
+                "materialize_rows_from_receipt_bundle"
             ],
             "import_rows": commands["import_rows"],
             "materialize_survival": commands["materialize_survival"],
@@ -1662,6 +1708,9 @@ def build_pocketmd_lite_source_acquisition_plan(
         survival_report_status=survival_report_status,
     )
     template_preflight_summary = _template_preflight_summary(repo_root)
+    rows_from_receipt_bundle_report_summary = (
+        _rows_from_receipt_bundle_report_summary(repo_root)
+    )
     phase4_actual_evidence_audit = _phase4_actual_evidence_audit(
         raw_row_candidate_status=raw_row_candidate_status,
         phase4_completion_audit=phase4_completion_audit,
@@ -1686,6 +1735,13 @@ def build_pocketmd_lite_source_acquisition_plan(
             "python3 scripts/materialize_pocketmd_lite_topk_rows_from_template.py "
             f"--template {DEFAULT_ROWS_TEMPLATE} --out-rows {DEFAULT_ROWS_OUT} "
             f"--out-report {PRODUCTIZATION / 'pocketmd_lite_topk_rows_from_template_report.json'} "
+            "--fail-blocked"
+        ),
+        "materialize_rows_from_receipt_bundle": (
+            "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py "
+            f"--receipt-bundle {PRODUCTIZATION / 'pocketmd_lite_refinement_receipt_bundle.json'} "
+            f"--out-rows {DEFAULT_ROWS_OUT} "
+            f"--out-report {DEFAULT_ROWS_FROM_RECEIPT_BUNDLE_REPORT} "
             "--fail-blocked"
         ),
         "build_refinement_execution_plan": _refinement_execution_plan_command(),
@@ -1716,6 +1772,9 @@ def build_pocketmd_lite_source_acquisition_plan(
         phase4_metric_closure_matrix=phase4_metric_closure_matrix,
         required_flat_row_fields=required_flat_row_fields,
         template_preflight_summary=template_preflight_summary,
+        rows_from_receipt_bundle_report_summary=(
+            rows_from_receipt_bundle_report_summary
+        ),
         commands=commands,
     )
     missing_row_input_actions = (
@@ -1744,10 +1803,14 @@ def build_pocketmd_lite_source_acquisition_plan(
                 Path("scripts/build_pocketmd_lite_source_acquisition_plan.py"),
                 Path("scripts/build_pocketmd_lite_refinement_execution_plan.py"),
                 Path("scripts/build_pocketmd_lite_topk_rows_template_preflight.py"),
+                Path(
+                    "scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py"
+                ),
                 Path("scripts/materialize_pocketmd_lite_operator_intake_from_rows.py"),
                 Path("scripts/materialize_pocketmd_lite_topk_survival_report.py"),
                 DEFAULT_ROWS_TEMPLATE,
                 DEFAULT_ROWS_TEMPLATE_PREFLIGHT,
+                DEFAULT_ROWS_FROM_RECEIPT_BUNDLE_REPORT,
                 DEFAULT_SURVIVAL_REPORT,
             ],
             reused_evidence=False,
@@ -1780,6 +1843,9 @@ def build_pocketmd_lite_source_acquisition_plan(
         "survival_report": survival_report_status,
         "refinement_execution_plan": refinement_execution_plan,
         "template_preflight_summary": template_preflight_summary,
+        "rows_from_receipt_bundle_report_summary": (
+            rows_from_receipt_bundle_report_summary
+        ),
         "phase4_refinement_receipt_promotion_policy": dict(
             PHASE4_REFINEMENT_RECEIPT_PROMOTION_POLICY
         ),
@@ -1891,6 +1957,18 @@ def build_pocketmd_lite_source_acquisition_plan(
                     "operator_input_source_receipt_blocked_count"
                 ]
             ),
+            "rows_from_receipt_bundle_report_status": (
+                rows_from_receipt_bundle_report_summary["status"]
+            ),
+            "rows_from_receipt_bundle_ready_receipt_count": (
+                rows_from_receipt_bundle_report_summary["ready_receipt_count"]
+            ),
+            "rows_from_receipt_bundle_missing_required_field_count": int(
+                rows_from_receipt_bundle_report_summary.get(
+                    "first_incomplete_receipt", {}
+                ).get("completion_missing_required_field_count")
+                or 0
+            ),
             "refinement_execution_plan_status": refinement_execution_plan["status"],
             "refinement_execution_plan_ready": refinement_execution_plan[
                 "execution_plan_ready"
@@ -1955,6 +2033,10 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"`{payload['template_preflight_summary']['role_receipt_blocked_count']}`",
         "- `template_preflight_operator_input_source_receipt_blocked_count`: "
         f"`{payload['template_preflight_summary']['operator_input_source_receipt_blocked_count']}`",
+        "- `rows_from_receipt_bundle_report_status`: "
+        f"`{payload['rows_from_receipt_bundle_report_summary']['status']}`",
+        "- `rows_from_receipt_bundle_ready_receipt_count`: "
+        f"`{payload['rows_from_receipt_bundle_report_summary']['ready_receipt_count']}`",
         f"- `row_template_artifact`: `{payload['row_artifact_contract']['template_artifact']}`",
         "",
         "## Operator Next Actions",
