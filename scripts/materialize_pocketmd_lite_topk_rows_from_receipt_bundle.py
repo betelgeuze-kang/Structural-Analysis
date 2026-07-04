@@ -75,6 +75,42 @@ DEFAULT_OPERATOR_REQUIRED_FIELDS = (
         for field in OPERATOR_INPUT_SOURCE_FIELDS
     ),
 )
+RECEIPT_METRIC_FAMILIES = (
+    {
+        "metric_family_id": "local_min_survival",
+        "product_requirement": "local-min survival and energy proxy movement are recorded",
+        "phase4_criterion_id": "local_min_survival_materialized",
+        "required_receipt_fields": [
+            "pre_refinement_energy_proxy",
+            "post_refinement_energy_proxy",
+            "local_min_survived",
+        ],
+    },
+    {
+        "metric_family_id": "contact_persistence",
+        "product_requirement": "contact persistence is recorded",
+        "phase4_criterion_id": "contact_persistence_materialized",
+        "required_receipt_fields": ["contact_persistence_rate"],
+    },
+    {
+        "metric_family_id": "h_bond_persistence",
+        "product_requirement": "H-bond persistence is recorded",
+        "phase4_criterion_id": "h_bond_persistence_materialized",
+        "required_receipt_fields": ["h_bond_persistence_rate"],
+    },
+    {
+        "metric_family_id": "clash_relief",
+        "product_requirement": "clash relief before/after counts are recorded",
+        "phase4_criterion_id": "clash_relief_materialized",
+        "required_receipt_fields": ["clash_count_before", "clash_count_after"],
+    },
+    {
+        "metric_family_id": "uncertainty",
+        "product_requirement": "uncertainty interval bounds are recorded",
+        "phase4_criterion_id": "uncertainty_summary_materialized",
+        "required_receipt_fields": ["uncertainty_low", "uncertainty_high"],
+    },
+)
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -332,6 +368,76 @@ def _receipt_completion_action_plan(
     return rows
 
 
+def _receipt_metric_family_completion_plan(
+    receipt_completion_action_plan: list[dict[str, Any]],
+    *,
+    receipt_count: int,
+) -> list[dict[str, Any]]:
+    plan: list[dict[str, Any]] = []
+    for family in RECEIPT_METRIC_FAMILIES:
+        required_fields = [
+            str(field)
+            for field in _as_list(family.get("required_receipt_fields"))
+            if str(field)
+        ]
+        blocked_receipts: list[dict[str, Any]] = []
+        missing_field_occurrence_count = 0
+        for receipt in receipt_completion_action_plan:
+            missing_field_set = {
+                str(field)
+                for field in _as_list(
+                    receipt.get("completion_missing_required_fields")
+                )
+            }
+            missing_fields = [
+                field for field in required_fields if field in missing_field_set
+            ]
+            if not missing_fields:
+                continue
+            missing_field_occurrence_count += len(missing_fields)
+            blocked_receipts.append(
+                {
+                    "run_key": str(receipt.get("run_key") or ""),
+                    "case_id": str(receipt.get("case_id") or ""),
+                    "top_k_rank": int(receipt.get("top_k_rank") or 0),
+                    "receipt_ref": str(receipt.get("receipt_ref") or ""),
+                    "missing_receipt_fields": missing_fields,
+                    "operator_completion_action": str(
+                        receipt.get("operator_completion_action") or ""
+                    ),
+                }
+            )
+        blocked_count = len(blocked_receipts)
+        plan.append(
+            {
+                "metric_family_id": str(family.get("metric_family_id") or ""),
+                "product_requirement": str(
+                    family.get("product_requirement") or ""
+                ),
+                "phase4_criterion_id": str(
+                    family.get("phase4_criterion_id") or ""
+                ),
+                "status": "blocked" if blocked_count else "ready",
+                "required_receipt_fields": required_fields,
+                "receipt_count": receipt_count,
+                "complete_receipt_count": max(0, receipt_count - blocked_count),
+                "blocked_receipt_count": blocked_count,
+                "missing_field_occurrence_count": missing_field_occurrence_count,
+                "first_blocked_receipt": (
+                    blocked_receipts[0] if blocked_receipts else {}
+                ),
+                "blocked_receipts": blocked_receipts,
+                "operator_completion_action": (
+                    "fill_metric_family_receipt_fields_for_"
+                    f"{family.get('metric_family_id')}"
+                    if blocked_count
+                    else "review_metric_family_receipts"
+                ),
+            }
+        )
+    return plan
+
+
 def materialize_pocketmd_lite_topk_rows_from_receipt_bundle(
     *,
     repo_root: Path = ROOT,
@@ -366,6 +472,12 @@ def materialize_pocketmd_lite_topk_rows_from_receipt_bundle(
     ]
     row_statuses = [status for _row, status in row_results]
     receipt_completion_action_plan = _receipt_completion_action_plan(row_statuses)
+    receipt_metric_family_completion_plan = (
+        _receipt_metric_family_completion_plan(
+            receipt_completion_action_plan,
+            receipt_count=len(raw_bundle_rows),
+        )
+    )
     first_incomplete_receipt = (
         receipt_completion_action_plan[0] if receipt_completion_action_plan else {}
     )
@@ -474,6 +586,21 @@ def materialize_pocketmd_lite_topk_rows_from_receipt_bundle(
         "incomplete_receipt_count": len(receipt_completion_action_plan),
         "first_incomplete_receipt": first_incomplete_receipt,
         "receipt_completion_action_plan": receipt_completion_action_plan,
+        "receipt_metric_family_completion_plan": (
+            receipt_metric_family_completion_plan
+        ),
+        "receipt_metric_family_count": len(
+            receipt_metric_family_completion_plan
+        ),
+        "receipt_metric_family_blocked_count": sum(
+            1
+            for row in receipt_metric_family_completion_plan
+            if row["status"] == "blocked"
+        ),
+        "receipt_metric_family_missing_field_occurrence_count": sum(
+            int(row.get("missing_field_occurrence_count") or 0)
+            for row in receipt_metric_family_completion_plan
+        ),
         "unique_missing_required_fields": unique_missing_required_fields,
         "unique_missing_required_field_count": len(unique_missing_required_fields),
         "total_missing_required_field_count": total_missing_required_field_count,
@@ -522,6 +649,18 @@ def materialize_pocketmd_lite_topk_rows_from_receipt_bundle(
                 1 for row in row_statuses if row.get("status") == "ready"
             ),
             "incomplete_receipt_count": len(receipt_completion_action_plan),
+            "receipt_metric_family_count": len(
+                receipt_metric_family_completion_plan
+            ),
+            "receipt_metric_family_blocked_count": sum(
+                1
+                for row in receipt_metric_family_completion_plan
+                if row["status"] == "blocked"
+            ),
+            "receipt_metric_family_missing_field_occurrence_count": sum(
+                int(row.get("missing_field_occurrence_count") or 0)
+                for row in receipt_metric_family_completion_plan
+            ),
             "unique_missing_required_field_count": len(unique_missing_required_fields),
             "total_missing_required_field_count": (
                 total_missing_required_field_count

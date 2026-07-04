@@ -164,6 +164,19 @@ def test_materializes_pocketmd_topk_rows_from_completed_receipt_bundle(
     assert report["incomplete_receipt_count"] == 0
     assert report["first_incomplete_receipt"] == {}
     assert report["receipt_completion_action_plan"] == []
+    assert report["receipt_metric_family_count"] == 5
+    assert report["receipt_metric_family_blocked_count"] == 0
+    assert report["receipt_metric_family_missing_field_occurrence_count"] == 0
+    assert {
+        row["metric_family_id"]: row["status"]
+        for row in report["receipt_metric_family_completion_plan"]
+    } == {
+        "local_min_survival": "ready",
+        "contact_persistence": "ready",
+        "h_bond_persistence": "ready",
+        "clash_relief": "ready",
+        "uncertainty": "ready",
+    }
     assert report["unique_missing_required_fields"] == []
     assert report["total_missing_required_field_count"] == 0
     assert report["row_count"] == 6
@@ -265,6 +278,38 @@ def test_pocketmd_topk_rows_from_receipt_bundle_reports_incomplete_templates(
     assert first_action["operator_completion_action"] == (
         "fill_completion_missing_required_fields_and_set_status_complete"
     )
+    assert report["receipt_metric_family_count"] == 5
+    assert report["receipt_metric_family_blocked_count"] == 5
+    assert report["receipt_metric_family_missing_field_occurrence_count"] == 54
+    metric_family_plan = {
+        row["metric_family_id"]: row
+        for row in report["receipt_metric_family_completion_plan"]
+    }
+    assert metric_family_plan["local_min_survival"][
+        "blocked_receipt_count"
+    ] == 6
+    assert metric_family_plan["local_min_survival"][
+        "missing_field_occurrence_count"
+    ] == 18
+    assert metric_family_plan["local_min_survival"][
+        "first_blocked_receipt"
+    ]["missing_receipt_fields"] == [
+        "pre_refinement_energy_proxy",
+        "post_refinement_energy_proxy",
+        "local_min_survived",
+    ]
+    assert metric_family_plan["contact_persistence"][
+        "missing_field_occurrence_count"
+    ] == 6
+    assert metric_family_plan["h_bond_persistence"][
+        "missing_field_occurrence_count"
+    ] == 6
+    assert metric_family_plan["clash_relief"][
+        "missing_field_occurrence_count"
+    ] == 12
+    assert metric_family_plan["uncertainty"][
+        "missing_field_occurrence_count"
+    ] == 12
     assert report["unique_missing_required_field_count"] == 18
     assert report["total_missing_required_field_count"] == 108
     assert first_status["receipt_complete"] is False
