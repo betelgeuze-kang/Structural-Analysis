@@ -50,6 +50,8 @@
       {
         "blockers": [
           "vina_gnina_comparison_ready",
+          "vina_gnina_comparison_ready::vina_gnina_rows_not_provided",
+          "public_benchmark_source_actuality_ready::source_actuality_scope_incomplete:vina_gnina_rows",
           "public_benchmark_vina_gnina_case_inputs_incomplete",
           "public_benchmark_vina_gnina_input_manifest_template_completion_required",
           "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified",
@@ -60,6 +62,18 @@
           "vina_gnina_rows_not_provided"
         ],
         "current": {
+          "completion_audit_status": "blocked",
+          "completion_blocked_requirement_ids": [
+            "vina_gnina_comparison_ready",
+            "public_benchmark_source_actuality_ready"
+          ],
+          "completion_blocker_count": 2,
+          "completion_blockers": [
+            "vina_gnina_comparison_ready::vina_gnina_rows_not_provided",
+            "public_benchmark_source_actuality_ready::source_actuality_scope_incomplete:vina_gnina_rows"
+          ],
+          "completion_requirement_count": 6,
+          "completion_requirement_pass_count": 4,
           "detected_row_artifact_count": 0,
           "failed_criteria": [
             "vina_gnina_comparison_ready"
@@ -77,12 +91,18 @@
           "requirement_count": 5,
           "requirement_pass_count": 4,
           "runtime_ready_for_engine_execution": false,
+          "source_actuality_missing_row_inputs": [
+            "vina_gnina_rows"
+          ],
+          "source_actuality_scope": "provided_row_inputs_only",
+          "source_actuality_scope_complete": false,
           "template_completion_blocked_case_count": 12,
           "verified_case_input_count": 0
         },
         "evidence_artifacts": [
           "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
           "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+          "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
           "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json"
         ],
         "name": "Public benchmark Phase 2 actual closure",
@@ -188,6 +208,20 @@
           "clash_relief_materialized",
           "uncertainty_summary_materialized",
           "report_blockers_resolved",
+          "operator_input_source_receipt_pass::operator_input_source_receipt_required",
+          "top_k_refinement_rows_present::pocketmd_lite_topk_candidate_rows_missing",
+          "top_k_refinement_case_coverage::pocketmd_lite_topk_candidate_rows_missing",
+          "local_min_survival_materialized::pocketmd_lite_local_min_survival_rows_missing",
+          "contact_persistence_materialized::pocketmd_lite_contact_persistence_rows_missing",
+          "h_bond_persistence_materialized::pocketmd_lite_h_bond_persistence_rows_missing",
+          "clash_relief_materialized::pocketmd_lite_clash_relief_rows_missing",
+          "uncertainty_summary_materialized::pocketmd_lite_uncertainty_rows_missing",
+          "report_blockers_resolved::pocketmd_lite_topk_candidate_rows_missing",
+          "report_blockers_resolved::pocketmd_lite_local_min_survival_rows_missing",
+          "report_blockers_resolved::pocketmd_lite_contact_persistence_rows_missing",
+          "report_blockers_resolved::pocketmd_lite_h_bond_persistence_rows_missing",
+          "report_blockers_resolved::pocketmd_lite_clash_relief_rows_missing",
+          "report_blockers_resolved::pocketmd_lite_uncertainty_rows_missing",
           "pocketmd_lite_local_min_survival_rows_missing",
           "pocketmd_lite_contact_persistence_rows_missing",
           "pocketmd_lite_h_bond_persistence_rows_missing",
@@ -214,11 +248,43 @@
           "reported_metric_count": 0,
           "required_metric_count": 5,
           "requirement_count": 9,
-          "requirement_pass_count": 1
+          "requirement_pass_count": 1,
+          "survival_completion_audit_status": "blocked",
+          "survival_completion_blocked_requirement_ids": [
+            "operator_input_source_receipt_pass",
+            "top_k_refinement_rows_present",
+            "top_k_refinement_case_coverage",
+            "local_min_survival_materialized",
+            "contact_persistence_materialized",
+            "h_bond_persistence_materialized",
+            "clash_relief_materialized",
+            "uncertainty_summary_materialized",
+            "report_blockers_resolved"
+          ],
+          "survival_completion_blocker_count": 14,
+          "survival_completion_blockers": [
+            "operator_input_source_receipt_pass::operator_input_source_receipt_required",
+            "top_k_refinement_rows_present::pocketmd_lite_topk_candidate_rows_missing",
+            "top_k_refinement_case_coverage::pocketmd_lite_topk_candidate_rows_missing",
+            "local_min_survival_materialized::pocketmd_lite_local_min_survival_rows_missing",
+            "contact_persistence_materialized::pocketmd_lite_contact_persistence_rows_missing",
+            "h_bond_persistence_materialized::pocketmd_lite_h_bond_persistence_rows_missing",
+            "clash_relief_materialized::pocketmd_lite_clash_relief_rows_missing",
+            "uncertainty_summary_materialized::pocketmd_lite_uncertainty_rows_missing",
+            "report_blockers_resolved::pocketmd_lite_topk_candidate_rows_missing",
+            "report_blockers_resolved::pocketmd_lite_local_min_survival_rows_missing",
+            "report_blockers_resolved::pocketmd_lite_contact_persistence_rows_missing",
+            "report_blockers_resolved::pocketmd_lite_h_bond_persistence_rows_missing",
+            "report_blockers_resolved::pocketmd_lite_clash_relief_rows_missing",
+            "report_blockers_resolved::pocketmd_lite_uncertainty_rows_missing"
+          ],
+          "survival_completion_requirement_count": 10,
+          "survival_completion_requirement_pass_count": 1
         },
         "evidence_artifacts": [
           "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
           "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+          "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
           "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json"
         ],
         "name": "PocketMD Lite top-k refinement",
@@ -273,6 +339,7 @@
     "evidence_artifacts": [
       "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
       "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+      "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
       "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json"
     ],
     "first_blocked_target": "public_benchmark_phase2_actual_closure",
@@ -647,6 +714,7 @@
     "evidence_artifacts": [
       "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
       "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+      "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
       "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json"
     ],
     "first_blocked_target": "public_benchmark_phase2_actual_closure",
@@ -1002,10 +1070,12 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
     "validation_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md"
   },
-  "generated_at": "2026-07-04T12:46:38.977304+00:00",
+  "generated_at": "2026-07-04T13:35:57.019598+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:be05411d7bb174d8612aaa5a6d3c2ffbace0c16d1310fc0b6897f9fd9038c6d1",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:50113b04a758c06b720aa91a3b64639e1d31ba94f35334cf21494462930a7d2f",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:03fd1523adcfed47c63c7403259425bcb03d91049b4e9d39dec970989d1731aa",
+    "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:06ffd80060d3ec29ee49953e7bbee5bc8448f2a4480ce1f301db17dbb3e89e9e",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:69285c5dcf0a4bdc30c7a71d48b86dabde7af6e458925f250a4e3f9b9616e109",
     "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json": "sha256:8552a4545a28550ac709acbc509977c0f9b05a378dc89ce3a67e0986bb62b46f",
     "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:781a71aa4ca54ed58be70e95bf15b75f4c7771ffdbc2b0899ce913b1a3de5afb",
@@ -1013,7 +1083,7 @@
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:c1af83f1b410aca8536d5ab832c0ba6a86153436844e42152860f84ec0002328",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:8adb767e05269c4063e04ca5e5060b0e94994916ccae4e9912c897c0c7fc9703",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:e8a6b5e0b8d86ef1b629c1a6d4e8caab6132dd4a3a311c64bc520c2e4e13954f",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:abfdf21f4215c0a86e924961274e44d62502630d146c70308c4c27a74425a3b6"
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:8cba91d42c09dfc492cf90c255caab48c1a568f97fd19686d7d7628cb287b5a3"
   },
   "mutation_allowed": false,
   "next_actions": [
@@ -1062,6 +1132,7 @@
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
         "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
         "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json"
       ],
       "first_blocked_target": "public_benchmark_phase2_actual_closure",
@@ -1436,6 +1507,7 @@
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
         "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
         "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json"
       ],
       "first_blocked_target": "public_benchmark_phase2_actual_closure",
@@ -2196,6 +2268,7 @@
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
         "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
         "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json"
       ],
       "first_blocked_target": "public_benchmark_phase2_actual_closure",
@@ -2566,6 +2639,7 @@
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
         "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json"
       ],
       "first_blocked_target": "pocketmd_lite_topk_actual_closure",
@@ -3016,6 +3090,7 @@
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
         "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
         "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json"
       ],
       "first_blocked_target": "public_benchmark_phase2_actual_closure",
@@ -3397,6 +3472,7 @@
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
         "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json"
       ],
       "first_blocked_target": "pocketmd_lite_topk_actual_closure",
@@ -3988,6 +4064,7 @@
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
         "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
         "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json"
       ],
       "first_blocked_target": "public_benchmark_phase2_actual_closure",
@@ -5793,6 +5870,7 @@
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
         "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json"
       ],
       "first_blocked_target": "pocketmd_lite_topk_actual_closure",
@@ -8863,7 +8941,7 @@
     ],
     "status": "operator_evidence_required"
   },
-  "source_commit_sha": "d3d1021a79d6b9c13225dd23cd66367082f2605a",
+  "source_commit_sha": "926df3a8e8ca502c9f5d68a654b6fb1a1deb314b",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

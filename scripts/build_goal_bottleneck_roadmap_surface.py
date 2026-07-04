@@ -32,6 +32,12 @@ DEFAULT_SCIENCE_ACTUAL_CLOSURE_ROW_AUDIT = (
 DEFAULT_SCIENCE_ACTUAL_CLOSURE_OPERATOR_HANDOFF = (
     PRODUCTIZATION / "science_actual_closure_operator_handoff.json"
 )
+DEFAULT_PUBLIC_BENCHMARK_PHASE2_ROW_AUDIT = (
+    PRODUCTIZATION / "public_benchmark_phase2_row_audit.json"
+)
+DEFAULT_POCKETMD_TOPK_SURVIVAL_REPORT = (
+    PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json"
+)
 DEFAULT_PRODUCT_CAPABILITIES = SURFACE_DIR / "product_capabilities_surface.json"
 DEFAULT_UX_OBSERVATION_REPORT = PRODUCTIZATION / "ux_new_user_observation_report.json"
 DEFAULT_UX_OBSERVATION_INTAKE_PACKET = (
@@ -56,6 +62,7 @@ SCIENCE_ACTUAL_CLOSURE_COMPONENT_PHASES: dict[str, dict[str, Any]] = {
         "evidence_artifacts": [
             DEFAULT_SCIENCE_ACTUAL_CLOSURE_ROW_AUDIT,
             DEFAULT_SCIENCE_ACTUAL_CLOSURE_OPERATOR_HANDOFF,
+            DEFAULT_PUBLIC_BENCHMARK_PHASE2_ROW_AUDIT,
             PRODUCTIZATION / "public_benchmark_phase2_source_acquisition_plan.json",
         ],
     },
@@ -88,6 +95,7 @@ SCIENCE_ACTUAL_CLOSURE_COMPONENT_PHASES: dict[str, dict[str, Any]] = {
         "evidence_artifacts": [
             DEFAULT_SCIENCE_ACTUAL_CLOSURE_ROW_AUDIT,
             DEFAULT_SCIENCE_ACTUAL_CLOSURE_OPERATOR_HANDOFF,
+            DEFAULT_POCKETMD_TOPK_SURVIVAL_REPORT,
             PRODUCTIZATION / "pocketmd_lite_source_acquisition_plan.json",
         ],
     },
@@ -137,6 +145,8 @@ def _input_paths() -> list[Path]:
         DEFAULT_SOURCE_OF_TRUTH_GAP_CLASSIFICATION,
         DEFAULT_SCIENCE_ACTUAL_CLOSURE_ROW_AUDIT,
         DEFAULT_SCIENCE_ACTUAL_CLOSURE_OPERATOR_HANDOFF,
+        DEFAULT_PUBLIC_BENCHMARK_PHASE2_ROW_AUDIT,
+        DEFAULT_POCKETMD_TOPK_SURVIVAL_REPORT,
         DEFAULT_PRODUCT_CAPABILITIES,
         DEFAULT_UX_OBSERVATION_REPORT,
         DEFAULT_UX_OBSERVATION_INTAKE_PACKET,
@@ -1198,6 +1208,8 @@ def _active_thread_goal_objective_audit(
     source_of_truth_gap_summary: dict[str, Any],
     source_of_truth_gap_evidence_matrix: list[dict[str, Any]],
     science_handoff: dict[str, Any],
+    public_phase2_row_audit: dict[str, Any] | None = None,
+    pocketmd_survival_report: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     rows_by_phase = _roadmap_rows_by_phase(roadmap_rows)
     source_row = _as_dict(rows_by_phase.get("phase_0_source_of_truth_hardening"))
@@ -1236,6 +1248,34 @@ def _active_thread_goal_objective_audit(
     phase2_requirement_summary = _as_dict(
         phase2_gate.get("phase2_requirement_summary")
     )
+    public_completion_audit = _as_dict(
+        _as_dict(public_phase2_row_audit).get("phase2_completion_audit")
+    )
+    public_completion_requirements = [
+        row
+        for row in _as_list(public_completion_audit.get("requirements"))
+        if isinstance(row, dict)
+    ]
+    public_completion_blockers = [
+        str(item) for item in _as_list(public_completion_audit.get("blockers"))
+    ]
+    public_completion_blocked_requirement_ids = [
+        str(row.get("requirement_id") or "")
+        for row in public_completion_requirements
+        if not _as_bool(row.get("pass")) and str(row.get("requirement_id") or "")
+    ]
+    public_source_actuality_requirement = next(
+        (
+            row
+            for row in public_completion_requirements
+            if str(row.get("requirement_id") or "")
+            == "public_benchmark_source_actuality_ready"
+        ),
+        {},
+    )
+    public_source_actuality_evidence = _as_dict(
+        _as_dict(public_source_actuality_requirement).get("evidence")
+    )
 
     gpcr_summary = _as_dict(phase3_row.get("summary"))
     gpcr_gate = _as_dict(gpcr_summary.get("phase3_exit_gate"))
@@ -1269,6 +1309,23 @@ def _active_thread_goal_objective_audit(
     phase4_requirement_summary = _as_dict(
         phase4_gate.get("phase4_requirement_summary")
     )
+    pocketmd_survival_completion_audit = _as_dict(
+        _as_dict(pocketmd_survival_report).get("topk_refinement_completion_audit")
+    )
+    pocketmd_survival_completion_requirements = [
+        row
+        for row in _as_list(pocketmd_survival_completion_audit.get("requirements"))
+        if isinstance(row, dict)
+    ]
+    pocketmd_survival_completion_blockers = [
+        str(item)
+        for item in _as_list(pocketmd_survival_completion_audit.get("blockers"))
+    ]
+    pocketmd_survival_completion_blocked_requirement_ids = [
+        str(row.get("requirement_id") or "")
+        for row in pocketmd_survival_completion_requirements
+        if not _as_bool(row.get("pass")) and str(row.get("requirement_id") or "")
+    ]
 
     priority_rows = [
         _goal_priority_row(
@@ -1330,6 +1387,54 @@ def _active_thread_goal_objective_audit(
                         phase2_requirement_summary.get("ready_component_count"),
                     )
                 ),
+                "completion_audit_status": str(
+                    public_completion_audit.get("status")
+                    or public_summary.get("phase2_row_audit_completion_audit_status")
+                    or ""
+                ),
+                "completion_requirement_count": _as_int(
+                    public_completion_audit.get(
+                        "requirement_count",
+                        public_summary.get("phase2_row_audit_completion_requirement_count"),
+                    )
+                ),
+                "completion_requirement_pass_count": _as_int(
+                    public_completion_audit.get(
+                        "requirement_pass_count",
+                        public_summary.get(
+                            "phase2_row_audit_completion_requirement_pass_count"
+                        ),
+                    )
+                ),
+                "completion_blocker_count": _as_int(
+                    public_summary.get(
+                        "phase2_row_audit_completion_blocker_count",
+                        len(public_completion_blockers),
+                    )
+                ),
+                "completion_blockers": public_completion_blockers,
+                "completion_blocked_requirement_ids": (
+                    public_completion_blocked_requirement_ids
+                ),
+                "source_actuality_scope": str(
+                    public_source_actuality_evidence.get("scope")
+                    or public_summary.get("phase2_row_audit_source_actuality_scope")
+                    or ""
+                ),
+                "source_actuality_scope_complete": _as_bool(
+                    public_source_actuality_evidence.get(
+                        "scope_complete",
+                        public_summary.get(
+                            "phase2_row_audit_source_actuality_scope_complete"
+                        ),
+                    )
+                ),
+                "source_actuality_missing_row_inputs": [
+                    str(item)
+                    for item in _as_list(
+                        public_source_actuality_evidence.get("missing_row_inputs")
+                    )
+                ],
                 "failed_criteria": [
                     str(item) for item in _as_list(phase2_summary.get("failed_criteria"))
                 ],
@@ -1379,6 +1484,7 @@ def _active_thread_goal_objective_audit(
             },
             blockers=_dedupe(
                 [str(item) for item in _as_list(phase2_summary.get("failed_criteria"))]
+                + public_completion_blockers
                 + [str(item) for item in _as_list(manifest_component.get("blockers"))]
                 + [str(item) for item in _as_list(runtime_component.get("blockers"))]
                 + [str(item) for item in _as_list(adapter_component.get("blockers"))]
@@ -1441,6 +1547,24 @@ def _active_thread_goal_objective_audit(
                 "requirement_pass_count": _as_int(
                     phase4_summary.get("requirement_pass_count")
                 ),
+                "survival_completion_audit_status": str(
+                    pocketmd_survival_completion_audit.get("status") or ""
+                ),
+                "survival_completion_requirement_count": _as_int(
+                    pocketmd_survival_completion_audit.get("requirement_count")
+                ),
+                "survival_completion_requirement_pass_count": _as_int(
+                    pocketmd_survival_completion_audit.get("requirement_pass_count")
+                ),
+                "survival_completion_blocker_count": len(
+                    pocketmd_survival_completion_blockers
+                ),
+                "survival_completion_blockers": (
+                    pocketmd_survival_completion_blockers
+                ),
+                "survival_completion_blocked_requirement_ids": (
+                    pocketmd_survival_completion_blocked_requirement_ids
+                ),
                 "ready_requirement_count": _as_int(
                     phase4_requirement_summary.get("ready_requirement_count")
                 ),
@@ -1495,6 +1619,7 @@ def _active_thread_goal_objective_audit(
             },
             blockers=_dedupe(
                 [str(item) for item in _as_list(phase4_summary.get("failed_criteria"))]
+                + pocketmd_survival_completion_blockers
                 + [str(item) for item in _as_list(survival_component.get("blockers"))]
                 + [
                     str(item)
@@ -2083,6 +2208,14 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         repo_root,
         DEFAULT_SCIENCE_ACTUAL_CLOSURE_OPERATOR_HANDOFF,
     )
+    public_phase2_row_audit = _load_json(
+        repo_root,
+        DEFAULT_PUBLIC_BENCHMARK_PHASE2_ROW_AUDIT,
+    )
+    pocketmd_survival_report = _load_json(
+        repo_root,
+        DEFAULT_POCKETMD_TOPK_SURVIVAL_REPORT,
+    )
     product_capabilities = _load_json(repo_root, DEFAULT_PRODUCT_CAPABILITIES)
     ux_observation_report = _load_json(repo_root, DEFAULT_UX_OBSERVATION_REPORT)
     ux_observation_intake_packet = _load_json(
@@ -2200,6 +2333,8 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         source_of_truth_gap_summary=source_of_truth_gap_summary,
         source_of_truth_gap_evidence_matrix=source_of_truth_gap_evidence_matrix,
         science_handoff=science_handoff,
+        public_phase2_row_audit=public_phase2_row_audit,
+        pocketmd_survival_report=pocketmd_survival_report,
     )
     handoff_source_rows = roadmap_rows
     operator_evidence_handoff_queue = _operator_evidence_handoff_queue(handoff_source_rows)

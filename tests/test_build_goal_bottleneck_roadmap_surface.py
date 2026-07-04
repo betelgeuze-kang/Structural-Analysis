@@ -501,6 +501,19 @@ def test_goal_bottleneck_surface_exposes_active_thread_goal_audit() -> None:
     assert public["state"] == "blocked"
     assert public["current"]["requirement_count"] == 5
     assert public["current"]["requirement_pass_count"] == 4
+    assert public["current"]["completion_audit_status"] == "blocked"
+    assert public["current"]["completion_requirement_count"] == 6
+    assert public["current"]["completion_requirement_pass_count"] == 4
+    assert public["current"]["completion_blocker_count"] == 2
+    assert public["current"]["completion_blocked_requirement_ids"] == [
+        "vina_gnina_comparison_ready",
+        "public_benchmark_source_actuality_ready",
+    ]
+    assert public["current"]["source_actuality_scope"] == "provided_row_inputs_only"
+    assert public["current"]["source_actuality_scope_complete"] is False
+    assert public["current"]["source_actuality_missing_row_inputs"] == [
+        "vina_gnina_rows"
+    ]
     assert public["current"]["missing_row_inputs"] == ["vina_gnina_rows"]
     assert public["current"]["input_manifest_detected"] is True
     assert public["current"]["input_manifest_syntax_ready"] is True
@@ -514,6 +527,10 @@ def test_goal_bottleneck_surface_exposes_active_thread_goal_audit() -> None:
         public["blockers"]
     )
     assert "vina_gnina_rows_not_provided" in public["blockers"]
+    assert (
+        "public_benchmark_source_actuality_ready::"
+        "source_actuality_scope_incomplete:vina_gnina_rows"
+    ) in public["blockers"]
 
     gpcr = rows["priority_3_gpcr_hard_decoy_actual_closure"]
     assert gpcr["state"] == "complete"
@@ -536,6 +553,21 @@ def test_goal_bottleneck_surface_exposes_active_thread_goal_audit() -> None:
     assert pocketmd["state"] == "blocked"
     assert pocketmd["current"]["requirement_count"] == 9
     assert pocketmd["current"]["requirement_pass_count"] == 1
+    assert pocketmd["current"]["survival_completion_audit_status"] == "blocked"
+    assert pocketmd["current"]["survival_completion_requirement_count"] == 10
+    assert pocketmd["current"]["survival_completion_requirement_pass_count"] == 1
+    assert pocketmd["current"]["survival_completion_blocker_count"] == 14
+    assert pocketmd["current"]["survival_completion_blocked_requirement_ids"] == [
+        "operator_input_source_receipt_pass",
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+    ]
     assert pocketmd["current"]["ready_requirement_count"] == 2
     assert pocketmd["current"]["missing_row_inputs"] == ["pocketmd_rows"]
     assert pocketmd["current"]["missing_candidate_slot_count"] == 6
@@ -549,6 +581,10 @@ def test_goal_bottleneck_surface_exposes_active_thread_goal_audit() -> None:
     assert pocketmd["current"]["ready_receipt_count"] == 0
     assert pocketmd["current"]["incomplete_receipt_count"] == 6
     assert "pocketmd_lite_local_min_survival_rows_missing" in pocketmd["blockers"]
+    assert (
+        "operator_input_source_receipt_pass::operator_input_source_receipt_required"
+        in pocketmd["blockers"]
+    )
 
 
 def test_goal_bottleneck_surface_uses_science_closure_aggregate_not_raw_rows(
@@ -576,6 +612,8 @@ def test_goal_bottleneck_surface_uses_science_closure_aggregate_not_raw_rows(
         loaded_paths
     )
     assert module.DEFAULT_SCIENCE_ACTUAL_CLOSURE_ROW_AUDIT.as_posix() in loaded_paths
+    assert module.DEFAULT_PUBLIC_BENCHMARK_PHASE2_ROW_AUDIT.as_posix() in loaded_paths
+    assert module.DEFAULT_POCKETMD_TOPK_SURVIVAL_REPORT.as_posix() in loaded_paths
     assert not any(
         fragment in path.lower()
         for path in loaded_paths
