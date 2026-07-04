@@ -481,6 +481,7 @@ def test_load_checkpoint_reads_optional_history(tmp_path: Path) -> None:
         load_scale=np.asarray(0.656, dtype=np.float64),
         displacement_u=state_history[-1],
         residual_inf_n=np.asarray(1.0, dtype=np.float64),
+        accepted_iteration_count=np.asarray(11, dtype=np.int64),
         accepted_state_history_u=state_history,
         accepted_residual_history=residual_history,
     )
@@ -488,6 +489,7 @@ def test_load_checkpoint_reads_optional_history(tmp_path: Path) -> None:
     meta, u, loaded_state_history, loaded_residual_history = _load_checkpoint(checkpoint)
 
     assert meta["checkpoint_schema"] == "mgt-direct-residual-newton-state.v1"
+    assert meta["accepted_iteration_count"] == 11
     assert meta["accepted_state_history_count"] == 2
     assert meta["accepted_residual_history_count"] == 2
     np.testing.assert_array_equal(u, state_history[-1])
@@ -1775,14 +1777,25 @@ def test_g1_fallback_zero_audit_only_triggered_when_hip_required() -> None:
 FIXTURE_MGT = REPO_ROOT / "tests/fixtures/foundation_realish/foundation_deep_small.mgt"
 
 
-def _make_checkpoint_npz(path: Path, *, dof_count: int, load_scale: float = 0.656) -> None:
-    np.savez_compressed(
-        path,
-        checkpoint_schema=np.asarray("mgt-direct-residual-newton-state.v1"),
-        load_scale=np.asarray(load_scale, dtype=np.float64),
-        displacement_u=np.zeros(dof_count, dtype=np.float64),
-        residual_inf_n=np.asarray(1.0, dtype=np.float64),
-    )
+def _make_checkpoint_npz(
+    path: Path,
+    *,
+    dof_count: int,
+    load_scale: float = 0.656,
+    accepted_iteration_count: int | None = None,
+) -> None:
+    payload: dict[str, Any] = {
+        "checkpoint_schema": np.asarray("mgt-direct-residual-newton-state.v1"),
+        "load_scale": np.asarray(load_scale, dtype=np.float64),
+        "displacement_u": np.zeros(dof_count, dtype=np.float64),
+        "residual_inf_n": np.asarray(1.0, dtype=np.float64),
+    }
+    if accepted_iteration_count is not None:
+        payload["accepted_iteration_count"] = np.asarray(
+            int(accepted_iteration_count),
+            dtype=np.int64,
+        )
+    np.savez_compressed(path, **payload)
 
 
 def _mock_hip_preflight_available() -> dict[str, Any]:
@@ -3183,7 +3196,8 @@ def test_row_correction_terminal_fd_promotion_refreshes_tangent_with_hip_jvp(
     mgt_path = tmp_path / "test.mgt"
     mgt_path.write_bytes(FIXTURE_MGT.read_bytes())
     checkpoint = tmp_path / "state.npz"
-    _make_checkpoint_npz(checkpoint, dof_count=60)
+    _make_checkpoint_npz(checkpoint, dof_count=60, accepted_iteration_count=7)
+    output_checkpoint = tmp_path / "row_promoted_state.npz"
 
     monkeypatch.setattr(
         direct_probe, "_rocm_hip_runtime_preflight", _mock_hip_preflight_available
@@ -3208,6 +3222,8 @@ def test_row_correction_terminal_fd_promotion_refreshes_tangent_with_hip_jvp(
         current_tangent_residual_row_batch_alpha_replay=True,
         current_tangent_residual_row_support_column_counts=(4,),
         current_tangent_residual_row_fd_max_support_columns=4,
+        output_final_checkpoint_npz=output_checkpoint,
+        compact_output_final_checkpoint=True,
     )
 
     row_correction = payload["current_tangent_residual_row_correction"]
@@ -3232,6 +3248,24 @@ def test_row_correction_terminal_fd_promotion_refreshes_tangent_with_hip_jvp(
     assert "row_correction_cpu_tangent_refresh_used" not in boundaries
     assert "row_correction_hip_required_tangent_refresh_missing" not in boundaries
     assert payload["gate_assessment"]["fallback_zero_passed"] is True
+    output_meta = payload["output_final_checkpoint"]
+    assert output_meta["written"] is True
+    assert output_meta["source_accepted_iteration_count"] == 7
+    assert output_meta["accepted_iteration_increment"] >= row_correction[
+        "promotion_count"
+    ]
+    assert output_meta["accepted_iteration_count"] == (
+        output_meta["source_accepted_iteration_count"]
+        + output_meta["accepted_iteration_increment"]
+    )
+    with np.load(output_checkpoint, allow_pickle=False) as archive:
+        assert int(archive["source_accepted_iteration_count"].item()) == 7
+        assert int(archive["accepted_iteration_increment"].item()) == output_meta[
+            "accepted_iteration_increment"
+        ]
+        assert int(archive["accepted_iteration_count"].item()) == output_meta[
+            "accepted_iteration_count"
+        ]
 
 
 def test_state_dependent_spy_wins_behaviorally_over_frozen_when_both_flags_set(

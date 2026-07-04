@@ -125,6 +125,15 @@ def _load_checkpoint(path: Path) -> tuple[dict[str, Any], np.ndarray, np.ndarray
                 "accepted_residual_history_count": int(residual_history.shape[0])
                 if residual_history is not None and residual_history.ndim == 2
                 else 0,
+                "accepted_iteration_count": int(
+                    np.asarray(archive["accepted_iteration_count"]).item()
+                )
+                if "accepted_iteration_count" in archive.files
+                else (
+                    int(state_history.shape[0])
+                    if state_history is not None and state_history.ndim == 2
+                    else 0
+                ),
                 "residual_inf_n": float(np.asarray(archive["residual_inf_n"]).item())
                 if "residual_inf_n" in archive.files
                 else None,
@@ -7547,6 +7556,23 @@ def run_mgt_direct_residual_newton_probe(
     if output_final_checkpoint_npz is not None and final_state_improved:
         output_final_checkpoint_npz.parent.mkdir(parents=True, exist_ok=True)
         final_translation_metrics = _translation_metrics(current_u, node_xyz)
+        source_accepted_iteration_count = int(
+            checkpoint_meta.get("accepted_iteration_count", 0) or 0
+        )
+        accepted_iteration_increment = int(accepted_count) + sum(
+            int(component.get("promotion_count", 0) or 0)
+            for component in (
+                secant_subspace_globalization,
+                secant_family_globalization,
+                matrix_free_jacobian_subspace,
+                matrix_free_global_krylov,
+                current_tangent_residual_row_correction,
+            )
+            if isinstance(component, dict)
+        )
+        output_accepted_iteration_count = (
+            source_accepted_iteration_count + accepted_iteration_increment
+        )
         checkpoint_payload: dict[str, Any] = {
             "checkpoint_schema": np.asarray("mgt-direct-residual-newton-state.v1"),
             "source_schema_version": np.asarray(SCHEMA_VERSION),
@@ -7564,6 +7590,18 @@ def run_mgt_direct_residual_newton_probe(
                 dtype=np.float64,
             ),
             "accepted_history_count": np.asarray(0, dtype=np.int64),
+            "accepted_iteration_count": np.asarray(
+                output_accepted_iteration_count,
+                dtype=np.int64,
+            ),
+            "source_accepted_iteration_count": np.asarray(
+                source_accepted_iteration_count,
+                dtype=np.int64,
+            ),
+            "accepted_iteration_increment": np.asarray(
+                accepted_iteration_increment,
+                dtype=np.int64,
+            ),
             "source_checkpoint_path": np.asarray(str(checkpoint_npz)),
             "shell_pressure_load_path_policy": np.asarray(str(shell_pressure_load_path_policy)),
             "compact_checkpoint": np.asarray(bool(compact_output_final_checkpoint)),
@@ -7597,6 +7635,9 @@ def run_mgt_direct_residual_newton_probe(
             "direct_residual_inf_n": float(final_direct_residual_inf),
             "max_translation_m": float(final_translation_metrics["max_translation_m"]),
             "accepted_history_count": int(accepted_history_count),
+            "accepted_iteration_count": int(output_accepted_iteration_count),
+            "source_accepted_iteration_count": int(source_accepted_iteration_count),
+            "accepted_iteration_increment": int(accepted_iteration_increment),
             "compact_checkpoint": bool(compact_output_final_checkpoint),
             "source_checkpoint_path": str(checkpoint_npz),
             "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),

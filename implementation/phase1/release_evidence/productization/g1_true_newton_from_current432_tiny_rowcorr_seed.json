@@ -1,0 +1,182 @@
+{
+  "schema_version": "g1-true-newton-reference-candidate.v1",
+  "generated_at": "2026-07-04T16:33:02.815237+00:00",
+  "is_candidate_only": true,
+  "promotes_g1_closure": false,
+  "load_scale": 1.0,
+  "initial_checkpoint_npz": "implementation/phase1/release_evidence/productization/g1_full_load_current432_tiny_rowcorr_diagnostic.npz",
+  "frame_service_tangent_source": "real_per_element",
+  "regularization": {
+    "mode": "relative_diagonal_shift",
+    "mu": 0.03,
+    "fixed_or_adaptive": "fixed"
+  },
+  "newton_mode": "true_newton_per_step_relinearization",
+  "material_tangent_update": {
+    "mode": "real_per_element_state_updated",
+    "state_updated": true,
+    "claim_boundary": "not_material_newton_breadth"
+  },
+  "production_lambda": 515.4025311317521,
+  "claim_boundary": "non_promoting_true_newton_reference_candidate_only",
+  "status": "ready",
+  "reason_code": "max_steps",
+  "uses_real_mgt_model": true,
+  "mgt_source": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "initial_state": {
+    "source": "checkpoint",
+    "checkpoint": {
+      "path": "implementation/phase1/release_evidence/productization/g1_full_load_current432_tiny_rowcorr_diagnostic.npz",
+      "content_sha256": "sha256:45d71074a1004bb53b923f3ed1edb26a140839a85712a3ca09bd124d7266ac6b",
+      "schema": "mgt-direct-residual-newton-state.v1",
+      "load_scale": 1.0,
+      "dof_count": 78282,
+      "free_dof_count": 58998,
+      "accepted_iteration_count": 0,
+      "direct_residual_inf_n": 668.8341383944957
+    },
+    "initial_iteration_count": 0
+  },
+  "modified_newton_baseline": {
+    "steps": 8,
+    "initial_residual_n": 668.8341383944957,
+    "final_residual_n": 661.7342588230243,
+    "total_reduction_ratio": 0.010615306791178813,
+    "residual_gate_passed": false,
+    "stop_reason": "max_steps"
+  },
+  "true_newton_candidate": {
+    "steps": 8,
+    "initial_checkpoint_iteration_count": 0,
+    "total_steps_including_initial_checkpoint": 8,
+    "initial_residual_n": 668.8341383944957,
+    "final_residual_n": 661.7346601244138,
+    "total_reduction_ratio": 0.01061470678982352,
+    "monotonic_residual_decrease": true,
+    "residual_gate_n": 0.0005,
+    "residual_gate_passed": false,
+    "stop_reason": "max_steps"
+  },
+  "true_newton_faster_than_modified": false,
+  "history": [
+    {
+      "iteration": 0,
+      "residual_before_n": 668.8341383944957,
+      "direction_solve_status": "ready",
+      "accepted_alpha": 0.03125,
+      "residual_after_n": 668.4582952921627,
+      "residual_reduction_ratio": 0.0005619376774564144,
+      "line_search_status": "ready",
+      "tangent_rebuilt": true,
+      "assembled_tangent_parity_pass": true
+    },
+    {
+      "iteration": 1,
+      "residual_before_n": 668.4582952921627,
+      "direction_solve_status": "ready",
+      "accepted_alpha": 0.125,
+      "residual_after_n": 666.955978292437,
+      "residual_reduction_ratio": 0.0022474356445365356,
+      "line_search_status": "ready",
+      "tangent_rebuilt": true,
+      "assembled_tangent_parity_pass": true
+    },
+    {
+      "iteration": 2,
+      "residual_before_n": 666.955978292437,
+      "direction_solve_status": "ready",
+      "accepted_alpha": 0.0625,
+      "residual_after_n": 666.2069578685531,
+      "residual_reduction_ratio": 0.0011230432716136916,
+      "line_search_status": "ready",
+      "tangent_rebuilt": true,
+      "assembled_tangent_parity_pass": true
+    },
+    {
+      "iteration": 3,
+      "residual_before_n": 666.2069578685531,
+      "direction_solve_status": "ready",
+      "accepted_alpha": 0.03125,
+      "residual_after_n": 665.8330040190029,
+      "residual_reduction_ratio": 0.0005613178384485523,
+      "line_search_status": "ready",
+      "tangent_rebuilt": true,
+      "assembled_tangent_parity_pass": true
+    },
+    {
+      "iteration": 4,
+      "residual_before_n": 665.8330040190029,
+      "direction_solve_status": "ready",
+      "accepted_alpha": 0.125,
+      "residual_after_n": 664.3383199310391,
+      "residual_reduction_ratio": 0.002244833282432444,
+      "line_search_status": "ready",
+      "tangent_rebuilt": true,
+      "assembled_tangent_parity_pass": true
+    },
+    {
+      "iteration": 5,
+      "residual_before_n": 664.3383199310391,
+      "direction_solve_status": "ready",
+      "accepted_alpha": 0.0625,
+      "residual_after_n": 663.5932515327871,
+      "residual_reduction_ratio": 0.0011215195268719838,
+      "line_search_status": "ready",
+      "tangent_rebuilt": true,
+      "assembled_tangent_parity_pass": true
+    },
+    {
+      "iteration": 6,
+      "residual_before_n": 663.5932515327871,
+      "direction_solve_status": "ready",
+      "accepted_alpha": 0.03125,
+      "residual_after_n": 663.2212991686496,
+      "residual_reduction_ratio": 0.0005605125779660888,
+      "line_search_status": "ready",
+      "tangent_rebuilt": true,
+      "assembled_tangent_parity_pass": true
+    },
+    {
+      "iteration": 7,
+      "residual_before_n": 663.2212991686496,
+      "direction_solve_status": "ready",
+      "accepted_alpha": 0.125,
+      "residual_after_n": 661.7346601244138,
+      "residual_reduction_ratio": 0.0022415429753224934,
+      "line_search_status": "ready",
+      "tangent_rebuilt": true,
+      "assembled_tangent_parity_pass": true
+    }
+  ],
+  "summary": {
+    "initial_residual_n": 668.8341383944957,
+    "final_residual_n": 661.7346601244138,
+    "total_reduction_ratio": 0.01061470678982352,
+    "monotonic_residual_decrease": true,
+    "residual_gate_passed": false,
+    "stop_reason": "max_steps",
+    "steps_taken": 8
+  },
+  "output_final_checkpoint": {
+    "written": true,
+    "path": "implementation/phase1/release_evidence/productization/g1_true_newton_from_current432_tiny_rowcorr_seed.npz",
+    "schema": "mgt-direct-residual-newton-state.v1",
+    "load_scale": 1.0,
+    "dof_count": 78282,
+    "free_dof_count": 58998,
+    "direct_residual_inf_n": 661.7346601244138,
+    "direct_relative_residual_inf": 0.05003353810921575,
+    "max_translation_m": 0.0002981616780854198,
+    "accepted_iteration_count": 8,
+    "accepted_history_count": 0,
+    "residual_gate_n": 0.0005,
+    "residual_gate_passed": false,
+    "promotes_g1_closure": false,
+    "claim_boundary": "This is a loadable true-Newton full-load checkpoint candidate only. It does not close G1 unless direct residual, increment, full-mesh, material breadth, and production ROCm/HIP gates also pass."
+  },
+  "resource_usage": {
+    "dof_count": 78282,
+    "free_dof_count": 58998,
+    "element_count": 12728
+  }
+}

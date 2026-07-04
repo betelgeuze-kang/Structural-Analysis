@@ -50,7 +50,7 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
-  "generated_at": "2026-07-04T15:31:21.672229+00:00",
+  "generated_at": "2026-07-04T17:12:47.648780+00:00",
   "hip_worker_contract": {
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -120,11 +120,11 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json": "sha256:bb1e06da4f7073f2b17405cb4f973e180bf49a9be386d280df4259236c008af2",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:92ca6c7d4e23dd89132e0fe834fbe16ca753e17ae860786ff5ad7bed97a27aad",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:26ee78e1d45ce1b6dc5b76c557c4d325af05fa6b8d1926307eda55b0f3b43899",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:9671fbbf84ffa7098c5eeae31967a72f9961138e0f12df04884bafaf77a1631d",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:461c82706d56e914cd27e1781e2bbfc9bbeb6b58e266952918766d2e00963858",
-    "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:5944a4f83df3fc3905b36239a580ffc136e42850541f37430607d4824521790b",
+    "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:c7bc800b9b456d06aab4c3d094eba55aeec1c4712cb51313ecf6b171c382e425",
     "implementation/phase1/release_evidence/productization/g1_true_newton_load_sweep_status.json": "sha256:c1a862c28a6f31163f15f8cbe03334e0060a6cbb81138b9e3819d53fad497aca",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:48c985f3ece104ede2718c0a4a9fbee61b44e8f41d86279be07012fd30a3a547",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:ee8e3e4eabfd81383a7043d340696a7828d98618b743ca209cda92b884d0424e",
     "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:d354d0a7e5a4cd52af0f06092f3c9a26b556db9172dab7a18c6492dc85c3d5d7"
   },
   "next_actions": [
@@ -244,7 +244,7 @@
     "runner_id": "build_consistent_newton_full_load_checkpoint_candidate_runner"
   },
   "schema_version": "g1-consistent-newton-full-load-checkpoint-candidate-runner.v1",
-  "source_commit_sha": "7e55995966b73245f5cc5269f4d23ca14560c57c",
+  "source_commit_sha": "7894aa2439253fd2729e5659431955a12cb9104e",
   "status": "ready_for_runner_implementation",
   "summary": {
     "assembly_contract_cpu_seed_newton_gate_passed": true,
@@ -275,7 +275,7 @@
     "residual_jvp_worker_path_ready": true,
     "row_only_correction_loop_stopped": true,
     "support_or_link_row_gap_disfavored": true,
-    "true_newton_full_load_checkpoint_candidate_direct_residual_n": 747.4190104793868,
+    "true_newton_full_load_checkpoint_candidate_direct_residual_n": 655.1039650392886,
     "true_newton_full_load_checkpoint_candidate_path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
     "true_newton_full_load_checkpoint_candidate_present": true,
     "true_newton_full_load_checkpoint_candidate_written": true,
@@ -293,7 +293,7 @@
       "full_mesh_nonlinear_equilibrium_not_proven_by_true_newton_checkpoint_candidate",
       "material_newton_breadth_not_proven_by_true_newton_checkpoint_candidate"
     ],
-    "checkpoint_direct_residual_inf_n": 747.4190104793868,
+    "checkpoint_direct_residual_inf_n": 655.1039650392886,
     "checkpoint_load_scale": 1.0,
     "checkpoint_path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
     "checkpoint_schema": "mgt-direct-residual-newton-state.v1",
@@ -304,9 +304,9 @@
     "present": true,
     "promotes_g1_closure": false,
     "status": "candidate_created",
-    "true_newton_final_residual_n": 747.4190104793868,
+    "true_newton_final_residual_n": 655.1039650392886,
     "true_newton_residual_gate_passed": false,
-    "true_newton_steps": 24
+    "true_newton_steps": 4
   },
   "true_newton_load_sweep": {
     "blockers": [

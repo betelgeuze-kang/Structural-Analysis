@@ -48,13 +48,13 @@ def test_hip_required_direct_probe_kwargs_broaden_row_fd_refresh_lane(
     )
     assert kwargs["enable_current_tangent_residual_row_correction"] is True
     assert kwargs["max_current_tangent_residual_row_corrections"] == 1
-    assert kwargs["current_tangent_residual_row_target_counts"] == (2,)
-    assert kwargs["current_tangent_residual_row_support_column_counts"] == (4,)
+    assert kwargs["current_tangent_residual_row_target_counts"] == (16,)
+    assert kwargs["current_tangent_residual_row_support_column_counts"] == (2,)
     assert kwargs["current_tangent_residual_row_support_selection"] == "target_rows"
     assert kwargs["current_tangent_residual_row_jacobian_mode"] == (
         "finite_difference"
     )
-    assert kwargs["current_tangent_residual_row_fd_max_support_columns"] == 4
+    assert kwargs["current_tangent_residual_row_fd_max_support_columns"] == 2
     assert kwargs["current_tangent_residual_row_batch_fd_replay"] is True
     assert kwargs["current_tangent_residual_row_batch_replay_backend"] == (
         "hip_full_residual"
@@ -62,6 +62,8 @@ def test_hip_required_direct_probe_kwargs_broaden_row_fd_refresh_lane(
     assert kwargs["current_tangent_residual_row_require_hip_batch_replay"] is True
     assert kwargs["current_tangent_residual_row_allow_negative_alphas"] is True
     assert kwargs["current_tangent_residual_row_alpha_values"] == (
+        0.5,
+        0.25,
         0.125,
         0.0625,
         0.03125,

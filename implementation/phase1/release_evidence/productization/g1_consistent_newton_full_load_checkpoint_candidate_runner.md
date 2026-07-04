@@ -11,7 +11,7 @@
 - `true_newton_full_load_gate`: `False`
 - `true_newton_full_load_final_residual_n`: `716.2398790963002`
 - `true_newton_checkpoint_candidate_written`: `True`
-- `true_newton_checkpoint_candidate_residual_n`: `747.4190104793868`
+- `true_newton_checkpoint_candidate_residual_n`: `655.1039650392886`
 - `worker_path_ready`: `True`
 - `worker_g1_closure_gate_ready`: `False`
 - `assembly_contract_seed_ready`: `True`
@@ -45,7 +45,7 @@
 - `status`: `candidate_created`
 - `checkpoint_written`: `True`
 - `checkpoint_path`: `implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz`
-- `checkpoint_direct_residual_inf_n`: `747.4190104793868`
+- `checkpoint_direct_residual_inf_n`: `655.1039650392886`
 
 ## Next Actions
 

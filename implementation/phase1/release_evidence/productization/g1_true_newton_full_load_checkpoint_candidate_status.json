@@ -7,14 +7,14 @@
   ],
   "checkpoint_candidate": {
     "accepted_history_count": 0,
-    "accepted_iteration_count": 348,
+    "accepted_iteration_count": 455,
     "claim_boundary": "This is a loadable true-Newton full-load checkpoint candidate only. It does not close G1 unless direct residual, increment, full-mesh, material breadth, and production ROCm/HIP gates also pass.",
-    "direct_relative_residual_inf": 0.05651210341217708,
-    "direct_residual_inf_n": 747.4190104793868,
+    "direct_relative_residual_inf": 0.04953219345368595,
+    "direct_residual_inf_n": 655.1039650392886,
     "dof_count": 78282,
     "free_dof_count": 58998,
     "load_scale": 1.0,
-    "max_translation_m": 0.00024213115996014724,
+    "max_translation_m": 0.00030177872051144364,
     "path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
     "promotes_g1_closure": false,
     "residual_gate_n": 0.0005,
@@ -31,20 +31,20 @@
   "evidence_closure_pass": false,
   "full_load_true_newton_residual_descent_observed": true,
   "full_load_true_newton_residual_gate_passed": false,
-  "generated_at": "2026-07-04T15:13:51.596247+00:00",
-  "initial_checkpoint_npz": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+  "generated_at": "2026-07-04T17:03:50.476686+00:00",
+  "initial_checkpoint_npz": "implementation/phase1/release_evidence/productization/g1_full_load_current450_target16_support2_rowcorr_diagnostic.npz",
   "initial_state": {
     "checkpoint": {
-      "accepted_iteration_count": 324,
-      "content_sha256": "sha256:05b2219ab2f3ad9d1ad56c86e8155ac6118728c0481dcd1dd47d093ec3fb1c23",
-      "direct_residual_inf_n": 771.4110742905287,
+      "accepted_iteration_count": 451,
+      "content_sha256": "sha256:42231e1acaec76920bd78fade92bf582f5a1a3a5b3a5506daecc942c8eef1df8",
+      "direct_residual_inf_n": 656.9728665992692,
       "dof_count": 78282,
       "free_dof_count": 58998,
       "load_scale": 1.0,
-      "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+      "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/g1_full_load_current450_target16_support2_rowcorr_diagnostic.npz",
       "schema": "mgt-direct-residual-newton-state.v1"
     },
-    "initial_iteration_count": 324,
+    "initial_iteration_count": 451,
     "source": "checkpoint"
   },
   "input_checksums": {
@@ -64,25 +64,25 @@
   "promotes_g1_closure": false,
   "regularization": {
     "mode": "relative_diagonal_shift",
-    "mu": 0.24
+    "mu": 0.03
   },
   "required_load_scale": 1.0,
   "residual_gate_n": 0.0005,
   "reuse_policy": "executes_true_newton_full_load_probe_and_writes_non_promoting_checkpoint_candidate",
   "reused_evidence": false,
   "schema_version": "g1-true-newton-full-load-checkpoint-candidate-status.v1",
-  "source_commit_sha": "7e55995966b73245f5cc5269f4d23ca14560c57c",
+  "source_commit_sha": "7894aa2439253fd2729e5659431955a12cb9104e",
   "status": "candidate_created",
-  "summary_line": "G1 true-Newton full-load checkpoint candidate: CANDIDATE_CREATED | checkpoint_written=True | final_residual=747.4190104793868 | residual_gate=False",
+  "summary_line": "G1 true-Newton full-load checkpoint candidate: CANDIDATE_CREATED | checkpoint_written=True | final_residual=655.1039650392886 | residual_gate=False",
   "true_newton_candidate": {
-    "final_residual_n": 747.4190104793868,
-    "initial_residual_n": 771.4110742905287,
+    "final_residual_n": 655.1039650392886,
+    "initial_residual_n": 656.9728665992692,
     "monotonic_residual_decrease": true,
-    "reason_code": "max_steps",
+    "reason_code": "line_search_no_descent",
     "residual_gate_passed": false,
-    "status": "ready",
-    "steps": 24,
-    "stop_reason": "max_steps",
-    "total_reduction_ratio": 0.03110152888744515
+    "status": "review",
+    "steps": 4,
+    "stop_reason": "line_search_no_descent",
+    "total_reduction_ratio": 0.0028447165096097725
   }
 }
