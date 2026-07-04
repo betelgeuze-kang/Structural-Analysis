@@ -3,32 +3,32 @@
 - `status`: `operator_rows_required`
 - `contract_pass`: `True`
 - `science_actual_closure_contract_pass`: `False`
-- `missing_slot_count`: `2`
+- `missing_slot_count`: `1`
 - `slot_count`: `6`
-- `blocker_count`: `7`
+- `blocker_count`: `5`
 
 ## Actual Closure Progress
 
 - `status`: `operator_evidence_required`
 - `actual_closure_ready`: `False`
-- `requirements`: `10/19`
-- `blocked_requirement_count`: `9`
-- `complete_components`: `1/3`
-- `blocked_components`: `public_benchmark_phase2_actual_closure`, `pocketmd_lite_topk_actual_closure`
-- `missing_row_inputs`: `vina_gnina_rows`, `pocketmd_rows`
+- `requirements`: `11/19`
+- `blocked_requirement_count`: `8`
+- `complete_components`: `2/3`
+- `blocked_components`: `pocketmd_lite_topk_actual_closure`
+- `missing_row_inputs`: `pocketmd_rows`
 
 | Row Input | Status | Preferred Path | CSV Starter | Closes Criteria | Action |
 | --- | --- | --- | --- | --- | --- |
 
 | Component | Status | Requirements | Missing Rows | Failed Criteria |
 | --- | --- | --- | --- | --- |
-| `public_benchmark_phase2_actual_closure` | `operator_rows_required` | `4/5` | `vina_gnina_rows` | `vina_gnina_comparison_ready` |
+| `public_benchmark_phase2_actual_closure` | `complete` | `5/5` | `none` | `none` |
 | `gpcr_hard_decoy_actual_closure` | `complete` | `5/5` | `none` | `none` |
 | `pocketmd_lite_topk_actual_closure` | `operator_rows_required` | `1/9` | `pocketmd_rows` | `top_k_refinement_rows_present`, `top_k_refinement_case_coverage`, `local_min_survival_materialized`, `contact_persistence_materialized`, `h_bond_persistence_materialized`, `clash_relief_materialized`, `uncertainty_summary_materialized`, `report_blockers_resolved` |
 | `subset_rows` | `provided` | `implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json` | `implementation/phase1/release_evidence/productization/public_benchmark_subset_rows_template.csv` | `casf_pdbbind_pose_success_harness_ready` | `review_subset_rows_materialization` |
 | `pose_rows` | `provided` | `implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json` | `implementation/phase1/release_evidence/productization/public_benchmark_pose_rows_template.csv` | `casf_pdbbind_pose_success_harness_ready, symmetry_aware_ligand_rmsd_ready, posebusters_style_pose_validity_ready` | `review_pose_rows_materialization` |
 | `enrichment_rows` | `provided` | `implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json` | `implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows_template.csv` | `dud_e_or_lit_pcba_enrichment_ready` | `review_enrichment_rows_materialization` |
-| `vina_gnina_rows` | `operator_input_required` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv` | `vina_gnina_comparison_ready` | `attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` |
+| `vina_gnina_rows` | `provided` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv` | `vina_gnina_comparison_ready` | `review_vina_gnina_rows_materialization` |
 | `gpcr_rows` | `provided` | `implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json` | `implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv` | `ranking_pr_auc_ci_low_min, top20_hit_rate_min, decoys_above_positive_count_max, no_positive_out_anchored_by_top_decoys, raw_hard_decoy_rows_actual_closure` | `review_gpcr_rows_materialization` |
 | `pocketmd_rows` | `operator_input_required` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv` | `top_k_refinement_rows_present, top_k_refinement_case_coverage, local_min_survival_materialized, contact_persistence_materialized, h_bond_persistence_materialized, clash_relief_materialized, uncertainty_summary_materialized, report_blockers_resolved, broad_all_atom_fep_claims_locked` | `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` |
 
@@ -36,14 +36,12 @@
 
 | Row Input | Status | Expected Rows | First Step | First Blocked Slot | Preflight Artifacts | Primary Command |
 | --- | --- | --- | --- | --- | --- | --- |
-| `vina_gnina_rows` | `engine_run_rows_required` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `review_public_benchmark_vina_gnina_input_manifest_template_preflight` | `bundle:engine_run_bundle_materialized`, `rows_bundle:operator_receipts_completion_required` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` |
 | `pocketmd_rows` | `operator_refinement_rows_required` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `preflight_pocketmd_lite_topk_rows_template` | `candidate:pocketmd_lite_case_001_rank_01/attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01`, `role:upstream_top_k_candidate_scope_receipt/pocketmd_lite_case_001_rank_01`, `source:source_id/attach_operator_input_source_source_id`, `receipt:operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json/missing_fields=18`, `report:top_k_refinement_operator_intake` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json` | `python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md` |
 
 ## Missing Row Packet
 
 | Row Input | Action | Template | Materialization |
 | --- | --- | --- | --- |
-| `vina_gnina_rows` | `attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv` | `python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked` |
 | `pocketmd_rows` | `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv` | `python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked` |
 
 ### PocketMD Top-k Candidate Slots
@@ -76,14 +74,12 @@
 | Component | Row Input | Action | Default Artifact | Source Action | Source Row Action | Source Command | Required Receipts | Source Phase 2 Criteria | Source Phase 4 Criteria |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `pocketmd_lite_topk_actual_closure` | `pocketmd_rows` | `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `resolve_pocketmd_lite_source_acquisition_blockers` | `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --source-id <source-id> --source-url <source-url> --source-license <license>` | `upstream_top_k_candidate_scope_receipt, lite_refinement_run_receipt, interaction_persistence_receipt, uncertainty_interval_receipt` | `` | `top_k_refinement_rows_present, top_k_refinement_case_coverage, local_min_survival_materialized, contact_persistence_materialized, h_bond_persistence_materialized, clash_relief_materialized, uncertainty_summary_materialized, report_blockers_resolved` |
-| `public_benchmark_phase2_actual_closure` | `vina_gnina_rows` | `attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `resolve_public_benchmark_phase2_source_acquisition_blockers` | `attach_vina_gnina_rows_then_run_phase2_row_audit` | `python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json` | `source_license_or_accession, source_checksum, provenance_ref, predicted_ligand_checksum, engine_config_checksum, engine_run_provenance_ref` | `vina_gnina_comparison_ready` | `` |
 
 ### Source Acquisition Next Actions
 
 | Component | Row Input | Source Action | First Step | Last Step | Count |
 | --- | --- | --- | --- | --- | ---: |
 | `pocketmd_lite_topk_actual_closure` | `pocketmd_rows` | `resolve_pocketmd_lite_source_acquisition_blockers` | `review_phase4_refinement_receipt_plan` | `refresh_science_actual_closure_from_rows` | 12 |
-| `public_benchmark_phase2_actual_closure` | `vina_gnina_rows` | `resolve_public_benchmark_phase2_source_acquisition_blockers` | `review_official_source_receipt_plan` | `refresh_public_benchmark_source_of_truth` | 14 |
 
 ### PocketMD Row Preflight Action
 
@@ -144,53 +140,6 @@
 | `uncertainty_summary_materialized` | `uncertainty_width_median` | `uncertainty_interval_receipt` | `uncertainty_low`, `uncertainty_high`, `uncertainty_unit` | `pocketmd_lite_topk_rows_not_acquired`, `upstream_top_k_candidate_receipts_not_attached`, `lite_refinement_metric_receipts_not_attached` |
 | `report_blockers_resolved` | `` | `lite_refinement_run_receipt`, `interaction_persistence_receipt`, `uncertainty_interval_receipt` | `none` | `pocketmd_lite_topk_rows_not_acquired`, `upstream_top_k_candidate_receipts_not_attached`, `lite_refinement_metric_receipts_not_attached` |
 
-### Vina/GNINA Input Manifest Action
-
-- `component_id`: `public_benchmark_phase2_actual_closure`
-- `row_input_id`: `vina_gnina_rows`
-- `status`: `operator_manifest_required`
-- `template_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv`
-- `expected_manifest_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv`
-- `default_execution_plan_manifest_path`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv`
-- `recommended_template_dropzone`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv`
-- `recommended_template_dropzone_is_supported_candidate_path`: `True`
-- `accepted_manifest_formats`: `json`, `jsonl`, `ndjson`, `csv`, `tsv`
-- `supported_manifest_candidate_paths`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.json`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.jsonl`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.ndjson`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.tsv`
-- `detected_manifest_artifact_count`: `1`
-- `selected_manifest_path`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv`
-- `selected_manifest_format`: `csv`
-- `input_manifest_row_count`: `12`
-- `input_manifest_load_errors`: `none`
-- `template_to_manifest_command`: `cp implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv`
-- `source_archive_operator_artifact`: `<CASF-2016.tar.gz>`
-- `source_archive_extraction_command`: `python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked`
-- `source_archive_extraction_report_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json`
-- `verify_execution_plan_command`: `python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json`
-- `verify_runtime_readiness_command`: `python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json`
-- `operator_must_fill_or_verify`: `prepared_receptor_path`, `prepared_receptor_checksum`, `prepared_ligand_path`, `prepared_ligand_checksum`, `vina_config_ref`, `gnina_config_ref`, `vina_run_receipt_ref`, `gnina_run_receipt_ref`, `input_preparation_provenance_ref`
-- `template_is_not_evidence`: `True`
-- `do_not_treat_blank_prepared_checksums_as_ready`: `True`
-
-### Vina/GNINA Adapter Row Preflight Action
-
-- `component_id`: `public_benchmark_phase2_actual_closure`
-- `row_input_id`: `vina_gnina_rows`
-- `status`: `row_artifact_missing`
-- `expected_rows_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json`
-- `row_template_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv`
-- `row_template_preflight_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json`
-- `build_row_template_preflight_command`: `python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md`
-- `role_receipt_blocked_count`: `72`
-- `first_blocked_role_receipt`: `engine_run_artifact_receipt` / `casf2016_4llx_vina_casf2016_4llx_vina_run`
-- `supported_candidate_paths`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv`
-- `detected_row_artifact_count`: `0`
-- `selected_path`: ``
-- `adapter_preflight_status`: `missing`
-- `adapter_preflight_blockers`: `none`
-- `direct_adapter_materialization_command`: `python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked`
-- `operator_rows_must_be_real_engine_outputs`: `True`
-- `preflight_does_not_run_engines`: `True`
-
 ### PocketMD Phase 4 Completion Audit
 
 - `status`: `operator_topk_rows_required`
@@ -244,22 +193,22 @@
 
 ### Public Benchmark Vina/GNINA Actual Evidence Audit
 
-- `status`: `adapter_rows_required`
-- `actual_closure_ready`: `False`
-- `ready_component_count`: `3`
-- `blocked_component_count`: `3`
-- `remaining_evidence`: `adapter_rows`, `per_engine_run_receipts`, `external_receipts`
+- `status`: `ready`
+- `actual_closure_ready`: `True`
+- `ready_component_count`: `6`
+- `blocked_component_count`: `0`
+- `remaining_evidence`: `none`
 - `operator_blocker_family_count`: `7`
-- `operator_blocker_family_missing_item_count`: `12`
+- `operator_blocker_family_missing_item_count`: `0`
 
 | Component | Status | Pass | Current | Required | Blockers |
 |---|---|---|---|---|---|
 | `engine_input_manifest` | `ready` | `True` | `{"blocked_case_input_slot_count": 0, "blocked_source_file_count": 0, "case_input_slot_count": 12, "input_manifest_detected": true, "input_manifest_row_count": 12, "input_manifest_status": "ready", "input_manifest_syntax_ready": true, "input_manifest_verification_status": "case_inputs_verified", "prepared_input_gap_count": 0, "prepared_input_ready_case_count": 12, "required_case_count": 12, "source_extraction_status": "source_files_verified_prepared_inputs_required", "source_file_count": 24, "source_files_ready": true, "source_ready_case_count": 12, "template_completion_blocked_case_count": 0, "template_manifest_ready": true, "template_missing_local_file_count": 0, "template_missing_receipt_ref_count": 0, "template_preflight_status": "operator_manifest_complete", "verified_case_input_count": 12, "verified_source_file_count": 24}` | `{"blocked_case_input_slot_count": 0, "input_manifest_detected": true, "input_manifest_row_count": ">=12", "input_manifest_syntax_ready": true, "template_manifest_ready": true, "verified_case_input_count": ">=12"}` | `none` |
-| `engine_runtime` | `ready` | `True` | `{"available_engine_count": 2, "missing_engine_count": 0, "missing_engine_ids": [], "runtime_ready_for_engine_execution": true, "runtime_status": "ready_for_engine_execution"}` | `{"missing_engine_count": 0, "runtime_ready_for_engine_execution": true}` | `none` |
+| `engine_runtime` | `ready` | `True` | `{"available_engine_count": 2, "missing_engine_count": 0, "missing_engine_ids": [], "runtime_ready_for_engine_execution": true, "runtime_status": "adapter_materialization_ready"}` | `{"missing_engine_count": 0, "runtime_ready_for_engine_execution": true}` | `none` |
 | `engine_run_slots` | `ready` | `True` | `{"blocked_engine_run_slot_count": 0, "ready_engine_run_slot_count": 24, "required_engine_run_count": 24}` | `{"blocked_engine_run_slot_count": 0, "ready_engine_run_slot_count": 24}` | `none` |
-| `adapter_rows` | `blocked` | `False` | `{"adapter_case_count": 0, "adapter_preflight_contract_pass": false, "adapter_preflight_status": "missing", "adapter_rows_ready": false, "detected_row_artifact_count": 0, "row_candidate_status": "row_artifact_missing", "selected_row_count": 0}` | `{"adapter_case_count": ">=1", "adapter_preflight_contract_pass": true, "detected_row_artifact_count": ">=1"}` | `public_benchmark_vina_gnina_rows_not_detected`, `vina_gnina_rows_not_provided` |
-| `per_engine_run_receipts` | `blocked` | `False` | `{"adapter_template_ready": false, "expected_rows_detected": false, "missing_engine_run_receipt_value_count": 72, "role_receipt_blocked_count": 72, "role_receipt_plan_count": 96, "rows_template_preflight_status": "operator_rows_completion_required"}` | `{"adapter_template_ready": true, "expected_rows_detected": true, "role_receipt_blocked_count": 0}` | `public_benchmark_vina_gnina_engine_run_receipts_incomplete` |
-| `external_receipts` | `blocked` | `False` | `{"all_expected_artifact_roles_complete": false, "blocked_official_receipt_role_count": 1, "external_receipt_completion_status": "blocked_pending_vina_gnina_receipts", "missing_expected_artifact_roles": ["vina_gnina_comparison_adapter"]}` | `{"all_expected_artifact_roles_complete": true, "blocked_official_receipt_role_count": 0}` | `vina_gnina_rows_not_provided`, `public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter` |
+| `adapter_rows` | `ready` | `True` | `{"adapter_case_count": 12, "adapter_preflight_contract_pass": true, "adapter_preflight_status": "ready", "adapter_rows_ready": true, "detected_row_artifact_count": 1, "row_candidate_status": "row_artifact_detected_validated", "selected_row_count": 12}` | `{"adapter_case_count": ">=1", "adapter_preflight_contract_pass": true, "detected_row_artifact_count": ">=1"}` | `none` |
+| `per_engine_run_receipts` | `ready` | `True` | `{"adapter_template_ready": false, "expected_rows_detected": false, "missing_engine_run_receipt_value_count": 72, "ready_engine_run_count": 24, "role_receipt_blocked_count": 72, "role_receipt_plan_count": 96, "rows_from_engine_run_bundle_materialized": true, "rows_from_engine_run_bundle_status": "rows_materialized", "rows_template_preflight_status": "operator_rows_completion_required"}` | `{"adapter_template_ready_or_rows_from_engine_run_bundle_materialized": true, "expected_rows_detected_or_materialized_bundle_rows": true, "role_receipt_blocked_count_or_bundle_blocker_count": 0}` | `none` |
+| `external_receipts` | `ready` | `True` | `{"all_expected_artifact_roles_complete": true, "blocked_official_receipt_role_count": 1, "external_receipt_completion_status": "operator_external_receipts_required", "missing_expected_artifact_roles": []}` | `{"all_expected_artifact_roles_complete": true, "blocked_official_receipt_role_count": 0}` | `pose_rows_source_actuality_not_ready` |
 
 #### Operator Blocker Families
 
@@ -271,7 +220,7 @@
 | `input_and_engine_receipt_refs` | `ready` | 0 | 0 | `attach_vina_gnina_input_and_engine_receipt_refs` | `build_input_manifest_template_preflight` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` |
 | `engine_runtime` | `ready` | 0 | 0 | `configure_vina_gnina_binary_or_container_runtime` | `rerun_runtime_readiness` | `python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json` |
 | `engine_run_slots` | `ready` | 0 | 0 | `rerun_runtime_readiness_until_engine_run_slots_ready` | `rerun_runtime_readiness` | `python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json` |
-| `adapter_rows` | `blocked` | 12 | 12 | `attach_or_materialize_public_benchmark_vina_gnina_rows` | `materialize_rows_from_engine_run_bundle` | `python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py --engine-run-bundle implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json --out-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json` |
+| `adapter_rows` | `ready` | 0 | 0 | `attach_or_materialize_public_benchmark_vina_gnina_rows` | `materialize_rows_from_engine_run_bundle` | `python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py --engine-run-bundle implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json --out-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json` |
 
 ### Public Benchmark Source Access Preflight
 
@@ -280,8 +229,8 @@
 - `network_probe_command`: `python3 scripts/build_public_benchmark_source_access_preflight_receipt.py --out implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_source_access_preflight_receipt.md --probe-network`
 - `receipt_status`: `reachable`
 - `receipt_reachable_count`: `6`
-- `external_receipts_status`: `operator_receipts_required`
-- `external_receipts_complete_roles`: `2/3`
+- `external_receipts_status`: `ready`
+- `external_receipts_complete_roles`: `3/3`
 
 | Source | Access Mode | Primary Probe |
 | --- | --- | --- |
@@ -308,7 +257,6 @@
 
 ## Upstream Source Blockers
 
-- `public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_rows_not_acquired`
 - `public_benchmark_phase2_source_acquisition::public_benchmark_external_receipts_not_attached`
 - `pocketmd_lite_source_acquisition::pocketmd_lite_topk_rows_not_acquired`
 - `pocketmd_lite_source_acquisition::upstream_top_k_candidate_receipts_not_attached`

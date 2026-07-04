@@ -41,45 +41,37 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert payload["contract_pass"] is True
     assert payload["science_actual_closure_contract_pass"] is False
     assert payload["summary"] == {
-        "actual_closure_blocked_component_count": 2,
-        "actual_closure_blocked_requirement_count": 9,
-        "actual_closure_complete_component_count": 1,
+        "actual_closure_blocked_component_count": 1,
+        "actual_closure_blocked_requirement_count": 8,
+        "actual_closure_complete_component_count": 2,
         "actual_closure_requirement_count": 19,
-        "actual_closure_requirement_pass_count": 10,
-        "blocker_count": 7,
-        "blocked_component_operator_action_count": 2,
+        "actual_closure_requirement_pass_count": 11,
+        "blocker_count": 5,
+        "blocked_component_operator_action_count": 1,
         "closes_actual_closure_criteria_count": 19,
         "component_count": 3,
         "expected_slot_count": 6,
         "missing_row_template_artifact_count": 0,
-        "missing_slot_count": 2,
-        "operator_rows_packet_missing_input_count": 2,
-        "provided_slot_count": 4,
+        "missing_slot_count": 1,
+        "operator_rows_packet_missing_input_count": 1,
+        "provided_slot_count": 5,
         "row_template_artifact_count": 6,
-        "science_actual_closure_blocker_count": 2,
+        "science_actual_closure_blocker_count": 1,
         "slot_count": 6,
-        "upstream_source_blocker_count": 5,
+        "upstream_source_blocker_count": 4,
         "upstream_source_context_count": 2,
     }
-    assert payload["blocker_count"] == 7
+    assert payload["blocker_count"] == 5
     assert payload["science_actual_closure_blockers"] == [
-        (
-            "public_benchmark_phase2_actual_closure::"
-            "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
-        ),
         "pocketmd_lite_topk_actual_closure::pocketmd_lite_topk_rows_not_provided",
     ]
-    assert payload["blockers"][:2] == [
-        (
-            "science_actual_closure::public_benchmark_phase2_actual_closure::"
-            "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
-        ),
+    assert payload["blockers"][:1] == [
         (
             "science_actual_closure::pocketmd_lite_topk_actual_closure::"
             "pocketmd_lite_topk_rows_not_provided"
         ),
     ]
-    assert payload["blockers"][2:] == payload["upstream_source_blockers"]
+    assert payload["blockers"][1:] == payload["upstream_source_blockers"]
     assert list(slots) == [
         "subset_rows",
         "pose_rows",
@@ -88,37 +80,28 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "gpcr_rows",
         "pocketmd_rows",
     ]
-    assert payload["missing_row_inputs"] == [
-        "vina_gnina_rows",
-        "pocketmd_rows",
-    ]
+    assert payload["missing_row_inputs"] == ["pocketmd_rows"]
     assert payload["operator_rows_packet"]["status"] == "operator_rows_required"
-    assert payload["operator_rows_packet"]["missing_row_inputs"] == [
-        "vina_gnina_rows",
-        "pocketmd_rows",
-    ]
-    assert payload["operator_rows_packet"]["row_input_contract_count"] == 2
+    assert payload["operator_rows_packet"]["missing_row_inputs"] == ["pocketmd_rows"]
+    assert payload["operator_rows_packet"]["row_input_contract_count"] == 1
     assert payload["operator_rows_packet"]["first_missing_row_input"] == (
-        "vina_gnina_rows"
+        "pocketmd_rows"
     )
     completion_progress = payload["science_actual_closure_completion_progress"]
     assert completion_progress["status"] == "operator_evidence_required"
     assert completion_progress["actual_closure_ready"] is False
     assert completion_progress["requirement_count"] == 19
-    assert completion_progress["requirement_pass_count"] == 10
-    assert completion_progress["blocked_requirement_count"] == 9
+    assert completion_progress["requirement_pass_count"] == 11
+    assert completion_progress["blocked_requirement_count"] == 8
     assert completion_progress["required_component_count"] == 3
     assert completion_progress["complete_component_ids"] == [
-        "gpcr_hard_decoy_actual_closure"
+        "public_benchmark_phase2_actual_closure",
+        "gpcr_hard_decoy_actual_closure",
     ]
     assert completion_progress["blocked_component_ids"] == [
-        "public_benchmark_phase2_actual_closure",
         "pocketmd_lite_topk_actual_closure",
     ]
-    assert completion_progress["missing_row_inputs"] == [
-        "vina_gnina_rows",
-        "pocketmd_rows",
-    ]
+    assert completion_progress["missing_row_inputs"] == ["pocketmd_rows"]
     component_progress = {
         row["component_id"]: row for row in completion_progress["component_progress"]
     }
@@ -130,145 +113,15 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     ] == 5
     assert component_progress["public_benchmark_phase2_actual_closure"][
         "failed_criteria"
-    ] == ["vina_gnina_comparison_ready"]
+    ] == []
     assert component_progress["pocketmd_lite_topk_actual_closure"][
         "missing_row_inputs"
     ] == ["pocketmd_rows"]
     unblock_plan = {
         row["row_input_id"]: row for row in payload["blocking_input_unblock_plan"]
     }
-    assert payload["blocking_input_unblock_plan_count"] == 2
-    assert sorted(unblock_plan) == ["pocketmd_rows", "vina_gnina_rows"]
-    assert unblock_plan["vina_gnina_rows"]["status"] == "engine_run_rows_required"
-    assert unblock_plan["vina_gnina_rows"]["first_operator_sequence_step"] == (
-        "review_public_benchmark_vina_gnina_input_manifest_template_preflight"
-    )
-    assert unblock_plan["vina_gnina_rows"]["expected_rows_artifact"].endswith(
-        "public_benchmark_vina_gnina_rows.json"
-    )
-    assert unblock_plan["vina_gnina_rows"]["artifact_refs"][
-        "input_manifest_template_preflight_artifact"
-    ].endswith("public_benchmark_vina_gnina_input_manifest_template_preflight.json")
-    assert unblock_plan["vina_gnina_rows"]["artifact_refs"][
-        "rows_template_preflight_artifact"
-    ].endswith("public_benchmark_vina_gnina_rows_template_preflight.json")
-    assert unblock_plan["vina_gnina_rows"]["counts"][
-        "blocked_engine_run_slot_count"
-    ] == 0
-    vina_runtime_action = unblock_plan["vina_gnina_rows"]["runtime_action_packet"]
-    assert vina_runtime_action["runtime_readiness_blocker_count"] == 1
-    assert vina_runtime_action["blocked_case_input_slot_count"] == 0
-    assert vina_runtime_action["blocked_engine_run_slot_count"] == 0
-    assert vina_runtime_action["missing_engine_ids"] == []
-    assert vina_runtime_action["adapter_row_preflight_status"] == (
-        "row_artifact_missing"
-    )
-    assert vina_runtime_action["engine_run_bundle_status"] == (
-        "engine_run_bundle_materialized"
-    )
-    assert vina_runtime_action["engine_run_bundle_materialized"] is True
-    assert vina_runtime_action["rows_from_engine_run_bundle_status"] == (
-        "operator_receipts_completion_required"
-    )
-    assert vina_runtime_action["rows_from_engine_run_bundle_materialized"] is False
-    assert vina_runtime_action["engine_run_bundle_summary"]["artifact"].endswith(
-        "public_benchmark_vina_gnina_engine_run_bundle.json"
-    )
-    assert vina_runtime_action["rows_from_engine_run_bundle_report_summary"][
-        "artifact"
-    ].endswith("public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json")
-    assert vina_runtime_action["input_manifest_template_preflight_status"] == (
-        "operator_manifest_complete"
-    )
-    assert vina_runtime_action["input_manifest_template_manifest_ready"] is True
-    manifest_preflight = vina_runtime_action[
-        "input_manifest_template_preflight_summary"
-    ]
-    assert manifest_preflight["template_row_count"] == 12
-    assert manifest_preflight["template_case_coverage_complete"] is True
-    assert manifest_preflight["invalid_source_receipt_count"] == 0
-    assert manifest_preflight["unsupported_benchmark_field_count"] == 0
-    assert manifest_preflight["missing_local_file_count"] == 0
-    assert manifest_preflight["missing_receipt_ref_count"] == 0
-    assert vina_runtime_action["input_manifest_completion_action_case_count"] == 0
-    assert vina_runtime_action["input_manifest_completion_blocked_case_count"] == 0
-    assert vina_runtime_action["engine_runtime_actions"] == [
-        {
-            "binary_env_var": "PUBLIC_BENCHMARK_VINA_BIN",
-            "container_image_env_var": "PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE",
-            "engine_id": "vina",
-            "operator_action": "configure_vina_runtime",
-        },
-        {
-            "binary_env_var": "PUBLIC_BENCHMARK_GNINA_BIN",
-            "container_image_env_var": "PUBLIC_BENCHMARK_GNINA_CONTAINER_IMAGE",
-            "engine_id": "gnina",
-            "operator_action": "configure_gnina_runtime",
-        },
-    ]
-    assert vina_runtime_action["first_blocked_case_input_slot"] == {}
-    assert vina_runtime_action["first_blocked_engine_run_slot"] == {}
-    assert "first_blocked_case_input_slot" not in unblock_plan["vina_gnina_rows"]
-    assert "first_blocked_engine_run_slot" not in unblock_plan["vina_gnina_rows"]
-    assert unblock_plan["vina_gnina_rows"]["commands"][
-        "build_rows_template_preflight"
-    ].startswith("python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py")
-    first_runtime_family = vina_runtime_action["first_operator_blocker_family"]
-    assert first_runtime_family["family_id"] == "adapter_rows"
-    assert first_runtime_family["next_action"] == (
-        "attach_or_materialize_public_benchmark_vina_gnina_rows"
-    )
-    assert first_runtime_family["command_key"] == (
-        "materialize_rows_from_engine_run_bundle"
-    )
-    assert (
-        "materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py"
-        in first_runtime_family["materialization_command"]
-    )
-    assert unblock_plan["vina_gnina_rows"]["first_runtime_action"] == {
-        "action_source": "first_operator_blocker_family",
-        "family_id": "adapter_rows",
-        "next_action": "attach_or_materialize_public_benchmark_vina_gnina_rows",
-        "command_key": "materialize_rows_from_engine_run_bundle",
-        "materialization_command": first_runtime_family[
-            "materialization_command"
-        ],
-        "missing_item_count": first_runtime_family["missing_item_count"],
-        "blocked_case_count": first_runtime_family["blocked_case_count"],
-        "first_missing_item": first_runtime_family["first_missing_item"],
-    }
-    assert unblock_plan["vina_gnina_rows"]["first_runtime_action"][
-        "first_missing_item"
-    ]["blocker"] == "public_benchmark_vina_gnina_rows_not_detected"
-    assert unblock_plan["vina_gnina_rows"][
-        "runtime_blocker_family_action_count"
-    ] == 7
-    assert [
-        row["family_id"]
-        for row in unblock_plan["vina_gnina_rows"][
-            "runtime_blocker_family_actions"
-        ]
-    ] == [
-        "manifest_required_values",
-        "official_source_files",
-        "prepared_input_files",
-        "input_and_engine_receipt_refs",
-        "engine_runtime",
-        "engine_run_slots",
-        "adapter_rows",
-    ]
-    assert unblock_plan["vina_gnina_rows"]["runtime_blocker_family_actions"][-1][
-        "first_missing_item"
-    ]["blocker"] == "public_benchmark_vina_gnina_rows_not_detected"
-    assert unblock_plan["vina_gnina_rows"]["next_action"] == (
-        "attach_or_materialize_public_benchmark_vina_gnina_rows"
-    )
-    assert unblock_plan["vina_gnina_rows"]["command_key"] == (
-        "materialize_rows_from_engine_run_bundle"
-    )
-    assert unblock_plan["vina_gnina_rows"]["materialization_command"] == (
-        first_runtime_family["materialization_command"]
-    )
+    assert payload["blocking_input_unblock_plan_count"] == 1
+    assert sorted(unblock_plan) == ["pocketmd_rows"]
     assert unblock_plan["pocketmd_rows"]["status"] == (
         "operator_refinement_rows_required"
     )
@@ -478,27 +331,7 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "materialize_survival_report"
     ].startswith("python3 scripts/materialize_pocketmd_lite_topk_survival_report.py")
     row_contracts = payload["row_input_materialization_contracts"]
-    assert sorted(row_contracts) == ["pocketmd_rows", "vina_gnina_rows"]
-    assert row_contracts["vina_gnina_rows"]["operator_action"] == (
-        "attach_vina_gnina_rows_at_"
-        "implementation/phase1/release_evidence/productization/"
-        "public_benchmark_vina_gnina_rows.json"
-    )
-    vina_contract_detail = row_contracts["vina_gnina_rows"][
-        "row_input_slot_detail"
-    ]
-    assert vina_contract_detail["status"] == "ready_for_engine_execution"
-    assert vina_contract_detail["required_engine_run_count"] == 24
-    assert vina_contract_detail["ready_engine_run_slot_count"] == 24
-    assert vina_contract_detail["blocked_engine_run_slot_count"] == 0
-    assert vina_contract_detail["runtime_readiness_blocker_count"] == 1
-    assert vina_contract_detail["missing_engine_ids"] == []
-    assert vina_contract_detail["engine_run_status_summary"][
-        "first_blocked_engine_run_slot"
-    ] == {}
-    assert vina_contract_detail["engine_run_status_summary"][
-        "first_ready_engine_run_slot"
-    ]["case_id"] == "casf2016_4llx"
+    assert sorted(row_contracts) == ["pocketmd_rows"]
     assert row_contracts["pocketmd_rows"]["row_template_artifact"].endswith(
         "pocketmd_lite_topk_rows_template.csv"
     )
@@ -518,132 +351,7 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     blocked_actions = {
         row["component_id"]: row for row in payload["blocked_component_operator_actions"]
     }
-    assert blocked_actions["public_benchmark_phase2_actual_closure"][
-        "missing_row_input_ids"
-    ] == ["vina_gnina_rows"]
-    public_action = blocked_actions["public_benchmark_phase2_actual_closure"][
-        "missing_row_input_actions"
-    ][0]
-    assert blocked_actions["public_benchmark_phase2_actual_closure"][
-        "missing_row_input_action_count"
-    ] == 1
-    assert blocked_actions["public_benchmark_phase2_actual_closure"][
-        "operator_action"
-    ] == (
-        "attach_vina_gnina_rows_at_"
-        "implementation/phase1/release_evidence/productization/"
-        "public_benchmark_vina_gnina_rows.json"
-    )
-    assert blocked_actions["public_benchmark_phase2_actual_closure"][
-        "source_acquisition_operator_action"
-    ] == "resolve_public_benchmark_phase2_source_acquisition_blockers"
-    assert "public_benchmark_vina_gnina_rows_not_acquired" in blocked_actions[
-        "public_benchmark_phase2_actual_closure"
-    ]["upstream_source_blockers"]
-    assert blocked_actions["public_benchmark_phase2_actual_closure"][
-        "first_missing_row_input_action"
-    ] == public_action
-    assert public_action["row_input_id"] == "vina_gnina_rows"
-    assert public_action["operator_action"] == (
-        "attach_vina_gnina_rows_at_"
-        "implementation/phase1/release_evidence/productization/"
-        "public_benchmark_vina_gnina_rows.json"
-    )
-    assert public_action["preferred_default_row_path"].endswith(
-        "public_benchmark_vina_gnina_rows.json"
-    )
-    assert public_action["row_template_artifact"].endswith(
-        "public_benchmark_vina_gnina_rows_template.csv"
-    )
-    assert public_action["source_acquisition_operator_action"] == (
-        "resolve_public_benchmark_phase2_source_acquisition_blockers"
-    )
-    assert public_action["source_acquisition_operator_next_actions"][:2] == [
-        "review_official_source_receipt_plan",
-        "attach_casf_pdbbind_subset_rows_with_local_file_checksums",
-    ]
-    assert public_action["source_acquisition_operator_next_actions"][-2:] == [
-        "run_public_benchmark_harness_bundle_materializer",
-        "refresh_public_benchmark_source_of_truth",
-    ]
-    assert public_action["source_acquisition_row_action"]["operator_action"] == (
-        "attach_vina_gnina_rows_then_run_phase2_row_audit"
-    )
-    assert public_action["source_acquisition_row_action"][
-        "closes_phase2_criteria"
-    ] == ["vina_gnina_comparison_ready"]
-    assert public_action["source_acquisition_row_action"][
-        "runtime_readiness_command"
-    ].startswith("python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py")
-    assert "engine_config_checksum" in public_action["source_acquisition_row_action"][
-        "receipt_fields"
-    ]
-    public_manifest_action = public_action["source_acquisition_row_action"][
-        "engine_input_manifest_action_packet"
-    ]
-    assert public_manifest_action["expected_manifest_artifact"].endswith(
-        "public_benchmark_vina_gnina_input_manifest.csv"
-    )
-    assert public_manifest_action["default_execution_plan_manifest_path"].endswith(
-        "public_benchmark_vina_gnina_input_manifest.csv"
-    )
-    assert public_manifest_action["recommended_template_dropzone"].endswith(
-        "public_benchmark_vina_gnina_input_manifest.csv"
-    )
-    assert (
-        public_manifest_action[
-            "recommended_template_dropzone_is_supported_candidate_path"
-        ]
-        is True
-    )
-    assert public_manifest_action["supported_manifest_candidate_paths"][3].endswith(
-        "public_benchmark_vina_gnina_input_manifest.csv"
-    )
-    assert public_manifest_action["detected_manifest_artifact_count"] == 1
-    assert public_manifest_action["input_manifest_load_errors"] == []
-    assert public_manifest_action["source_archive_operator_artifact"] == (
-        "<CASF-2016.tar.gz>"
-    )
-    assert public_manifest_action["source_archive_extraction_command"].startswith(
-        "python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py "
-        "--archive <CASF-2016.tar.gz>"
-    )
-    assert public_manifest_action[
-        "source_archive_extraction_report_artifact"
-    ].endswith(
-        "public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json"
-    )
-    assert public_manifest_action["template_safety_policy"][
-        "template_is_not_evidence"
-    ] is True
-    public_adapter_preflight_action = public_action["source_acquisition_row_action"][
-        "adapter_row_preflight_action_packet"
-    ]
-    assert public_adapter_preflight_action["status"] == "row_artifact_missing"
-    assert public_adapter_preflight_action["supported_candidate_paths"][3].endswith(
-        "public_benchmark_vina_gnina_rows.csv"
-    )
-    assert public_adapter_preflight_action["row_template_preflight_artifact"].endswith(
-        "public_benchmark_vina_gnina_rows_template_preflight.json"
-    )
-    assert public_adapter_preflight_action["role_receipt_plan_summary"][
-        "role_receipt_blocked_count"
-    ] == 72
-    assert public_adapter_preflight_action["role_receipt_plan_summary"][
-        "first_blocked_role_receipt"
-    ]["role_id"] == "engine_run_artifact_receipt"
-    assert public_adapter_preflight_action["role_receipt_plan_summary"][
-        "first_blocked_role_receipt"
-    ]["slot_id"] == "casf2016_4llx_vina_casf2016_4llx_vina_run"
-    assert "build_public_benchmark_vina_gnina_rows_template_preflight.py" in public_adapter_preflight_action[
-        "build_row_template_preflight_command"
-    ]
-    assert public_adapter_preflight_action["template_safety_policy"][
-        "preflight_does_not_run_engines"
-    ] is True
-    assert "public_benchmark_vina_gnina_rows_not_acquired" in public_action[
-        "upstream_source_blockers"
-    ]
+    assert sorted(blocked_actions) == ["pocketmd_lite_topk_actual_closure"]
     assert blocked_actions["pocketmd_lite_topk_actual_closure"][
         "missing_row_input_ids"
     ] == ["pocketmd_rows"]
@@ -775,7 +483,7 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert "pocketmd_lite_topk_rows_not_acquired" in pocketmd_action[
         "upstream_source_blockers"
     ]
-    assert len(payload["upstream_source_blockers"]) == 5
+    assert len(payload["upstream_source_blockers"]) == 4
     assert payload["upstream_source_acquisition"]["public_benchmark_phase2"][
         "present"
     ] is True
@@ -807,7 +515,7 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
             "public_benchmark_vina_gnina_rows_template.csv"
         ),
     }
-    assert payload["first_missing_slot"]["row_input_id"] == "vina_gnina_rows"
+    assert payload["first_missing_slot"]["row_input_id"] == "pocketmd_rows"
 
     subset = slots["subset_rows"]
     assert subset["status"] == "provided"
@@ -843,15 +551,15 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert enrichment["status"] == "provided"
 
     vina_gnina = slots["vina_gnina_rows"]
-    assert vina_gnina["status"] == "operator_input_required"
-    assert vina_gnina["missing"] is True
+    assert vina_gnina["status"] == "provided"
+    assert vina_gnina["missing"] is False
     assert vina_gnina["upstream_source_id"] == "public_benchmark_phase2"
     assert vina_gnina["upstream_source_acquisition"][
         "phase2_row_closure_matrix_count"
     ] == 4
     assert vina_gnina["upstream_source_acquisition"][
         "phase2_exit_criterion_count"
-    ] == 5
+    ] == 6
     assert vina_gnina["upstream_source_acquisition"][
         "source_access_preflight_count"
     ] == 6
@@ -876,15 +584,13 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "external_receipts_validation_summary"
     ]
     assert external_receipts["summary_source"] == "source_acquisition_plan"
-    assert external_receipts["status"] == "operator_receipts_required"
-    assert external_receipts["public_benchmark_external_receipts_ready"] is False
-    assert external_receipts["materialized_row_count"] == 13
-    assert external_receipts["receipt_complete_row_count"] == 13
-    assert external_receipts["receipt_complete_artifact_role_count"] == 2
+    assert external_receipts["status"] == "ready"
+    assert external_receipts["public_benchmark_external_receipts_ready"] is True
+    assert external_receipts["materialized_row_count"] == 25
+    assert external_receipts["receipt_complete_row_count"] == 25
+    assert external_receipts["receipt_complete_artifact_role_count"] == 3
     assert external_receipts["expected_artifact_role_count"] == 3
-    assert external_receipts["missing_expected_artifact_roles"] == [
-        "vina_gnina_comparison_adapter",
-    ]
+    assert external_receipts["missing_expected_artifact_roles"] == []
     assert vina_gnina["upstream_source_acquisition"][
         "vina_gnina_case_input_slot_matrix_count"
     ] == 12
@@ -900,7 +606,7 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     upstream_runtime = vina_gnina["upstream_source_acquisition"][
         "vina_gnina_runtime_readiness"
     ]
-    assert upstream_runtime["status"] == "ready_for_engine_execution"
+    assert upstream_runtime["status"] == "adapter_materialization_ready"
     assert upstream_runtime["operator_unblock_packet"][
         "input_manifest_template_preflight_artifact"
     ].endswith("public_benchmark_vina_gnina_input_manifest_template_preflight.json")
@@ -910,8 +616,11 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     vina_gnina_actual = vina_gnina["upstream_source_acquisition"][
         "vina_gnina_actual_evidence_audit"
     ]
-    assert vina_gnina_actual["status"] == "adapter_rows_required"
-    assert vina_gnina_actual["blocked_component_count"] == 3
+    assert vina_gnina_actual["status"] == "ready"
+    assert vina_gnina_actual["blocked_component_count"] == 0
+    assert vina_gnina_actual["ready_component_count"] == 6
+    assert vina_gnina_actual["remaining_evidence"] == []
+    assert vina_gnina_actual["pass"] is True
     assert vina_gnina_actual["components"][0]["component_id"] == (
         "engine_input_manifest"
     )
@@ -937,11 +646,12 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
             "materialization_command"
         ]
     )
+    assert vina_gnina_blocker_families["adapter_rows"]["status"] == "ready"
     assert vina_gnina["source_acquisition_operator_action"] == (
         "resolve_public_benchmark_phase2_source_acquisition_blockers"
     )
-    assert "public_benchmark_vina_gnina_rows_not_acquired" in vina_gnina[
-        "upstream_source_blockers"
+    assert vina_gnina["upstream_source_blockers"] == [
+        "public_benchmark_external_receipts_not_attached"
     ]
     assert "public_benchmark_vina_gnina_input_manifest_not_detected" not in vina_gnina[
         "upstream_source_blockers"
@@ -960,8 +670,10 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     assert vina_detail["engine_run_slots"][0]["operator_actions"] == [
         "attach_vina_gnina_adapter_row_for_casf2016_4llx_vina",
     ]
+    assert vina_detail["status"] == "adapter_materialization_ready"
+    assert vina_detail["runtime_readiness_blocker_count"] == 0
     assert vina_detail["operator_unblock_packet"]["status"] == (
-        "engine_run_rows_required"
+        "adapter_materialization_ready"
     )
     assert vina_detail["operator_unblock_packet"][
         "input_manifest_template_artifact"
@@ -1191,7 +903,7 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     }
     assert component_summaries["public_benchmark_phase2_actual_closure"][
         "missing_row_input_ids"
-    ] == ["vina_gnina_rows"]
+    ] == []
     assert component_summaries["gpcr_hard_decoy_actual_closure"][
         "missing_row_input_ids"
     ] == []
@@ -1222,7 +934,7 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert payload["contract_pass"] is True
     assert payload["row_slot_handoff_count"] == 6
     assert payload["summary"]["row_template_artifact_count"] == 6
-    assert payload["summary"]["missing_slot_count"] == 2
+    assert payload["summary"]["missing_slot_count"] == 1
     assert payload["input_checksums"][
         "scripts/build_science_actual_closure_operator_handoff.py"
     ].startswith("sha256:")
@@ -1247,16 +959,16 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
         "gpcr_hard_decoy_suite_report.json"
     ].startswith("sha256:")
     assert "| `subset_rows` | `provided` |" in markdown
-    assert "| `vina_gnina_rows` | `operator_input_required` |" in markdown
+    assert "| `vina_gnina_rows` | `provided` |" in markdown
     assert "| `pocketmd_rows` | `operator_input_required` |" in markdown
-    assert "- `blocker_count`: `7`" in markdown
+    assert "- `blocker_count`: `5`" in markdown
     assert "## Actual Closure Progress" in markdown
-    assert "- `requirements`: `10/19`" in markdown
-    assert "- `blocked_requirement_count`: `9`" in markdown
-    assert "- `complete_components`: `1/3`" in markdown
+    assert "- `requirements`: `11/19`" in markdown
+    assert "- `blocked_requirement_count`: `8`" in markdown
+    assert "- `complete_components`: `2/3`" in markdown
     assert (
-        "| `public_benchmark_phase2_actual_closure` | `operator_rows_required` | "
-        "`4/5` | `vina_gnina_rows` | `vina_gnina_comparison_ready` |"
+        "| `public_benchmark_phase2_actual_closure` | `complete` | `5/5` | "
+        "`none` | `none` |"
     ) in markdown
     assert (
         "| `gpcr_hard_decoy_actual_closure` | `complete` | `5/5` | `none` | "
@@ -1264,8 +976,7 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     ) in markdown
     assert "## Missing Row Packet" in markdown
     assert "First Blocked Slot" in markdown
-    assert "bundle:engine_run_bundle_materialized" in markdown
-    assert "rows_bundle:operator_receipts_completion_required" in markdown
+    assert "rank_01_refinement_receipt.json/missing_fields=18" in markdown
     assert (
         "candidate:pocketmd_lite_case_001_rank_01/"
         "attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01"
@@ -1277,7 +988,6 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "source:source_id/attach_operator_input_source_source_id" in markdown
     assert "report:top_k_refinement_operator_intake" in markdown
     assert "## Blocked Component Actions" in markdown
-    assert "public_benchmark_phase2_actual_closure" in markdown
     assert "pocketmd_lite_topk_actual_closure" in markdown
     assert "Source Row Action" in markdown
     assert "Source Command" in markdown
@@ -1285,50 +995,24 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "Source Phase 2 Criteria" in markdown
     assert "Source Phase 4 Criteria" in markdown
     assert "### Source Acquisition Next Actions" in markdown
-    assert "review_official_source_receipt_plan" in markdown
-    assert "refresh_public_benchmark_source_of_truth" in markdown
     assert "review_phase4_refinement_receipt_plan" in markdown
     assert "refresh_science_actual_closure_from_rows" in markdown
-    assert "attach_vina_gnina_rows_then_run_phase2_row_audit" in markdown
     assert "vina_gnina_comparison_ready" in markdown
     assert "build_public_benchmark_vina_gnina_runtime_readiness.py" in markdown
-    assert "engine_config_checksum" in markdown
     assert "materialize_pocketmd_lite_operator_intake_from_rows.py" in markdown
     assert "uncertainty_summary_materialized" in markdown
     assert "uncertainty_interval_receipt" in markdown
-    assert "### Vina/GNINA Input Manifest Action" in markdown
-    assert "public_benchmark_vina_gnina_input_manifest.json" in markdown
-    assert "public_benchmark_vina_gnina_input_manifest.csv" in markdown
-    assert "public_benchmark_vina_gnina_input_manifest_template_preflight" in markdown
-    assert "`engine_run_rows_required`" in markdown
-    assert "`recommended_template_dropzone_is_supported_candidate_path`: `True`" in markdown
-    assert "`input_manifest_load_errors`: `none`" in markdown
-    assert "materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py" in markdown
-    assert "`source_archive_operator_artifact`: `<CASF-2016.tar.gz>`" in markdown
-    assert "public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json" in markdown
-    assert "`do_not_treat_blank_prepared_checksums_as_ready`: `True`" in markdown
-    assert "### Vina/GNINA Adapter Row Preflight Action" in markdown
-    assert "public_benchmark_vina_gnina_rows_template_preflight.json" in markdown
-    assert "build_public_benchmark_vina_gnina_rows_template_preflight.py" in markdown
-    assert "`role_receipt_blocked_count`: `72`" in markdown
-    assert (
-        "`first_blocked_role_receipt`: `engine_run_artifact_receipt` / "
-        "`casf2016_4llx_vina_casf2016_4llx_vina_run`"
-    ) in markdown
-    assert "public_benchmark_vina_gnina_rows.csv" in markdown
-    assert "`operator_rows_must_be_real_engine_outputs`: `True`" in markdown
     assert "### Public Benchmark Vina/GNINA Actual Evidence Audit" in markdown
     assert "`engine_input_manifest`" in markdown
     assert "`per_engine_run_receipts`" in markdown
-    assert "`public_benchmark_vina_gnina_rows_not_detected`" in markdown
-    assert "`public_benchmark_vina_gnina_engine_run_receipts_incomplete`" in (
-        markdown
-    )
+    assert "`adapter_rows` | `ready`" in markdown
+    assert '"rows_from_engine_run_bundle_status": "rows_materialized"' in markdown
+    assert "`remaining_evidence`: `none`" in markdown
     assert "### Public Benchmark Source Access Preflight" in markdown
     assert "`receipt_status`: `reachable`" in markdown
     assert "`receipt_reachable_count`: `6`" in markdown
-    assert "`external_receipts_status`: `operator_receipts_required`" in markdown
-    assert "`external_receipts_complete_roles`: `2/3`" in markdown
+    assert "`external_receipts_status`: `ready`" in markdown
+    assert "`external_receipts_complete_roles`: `3/3`" in markdown
     assert "curl --head --location --max-time 20" in markdown
     assert "### PocketMD Top-k Rows Action" in markdown
     assert "materialize_rows_from_template_command" in markdown
@@ -1384,7 +1068,7 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "attach_pocketmd_rows_at_" in markdown
     assert "CSV Starter" in markdown
     assert "## Upstream Source Blockers" in markdown
-    assert "public_benchmark_vina_gnina_rows_not_acquired" in markdown
+    assert "public_benchmark_external_receipts_not_attached" in markdown
     assert "public_benchmark_vina_gnina_engine_runtime_not_ready" not in markdown
     assert "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing" not in markdown
     assert "public_benchmark_vina_gnina_input_manifest_not_detected" not in markdown
@@ -1392,8 +1076,6 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "`missing_engine_ids`: `vina`, `gnina`" not in markdown
     assert "`runtime_readiness_blocker_count`: `76`" not in markdown
     assert "`status`: `row_artifact_missing`" in markdown
-    assert "public_benchmark_vina_gnina_input_manifest_template.csv" in markdown
-    assert "casf2016_4llx_vina_casf2016_4llx_vina_run" in markdown
     assert "## Provided Closure Evidence" in markdown
     assert "### GPCR Phase 3 Gate" in markdown
     assert "| `DRD2` | `1.0` | `0.6` | `0` | `False` | `pass` |" in markdown

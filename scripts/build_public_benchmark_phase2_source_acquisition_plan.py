@@ -2670,7 +2670,18 @@ def _vina_gnina_actual_evidence_audit(
         >= minimum_comparison_case_count
         and bool(adapter_preflight.get("contract_pass"))
     )
-    row_receipts_ready = (
+    rows_from_engine_run_bundle_summary = _as_dict(
+        vina_gnina_runtime_readiness_summary.get(
+            "rows_from_engine_run_bundle_report_summary"
+        )
+    )
+    bundle_receipts_ready = (
+        bool(rows_from_engine_run_bundle_summary.get("rows_materialized"))
+        and _as_int(rows_from_engine_run_bundle_summary.get("ready_engine_run_count"))
+        >= required_engine_run_count
+        and _as_int(rows_from_engine_run_bundle_summary.get("blocker_count")) == 0
+    )
+    template_receipts_ready = (
         bool(vina_gnina_rows_template_preflight_summary.get("expected_rows_detected"))
         and bool(
             vina_gnina_rows_template_preflight_summary.get("adapter_template_ready")
@@ -2682,6 +2693,7 @@ def _vina_gnina_actual_evidence_audit(
         )
         == 0
     )
+    row_receipts_ready = bundle_receipts_ready or template_receipts_ready
     external_receipts_ready = bool(
         external_receipt_completion_audit.get("all_expected_artifact_roles_complete")
     )
@@ -2950,11 +2962,20 @@ def _vina_gnina_actual_evidence_audit(
                         "missing_engine_run_receipt_value_count"
                     )
                 ),
+                "rows_from_engine_run_bundle_status": str(
+                    rows_from_engine_run_bundle_summary.get("status") or ""
+                ),
+                "rows_from_engine_run_bundle_materialized": bool(
+                    rows_from_engine_run_bundle_summary.get("rows_materialized")
+                ),
+                "ready_engine_run_count": _as_int(
+                    rows_from_engine_run_bundle_summary.get("ready_engine_run_count")
+                ),
             },
             "required": {
-                "expected_rows_detected": True,
-                "adapter_template_ready": True,
-                "role_receipt_blocked_count": 0,
+                "expected_rows_detected_or_materialized_bundle_rows": True,
+                "adapter_template_ready_or_rows_from_engine_run_bundle_materialized": True,
+                "role_receipt_blocked_count_or_bundle_blocker_count": 0,
             },
             "blockers": (
                 []

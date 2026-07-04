@@ -1,14 +1,12 @@
 {
-  "blocker_count": 1,
-  "blockers": [
-    "public_benchmark_external_receipts_missing"
-  ],
+  "blocker_count": 0,
+  "blockers": [],
   "claim_boundary": "This validator checks operator-attached license/accession, checksum, and provenance receipt fields already present in materialized benchmark rows. It does not fetch public data, approve licenses, or claim Tier beta without materialized benchmark evidence.",
   "contract_pass": true,
-  "materialized_row_count": 0,
-  "public_benchmark_external_receipts_ready": false,
+  "materialized_row_count": 25,
+  "public_benchmark_external_receipts_ready": true,
   "receipt_blocked_row_count": 0,
-  "receipt_complete_row_count": 0,
+  "receipt_complete_row_count": 25,
   "receipt_coverage": {
     "claim_boundary": "Receipt coverage is grouped by benchmark artifact role. A role is covered only when at least one materialized row exists and every required receipt field for that role validates locally; this does not approve licenses or fetch external benchmark data.",
     "expected_artifact_role_count": 3,
@@ -17,22 +15,18 @@
       "dud_e_lit_pcba_enrichment_scorecard",
       "vina_gnina_comparison_adapter"
     ],
-    "materialized_artifact_role_count": 0,
-    "missing_expected_artifact_role_count": 3,
-    "missing_expected_artifact_roles": [
-      "casf_pdbbind_subset_manifest",
-      "dud_e_lit_pcba_enrichment_scorecard",
-      "vina_gnina_comparison_adapter"
-    ],
-    "receipt_complete_artifact_role_count": 0,
+    "materialized_artifact_role_count": 3,
+    "missing_expected_artifact_role_count": 0,
+    "missing_expected_artifact_roles": [],
+    "receipt_complete_artifact_role_count": 3,
     "role_summaries": [
       {
         "artifact_role": "casf_pdbbind_subset_manifest",
         "blocker_count": 0,
         "blockers": [],
-        "materialized_row_count": 0,
+        "materialized_row_count": 12,
         "receipt_blocked_row_count": 0,
-        "receipt_complete_row_count": 0,
+        "receipt_complete_row_count": 12,
         "required_receipt_fields": [
           "source_license_or_accession",
           "source_checksum",
@@ -44,9 +38,9 @@
         "artifact_role": "dud_e_lit_pcba_enrichment_scorecard",
         "blocker_count": 0,
         "blockers": [],
-        "materialized_row_count": 0,
+        "materialized_row_count": 1,
         "receipt_blocked_row_count": 0,
-        "receipt_complete_row_count": 0,
+        "receipt_complete_row_count": 1,
         "required_receipt_fields": [
           "source_license_or_accession",
           "source_checksum",
@@ -57,9 +51,9 @@
         "artifact_role": "vina_gnina_comparison_adapter",
         "blocker_count": 0,
         "blockers": [],
-        "materialized_row_count": 0,
+        "materialized_row_count": 12,
         "receipt_blocked_row_count": 0,
-        "receipt_complete_row_count": 0,
+        "receipt_complete_row_count": 12,
         "required_receipt_fields": [
           "source_license_or_accession",
           "source_checksum",
@@ -68,7 +62,320 @@
       }
     ]
   },
-  "receipt_rows": [],
+  "receipt_rows": [
+    {
+      "artifact_role": "casf_pdbbind_subset_manifest",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "source_file_checksums"
+      ],
+      "row_key": "subset_manifest:casf2016_4llx",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "casf_pdbbind_subset_manifest",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "source_file_checksums"
+      ],
+      "row_key": "subset_manifest:casf2016_5c28",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "casf_pdbbind_subset_manifest",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "source_file_checksums"
+      ],
+      "row_key": "subset_manifest:casf2016_3uuo",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "casf_pdbbind_subset_manifest",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "source_file_checksums"
+      ],
+      "row_key": "subset_manifest:casf2016_3ui7",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "casf_pdbbind_subset_manifest",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "source_file_checksums"
+      ],
+      "row_key": "subset_manifest:casf2016_5c2h",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "casf_pdbbind_subset_manifest",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "source_file_checksums"
+      ],
+      "row_key": "subset_manifest:casf2016_2v00",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "casf_pdbbind_subset_manifest",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "source_file_checksums"
+      ],
+      "row_key": "subset_manifest:casf2016_3wz8",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "casf_pdbbind_subset_manifest",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "source_file_checksums"
+      ],
+      "row_key": "subset_manifest:casf2016_3pww",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "casf_pdbbind_subset_manifest",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "source_file_checksums"
+      ],
+      "row_key": "subset_manifest:casf2016_3prs",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "casf_pdbbind_subset_manifest",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "source_file_checksums"
+      ],
+      "row_key": "subset_manifest:casf2016_3uri",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "casf_pdbbind_subset_manifest",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "source_file_checksums"
+      ],
+      "row_key": "subset_manifest:casf2016_4m0z",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "casf_pdbbind_subset_manifest",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "source_file_checksums"
+      ],
+      "row_key": "subset_manifest:casf2016_4m0y",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "dud_e_lit_pcba_enrichment_scorecard",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "row_key": "enrichment_scorecard:AA2AR",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "vina_gnina_comparison_adapter",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "row_key": "vina_gnina_comparison_adapter:casf2016_4llx",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "vina_gnina_comparison_adapter",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "row_key": "vina_gnina_comparison_adapter:casf2016_5c28",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "vina_gnina_comparison_adapter",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "row_key": "vina_gnina_comparison_adapter:casf2016_3uuo",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "vina_gnina_comparison_adapter",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "row_key": "vina_gnina_comparison_adapter:casf2016_3ui7",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "vina_gnina_comparison_adapter",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "row_key": "vina_gnina_comparison_adapter:casf2016_5c2h",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "vina_gnina_comparison_adapter",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "row_key": "vina_gnina_comparison_adapter:casf2016_2v00",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "vina_gnina_comparison_adapter",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "row_key": "vina_gnina_comparison_adapter:casf2016_3wz8",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "vina_gnina_comparison_adapter",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "row_key": "vina_gnina_comparison_adapter:casf2016_3pww",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "vina_gnina_comparison_adapter",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "row_key": "vina_gnina_comparison_adapter:casf2016_3prs",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "vina_gnina_comparison_adapter",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "row_key": "vina_gnina_comparison_adapter:casf2016_3uri",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "vina_gnina_comparison_adapter",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "row_key": "vina_gnina_comparison_adapter:casf2016_4m0z",
+      "status": "pass"
+    },
+    {
+      "artifact_role": "vina_gnina_comparison_adapter",
+      "blockers": [],
+      "contract_pass": true,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "row_key": "vina_gnina_comparison_adapter:casf2016_4m0y",
+      "status": "pass"
+    }
+  ],
   "required_receipt_fields": [
     "source_license_or_accession",
     "source_checksum",
@@ -112,5 +419,5 @@
     ],
     "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest"
   },
-  "status": "operator_receipts_required"
+  "status": "ready"
 }

@@ -1,149 +1,810 @@
 {
-  "benchmark_split_counts": {},
-  "blockers": [
-    "vina_gnina_comparison_cases_missing",
-    "vina_gnina_engine_runs_missing",
-    "vina_gnina_external_receipts_missing"
-  ],
-  "case_rows": [],
-  "claim_boundary": "This seed defines the Vina/GNINA comparison adapter shape and materializer command. With zero operator-attached engine comparison rows it is intentionally blocked and cannot support engine comparison claims.",
-  "contract_pass": false,
-  "engine_summaries": [
+  "benchmark_split_counts": {
+    "CASF-core": 12
+  },
+  "blockers": [],
+  "boolean_value_policy": {
+    "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+  },
+  "case_rows": [
     {
-      "engine_id": "vina",
-      "pose_success_count": 0,
-      "pose_success_rate": null,
-      "run_count": 0,
-      "symmetry_aware_rmsd_median_angstrom": null
+      "benchmark_split": "CASF-core",
+      "blockers": [],
+      "case_id": "casf2016_4llx",
+      "complex_id": "4llx",
+      "contract_pass": true,
+      "engine_runs": [
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_4llx_vina_run",
+          "engine_config_checksum": "sha256:2b6adbcbd43afa5747d43284d9a6aa80cae3e5eb0724be069824cabb63321726",
+          "engine_id": "vina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+          "engine_version": "vina-python-api 1.2.7",
+          "pose_success": true,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:a75c92e65d577bf59198ddd190c982b1cfd3aeed2f66ce3378a455ef064cd65e",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+          "score": -5.131,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 0.00042551784802507896
+        },
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_4llx_gnina_run",
+          "engine_config_checksum": "sha256:730693537246d60e068195c7aab63b409516804a491dbb756cc774c40cbdf5d3",
+          "engine_id": "gnina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_run_receipt.json",
+          "engine_version": "gnina v1.0-rc.1 master:b83b262 Built Dec 30 2020.",
+          "pose_success": true,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:1771bbfeb4aeeea784d8c3b21b943a6ff83b68ea9b66ea295a719d1258cde9e9",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4llx/gnina_pose.sdf",
+          "score": -5.27983046,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 0.0004736164253771169
+        }
+      ],
+      "present_engines": [
+        "gnina",
+        "vina"
+      ],
+      "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_pose_id": "casf2016_4llx_reference",
+      "root_cause_tags": [],
+      "source_checksum": "sha256:740e385f5a12882b6515f8f8c6228b5b62d5d051de2650ee2bd0073513471fc3",
+      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "status": "pass"
     },
     {
-      "engine_id": "gnina",
-      "pose_success_count": 0,
-      "pose_success_rate": null,
-      "run_count": 0,
-      "symmetry_aware_rmsd_median_angstrom": null
+      "benchmark_split": "CASF-core",
+      "blockers": [],
+      "case_id": "casf2016_5c28",
+      "complex_id": "5c28",
+      "contract_pass": true,
+      "engine_runs": [
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_5c28_vina_run",
+          "engine_config_checksum": "sha256:4b536b4b0a1fea26e340b2dfaa4b8d441df4d306e5c4e88f101a50c14623e8b8",
+          "engine_id": "vina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_run_receipt.json",
+          "engine_version": "vina-python-api 1.2.7",
+          "pose_success": true,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:417690468196781cc7112c7d9c63acfbcbb63f63c6681794927f0b32401e52f8",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c28/vina_pose.sdf",
+          "score": -6.352,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 0.6257394855422223
+        },
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_5c28_gnina_run",
+          "engine_config_checksum": "sha256:05567d3a46a72ecffd09e250f40655738f6ecd16c8cbba39a337206245021bc7",
+          "engine_id": "gnina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_run_receipt.json",
+          "engine_version": "gnina v1.0-rc.1 master:b83b262 Built Dec 30 2020.",
+          "pose_success": true,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:38718787221af6d9bba45aba725dcd817b6e6fb191826b0e5e6c3bc4e693c826",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c28/gnina_pose.sdf",
+          "score": -6.52581358,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 0.6253495691006538
+        }
+      ],
+      "present_engines": [
+        "gnina",
+        "vina"
+      ],
+      "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_pose_id": "casf2016_5c28_reference",
+      "root_cause_tags": [],
+      "source_checksum": "sha256:9439782979e3d784197b0cb71e96c67e8f88bbbee1c3c203dfe1bf2e2593c899",
+      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "status": "pass"
+    },
+    {
+      "benchmark_split": "CASF-core",
+      "blockers": [],
+      "case_id": "casf2016_3uuo",
+      "complex_id": "3uuo",
+      "contract_pass": true,
+      "engine_runs": [
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_3uuo_vina_run",
+          "engine_config_checksum": "sha256:d785204f866e55dc61cfb36fa5de6037b2b3e9fafe59f7ca80cad6890af61a32",
+          "engine_id": "vina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_run_receipt.json",
+          "engine_version": "vina-python-api 1.2.7",
+          "pose_success": true,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:78d9189fc2c95f29e1ee4947a37c23b32e780d7624ecfd02d1241d793ab5073b",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uuo/vina_pose.sdf",
+          "score": -8.347,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 0.4959820266433171
+        },
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_3uuo_gnina_run",
+          "engine_config_checksum": "sha256:a3b21ec46692a71aac084f2600c5c34194daa9970832cc066818043e567b14fc",
+          "engine_id": "gnina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_run_receipt.json",
+          "engine_version": "gnina v1.0-rc.1 master:b83b262 Built Dec 30 2020.",
+          "pose_success": true,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:7fdba7838ba56e19da1b6aea0b91ac6bff541358735ea6c95f10070dc96939f1",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uuo/gnina_pose.sdf",
+          "score": -8.34818649,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 0.24537249056978278
+        }
+      ],
+      "present_engines": [
+        "gnina",
+        "vina"
+      ],
+      "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_pose_id": "casf2016_3uuo_reference",
+      "root_cause_tags": [],
+      "source_checksum": "sha256:05002ef7e724566be40cdea596d599243989a19fa05994bd4198b36498c59f03",
+      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "status": "pass"
+    },
+    {
+      "benchmark_split": "CASF-core",
+      "blockers": [],
+      "case_id": "casf2016_3ui7",
+      "complex_id": "3ui7",
+      "contract_pass": true,
+      "engine_runs": [
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_3ui7_vina_run",
+          "engine_config_checksum": "sha256:856c6b904bb52648d5bacc91d56c3457d3e655ac7e91cc6163e1b7962fa24efc",
+          "engine_id": "vina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_run_receipt.json",
+          "engine_version": "vina-python-api 1.2.7",
+          "pose_success": true,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:31ab4749afc52a0b2ee75012b61b4bd43dcfe19a6ca44c8a40e605c431e40701",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3ui7/vina_pose.sdf",
+          "score": -8.762,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 0.21573441184599734
+        },
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_3ui7_gnina_run",
+          "engine_config_checksum": "sha256:6d85774f9006eddb8890cbf6c2dbf4a67523c473b6b046397059f95e709f17f9",
+          "engine_id": "gnina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_run_receipt.json",
+          "engine_version": "gnina v1.0-rc.1 master:b83b262 Built Dec 30 2020.",
+          "pose_success": true,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:b0f37ed79e6b094da07b178dfe0f63c18ffd1f437abb85c491af53fd9360528b",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3ui7/gnina_pose.sdf",
+          "score": -8.77202511,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 0.9780847252929341
+        }
+      ],
+      "present_engines": [
+        "gnina",
+        "vina"
+      ],
+      "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_pose_id": "casf2016_3ui7_reference",
+      "root_cause_tags": [],
+      "source_checksum": "sha256:0e6013d93997926592a33f01b38598daf29e40deb028ff211673982c0f678341",
+      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "status": "pass"
+    },
+    {
+      "benchmark_split": "CASF-core",
+      "blockers": [],
+      "case_id": "casf2016_5c2h",
+      "complex_id": "5c2h",
+      "contract_pass": true,
+      "engine_runs": [
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_5c2h_vina_run",
+          "engine_config_checksum": "sha256:8e6de493db65c4f47f7fb4b14970755152fa4332acd605b333a8532844323e81",
+          "engine_id": "vina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_run_receipt.json",
+          "engine_version": "vina-python-api 1.2.7",
+          "pose_success": true,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:4ef68205a3fa83017bb49a3fe053c93ff5dd74bc3e3a9a9dc8b5a6492bd6714f",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c2h/vina_pose.sdf",
+          "score": -10.0,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 1.7023576497713206
+        },
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_5c2h_gnina_run",
+          "engine_config_checksum": "sha256:67ca9275f8b1558667c7b65a0cca75a6fd7dd4e577ae3da2f5ef54af2d5abff4",
+          "engine_id": "gnina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_run_receipt.json",
+          "engine_version": "gnina v1.0-rc.1 master:b83b262 Built Dec 30 2020.",
+          "pose_success": true,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:6aa28e7a5c8f42bc9dc5fad9ee8a115f02f8cce8ba96853adcf13c74e2953404",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_5c2h/gnina_pose.sdf",
+          "score": -10.2285213,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 1.489043614411706
+        }
+      ],
+      "present_engines": [
+        "gnina",
+        "vina"
+      ],
+      "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_pose_id": "casf2016_5c2h_reference",
+      "root_cause_tags": [],
+      "source_checksum": "sha256:363d9a878ecbeeb13bcc8fa4e7a80091071465cd19b6482a1b0c52ebcc29a6a7",
+      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "status": "pass"
+    },
+    {
+      "benchmark_split": "CASF-core",
+      "blockers": [],
+      "case_id": "casf2016_2v00",
+      "complex_id": "2v00",
+      "contract_pass": true,
+      "engine_runs": [
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_2v00_vina_run",
+          "engine_config_checksum": "sha256:4d7041c0b87867627c01fb18e3d4645b103003417f7eebfd15417d7f3f1c9a82",
+          "engine_id": "vina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_run_receipt.json",
+          "engine_version": "vina-python-api 1.2.7",
+          "pose_success": true,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:209cba4c65d9447e4969a85a6050b1a88e36a51f3ff04c86f63908605ef272c5",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_2v00/vina_pose.sdf",
+          "score": -7.615,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 0.6219752540410227
+        },
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_2v00_gnina_run",
+          "engine_config_checksum": "sha256:7c3b697eb1e3fa7deb74c0643c6e8a8b186acff6931b7be03d9aeebdbc37dfdd",
+          "engine_id": "gnina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_run_receipt.json",
+          "engine_version": "gnina v1.0-rc.1 master:b83b262 Built Dec 30 2020.",
+          "pose_success": true,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:180ac2272bb03299d7a5b3f52d7c49fe4572a66e96124071390371f663f38704",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_2v00/gnina_pose.sdf",
+          "score": -6.2771554,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 1.3650588751520782
+        }
+      ],
+      "present_engines": [
+        "gnina",
+        "vina"
+      ],
+      "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_pose_id": "casf2016_2v00_reference",
+      "root_cause_tags": [],
+      "source_checksum": "sha256:0ca5f029c5fe7ca0191fd2c9c33234e3fc51aa8bc0fbf5a7592ca2dc253383b4",
+      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "status": "pass"
+    },
+    {
+      "benchmark_split": "CASF-core",
+      "blockers": [],
+      "case_id": "casf2016_3wz8",
+      "complex_id": "3wz8",
+      "contract_pass": true,
+      "engine_runs": [
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_3wz8_vina_run",
+          "engine_config_checksum": "sha256:125b4decd0d500018cd7837548ba882aaa30ef8ada7143fc7a4527c999a4099d",
+          "engine_id": "vina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_run_receipt.json",
+          "engine_version": "vina-python-api 1.2.7",
+          "pose_success": true,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:dc118d0265807fcf18bb285773967833066706d45ab0e2027598a0810ae70447",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3wz8/vina_pose.sdf",
+          "score": -9.41,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 1.9661384192274638
+        },
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_3wz8_gnina_run",
+          "engine_config_checksum": "sha256:37d796e52cff4bfc1f1764d9398e567a192f6fd3e02823d51b935b3cc3081739",
+          "engine_id": "gnina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_run_receipt.json",
+          "engine_version": "gnina v1.0-rc.1 master:b83b262 Built Dec 30 2020.",
+          "pose_success": true,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:e5dd9726caf543009d18b3ab9f0cedf297356a1cf1f53a302df810e1d2516e12",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_pose.sdf",
+          "score": -9.52263641,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 1.967469884685955
+        }
+      ],
+      "present_engines": [
+        "gnina",
+        "vina"
+      ],
+      "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_pose_id": "casf2016_3wz8_reference",
+      "root_cause_tags": [],
+      "source_checksum": "sha256:2aa5a843fb5cccd932ba65c7b33c115fbdbc80c7656b3f15916a1c51ce017696",
+      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "status": "pass"
+    },
+    {
+      "benchmark_split": "CASF-core",
+      "blockers": [],
+      "case_id": "casf2016_3pww",
+      "complex_id": "3pww",
+      "contract_pass": true,
+      "engine_runs": [
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_3pww_vina_run",
+          "engine_config_checksum": "sha256:38e624f1468c7ff31ead64de6b38b933345833b05553939da2238fad8b7972a2",
+          "engine_id": "vina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_run_receipt.json",
+          "engine_version": "vina-python-api 1.2.7",
+          "pose_success": false,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:aadedf4d75ab1f93bb3974c88fe669a9dcdb28d5609aad698277ddc570cb2655",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3pww/vina_pose.sdf",
+          "score": -10.09,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 3.0747199870873043
+        },
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_3pww_gnina_run",
+          "engine_config_checksum": "sha256:2d7417d729e5e8c7c0613fc71f5df724a3df7c5a019a1445ab20a4e86be70f67",
+          "engine_id": "gnina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_run_receipt.json",
+          "engine_version": "gnina v1.0-rc.1 master:b83b262 Built Dec 30 2020.",
+          "pose_success": false,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:44165474406a91b647541637deec63d41e56f5327c018a60b329c0ef135c8b76",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_pose.sdf",
+          "score": -11.4232635,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 4.022736232204531
+        }
+      ],
+      "present_engines": [
+        "gnina",
+        "vina"
+      ],
+      "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_pose_id": "casf2016_3pww_reference",
+      "root_cause_tags": [],
+      "source_checksum": "sha256:8f1d45ed485f8a7ee9fc3e0b8e57f5066dfc44c040e6de302117081da1fe45ca",
+      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "status": "pass"
+    },
+    {
+      "benchmark_split": "CASF-core",
+      "blockers": [],
+      "case_id": "casf2016_3prs",
+      "complex_id": "3prs",
+      "contract_pass": true,
+      "engine_runs": [
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_3prs_vina_run",
+          "engine_config_checksum": "sha256:1c16092489dc882921e9c92a8c10c0488d38a08e19511d9d61939e5ea6c5cbd8",
+          "engine_id": "vina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_run_receipt.json",
+          "engine_version": "vina-python-api 1.2.7",
+          "pose_success": false,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:448222082b43d204ba46c3cc3005718e3495190e3c04f6cfa2800e406d43df78",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3prs/vina_pose.sdf",
+          "score": -8.499,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 4.593708570142953
+        },
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_3prs_gnina_run",
+          "engine_config_checksum": "sha256:d59dfabe989be84d2021bd6a6bfe2cacb00da710e32dc5422a79bdd8421f6b0e",
+          "engine_id": "gnina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_run_receipt.json",
+          "engine_version": "gnina v1.0-rc.1 master:b83b262 Built Dec 30 2020.",
+          "pose_success": true,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:2a72301bede217f4d560613e1bfc9d15c6d7fe753657bef2cf8612687c4410e1",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3prs/gnina_pose.sdf",
+          "score": -9.75852299,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 1.5919482169955004
+        }
+      ],
+      "present_engines": [
+        "gnina",
+        "vina"
+      ],
+      "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_pose_id": "casf2016_3prs_reference",
+      "root_cause_tags": [],
+      "source_checksum": "sha256:977dcc3b37426a97e561a12b65eb98a0c5599318e7ed1b8573ec766014861344",
+      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "status": "pass"
+    },
+    {
+      "benchmark_split": "CASF-core",
+      "blockers": [],
+      "case_id": "casf2016_3uri",
+      "complex_id": "3uri",
+      "contract_pass": true,
+      "engine_runs": [
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_3uri_vina_run",
+          "engine_config_checksum": "sha256:6bdba588ce71c92257dcc5051cbb13a36a95fa36c869ea982bdd116929b0b85c",
+          "engine_id": "vina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_run_receipt.json",
+          "engine_version": "vina-python-api 1.2.7",
+          "pose_success": false,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:d0b4956351294f49a29620c5d422e370777fe75deace86ae3d409b005fd481c4",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_pose.sdf",
+          "score": -9.013,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 3.0626439684202142
+        },
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_3uri_gnina_run",
+          "engine_config_checksum": "sha256:d9e7376bb38baed0132a2fb6d3c56a47273581821d315e2a4a61b431e3a6dc53",
+          "engine_id": "gnina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_run_receipt.json",
+          "engine_version": "gnina v1.0-rc.1 master:b83b262 Built Dec 30 2020.",
+          "pose_success": false,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:63757de030bed5b18637edd085f5f0ab0f5ecbba0c9ad36c80d9d7a5a375d7e0",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uri/gnina_pose.sdf",
+          "score": -8.26766968,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 2.5801791859858243
+        }
+      ],
+      "present_engines": [
+        "gnina",
+        "vina"
+      ],
+      "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_pose_id": "casf2016_3uri_reference",
+      "root_cause_tags": [],
+      "source_checksum": "sha256:611b2b2802de17514068f4d2943f85d8ac27b7cae16cfa919ebd3c0242efff0c",
+      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "status": "pass"
+    },
+    {
+      "benchmark_split": "CASF-core",
+      "blockers": [],
+      "case_id": "casf2016_4m0z",
+      "complex_id": "4m0z",
+      "contract_pass": true,
+      "engine_runs": [
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_4m0z_vina_run",
+          "engine_config_checksum": "sha256:12cf8786d74c737d1a9a954a4ad5d7ed00dfb147a3a1fbf10e0063143734fe1b",
+          "engine_id": "vina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_run_receipt.json",
+          "engine_version": "vina-python-api 1.2.7",
+          "pose_success": true,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:5d8a3c0d85db5312ec56d620078973e0c52276dd0d009d8e9a53e0d060147f71",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0z/vina_pose.sdf",
+          "score": -9.776,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 0.7414703751944289
+        },
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_4m0z_gnina_run",
+          "engine_config_checksum": "sha256:48ce470d5820c560515f39c5bf16537e69036b4054dfa38a556708d6dfcba830",
+          "engine_id": "gnina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_run_receipt.json",
+          "engine_version": "gnina v1.0-rc.1 master:b83b262 Built Dec 30 2020.",
+          "pose_success": true,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:92566ba1c2e7a4178fce037d4c78b5ad609d32ea2fda99a356341d1ec2a986c4",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0z/gnina_pose.sdf",
+          "score": -11.1598005,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 0.16903526121309456
+        }
+      ],
+      "present_engines": [
+        "gnina",
+        "vina"
+      ],
+      "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_pose_id": "casf2016_4m0z_reference",
+      "root_cause_tags": [],
+      "source_checksum": "sha256:43dd7dad2ed329dd3fe2d69b67befa9950b97acd3733f12aa7992e7985480fdc",
+      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "status": "pass"
+    },
+    {
+      "benchmark_split": "CASF-core",
+      "blockers": [],
+      "case_id": "casf2016_4m0y",
+      "complex_id": "4m0y",
+      "contract_pass": true,
+      "engine_runs": [
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_4m0y_vina_run",
+          "engine_config_checksum": "sha256:839a39dc22e074600e66128c8db7ce978106c8c699de29b7777577f21cfc8d72",
+          "engine_id": "vina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_run_receipt.json",
+          "engine_version": "vina-python-api 1.2.7",
+          "pose_success": true,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:0b480238e0c0bb0fdc649e712859a06e77448c0ddc3dc4014ab9c9e37264d148",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0y/vina_pose.sdf",
+          "score": -9.345,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 0.4054322315566931
+        },
+        {
+          "blockers": [],
+          "contract_pass": true,
+          "docking_run_id": "casf2016_4m0y_gnina_run",
+          "engine_config_checksum": "sha256:c7a662626220175a6275ef7485fa8d64008c92ffa7ff203414e831cdbd4a8ce6",
+          "engine_id": "gnina",
+          "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_run_receipt.json",
+          "engine_version": "gnina v1.0-rc.1 master:b83b262 Built Dec 30 2020.",
+          "pose_success": false,
+          "pose_success_rmsd_threshold_angstrom": 2.0,
+          "predicted_ligand_checksum": "sha256:646dd82e60484f579ee54be8fc1b6021d7d0be0bce53e1d09c0f13be88db4f78",
+          "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_4m0y/gnina_pose.sdf",
+          "score": -6.93669987,
+          "score_direction": "lower_is_better",
+          "status": "pass",
+          "symmetry_aware_rmsd_angstrom": 2.154156111226545
+        }
+      ],
+      "present_engines": [
+        "gnina",
+        "vina"
+      ],
+      "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+      "reference_pose_id": "casf2016_4m0y_reference",
+      "root_cause_tags": [],
+      "source_checksum": "sha256:490c2a65230e07efc35f5c625a4a538f59fdf02e5e1e3845c7719f11d0f1b506",
+      "source_family": "CASF/PDBBind + Vina/GNINA",
+      "source_license_or_accession": "PDBbind+ CASF-2016 official package",
+      "status": "pass"
     }
   ],
-  "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T23:31:05.438641+00:00",
-  "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:6b7d2c67ee7322b65e0c388bbac8737c7c8ce232fea99657ab263024c0a04203",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:4acacfc65c70a8b52f02a183bc829ce139247e7a4eda72ad618c4dfbc0774fbb",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:57e7df559ab42c7f3591f00a5ea6df353e0b81cfbbf12c1b5996df4932da536c",
-    "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
-    "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
-    "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
-    "scripts/materialize_public_benchmark_pose_success_harness.py": "sha256:8a8eccfa010924ca874984fecc8a484a158d974dd7888ba9bf42a01009366e61",
-    "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:f3f8ee12c7b15238da7a940bab4c4bfa2ba17cf270ea3522d000430dc20cd4a8",
-    "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:373b1e217aaa6bce582e83a3c9d84e8b7e25664362dc91a9ba009ee54a01cf56",
-    "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:988022141137fa8dd3f56ff4feaebad1bdc218c838ed4cc9028f85bcc510d6e7",
-    "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:0919b1f1aca8be36939fedb6e55fb93ca52cb0a4a18366c2daaebb5958acbd31",
-    "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:1741e0d4261554b76e9eb649028430ce0d3e96626358a6bc2bc31db6c16d650d",
-    "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:4718c87bbcef615afc9f3ab4cce2e1e7a74e4f767d14d7558903d6cfec59dab3",
-    "scripts/validate_public_benchmark_external_receipts.py": "sha256:efe47b90b4d467b89ea13797c2681851e7cffc4f8ab8ba15f9d11bb0a765a8e0",
-    "scripts/validate_public_benchmark_pose_validity.py": "sha256:781e1a90205d6e04929d2bd29f7519427db86eefb708320e12a0ebc5559fea9d",
-    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:1750e9440703be1f4e85fbc950adc15b197466af19cd3c8c21df9f46bae5dcf5"
+  "claim_boundary": "This adapter consumes operator-attached Vina/GNINA comparison rows for already-selected public benchmark cases. It does not run Vina or GNINA, download benchmark data, validate ligand chemistry, or close Tier beta by itself.",
+  "contract_pass": true,
+  "engine_pair_policy": {
+    "duplicate_docking_run_ids_rejected": true,
+    "duplicate_engine_ids_rejected": true,
+    "per_case_required_engines": [
+      "vina",
+      "gnina"
+    ]
   },
-  "materializer": {
-    "claim_boundary": "The adapter consumes operator-attached Vina/GNINA comparison rows. It does not run docking engines, fetch public benchmark files, infer ligand chemistry, or close Tier beta.",
-    "intake_case_key": "cases",
-    "materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-comparison-intake.json> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
-    "required_case_fields": [
-      "case_id",
-      "source_family",
-      "benchmark_split",
-      "complex_id",
-      "reference_pose_id",
-      "engine_runs",
-      "source_license_or_accession",
-      "source_checksum",
-      "provenance_ref"
+  "engine_run_receipt_policy": {
+    "checksum_fields": [
+      "predicted_ligand_checksum",
+      "engine_config_checksum"
     ],
-    "required_engine_run_fields": [
-      "engine_id",
-      "docking_run_id",
+    "provenance_fields": [
+      "predicted_ligand_path_or_pose_ref",
+      "engine_run_provenance_ref"
+    ],
+    "purpose": "Each Vina/GNINA engine run must carry enough receipts to trace the produced pose artifact, engine version, run configuration, and external run record.",
+    "required_fields": [
       "predicted_ligand_path_or_pose_ref",
       "predicted_ligand_checksum",
       "engine_version",
       "engine_config_checksum",
-      "engine_run_provenance_ref",
-      "symmetry_aware_rmsd_angstrom",
-      "pose_success",
-      "score",
-      "score_direction"
-    ],
-    "schema_version": "public-benchmark-vina-gnina-comparison-materialization.v1",
-    "source_checksum_policy": {
-      "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
-      "required_receipt_field": "source_checksum"
+      "engine_run_provenance_ref"
+    ]
+  },
+  "engine_summaries": [
+    {
+      "engine_id": "vina",
+      "pose_success_count": 9,
+      "pose_success_rate": 0.75,
+      "run_count": 12,
+      "symmetry_aware_rmsd_median_angstrom": 0.6836049303683256
     },
-    "status": "ready_for_operator_intake",
-    "supported_benchmark_splits": [
-      "CASF-core",
-      "PDBBind-core",
-      "PDBBind-refined",
-      "PDBBind-general"
-    ],
-    "supported_engines": [
-      "vina",
-      "gnina"
-    ],
-    "template": {
+    {
+      "engine_id": "gnina",
+      "pose_success_count": 9,
+      "pose_success_rate": 0.75,
+      "run_count": 12,
+      "symmetry_aware_rmsd_median_angstrom": 1.4270512447818922
+    }
+  ],
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "first_blocked_target": "",
+  "generated_at": "2026-07-04T16:17:30.476089+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json": "sha256:d4caae8594bf807f7751abccd728ee6cacc8dc1da3500c87b109f37d39a2940a",
+    "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:8c1ce46cbd085987f2923602424b666bb63e9edb6fdb2438158d36aee890dd41"
+  },
+  "materialization_report": {
+    "benchmark_split_counts": {
+      "CASF-core": 12
+    },
+    "blocker_count": 0,
+    "materialized_case_count": 12,
+    "operator_case_count": 12,
+    "public_benchmark_engine_comparison_ready": true,
+    "ready_case_count": 12,
+    "schema_version": "public-benchmark-vina-gnina-comparison-materialization.v1",
+    "supported_intake_formats": [
+      "json",
+      "jsonl",
+      "ndjson",
+      "csv"
+    ]
+  },
+  "numeric_value_policy": {
+    "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+    "score": "must parse to a finite float; NaN and Infinity are rejected",
+    "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+  },
+  "pose_success_policy": {
+    "consistency_rule": "pose_success must equal symmetry_aware_rmsd_angstrom <= pose_success_rmsd_threshold_angstrom",
+    "threshold_default_angstrom": 2.0
+  },
+  "public_benchmark_engine_comparison_ready": true,
+  "real_comparison_case_count": 12,
+  "required_case_fields": [
+    "case_id",
+    "source_family",
+    "benchmark_split",
+    "complex_id",
+    "reference_pose_id",
+    "engine_runs",
+    "source_license_or_accession",
+    "source_checksum",
+    "provenance_ref"
+  ],
+  "required_engine_run_fields": [
+    "engine_id",
+    "docking_run_id",
+    "predicted_ligand_path_or_pose_ref",
+    "predicted_ligand_checksum",
+    "engine_version",
+    "engine_config_checksum",
+    "engine_run_provenance_ref",
+    "symmetry_aware_rmsd_angstrom",
+    "pose_success",
+    "score",
+    "score_direction"
+  ],
+  "reuse_policy": "public_benchmark_vina_gnina_comparison_adapter_materialized_from_operator_intake",
+  "reused_evidence": false,
+  "root_cause_tags": [],
+  "row_integrity_policy": {
+    "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+    "required_unique_row_keys": {
+      "case_engine_runs": [
+        "engine_id",
+        "docking_run_id"
+      ],
       "cases": [
-        {
-          "benchmark_split": "CASF-core",
-          "case_id": "casf_pdbbind_subset_001",
-          "complex_id": "SOURCE_COMPLEX_ID",
-          "engine_runs": [
-            {
-              "docking_run_id": "SOURCE_COMPLEX_ID_vina_run",
-              "engine_config_checksum": "sha256:operator_supplied_vina_config_checksum",
-              "engine_id": "vina",
-              "engine_run_provenance_ref": "operator_supplied_vina_run_receipt",
-              "engine_version": "operator_supplied_vina_version",
-              "pose_success": null,
-              "predicted_ligand_checksum": "sha256:operator_supplied_vina_pose_checksum",
-              "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/SOURCE_COMPLEX_ID/vina_pose.sdf",
-              "score": null,
-              "score_direction": "lower_is_better",
-              "symmetry_aware_rmsd_angstrom": null
-            },
-            {
-              "docking_run_id": "SOURCE_COMPLEX_ID_gnina_run",
-              "engine_config_checksum": "sha256:operator_supplied_gnina_config_checksum",
-              "engine_id": "gnina",
-              "engine_run_provenance_ref": "operator_supplied_gnina_run_receipt",
-              "engine_version": "operator_supplied_gnina_version",
-              "pose_success": null,
-              "predicted_ligand_checksum": "sha256:operator_supplied_gnina_pose_checksum",
-              "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/SOURCE_COMPLEX_ID/gnina_pose.sdf",
-              "score": null,
-              "score_direction": "lower_is_better",
-              "symmetry_aware_rmsd_angstrom": null
-            }
-          ],
-          "provenance_ref": "operator_supplied_vina_gnina_run_receipt",
-          "reference_pose_id": "SOURCE_COMPLEX_ID_reference_ligand",
-          "source_checksum": "sha256:operator_supplied_vina_gnina_rows_checksum",
-          "source_family": "CASF/PDBBind",
-          "source_license_or_accession": "operator_supplied_casf_pdbbind_accession"
-        }
+        "case_id"
       ]
     }
   },
-  "public_benchmark_engine_comparison_ready": false,
-  "real_comparison_case_count": 0,
-  "reuse_policy": "public_benchmark_vina_gnina_comparison_adapter_seed_from_repo_contract",
-  "reused_evidence": false,
   "schema_version": "public-benchmark-vina-gnina-comparison-adapter.v1",
-  "source_commit_sha": "4a490512e07211e5a6e50a5e1be46025483ccd7b",
-  "status": "operator_evidence_required",
+  "score_direction_policy": {
+    "accepted_aliases": {
+      "higher_is_better": [
+        "higher",
+        "higher_is_better",
+        "descending"
+      ],
+      "lower_is_better": [
+        "lower",
+        "lower_is_better",
+        "ascending"
+      ]
+    },
+    "accepted_values": [
+      "higher_is_better",
+      "lower_is_better"
+    ],
+    "blank_values": "rejected; no implicit default is applied",
+    "required": true
+  },
+  "source_commit_sha": "eedcdb06f08318c4e19d93d9f3d66c935c056ac2",
+  "status": "ready",
   "summary": {
-    "benchmark_split_counts": {},
-    "blocker_count": 3,
-    "case_count": 0,
+    "benchmark_split_counts": {
+      "CASF-core": 12
+    },
+    "blocker_count": 0,
+    "case_count": 12,
     "engine_count": 2,
-    "ready_case_count": 0,
+    "ready_case_count": 12,
     "supported_benchmark_splits": [
       "CASF-core",
       "PDBBind-core",
@@ -155,6 +816,7 @@
       "gnina"
     ]
   },
+  "summary_line": "Public benchmark Vina/GNINA comparison adapter: PASS | cases=12",
   "supported_benchmark_splits": [
     "CASF-core",
     "PDBBind-core",

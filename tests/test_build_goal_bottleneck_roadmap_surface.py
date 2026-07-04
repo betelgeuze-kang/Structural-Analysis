@@ -148,22 +148,18 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert kpis["locked_evidence_surface_count"] == 0
     assert kpis["missing_evidence_surface_count"] == 0
     assert surface["science_evidence_surface_bottlenecks"] == [
-        "public_benchmark_vina_gnina_actual_rows_required",
         "pocketmd_lite_topk_actual_rows_required",
     ]
     science_status = surface["science_evidence_surface_status"]
     assert science_status["status"] == "operator_evidence_required"
     assert science_status["contract_pass"] is False
-    assert science_status["missing_row_inputs"] == [
-        "vina_gnina_rows",
-        "pocketmd_rows",
-    ]
+    assert science_status["missing_row_inputs"] == ["pocketmd_rows"]
     science_progress = science_status["completion_progress"]
     assert science_progress["complete_component_ids"] == [
+        "public_benchmark_phase2_actual_closure",
         "gpcr_hard_decoy_actual_closure"
     ]
     assert science_progress["blocked_component_ids"] == [
-        "public_benchmark_phase2_actual_closure",
         "pocketmd_lite_topk_actual_closure",
     ]
     assert surface["non_expert_release_briefing_ready"] is True
@@ -292,18 +288,8 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     )
     assert briefing["primary_roadmap_phase_id"] == "phase_1_goal_release_cockpit"
-    assert briefing["blocked_science_or_beta_phase_count"] == 2
+    assert briefing["blocked_science_or_beta_phase_count"] == 1
     assert briefing["blocked_science_or_beta_phases"] == [
-        {
-            "phase_id": "phase_2_public_benchmark_actual_closure",
-            "roadmap_item": "Public benchmark Phase 2 actual closure",
-            "bottleneck": "public_benchmark_vina_gnina_actual_rows_required",
-            "first_blocker": (
-                "public_benchmark_phase2_actual_closure::"
-                "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
-            ),
-            "first_blocked_target": "public_benchmark_phase2_actual_closure",
-        },
         {
             "phase_id": "phase_4_pocketmd_lite_topk_actual_closure",
             "roadmap_item": "PocketMD Lite top-k actual closure",
@@ -314,71 +300,36 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
             "first_blocked_target": "pocketmd_lite_topk_actual_closure",
         },
     ]
-    assert briefing["next_owner_handoff_count"] == 2
-    assert briefing["first_operator_handoff"]["slot_id"] == "vina_gnina_rows"
+    assert briefing["next_owner_handoff_count"] == 1
+    assert briefing["first_operator_handoff"]["slot_id"] == "pocketmd_rows"
     assert briefing["first_operator_handoff"][
         "actual_evidence_audit_status"
-    ] == "adapter_rows_required"
-    assert briefing["next_owner_handoff_slot_count"] == 2
-    assert briefing["first_operator_handoff_slot"]["slot_id"] == "vina_gnina_rows"
+    ] == "operator_topk_rows_required"
+    assert briefing["next_owner_handoff_slot_count"] == 1
+    assert briefing["first_operator_handoff_slot"]["slot_id"] == "pocketmd_rows"
     assert briefing["first_operator_handoff_slot"][
         "blocked_criteria"
-    ] == ["vina_gnina_comparison_ready"]
+    ] == [
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+    ]
     assert briefing["claim_boundaries"] == [
         "do_not_claim_limited_commercial_release_until_release_allowed_true",
         "do_not_replace_human_ux_observation_with_templates_or_automation",
         "do_not_claim_science_actual_closure_until_operator_rows_pass",
     ]
-    assert surface["operator_evidence_handoff_count"] == 2
+    assert surface["operator_evidence_handoff_count"] == 1
     handoffs = {
         row["slot_id"]: row for row in surface["operator_evidence_handoff_queue"]
     }
-    assert sorted(handoffs) == ["pocketmd_rows", "vina_gnina_rows"]
-    assert handoffs["vina_gnina_rows"]["queue_priority"] == 1
-    assert handoffs["vina_gnina_rows"]["template_artifact"].endswith(
-        "public_benchmark_vina_gnina_rows_template.csv"
-    )
-    assert handoffs["vina_gnina_rows"]["first_next_action"] == (
-        "attach_or_materialize_public_benchmark_vina_gnina_rows"
-    )
-    assert handoffs["vina_gnina_rows"]["command_key"] == (
-        "materialize_rows_from_engine_run_bundle"
-    )
-    assert (
-        "materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py"
-        in handoffs["vina_gnina_rows"]["materialization_command"]
-    )
-    assert handoffs["vina_gnina_rows"]["first_unblock_action"][
-        "action_source"
-    ] == "first_operator_blocker_family"
-    assert handoffs["vina_gnina_rows"]["first_unblock_action"][
-        "first_missing_item"
-    ]["blocker"] == "public_benchmark_vina_gnina_rows_not_detected"
-    assert handoffs["vina_gnina_rows"][
-        "runtime_blocker_family_action_count"
-    ] == 7
-    assert [
-        row["family_id"]
-        for row in handoffs["vina_gnina_rows"]["runtime_blocker_family_actions"]
-    ] == [
-        "manifest_required_values",
-        "official_source_files",
-        "prepared_input_files",
-        "input_and_engine_receipt_refs",
-        "engine_runtime",
-        "engine_run_slots",
-        "adapter_rows",
-    ]
-    assert handoffs["vina_gnina_rows"][
-        "actual_evidence_audit_status"
-    ] == "adapter_rows_required"
-    assert handoffs["vina_gnina_rows"][
-        "actual_evidence_blocked_component_count"
-    ] == 3
-    assert "adapter_rows" in handoffs["vina_gnina_rows"][
-        "actual_evidence_remaining_evidence"
-    ]
-    assert handoffs["pocketmd_rows"]["queue_priority"] == 2
+    assert sorted(handoffs) == ["pocketmd_rows"]
+    assert handoffs["pocketmd_rows"]["queue_priority"] == 1
     assert handoffs["pocketmd_rows"]["template_artifact"].endswith(
         "pocketmd_lite_topk_rows_template.csv"
     )
@@ -433,18 +384,11 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert "bounded_top_k_row_slots" in handoffs["pocketmd_rows"][
         "actual_evidence_remaining_evidence"
     ]
-    assert surface["operator_evidence_handoff_slot_count"] == 2
+    assert surface["operator_evidence_handoff_slot_count"] == 1
     slots = {
         row["slot_id"]: row for row in surface["operator_evidence_handoff_slot_queue"]
     }
-    assert sorted(slots) == ["pocketmd_rows", "vina_gnina_rows"]
-    assert slots["vina_gnina_rows"]["first_next_action"] == (
-        "attach_or_materialize_public_benchmark_vina_gnina_rows"
-    )
-    assert slots["vina_gnina_rows"]["command_key"] == (
-        "materialize_rows_from_engine_run_bundle"
-    )
-    assert slots["vina_gnina_rows"]["runtime_blocker_family_action_count"] == 7
+    assert sorted(slots) == ["pocketmd_rows"]
     assert slots["pocketmd_rows"]["first_next_action"] == (
         "fill_completion_missing_required_fields_and_set_status_complete"
     )
@@ -470,20 +414,17 @@ def test_goal_bottleneck_surface_exposes_active_thread_goal_audit() -> None:
     assert audit["status"] == "operator_evidence_required"
     assert audit["actual_closure_ready"] is False
     assert audit["priority_count"] == 4
-    assert audit["complete_priority_count"] == 2
-    assert audit["blocked_priority_count"] == 2
+    assert audit["complete_priority_count"] == 3
+    assert audit["blocked_priority_count"] == 1
     assert audit["complete_priority_ids"] == [
         "priority_1_source_of_truth_gap_classification",
+        "priority_2_public_benchmark_phase2_actual_closure",
         "priority_3_gpcr_hard_decoy_actual_closure",
     ]
     assert audit["blocked_priority_ids"] == [
-        "priority_2_public_benchmark_phase2_actual_closure",
         "priority_4_pocketmd_lite_topk_refinement",
     ]
-    assert audit["operator_row_inputs_required"] == [
-        "vina_gnina_rows",
-        "pocketmd_rows",
-    ]
+    assert audit["operator_row_inputs_required"] == ["pocketmd_rows"]
 
     rows = {row["priority_id"]: row for row in audit["priority_rows"]}
     source = rows["priority_1_source_of_truth_gap_classification"]
@@ -498,23 +439,20 @@ def test_goal_bottleneck_surface_exposes_active_thread_goal_audit() -> None:
     ] is True
 
     public = rows["priority_2_public_benchmark_phase2_actual_closure"]
-    assert public["state"] == "blocked"
+    assert public["state"] == "complete"
+    assert public["pass"] is True
     assert public["current"]["requirement_count"] == 5
-    assert public["current"]["requirement_pass_count"] == 4
-    assert public["current"]["completion_audit_status"] == "blocked"
+    assert public["current"]["requirement_pass_count"] == 5
+    assert public["current"]["completion_audit_status"] == "pass"
     assert public["current"]["completion_requirement_count"] == 6
-    assert public["current"]["completion_requirement_pass_count"] == 4
-    assert public["current"]["completion_blocker_count"] == 2
-    assert public["current"]["completion_blocked_requirement_ids"] == [
-        "vina_gnina_comparison_ready",
-        "public_benchmark_source_actuality_ready",
-    ]
-    assert public["current"]["source_actuality_scope"] == "provided_row_inputs_only"
-    assert public["current"]["source_actuality_scope_complete"] is False
-    assert public["current"]["source_actuality_missing_row_inputs"] == [
-        "vina_gnina_rows"
-    ]
-    assert public["current"]["missing_row_inputs"] == ["vina_gnina_rows"]
+    assert public["current"]["completion_requirement_pass_count"] == 6
+    assert public["current"]["completion_blocker_count"] == 0
+    assert public["current"]["completion_blocked_requirement_ids"] == []
+    assert public["current"]["source_actuality_scope"] == ""
+    assert public["current"]["source_actuality_scope_complete"] is True
+    assert public["current"]["source_actuality_missing_row_inputs"] == []
+    assert public["current"]["missing_row_inputs"] == []
+    assert public["current"]["detected_row_artifact_count"] == 1
     assert public["current"]["input_manifest_detected"] is True
     assert public["current"]["input_manifest_syntax_ready"] is True
     assert public["current"]["input_manifest_verification_status"] == (
@@ -529,12 +467,8 @@ def test_goal_bottleneck_surface_exposes_active_thread_goal_audit() -> None:
     assert public["current"]["blocked_source_file_count"] == 0
     assert public["current"]["prepared_input_gap_count"] == 0
     assert public["current"]["missing_engine_ids"] == []
-    assert "public_benchmark_vina_gnina_rows_not_detected" in public["blockers"]
-    assert "vina_gnina_rows_not_provided" in public["blockers"]
-    assert (
-        "public_benchmark_source_actuality_ready::"
-        "source_actuality_scope_incomplete:vina_gnina_rows"
-    ) in public["blockers"]
+    assert public["current"]["runtime_ready_for_engine_execution"] is True
+    assert public["blockers"] == []
 
     gpcr = rows["priority_3_gpcr_hard_decoy_actual_closure"]
     assert gpcr["state"] == "complete"
@@ -716,30 +650,24 @@ def test_goal_bottleneck_roadmap_surface_links_structural_release_bottleneck() -
     }
     assert phase_1["next_actions"] == ["work_release_decision_operator_actions"]
     phase_2 = rows["phase_2_public_benchmark_actual_closure"]
-    assert phase_2["state"] == "blocked"
-    assert phase_2["bottleneck"] == (
-        "public_benchmark_vina_gnina_actual_rows_required"
-    )
-    assert phase_2["summary"]["missing_row_inputs"] == ["vina_gnina_rows"]
-    assert phase_2["summary"]["actual_evidence_audit_status"] == (
-        "adapter_rows_required"
-    )
-    assert phase_2["summary"]["operator_evidence_gap_register"][0]["slot_id"] == (
-        "vina_gnina_rows"
-    )
+    assert phase_2["state"] == "ready"
+    assert phase_2["bottleneck"] == ""
+    assert phase_2["summary"]["missing_row_inputs"] == []
+    assert phase_2["summary"]["actual_evidence_audit_status"] == "ready"
+    assert phase_2["summary"]["operator_evidence_gap_register"] == []
     phase2_gate = phase_2["summary"]["component_gate_summary"]
-    assert phase2_gate["phase2_exit_gate_status"] == "blocked"
-    assert phase2_gate["phase2_ready"] is False
-    assert phase2_gate["phase2_failed_criteria"] == ["vina_gnina_comparison_ready"]
+    assert phase2_gate["phase2_exit_gate_status"] == "ready"
+    assert phase2_gate["phase2_ready"] is True
+    assert phase2_gate["phase2_failed_criteria"] == []
     assert phase2_gate["phase2_requirement_summary"] == {
-        "blocked_component_count": 1,
-        "blocked_component_ids": ["vina_gnina_comparison_adapter"],
-        "materialized_component_count": 4,
-        "missing_row_input_count": 1,
-        "missing_row_inputs": ["vina_gnina_rows"],
-        "operator_evidence_required_count": 1,
-        "phase2_ready": False,
-        "ready_component_count": 4,
+        "blocked_component_count": 0,
+        "blocked_component_ids": [],
+        "materialized_component_count": 5,
+        "missing_row_input_count": 0,
+        "missing_row_inputs": [],
+        "operator_evidence_required_count": 0,
+        "phase2_ready": True,
+        "ready_component_count": 5,
         "required_component_count": 5,
     }
     phase2_requirements = {
@@ -768,11 +696,12 @@ def test_goal_bottleneck_roadmap_surface_links_structural_release_bottleneck() -
     assert phase2_requirements["dud_e_or_lit_pcba_enrichment"]["pass"] is True
     vina_requirement = phase2_requirements["vina_gnina_comparison_adapter"]
     assert vina_requirement["requirement"] == "Vina/GNINA comparison adapter"
-    assert vina_requirement["ready"] is False
-    assert vina_requirement["pass"] is False
-    assert vina_requirement["operator_evidence_required"] is True
-    assert vina_requirement["row_input_status"] == {"vina_gnina_rows": "missing"}
-    assert vina_requirement["blockers"] == ["vina_gnina_rows_not_provided"]
+    assert vina_requirement["ready"] is True
+    assert vina_requirement["pass"] is True
+    assert vina_requirement["operator_evidence_required"] is False
+    assert vina_requirement["row_input_status"] == {"vina_gnina_rows": "provided"}
+    assert vina_requirement["blockers"] == []
+    assert vina_requirement["current_count"] == 12
     phase2_row_inputs = {
         row["row_input_id"]: row
         for row in phase2_gate["phase2_row_closure_matrix"]
@@ -780,7 +709,7 @@ def test_goal_bottleneck_roadmap_surface_links_structural_release_bottleneck() -
     assert phase2_row_inputs["subset_rows"]["status"] == "provided"
     assert phase2_row_inputs["pose_rows"]["status"] == "provided"
     assert phase2_row_inputs["enrichment_rows"]["status"] == "provided"
-    assert phase2_row_inputs["vina_gnina_rows"]["status"] == "missing"
+    assert phase2_row_inputs["vina_gnina_rows"]["status"] == "provided"
     assert phase2_row_inputs["vina_gnina_rows"]["operator_blockers_if_missing"] == [
         "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
     ]
