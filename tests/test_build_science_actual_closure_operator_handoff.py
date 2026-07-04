@@ -218,6 +218,9 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "attach_pocketmd_rows_at_implementation/phase1/release_evidence/"
         "productization/pocketmd_lite_topk_rows.json"
     )
+    assert "uncertainty_summary_materialized" in pocketmd_action[
+        "source_acquisition_row_action"
+    ]["closes_phase4_criteria"]
     assert "materialize_survival" in pocketmd_action["source_acquisition_row_action"][
         "commands"
     ]
@@ -451,6 +454,15 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
         "pocketmd_lite_topk_rows_template.csv"
     )
     assert pocketmd["upstream_source_id"] == "pocketmd_lite"
+    assert pocketmd["upstream_source_acquisition"][
+        "phase4_candidate_slot_matrix_count"
+    ] == 6
+    assert pocketmd["upstream_source_acquisition"][
+        "phase4_missing_candidate_slot_count"
+    ] == 6
+    assert pocketmd["upstream_source_acquisition"][
+        "phase4_metric_closure_matrix_count"
+    ] == 8
     assert pocketmd["source_acquisition_operator_action"] == (
         "resolve_pocketmd_lite_source_acquisition_blockers"
     )
@@ -578,11 +590,13 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert "Source Command" in markdown
     assert "Required Receipts" in markdown
     assert "Source Phase 2 Criteria" in markdown
+    assert "Source Phase 4 Criteria" in markdown
     assert "attach_vina_gnina_rows_then_run_phase2_row_audit" in markdown
     assert "vina_gnina_comparison_ready" in markdown
     assert "build_public_benchmark_vina_gnina_runtime_readiness.py" in markdown
     assert "engine_config_checksum" in markdown
     assert "materialize_pocketmd_lite_operator_intake_from_rows.py" in markdown
+    assert "uncertainty_summary_materialized" in markdown
     assert "uncertainty_interval_receipt" in markdown
     assert "### Vina/GNINA Input Manifest Action" in markdown
     assert "public_benchmark_vina_gnina_input_manifest.csv" in markdown

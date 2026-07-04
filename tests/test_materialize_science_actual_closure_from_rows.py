@@ -880,6 +880,25 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
                 "blocker_count": 1,
                 "blockers": ["pocketmd_lite_topk_rows_not_acquired"],
                 "summary": {"operator_rows_ready": False},
+                "phase4_candidate_slot_matrix_count": 6,
+                "phase4_missing_candidate_slot_count": 6,
+                "phase4_candidate_slot_matrix": [
+                    {
+                        "slot_id": "pocketmd_lite_case_001_rank_1",
+                        "case_id": "pocketmd_lite_case_001",
+                        "top_k_rank": 1,
+                        "status": "missing",
+                        "missing": True,
+                    }
+                ],
+                "phase4_metric_closure_matrix_count": 8,
+                "phase4_metric_closure_matrix": [
+                    {
+                        "criterion_id": "local_min_survival_materialized",
+                        "metric_id": "local_min_survival_rate",
+                        "status": "blocked",
+                    }
+                ],
                 "missing_row_input_action_count": 1,
                 "missing_row_input_actions": [
                     {
@@ -933,6 +952,21 @@ def test_science_actual_closure_audit_surfaces_source_acquisition_blockers(
     ][0]["operator_action"] == (
         "attach_pocketmd_rows_at_pocketmd_lite_topk_rows.json"
     )
+    assert audit["upstream_source_acquisition"]["pocketmd_lite"][
+        "phase4_candidate_slot_matrix_count"
+    ] == 6
+    assert audit["upstream_source_acquisition"]["pocketmd_lite"][
+        "phase4_missing_candidate_slot_count"
+    ] == 6
+    assert audit["upstream_source_acquisition"]["pocketmd_lite"][
+        "phase4_candidate_slot_matrix"
+    ][0]["slot_id"] == "pocketmd_lite_case_001_rank_1"
+    assert audit["upstream_source_acquisition"]["pocketmd_lite"][
+        "phase4_metric_closure_matrix_count"
+    ] == 8
+    assert audit["upstream_source_acquisition"]["pocketmd_lite"][
+        "phase4_metric_closure_matrix"
+    ][0]["criterion_id"] == "local_min_survival_materialized"
     assert audit["operator_next_actions"] == [
         "attach_subset_rows",
         "attach_pose_rows",

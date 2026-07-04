@@ -9,6 +9,9 @@
 - `refinement_execution_plan`: `implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json`
 - `refinement_execution_plan_status`: `operator_refinement_rows_required`
 - `required_candidate_slot_count`: `6`
+- `phase4_candidate_slot_matrix_count`: `6`
+- `phase4_missing_candidate_slot_count`: `6`
+- `phase4_metric_closure_matrix_count`: `8`
 - `row_template_artifact`: `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv`
 
 | Case | Minimum Rows | Required Rank Prefix | Scope |
@@ -16,6 +19,30 @@
 | `pocketmd_lite_case_001` | 2 | `1,2` | `upstream_ranked_top_k_candidates_only` |
 | `pocketmd_lite_case_002` | 2 | `1,2` | `upstream_ranked_top_k_candidates_only` |
 | `pocketmd_lite_case_003` | 2 | `1,2` | `upstream_ranked_top_k_candidates_only` |
+
+## Phase 4 Candidate Slot Matrix
+
+| Slot | Case | Rank | Status | Required Metric Fields |
+|---|---|---|---|---|
+| `pocketmd_lite_case_001_rank_1` | `pocketmd_lite_case_001` | `1` | `missing` | `local_min_survived`, `contact_persistence_rate`, `h_bond_persistence_rate`, `clash_count_before`, `clash_count_after`, `uncertainty_low`, `uncertainty_high`, `uncertainty_unit` |
+| `pocketmd_lite_case_001_rank_2` | `pocketmd_lite_case_001` | `2` | `missing` | `local_min_survived`, `contact_persistence_rate`, `h_bond_persistence_rate`, `clash_count_before`, `clash_count_after`, `uncertainty_low`, `uncertainty_high`, `uncertainty_unit` |
+| `pocketmd_lite_case_002_rank_1` | `pocketmd_lite_case_002` | `1` | `missing` | `local_min_survived`, `contact_persistence_rate`, `h_bond_persistence_rate`, `clash_count_before`, `clash_count_after`, `uncertainty_low`, `uncertainty_high`, `uncertainty_unit` |
+| `pocketmd_lite_case_002_rank_2` | `pocketmd_lite_case_002` | `2` | `missing` | `local_min_survived`, `contact_persistence_rate`, `h_bond_persistence_rate`, `clash_count_before`, `clash_count_after`, `uncertainty_low`, `uncertainty_high`, `uncertainty_unit` |
+| `pocketmd_lite_case_003_rank_1` | `pocketmd_lite_case_003` | `1` | `missing` | `local_min_survived`, `contact_persistence_rate`, `h_bond_persistence_rate`, `clash_count_before`, `clash_count_after`, `uncertainty_low`, `uncertainty_high`, `uncertainty_unit` |
+| `pocketmd_lite_case_003_rank_2` | `pocketmd_lite_case_003` | `2` | `missing` | `local_min_survived`, `contact_persistence_rate`, `h_bond_persistence_rate`, `clash_count_before`, `clash_count_after`, `uncertainty_low`, `uncertainty_high`, `uncertainty_unit` |
+
+## Phase 4 Metric Closure Matrix
+
+| Criterion | Metric | Status | Required Fields | Receipt Roles |
+|---|---|---|---|---|
+| `top_k_refinement_rows_present` | `` | `blocked` | `row_coverage_and_receipts` | `upstream_top_k_candidate_scope_receipt` |
+| `top_k_refinement_case_coverage` | `` | `blocked` | `row_coverage_and_receipts` | `upstream_top_k_candidate_scope_receipt` |
+| `local_min_survival_materialized` | `local_min_survival_rate` | `blocked` | `local_min_survived` | `lite_refinement_run_receipt` |
+| `contact_persistence_materialized` | `contact_persistence_rate` | `blocked` | `contact_persistence_rate` | `interaction_persistence_receipt` |
+| `h_bond_persistence_materialized` | `h_bond_persistence_rate` | `blocked` | `h_bond_persistence_rate` | `interaction_persistence_receipt` |
+| `clash_relief_materialized` | `clash_relief_rate` | `blocked` | `clash_count_before`, `clash_count_after` | `interaction_persistence_receipt` |
+| `uncertainty_summary_materialized` | `uncertainty_width_median` | `blocked` | `uncertainty_low`, `uncertainty_high`, `uncertainty_unit` | `uncertainty_interval_receipt` |
+| `report_blockers_resolved` | `` | `blocked` | `row_coverage_and_receipts` | `lite_refinement_run_receipt`, `interaction_persistence_receipt`, `uncertainty_interval_receipt` |
 
 ## Phase 4 Receipt Roles
 

@@ -1440,10 +1440,10 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T00:49:50.033481+00:00",
+  "generated_at": "2026-07-04T00:58:51.345326+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json": "sha256:98255bfca71cb82c3146a11e74e90cc338836518d93672950cbec5defd7d7147",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:a1b68b4afdd86453903dd01b00867ab647896bf5f00714711fb5e1ebbf3332f3",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:f44469aa18f3d3b8df2424fd638ec7ecc5c8e769215eb65f1904b82a6ab6f89e",
     "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json": "sha256:de5b3b0565f697fd5c5e3f893779671b614369d73bb49ad610ab476b4534b792",
     "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
@@ -1455,7 +1455,7 @@
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
     "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:cea647619944140048844f8c2efc475f47008bbd55333cd276673bb56f80d192",
-    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:d17ca9b0d389338b0f6e4869fa1e36c82640c902bb6d1cfb1ce806acf94c3771"
+    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:2c574ed85f274785946e4024aec25bf5d3a25a438df6859325e87ecd88168aaa"
   },
   "missing_row_inputs": [
     "vina_gnina_rows",
@@ -2869,7 +2869,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "027ca2fd60c06ab641ae0a72074f3c6a00dc5748",
+  "source_commit_sha": "613bcfc429b98ce92accc3c4fde4e00128e768f7",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,
@@ -3190,6 +3190,436 @@
       "phase2_exit_criterion_count": 0,
       "phase2_row_closure_matrix": [],
       "phase2_row_closure_matrix_count": 0,
+      "phase4_candidate_slot_matrix": [
+        {
+          "candidate_scope": "upstream_ranked_top_k_candidates_only",
+          "case_id": "pocketmd_lite_case_001",
+          "claim_boundary": "This slot maps one required case/rank candidate to the bounded PocketMD Lite metric rows it must carry. It is not evidence until real top-k rows and receipts pass.",
+          "closes_phase4_criteria": [
+            "top_k_refinement_rows_present",
+            "top_k_refinement_case_coverage",
+            "local_min_survival_materialized",
+            "contact_persistence_materialized",
+            "h_bond_persistence_materialized",
+            "clash_relief_materialized",
+            "uncertainty_summary_materialized",
+            "report_blockers_resolved"
+          ],
+          "missing": true,
+          "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+          "required_metric_fields": [
+            "local_min_survived",
+            "contact_persistence_rate",
+            "h_bond_persistence_rate",
+            "clash_count_before",
+            "clash_count_after",
+            "uncertainty_low",
+            "uncertainty_high",
+            "uncertainty_unit"
+          ],
+          "required_receipt_roles": [
+            "upstream_top_k_candidate_scope_receipt",
+            "lite_refinement_run_receipt",
+            "interaction_persistence_receipt",
+            "uncertainty_interval_receipt"
+          ],
+          "slot_id": "pocketmd_lite_case_001_rank_1",
+          "status": "missing",
+          "top_k_rank": 1
+        },
+        {
+          "candidate_scope": "upstream_ranked_top_k_candidates_only",
+          "case_id": "pocketmd_lite_case_001",
+          "claim_boundary": "This slot maps one required case/rank candidate to the bounded PocketMD Lite metric rows it must carry. It is not evidence until real top-k rows and receipts pass.",
+          "closes_phase4_criteria": [
+            "top_k_refinement_rows_present",
+            "top_k_refinement_case_coverage",
+            "local_min_survival_materialized",
+            "contact_persistence_materialized",
+            "h_bond_persistence_materialized",
+            "clash_relief_materialized",
+            "uncertainty_summary_materialized",
+            "report_blockers_resolved"
+          ],
+          "missing": true,
+          "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+          "required_metric_fields": [
+            "local_min_survived",
+            "contact_persistence_rate",
+            "h_bond_persistence_rate",
+            "clash_count_before",
+            "clash_count_after",
+            "uncertainty_low",
+            "uncertainty_high",
+            "uncertainty_unit"
+          ],
+          "required_receipt_roles": [
+            "upstream_top_k_candidate_scope_receipt",
+            "lite_refinement_run_receipt",
+            "interaction_persistence_receipt",
+            "uncertainty_interval_receipt"
+          ],
+          "slot_id": "pocketmd_lite_case_001_rank_2",
+          "status": "missing",
+          "top_k_rank": 2
+        },
+        {
+          "candidate_scope": "upstream_ranked_top_k_candidates_only",
+          "case_id": "pocketmd_lite_case_002",
+          "claim_boundary": "This slot maps one required case/rank candidate to the bounded PocketMD Lite metric rows it must carry. It is not evidence until real top-k rows and receipts pass.",
+          "closes_phase4_criteria": [
+            "top_k_refinement_rows_present",
+            "top_k_refinement_case_coverage",
+            "local_min_survival_materialized",
+            "contact_persistence_materialized",
+            "h_bond_persistence_materialized",
+            "clash_relief_materialized",
+            "uncertainty_summary_materialized",
+            "report_blockers_resolved"
+          ],
+          "missing": true,
+          "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+          "required_metric_fields": [
+            "local_min_survived",
+            "contact_persistence_rate",
+            "h_bond_persistence_rate",
+            "clash_count_before",
+            "clash_count_after",
+            "uncertainty_low",
+            "uncertainty_high",
+            "uncertainty_unit"
+          ],
+          "required_receipt_roles": [
+            "upstream_top_k_candidate_scope_receipt",
+            "lite_refinement_run_receipt",
+            "interaction_persistence_receipt",
+            "uncertainty_interval_receipt"
+          ],
+          "slot_id": "pocketmd_lite_case_002_rank_1",
+          "status": "missing",
+          "top_k_rank": 1
+        },
+        {
+          "candidate_scope": "upstream_ranked_top_k_candidates_only",
+          "case_id": "pocketmd_lite_case_002",
+          "claim_boundary": "This slot maps one required case/rank candidate to the bounded PocketMD Lite metric rows it must carry. It is not evidence until real top-k rows and receipts pass.",
+          "closes_phase4_criteria": [
+            "top_k_refinement_rows_present",
+            "top_k_refinement_case_coverage",
+            "local_min_survival_materialized",
+            "contact_persistence_materialized",
+            "h_bond_persistence_materialized",
+            "clash_relief_materialized",
+            "uncertainty_summary_materialized",
+            "report_blockers_resolved"
+          ],
+          "missing": true,
+          "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+          "required_metric_fields": [
+            "local_min_survived",
+            "contact_persistence_rate",
+            "h_bond_persistence_rate",
+            "clash_count_before",
+            "clash_count_after",
+            "uncertainty_low",
+            "uncertainty_high",
+            "uncertainty_unit"
+          ],
+          "required_receipt_roles": [
+            "upstream_top_k_candidate_scope_receipt",
+            "lite_refinement_run_receipt",
+            "interaction_persistence_receipt",
+            "uncertainty_interval_receipt"
+          ],
+          "slot_id": "pocketmd_lite_case_002_rank_2",
+          "status": "missing",
+          "top_k_rank": 2
+        },
+        {
+          "candidate_scope": "upstream_ranked_top_k_candidates_only",
+          "case_id": "pocketmd_lite_case_003",
+          "claim_boundary": "This slot maps one required case/rank candidate to the bounded PocketMD Lite metric rows it must carry. It is not evidence until real top-k rows and receipts pass.",
+          "closes_phase4_criteria": [
+            "top_k_refinement_rows_present",
+            "top_k_refinement_case_coverage",
+            "local_min_survival_materialized",
+            "contact_persistence_materialized",
+            "h_bond_persistence_materialized",
+            "clash_relief_materialized",
+            "uncertainty_summary_materialized",
+            "report_blockers_resolved"
+          ],
+          "missing": true,
+          "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+          "required_metric_fields": [
+            "local_min_survived",
+            "contact_persistence_rate",
+            "h_bond_persistence_rate",
+            "clash_count_before",
+            "clash_count_after",
+            "uncertainty_low",
+            "uncertainty_high",
+            "uncertainty_unit"
+          ],
+          "required_receipt_roles": [
+            "upstream_top_k_candidate_scope_receipt",
+            "lite_refinement_run_receipt",
+            "interaction_persistence_receipt",
+            "uncertainty_interval_receipt"
+          ],
+          "slot_id": "pocketmd_lite_case_003_rank_1",
+          "status": "missing",
+          "top_k_rank": 1
+        },
+        {
+          "candidate_scope": "upstream_ranked_top_k_candidates_only",
+          "case_id": "pocketmd_lite_case_003",
+          "claim_boundary": "This slot maps one required case/rank candidate to the bounded PocketMD Lite metric rows it must carry. It is not evidence until real top-k rows and receipts pass.",
+          "closes_phase4_criteria": [
+            "top_k_refinement_rows_present",
+            "top_k_refinement_case_coverage",
+            "local_min_survival_materialized",
+            "contact_persistence_materialized",
+            "h_bond_persistence_materialized",
+            "clash_relief_materialized",
+            "uncertainty_summary_materialized",
+            "report_blockers_resolved"
+          ],
+          "missing": true,
+          "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+          "required_metric_fields": [
+            "local_min_survived",
+            "contact_persistence_rate",
+            "h_bond_persistence_rate",
+            "clash_count_before",
+            "clash_count_after",
+            "uncertainty_low",
+            "uncertainty_high",
+            "uncertainty_unit"
+          ],
+          "required_receipt_roles": [
+            "upstream_top_k_candidate_scope_receipt",
+            "lite_refinement_run_receipt",
+            "interaction_persistence_receipt",
+            "uncertainty_interval_receipt"
+          ],
+          "slot_id": "pocketmd_lite_case_003_rank_2",
+          "status": "missing",
+          "top_k_rank": 2
+        }
+      ],
+      "phase4_candidate_slot_matrix_count": 6,
+      "phase4_metric_closure_matrix": [
+        {
+          "blockers": [
+            "pocketmd_lite_topk_rows_not_acquired",
+            "upstream_top_k_candidate_receipts_not_attached",
+            "lite_refinement_metric_receipts_not_attached"
+          ],
+          "claim_boundary": "This row maps a PocketMD Lite Phase 4 criterion to the row fields and receipt roles that can close it. It is not closure evidence until the rows and receipts materialize.",
+          "criterion_id": "top_k_refinement_rows_present",
+          "current": {
+            "coverage_ready": false,
+            "covered_required_slot_count": 0,
+            "required_candidate_slot_count": 6,
+            "row_artifact_detected": false,
+            "validated_row_count": 0
+          },
+          "materialized_report_field": "",
+          "metric_id": "",
+          "receipt_roles": [
+            "upstream_top_k_candidate_scope_receipt"
+          ],
+          "required_row_fields": [],
+          "required_value_policy": "",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "pocketmd_lite_topk_rows_not_acquired",
+            "upstream_top_k_candidate_receipts_not_attached",
+            "lite_refinement_metric_receipts_not_attached"
+          ],
+          "claim_boundary": "This row maps a PocketMD Lite Phase 4 criterion to the row fields and receipt roles that can close it. It is not closure evidence until the rows and receipts materialize.",
+          "criterion_id": "top_k_refinement_case_coverage",
+          "current": {
+            "coverage_ready": false,
+            "covered_required_slot_count": 0,
+            "required_candidate_slot_count": 6,
+            "row_artifact_detected": false,
+            "validated_row_count": 0
+          },
+          "materialized_report_field": "",
+          "metric_id": "",
+          "receipt_roles": [
+            "upstream_top_k_candidate_scope_receipt"
+          ],
+          "required_row_fields": [],
+          "required_value_policy": "",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "pocketmd_lite_topk_rows_not_acquired",
+            "upstream_top_k_candidate_receipts_not_attached",
+            "lite_refinement_metric_receipts_not_attached"
+          ],
+          "claim_boundary": "This row maps a PocketMD Lite Phase 4 criterion to the row fields and receipt roles that can close it. It is not closure evidence until the rows and receipts materialize.",
+          "criterion_id": "local_min_survival_materialized",
+          "current": {
+            "coverage_ready": false,
+            "covered_required_slot_count": 0,
+            "required_candidate_slot_count": 6,
+            "row_artifact_detected": false,
+            "validated_row_count": 0
+          },
+          "materialized_report_field": "local_min_survival_rate",
+          "metric_id": "local_min_survival_rate",
+          "receipt_roles": [
+            "lite_refinement_run_receipt"
+          ],
+          "required_row_fields": [
+            "local_min_survived"
+          ],
+          "required_value_policy": "boolean per top-k candidate",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "pocketmd_lite_topk_rows_not_acquired",
+            "upstream_top_k_candidate_receipts_not_attached",
+            "lite_refinement_metric_receipts_not_attached"
+          ],
+          "claim_boundary": "This row maps a PocketMD Lite Phase 4 criterion to the row fields and receipt roles that can close it. It is not closure evidence until the rows and receipts materialize.",
+          "criterion_id": "contact_persistence_materialized",
+          "current": {
+            "coverage_ready": false,
+            "covered_required_slot_count": 0,
+            "required_candidate_slot_count": 6,
+            "row_artifact_detected": false,
+            "validated_row_count": 0
+          },
+          "materialized_report_field": "contact_persistence_summary",
+          "metric_id": "contact_persistence_rate",
+          "receipt_roles": [
+            "interaction_persistence_receipt"
+          ],
+          "required_row_fields": [
+            "contact_persistence_rate"
+          ],
+          "required_value_policy": "finite fraction from 0.0 to 1.0",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "pocketmd_lite_topk_rows_not_acquired",
+            "upstream_top_k_candidate_receipts_not_attached",
+            "lite_refinement_metric_receipts_not_attached"
+          ],
+          "claim_boundary": "This row maps a PocketMD Lite Phase 4 criterion to the row fields and receipt roles that can close it. It is not closure evidence until the rows and receipts materialize.",
+          "criterion_id": "h_bond_persistence_materialized",
+          "current": {
+            "coverage_ready": false,
+            "covered_required_slot_count": 0,
+            "required_candidate_slot_count": 6,
+            "row_artifact_detected": false,
+            "validated_row_count": 0
+          },
+          "materialized_report_field": "h_bond_persistence_summary",
+          "metric_id": "h_bond_persistence_rate",
+          "receipt_roles": [
+            "interaction_persistence_receipt"
+          ],
+          "required_row_fields": [
+            "h_bond_persistence_rate"
+          ],
+          "required_value_policy": "finite fraction from 0.0 to 1.0",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "pocketmd_lite_topk_rows_not_acquired",
+            "upstream_top_k_candidate_receipts_not_attached",
+            "lite_refinement_metric_receipts_not_attached"
+          ],
+          "claim_boundary": "This row maps a PocketMD Lite Phase 4 criterion to the row fields and receipt roles that can close it. It is not closure evidence until the rows and receipts materialize.",
+          "criterion_id": "clash_relief_materialized",
+          "current": {
+            "coverage_ready": false,
+            "covered_required_slot_count": 0,
+            "required_candidate_slot_count": 6,
+            "row_artifact_detected": false,
+            "validated_row_count": 0
+          },
+          "materialized_report_field": "clash_relief_summary",
+          "metric_id": "clash_relief_rate",
+          "receipt_roles": [
+            "interaction_persistence_receipt"
+          ],
+          "required_row_fields": [
+            "clash_count_before",
+            "clash_count_after"
+          ],
+          "required_value_policy": "non-negative integer clash counts",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "pocketmd_lite_topk_rows_not_acquired",
+            "upstream_top_k_candidate_receipts_not_attached",
+            "lite_refinement_metric_receipts_not_attached"
+          ],
+          "claim_boundary": "This row maps a PocketMD Lite Phase 4 criterion to the row fields and receipt roles that can close it. It is not closure evidence until the rows and receipts materialize.",
+          "criterion_id": "uncertainty_summary_materialized",
+          "current": {
+            "coverage_ready": false,
+            "covered_required_slot_count": 0,
+            "required_candidate_slot_count": 6,
+            "row_artifact_detected": false,
+            "validated_row_count": 0
+          },
+          "materialized_report_field": "uncertainty_width_summary",
+          "metric_id": "uncertainty_width_median",
+          "receipt_roles": [
+            "uncertainty_interval_receipt"
+          ],
+          "required_row_fields": [
+            "uncertainty_low",
+            "uncertainty_high",
+            "uncertainty_unit"
+          ],
+          "required_value_policy": "finite interval with high >= low and nonblank unit",
+          "status": "blocked"
+        },
+        {
+          "blockers": [
+            "pocketmd_lite_topk_rows_not_acquired",
+            "upstream_top_k_candidate_receipts_not_attached",
+            "lite_refinement_metric_receipts_not_attached"
+          ],
+          "claim_boundary": "This row maps a PocketMD Lite Phase 4 criterion to the row fields and receipt roles that can close it. It is not closure evidence until the rows and receipts materialize.",
+          "criterion_id": "report_blockers_resolved",
+          "current": {
+            "coverage_ready": false,
+            "covered_required_slot_count": 0,
+            "required_candidate_slot_count": 6,
+            "row_artifact_detected": false,
+            "validated_row_count": 0
+          },
+          "materialized_report_field": "",
+          "metric_id": "",
+          "receipt_roles": [
+            "lite_refinement_run_receipt",
+            "interaction_persistence_receipt",
+            "uncertainty_interval_receipt"
+          ],
+          "required_row_fields": [],
+          "required_value_policy": "",
+          "status": "blocked"
+        }
+      ],
+      "phase4_metric_closure_matrix_count": 8,
+      "phase4_missing_candidate_slot_count": 6,
       "present": true,
       "status": "operator_acquisition_required",
       "summary": {
@@ -3201,6 +3631,9 @@
         "minimum_rows_by_case_count": 3,
         "missing_row_input_action_count": 1,
         "operator_rows_ready": false,
+        "phase4_candidate_slot_matrix_count": 6,
+        "phase4_metric_closure_matrix_count": 8,
+        "phase4_missing_candidate_slot_count": 6,
         "phase4_refinement_receipt_plan_status": "operator_receipts_required",
         "phase4_refinement_receipt_role_count": 4,
         "raw_row_artifact_detected": false,
@@ -3679,6 +4112,11 @@
         }
       ],
       "phase2_row_closure_matrix_count": 4,
+      "phase4_candidate_slot_matrix": [],
+      "phase4_candidate_slot_matrix_count": 0,
+      "phase4_metric_closure_matrix": [],
+      "phase4_metric_closure_matrix_count": 0,
+      "phase4_missing_candidate_slot_count": 0,
       "present": true,
       "status": "operator_acquisition_required",
       "summary": {

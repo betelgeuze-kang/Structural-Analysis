@@ -281,6 +281,43 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "interaction_persistence_receipt",
         "uncertainty_interval_receipt",
     ]
+    assert payload["phase4_candidate_slot_matrix_count"] == 6
+    assert payload["phase4_missing_candidate_slot_count"] == 6
+    slot_matrix = {
+        row["slot_id"]: row for row in payload["phase4_candidate_slot_matrix"]
+    }
+    first_slot = slot_matrix["pocketmd_lite_case_001_rank_1"]
+    assert first_slot["status"] == "missing"
+    assert first_slot["required_receipt_roles"] == [
+        "upstream_top_k_candidate_scope_receipt",
+        "lite_refinement_run_receipt",
+        "interaction_persistence_receipt",
+        "uncertainty_interval_receipt",
+    ]
+    assert "contact_persistence_rate" in first_slot["required_metric_fields"]
+    assert "uncertainty_summary_materialized" in first_slot[
+        "closes_phase4_criteria"
+    ]
+    assert payload["phase4_metric_closure_matrix_count"] == 8
+    metric_matrix = {
+        row["criterion_id"]: row for row in payload["phase4_metric_closure_matrix"]
+    }
+    assert metric_matrix["local_min_survival_materialized"]["metric_id"] == (
+        "local_min_survival_rate"
+    )
+    assert metric_matrix["contact_persistence_materialized"][
+        "required_row_fields"
+    ] == ["contact_persistence_rate"]
+    assert metric_matrix["h_bond_persistence_materialized"]["metric_id"] == (
+        "h_bond_persistence_rate"
+    )
+    assert metric_matrix["clash_relief_materialized"]["required_row_fields"] == [
+        "clash_count_before",
+        "clash_count_after",
+    ]
+    assert metric_matrix["uncertainty_summary_materialized"][
+        "required_row_fields"
+    ] == ["uncertainty_low", "uncertainty_high", "uncertainty_unit"]
     preflight_action = row_action["row_preflight_action_packet"]
     assert preflight_action["status"] == "row_artifact_missing"
     assert preflight_action["expected_rows_artifact"].endswith(
@@ -399,6 +436,9 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "missing_row_input_action_count": 1,
         "minimum_rows_by_case_count": 3,
         "operator_rows_ready": False,
+        "phase4_candidate_slot_matrix_count": 6,
+        "phase4_metric_closure_matrix_count": 8,
+        "phase4_missing_candidate_slot_count": 6,
         "phase4_refinement_receipt_plan_status": "operator_receipts_required",
         "phase4_refinement_receipt_role_count": 4,
         "raw_row_artifact_detected": False,
@@ -493,6 +533,11 @@ def test_pocketmd_lite_source_acquisition_plan_validates_slot_coverage(
     )
     assert payload["summary"]["validated_row_count"] == 6
     assert payload["summary"]["covered_required_slot_count"] == 6
+    assert payload["phase4_missing_candidate_slot_count"] == 0
+    assert all(
+        row["status"] == "provided"
+        for row in payload["phase4_candidate_slot_matrix"]
+    )
     assert payload["missing_row_input_actions"] == []
     assert payload["missing_row_input_action_count"] == 0
     assert payload["pocketmd_rows_operator_action"]["status"] == "provided"
@@ -516,11 +561,18 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert payload["actual_closure_ready"] is False
     assert payload["summary"]["required_total_candidate_rows"] == 6
     assert payload["summary"]["required_candidate_slot_count"] == 6
+    assert payload["summary"]["phase4_candidate_slot_matrix_count"] == 6
+    assert payload["summary"]["phase4_metric_closure_matrix_count"] == 8
     assert payload["phase4_refinement_receipt_plan"]["receipt_role_count"] == 4
     assert payload["refinement_execution_plan"]["execution_plan_ready"] is True
     assert "# PocketMD Lite Source Acquisition Plan" in markdown
     assert "pocketmd_lite_refinement_execution_plan.json" in markdown
     assert "pocketmd_lite_topk_rows_template.csv" in markdown
+    assert "## Phase 4 Candidate Slot Matrix" in markdown
+    assert "pocketmd_lite_case_001_rank_1" in markdown
+    assert "## Phase 4 Metric Closure Matrix" in markdown
+    assert "local_min_survival_materialized" in markdown
+    assert "uncertainty_width_median" in markdown
     assert "## Missing Row Input Actions" in markdown
     assert "attach_pocketmd_rows_at_" in markdown
     assert "### PocketMD Row Preflight Action" in markdown

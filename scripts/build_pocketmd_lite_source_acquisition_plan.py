@@ -83,6 +83,28 @@ PHASE4_CRITERIA_BY_RECEIPT_ROLE = {
         "report_blockers_resolved",
     ],
 }
+PHASE4_METRIC_CRITERIA = {
+    "local_min_survival_materialized": {
+        "metric_id": "local_min_survival_rate",
+        "materialized_report_field": "local_min_survival_rate",
+    },
+    "contact_persistence_materialized": {
+        "metric_id": "contact_persistence_rate",
+        "materialized_report_field": "contact_persistence_summary",
+    },
+    "h_bond_persistence_materialized": {
+        "metric_id": "h_bond_persistence_rate",
+        "materialized_report_field": "h_bond_persistence_summary",
+    },
+    "clash_relief_materialized": {
+        "metric_id": "clash_relief_rate",
+        "materialized_report_field": "clash_relief_summary",
+    },
+    "uncertainty_summary_materialized": {
+        "metric_id": "uncertainty_width_median",
+        "materialized_report_field": "uncertainty_width_summary",
+    },
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -394,6 +416,183 @@ def _phase4_refinement_receipt_plan() -> dict[str, Any]:
     }
 
 
+def _phase4_candidate_slot_matrix(
+    *,
+    minimum_rows_by_case: list[dict[str, Any]],
+    raw_row_candidate_status: dict[str, Any],
+) -> list[dict[str, Any]]:
+    missing_slots = {
+        (str(row.get("case_id") or ""), int(row.get("top_k_rank") or 0))
+        for row in raw_row_candidate_status.get("missing_required_slots", [])
+        if isinstance(row, dict)
+    }
+    case_rank_prefixes = raw_row_candidate_status.get("case_top_k_rank_prefixes")
+    if not isinstance(case_rank_prefixes, dict):
+        case_rank_prefixes = {}
+    rows: list[dict[str, Any]] = []
+    for row in minimum_rows_by_case:
+        case_id = str(row.get("case_id") or "")
+        ranks = row.get("required_top_k_rank_prefix")
+        if not case_id or not isinstance(ranks, list):
+            continue
+        observed_ranks = {
+            int(rank)
+            for rank in case_rank_prefixes.get(case_id, [])
+            if str(rank)
+        }
+        for raw_rank in ranks:
+            try:
+                rank = int(raw_rank)
+            except (TypeError, ValueError):
+                continue
+            missing = (case_id, rank) in missing_slots or rank not in observed_ranks
+            rows.append(
+                {
+                    "slot_id": f"{case_id}_rank_{rank}",
+                    "case_id": case_id,
+                    "top_k_rank": rank,
+                    "status": "missing" if missing else "provided",
+                    "missing": missing,
+                    "candidate_scope": str(
+                        row.get("candidate_scope")
+                        or "upstream_ranked_top_k_candidates_only"
+                    ),
+                    "required_receipt_roles": [
+                        "upstream_top_k_candidate_scope_receipt",
+                        "lite_refinement_run_receipt",
+                        "interaction_persistence_receipt",
+                        "uncertainty_interval_receipt",
+                    ],
+                    "required_metric_fields": [
+                        "local_min_survived",
+                        "contact_persistence_rate",
+                        "h_bond_persistence_rate",
+                        "clash_count_before",
+                        "clash_count_after",
+                        "uncertainty_low",
+                        "uncertainty_high",
+                        "uncertainty_unit",
+                    ],
+                    "closes_phase4_criteria": [
+                        "top_k_refinement_rows_present",
+                        "top_k_refinement_case_coverage",
+                        "local_min_survival_materialized",
+                        "contact_persistence_materialized",
+                        "h_bond_persistence_materialized",
+                        "clash_relief_materialized",
+                        "uncertainty_summary_materialized",
+                        "report_blockers_resolved",
+                    ],
+                    "operator_action": (
+                        "attach_pocketmd_rows_at_"
+                        f"{DEFAULT_ROWS_OUT}"
+                        if missing
+                        else "review_validated_pocketmd_lite_rows_and_attach_receipts"
+                    ),
+                    "claim_boundary": (
+                        "This slot maps one required case/rank candidate to the "
+                        "bounded PocketMD Lite metric rows it must carry. It is "
+                        "not evidence until real top-k rows and receipts pass."
+                    ),
+                }
+            )
+    return rows
+
+
+def _phase4_metric_closure_matrix(
+    *,
+    metric_receipt_contract: list[dict[str, Any]],
+    phase4_refinement_receipt_plan: dict[str, Any],
+    raw_row_candidate_status: dict[str, Any],
+) -> list[dict[str, Any]]:
+    metric_contracts = {
+        str(row.get("metric_id") or ""): row
+        for row in metric_receipt_contract
+        if isinstance(row, dict)
+    }
+    receipt_roles = [
+        row
+        for row in phase4_refinement_receipt_plan.get("receipt_roles", [])
+        if isinstance(row, dict)
+    ]
+    criteria = [
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+    ]
+    rows: list[dict[str, Any]] = []
+    for criterion_id in criteria:
+        closing_roles = [
+            str(row.get("receipt_role_id") or "")
+            for row in receipt_roles
+            if criterion_id in list(row.get("closes_phase4_criteria") or [])
+        ]
+        metric_id = str(PHASE4_METRIC_CRITERIA.get(criterion_id, {}).get("metric_id") or "")
+        metric_contract = metric_contracts.get(metric_id, {})
+        rows.append(
+            {
+                "criterion_id": criterion_id,
+                "status": "blocked",
+                "metric_id": metric_id,
+                "required_row_fields": list(
+                    metric_contract.get("required_row_fields") or []
+                ),
+                "required_value_policy": str(
+                    metric_contract.get("required_value_policy") or ""
+                ),
+                "receipt_roles": closing_roles,
+                "materialized_report_field": str(
+                    PHASE4_METRIC_CRITERIA.get(criterion_id, {}).get(
+                        "materialized_report_field"
+                    )
+                    or ""
+                ),
+                "current": {
+                    "row_artifact_detected": (
+                        int(
+                            raw_row_candidate_status.get(
+                                "detected_row_artifact_count"
+                            )
+                            or 0
+                        )
+                        > 0
+                    ),
+                    "coverage_ready": bool(
+                        raw_row_candidate_status.get("coverage_ready")
+                    ),
+                    "validated_row_count": int(
+                        raw_row_candidate_status.get("validated_row_count") or 0
+                    ),
+                    "covered_required_slot_count": int(
+                        raw_row_candidate_status.get("covered_required_slot_count")
+                        or 0
+                    ),
+                    "required_candidate_slot_count": int(
+                        raw_row_candidate_status.get("required_candidate_slot_count")
+                        or 0
+                    ),
+                },
+                "blockers": [
+                    str(raw_row_candidate_status.get("blocker") or "")
+                    or "pocketmd_lite_topk_rows_not_acquired",
+                    "upstream_top_k_candidate_receipts_not_attached",
+                    "lite_refinement_metric_receipts_not_attached",
+                ],
+                "claim_boundary": (
+                    "This row maps a PocketMD Lite Phase 4 criterion to the "
+                    "row fields and receipt roles that can close it. It is not "
+                    "closure evidence until the rows and receipts materialize."
+                ),
+            }
+        )
+    return rows
+
+
 def _refinement_execution_plan_command() -> str:
     return (
         "python3 scripts/build_pocketmd_lite_refinement_execution_plan.py "
@@ -623,6 +822,48 @@ def build_pocketmd_lite_source_acquisition_plan(
     min_total = int(TOPK_ROW_QUALITY_CRITERIA["min_total_top_k_candidate_count"])
     min_cases = int(TOPK_ROW_QUALITY_CRITERIA["min_real_refinement_case_count"])
     phase4_refinement_receipt_plan = _phase4_refinement_receipt_plan()
+    metric_receipt_contract = [
+        {
+            "metric_id": "local_min_survival_rate",
+            "required_row_fields": ["local_min_survived"],
+            "required_value_policy": "boolean per top-k candidate",
+        },
+        {
+            "metric_id": "contact_persistence_rate",
+            "required_row_fields": ["contact_persistence_rate"],
+            "required_value_policy": "finite fraction from 0.0 to 1.0",
+        },
+        {
+            "metric_id": "h_bond_persistence_rate",
+            "required_row_fields": ["h_bond_persistence_rate"],
+            "required_value_policy": "finite fraction from 0.0 to 1.0",
+        },
+        {
+            "metric_id": "clash_relief_rate",
+            "required_row_fields": ["clash_count_before", "clash_count_after"],
+            "required_value_policy": "non-negative integer clash counts",
+        },
+        {
+            "metric_id": "uncertainty_width_median",
+            "required_row_fields": [
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit",
+            ],
+            "required_value_policy": (
+                "finite interval with high >= low and nonblank unit"
+            ),
+        },
+    ]
+    phase4_candidate_slot_matrix = _phase4_candidate_slot_matrix(
+        minimum_rows_by_case=minimum_rows_by_case,
+        raw_row_candidate_status=raw_row_candidate_status,
+    )
+    phase4_metric_closure_matrix = _phase4_metric_closure_matrix(
+        metric_receipt_contract=metric_receipt_contract,
+        phase4_refinement_receipt_plan=phase4_refinement_receipt_plan,
+        raw_row_candidate_status=raw_row_candidate_status,
+    )
     refinement_execution_plan = _refinement_execution_plan_summary(
         minimum_rows_by_case,
         operator_rows_ready=operator_rows_ready,
@@ -693,6 +934,13 @@ def build_pocketmd_lite_source_acquisition_plan(
         "minimum_rows_by_case": minimum_rows_by_case,
         "raw_row_candidate_status": raw_row_candidate_status,
         "phase4_refinement_receipt_plan": phase4_refinement_receipt_plan,
+        "phase4_candidate_slot_matrix": phase4_candidate_slot_matrix,
+        "phase4_candidate_slot_matrix_count": len(phase4_candidate_slot_matrix),
+        "phase4_missing_candidate_slot_count": sum(
+            1 for row in phase4_candidate_slot_matrix if row["missing"]
+        ),
+        "phase4_metric_closure_matrix": phase4_metric_closure_matrix,
+        "phase4_metric_closure_matrix_count": len(phase4_metric_closure_matrix),
         "refinement_execution_plan": refinement_execution_plan,
         "phase4_refinement_receipt_promotion_policy": dict(
             PHASE4_REFINEMENT_RECEIPT_PROMOTION_POLICY
@@ -721,39 +969,7 @@ def build_pocketmd_lite_source_acquisition_plan(
             "row_value_contract": row_value_contract(max_top_k=20),
             "source_receipt_requirements": dict(SOURCE_RECEIPT_REQUIREMENTS),
         },
-        "metric_receipt_contract": [
-            {
-                "metric_id": "local_min_survival_rate",
-                "required_row_fields": ["local_min_survived"],
-                "required_value_policy": "boolean per top-k candidate",
-            },
-            {
-                "metric_id": "contact_persistence_rate",
-                "required_row_fields": ["contact_persistence_rate"],
-                "required_value_policy": "finite fraction from 0.0 to 1.0",
-            },
-            {
-                "metric_id": "h_bond_persistence_rate",
-                "required_row_fields": ["h_bond_persistence_rate"],
-                "required_value_policy": "finite fraction from 0.0 to 1.0",
-            },
-            {
-                "metric_id": "clash_relief_rate",
-                "required_row_fields": ["clash_count_before", "clash_count_after"],
-                "required_value_policy": "non-negative integer clash counts",
-            },
-            {
-                "metric_id": "uncertainty_width_median",
-                "required_row_fields": [
-                    "uncertainty_low",
-                    "uncertainty_high",
-                    "uncertainty_unit",
-                ],
-                "required_value_policy": (
-                    "finite interval with high >= low and nonblank unit"
-                ),
-            },
-        ],
+        "metric_receipt_contract": metric_receipt_contract,
         "operator_acquisition_checklist": [
             "review_phase4_refinement_receipt_plan",
             "build_pocketmd_lite_refinement_execution_plan",
@@ -789,6 +1005,13 @@ def build_pocketmd_lite_source_acquisition_plan(
                 phase4_refinement_receipt_plan[
                     "covered_phase4_criterion_count"
                 ]
+            ),
+            "phase4_candidate_slot_matrix_count": len(phase4_candidate_slot_matrix),
+            "phase4_missing_candidate_slot_count": sum(
+                1 for row in phase4_candidate_slot_matrix if row["missing"]
+            ),
+            "phase4_metric_closure_matrix_count": len(
+                phase4_metric_closure_matrix
             ),
             "refinement_execution_plan_status": refinement_execution_plan["status"],
             "refinement_execution_plan_ready": refinement_execution_plan[
@@ -833,6 +1056,9 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `refinement_execution_plan`: `{payload['refinement_execution_plan']['artifact']}`",
         f"- `refinement_execution_plan_status`: `{payload['refinement_execution_plan']['status']}`",
         f"- `required_candidate_slot_count`: `{payload['refinement_execution_plan']['required_candidate_slot_count']}`",
+        f"- `phase4_candidate_slot_matrix_count`: `{payload['phase4_candidate_slot_matrix_count']}`",
+        f"- `phase4_missing_candidate_slot_count`: `{payload['phase4_missing_candidate_slot_count']}`",
+        f"- `phase4_metric_closure_matrix_count`: `{payload['phase4_metric_closure_matrix_count']}`",
         f"- `row_template_artifact`: `{payload['row_artifact_contract']['template_artifact']}`",
         "",
         "| Case | Minimum Rows | Required Rank Prefix | Scope |",
@@ -843,6 +1069,44 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.append(
             f"| `{row['case_id']}` | {row['minimum_candidate_rows']} | "
             f"`{ranks}` | `{row['candidate_scope']}` |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Phase 4 Candidate Slot Matrix",
+            "",
+            "| Slot | Case | Rank | Status | Required Metric Fields |",
+            "|---|---|---|---|---|",
+        ]
+    )
+    for row in payload["phase4_candidate_slot_matrix"]:
+        metric_fields = ", ".join(
+            f"`{field}`" for field in row["required_metric_fields"]
+        )
+        lines.append(
+            f"| `{row['slot_id']}` | `{row['case_id']}` | "
+            f"`{row['top_k_rank']}` | `{row['status']}` | {metric_fields} |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Phase 4 Metric Closure Matrix",
+            "",
+            "| Criterion | Metric | Status | Required Fields | Receipt Roles |",
+            "|---|---|---|---|---|",
+        ]
+    )
+    for row in payload["phase4_metric_closure_matrix"]:
+        fields = ", ".join(
+            f"`{field}`" for field in row.get("required_row_fields", [])
+        )
+        receipt_roles = ", ".join(
+            f"`{role}`" for role in row.get("receipt_roles", [])
+        )
+        lines.append(
+            f"| `{row['criterion_id']}` | `{row.get('metric_id', '')}` | "
+            f"`{row['status']}` | {fields or '`row_coverage_and_receipts`'} | "
+            f"{receipt_roles or '`all_required_roles`'} |"
         )
     lines.extend(["", "## Phase 4 Receipt Roles", ""])
     lines.extend(["| Receipt Role | Source Role | Closes Criteria |", "|---|---|---|"])

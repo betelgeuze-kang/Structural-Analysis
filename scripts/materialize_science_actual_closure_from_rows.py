@@ -122,6 +122,16 @@ def _source_acquisition_summary(
         for row in payload.get("phase2_exit_criteria", [])
         if isinstance(row, dict)
     ] if isinstance(payload.get("phase2_exit_criteria"), list) else []
+    phase4_candidate_slot_matrix = [
+        row
+        for row in payload.get("phase4_candidate_slot_matrix", [])
+        if isinstance(row, dict)
+    ] if isinstance(payload.get("phase4_candidate_slot_matrix"), list) else []
+    phase4_metric_closure_matrix = [
+        row
+        for row in payload.get("phase4_metric_closure_matrix", [])
+        if isinstance(row, dict)
+    ] if isinstance(payload.get("phase4_metric_closure_matrix"), list) else []
     return {
         "artifact": str(artifact),
         "present": True,
@@ -144,6 +154,20 @@ def _source_acquisition_summary(
             or len(phase2_exit_criteria)
         ),
         "phase2_exit_criteria": phase2_exit_criteria,
+        "phase4_candidate_slot_matrix_count": int(
+            payload.get("phase4_candidate_slot_matrix_count")
+            or len(phase4_candidate_slot_matrix)
+        ),
+        "phase4_missing_candidate_slot_count": int(
+            payload.get("phase4_missing_candidate_slot_count")
+            or sum(1 for row in phase4_candidate_slot_matrix if row.get("missing"))
+        ),
+        "phase4_candidate_slot_matrix": phase4_candidate_slot_matrix,
+        "phase4_metric_closure_matrix_count": int(
+            payload.get("phase4_metric_closure_matrix_count")
+            or len(phase4_metric_closure_matrix)
+        ),
+        "phase4_metric_closure_matrix": phase4_metric_closure_matrix,
         "summary": summary,
     }
 
