@@ -14,12 +14,12 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_operator_evidence_handoff": {},
   "first_operator_evidence_handoff_slot": {},
-  "generated_at": "2026-07-04T00:27:29.254602+00:00",
+  "generated_at": "2026-07-04T04:35:37.274652+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:5558e5f0d82be0cbcb22c4431c0247939a1a9f780938f6d40bcf8484561b0eed",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:fc87faa4fd9acfb4e87000f955f1086cc39a86f479b9325e30cb2864c9f19631",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:69285c5dcf0a4bdc30c7a71d48b86dabde7af6e458925f250a4e3f9b9616e109",
-    "implementation/phase1/release_evidence/productization/source_of_truth_gap_classification.json": "sha256:b6f279a483e1950eb855622cb9fcdc49a659a24476c5c502272620f9eef006ab",
+    "implementation/phase1/release_evidence/productization/source_of_truth_gap_classification.json": "sha256:531d84c7411b3399a6b875233ef4d41021cead481f1c4e0c638eb426e0df1cee",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:c1af83f1b410aca8536d5ab832c0ba6a86153436844e42152860f84ec0002328",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:8adb767e05269c4063e04ca5e5060b0e94994916ccae4e9912c897c0c7fc9703",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:e8a6b5e0b8d86ef1b629c1a6d4e8caab6132dd4a3a311c64bc520c2e4e13954f",
@@ -520,7 +520,7 @@
   "schema_version": "goal-bottleneck-roadmap-surface.v1",
   "science_evidence_surface_bottlenecks": [],
   "science_evidence_surface_status": {},
-  "source_commit_sha": "6af32c17e22a1bc3b886dbb3c13ed796bb5067a1",
+  "source_commit_sha": "287c080ef1fcb227721e1d8af78f64cfa7f6131f",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
