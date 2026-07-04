@@ -124,6 +124,47 @@ def test_gpcr_hard_decoy_source_acquisition_plan_exposes_verified_targets() -> N
     assert payload["suite_report"]["broad_gpcr_family_claim_safe"] is True
     assert payload["suite_report"]["target_pass_count"] == 3
     assert payload["suite_report"]["blocker_count"] == 0
+    completion_audit = payload["actual_closure_completion_audit"]
+    assert completion_audit["status"] == "pass"
+    assert completion_audit["pass"] is True
+    assert completion_audit["requirement_count"] == 9
+    assert completion_audit["requirement_pass_count"] == 9
+    assert completion_audit["blockers"] == []
+    assert [
+        row["requirement_id"] for row in completion_audit["requirements"]
+    ] == [
+        "expected_gpcr_target_set_present",
+        "operator_input_source_receipt_verified",
+        "raw_hard_decoy_rows_actual_closure_computed",
+        "ranking_pr_auc_ci_low_gate",
+        "top20_hit_rate_gate",
+        "decoys_above_positive_count_gate",
+        "top_decoy_anchor_gate",
+        "phase3_exit_gate_ready",
+        "candidate_sources_and_activity_rows_ready",
+    ]
+    assert all(row["pass"] for row in completion_audit["requirements"])
+    metric_rows = {
+        row["target_id"]: row
+        for row in completion_audit["target_metric_rows"]
+    }
+    assert set(metric_rows) == {"DRD2", "HTR2A", "OPRM1"}
+    for row in metric_rows.values():
+        assert row["target_status"] == "pass"
+        assert row["calculation_status"] == "computed"
+        assert row["ranking_pr_auc_ci_low"] == 1.0
+        assert row["top20_hit_rate"] == 0.6
+        assert row["decoys_above_positive_count"] == 0
+        assert row["positive_out_anchored_by_top_decoys"] is False
+        assert row["raw_row_quality_pass"] is True
+        assert row["positive_count"] == 12
+        assert row["decoy_count"] == 20
+        assert row["total_row_count"] == 32
+        assert row["ranking_gate_pass"] is True
+        assert row["top20_gate_pass"] is True
+        assert row["decoy_leakage_gate_pass"] is True
+        assert row["top_decoy_anchor_gate_pass"] is True
+        assert row["raw_rows_actual_closure_pass"] is True
     assert payload["acceptable_source_roles"][0]["candidate_snapshot"] == (
         payload["positive_source_snapshot"]
     )
@@ -149,6 +190,10 @@ def test_gpcr_hard_decoy_source_acquisition_plan_exposes_verified_targets() -> N
     assert payload["summary"]["suite_report_status"] == "ready"
     assert payload["summary"]["suite_target_pass_count"] == 3
     assert payload["summary"]["suite_blocker_count"] == 0
+    assert payload["summary"]["completion_audit_status"] == "pass"
+    assert payload["summary"]["completion_audit_requirement_count"] == 9
+    assert payload["summary"]["completion_audit_requirement_pass_count"] == 9
+    assert payload["summary"]["completion_audit_blocker_count"] == 0
     assert payload["summary"]["required_target_count"] == 3
     assert payload["summary"]["target_source_count"] == 3
     assert payload["summary"]["target_source_mapping_complete"] is True
@@ -185,4 +230,8 @@ def test_gpcr_hard_decoy_source_acquisition_plan_cli_writes_markdown(
     assert "`OPRM1` | `P35372` | `CHEMBL233`" in markdown
     assert "gpcr_hard_decoy_positive_source_snapshot.json" in markdown
     assert "gpcr_hard_decoy_decoy_source_snapshot.json" in markdown
+    assert "## Actual Closure Completion Audit" in markdown
+    assert "`ranking_pr_auc_ci_low_gate` | `pass`" in markdown
+    assert "`top_decoy_anchor_gate` | `pass`" in markdown
+    assert "`DRD2` | `1.0` | `0.6` | `0` | `False` | `computed`" in markdown
     assert "materialize_gpcr_hard_decoy_operator_template_from_rows.py" in markdown

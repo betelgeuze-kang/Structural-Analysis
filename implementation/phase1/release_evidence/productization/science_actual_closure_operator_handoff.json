@@ -4479,14 +4479,14 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T05:40:58.600111+00:00",
+  "generated_at": "2026-07-04T05:48:01.350110+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:1d972869588862f564778538c242fa0bf7d1347a30c06930e1d15f68adbce476",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:17ed4030e0f5d4c0e85e229081fff79daf0056f36842fac5736e72010788ced0",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:25acd0c4e672d933220769a3e34135ea65d1fac049877b818d44b3c9288618f5",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:1aa07a73ba0f9770659d6317d4d813eff0660669c991dd35c5b89726f4045f20",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:e3a98f7bed334c844cbb54832b9e3e2da97325597da99654985aa3bf15398508",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:c3382754f0caec3c66af44c9542f3cf9d98c498a4577c7d4bb49fa1252c456f9",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:a442e2a44b2a603acf8db7fc964323f07285f261144ceb3c528db354a502a19d",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:62b1c9d764aa45d471dffff547e6548c55acaae3dfb870c5345337f6ae58cc64",
     "scripts/build_science_actual_closure_operator_handoff.py": "sha256:bcb70ee667e805cbc0e9654bc2bd0b103f90e1e572f96cef4bc08c5c239ceebb"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
@@ -16009,7 +16009,7 @@
   },
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "f120648bc76e8380b38532b7baa1ea74ac444f98",
+  "source_commit_sha": "f8222cd2b6c6a76987ae235ce9e18693d8a247b2",
   "status": "operator_rows_required",
   "summary": {
     "actual_closure_blocked_component_count": 2,

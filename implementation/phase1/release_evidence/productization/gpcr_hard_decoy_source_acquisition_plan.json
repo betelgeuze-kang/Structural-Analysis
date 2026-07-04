@@ -119,6 +119,227 @@
       "role": "scoring_protocol"
     }
   ],
+  "actual_closure_completion_audit": {
+    "blockers": [],
+    "claim_boundary": "This audit proves the GPCR hard-decoy actual-closure gate from the current suite report, source receipt, raw-row quality checks, and per-target Phase 3 metrics. It does not generalize beyond the declared DRD2, HTR2A, and OPRM1 target set.",
+    "pass": true,
+    "requirement_count": 9,
+    "requirement_pass_count": 9,
+    "requirements": [
+      {
+        "evidence": {
+          "actual_targets": [
+            "DRD2",
+            "HTR2A",
+            "OPRM1"
+          ],
+          "expected_targets": [
+            "DRD2",
+            "HTR2A",
+            "OPRM1"
+          ]
+        },
+        "pass": true,
+        "requirement_id": "expected_gpcr_target_set_present",
+        "status": "pass"
+      },
+      {
+        "evidence": {
+          "blockers": [],
+          "mode": "raw_hard_decoy_rows",
+          "source_actuality_contract_pass": true,
+          "source_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+          "source_artifact_present": true,
+          "source_artifact_sha256_matches": true,
+          "status": "pass"
+        },
+        "pass": true,
+        "requirement_id": "operator_input_source_receipt_verified",
+        "status": "pass"
+      },
+      {
+        "evidence": {
+          "criterion_id": "raw_hard_decoy_rows_actual_closure",
+          "per_target": [
+            {
+              "calculation_status": "computed",
+              "decoy_count": 20,
+              "positive_count": 12,
+              "raw_row_quality_pass": true,
+              "target_id": "DRD2",
+              "total_row_count": 32
+            },
+            {
+              "calculation_status": "computed",
+              "decoy_count": 20,
+              "positive_count": 12,
+              "raw_row_quality_pass": true,
+              "target_id": "HTR2A",
+              "total_row_count": 32
+            },
+            {
+              "calculation_status": "computed",
+              "decoy_count": 20,
+              "positive_count": 12,
+              "raw_row_quality_pass": true,
+              "target_id": "OPRM1",
+              "total_row_count": 32
+            }
+          ],
+          "required": "computed_from_raw_hard_decoy_rows_with_quality_minimums"
+        },
+        "pass": true,
+        "requirement_id": "raw_hard_decoy_rows_actual_closure_computed",
+        "status": "pass"
+      },
+      {
+        "evidence": {
+          "current_by_target": {
+            "DRD2": 1.0,
+            "HTR2A": 1.0,
+            "OPRM1": 1.0
+          },
+          "required_minimum": 0.45
+        },
+        "pass": true,
+        "requirement_id": "ranking_pr_auc_ci_low_gate",
+        "status": "pass"
+      },
+      {
+        "evidence": {
+          "current_by_target": {
+            "DRD2": 0.6,
+            "HTR2A": 0.6,
+            "OPRM1": 0.6
+          },
+          "required_minimum": 0.2
+        },
+        "pass": true,
+        "requirement_id": "top20_hit_rate_gate",
+        "status": "pass"
+      },
+      {
+        "evidence": {
+          "current_by_target": {
+            "DRD2": 0,
+            "HTR2A": 0,
+            "OPRM1": 0
+          },
+          "required_maximum": 0
+        },
+        "pass": true,
+        "requirement_id": "decoys_above_positive_count_gate",
+        "status": "pass"
+      },
+      {
+        "evidence": {
+          "current_by_target": {
+            "DRD2": false,
+            "HTR2A": false,
+            "OPRM1": false
+          },
+          "positive_out_anchored_by_top_decoys_allowed": false
+        },
+        "pass": true,
+        "requirement_id": "top_decoy_anchor_gate",
+        "status": "pass"
+      },
+      {
+        "evidence": {
+          "criteria_pass": {
+            "decoys_above_positive_count_max": true,
+            "no_positive_out_anchored_by_top_decoys": true,
+            "ranking_pr_auc_ci_low_min": true,
+            "raw_hard_decoy_rows_actual_closure": true,
+            "top20_hit_rate_min": true
+          },
+          "failed_criteria": [],
+          "required_criteria": [
+            "ranking_pr_auc_ci_low_min",
+            "top20_hit_rate_min",
+            "decoys_above_positive_count_max",
+            "no_positive_out_anchored_by_top_decoys",
+            "raw_hard_decoy_rows_actual_closure"
+          ],
+          "status": "ready"
+        },
+        "pass": true,
+        "requirement_id": "phase3_exit_gate_ready",
+        "status": "pass"
+      },
+      {
+        "evidence": {
+          "chembl_activity_row_count": 96,
+          "chembl_activity_rows_ready": true,
+          "decoy_candidate_source_ready": true,
+          "positive_source_ready": true
+        },
+        "pass": true,
+        "requirement_id": "candidate_sources_and_activity_rows_ready",
+        "status": "pass"
+      }
+    ],
+    "status": "pass",
+    "target_metric_rows": [
+      {
+        "calculation_status": "computed",
+        "decoy_count": 20,
+        "decoy_leakage_gate_pass": true,
+        "decoys_above_positive_count": 0,
+        "positive_count": 12,
+        "positive_out_anchored_by_top_decoys": false,
+        "ranking_gate_pass": true,
+        "ranking_pr_auc_ci_low": 1.0,
+        "raw_row_quality_pass": true,
+        "raw_rows_actual_closure_pass": true,
+        "target_contract_pass": true,
+        "target_id": "DRD2",
+        "target_status": "pass",
+        "top20_gate_pass": true,
+        "top20_hit_rate": 0.6,
+        "top_decoy_anchor_gate_pass": true,
+        "total_row_count": 32
+      },
+      {
+        "calculation_status": "computed",
+        "decoy_count": 20,
+        "decoy_leakage_gate_pass": true,
+        "decoys_above_positive_count": 0,
+        "positive_count": 12,
+        "positive_out_anchored_by_top_decoys": false,
+        "ranking_gate_pass": true,
+        "ranking_pr_auc_ci_low": 1.0,
+        "raw_row_quality_pass": true,
+        "raw_rows_actual_closure_pass": true,
+        "target_contract_pass": true,
+        "target_id": "HTR2A",
+        "target_status": "pass",
+        "top20_gate_pass": true,
+        "top20_hit_rate": 0.6,
+        "top_decoy_anchor_gate_pass": true,
+        "total_row_count": 32
+      },
+      {
+        "calculation_status": "computed",
+        "decoy_count": 20,
+        "decoy_leakage_gate_pass": true,
+        "decoys_above_positive_count": 0,
+        "positive_count": 12,
+        "positive_out_anchored_by_top_decoys": false,
+        "ranking_gate_pass": true,
+        "ranking_pr_auc_ci_low": 1.0,
+        "raw_row_quality_pass": true,
+        "raw_rows_actual_closure_pass": true,
+        "target_contract_pass": true,
+        "target_id": "OPRM1",
+        "target_status": "pass",
+        "top20_gate_pass": true,
+        "top20_hit_rate": 0.6,
+        "top_decoy_anchor_gate_pass": true,
+        "total_row_count": 32
+      }
+    ]
+  },
   "actual_closure_ready": true,
   "blocker_count": 0,
   "blockers": [],
@@ -206,16 +427,16 @@
     "total_decoy_candidate_count": 60
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-03T22:02:53.440989+00:00",
+  "generated_at": "2026-07-04T05:48:58.494553+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json": "sha256:6ec740aa2bd6c18684d2ea1eec0d9bc678786aa0fe114b1e632192c1bf4c4b29",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json": "sha256:66ed4370361fd02d9f820067a4ea02506c43834e681972fdb37ee05d6b37c18b",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json": "sha256:14fc63c1890aaaf1e9187a79b47fef21f3dc33511c2cf14e97356942568ae2c4",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:a3161e9a00cebc00998ca57b1d2187774add4a553a1997c92b69ef1355e81eb4",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:17ed4030e0f5d4c0e85e229081fff79daf0056f36842fac5736e72010788ced0",
     "scripts/build_gpcr_hard_decoy_chembl_activity_rows.py": "sha256:2dafd153b15bf3287f500ebe07f4a47df2bc5973e37391e8ae520bec5f084543",
     "scripts/build_gpcr_hard_decoy_decoy_source_snapshot.py": "sha256:94862b9e94724e136d0bfcd966ad500d196245587f9dfb86bada83ea6c25e250",
     "scripts/build_gpcr_hard_decoy_positive_source_snapshot.py": "sha256:6e27e6448a6114b6defd76f52cf63ef2179ba57bd8895634ec8037f8c3378bc1",
-    "scripts/build_gpcr_hard_decoy_source_acquisition_plan.py": "sha256:4744de0029ab0431ce15b89b80ff364b0ee75bf0b4a7054249998b0388024d67",
+    "scripts/build_gpcr_hard_decoy_source_acquisition_plan.py": "sha256:f9f104d5d958babaa3970e908adee686e3afb3ad306e235ce70ab9bda061f3a7",
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:e9a2b010be4254d67a3574ab917821583a6de5e5803ab1cbd6a92ca8d15eea30"
   },
@@ -325,7 +546,7 @@
     "source_attached_candidate_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json"
   },
   "schema_version": "gpcr-hard-decoy-source-acquisition-plan.v1",
-  "source_commit_sha": "09165e21a218f40a8be2951d512a86386b662700",
+  "source_commit_sha": "f8222cd2b6c6a76987ae235ce9e18693d8a247b2",
   "status": "actual_closure_ready",
   "suite_report": {
     "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
@@ -347,6 +568,10 @@
     "chembl_activity_row_count": 96,
     "chembl_activity_rows_ready": true,
     "chembl_activity_rows_status": "raw_activity_rows_ready",
+    "completion_audit_blocker_count": 0,
+    "completion_audit_requirement_count": 9,
+    "completion_audit_requirement_pass_count": 9,
+    "completion_audit_status": "pass",
     "decoy_candidate_source_ready": true,
     "decoy_source_snapshot_status": "decoy_candidate_sources_ready",
     "minimum_decoy_rows_total": 60,

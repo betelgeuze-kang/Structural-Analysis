@@ -1785,7 +1785,7 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T05:40:58.541443+00:00",
+  "generated_at": "2026-07-04T05:48:01.291066+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json": "sha256:98255bfca71cb82c3146a11e74e90cc338836518d93672950cbec5defd7d7147",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json": "sha256:a8b90e6c8e24b8ebd06d466bda1ef120117530202b8d14ab0114c228484b7eb6",
@@ -3216,7 +3216,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "f120648bc76e8380b38532b7baa1ea74ac444f98",
+  "source_commit_sha": "f8222cd2b6c6a76987ae235ce9e18693d8a247b2",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,

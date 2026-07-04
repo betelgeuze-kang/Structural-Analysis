@@ -14,12 +14,34 @@
 - `suite_report`: `implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json`
 - `suite_status`: `ready`
 - `suite_target_pass_count`: `3`
+- `completion_audit_status`: `pass`
+- `completion_audit_requirements`: `9/9`
 
 | Target | UniProt | ChEMBL | Role |
 |---|---|---|---|
 | `DRD2` | `P14416` | `CHEMBL217` | `target_activity_candidate_source_only` |
 | `HTR2A` | `P28223` | `CHEMBL224` | `target_activity_candidate_source_only` |
 | `OPRM1` | `P35372` | `CHEMBL233` | `target_activity_candidate_source_only` |
+
+## Actual Closure Completion Audit
+
+| Requirement | Status |
+|---|---|
+| `expected_gpcr_target_set_present` | `pass` |
+| `operator_input_source_receipt_verified` | `pass` |
+| `raw_hard_decoy_rows_actual_closure_computed` | `pass` |
+| `ranking_pr_auc_ci_low_gate` | `pass` |
+| `top20_hit_rate_gate` | `pass` |
+| `decoys_above_positive_count_gate` | `pass` |
+| `top_decoy_anchor_gate` | `pass` |
+| `phase3_exit_gate_ready` | `pass` |
+| `candidate_sources_and_activity_rows_ready` | `pass` |
+
+| Target | PR AUC CI Low | Top20 Hit Rate | Decoys Above Positive | Out-Anchored | Raw Rows |
+|---|---:|---:|---:|---|---|
+| `DRD2` | `1.0` | `0.6` | `0` | `False` | `computed` |
+| `HTR2A` | `1.0` | `0.6` | `0` | `False` | `computed` |
+| `OPRM1` | `1.0` | `0.6` | `0` | `False` | `computed` |
 
 ## Commands
 

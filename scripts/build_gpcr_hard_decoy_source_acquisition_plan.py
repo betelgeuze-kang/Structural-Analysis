@@ -93,6 +93,37 @@ def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _as_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
+def _as_float(value: Any) -> float | None:
+    if isinstance(value, bool):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _as_int(value: Any) -> int | None:
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float) and value.is_integer():
+        return int(value)
+    return None
+
+
+def _as_bool(value: Any) -> bool | None:
+    return value if isinstance(value, bool) else None
+
+
 def _positive_source_snapshot_summary(
     snapshot: dict[str, Any],
 ) -> dict[str, Any]:
@@ -304,6 +335,285 @@ def _per_target_exit_gate(target_id: str) -> dict[str, Any]:
     }
 
 
+def _completion_requirement(
+    requirement_id: str,
+    passed: bool,
+    evidence: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "requirement_id": requirement_id,
+        "status": "pass" if passed else "fail",
+        "pass": passed,
+        "evidence": evidence,
+    }
+
+
+def _target_metric_rows(suite_report: dict[str, Any]) -> list[dict[str, Any]]:
+    rows_by_target = {
+        str(row.get("target_id") or ""): row
+        for row in _as_list(suite_report.get("target_rows"))
+        if isinstance(row, dict)
+    }
+    metric_rows: list[dict[str, Any]] = []
+    for target_id in REQUIRED_TARGETS:
+        row = _as_dict(rows_by_target.get(target_id))
+        metrics = _as_dict(row.get("computed_hard_decoy_metrics"))
+        quality = _as_dict(metrics.get("hard_decoy_row_quality"))
+        ranking = _as_float(row.get("ranking_pr_auc_ci_low"))
+        top20 = _as_float(row.get("top20_hit_rate"))
+        decoys_above = _as_int(row.get("decoys_above_positive_count"))
+        out_anchored = _as_bool(row.get("positive_out_anchored_by_top_decoys"))
+        metric_rows.append(
+            {
+                "target_id": target_id,
+                "target_status": str(row.get("status") or "missing"),
+                "target_contract_pass": bool(row.get("contract_pass")),
+                "calculation_status": str(
+                    metrics.get("calculation_status") or "missing"
+                ),
+                "ranking_pr_auc_ci_low": ranking,
+                "top20_hit_rate": top20,
+                "decoys_above_positive_count": decoys_above,
+                "positive_out_anchored_by_top_decoys": out_anchored,
+                "raw_row_quality_pass": bool(quality.get("contract_pass")),
+                "positive_count": _as_int(quality.get("positive_count")),
+                "decoy_count": _as_int(quality.get("decoy_count")),
+                "total_row_count": _as_int(quality.get("total_row_count")),
+                "ranking_gate_pass": (
+                    ranking is not None
+                    and ranking >= float(EXIT_CRITERIA["ranking_pr_auc_ci_low_min"])
+                ),
+                "top20_gate_pass": (
+                    top20 is not None
+                    and top20 >= float(EXIT_CRITERIA["top20_hit_rate_min"])
+                ),
+                "decoy_leakage_gate_pass": (
+                    decoys_above
+                    == int(EXIT_CRITERIA["decoys_above_positive_count_max"])
+                ),
+                "top_decoy_anchor_gate_pass": (
+                    out_anchored
+                    is bool(
+                        EXIT_CRITERIA[
+                            "positive_out_anchored_by_top_decoys_allowed"
+                        ]
+                    )
+                ),
+                "raw_rows_actual_closure_pass": (
+                    metrics.get("calculation_status") == "computed"
+                    and bool(quality.get("contract_pass"))
+                ),
+            }
+        )
+    return metric_rows
+
+
+def _phase3_criteria_by_id(suite_report: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    phase3_exit_gate = _as_dict(suite_report.get("phase3_exit_gate"))
+    return {
+        str(row.get("criterion_id") or ""): row
+        for row in _as_list(phase3_exit_gate.get("criteria"))
+        if isinstance(row, dict) and str(row.get("criterion_id") or "")
+    }
+
+
+def _gpcr_actual_closure_completion_audit(
+    *,
+    suite_report: dict[str, Any],
+    positive_source_summary: dict[str, Any],
+    decoy_source_summary: dict[str, Any],
+    chembl_activity_rows_summary: dict[str, Any],
+) -> dict[str, Any]:
+    metric_rows = _target_metric_rows(suite_report)
+    phase3_exit_gate = _as_dict(suite_report.get("phase3_exit_gate"))
+    criteria_by_id = _phase3_criteria_by_id(suite_report)
+    operator_source_receipt = _as_dict(
+        suite_report.get("operator_input_source_receipt")
+    )
+    source_actuality = _as_dict(operator_source_receipt.get("source_actuality_check"))
+    expected_targets = list(REQUIRED_TARGETS)
+    target_ids = [row["target_id"] for row in metric_rows]
+    required_criteria = [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+        ACTUAL_CLOSURE_CRITERION_ID,
+    ]
+    requirements = [
+        _completion_requirement(
+            "expected_gpcr_target_set_present",
+            target_ids == expected_targets
+            and all(row["target_status"] != "missing" for row in metric_rows),
+            {
+                "expected_targets": expected_targets,
+                "actual_targets": target_ids,
+            },
+        ),
+        _completion_requirement(
+            "operator_input_source_receipt_verified",
+            bool(operator_source_receipt.get("contract_pass"))
+            and operator_source_receipt.get("status") == "pass"
+            and bool(operator_source_receipt.get("source_artifact_present"))
+            and bool(operator_source_receipt.get("source_artifact_sha256_matches"))
+            and bool(source_actuality.get("contract_pass")),
+            {
+                "status": str(operator_source_receipt.get("status") or ""),
+                "mode": str(operator_source_receipt.get("mode") or ""),
+                "source_artifact": str(
+                    operator_source_receipt.get("source_artifact") or ""
+                ),
+                "source_artifact_present": bool(
+                    operator_source_receipt.get("source_artifact_present")
+                ),
+                "source_artifact_sha256_matches": bool(
+                    operator_source_receipt.get("source_artifact_sha256_matches")
+                ),
+                "source_actuality_contract_pass": bool(
+                    source_actuality.get("contract_pass")
+                ),
+                "blockers": [
+                    str(row)
+                    for row in _as_list(operator_source_receipt.get("blockers"))
+                    if str(row)
+                ],
+            },
+        ),
+        _completion_requirement(
+            "raw_hard_decoy_rows_actual_closure_computed",
+            all(row["raw_rows_actual_closure_pass"] for row in metric_rows),
+            {
+                "criterion_id": ACTUAL_CLOSURE_CRITERION_ID,
+                "required": (
+                    "computed_from_raw_hard_decoy_rows_with_quality_minimums"
+                ),
+                "per_target": [
+                    {
+                        "target_id": row["target_id"],
+                        "calculation_status": row["calculation_status"],
+                        "raw_row_quality_pass": row["raw_row_quality_pass"],
+                        "positive_count": row["positive_count"],
+                        "decoy_count": row["decoy_count"],
+                        "total_row_count": row["total_row_count"],
+                    }
+                    for row in metric_rows
+                ],
+            },
+        ),
+        _completion_requirement(
+            "ranking_pr_auc_ci_low_gate",
+            all(row["ranking_gate_pass"] for row in metric_rows),
+            {
+                "required_minimum": EXIT_CRITERIA["ranking_pr_auc_ci_low_min"],
+                "current_by_target": {
+                    row["target_id"]: row["ranking_pr_auc_ci_low"]
+                    for row in metric_rows
+                },
+            },
+        ),
+        _completion_requirement(
+            "top20_hit_rate_gate",
+            all(row["top20_gate_pass"] for row in metric_rows),
+            {
+                "required_minimum": EXIT_CRITERIA["top20_hit_rate_min"],
+                "current_by_target": {
+                    row["target_id"]: row["top20_hit_rate"] for row in metric_rows
+                },
+            },
+        ),
+        _completion_requirement(
+            "decoys_above_positive_count_gate",
+            all(row["decoy_leakage_gate_pass"] for row in metric_rows),
+            {
+                "required_maximum": EXIT_CRITERIA[
+                    "decoys_above_positive_count_max"
+                ],
+                "current_by_target": {
+                    row["target_id"]: row["decoys_above_positive_count"]
+                    for row in metric_rows
+                },
+            },
+        ),
+        _completion_requirement(
+            "top_decoy_anchor_gate",
+            all(row["top_decoy_anchor_gate_pass"] for row in metric_rows),
+            {
+                "positive_out_anchored_by_top_decoys_allowed": EXIT_CRITERIA[
+                    "positive_out_anchored_by_top_decoys_allowed"
+                ],
+                "current_by_target": {
+                    row["target_id"]: row["positive_out_anchored_by_top_decoys"]
+                    for row in metric_rows
+                },
+            },
+        ),
+        _completion_requirement(
+            "phase3_exit_gate_ready",
+            phase3_exit_gate.get("status") == "ready"
+            and not _as_list(phase3_exit_gate.get("failed_criteria"))
+            and all(
+                bool(criteria_by_id.get(criterion_id, {}).get("pass"))
+                for criterion_id in required_criteria
+            ),
+            {
+                "status": str(phase3_exit_gate.get("status") or ""),
+                "required_criteria": required_criteria,
+                "failed_criteria": [
+                    str(row)
+                    for row in _as_list(phase3_exit_gate.get("failed_criteria"))
+                    if str(row)
+                ],
+                "criteria_pass": {
+                    criterion_id: bool(
+                        criteria_by_id.get(criterion_id, {}).get("pass")
+                    )
+                    for criterion_id in required_criteria
+                },
+            },
+        ),
+        _completion_requirement(
+            "candidate_sources_and_activity_rows_ready",
+            bool(positive_source_summary.get("positive_source_ready"))
+            and bool(decoy_source_summary.get("decoy_candidate_source_ready"))
+            and bool(chembl_activity_rows_summary.get("raw_rows_ready")),
+            {
+                "positive_source_ready": bool(
+                    positive_source_summary.get("positive_source_ready")
+                ),
+                "decoy_candidate_source_ready": bool(
+                    decoy_source_summary.get("decoy_candidate_source_ready")
+                ),
+                "chembl_activity_rows_ready": bool(
+                    chembl_activity_rows_summary.get("raw_rows_ready")
+                ),
+                "chembl_activity_row_count": int(
+                    chembl_activity_rows_summary.get("row_count") or 0
+                ),
+            },
+        ),
+    ]
+    blockers = [
+        str(row["requirement_id"])
+        for row in requirements
+        if not bool(row.get("pass"))
+    ]
+    return {
+        "status": "pass" if not blockers else "fail",
+        "pass": not blockers,
+        "requirement_count": len(requirements),
+        "requirement_pass_count": len(requirements) - len(blockers),
+        "blockers": blockers,
+        "target_metric_rows": metric_rows,
+        "requirements": requirements,
+        "claim_boundary": (
+            "This audit proves the GPCR hard-decoy actual-closure gate from the "
+            "current suite report, source receipt, raw-row quality checks, and "
+            "per-target Phase 3 metrics. It does not generalize beyond the "
+            "declared DRD2, HTR2A, and OPRM1 target set."
+        ),
+    }
+
+
 def build_gpcr_hard_decoy_source_acquisition_plan(
     *,
     repo_root: Path = ROOT,
@@ -321,14 +631,16 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
     )
     suite_report = _load_json(repo_root, DEFAULT_SUITE_REPORT)
     suite_report_summary = _suite_report_summary(suite_report)
+    completion_audit = _gpcr_actual_closure_completion_audit(
+        suite_report=suite_report,
+        positive_source_summary=positive_source_summary,
+        decoy_source_summary=decoy_source_summary,
+        chembl_activity_rows_summary=chembl_activity_rows_summary,
+    )
     required_targets = list(REQUIRED_TARGETS)
     target_ids = [str(row["target_id"]) for row in target_sources]
     chembl_rows_ready = bool(chembl_activity_rows_summary.get("raw_rows_ready"))
-    actual_closure_ready = bool(
-        suite_report_summary.get("broad_gpcr_family_claim_safe")
-        and suite_report_summary.get("target_pass_count") == len(required_targets)
-        and suite_report_summary.get("blocker_count") == 0
-    )
+    actual_closure_ready = bool(completion_audit.get("pass"))
     blockers = (
         []
         if actual_closure_ready
@@ -383,6 +695,7 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
         "decoy_source_snapshot": decoy_source_summary,
         "chembl_activity_rows": chembl_activity_rows_summary,
         "suite_report": suite_report_summary,
+        "actual_closure_completion_audit": completion_audit,
         "per_target_exit_gates": [
             _per_target_exit_gate(target_id) for target_id in required_targets
         ],
@@ -556,6 +869,18 @@ def build_gpcr_hard_decoy_source_acquisition_plan(
                 suite_report_summary.get("target_pass_count") or 0
             ),
             "suite_blocker_count": int(suite_report_summary.get("blocker_count") or 0),
+            "completion_audit_status": str(completion_audit.get("status") or ""),
+            "completion_audit_requirement_count": int(
+                completion_audit.get("requirement_count") or 0
+            ),
+            "completion_audit_requirement_pass_count": int(
+                completion_audit.get("requirement_pass_count") or 0
+            ),
+            "completion_audit_blocker_count": len(
+                completion_audit.get("blockers", [])
+            )
+            if isinstance(completion_audit.get("blockers"), list)
+            else 0,
             "minimum_positive_rows_total": int(
                 RAW_ROW_QUALITY_CRITERIA["min_positive_count_per_target"]
             )
@@ -595,6 +920,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `suite_report`: `{payload['suite_report']['artifact']}`",
         f"- `suite_status`: `{payload['suite_report']['status']}`",
         f"- `suite_target_pass_count`: `{payload['suite_report']['target_pass_count']}`",
+        f"- `completion_audit_status`: `{payload['actual_closure_completion_audit']['status']}`",
+        f"- `completion_audit_requirements`: `{payload['actual_closure_completion_audit']['requirement_pass_count']}/{payload['actual_closure_completion_audit']['requirement_count']}`",
         "",
         "| Target | UniProt | ChEMBL | Role |",
         "|---|---|---|---|",
@@ -603,6 +930,31 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.append(
             f"| `{row['target_id']}` | `{row['uniprot_accession']}` | "
             f"`{row['chembl_target_id']}` | `{row['source_role']}` |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Actual Closure Completion Audit",
+            "",
+            "| Requirement | Status |",
+            "|---|---|",
+        ]
+    )
+    for row in payload["actual_closure_completion_audit"]["requirements"]:
+        lines.append(f"| `{row['requirement_id']}` | `{row['status']}` |")
+    lines.extend(
+        [
+            "",
+            "| Target | PR AUC CI Low | Top20 Hit Rate | Decoys Above Positive | Out-Anchored | Raw Rows |",
+            "|---|---:|---:|---:|---|---|",
+        ]
+    )
+    for row in payload["actual_closure_completion_audit"]["target_metric_rows"]:
+        lines.append(
+            f"| `{row['target_id']}` | `{row['ranking_pr_auc_ci_low']}` | "
+            f"`{row['top20_hit_rate']}` | `{row['decoys_above_positive_count']}` | "
+            f"`{row['positive_out_anchored_by_top_decoys']}` | "
+            f"`{row['calculation_status']}` |"
         )
     lines.extend(["", "## Commands", ""])
     for key, command in payload["commands"].items():
