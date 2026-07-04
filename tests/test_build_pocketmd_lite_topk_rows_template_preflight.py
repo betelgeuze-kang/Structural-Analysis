@@ -57,40 +57,7 @@ def _write_csv(path: Path, rows: list[dict[str, str]]) -> None:
         writer.writerows(rows)
 
 
-def test_current_pocketmd_lite_topk_rows_template_preflight_surfaces_gaps() -> None:
-    payload = module.build_pocketmd_lite_topk_rows_template_preflight(
-        repo_root=REPO_ROOT,
-    )
-
-    assert payload["schema_version"] == "pocketmd-lite-topk-rows-template-preflight.v1"
-    assert payload["status"] == "operator_rows_completion_required"
-    assert payload["contract_pass"] is True
-    assert payload["top_k_template_ready"] is False
-    assert payload["expected_rows_detected"] is False
-    assert payload["summary"]["expected_slot_count"] == 6
-    assert payload["summary"]["template_row_count"] == 6
-    assert payload["summary"]["template_slot_coverage_complete"] is True
-    assert payload["summary"]["missing_expected_slot_count"] == 0
-    assert payload["summary"]["missing_required_value_count"] > 0
-    assert payload["summary"]["missing_metric_value_count"] > 0
-    assert payload["summary"]["missing_receipt_value_count"] > 0
-    first_row = payload["row_preflight_rows"][0]
-    assert first_row["case_id"] == "pocketmd_lite_case_001"
-    assert first_row["top_k_rank"] == 1
-    assert "contact_persistence_rate" in first_row["missing_metric_fields"]
-    assert "upstream_top_k_provenance_ref" in first_row["missing_receipt_fields"]
-    assert payload["template_safety_policy"][
-        "operator_rows_must_be_real_top_k_refinement_outputs"
-    ] is True
-    assert "does not promote the template" in payload["claim_boundary"]
-
-
-def test_pocketmd_lite_topk_rows_template_preflight_accepts_completed_rows(
-    tmp_path: Path,
-) -> None:
-    refinement_plan = tmp_path / "refinement_plan.json"
-    template = tmp_path / "template.csv"
-    _write_refinement_plan(refinement_plan)
+def _completed_rows() -> list[dict[str, str]]:
     rows = []
     for case_id in ("case_a", "case_b", "case_c"):
         for rank in (1, 2):
@@ -127,7 +94,57 @@ def test_pocketmd_lite_topk_rows_template_preflight_accepts_completed_rows(
                     ),
                 }
             )
-    _write_csv(template, rows)
+    return rows
+
+
+def test_current_pocketmd_lite_topk_rows_template_preflight_surfaces_gaps() -> None:
+    payload = module.build_pocketmd_lite_topk_rows_template_preflight(
+        repo_root=REPO_ROOT,
+    )
+
+    assert payload["schema_version"] == "pocketmd-lite-topk-rows-template-preflight.v1"
+    assert payload["status"] == "operator_rows_completion_required"
+    assert payload["contract_pass"] is True
+    assert payload["top_k_template_ready"] is False
+    assert payload["expected_rows_detected"] is False
+    assert payload["summary"]["expected_slot_count"] == 6
+    assert payload["summary"]["template_row_count"] == 6
+    assert payload["summary"]["template_slot_coverage_complete"] is True
+    assert payload["summary"]["missing_expected_slot_count"] == 0
+    assert payload["summary"]["missing_required_value_count"] > 0
+    assert payload["summary"]["missing_metric_value_count"] > 0
+    assert payload["summary"]["missing_energy_proxy_value_count"] == 12
+    assert payload["summary"]["missing_receipt_value_count"] > 0
+    assert payload["summary"]["role_receipt_plan_count"] == 24
+    assert payload["summary"]["role_receipt_blocked_count"] == 24
+    assert payload["summary"]["operator_input_source_receipt_blocked_count"] > 0
+    first_row = payload["row_preflight_rows"][0]
+    assert first_row["case_id"] == "pocketmd_lite_case_001"
+    assert first_row["top_k_rank"] == 1
+    assert "pre_refinement_energy_proxy" in first_row["missing_energy_proxy_fields"]
+    assert "contact_persistence_rate" in first_row["missing_metric_fields"]
+    assert "upstream_top_k_provenance_ref" in first_row["missing_receipt_fields"]
+    first_role = payload["role_receipt_plan"][0]
+    assert first_role["role_id"] == "upstream_top_k_candidate_scope_receipt"
+    assert first_role["operator_action"] == "attach_upstream_top_k_scope_receipt"
+    markdown = module.render_pocketmd_lite_topk_rows_template_preflight_markdown(
+        payload
+    )
+    assert "## Role Receipt Plan" in markdown
+    assert "## Operator Input Source Receipt Plan" in markdown
+    assert payload["template_safety_policy"][
+        "operator_rows_must_be_real_top_k_refinement_outputs"
+    ] is True
+    assert "does not promote the template" in payload["claim_boundary"]
+
+
+def test_pocketmd_lite_topk_rows_template_preflight_accepts_completed_rows(
+    tmp_path: Path,
+) -> None:
+    refinement_plan = tmp_path / "refinement_plan.json"
+    template = tmp_path / "template.csv"
+    _write_refinement_plan(refinement_plan)
+    _write_csv(template, _completed_rows())
 
     payload = module.build_pocketmd_lite_topk_rows_template_preflight(
         repo_root=tmp_path,
@@ -141,9 +158,41 @@ def test_pocketmd_lite_topk_rows_template_preflight_accepts_completed_rows(
     assert payload["top_k_template_ready"] is True
     assert payload["summary"]["missing_required_value_count"] == 0
     assert payload["summary"]["missing_metric_value_count"] == 0
+    assert payload["summary"]["missing_energy_proxy_value_count"] == 0
+    assert payload["summary"]["invalid_energy_proxy_value_count"] == 0
     assert payload["summary"]["missing_receipt_value_count"] == 0
+    assert payload["summary"]["role_receipt_blocked_count"] == 0
     assert payload["summary"]["invalid_checksum_count"] == 0
     assert payload["row_preflight_rows"][0]["status"] == "ready"
+
+
+def test_pocketmd_lite_topk_rows_template_preflight_blocks_invalid_energy_proxy(
+    tmp_path: Path,
+) -> None:
+    refinement_plan = tmp_path / "refinement_plan.json"
+    template = tmp_path / "template.csv"
+    _write_refinement_plan(refinement_plan)
+    rows = _completed_rows()
+    rows[0]["pre_refinement_energy_proxy"] = "not-a-number"
+    _write_csv(template, rows)
+
+    payload = module.build_pocketmd_lite_topk_rows_template_preflight(
+        repo_root=tmp_path,
+        refinement_plan=refinement_plan,
+        template=template,
+        expected_rows=tmp_path / "pocketmd_lite_topk_rows.json",
+    )
+
+    assert payload["status"] == "operator_rows_completion_required"
+    assert payload["top_k_template_ready"] is False
+    assert payload["summary"]["invalid_energy_proxy_value_count"] == 1
+    assert "pre_refinement_energy_proxy" in payload["row_preflight_rows"][0][
+        "invalid_energy_proxy_fields"
+    ]
+    refinement_role = payload["row_preflight_rows"][0]["role_plan_rows"][1]
+    assert refinement_role["role_id"] == "lite_refinement_run_receipt"
+    assert refinement_role["status"] == "operator_completion_required"
+    assert refinement_role["invalid_fields"] == ["pre_refinement_energy_proxy"]
 
 
 def test_pocketmd_lite_topk_rows_template_preflight_writer_creates_outputs(

@@ -18,13 +18,13 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T03:28:30.894157+00:00",
+  "generated_at": "2026-07-04T03:45:43.994389+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv": "sha256:4fac3161714e8bf0444ee3e085a3c34d2f9841acaf9b4427bd8de2224294e196",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:38284961e22e3780859ff077042c86a58db1b4e5c4378efc8aec10ae1763135c",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:1aa07a73ba0f9770659d6317d4d813eff0660669c991dd35c5b89726f4045f20",
     "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:c4e52648fc194826a082a0816d7946350a90fe1e4eae7d31e3d6f37dd1c05148",
-    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:40266f5a4f80513507c5c9fb163dba25f63264475c30a43d78a39e2eb690100c",
-    "scripts/build_pocketmd_lite_topk_rows_template_preflight.py": "sha256:c8e2e3d45e6505823d3943c46905b4a92a0b421daf0d4ad2647eb453452a2960",
+    "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:840b8d8ce3a0af49797f02e49d00913f17cc8b628ac2aeb14f5f38775eef6783",
+    "scripts/build_pocketmd_lite_topk_rows_template_preflight.py": "sha256:bee7f8a388bcec0cf613c291afe00fe6892667bd47c1457967e14ec30d1133af",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:dad666c08fff6ec709e535de64fdc41121b7c93de5e19c42f0876d71a44a67c9",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:161673d8ff036a7a31d657fb972764eeb4b62f6d55cc0840e26f398565707c6f"
   },
@@ -1879,7 +1879,7 @@
     "template_usage_policy": "The template enumerates required columns and minimum case/rank slots only. Operators must replace placeholder blanks with real top-k refinement rows and receipts before writing rows to the default output."
   },
   "schema_version": "pocketmd-lite-source-acquisition-plan.v1",
-  "source_commit_sha": "c202f309b4c2f0b35926eed659af88b9c1842b86",
+  "source_commit_sha": "bd38f5f4360c26232d04232bf6159a3eb8d819d2",
   "source_scope": "bounded_top_k_lite_refinement_rows",
   "status": "operator_acquisition_required",
   "summary": {

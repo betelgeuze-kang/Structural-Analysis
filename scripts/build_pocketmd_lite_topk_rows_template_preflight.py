@@ -48,6 +48,7 @@ REQUIRED_METRIC_FIELDS = (
     "uncertainty_high",
     "uncertainty_unit",
 )
+ENERGY_PROXY_FIELDS = ("pre_refinement_energy_proxy", "post_refinement_energy_proxy")
 ROW_RECEIPT_FIELDS = (
     "upstream_top_k_provenance_ref",
     "upstream_top_k_source_checksum",
@@ -56,6 +57,71 @@ ROW_RECEIPT_FIELDS = (
 )
 CHECKSUM_FIELDS = ("upstream_top_k_source_checksum", "source_checksum")
 PROVENANCE_REF_FIELDS = ("upstream_top_k_provenance_ref", "provenance_ref")
+ROLE_PLANS = (
+    {
+        "role_id": "upstream_top_k_candidate_scope_receipt",
+        "required_fields": (
+            "case_id",
+            "candidate_id",
+            "top_k_rank",
+            "upstream_top_k_provenance_ref",
+            "upstream_top_k_source_checksum",
+        ),
+        "operator_action": "attach_upstream_top_k_scope_receipt",
+        "closes_phase4_criteria": (
+            "top_k_refinement_rows_present",
+            "top_k_refinement_case_coverage",
+        ),
+    },
+    {
+        "role_id": "lite_refinement_run_receipt",
+        "required_fields": (
+            "pre_refinement_energy_proxy",
+            "post_refinement_energy_proxy",
+            "local_min_survived",
+            "provenance_ref",
+            "source_checksum",
+        ),
+        "operator_action": "attach_lite_refinement_run_receipt",
+        "closes_phase4_criteria": (
+            "local_min_survival_materialized",
+            "report_blockers_resolved",
+        ),
+    },
+    {
+        "role_id": "interaction_persistence_receipt",
+        "required_fields": (
+            "contact_persistence_rate",
+            "h_bond_persistence_rate",
+            "clash_count_before",
+            "clash_count_after",
+            "provenance_ref",
+            "source_checksum",
+        ),
+        "operator_action": "attach_contact_hbond_clash_metric_receipt",
+        "closes_phase4_criteria": (
+            "contact_persistence_materialized",
+            "h_bond_persistence_materialized",
+            "clash_relief_materialized",
+            "report_blockers_resolved",
+        ),
+    },
+    {
+        "role_id": "uncertainty_interval_receipt",
+        "required_fields": (
+            "uncertainty_low",
+            "uncertainty_high",
+            "uncertainty_unit",
+            "provenance_ref",
+            "source_checksum",
+        ),
+        "operator_action": "attach_uncertainty_interval_receipt",
+        "closes_phase4_criteria": (
+            "uncertainty_summary_materialized",
+            "report_blockers_resolved",
+        ),
+    },
+)
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -249,12 +315,89 @@ def _metric_status(field: str, value: str) -> dict[str, Any]:
     return {"present": True, "valid": True, "blocker": ""}
 
 
+def _energy_proxy_status(value: str) -> dict[str, Any]:
+    if not value:
+        return {"present": False, "valid": False, "blocker": "energy_proxy_missing"}
+    parsed = _number(value)
+    return {
+        "present": True,
+        "valid": parsed is not None,
+        "blocker": "" if parsed is not None else "energy_proxy_invalid",
+    }
+
+
+def _role_plan_rows(row_preflight: dict[str, Any]) -> list[dict[str, Any]]:
+    role_rows = []
+    missing_sets = [
+        set(row_preflight["missing_required_fields"]),
+        set(row_preflight["missing_metric_fields"]),
+        set(row_preflight["missing_energy_proxy_fields"]),
+        set(row_preflight["missing_receipt_fields"]),
+    ]
+    invalid_sets = [
+        set(row_preflight["invalid_checksum_fields"]),
+        set(row_preflight["invalid_provenance_ref_fields"]),
+        set(row_preflight["invalid_metric_fields"]),
+        set(row_preflight["invalid_energy_proxy_fields"]),
+    ]
+    for role in ROLE_PLANS:
+        required_fields = [str(field) for field in role["required_fields"]]
+        missing_fields = sorted(
+            {
+                field
+                for field in required_fields
+                if any(field in missing_set for missing_set in missing_sets)
+            }
+        )
+        invalid_fields = sorted(
+            {
+                field
+                for field in required_fields
+                if any(field in invalid_set for invalid_set in invalid_sets)
+            }
+        )
+        blockers = []
+        if missing_fields:
+            blockers.append("required_role_fields_missing")
+        if invalid_fields:
+            blockers.append("required_role_fields_invalid")
+        if (
+            role["role_id"] == "upstream_top_k_candidate_scope_receipt"
+            and row_preflight["top_k_rank_blocker"]
+        ):
+            blockers.append(str(row_preflight["top_k_rank_blocker"]))
+        if (
+            role["role_id"] == "uncertainty_interval_receipt"
+            and row_preflight["uncertainty_interval_blocker"]
+        ):
+            blockers.append(str(row_preflight["uncertainty_interval_blocker"]))
+        role_rows.append(
+            {
+                "case_id": row_preflight["case_id"],
+                "top_k_rank": row_preflight["top_k_rank"],
+                "candidate_id": row_preflight["candidate_id"],
+                "role_id": role["role_id"],
+                "required_fields": required_fields,
+                "missing_fields": missing_fields,
+                "invalid_fields": invalid_fields,
+                "closes_phase4_criteria": list(role["closes_phase4_criteria"]),
+                "operator_action": role["operator_action"],
+                "status": "ready" if not blockers else "operator_completion_required",
+                "blockers": blockers,
+            }
+        )
+    return role_rows
+
+
 def _row_preflight(row: dict[str, str]) -> dict[str, Any]:
     missing_required_fields = [
         field for field in REQUIRED_FLAT_ROW_FIELDS if not str(row.get(field) or "")
     ]
     missing_metric_fields = [
         field for field in REQUIRED_METRIC_FIELDS if not str(row.get(field) or "")
+    ]
+    missing_energy_proxy_fields = [
+        field for field in ENERGY_PROXY_FIELDS if not str(row.get(field) or "")
     ]
     missing_receipt_fields = [
         field for field in ROW_RECEIPT_FIELDS if not str(row.get(field) or "")
@@ -285,6 +428,15 @@ def _row_preflight(row: dict[str, str]) -> dict[str, Any]:
         for field, status in metric_statuses.items()
         if status["present"] and not bool(status["valid"])
     ]
+    energy_proxy_statuses = {
+        field: _energy_proxy_status(str(row.get(field) or ""))
+        for field in ENERGY_PROXY_FIELDS
+    }
+    invalid_energy_proxy_fields = [
+        field
+        for field, status in energy_proxy_statuses.items()
+        if status["present"] and not bool(status["valid"])
+    ]
     interval_blocker = ""
     low = _number(str(row.get("uncertainty_low") or ""))
     high = _number(str(row.get("uncertainty_high") or ""))
@@ -302,6 +454,8 @@ def _row_preflight(row: dict[str, str]) -> dict[str, Any]:
         blockers.append("topk_required_fields_missing")
     if missing_metric_fields:
         blockers.append("topk_metric_fields_missing")
+    if missing_energy_proxy_fields:
+        blockers.append("topk_energy_proxy_fields_missing")
     if missing_receipt_fields:
         blockers.append("topk_receipt_fields_missing")
     if invalid_checksum_fields:
@@ -310,9 +464,11 @@ def _row_preflight(row: dict[str, str]) -> dict[str, Any]:
         blockers.append("topk_provenance_refs_invalid")
     if invalid_metric_fields or interval_blocker:
         blockers.append("topk_metric_values_invalid")
+    if invalid_energy_proxy_fields:
+        blockers.append("topk_energy_proxy_values_invalid")
     if rank_blocker:
         blockers.append("top_k_rank_invalid")
-    return {
+    row_preflight = {
         "case_id": str(row.get("case_id") or ""),
         "top_k_rank": rank or 0,
         "candidate_id": str(row.get("candidate_id") or ""),
@@ -324,17 +480,66 @@ def _row_preflight(row: dict[str, str]) -> dict[str, Any]:
         "status": "operator_completion_required" if blockers else "ready",
         "missing_required_fields": missing_required_fields,
         "missing_metric_fields": missing_metric_fields,
+        "missing_energy_proxy_fields": missing_energy_proxy_fields,
         "missing_receipt_fields": missing_receipt_fields,
         "invalid_checksum_fields": invalid_checksum_fields,
         "invalid_provenance_ref_fields": invalid_provenance_ref_fields,
         "invalid_metric_fields": invalid_metric_fields,
+        "invalid_energy_proxy_fields": invalid_energy_proxy_fields,
         "uncertainty_interval_blocker": interval_blocker,
         "top_k_rank_blocker": rank_blocker,
         "checksum_statuses": checksum_statuses,
         "provenance_ref_statuses": provenance_ref_statuses,
         "metric_statuses": metric_statuses,
+        "energy_proxy_statuses": energy_proxy_statuses,
         "blockers": blockers,
     }
+    row_preflight["role_plan_rows"] = _role_plan_rows(row_preflight)
+    return row_preflight
+
+
+def _operator_input_source_receipt_plan(
+    *,
+    expected_rows: Path,
+    expected_rows_detected: bool,
+) -> list[dict[str, Any]]:
+    plan = []
+    for field in SOURCE_RECEIPT_REQUIREMENTS["required_fields"]:
+        field = str(field)
+        if field == "source_artifact":
+            plan.append(
+                {
+                    "field": field,
+                    "expected_value": str(expected_rows),
+                    "status": "ready"
+                    if expected_rows_detected
+                    else "operator_completion_required",
+                    "blocker": "" if expected_rows_detected else "source_artifact_missing",
+                    "operator_action": "write_pocketmd_lite_topk_rows_at_expected_artifact",
+                }
+            )
+            continue
+        if field == "source_artifact_sha256":
+            plan.append(
+                {
+                    "field": field,
+                    "expected_value": "",
+                    "status": "operator_completion_required",
+                    "blocker": "source_artifact_sha256_required",
+                    "operator_action": "compute_source_artifact_sha256_after_rows_written",
+                }
+            )
+            continue
+        plan.append(
+            {
+                "field": field,
+                "expected_value": "",
+                "status": "operator_completion_required",
+                "blocker": f"{field}_required",
+                "operator_action": f"attach_operator_input_source_{field}",
+            }
+        )
+    return plan
 
 
 def build_pocketmd_lite_topk_rows_template_preflight(
@@ -347,6 +552,11 @@ def build_pocketmd_lite_topk_rows_template_preflight(
     refinement_plan_payload = _load_json(repo_root, refinement_plan)
     header_fields, rows = _read_csv_rows(repo_root, template)
     row_preflights = [_row_preflight(row) for row in rows]
+    role_receipt_plan = [
+        role_row
+        for row in row_preflights
+        for role_row in row["role_plan_rows"]
+    ]
     expected_slots = _expected_slots(refinement_plan_payload)
     expected_slot_keys = [(_slot_key(row)) for row in expected_slots]
     template_slot_keys = [_slot_key(row) for row in rows]
@@ -376,6 +586,9 @@ def build_pocketmd_lite_topk_rows_template_preflight(
     missing_metric_value_count = sum(
         len(row["missing_metric_fields"]) for row in row_preflights
     )
+    missing_energy_proxy_value_count = sum(
+        len(row["missing_energy_proxy_fields"]) for row in row_preflights
+    )
     missing_receipt_value_count = sum(
         len(row["missing_receipt_fields"]) for row in row_preflights
     )
@@ -391,6 +604,9 @@ def build_pocketmd_lite_topk_rows_template_preflight(
         + (1 if row["top_k_rank_blocker"] else 0)
         for row in row_preflights
     )
+    invalid_energy_proxy_value_count = sum(
+        len(row["invalid_energy_proxy_fields"]) for row in row_preflights
+    )
     template_slot_coverage_complete = bool(rows) and not (
         missing_expected_slots or unexpected_template_slots or duplicate_slots
     )
@@ -398,10 +614,12 @@ def build_pocketmd_lite_topk_rows_template_preflight(
         missing_header_fields
         or missing_required_value_count
         or missing_metric_value_count
+        or missing_energy_proxy_value_count
         or missing_receipt_value_count
         or invalid_checksum_count
         or invalid_provenance_ref_count
         or invalid_metric_value_count
+        or invalid_energy_proxy_value_count
     )
     if not rows:
         status = "template_missing_or_empty"
@@ -412,6 +630,19 @@ def build_pocketmd_lite_topk_rows_template_preflight(
     else:
         status = "operator_rows_completion_required"
     expected_rows_resolved = _resolve(repo_root, expected_rows)
+    expected_rows_detected = expected_rows_resolved.exists()
+    operator_input_source_receipt_plan = _operator_input_source_receipt_plan(
+        expected_rows=expected_rows,
+        expected_rows_detected=expected_rows_detected,
+    )
+    role_receipt_blocked_count = sum(
+        1 for row in role_receipt_plan if row["status"] != "ready"
+    )
+    operator_input_source_receipt_blocked_count = sum(
+        1
+        for row in operator_input_source_receipt_plan
+        if row["status"] != "ready"
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -430,9 +661,10 @@ def build_pocketmd_lite_topk_rows_template_preflight(
         "top_k_template_ready": top_k_template_ready,
         "template_artifact": str(template),
         "expected_rows_artifact": str(expected_rows),
-        "expected_rows_detected": expected_rows_resolved.exists(),
+        "expected_rows_detected": expected_rows_detected,
         "required_fields": list(REQUIRED_FLAT_ROW_FIELDS),
         "required_metric_fields": list(REQUIRED_METRIC_FIELDS),
+        "required_energy_proxy_fields": list(ENERGY_PROXY_FIELDS),
         "required_row_receipt_fields": list(ROW_RECEIPT_FIELDS),
         "operator_source_receipt_required_fields": list(
             SOURCE_RECEIPT_REQUIREMENTS["required_fields"]
@@ -449,6 +681,8 @@ def build_pocketmd_lite_topk_rows_template_preflight(
         "duplicate_slots": duplicate_slots,
         "row_preflight_rows": row_preflights,
         "row_preflight_count": len(row_preflights),
+        "role_receipt_plan": role_receipt_plan,
+        "operator_input_source_receipt_plan": operator_input_source_receipt_plan,
         "row_value_contract": row_value_contract(max_top_k=DEFAULT_MAX_TOP_K),
         "source_receipt_requirements": dict(SOURCE_RECEIPT_REQUIREMENTS),
         "template_safety_policy": {
@@ -508,12 +742,22 @@ def build_pocketmd_lite_topk_rows_template_preflight(
             "missing_header_field_count": len(missing_header_fields),
             "missing_required_value_count": missing_required_value_count,
             "missing_metric_value_count": missing_metric_value_count,
+            "missing_energy_proxy_value_count": missing_energy_proxy_value_count,
             "missing_receipt_value_count": missing_receipt_value_count,
             "invalid_checksum_count": invalid_checksum_count,
             "invalid_provenance_ref_count": invalid_provenance_ref_count,
             "invalid_metric_value_count": invalid_metric_value_count,
+            "invalid_energy_proxy_value_count": invalid_energy_proxy_value_count,
+            "role_receipt_plan_count": len(role_receipt_plan),
+            "role_receipt_blocked_count": role_receipt_blocked_count,
+            "operator_input_source_receipt_requirement_count": len(
+                operator_input_source_receipt_plan
+            ),
+            "operator_input_source_receipt_blocked_count": (
+                operator_input_source_receipt_blocked_count
+            ),
             "top_k_template_ready": top_k_template_ready,
-            "expected_rows_detected": expected_rows_resolved.exists(),
+            "expected_rows_detected": expected_rows_detected,
         },
         "claim_boundary": (
             "This preflight audits the PocketMD Lite top-k rows template only. It "
@@ -538,22 +782,70 @@ def render_pocketmd_lite_topk_rows_template_preflight_markdown(
         f"- `expected_slot_count`: `{summary['expected_slot_count']}`",
         f"- `missing_required_value_count`: `{summary['missing_required_value_count']}`",
         f"- `missing_metric_value_count`: `{summary['missing_metric_value_count']}`",
+        f"- `missing_energy_proxy_value_count`: `{summary['missing_energy_proxy_value_count']}`",
         f"- `missing_receipt_value_count`: `{summary['missing_receipt_value_count']}`",
         f"- `invalid_metric_value_count`: `{summary['invalid_metric_value_count']}`",
+        f"- `invalid_energy_proxy_value_count`: `{summary['invalid_energy_proxy_value_count']}`",
+        f"- `role_receipt_blocked_count`: `{summary['role_receipt_blocked_count']}`",
+        "- `operator_input_source_receipt_blocked_count`: "
+        f"`{summary['operator_input_source_receipt_blocked_count']}`",
         f"- `expected_rows_detected`: `{summary['expected_rows_detected']}`",
         "",
         "## Row Slots",
         "",
-        "| Slot | Case | Rank | Status | Missing Metrics | Missing Receipts |",
-        "|---|---|---|---|---|---|",
+        "| Slot | Case | Rank | Status | Missing Energy | Missing Metrics | Missing Receipts |",
+        "|---|---|---|---|---|---|---|",
     ]
     for row in payload["row_preflight_rows"]:
         lines.append(
             f"| `{row['slot_id']}` | `{row['case_id']}` | "
             f"`{row['top_k_rank']}` | `{row['status']}` | "
+            f"`{len(row['missing_energy_proxy_fields'])}` | "
             f"`{len(row['missing_metric_fields'])}` | "
             f"`{len(row['missing_receipt_fields'])}` |"
         )
+    role_plan = [
+        row for row in payload.get("role_receipt_plan", []) if isinstance(row, dict)
+    ]
+    if role_plan:
+        lines.extend(
+            [
+                "",
+                "## Role Receipt Plan",
+                "",
+                "| Candidate | Role | Status | Missing | Invalid | Action |",
+                "|---|---|---|---:|---:|---|",
+            ]
+        )
+        for row in role_plan:
+            lines.append(
+                f"| `{row.get('candidate_id', '')}` | `{row.get('role_id', '')}` | "
+                f"`{row.get('status', '')}` | "
+                f"`{len(row.get('missing_fields', []))}` | "
+                f"`{len(row.get('invalid_fields', []))}` | "
+                f"`{row.get('operator_action', '')}` |"
+            )
+    source_receipt_plan = [
+        row
+        for row in payload.get("operator_input_source_receipt_plan", [])
+        if isinstance(row, dict)
+    ]
+    if source_receipt_plan:
+        lines.extend(
+            [
+                "",
+                "## Operator Input Source Receipt Plan",
+                "",
+                "| Field | Status | Blocker | Action |",
+                "|---|---|---|---|",
+            ]
+        )
+        for row in source_receipt_plan:
+            lines.append(
+                f"| `{row.get('field', '')}` | `{row.get('status', '')}` | "
+                f"`{row.get('blocker', '')}` | "
+                f"`{row.get('operator_action', '')}` |"
+            )
     lines.extend(["", "## Commands", ""])
     for key, command in payload["commands"].items():
         lines.append(f"- `{key}`: `{command}`")
