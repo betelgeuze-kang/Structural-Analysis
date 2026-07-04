@@ -7,7 +7,7 @@
 - `expected_engine_run_slot_count`: `24`
 - `missing_required_value_count`: `144`
 - `missing_engine_run_receipt_value_count`: `72`
-- `missing_local_ref_count`: `48`
+- `missing_local_ref_count`: `24`
 - `missing_numeric_value_count`: `48`
 - `invalid_pose_success_count`: `24`
 - `role_receipt_plan_count`: `96`
@@ -48,99 +48,99 @@
 | Slot | Role | Status | Missing Fields | Invalid Fields |
 |---|---|---|---|---|
 | `casf2016_4llx_vina_casf2016_4llx_vina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_4llx_vina_casf2016_4llx_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_4llx_vina_casf2016_4llx_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_4llx_vina_casf2016_4llx_vina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_4llx_vina_casf2016_4llx_vina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_4llx_gnina_casf2016_4llx_gnina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_4llx_gnina_casf2016_4llx_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_4llx_gnina_casf2016_4llx_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_4llx_gnina_casf2016_4llx_gnina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_4llx_gnina_casf2016_4llx_gnina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_5c28_vina_casf2016_5c28_vina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_5c28_vina_casf2016_5c28_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_5c28_vina_casf2016_5c28_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_5c28_vina_casf2016_5c28_vina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_5c28_vina_casf2016_5c28_vina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_5c28_gnina_casf2016_5c28_gnina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_5c28_gnina_casf2016_5c28_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_5c28_gnina_casf2016_5c28_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_5c28_gnina_casf2016_5c28_gnina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_5c28_gnina_casf2016_5c28_gnina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_3uuo_vina_casf2016_3uuo_vina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_3uuo_vina_casf2016_3uuo_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_3uuo_vina_casf2016_3uuo_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_3uuo_vina_casf2016_3uuo_vina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_3uuo_vina_casf2016_3uuo_vina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_3uuo_gnina_casf2016_3uuo_gnina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_3uuo_gnina_casf2016_3uuo_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_3uuo_gnina_casf2016_3uuo_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_3uuo_gnina_casf2016_3uuo_gnina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_3uuo_gnina_casf2016_3uuo_gnina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_3ui7_vina_casf2016_3ui7_vina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_3ui7_vina_casf2016_3ui7_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_3ui7_vina_casf2016_3ui7_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_3ui7_vina_casf2016_3ui7_vina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_3ui7_vina_casf2016_3ui7_vina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_3ui7_gnina_casf2016_3ui7_gnina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_3ui7_gnina_casf2016_3ui7_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_3ui7_gnina_casf2016_3ui7_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_3ui7_gnina_casf2016_3ui7_gnina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_3ui7_gnina_casf2016_3ui7_gnina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_5c2h_vina_casf2016_5c2h_vina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_5c2h_vina_casf2016_5c2h_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_5c2h_vina_casf2016_5c2h_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_5c2h_vina_casf2016_5c2h_vina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_5c2h_vina_casf2016_5c2h_vina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_5c2h_gnina_casf2016_5c2h_gnina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_5c2h_gnina_casf2016_5c2h_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_5c2h_gnina_casf2016_5c2h_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_5c2h_gnina_casf2016_5c2h_gnina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_5c2h_gnina_casf2016_5c2h_gnina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_2v00_vina_casf2016_2v00_vina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_2v00_vina_casf2016_2v00_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_2v00_vina_casf2016_2v00_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_2v00_vina_casf2016_2v00_vina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_2v00_vina_casf2016_2v00_vina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_2v00_gnina_casf2016_2v00_gnina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_2v00_gnina_casf2016_2v00_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_2v00_gnina_casf2016_2v00_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_2v00_gnina_casf2016_2v00_gnina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_2v00_gnina_casf2016_2v00_gnina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_3wz8_vina_casf2016_3wz8_vina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_3wz8_vina_casf2016_3wz8_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_3wz8_vina_casf2016_3wz8_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_3wz8_vina_casf2016_3wz8_vina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_3wz8_vina_casf2016_3wz8_vina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_3wz8_gnina_casf2016_3wz8_gnina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_3wz8_gnina_casf2016_3wz8_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_3wz8_gnina_casf2016_3wz8_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_3wz8_gnina_casf2016_3wz8_gnina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_3wz8_gnina_casf2016_3wz8_gnina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_3pww_vina_casf2016_3pww_vina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_3pww_vina_casf2016_3pww_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_3pww_vina_casf2016_3pww_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_3pww_vina_casf2016_3pww_vina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_3pww_vina_casf2016_3pww_vina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_3pww_gnina_casf2016_3pww_gnina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_3pww_gnina_casf2016_3pww_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_3pww_gnina_casf2016_3pww_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_3pww_gnina_casf2016_3pww_gnina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_3pww_gnina_casf2016_3pww_gnina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_3prs_vina_casf2016_3prs_vina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_3prs_vina_casf2016_3prs_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_3prs_vina_casf2016_3prs_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_3prs_vina_casf2016_3prs_vina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_3prs_vina_casf2016_3prs_vina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_3prs_gnina_casf2016_3prs_gnina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_3prs_gnina_casf2016_3prs_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_3prs_gnina_casf2016_3prs_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_3prs_gnina_casf2016_3prs_gnina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_3prs_gnina_casf2016_3prs_gnina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_3uri_vina_casf2016_3uri_vina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_3uri_vina_casf2016_3uri_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_3uri_vina_casf2016_3uri_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_3uri_vina_casf2016_3uri_vina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_3uri_vina_casf2016_3uri_vina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_3uri_gnina_casf2016_3uri_gnina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_3uri_gnina_casf2016_3uri_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_3uri_gnina_casf2016_3uri_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_3uri_gnina_casf2016_3uri_gnina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_3uri_gnina_casf2016_3uri_gnina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_4m0z_vina_casf2016_4m0z_vina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_4m0z_vina_casf2016_4m0z_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_4m0z_vina_casf2016_4m0z_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_4m0z_vina_casf2016_4m0z_vina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_4m0z_vina_casf2016_4m0z_vina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_4m0z_gnina_casf2016_4m0z_gnina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_4m0z_gnina_casf2016_4m0z_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_4m0z_gnina_casf2016_4m0z_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_4m0z_gnina_casf2016_4m0z_gnina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_4m0z_gnina_casf2016_4m0z_gnina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_4m0y_vina_casf2016_4m0y_vina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_4m0y_vina_casf2016_4m0y_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_4m0y_vina_casf2016_4m0y_vina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_4m0y_vina_casf2016_4m0y_vina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_4m0y_vina_casf2016_4m0y_vina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 | `casf2016_4m0y_gnina_casf2016_4m0y_gnina_run` | `casf_pdbbind_case_source_receipt` | `ready` | `none` | `none` |
-| `casf2016_4m0y_gnina_casf2016_4m0y_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `engine_run_provenance_ref`, `predicted_ligand_path_or_pose_ref` |
+| `casf2016_4m0y_gnina_casf2016_4m0y_gnina_run` | `engine_run_artifact_receipt` | `operator_completion_required` | `predicted_ligand_checksum` | `predicted_ligand_path_or_pose_ref` |
 | `casf2016_4m0y_gnina_casf2016_4m0y_gnina_run` | `engine_config_version_receipt` | `operator_completion_required` | `engine_config_checksum`, `engine_version` | `none` |
 | `casf2016_4m0y_gnina_casf2016_4m0y_gnina_run` | `comparison_metric_receipt` | `operator_completion_required` | `pose_success`, `score`, `symmetry_aware_rmsd_angstrom` | `none` |
 

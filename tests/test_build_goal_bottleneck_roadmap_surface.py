@@ -318,7 +318,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert briefing["first_operator_handoff"]["slot_id"] == "vina_gnina_rows"
     assert briefing["first_operator_handoff"][
         "actual_evidence_audit_status"
-    ] == "engine_input_manifest_required"
+    ] == "adapter_rows_required"
     assert briefing["next_owner_handoff_slot_count"] == 2
     assert briefing["first_operator_handoff_slot"]["slot_id"] == "vina_gnina_rows"
     assert briefing["first_operator_handoff_slot"][
@@ -339,13 +339,13 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "public_benchmark_vina_gnina_rows_template.csv"
     )
     assert handoffs["vina_gnina_rows"]["first_next_action"] == (
-        "complete_vina_gnina_input_manifest_required_values"
+        "attach_or_materialize_public_benchmark_vina_gnina_rows"
     )
     assert handoffs["vina_gnina_rows"]["command_key"] == (
-        "build_input_manifest_template_preflight"
+        "materialize_rows_from_engine_run_bundle"
     )
     assert (
-        "build_public_benchmark_vina_gnina_input_manifest_template_preflight.py"
+        "materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py"
         in handoffs["vina_gnina_rows"]["materialization_command"]
     )
     assert handoffs["vina_gnina_rows"]["first_unblock_action"][
@@ -353,7 +353,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     ] == "first_operator_blocker_family"
     assert handoffs["vina_gnina_rows"]["first_unblock_action"][
         "first_missing_item"
-    ]["field"] == "prepared_receptor_checksum"
+    ]["blocker"] == "public_benchmark_vina_gnina_rows_not_detected"
     assert handoffs["vina_gnina_rows"][
         "runtime_blocker_family_action_count"
     ] == 7
@@ -371,11 +371,11 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     ]
     assert handoffs["vina_gnina_rows"][
         "actual_evidence_audit_status"
-    ] == "engine_input_manifest_required"
+    ] == "adapter_rows_required"
     assert handoffs["vina_gnina_rows"][
         "actual_evidence_blocked_component_count"
-    ] == 6
-    assert "engine_input_manifest" in handoffs["vina_gnina_rows"][
+    ] == 3
+    assert "adapter_rows" in handoffs["vina_gnina_rows"][
         "actual_evidence_remaining_evidence"
     ]
     assert handoffs["pocketmd_rows"]["queue_priority"] == 2
@@ -439,10 +439,10 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     }
     assert sorted(slots) == ["pocketmd_rows", "vina_gnina_rows"]
     assert slots["vina_gnina_rows"]["first_next_action"] == (
-        "complete_vina_gnina_input_manifest_required_values"
+        "attach_or_materialize_public_benchmark_vina_gnina_rows"
     )
     assert slots["vina_gnina_rows"]["command_key"] == (
-        "build_input_manifest_template_preflight"
+        "materialize_rows_from_engine_run_bundle"
     )
     assert slots["vina_gnina_rows"]["runtime_blocker_family_action_count"] == 7
     assert slots["pocketmd_rows"]["first_next_action"] == (
@@ -518,20 +518,18 @@ def test_goal_bottleneck_surface_exposes_active_thread_goal_audit() -> None:
     assert public["current"]["input_manifest_detected"] is True
     assert public["current"]["input_manifest_syntax_ready"] is True
     assert public["current"]["input_manifest_verification_status"] == (
-        "syntactic_manifest_detected_but_case_inputs_unverified"
+        "case_inputs_verified"
     )
-    assert public["current"]["verified_case_input_count"] == 0
-    assert public["current"]["template_completion_blocked_case_count"] == 12
+    assert public["current"]["verified_case_input_count"] == 12
+    assert public["current"]["template_completion_blocked_case_count"] == 0
     assert public["current"]["source_files_ready"] is True
     assert public["current"]["source_ready_case_count"] == 12
     assert public["current"]["source_file_count"] == 24
     assert public["current"]["verified_source_file_count"] == 24
     assert public["current"]["blocked_source_file_count"] == 0
-    assert public["current"]["prepared_input_gap_count"] == 24
-    assert public["current"]["missing_engine_ids"] == ["vina", "gnina"]
-    assert "public_benchmark_vina_gnina_case_input_files_or_receipts_unverified" in (
-        public["blockers"]
-    )
+    assert public["current"]["prepared_input_gap_count"] == 0
+    assert public["current"]["missing_engine_ids"] == []
+    assert "public_benchmark_vina_gnina_rows_not_detected" in public["blockers"]
     assert "vina_gnina_rows_not_provided" in public["blockers"]
     assert (
         "public_benchmark_source_actuality_ready::"
@@ -724,7 +722,7 @@ def test_goal_bottleneck_roadmap_surface_links_structural_release_bottleneck() -
     )
     assert phase_2["summary"]["missing_row_inputs"] == ["vina_gnina_rows"]
     assert phase_2["summary"]["actual_evidence_audit_status"] == (
-        "engine_input_manifest_required"
+        "adapter_rows_required"
     )
     assert phase_2["summary"]["operator_evidence_gap_register"][0]["slot_id"] == (
         "vina_gnina_rows"

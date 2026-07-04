@@ -1,0 +1,28 @@
+{
+  "case_id": "casf2016_3uri",
+  "claim_boundary": "This is a receipt template, not evidence of a completed Vina/GNINA run. Public Benchmark Phase 2 requires real predicted ligand output checksums and comparison metrics before adapter rows can be promoted.",
+  "command": "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/bin/vina --receptor tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uri/3uri_receptor.pdbqt --ligand tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uri/3uri_ligand.pdbqt --center_x 1.84375 --center_y 31.63795 --center_z 18.57955 --size_x 31.2535 --size_y 35.0481 --size_z 32.7671 --out operator_attached/vina_gnina/casf2016_3uri/vina_pose.sdf",
+  "complex_id": "3uri",
+  "docking_run_id": "casf2016_3uri_vina_run",
+  "engine_config_checksum": "sha256:6bdba588ce71c92257dcc5051cbb13a36a95fa36c869ea982bdd116929b0b85c",
+  "engine_id": "vina",
+  "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_run_receipt.json",
+  "engine_version": "AutoDock Vina Python API 1.2.7",
+  "operator_required_fields": [
+    "predicted_ligand_checksum",
+    "engine_version",
+    "symmetry_aware_rmsd_angstrom",
+    "pose_success",
+    "score"
+  ],
+  "pose_success": "",
+  "predicted_ligand_checksum": "",
+  "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3uri/vina_pose.sdf",
+  "prepared_ligand_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uri/3uri_ligand.pdbqt",
+  "prepared_receptor_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uri/3uri_receptor.pdbqt",
+  "schema_version": "public-benchmark-vina-gnina-engine-run-receipt-template.v1",
+  "score": "",
+  "score_direction": "lower_is_better",
+  "status": "operator_run_required",
+  "symmetry_aware_rmsd_angstrom": ""
+}

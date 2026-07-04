@@ -1089,6 +1089,12 @@ def _vina_gnina_execution_plan_summary(payload: dict[str, Any]) -> dict[str, Any
         ),
         "available_engine_count": int(summary.get("available_engine_count") or 0),
         "missing_engine_count": int(summary.get("missing_engine_count") or 0),
+        "local_source_ready_case_count": int(
+            summary.get("local_source_ready_case_count") or 0
+        ),
+        "prepared_input_ready_case_count": int(
+            summary.get("prepared_input_ready_case_count") or 0
+        ),
         "missing_engine_ids": [
             str(row)
             for row in payload.get("missing_engine_ids", [])
@@ -2616,10 +2622,21 @@ def _vina_gnina_actual_evidence_audit(
     input_manifest_template_ready = bool(
         input_manifest_preflight.get("manifest_ready")
     )
+    prepared_input_ready_case_count = _as_int(
+        vina_gnina_execution_plan_summary.get("prepared_input_ready_case_count")
+    )
+    prepared_input_gap_count = max(
+        0,
+        2 * max(0, required_case_count - prepared_input_ready_case_count),
+    )
+    if prepared_input_ready_case_count == 0:
+        prepared_input_gap_count = _as_int(
+            vina_gnina_source_extraction_summary.get("prepared_input_gap_count")
+        )
     input_manifest_ready = (
         input_manifest_syntax_ready
-        and input_manifest_template_ready
         and blocked_case_input_slot_count == 0
+        and verified_case_input_count >= required_case_count
     )
     if input_manifest_ready:
         input_manifest_verification_status = "case_inputs_verified"
@@ -2738,10 +2755,9 @@ def _vina_gnina_actual_evidence_audit(
                     )
                 ),
                 "prepared_input_gap_count": _as_int(
-                    vina_gnina_source_extraction_summary.get(
-                        "prepared_input_gap_count"
-                    )
+                    prepared_input_gap_count
                 ),
+                "prepared_input_ready_case_count": prepared_input_ready_case_count,
             },
             "required": {
                 "input_manifest_detected": True,
@@ -2770,7 +2786,8 @@ def _vina_gnina_actual_evidence_audit(
                             [
                                 "public_benchmark_vina_gnina_input_manifest_template_completion_required"
                             ]
-                            if input_manifest_syntax_ready
+                            if not input_manifest_ready
+                            and input_manifest_syntax_ready
                             and not input_manifest_template_ready
                             else []
                         ),
@@ -3061,6 +3078,38 @@ def _vina_gnina_actual_evidence_audit(
                     },
                 }
                 if str(row.get("family_id") or "") == "official_source_files"
+                else row
+            )
+            for row in operator_blocker_family_plan
+        ]
+    if input_manifest_ready or prepared_input_ready_case_count >= required_case_count:
+        ready_family_ids: set[str] = set()
+        if input_manifest_ready:
+            ready_family_ids.add("manifest_required_values")
+        if prepared_input_ready_case_count >= required_case_count:
+            ready_family_ids.add("prepared_input_files")
+        operator_blocker_family_plan = [
+            (
+                {
+                    **row,
+                    "status": "ready",
+                    "missing_item_count": 0,
+                    "blocked_case_count": 0,
+                    "first_missing_item": {},
+                    "next_action": (
+                        "review_verified_vina_gnina_input_manifest"
+                        if str(row.get("family_id") or "")
+                        == "manifest_required_values"
+                        else "review_verified_vina_gnina_prepared_inputs"
+                    ),
+                    "operator_action": (
+                        "review_verified_vina_gnina_input_manifest"
+                        if str(row.get("family_id") or "")
+                        == "manifest_required_values"
+                        else "review_verified_vina_gnina_prepared_inputs"
+                    ),
+                }
+                if str(row.get("family_id") or "") in ready_family_ids
                 else row
             )
             for row in operator_blocker_family_plan
@@ -3959,7 +4008,12 @@ def build_public_benchmark_phase2_source_acquisition_plan(
                 ]
             ),
             "vina_gnina_prepared_input_gap_count": (
-                vina_gnina_source_extraction_summary["prepared_input_gap_count"]
+                vina_gnina_input_manifest_current.get("prepared_input_gap_count")
+            ),
+            "vina_gnina_prepared_input_ready_case_count": (
+                vina_gnina_input_manifest_current.get(
+                    "prepared_input_ready_case_count"
+                )
             ),
             "vina_gnina_missing_engine_count": vina_gnina_execution_plan_summary[
                 "missing_engine_count"

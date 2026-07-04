@@ -44,11 +44,11 @@
 - `status`: `operator_runtime_or_rows_required`
 - `rows_present`: `False`
 - `expected_rows_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json`
-- `runtime_status`: `execution_plan_blocked`
-- `blocked_case_input_slot_count`: `12`
-- `blocked_engine_run_slot_count`: `24`
-- `first_operator_blocker_family`: `manifest_required_values` / `complete_vina_gnina_input_manifest_required_values`
-- `first_blocked_case_input_slot`: `casf2016_4llx` / `prepared_receptor_path_missing, prepared_ligand_path_missing`
-- `first_blocked_engine_run_slot`: `casf2016_4llx` / `vina` / `prepared_receptor_path_missing, prepared_ligand_path_missing, vina_binary_missing`
+- `runtime_status`: `ready_for_engine_execution`
+- `blocked_case_input_slot_count`: `0`
+- `blocked_engine_run_slot_count`: `0`
+- `first_operator_blocker_family`: `adapter_rows` / `attach_or_materialize_public_benchmark_vina_gnina_rows`
+- `first_blocked_case_input_slot`: `` / `none`
+- `first_blocked_engine_run_slot`: `` / `` / `none`
 
 This runner only materializes operator-attached public benchmark row files through the existing Public Benchmark harness materializers. It does not download CASF/PDBBind, DUD-E, or LIT-PCBA data, approve licenses, run docking engines, infer chemistry, or treat fixture/proxy rows as actual Phase 2 evidence.

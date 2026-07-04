@@ -5,7 +5,7 @@
 - `science_actual_closure_contract_pass`: `False`
 - `missing_slot_count`: `2`
 - `slot_count`: `6`
-- `blocker_count`: `9`
+- `blocker_count`: `7`
 
 ## Actual Closure Progress
 
@@ -36,7 +36,7 @@
 
 | Row Input | Status | Expected Rows | First Step | First Blocked Slot | Preflight Artifacts | Primary Command |
 | --- | --- | --- | --- | --- | --- | --- |
-| `vina_gnina_rows` | `engine_inputs_required` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `review_public_benchmark_vina_gnina_input_manifest_template_preflight` | `case:casf2016_4llx/fill_vina_gnina_input_manifest_row_for_casf2016_4llx`, `engine:casf2016_4llx/vina/casf2016_4llx_vina_run`, `bundle:execution_plan_not_ready`, `rows_bundle:engine_run_bundle_not_ready`, `manifest:casf2016_4llx/complete_vina_gnina_input_manifest_row_for_casf2016_4llx/missing_files=4` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` |
+| `vina_gnina_rows` | `engine_run_rows_required` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `review_public_benchmark_vina_gnina_input_manifest_template_preflight` | `bundle:engine_run_bundle_materialized`, `rows_bundle:operator_receipts_completion_required` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json`, `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` |
 | `pocketmd_rows` | `operator_refinement_rows_required` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `preflight_pocketmd_lite_topk_rows_template` | `candidate:pocketmd_lite_case_001_rank_01/attach_pocketmd_topk_row_for_pocketmd_lite_case_001_rank_01`, `role:upstream_top_k_candidate_scope_receipt/pocketmd_lite_case_001_rank_01`, `source:source_id/attach_operator_input_source_source_id`, `receipt:operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json/missing_fields=18`, `report:top_k_refinement_operator_intake` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json` | `python3 scripts/build_pocketmd_lite_topk_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md` |
 
 ## Missing Row Packet
@@ -44,49 +44,6 @@
 | Row Input | Action | Template | Materialization |
 | --- | --- | --- | --- |
 | `vina_gnina_rows` | `attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv` | `python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked` |
-
-### Vina/GNINA Engine Run Slots
-
-- `blocked_engine_run_slot_count`: `24`
-- `operator_unblock_status`: `engine_inputs_required`
-- `missing_engine_ids`: `vina`, `gnina`
-- `runtime_readiness_blocker_count`: `76`
-- `adapter_row_preflight_status`: `row_artifact_missing`
-- `input_manifest_template_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv`
-- `input_manifest_template_preflight_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json`
-- `input_manifest_template_preflight_command`: `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md`
-
-| Engine | Runtime Action | Binary Env | Container Env |
-| --- | --- | --- | --- |
-| `vina` | `configure_vina_runtime` | `PUBLIC_BENCHMARK_VINA_BIN` | `PUBLIC_BENCHMARK_VINA_CONTAINER_IMAGE` |
-| `gnina` | `configure_gnina_runtime` | `PUBLIC_BENCHMARK_GNINA_BIN` | `PUBLIC_BENCHMARK_GNINA_CONTAINER_IMAGE` |
-
-| Slot | Case | Engine | Status | Actions |
-| --- | --- | --- | --- | --- |
-| `casf2016_4llx_vina_casf2016_4llx_vina_run` | `casf2016_4llx` | `vina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_4llx, configure_vina_runtime, attach_vina_gnina_adapter_row_for_casf2016_4llx_vina` |
-| `casf2016_4llx_gnina_casf2016_4llx_gnina_run` | `casf2016_4llx` | `gnina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_4llx, configure_gnina_runtime, attach_vina_gnina_adapter_row_for_casf2016_4llx_gnina` |
-| `casf2016_5c28_vina_casf2016_5c28_vina_run` | `casf2016_5c28` | `vina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_5c28, configure_vina_runtime, attach_vina_gnina_adapter_row_for_casf2016_5c28_vina` |
-| `casf2016_5c28_gnina_casf2016_5c28_gnina_run` | `casf2016_5c28` | `gnina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_5c28, configure_gnina_runtime, attach_vina_gnina_adapter_row_for_casf2016_5c28_gnina` |
-| `casf2016_3uuo_vina_casf2016_3uuo_vina_run` | `casf2016_3uuo` | `vina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_3uuo, configure_vina_runtime, attach_vina_gnina_adapter_row_for_casf2016_3uuo_vina` |
-| `casf2016_3uuo_gnina_casf2016_3uuo_gnina_run` | `casf2016_3uuo` | `gnina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_3uuo, configure_gnina_runtime, attach_vina_gnina_adapter_row_for_casf2016_3uuo_gnina` |
-| `casf2016_3ui7_vina_casf2016_3ui7_vina_run` | `casf2016_3ui7` | `vina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_3ui7, configure_vina_runtime, attach_vina_gnina_adapter_row_for_casf2016_3ui7_vina` |
-| `casf2016_3ui7_gnina_casf2016_3ui7_gnina_run` | `casf2016_3ui7` | `gnina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_3ui7, configure_gnina_runtime, attach_vina_gnina_adapter_row_for_casf2016_3ui7_gnina` |
-| `casf2016_5c2h_vina_casf2016_5c2h_vina_run` | `casf2016_5c2h` | `vina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_5c2h, configure_vina_runtime, attach_vina_gnina_adapter_row_for_casf2016_5c2h_vina` |
-| `casf2016_5c2h_gnina_casf2016_5c2h_gnina_run` | `casf2016_5c2h` | `gnina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_5c2h, configure_gnina_runtime, attach_vina_gnina_adapter_row_for_casf2016_5c2h_gnina` |
-| `casf2016_2v00_vina_casf2016_2v00_vina_run` | `casf2016_2v00` | `vina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_2v00, configure_vina_runtime, attach_vina_gnina_adapter_row_for_casf2016_2v00_vina` |
-| `casf2016_2v00_gnina_casf2016_2v00_gnina_run` | `casf2016_2v00` | `gnina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_2v00, configure_gnina_runtime, attach_vina_gnina_adapter_row_for_casf2016_2v00_gnina` |
-| `casf2016_3wz8_vina_casf2016_3wz8_vina_run` | `casf2016_3wz8` | `vina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_3wz8, configure_vina_runtime, attach_vina_gnina_adapter_row_for_casf2016_3wz8_vina` |
-| `casf2016_3wz8_gnina_casf2016_3wz8_gnina_run` | `casf2016_3wz8` | `gnina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_3wz8, configure_gnina_runtime, attach_vina_gnina_adapter_row_for_casf2016_3wz8_gnina` |
-| `casf2016_3pww_vina_casf2016_3pww_vina_run` | `casf2016_3pww` | `vina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_3pww, configure_vina_runtime, attach_vina_gnina_adapter_row_for_casf2016_3pww_vina` |
-| `casf2016_3pww_gnina_casf2016_3pww_gnina_run` | `casf2016_3pww` | `gnina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_3pww, configure_gnina_runtime, attach_vina_gnina_adapter_row_for_casf2016_3pww_gnina` |
-| `casf2016_3prs_vina_casf2016_3prs_vina_run` | `casf2016_3prs` | `vina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_3prs, configure_vina_runtime, attach_vina_gnina_adapter_row_for_casf2016_3prs_vina` |
-| `casf2016_3prs_gnina_casf2016_3prs_gnina_run` | `casf2016_3prs` | `gnina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_3prs, configure_gnina_runtime, attach_vina_gnina_adapter_row_for_casf2016_3prs_gnina` |
-| `casf2016_3uri_vina_casf2016_3uri_vina_run` | `casf2016_3uri` | `vina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_3uri, configure_vina_runtime, attach_vina_gnina_adapter_row_for_casf2016_3uri_vina` |
-| `casf2016_3uri_gnina_casf2016_3uri_gnina_run` | `casf2016_3uri` | `gnina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_3uri, configure_gnina_runtime, attach_vina_gnina_adapter_row_for_casf2016_3uri_gnina` |
-| `casf2016_4m0z_vina_casf2016_4m0z_vina_run` | `casf2016_4m0z` | `vina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_4m0z, configure_vina_runtime, attach_vina_gnina_adapter_row_for_casf2016_4m0z_vina` |
-| `casf2016_4m0z_gnina_casf2016_4m0z_gnina_run` | `casf2016_4m0z` | `gnina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_4m0z, configure_gnina_runtime, attach_vina_gnina_adapter_row_for_casf2016_4m0z_gnina` |
-| `casf2016_4m0y_vina_casf2016_4m0y_vina_run` | `casf2016_4m0y` | `vina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_4m0y, configure_vina_runtime, attach_vina_gnina_adapter_row_for_casf2016_4m0y_vina` |
-| `casf2016_4m0y_gnina_casf2016_4m0y_gnina_run` | `casf2016_4m0y` | `gnina` | `blocked` | `resolve_vina_gnina_case_inputs_for_casf2016_4m0y, configure_gnina_runtime, attach_vina_gnina_adapter_row_for_casf2016_4m0y_gnina` |
 | `pocketmd_rows` | `attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv` | `python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked` |
 
 ### PocketMD Top-k Candidate Slots
@@ -287,33 +244,33 @@
 
 ### Public Benchmark Vina/GNINA Actual Evidence Audit
 
-- `status`: `engine_input_manifest_required`
+- `status`: `adapter_rows_required`
 - `actual_closure_ready`: `False`
-- `ready_component_count`: `0`
-- `blocked_component_count`: `6`
-- `remaining_evidence`: `engine_input_manifest`, `engine_runtime`, `engine_run_slots`, `adapter_rows`, `per_engine_run_receipts`, `external_receipts`
+- `ready_component_count`: `3`
+- `blocked_component_count`: `3`
+- `remaining_evidence`: `adapter_rows`, `per_engine_run_receipts`, `external_receipts`
 - `operator_blocker_family_count`: `7`
-- `operator_blocker_family_missing_item_count`: `158`
+- `operator_blocker_family_missing_item_count`: `12`
 
 | Component | Status | Pass | Current | Required | Blockers |
 |---|---|---|---|---|---|
-| `engine_input_manifest` | `blocked` | `False` | `{"blocked_case_input_slot_count": 12, "blocked_source_file_count": 0, "case_input_slot_count": 12, "input_manifest_detected": true, "input_manifest_row_count": 12, "input_manifest_status": "ready", "input_manifest_syntax_ready": true, "input_manifest_verification_status": "syntactic_manifest_detected_but_case_inputs_unverified", "prepared_input_gap_count": 24, "required_case_count": 12, "source_extraction_status": "source_files_verified_prepared_inputs_required", "source_file_count": 24, "source_files_ready": true, "source_ready_case_count": 12, "template_completion_blocked_case_count": 12, "template_manifest_ready": false, "template_missing_local_file_count": 48, "template_missing_receipt_ref_count": 60, "template_preflight_status": "operator_manifest_completion_required", "verified_case_input_count": 0, "verified_source_file_count": 24}` | `{"blocked_case_input_slot_count": 0, "input_manifest_detected": true, "input_manifest_row_count": ">=12", "input_manifest_syntax_ready": true, "template_manifest_ready": true, "verified_case_input_count": ">=12"}` | `public_benchmark_vina_gnina_case_inputs_incomplete`, `public_benchmark_vina_gnina_input_manifest_template_completion_required`, `public_benchmark_vina_gnina_case_input_files_or_receipts_unverified` |
-| `engine_runtime` | `blocked` | `False` | `{"available_engine_count": 0, "missing_engine_count": 2, "missing_engine_ids": ["vina", "gnina"], "runtime_ready_for_engine_execution": false, "runtime_status": "execution_plan_blocked"}` | `{"missing_engine_count": 0, "runtime_ready_for_engine_execution": true}` | `vina_gnina_execution_plan_not_ready`, `vina_binary_missing`, `gnina_binary_missing` |
-| `engine_run_slots` | `blocked` | `False` | `{"blocked_engine_run_slot_count": 24, "ready_engine_run_slot_count": 0, "required_engine_run_count": 24}` | `{"blocked_engine_run_slot_count": 0, "ready_engine_run_slot_count": 24}` | `public_benchmark_vina_gnina_engine_run_slots_incomplete` |
+| `engine_input_manifest` | `ready` | `True` | `{"blocked_case_input_slot_count": 0, "blocked_source_file_count": 0, "case_input_slot_count": 12, "input_manifest_detected": true, "input_manifest_row_count": 12, "input_manifest_status": "ready", "input_manifest_syntax_ready": true, "input_manifest_verification_status": "case_inputs_verified", "prepared_input_gap_count": 0, "prepared_input_ready_case_count": 12, "required_case_count": 12, "source_extraction_status": "source_files_verified_prepared_inputs_required", "source_file_count": 24, "source_files_ready": true, "source_ready_case_count": 12, "template_completion_blocked_case_count": 0, "template_manifest_ready": true, "template_missing_local_file_count": 0, "template_missing_receipt_ref_count": 0, "template_preflight_status": "operator_manifest_complete", "verified_case_input_count": 12, "verified_source_file_count": 24}` | `{"blocked_case_input_slot_count": 0, "input_manifest_detected": true, "input_manifest_row_count": ">=12", "input_manifest_syntax_ready": true, "template_manifest_ready": true, "verified_case_input_count": ">=12"}` | `none` |
+| `engine_runtime` | `ready` | `True` | `{"available_engine_count": 2, "missing_engine_count": 0, "missing_engine_ids": [], "runtime_ready_for_engine_execution": true, "runtime_status": "ready_for_engine_execution"}` | `{"missing_engine_count": 0, "runtime_ready_for_engine_execution": true}` | `none` |
+| `engine_run_slots` | `ready` | `True` | `{"blocked_engine_run_slot_count": 0, "ready_engine_run_slot_count": 24, "required_engine_run_count": 24}` | `{"blocked_engine_run_slot_count": 0, "ready_engine_run_slot_count": 24}` | `none` |
 | `adapter_rows` | `blocked` | `False` | `{"adapter_case_count": 0, "adapter_preflight_contract_pass": false, "adapter_preflight_status": "missing", "adapter_rows_ready": false, "detected_row_artifact_count": 0, "row_candidate_status": "row_artifact_missing", "selected_row_count": 0}` | `{"adapter_case_count": ">=1", "adapter_preflight_contract_pass": true, "detected_row_artifact_count": ">=1"}` | `public_benchmark_vina_gnina_rows_not_detected`, `vina_gnina_rows_not_provided` |
 | `per_engine_run_receipts` | `blocked` | `False` | `{"adapter_template_ready": false, "expected_rows_detected": false, "missing_engine_run_receipt_value_count": 72, "role_receipt_blocked_count": 72, "role_receipt_plan_count": 96, "rows_template_preflight_status": "operator_rows_completion_required"}` | `{"adapter_template_ready": true, "expected_rows_detected": true, "role_receipt_blocked_count": 0}` | `public_benchmark_vina_gnina_engine_run_receipts_incomplete` |
-| `external_receipts` | `blocked` | `False` | `{"all_expected_artifact_roles_complete": false, "blocked_official_receipt_role_count": 1, "external_receipt_completion_status": "blocked_pending_vina_gnina_receipts", "missing_expected_artifact_roles": ["vina_gnina_comparison_adapter"]}` | `{"all_expected_artifact_roles_complete": true, "blocked_official_receipt_role_count": 0}` | `vina_gnina_rows_not_provided`, `public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter`, `public_benchmark_vina_gnina_engine_runtime_not_ready` |
+| `external_receipts` | `blocked` | `False` | `{"all_expected_artifact_roles_complete": false, "blocked_official_receipt_role_count": 1, "external_receipt_completion_status": "blocked_pending_vina_gnina_receipts", "missing_expected_artifact_roles": ["vina_gnina_comparison_adapter"]}` | `{"all_expected_artifact_roles_complete": true, "blocked_official_receipt_role_count": 0}` | `vina_gnina_rows_not_provided`, `public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter` |
 
 #### Operator Blocker Families
 
 | Family | Status | Missing Items | Blocked Cases | Operator Action | Command Key | Materialization Command |
 |---|---|---:|---:|---|---|---|
-| `manifest_required_values` | `blocked` | 36 | 12 | `complete_vina_gnina_input_manifest_required_values` | `build_input_manifest_template_preflight` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` |
+| `manifest_required_values` | `ready` | 0 | 0 | `review_verified_vina_gnina_input_manifest` | `build_input_manifest_template_preflight` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` |
 | `official_source_files` | `ready` | 0 | 0 | `review_verified_casf_source_file_receipt` | `materialize_input_manifest_from_casf_archive` | `python3 scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py --archive <CASF-2016.tar.gz> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json --fail-blocked` |
-| `prepared_input_files` | `blocked` | 24 | 12 | `prepare_vina_gnina_inputs_and_record_checksums` | `build_input_manifest_template_preflight` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` |
-| `input_and_engine_receipt_refs` | `blocked` | 60 | 12 | `attach_vina_gnina_input_and_engine_receipt_refs` | `build_input_manifest_template_preflight` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` |
-| `engine_runtime` | `blocked` | 2 | 0 | `configure_vina_gnina_binary_or_container_runtime` | `rerun_runtime_readiness` | `python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json` |
-| `engine_run_slots` | `blocked` | 24 | 12 | `rerun_runtime_readiness_until_engine_run_slots_ready` | `rerun_runtime_readiness` | `python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json` |
+| `prepared_input_files` | `ready` | 0 | 0 | `review_verified_vina_gnina_prepared_inputs` | `build_input_manifest_template_preflight` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` |
+| `input_and_engine_receipt_refs` | `ready` | 0 | 0 | `attach_vina_gnina_input_and_engine_receipt_refs` | `build_input_manifest_template_preflight` | `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md` |
+| `engine_runtime` | `ready` | 0 | 0 | `configure_vina_gnina_binary_or_container_runtime` | `rerun_runtime_readiness` | `python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json` |
+| `engine_run_slots` | `ready` | 0 | 0 | `rerun_runtime_readiness_until_engine_run_slots_ready` | `rerun_runtime_readiness` | `python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json` |
 | `adapter_rows` | `blocked` | 12 | 12 | `attach_or_materialize_public_benchmark_vina_gnina_rows` | `materialize_rows_from_engine_run_bundle` | `python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py --engine-run-bundle implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json --out-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json` |
 
 ### Public Benchmark Source Access Preflight
@@ -352,8 +309,6 @@
 ## Upstream Source Blockers
 
 - `public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_rows_not_acquired`
-- `public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_engine_runtime_not_ready`
-- `public_benchmark_phase2_source_acquisition::public_benchmark_vina_gnina_engine_binaries_or_container_images_missing`
 - `public_benchmark_phase2_source_acquisition::public_benchmark_external_receipts_not_attached`
 - `pocketmd_lite_source_acquisition::pocketmd_lite_topk_rows_not_acquired`
 - `pocketmd_lite_source_acquisition::upstream_top_k_candidate_receipts_not_attached`

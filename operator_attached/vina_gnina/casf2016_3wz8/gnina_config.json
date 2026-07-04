@@ -1,0 +1,34 @@
+{
+  "benchmark_split": "CASF-core",
+  "case_id": "casf2016_3wz8",
+  "claim_boundary": "This config is generated from a ready Vina/GNINA execution plan. It does not prove an engine was run; the paired receipt must be replaced or completed with real engine output evidence.",
+  "complex_id": "3wz8",
+  "docking_box": {
+    "basis": "axis-aligned box around materialized reference ligand atoms",
+    "center": {
+      "x": 23.1742,
+      "y": 3.68095,
+      "z": 58.60175
+    },
+    "margin_angstrom": 8.0,
+    "minimum_size_angstrom": 15.0,
+    "size": {
+      "x": 27.2284,
+      "y": 31.2691,
+      "z": 22.4397
+    },
+    "status": "ready"
+  },
+  "docking_run_id": "casf2016_3wz8_gnina_run",
+  "engine_id": "gnina",
+  "expected_predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3wz8/gnina_pose.sdf",
+  "prepared_ligand_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3wz8/3wz8_ligand.pdbqt",
+  "prepared_receptor_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3wz8/3wz8_receptor.pdbqt",
+  "provenance_ref": "https://static.pdbbind-plus.org.cn/download/CASF-2016.tar.gz",
+  "reference_pose_id": "casf2016_3wz8_reference",
+  "schema_version": "public-benchmark-vina-gnina-engine-config.v1",
+  "score_direction": "lower_is_better",
+  "source_checksum": "sha256:2aa5a843fb5cccd932ba65c7b33c115fbdbc80c7656b3f15916a1c51ce017696",
+  "source_family": "CASF/PDBBind + Vina/GNINA",
+  "source_license_or_accession": "PDBbind+ CASF-2016 official package"
+}

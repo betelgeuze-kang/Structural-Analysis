@@ -1,0 +1,661 @@
+{
+  "blocker_count": 0,
+  "case_count": 12,
+  "case_rows": [
+    {
+      "blockers": [],
+      "case_id": "casf2016_4llx",
+      "complex_id": "4llx",
+      "ligand_normalization": {
+        "atom_count": 18,
+        "blocker": "",
+        "carboxylate_charge_correction_count": 0,
+        "heavy_atom_count": 9,
+        "query_atom_count_before": 18,
+        "query_bond_count_before": 18,
+        "rdkit_version": "2022.09.5",
+        "status": "ready"
+      },
+      "ligand_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_ligand.py",
+          "-i",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4llx/4llx_ligand_query_free.sdf",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4llx/4llx_ligand.pdbqt"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "",
+        "stdout_tail": "Input molecules processed: 1, skipped: 0\nPDBQT files written: 1\nPDBQT files not written due to error: 0\nInput molecules with errors: 0\n"
+      },
+      "prepared_ligand_checksum": "sha256:1ea1c5148e59b2a4d189095e75440dc172f6b6e46d6fe35004048f01e8e65ccd",
+      "prepared_ligand_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4llx/4llx_ligand.pdbqt",
+      "prepared_receptor_checksum": "sha256:de03ccd0af958764fa4b939728ee729e98999c897176ab901f3476c931fb4ab8",
+      "prepared_receptor_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4llx/4llx_receptor.pdbqt",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4llx/4llx_protein.pdb",
+      "query_free_ligand_sdf": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4llx/4llx_ligand_query_free.sdf",
+      "receptor_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_receptor.py",
+          "--read_pdb",
+          "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4llx/4llx_protein.pdb",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4llx/4llx_receptor",
+          "-p",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4llx/4llx_receptor.pdbqt",
+          "-a"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:461\nNo template matched for residue_key='A:506'\ntried 6 templates for residue_key='A:506'excess_H_ok=False\nGLU        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNGLU       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCGLU       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nGLH        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNGLH       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCGLH       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:506\nNo template matched for residue_key='A:521'\ntried 3 templates for residue_key='A:521'excess_H_ok=False\nARG        heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNARG       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCARG       heavy_miss=6 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:521\nNo template matched for residue_key='A:577'\ntried 6 templates for residue_key='A:577'excess_H_ok=False\nLYS        heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYS       heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYS       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nLYN        heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYN       heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYN       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:577\nNo template matched for residue_key='A:643'\ntried 6 templates for residue_key='A:643'excess_H_ok=False\nLYS        heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYS       heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYS       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nLYN        heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYN       heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYN       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:643\nNo template matched for residue_key='A:753'\ntried 6 templates for residue_key='A:753'excess_H_ok=False\nLYS        heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYS       heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYS       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nLYN        heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYN       heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYN       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:753\nNo template matched for residue_key='A:773'\ntried 3 templates for residue_key='A:773'excess_H_ok=False\nTHR        heavy_miss=2 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNTHR       heavy_miss=2 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCTHR       heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:773\nNo template matched for residue_key='A:775'\ntried 3 templates for residue_key='A:775'excess_H_ok=False\nILE        heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss={0} bond_excess=set()\nNILE       heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss={0} bond_excess={4}\nCILE       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\n\n- Template matching failed for: ['A:453', 'A:454', 'A:461', 'A:506', 'A:521', 'A:577', 'A:643', 'A:753', 'A:773', 'A:775'] Ignored due to allow_bad_res.\n",
+        "stdout_tail": "\nFiles written:\ntmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4llx/4llx_receptor.pdbqt <-- static (i.e., rigid) receptor input file\n"
+      },
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4llx/4llx_ligand.sdf",
+      "status": "ready"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_5c28",
+      "complex_id": "5c28",
+      "ligand_normalization": {
+        "atom_count": 22,
+        "blocker": "",
+        "carboxylate_charge_correction_count": 0,
+        "heavy_atom_count": 12,
+        "query_atom_count_before": 22,
+        "query_bond_count_before": 23,
+        "rdkit_version": "2022.09.5",
+        "status": "ready"
+      },
+      "ligand_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_ligand.py",
+          "-i",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_5c28/5c28_ligand_query_free.sdf",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_5c28/5c28_ligand.pdbqt"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "",
+        "stdout_tail": "Input molecules processed: 1, skipped: 0\nPDBQT files written: 1\nPDBQT files not written due to error: 0\nInput molecules with errors: 0\n"
+      },
+      "prepared_ligand_checksum": "sha256:be86ee1b5eed370876ca35b328c2ec487ee7f167e14078d4c831729597faac25",
+      "prepared_ligand_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_5c28/5c28_ligand.pdbqt",
+      "prepared_receptor_checksum": "sha256:c4e44d5e67a00d2223405f8803b1fe18d162b15b57a598929493c3e85ffa7f4c",
+      "prepared_receptor_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_5c28/5c28_receptor.pdbqt",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c28/5c28_protein.pdb",
+      "query_free_ligand_sdf": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_5c28/5c28_ligand_query_free.sdf",
+      "receptor_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_receptor.py",
+          "--read_pdb",
+          "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c28/5c28_protein.pdb",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_5c28/5c28_receptor",
+          "-p",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_5c28/5c28_receptor.pdbqt",
+          "-a"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "No template matched for residue_key='A:460'\ntried 6 templates for residue_key='A:460'excess_H_ok=False\nLYS        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYS       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYS       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nLYN        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYN       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYN       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:460\nNo template matched for residue_key='A:494'\ntried 6 templates for residue_key='A:494'excess_H_ok=False\nGLU        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNGLU       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCGLU       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nGLH        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNGLH       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCGLH       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:494\nNo template matched for residue_key='A:567'\ntried 6 templates for residue_key='A:567'excess_H_ok=False\nLYS        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYS       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYS       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nLYN        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYN       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYN       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:567\nNo template matched for residue_key='A:760'\ntried 6 templates for residue_key='A:760'excess_H_ok=False\nGLU        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNGLU       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCGLU       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nGLH        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNGLH       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCGLH       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:760\n- Template matching failed for: ['A:460', 'A:494', 'A:567', 'A:760'] Ignored due to allow_bad_res.\n",
+        "stdout_tail": "\nFiles written:\ntmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_5c28/5c28_receptor.pdbqt <-- static (i.e., rigid) receptor input file\n"
+      },
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c28/5c28_ligand.sdf",
+      "status": "ready"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_3uuo",
+      "complex_id": "3uuo",
+      "ligand_normalization": {
+        "atom_count": 45,
+        "blocker": "",
+        "carboxylate_charge_correction_count": 0,
+        "heavy_atom_count": 23,
+        "query_atom_count_before": 45,
+        "query_bond_count_before": 48,
+        "rdkit_version": "2022.09.5",
+        "status": "ready"
+      },
+      "ligand_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_ligand.py",
+          "-i",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uuo/3uuo_ligand_query_free.sdf",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uuo/3uuo_ligand.pdbqt"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "",
+        "stdout_tail": "Input molecules processed: 1, skipped: 0\nPDBQT files written: 1\nPDBQT files not written due to error: 0\nInput molecules with errors: 0\n"
+      },
+      "prepared_ligand_checksum": "sha256:633ff433b4efae605d0fa8e76dd6edeeb5c178c4af2c376b863cedbef3d6e99c",
+      "prepared_ligand_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uuo/3uuo_ligand.pdbqt",
+      "prepared_receptor_checksum": "sha256:252f38e441c93b3e6f90c625366d09d56720f6029b11c91c615a91e97c432c90",
+      "prepared_receptor_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uuo/3uuo_receptor.pdbqt",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uuo/3uuo_protein.pdb",
+      "query_free_ligand_sdf": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uuo/3uuo_ligand_query_free.sdf",
+      "receptor_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_receptor.py",
+          "--read_pdb",
+          "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uuo/3uuo_protein.pdb",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uuo/3uuo_receptor",
+          "-p",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uuo/3uuo_receptor.pdbqt",
+          "-a"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "",
+        "stdout_tail": "\nFiles written:\ntmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uuo/3uuo_receptor.pdbqt <-- static (i.e., rigid) receptor input file\n"
+      },
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uuo/3uuo_ligand.sdf",
+      "status": "ready"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_3ui7",
+      "complex_id": "3ui7",
+      "ligand_normalization": {
+        "atom_count": 47,
+        "blocker": "",
+        "carboxylate_charge_correction_count": 0,
+        "heavy_atom_count": 24,
+        "query_atom_count_before": 47,
+        "query_bond_count_before": 50,
+        "rdkit_version": "2022.09.5",
+        "status": "ready"
+      },
+      "ligand_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_ligand.py",
+          "-i",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3ui7/3ui7_ligand_query_free.sdf",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3ui7/3ui7_ligand.pdbqt"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "",
+        "stdout_tail": "Input molecules processed: 1, skipped: 0\nPDBQT files written: 1\nPDBQT files not written due to error: 0\nInput molecules with errors: 0\n"
+      },
+      "prepared_ligand_checksum": "sha256:992502112eee802f34ccf4089c19dfdbf52647a3c97a510c37d4493ec5f831ba",
+      "prepared_ligand_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3ui7/3ui7_ligand.pdbqt",
+      "prepared_receptor_checksum": "sha256:1a2174ecb65e1aa8a14dce024df7b0993275ce071c2eda0e7f8eb4a8d00dbb05",
+      "prepared_receptor_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3ui7/3ui7_receptor.pdbqt",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3ui7/3ui7_protein.pdb",
+      "query_free_ligand_sdf": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3ui7/3ui7_ligand_query_free.sdf",
+      "receptor_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_receptor.py",
+          "--read_pdb",
+          "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3ui7/3ui7_protein.pdb",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3ui7/3ui7_receptor",
+          "-p",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3ui7/3ui7_receptor.pdbqt",
+          "-a"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "",
+        "stdout_tail": "\nFiles written:\ntmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3ui7/3ui7_receptor.pdbqt <-- static (i.e., rigid) receptor input file\n"
+      },
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3ui7/3ui7_ligand.sdf",
+      "status": "ready"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_5c2h",
+      "complex_id": "5c2h",
+      "ligand_normalization": {
+        "atom_count": 55,
+        "blocker": "",
+        "carboxylate_charge_correction_count": 0,
+        "heavy_atom_count": 31,
+        "query_atom_count_before": 55,
+        "query_bond_count_before": 58,
+        "rdkit_version": "2022.09.5",
+        "status": "ready"
+      },
+      "ligand_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_ligand.py",
+          "-i",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_5c2h/5c2h_ligand_query_free.sdf",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_5c2h/5c2h_ligand.pdbqt"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "",
+        "stdout_tail": "Input molecules processed: 1, skipped: 0\nPDBQT files written: 1\nPDBQT files not written due to error: 0\nInput molecules with errors: 0\n"
+      },
+      "prepared_ligand_checksum": "sha256:6c5ff1eb25d254d7026c21533cb0a91d155d911feab3d39ce76b028cd15a876d",
+      "prepared_ligand_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_5c2h/5c2h_ligand.pdbqt",
+      "prepared_receptor_checksum": "sha256:294fb92f1a79fa28b7871b18e61b75921efd1891ab7ed2dc1cf5d7a40bac8525",
+      "prepared_receptor_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_5c2h/5c2h_receptor.pdbqt",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c2h/5c2h_protein.pdb",
+      "query_free_ligand_sdf": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_5c2h/5c2h_ligand_query_free.sdf",
+      "receptor_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_receptor.py",
+          "--read_pdb",
+          "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c2h/5c2h_protein.pdb",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_5c2h/5c2h_receptor",
+          "-p",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_5c2h/5c2h_receptor.pdbqt",
+          "-a"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "No template matched for residue_key='B:447'\ntried 3 templates for residue_key='B:447'excess_H_ok=False\nGLN        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNGLN       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCGLN       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): B:447\nNo template matched for residue_key='B:457'\ntried 3 templates for residue_key='B:457'excess_H_ok=False\nARG        heavy_miss=6 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNARG       heavy_miss=6 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCARG       heavy_miss=7 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): B:457\nNo template matched for residue_key='B:460'\ntried 6 templates for residue_key='B:460'excess_H_ok=False\nLYS        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYS       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYS       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nLYN        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYN       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYN       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): B:460\nNo template matched for residue_key='B:540'\ntried 6 templates for residue_key='B:540'excess_H_ok=False\nASP        heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNASP       heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCASP       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nASH        heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nCASH       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nNASH       heavy_miss=3 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\n\nmatched with excess inter-residue bond(s): B:540\nNo template matched for residue_key='B:614'\ntried 6 templates for residue_key='B:614'excess_H_ok=False\nGLU        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNGLU       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCGLU       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nGLH        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNGLH       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCGLH       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): B:614\nNo template matched for residue_key='B:633'\ntried 6 templates for residue_key='B:633'excess_H_ok=False\nLYS        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYS       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYS       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nLYN        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYN       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYN       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): B:633\n- Template matching failed for: ['B:447', 'B:457', 'B:460', 'B:540', 'B:614', 'B:633'] Ignored due to allow_bad_res.\n",
+        "stdout_tail": "\nFiles written:\ntmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_5c2h/5c2h_receptor.pdbqt <-- static (i.e., rigid) receptor input file\n"
+      },
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/5c2h/5c2h_ligand.sdf",
+      "status": "ready"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_2v00",
+      "complex_id": "2v00",
+      "ligand_normalization": {
+        "atom_count": 29,
+        "blocker": "",
+        "carboxylate_charge_correction_count": 0,
+        "heavy_atom_count": 16,
+        "query_atom_count_before": 29,
+        "query_bond_count_before": 30,
+        "rdkit_version": "2022.09.5",
+        "status": "ready"
+      },
+      "ligand_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_ligand.py",
+          "-i",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_2v00/2v00_ligand_query_free.sdf",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_2v00/2v00_ligand.pdbqt"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "",
+        "stdout_tail": "Input molecules processed: 1, skipped: 0\nPDBQT files written: 1\nPDBQT files not written due to error: 0\nInput molecules with errors: 0\n"
+      },
+      "prepared_ligand_checksum": "sha256:0f6325b1cfdabdb78d4c2791078731664a12482541c661a07c05b1abbc652c54",
+      "prepared_ligand_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_2v00/2v00_ligand.pdbqt",
+      "prepared_receptor_checksum": "sha256:7b5b15472e5934b3fa08e386a47a7747a2689da7a2e729246e5f5ce8e6c91e82",
+      "prepared_receptor_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_2v00/2v00_receptor.pdbqt",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/2v00/2v00_protein.pdb",
+      "query_free_ligand_sdf": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_2v00/2v00_ligand_query_free.sdf",
+      "receptor_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_receptor.py",
+          "--read_pdb",
+          "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/2v00/2v00_protein.pdb",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_2v00/2v00_receptor",
+          "-p",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_2v00/2v00_receptor.pdbqt",
+          "-a"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "No template matched for residue_key='A:330'\ntried 6 templates for residue_key='A:330'excess_H_ok=False\nLYS        heavy_miss=0 heavy_excess=1 H_excess=[-1] bond_miss={0} bond_excess=set()\nNLYS       heavy_miss=0 heavy_excess=1 H_excess=[-1] bond_miss={0} bond_excess={4}\nCLYS       heavy_miss=0 heavy_excess=0 H_excess=[2] bond_miss=set() bond_excess=set()\nLYN        heavy_miss=0 heavy_excess=1 H_excess=[-1, 18] bond_miss={0} bond_excess=set()\nNLYN       heavy_miss=0 heavy_excess=1 H_excess=[-1, 20] bond_miss={0} bond_excess={4}\nCLYN       heavy_miss=0 heavy_excess=0 H_excess=[2, 19] bond_miss=set() bond_excess=set()\n\n- Template matching failed for: ['A:330'] Ignored due to allow_bad_res.\n",
+        "stdout_tail": "\nFiles written:\ntmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_2v00/2v00_receptor.pdbqt <-- static (i.e., rigid) receptor input file\n"
+      },
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/2v00/2v00_ligand.sdf",
+      "status": "ready"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_3wz8",
+      "complex_id": "3wz8",
+      "ligand_normalization": {
+        "atom_count": 58,
+        "blocker": "",
+        "carboxylate_charge_correction_count": 0,
+        "heavy_atom_count": 33,
+        "query_atom_count_before": 58,
+        "query_bond_count_before": 61,
+        "rdkit_version": "2022.09.5",
+        "status": "ready"
+      },
+      "ligand_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_ligand.py",
+          "-i",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3wz8/3wz8_ligand_query_free.sdf",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3wz8/3wz8_ligand.pdbqt"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "",
+        "stdout_tail": "Input molecules processed: 1, skipped: 0\nPDBQT files written: 1\nPDBQT files not written due to error: 0\nInput molecules with errors: 0\n"
+      },
+      "prepared_ligand_checksum": "sha256:7911ee3d3af3154a9071b2de31779d84daaac26270ddb7160eeb7a231fb77b4d",
+      "prepared_ligand_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3wz8/3wz8_ligand.pdbqt",
+      "prepared_receptor_checksum": "sha256:83a5be536e85345f0776aaafe140e4dc64c9f583e0b6eaf906e5f3296a17e8a4",
+      "prepared_receptor_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3wz8/3wz8_receptor.pdbqt",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3wz8/3wz8_protein.pdb",
+      "query_free_ligand_sdf": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3wz8/3wz8_ligand_query_free.sdf",
+      "receptor_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_receptor.py",
+          "--read_pdb",
+          "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3wz8/3wz8_protein.pdb",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3wz8/3wz8_receptor",
+          "-p",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3wz8/3wz8_receptor.pdbqt",
+          "-a"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "No template matched for residue_key='A:330'\ntried 6 templates for residue_key='A:330'excess_H_ok=False\nLYS        heavy_miss=0 heavy_excess=1 H_excess=[-1] bond_miss={0} bond_excess=set()\nNLYS       heavy_miss=0 heavy_excess=1 H_excess=[-1] bond_miss={0} bond_excess={4}\nCLYS       heavy_miss=0 heavy_excess=0 H_excess=[2] bond_miss=set() bond_excess=set()\nLYN        heavy_miss=0 heavy_excess=1 H_excess=[-1, 18] bond_miss={0} bond_excess=set()\nNLYN       heavy_miss=0 heavy_excess=1 H_excess=[-1, 20] bond_miss={0} bond_excess={4}\nCLYN       heavy_miss=0 heavy_excess=0 H_excess=[2, 19] bond_miss=set() bond_excess=set()\n\n- Template matching failed for: ['A:330'] Ignored due to allow_bad_res.\n",
+        "stdout_tail": "\nFiles written:\ntmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3wz8/3wz8_receptor.pdbqt <-- static (i.e., rigid) receptor input file\n"
+      },
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3wz8/3wz8_ligand.sdf",
+      "status": "ready"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_3pww",
+      "complex_id": "3pww",
+      "ligand_normalization": {
+        "atom_count": 100,
+        "blocker": "",
+        "carboxylate_charge_correction_count": 0,
+        "heavy_atom_count": 49,
+        "query_atom_count_before": 100,
+        "query_bond_count_before": 104,
+        "rdkit_version": "2022.09.5",
+        "status": "ready"
+      },
+      "ligand_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_ligand.py",
+          "-i",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3pww/3pww_ligand_query_free.sdf",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3pww/3pww_ligand.pdbqt"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "",
+        "stdout_tail": "Input molecules processed: 1, skipped: 0\nPDBQT files written: 1\nPDBQT files not written due to error: 0\nInput molecules with errors: 0\n"
+      },
+      "prepared_ligand_checksum": "sha256:71934fbaef24028a7d2eb7ebd71d1358ad49473b35b16efc82dd41f2dac7c4b3",
+      "prepared_ligand_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3pww/3pww_ligand.pdbqt",
+      "prepared_receptor_checksum": "sha256:17059aae4c030f34f327ccb8a5437b05455752ae60c6bf4ac9d840478350430c",
+      "prepared_receptor_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3pww/3pww_receptor.pdbqt",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3pww/3pww_protein.pdb",
+      "query_free_ligand_sdf": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3pww/3pww_ligand_query_free.sdf",
+      "receptor_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_receptor.py",
+          "--read_pdb",
+          "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3pww/3pww_protein.pdb",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3pww/3pww_receptor",
+          "-p",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3pww/3pww_receptor.pdbqt",
+          "-a"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "hed for residue_key='A:111'\ntried 6 templates for residue_key='A:111'excess_H_ok=False\nLYS        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYS       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYS       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nLYN        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYN       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYN       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:111\nNo template matched for residue_key='A:142'\ntried 6 templates for residue_key='A:142'excess_H_ok=False\nLYS        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYS       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYS       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nLYN        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYN       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYN       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:142\nNo template matched for residue_key='A:149'\ntried 6 templates for residue_key='A:149'excess_H_ok=False\nLYS        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYS       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYS       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nLYN        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYN       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYN       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:149\nNo template matched for residue_key='A:191'\ntried 6 templates for residue_key='A:191'excess_H_ok=False\nLYS        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYS       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYS       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nLYN        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYN       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYN       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:191\nNo template matched for residue_key='A:243'\ntried 6 templates for residue_key='A:243'excess_H_ok=False\nLYS        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYS       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYS       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nLYN        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYN       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYN       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:243\nNo template matched for residue_key='A:330'\ntried 6 templates for residue_key='A:330'excess_H_ok=False\nLYS        heavy_miss=0 heavy_excess=1 H_excess=[-1] bond_miss={0} bond_excess=set()\nNLYS       heavy_miss=0 heavy_excess=1 H_excess=[-1] bond_miss={0} bond_excess={4}\nCLYS       heavy_miss=0 heavy_excess=0 H_excess=[2] bond_miss=set() bond_excess=set()\nLYN        heavy_miss=0 heavy_excess=1 H_excess=[-1, 18] bond_miss={0} bond_excess=set()\nNLYN       heavy_miss=0 heavy_excess=1 H_excess=[-1, 20] bond_miss={0} bond_excess={4}\nCLYN       heavy_miss=0 heavy_excess=0 H_excess=[2, 19] bond_miss=set() bond_excess=set()\n\n- Template matching failed for: ['A:111', 'A:142', 'A:149', 'A:191', 'A:243', 'A:330'] Ignored due to allow_bad_res.\n",
+        "stdout_tail": "\nFiles written:\ntmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3pww/3pww_receptor.pdbqt <-- static (i.e., rigid) receptor input file\n"
+      },
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3pww/3pww_ligand.sdf",
+      "status": "ready"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_3prs",
+      "complex_id": "3prs",
+      "ligand_normalization": {
+        "atom_count": 98,
+        "blocker": "",
+        "carboxylate_charge_correction_count": 0,
+        "heavy_atom_count": 50,
+        "query_atom_count_before": 98,
+        "query_bond_count_before": 101,
+        "rdkit_version": "2022.09.5",
+        "status": "ready"
+      },
+      "ligand_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_ligand.py",
+          "-i",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3prs/3prs_ligand_query_free.sdf",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3prs/3prs_ligand.pdbqt"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "",
+        "stdout_tail": "Input molecules processed: 1, skipped: 0\nPDBQT files written: 1\nPDBQT files not written due to error: 0\nInput molecules with errors: 0\n"
+      },
+      "prepared_ligand_checksum": "sha256:42a99318198c06fb4e3d78f8e56402c5e04a85482a68d5d3da913547da231b51",
+      "prepared_ligand_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3prs/3prs_ligand.pdbqt",
+      "prepared_receptor_checksum": "sha256:8b236ea8493e3d3bc34d7cdf8fc8b5a361c38a7f13b90f6e1f5999755b219c6b",
+      "prepared_receptor_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3prs/3prs_receptor.pdbqt",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3prs/3prs_protein.pdb",
+      "query_free_ligand_sdf": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3prs/3prs_ligand_query_free.sdf",
+      "receptor_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_receptor.py",
+          "--read_pdb",
+          "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3prs/3prs_protein.pdb",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3prs/3prs_receptor",
+          "-p",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3prs/3prs_receptor.pdbqt",
+          "-a"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "No template matched for residue_key='A:63'\ntried 6 templates for residue_key='A:63'excess_H_ok=False\nLYS        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYS       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYS       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nLYN        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYN       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYN       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:63\nNo template matched for residue_key='A:68'\ntried 6 templates for residue_key='A:68'excess_H_ok=False\nLYS        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYS       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYS       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nLYN        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYN       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYN       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:68\nNo template matched for residue_key='A:149'\ntried 6 templates for residue_key='A:149'excess_H_ok=False\nLYS        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYS       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYS       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nLYN        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYN       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYN       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:149\nNo template matched for residue_key='A:191'\ntried 6 templates for residue_key='A:191'excess_H_ok=False\nLYS        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYS       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYS       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\nLYN        heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess=set()\nNLYN       heavy_miss=4 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={4}\nCLYN       heavy_miss=5 heavy_excess=0 H_excess=[] bond_miss=set() bond_excess={1}\n\nmatched with excess inter-residue bond(s): A:191\nNo template matched for residue_key='A:330'\ntried 6 templates for residue_key='A:330'excess_H_ok=False\nLYS        heavy_miss=0 heavy_excess=1 H_excess=[-1] bond_miss={0} bond_excess=set()\nNLYS       heavy_miss=0 heavy_excess=1 H_excess=[-1] bond_miss={0} bond_excess={4}\nCLYS       heavy_miss=0 heavy_excess=0 H_excess=[2] bond_miss=set() bond_excess=set()\nLYN        heavy_miss=0 heavy_excess=1 H_excess=[-1, 18] bond_miss={0} bond_excess=set()\nNLYN       heavy_miss=0 heavy_excess=1 H_excess=[-1, 20] bond_miss={0} bond_excess={4}\nCLYN       heavy_miss=0 heavy_excess=0 H_excess=[2, 19] bond_miss=set() bond_excess=set()\n\n- Template matching failed for: ['A:63', 'A:68', 'A:149', 'A:191', 'A:330'] Ignored due to allow_bad_res.\n",
+        "stdout_tail": "\nFiles written:\ntmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3prs/3prs_receptor.pdbqt <-- static (i.e., rigid) receptor input file\n"
+      },
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3prs/3prs_ligand.sdf",
+      "status": "ready"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_3uri",
+      "complex_id": "3uri",
+      "ligand_normalization": {
+        "atom_count": 130,
+        "blocker": "",
+        "carboxylate_charge_correction_count": 1,
+        "heavy_atom_count": 65,
+        "query_atom_count_before": 130,
+        "query_bond_count_before": 133,
+        "rdkit_version": "2022.09.5",
+        "status": "ready"
+      },
+      "ligand_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_ligand.py",
+          "-i",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uri/3uri_ligand_query_free.sdf",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uri/3uri_ligand.pdbqt"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "",
+        "stdout_tail": "Input molecules processed: 1, skipped: 0\nPDBQT files written: 1\nPDBQT files not written due to error: 0\nInput molecules with errors: 0\n"
+      },
+      "prepared_ligand_checksum": "sha256:8aaa32fe9843effcaf655153fd7f6539bb854f339219e75c91586b81cc3de62c",
+      "prepared_ligand_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uri/3uri_ligand.pdbqt",
+      "prepared_receptor_checksum": "sha256:87910269466b6668c1ca9449910cd48841b9c656c6fcd6fb40da941a173c7fb6",
+      "prepared_receptor_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uri/3uri_receptor.pdbqt",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uri/3uri_protein.pdb",
+      "query_free_ligand_sdf": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uri/3uri_ligand_query_free.sdf",
+      "receptor_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_receptor.py",
+          "--read_pdb",
+          "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uri/3uri_protein.pdb",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uri/3uri_receptor",
+          "-p",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uri/3uri_receptor.pdbqt",
+          "-a"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "No template matched for residue_key='A:329'\ntried 6 templates for residue_key='A:329'excess_H_ok=False\nLYS        heavy_miss=0 heavy_excess=1 H_excess=[-1] bond_miss={0} bond_excess=set()\nNLYS       heavy_miss=0 heavy_excess=1 H_excess=[-1] bond_miss={0} bond_excess={4}\nCLYS       heavy_miss=0 heavy_excess=0 H_excess=[2] bond_miss=set() bond_excess=set()\nLYN        heavy_miss=0 heavy_excess=1 H_excess=[-1, 18] bond_miss={0} bond_excess=set()\nNLYN       heavy_miss=0 heavy_excess=1 H_excess=[-1, 20] bond_miss={0} bond_excess={4}\nCLYN       heavy_miss=0 heavy_excess=0 H_excess=[2, 19] bond_miss=set() bond_excess=set()\n\n- Template matching failed for: ['A:329'] Ignored due to allow_bad_res.\n",
+        "stdout_tail": "\nFiles written:\ntmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3uri/3uri_receptor.pdbqt <-- static (i.e., rigid) receptor input file\n"
+      },
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/3uri/3uri_ligand.sdf",
+      "status": "ready"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_4m0z",
+      "complex_id": "4m0z",
+      "ligand_normalization": {
+        "atom_count": 39,
+        "blocker": "",
+        "carboxylate_charge_correction_count": 0,
+        "heavy_atom_count": 24,
+        "query_atom_count_before": 39,
+        "query_bond_count_before": 41,
+        "rdkit_version": "2022.09.5",
+        "status": "ready"
+      },
+      "ligand_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_ligand.py",
+          "-i",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4m0z/4m0z_ligand_query_free.sdf",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4m0z/4m0z_ligand.pdbqt"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "",
+        "stdout_tail": "Input molecules processed: 1, skipped: 0\nPDBQT files written: 1\nPDBQT files not written due to error: 0\nInput molecules with errors: 0\n"
+      },
+      "prepared_ligand_checksum": "sha256:6b5e58de803b33b3db9ac673c039c16ecb50d05dd44c9b7267acdf495a11bde8",
+      "prepared_ligand_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4m0z/4m0z_ligand.pdbqt",
+      "prepared_receptor_checksum": "sha256:e0a7daa8114a4ba431e6cde226b924d4d2f291795f5f9487680b60f691d61caa",
+      "prepared_receptor_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4m0z/4m0z_receptor.pdbqt",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0z/4m0z_protein.pdb",
+      "query_free_ligand_sdf": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4m0z/4m0z_ligand_query_free.sdf",
+      "receptor_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_receptor.py",
+          "--read_pdb",
+          "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0z/4m0z_protein.pdb",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4m0z/4m0z_receptor",
+          "-p",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4m0z/4m0z_receptor.pdbqt",
+          "-a"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "",
+        "stdout_tail": "\nFiles written:\ntmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4m0z/4m0z_receptor.pdbqt <-- static (i.e., rigid) receptor input file\n"
+      },
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0z/4m0z_ligand.sdf",
+      "status": "ready"
+    },
+    {
+      "blockers": [],
+      "case_id": "casf2016_4m0y",
+      "complex_id": "4m0y",
+      "ligand_normalization": {
+        "atom_count": 35,
+        "blocker": "",
+        "carboxylate_charge_correction_count": 0,
+        "heavy_atom_count": 22,
+        "query_atom_count_before": 35,
+        "query_bond_count_before": 37,
+        "rdkit_version": "2022.09.5",
+        "status": "ready"
+      },
+      "ligand_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_ligand.py",
+          "-i",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4m0y/4m0y_ligand_query_free.sdf",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4m0y/4m0y_ligand.pdbqt"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "",
+        "stdout_tail": "Input molecules processed: 1, skipped: 0\nPDBQT files written: 1\nPDBQT files not written due to error: 0\nInput molecules with errors: 0\n"
+      },
+      "prepared_ligand_checksum": "sha256:85d125f04c88337c6546ff759b6431483a75d5a29ca338ce76eed7c41bf0d783",
+      "prepared_ligand_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4m0y/4m0y_ligand.pdbqt",
+      "prepared_receptor_checksum": "sha256:33a93c55125ea350e629c33081850a2572b6efe98aeae71ffcdda40b92af1967",
+      "prepared_receptor_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4m0y/4m0y_receptor.pdbqt",
+      "protein_structure_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0y/4m0y_protein.pdb",
+      "query_free_ligand_sdf": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4m0y/4m0y_ligand_query_free.sdf",
+      "receptor_preparation_command": {
+        "command": [
+          "/home/betelgeuze/건축구조분석/tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_receptor.py",
+          "--read_pdb",
+          "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0y/4m0y_protein.pdb",
+          "-o",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4m0y/4m0y_receptor",
+          "-p",
+          "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4m0y/4m0y_receptor.pdbqt",
+          "-a"
+        ],
+        "returncode": 0,
+        "status": "ready",
+        "stderr_tail": "",
+        "stdout_tail": "\nFiles written:\ntmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_4m0y/4m0y_receptor.pdbqt <-- static (i.e., rigid) receptor input file\n"
+      },
+      "reference_ligand_path": "tmp/public_benchmark_vina_gnina/casf2016_source_files/CASF-2016/coreset/4m0y/4m0y_ligand.sdf",
+      "status": "ready"
+    }
+  ],
+  "claim_boundary": "This materializes derived Vina/GNINA PDBQT inputs into the local operator workspace and records checksums in the manifest. It does not prove Vina or GNINA engines were run and does not commit the derived CASF payload files.",
+  "contract_pass": true,
+  "input_manifest": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+  "ligand_preparer": "tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_ligand.py",
+  "manifest_ready": true,
+  "metadata": {
+    "engine_version": "structural-optimization-workbench@1.0.0",
+    "generated_at": "2026-07-04T14:37:57.574639+00:00",
+    "input_checksums": {
+      "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv": "sha256:0bdd2fc0230b6ada96a3f86a58752c9fc4d103e08ffd84dd3fb58924f9e84a23",
+      "scripts/materialize_public_benchmark_vina_gnina_prepared_inputs.py": "sha256:320b3486c3ce7bf39d6c09794c2c79f8815e03f6b29ac6732e6366c654ef1a0e"
+    },
+    "reuse_policy": "materialize_public_benchmark_vina_gnina_prepared_inputs",
+    "reused_evidence": false,
+    "source_commit_sha": "e516b0589ed541545f5ff9c2c4a44f9e620f55ff"
+  },
+  "output_manifest": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+  "prepared_dir": "tmp/public_benchmark_vina_gnina/prepared_inputs",
+  "prepared_input_count": 24,
+  "prepared_inputs_ready": true,
+  "ready_case_count": 12,
+  "receptor_preparer": "tmp/public_benchmark_vina_gnina/vina_env/bin/mk_prepare_receptor.py",
+  "schema_version": "public-benchmark-vina-gnina-prepared-inputs.v1",
+  "status": "prepared_inputs_ready",
+  "summary": {
+    "blocked_case_count": 0,
+    "blocker_count": 0,
+    "case_count": 12,
+    "prepared_input_count": 24,
+    "ready_case_count": 12
+  }
+}

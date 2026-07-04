@@ -1,0 +1,28 @@
+{
+  "case_id": "casf2016_3pww",
+  "claim_boundary": "This is a receipt template, not evidence of a completed Vina/GNINA run. Public Benchmark Phase 2 requires real predicted ligand output checksums and comparison metrics before adapter rows can be promoted.",
+  "command": "/usr/bin/docker run --rm -v $PWD:/work -w /work dkoes/gnina:latest gnina --receptor tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3pww/3pww_receptor.pdbqt --ligand tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3pww/3pww_ligand.pdbqt --center_x -1.9487 --center_y 4.96425 --center_z 10.0338 --size_x 30.3758 --size_y 31.4855 --size_z 27.7702 --out operator_attached/vina_gnina/casf2016_3pww/gnina_pose.sdf",
+  "complex_id": "3pww",
+  "docking_run_id": "casf2016_3pww_gnina_run",
+  "engine_config_checksum": "sha256:2d7417d729e5e8c7c0613fc71f5df724a3df7c5a019a1445ab20a4e86be70f67",
+  "engine_id": "gnina",
+  "engine_run_provenance_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_run_receipt.json",
+  "engine_version": "29.1.3",
+  "operator_required_fields": [
+    "predicted_ligand_checksum",
+    "engine_version",
+    "symmetry_aware_rmsd_angstrom",
+    "pose_success",
+    "score"
+  ],
+  "pose_success": "",
+  "predicted_ligand_checksum": "",
+  "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/casf2016_3pww/gnina_pose.sdf",
+  "prepared_ligand_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3pww/3pww_ligand.pdbqt",
+  "prepared_receptor_path": "tmp/public_benchmark_vina_gnina/prepared_inputs/casf2016_3pww/3pww_receptor.pdbqt",
+  "schema_version": "public-benchmark-vina-gnina-engine-run-receipt-template.v1",
+  "score": "",
+  "score_direction": "lower_is_better",
+  "status": "operator_run_required",
+  "symmetry_aware_rmsd_angstrom": ""
+}
