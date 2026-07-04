@@ -387,6 +387,25 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     ]
     assert vina_gnina_actual_audit["required_case_count"] == 12
     assert vina_gnina_actual_audit["required_engine_run_count"] == 24
+    assert vina_gnina_actual_audit["operator_blocker_family_count"] == 7
+    assert vina_gnina_actual_audit["operator_blocker_family_blocked_count"] == 7
+    assert (
+        vina_gnina_actual_audit["operator_blocker_family_missing_item_count"]
+        == 182
+    )
+    assert vina_gnina_actual_audit["first_operator_blocker_family"][
+        "family_id"
+    ] == "manifest_required_values"
+    family_plan = {
+        row["family_id"]: row
+        for row in vina_gnina_actual_audit["operator_blocker_family_plan"]
+    }
+    assert family_plan["official_source_files"]["missing_item_count"] == 24
+    assert family_plan["prepared_input_files"]["missing_item_count"] == 24
+    assert family_plan["input_and_engine_receipt_refs"]["missing_item_count"] == 60
+    assert family_plan["engine_runtime"]["missing_item_count"] == 2
+    assert family_plan["engine_run_slots"]["missing_item_count"] == 24
+    assert family_plan["adapter_rows"]["missing_item_count"] == 12
     actual_components = {
         row["component_id"]: row
         for row in vina_gnina_actual_audit["components"]
@@ -738,6 +757,9 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "vina_gnina_actual_evidence_ready_component_count": 0,
         "vina_gnina_actual_evidence_blocked_component_count": 6,
         "vina_gnina_actual_evidence_required_engine_run_count": 24,
+        "vina_gnina_actual_operator_blocker_family_count": 7,
+        "vina_gnina_actual_operator_blocker_family_blocked_count": 7,
+        "vina_gnina_actual_operator_blocker_family_missing_item_count": 182,
         "phase2_row_audit_missing_row_input_count": 1,
         "phase2_row_audit_missing_row_inputs": [
             "vina_gnina_rows",
