@@ -13,6 +13,10 @@
 - `source_access_preflight_receipt_ready`: `True`
 - `source_access_preflight_reachable_count`: `6`
 - `source_access_preflight_blocked_count`: `0`
+- `external_receipts_validation_status`: `operator_receipts_required`
+- `external_receipts_complete_artifact_roles`: `2/3`
+- `external_receipt_completion_audit_status`: `blocked_pending_vina_gnina_receipts`
+- `external_receipt_blocked_official_role_count`: `1`
 - `phase2_row_audit`: `implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json`
 - `phase2_row_audit_status`: `operator_evidence_required`
 - `phase2_row_audit_missing_row_inputs`: `vina_gnina_rows`
@@ -78,6 +82,25 @@
 | `autodock_vina` | `Vina` | `primary_reachable` | 200 | 200 | `none` |
 | `gnina` | `GNINA` | `primary_reachable` | 200 | 200 | `none` |
 | `posebusters` | `PoseBusters` | `primary_reachable` | 200 | 200 | `none` |
+
+## External Receipt Completion Audit
+
+- `status`: `blocked_pending_vina_gnina_receipts`
+- `source_access_ready`: `True`
+- `external_receipts_validation_status`: `operator_receipts_required`
+- `external_receipts_ready_for_materialized_rows`: `False`
+- `complete_artifact_roles`: `2/3`
+- `all_expected_artifact_roles_complete`: `False`
+- `missing_expected_artifact_roles`: `vina_gnina_comparison_adapter`
+- `blocked_official_receipt_role_count`: `1`
+- `operator_action`: `attach_vina_gnina_rows_and_receipts_then_refresh_external_receipts`
+
+| Receipt Role | Row Input | Status | Row Status | Sources Ready | Validator Role | Blockers |
+|---|---|---|---|---|---|---|
+| `casf_pdbbind_subset_source_receipt` | `subset_rows` | `ready` | `provided` | `True` | `casf_pdbbind_subset_manifest` | `none` |
+| `casf_pdbbind_pose_coordinate_receipt` | `pose_rows` | `ready` | `provided` | `True` | `row_actuality` | `none` |
+| `dud_e_or_lit_pcba_enrichment_receipt` | `enrichment_rows` | `ready` | `provided` | `True` | `dud_e_lit_pcba_enrichment_scorecard` | `none` |
+| `vina_gnina_engine_comparison_receipt` | `vina_gnina_rows` | `operator_receipt_required` | `missing` | `True` | `vina_gnina_comparison_adapter` | `vina_gnina_rows_not_provided`, `public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter`, `public_benchmark_vina_gnina_input_manifest_not_detected`, `public_benchmark_vina_gnina_engine_runtime_not_ready` |
 
 ## Phase 2 Harness Completion Audit
 

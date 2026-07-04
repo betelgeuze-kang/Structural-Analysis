@@ -50,6 +50,9 @@ from validate_public_benchmark_subset_manifest import (  # noqa: E402
     REQUIRED_CASE_FIELDS,
     SUPPORTED_CASF_PDBBIND_BENCHMARK_SPLITS,
 )
+from validate_public_benchmark_external_receipts import (  # noqa: E402
+    validate_external_receipts,
+)
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -57,6 +60,13 @@ DEFAULT_OUT = PRODUCTIZATION / "public_benchmark_phase2_source_acquisition_plan.
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_OPERATOR_BUNDLE = PRODUCTIZATION / "public_benchmark_operator_bundle.json"
 DEFAULT_SOURCE_OF_TRUTH = PRODUCTIZATION / "public_benchmark_source_of_truth.json"
+DEFAULT_SUBSET_MANIFEST = PRODUCTIZATION / "public_benchmark_subset_manifest.json"
+DEFAULT_ENRICHMENT_SCORECARD = (
+    PRODUCTIZATION / "public_benchmark_enrichment_scorecard.json"
+)
+DEFAULT_VINA_GNINA_COMPARISON_ADAPTER = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_comparison_adapter.json"
+)
 DEFAULT_PHASE2_ROW_AUDIT = PRODUCTIZATION / "public_benchmark_phase2_row_audit.json"
 DEFAULT_PHASE2_ROW_AUDIT_MD = DEFAULT_PHASE2_ROW_AUDIT.with_suffix(".md")
 DEFAULT_HARNESS_BUNDLE = PRODUCTIZATION / "public_benchmark_harness_bundle.json"
@@ -87,6 +97,9 @@ DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT = (
 )
 DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT_MD = (
     DEFAULT_SOURCE_ACCESS_PREFLIGHT_RECEIPT.with_suffix(".md")
+)
+DEFAULT_EXTERNAL_RECEIPTS_VALIDATION = (
+    PRODUCTIZATION / "public_benchmark_external_receipts_validation.json"
 )
 
 SCHEMA_VERSION = "public-benchmark-phase2-source-acquisition-plan.v1"
@@ -1547,6 +1560,367 @@ def _source_access_preflight_receipt_summary(repo_root: Path) -> dict[str, Any]:
     }
 
 
+def _external_receipts_validation_summary(repo_root: Path) -> dict[str, Any]:
+    persisted_payload = _load_json(repo_root, DEFAULT_EXTERNAL_RECEIPTS_VALIDATION)
+    materialized_artifact_paths = [
+        DEFAULT_SUBSET_MANIFEST,
+        DEFAULT_ENRICHMENT_SCORECARD,
+        DEFAULT_VINA_GNINA_COMPARISON_ADAPTER,
+    ]
+    resolved_materialized_artifact_paths = [
+        path if path.is_absolute() else repo_root / path
+        for path in materialized_artifact_paths
+    ]
+    computed_from_materialized_artifacts = all(
+        path.exists() for path in resolved_materialized_artifact_paths
+    )
+    if computed_from_materialized_artifacts:
+        payload = validate_external_receipts(
+            subset_manifest=_load_json(repo_root, DEFAULT_SUBSET_MANIFEST),
+            enrichment_scorecard=_load_json(repo_root, DEFAULT_ENRICHMENT_SCORECARD),
+            vina_gnina_comparison_adapter=_load_json(
+                repo_root,
+                DEFAULT_VINA_GNINA_COMPARISON_ADAPTER,
+            ),
+        )
+    else:
+        payload = persisted_payload
+    receipt_coverage = _as_dict(payload.get("receipt_coverage"))
+    role_summaries = [
+        {
+            "artifact_role": str(row.get("artifact_role") or ""),
+            "materialized_row_count": _as_int(row.get("materialized_row_count")),
+            "receipt_complete_row_count": _as_int(
+                row.get("receipt_complete_row_count")
+            ),
+            "receipt_blocked_row_count": _as_int(
+                row.get("receipt_blocked_row_count")
+            ),
+            "required_receipt_fields": [
+                str(field)
+                for field in _as_list(row.get("required_receipt_fields"))
+                if str(field)
+            ],
+            "blocker_count": _as_int(row.get("blocker_count")),
+            "blockers": [
+                str(blocker)
+                for blocker in _as_list(row.get("blockers"))
+                if str(blocker)
+            ],
+        }
+        for row in _as_list(receipt_coverage.get("role_summaries"))
+        if isinstance(row, dict)
+    ]
+    blockers = [
+        str(blocker)
+        for blocker in _as_list(payload.get("blockers"))
+        if str(blocker)
+    ]
+    if not payload:
+        blockers = ["public_benchmark_external_receipts_validation_missing"]
+    return {
+        "artifact": str(DEFAULT_EXTERNAL_RECEIPTS_VALIDATION),
+        "present": bool(persisted_payload),
+        "computed_from_materialized_artifacts": computed_from_materialized_artifacts,
+        "persisted_artifact_status": str(
+            persisted_payload.get("status") or "missing"
+        ),
+        "persisted_artifact_materialized_row_count": _as_int(
+            persisted_payload.get("materialized_row_count")
+        ),
+        "materialized_artifact_inputs": [
+            str(path) for path in materialized_artifact_paths
+        ],
+        "status": str(payload.get("status") or "missing"),
+        "contract_pass": payload.get("contract_pass"),
+        "public_benchmark_external_receipts_ready": bool(
+            payload.get("public_benchmark_external_receipts_ready")
+        ),
+        "materialized_row_count": _as_int(payload.get("materialized_row_count")),
+        "receipt_complete_row_count": _as_int(
+            payload.get("receipt_complete_row_count")
+        ),
+        "receipt_blocked_row_count": _as_int(
+            payload.get("receipt_blocked_row_count")
+        ),
+        "expected_artifact_role_count": _as_int(
+            receipt_coverage.get("expected_artifact_role_count")
+        ),
+        "materialized_artifact_role_count": _as_int(
+            receipt_coverage.get("materialized_artifact_role_count")
+        ),
+        "receipt_complete_artifact_role_count": _as_int(
+            receipt_coverage.get("receipt_complete_artifact_role_count")
+        ),
+        "missing_expected_artifact_role_count": _as_int(
+            receipt_coverage.get("missing_expected_artifact_role_count")
+        ),
+        "missing_expected_artifact_roles": [
+            str(role)
+            for role in _as_list(
+                receipt_coverage.get("missing_expected_artifact_roles")
+            )
+            if str(role)
+        ],
+        "role_summaries": role_summaries,
+        "blocker_count": len(blockers),
+        "blockers": blockers,
+        "command": (
+            "python3 scripts/validate_public_benchmark_external_receipts.py "
+            "--subset-manifest "
+            f"{DEFAULT_SUBSET_MANIFEST} "
+            "--enrichment-scorecard "
+            f"{DEFAULT_ENRICHMENT_SCORECARD} "
+            "--vina-gnina-comparison-adapter "
+            f"{DEFAULT_VINA_GNINA_COMPARISON_ADAPTER} "
+            f"--out {DEFAULT_EXTERNAL_RECEIPTS_VALIDATION}"
+        ),
+        "claim_boundary": str(payload.get("claim_boundary") or ""),
+    }
+
+
+def _external_receipt_completion_audit(
+    *,
+    official_source_receipt_plan: dict[str, Any],
+    source_access_preflight_receipt_summary: dict[str, Any],
+    external_receipts_validation_summary: dict[str, Any],
+    phase2_row_audit_summary: dict[str, Any],
+    phase2_row_closure_matrix: list[dict[str, Any]],
+    vina_gnina_execution_plan_summary: dict[str, Any],
+    vina_gnina_runtime_readiness_summary: dict[str, Any],
+) -> dict[str, Any]:
+    source_catalog = [
+        row
+        for row in _as_list(official_source_receipt_plan.get("official_source_catalog"))
+        if isinstance(row, dict)
+    ]
+    receipt_roles = [
+        row
+        for row in _as_list(official_source_receipt_plan.get("row_input_receipt_roles"))
+        if isinstance(row, dict)
+    ]
+    source_status_by_id = {
+        str(row.get("source_id") or ""): row
+        for row in _as_list(source_access_preflight_receipt_summary.get("row_statuses"))
+        if isinstance(row, dict)
+    }
+    closure_by_row_input = {
+        str(row.get("row_input_id") or ""): row
+        for row in phase2_row_closure_matrix
+        if isinstance(row, dict)
+    }
+    role_summary_by_artifact = {
+        str(row.get("artifact_role") or ""): row
+        for row in _as_list(external_receipts_validation_summary.get("role_summaries"))
+        if isinstance(row, dict)
+    }
+    artifact_role_by_row_input = {
+        "subset_rows": "casf_pdbbind_subset_manifest",
+        "enrichment_rows": "dud_e_lit_pcba_enrichment_scorecard",
+        "vina_gnina_rows": "vina_gnina_comparison_adapter",
+    }
+    missing_row_inputs = {
+        str(row)
+        for row in phase2_row_audit_summary.get("missing_row_inputs", [])
+        if str(row)
+    }
+    provided_row_inputs = {
+        str(row)
+        for row in phase2_row_audit_summary.get(
+            "source_actuality_provided_row_inputs", []
+        )
+        if str(row)
+    }
+    rows: list[dict[str, Any]] = []
+    for role in receipt_roles:
+        row_input_id = str(role.get("row_input_id") or "")
+        source_ids = [
+            str(source.get("source_id") or "")
+            for source in source_catalog
+            if row_input_id in _as_list(source.get("feeds_row_inputs"))
+        ]
+        source_access_rows = [
+            {
+                "source_id": source_id,
+                "status": str(source_status_by_id.get(source_id, {}).get("status") or ""),
+                "primary_http_status": _as_int(
+                    source_status_by_id.get(source_id, {}).get("primary_http_status")
+                ),
+                "fallback_http_status": _as_int(
+                    source_status_by_id.get(source_id, {}).get("fallback_http_status")
+                ),
+                "blockers": [
+                    str(blocker)
+                    for blocker in _as_list(
+                        source_status_by_id.get(source_id, {}).get("blockers")
+                    )
+                    if str(blocker)
+                ],
+            }
+            for source_id in source_ids
+        ]
+        source_access_ready = bool(source_access_rows) and all(
+            row["status"] in {"primary_reachable", "fallback_reachable"}
+            for row in source_access_rows
+        )
+        closure = closure_by_row_input.get(row_input_id, {})
+        row_input_status = str(closure.get("status") or "")
+        if not row_input_status:
+            row_input_status = (
+                "missing" if row_input_id in missing_row_inputs else "provided"
+            )
+        artifact_role = artifact_role_by_row_input.get(row_input_id, "")
+        artifact_role_summary = role_summary_by_artifact.get(artifact_role, {})
+        artifact_receipts_complete = bool(
+            artifact_role
+            and _as_int(artifact_role_summary.get("materialized_row_count")) > 0
+            and _as_int(artifact_role_summary.get("receipt_blocked_row_count")) == 0
+        )
+        row_source_actuality_ready = row_input_id in provided_row_inputs and int(
+            phase2_row_audit_summary.get("source_actuality_blocker_count") or 0
+        ) == 0
+        blockers: list[str] = []
+        if not source_access_ready:
+            blockers.append("source_access_preflight_not_ready")
+        if row_input_id in missing_row_inputs:
+            blockers.append(f"{row_input_id}_not_provided")
+        if artifact_role:
+            if not artifact_receipts_complete:
+                blockers.append(
+                    f"public_benchmark_external_receipt_role_missing:{artifact_role}"
+                )
+        elif not row_source_actuality_ready:
+            blockers.append(f"{row_input_id}_source_actuality_not_ready")
+        if row_input_id == "vina_gnina_rows":
+            if not vina_gnina_execution_plan_summary.get("input_manifest_detected"):
+                blockers.append(
+                    "public_benchmark_vina_gnina_input_manifest_not_detected"
+                )
+            if not vina_gnina_runtime_readiness_summary.get(
+                "runtime_ready_for_engine_execution"
+            ):
+                blockers.append(
+                    "public_benchmark_vina_gnina_engine_runtime_not_ready"
+                )
+        rows.append(
+            {
+                "row_input_id": row_input_id,
+                "receipt_role_id": str(role.get("receipt_role_id") or ""),
+                "status": "ready" if not blockers else "operator_receipt_required",
+                "source_family": str(role.get("source_family") or ""),
+                "row_input_status": row_input_status,
+                "row_input_resolved_path": str(closure.get("resolved_path") or ""),
+                "source_ids": source_ids,
+                "source_access_ready": source_access_ready,
+                "source_access_rows": source_access_rows,
+                "validator_artifact_role": artifact_role,
+                "validator_artifact_role_summary": artifact_role_summary,
+                "artifact_receipts_complete": artifact_receipts_complete,
+                "row_source_actuality_ready": row_source_actuality_ready,
+                "required_receipt_fields": [
+                    str(field)
+                    for field in _as_list(role.get("required_receipt_fields"))
+                    if str(field)
+                ],
+                "operator_must_attach": [
+                    str(item)
+                    for item in _as_list(role.get("operator_must_attach"))
+                    if str(item)
+                ],
+                "blockers": blockers,
+                "claim_boundary": (
+                    "This row ties official source access, row-input presence, "
+                    "and receipt validation coverage to one receipt role. It "
+                    "does not approve licenses or replace the row materializers."
+                ),
+            }
+        )
+    ready_rows = [row for row in rows if row["status"] == "ready"]
+    blocked_rows = [row for row in rows if row["status"] != "ready"]
+    all_expected_artifact_roles_complete = (
+        external_receipts_validation_summary["expected_artifact_role_count"] > 0
+        and external_receipts_validation_summary[
+            "receipt_complete_artifact_role_count"
+        ]
+        == external_receipts_validation_summary["expected_artifact_role_count"]
+        and external_receipts_validation_summary[
+            "missing_expected_artifact_role_count"
+        ]
+        == 0
+    )
+    status = "ready" if not blocked_rows and all_expected_artifact_roles_complete else (
+        "blocked_pending_vina_gnina_receipts"
+        if external_receipts_validation_summary["missing_expected_artifact_roles"]
+        == ["vina_gnina_comparison_adapter"]
+        else "operator_external_receipts_required"
+    )
+    return {
+        "status": status,
+        "pass": status == "ready",
+        "source_access_ready": bool(
+            source_access_preflight_receipt_summary.get("source_access_ready")
+        ),
+        "source_access_reachable_count": _as_int(
+            source_access_preflight_receipt_summary.get("reachable_count")
+        ),
+        "external_receipts_validation_artifact": str(
+            DEFAULT_EXTERNAL_RECEIPTS_VALIDATION
+        ),
+        "external_receipts_validation_status": str(
+            external_receipts_validation_summary.get("status") or ""
+        ),
+        "external_receipts_ready_for_materialized_rows": bool(
+            external_receipts_validation_summary.get(
+                "public_benchmark_external_receipts_ready"
+            )
+        ),
+        "all_expected_artifact_roles_complete": (
+            all_expected_artifact_roles_complete
+        ),
+        "expected_artifact_role_count": external_receipts_validation_summary[
+            "expected_artifact_role_count"
+        ],
+        "receipt_complete_artifact_role_count": (
+            external_receipts_validation_summary[
+                "receipt_complete_artifact_role_count"
+            ]
+        ),
+        "missing_expected_artifact_role_count": (
+            external_receipts_validation_summary[
+                "missing_expected_artifact_role_count"
+            ]
+        ),
+        "missing_expected_artifact_roles": external_receipts_validation_summary[
+            "missing_expected_artifact_roles"
+        ],
+        "official_receipt_role_count": len(rows),
+        "ready_official_receipt_role_count": len(ready_rows),
+        "blocked_official_receipt_role_count": len(blocked_rows),
+        "blocked_receipt_role_ids": [
+            str(row["receipt_role_id"]) for row in blocked_rows
+        ],
+        "remaining_row_inputs": sorted(missing_row_inputs),
+        "remaining_blockers": [
+            str(blocker)
+            for row in blocked_rows
+            for blocker in row.get("blockers", [])
+            if str(blocker)
+        ],
+        "operator_action": (
+            "attach_vina_gnina_rows_and_receipts_then_refresh_external_receipts"
+            if status == "blocked_pending_vina_gnina_receipts"
+            else "attach_external_source_receipts_and_license_or_accession_refs"
+        ),
+        "receipt_roles": rows,
+        "claim_boundary": (
+            "This audit distinguishes source-access reachability from official "
+            "receipt completion. It can show materialized-row receipts that are "
+            "valid while still blocking full Phase 2 until every expected "
+            "artifact role, especially Vina/GNINA, is present."
+        ),
+    }
+
+
 def _row_input_contract_map(
     row_input_contracts: list[dict[str, Any]],
 ) -> dict[str, dict[str, Any]]:
@@ -2036,6 +2410,9 @@ def build_public_benchmark_phase2_source_acquisition_plan(
     source_access_preflight_receipt_summary = (
         _source_access_preflight_receipt_summary(repo_root)
     )
+    external_receipts_validation_summary = (
+        _external_receipts_validation_summary(repo_root)
+    )
     phase2_row_audit = _load_json(repo_root, DEFAULT_PHASE2_ROW_AUDIT)
     phase2_row_audit_summary = _phase2_row_audit_summary(phase2_row_audit)
     phase2_row_closure_matrix = _phase2_row_closure_matrix(phase2_row_audit)
@@ -2137,6 +2514,21 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             vina_gnina_runtime_readiness_summary
         ),
     )
+    external_receipt_completion_audit = _external_receipt_completion_audit(
+        official_source_receipt_plan=official_source_receipt_plan,
+        source_access_preflight_receipt_summary=(
+            source_access_preflight_receipt_summary
+        ),
+        external_receipts_validation_summary=(
+            external_receipts_validation_summary
+        ),
+        phase2_row_audit_summary=phase2_row_audit_summary,
+        phase2_row_closure_matrix=phase2_row_closure_matrix,
+        vina_gnina_execution_plan_summary=vina_gnina_execution_plan_summary,
+        vina_gnina_runtime_readiness_summary=(
+            vina_gnina_runtime_readiness_summary
+        ),
+    )
     operator_next_actions = [
         "review_official_source_receipt_plan",
         "attach_casf_pdbbind_subset_rows_with_local_file_checksums",
@@ -2162,6 +2554,9 @@ def build_public_benchmark_phase2_source_acquisition_plan(
                 Path("scripts/materialize_public_benchmark_phase2_from_rows.py"),
                 Path("scripts/materialize_public_benchmark_harness_bundle.py"),
                 DEFAULT_PHASE2_ROW_AUDIT,
+                DEFAULT_SUBSET_MANIFEST,
+                DEFAULT_ENRICHMENT_SCORECARD,
+                DEFAULT_VINA_GNINA_COMPARISON_ADAPTER,
                 Path("scripts/materialize_public_benchmark_subset_manifest.py"),
                 Path("scripts/materialize_public_benchmark_pose_validity_input.py"),
                 Path("scripts/materialize_public_benchmark_posebusters_validity_packet.py"),
@@ -2195,6 +2590,10 @@ def build_public_benchmark_phase2_source_acquisition_plan(
         "official_source_receipt_plan": official_source_receipt_plan,
         "source_access_preflight_receipt": (
             source_access_preflight_receipt_summary
+        ),
+        "external_receipts_validation": external_receipts_validation_summary,
+        "external_receipt_completion_audit": (
+            external_receipt_completion_audit
         ),
         "receipt_promotion_policy": dict(RECEIPT_PROMOTION_POLICY),
         "phase2_row_audit": phase2_row_audit_summary,
@@ -2248,6 +2647,47 @@ def build_public_benchmark_phase2_source_acquisition_plan(
             "source_access_preflight_network_probe_performed": (
                 source_access_preflight_receipt_summary[
                     "network_probe_performed"
+                ]
+            ),
+            "external_receipts_validation_status": (
+                external_receipts_validation_summary["status"]
+            ),
+            "external_receipts_ready_for_materialized_rows": (
+                external_receipts_validation_summary[
+                    "public_benchmark_external_receipts_ready"
+                ]
+            ),
+            "external_receipts_expected_artifact_role_count": (
+                external_receipts_validation_summary[
+                    "expected_artifact_role_count"
+                ]
+            ),
+            "external_receipts_complete_artifact_role_count": (
+                external_receipts_validation_summary[
+                    "receipt_complete_artifact_role_count"
+                ]
+            ),
+            "external_receipts_missing_expected_artifact_roles": (
+                external_receipts_validation_summary[
+                    "missing_expected_artifact_roles"
+                ]
+            ),
+            "external_receipt_completion_audit_status": (
+                external_receipt_completion_audit["status"]
+            ),
+            "external_receipt_ready_official_role_count": (
+                external_receipt_completion_audit[
+                    "ready_official_receipt_role_count"
+                ]
+            ),
+            "external_receipt_blocked_official_role_count": (
+                external_receipt_completion_audit[
+                    "blocked_official_receipt_role_count"
+                ]
+            ),
+            "external_receipt_all_expected_artifact_roles_complete": (
+                external_receipt_completion_audit[
+                    "all_expected_artifact_roles_complete"
                 ]
             ),
             "phase2_row_audit_status": phase2_row_audit_summary["status"],
@@ -2421,6 +2861,15 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
         f"`{payload['source_access_preflight_receipt']['reachable_count']}`",
         "- `source_access_preflight_blocked_count`: "
         f"`{payload['source_access_preflight_receipt']['blocked_count']}`",
+        "- `external_receipts_validation_status`: "
+        f"`{payload['external_receipts_validation']['status']}`",
+        "- `external_receipts_complete_artifact_roles`: "
+        f"`{payload['external_receipts_validation']['receipt_complete_artifact_role_count']}/"
+        f"{payload['external_receipts_validation']['expected_artifact_role_count']}`",
+        "- `external_receipt_completion_audit_status`: "
+        f"`{payload['external_receipt_completion_audit']['status']}`",
+        "- `external_receipt_blocked_official_role_count`: "
+        f"`{payload['external_receipt_completion_audit']['blocked_official_receipt_role_count']}`",
         f"- `phase2_row_audit`: `{payload['phase2_row_audit']['artifact']}`",
         f"- `phase2_row_audit_status`: `{payload['phase2_row_audit']['status']}`",
         f"- `phase2_row_audit_missing_row_inputs`: `{', '.join(payload['phase2_row_audit']['missing_row_inputs'])}`",
@@ -2501,6 +2950,65 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                 f"`{row.get('status', '')}` | "
                 f"{row.get('primary_http_status', 0)} | "
                 f"{row.get('fallback_http_status', 0)} | "
+                f"{blockers or '`none`'} |"
+            )
+    external_receipt_audit = _as_dict(
+        payload.get("external_receipt_completion_audit")
+    )
+    external_receipt_roles = [
+        row
+        for row in external_receipt_audit.get("receipt_roles", [])
+        if isinstance(row, dict)
+    ] if isinstance(external_receipt_audit.get("receipt_roles"), list) else []
+    if external_receipt_audit:
+        missing_artifact_roles = ", ".join(
+            f"`{role}`"
+            for role in external_receipt_audit.get(
+                "missing_expected_artifact_roles", []
+            )
+            if str(role)
+        )
+        lines.extend(
+            [
+                "",
+                "## External Receipt Completion Audit",
+                "",
+                f"- `status`: `{external_receipt_audit.get('status')}`",
+                "- `source_access_ready`: "
+                f"`{external_receipt_audit.get('source_access_ready')}`",
+                "- `external_receipts_validation_status`: "
+                f"`{external_receipt_audit.get('external_receipts_validation_status')}`",
+                "- `external_receipts_ready_for_materialized_rows`: "
+                f"`{external_receipt_audit.get('external_receipts_ready_for_materialized_rows')}`",
+                "- `complete_artifact_roles`: "
+                f"`{external_receipt_audit.get('receipt_complete_artifact_role_count')}/"
+                f"{external_receipt_audit.get('expected_artifact_role_count')}`",
+                "- `all_expected_artifact_roles_complete`: "
+                f"`{external_receipt_audit.get('all_expected_artifact_roles_complete')}`",
+                "- `missing_expected_artifact_roles`: "
+                f"{missing_artifact_roles or '`none`'}",
+                "- `blocked_official_receipt_role_count`: "
+                f"`{external_receipt_audit.get('blocked_official_receipt_role_count')}`",
+                f"- `operator_action`: `{external_receipt_audit.get('operator_action')}`",
+                "",
+                "| Receipt Role | Row Input | Status | Row Status | Sources Ready | Validator Role | Blockers |",
+                "|---|---|---|---|---|---|---|",
+            ]
+        )
+        for row in external_receipt_roles:
+            blockers = ", ".join(
+                f"`{blocker}`"
+                for blocker in row.get("blockers", [])
+                if str(blocker)
+            )
+            validator_role = row.get("validator_artifact_role") or "row_actuality"
+            lines.append(
+                f"| `{row.get('receipt_role_id', '')}` | "
+                f"`{row.get('row_input_id', '')}` | "
+                f"`{row.get('status', '')}` | "
+                f"`{row.get('row_input_status', '')}` | "
+                f"`{row.get('source_access_ready')}` | "
+                f"`{validator_role}` | "
                 f"{blockers or '`none`'} |"
             )
     harness_audit = _as_dict(payload.get("phase2_harness_completion_audit"))

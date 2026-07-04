@@ -117,6 +117,40 @@ def test_external_receipts_pass_for_complete_rows() -> None:
     ]
 
 
+def test_external_receipts_block_when_expected_role_is_missing() -> None:
+    result = module.validate_external_receipts(
+        subset_manifest={"case_rows": [_subset_row("case_a")]},
+        enrichment_scorecard={
+            "target_rows": [
+                {
+                    "target_id": "target_a",
+                    "source_license_or_accession": "DUD-E:target_a:release-2015",
+                    "source_checksum": _sha("DUD-E:target_a:release-2015"),
+                    "provenance_ref": _provenance_ref(
+                        "public-benchmark", "enrichment", "target_a.json"
+                    ),
+                }
+            ]
+        },
+        vina_gnina_comparison_adapter={"case_rows": []},
+    )
+
+    assert result["status"] == "operator_receipts_required"
+    assert result["public_benchmark_external_receipts_ready"] is False
+    assert result["materialized_row_count"] == 2
+    assert result["receipt_complete_row_count"] == 2
+    assert result["blockers"] == [
+        "public_benchmark_external_receipt_role_missing:"
+        "vina_gnina_comparison_adapter"
+    ]
+    coverage = result["receipt_coverage"]
+    assert coverage["materialized_artifact_role_count"] == 2
+    assert coverage["receipt_complete_artifact_role_count"] == 2
+    assert coverage["missing_expected_artifact_roles"] == [
+        "vina_gnina_comparison_adapter"
+    ]
+
+
 def test_external_receipts_require_subset_provenance_and_valid_checksums() -> None:
     row = _subset_row("case_a")
     row["provenance_ref"] = ""
@@ -132,6 +166,10 @@ def test_external_receipts_require_subset_provenance_and_valid_checksums() -> No
     assert result["blockers"] == [
         "subset_manifest:case_a:provenance_ref_blank",
         "subset_manifest:case_a:source_file_checksum_0_invalid",
+        "public_benchmark_external_receipt_role_missing:"
+        "dud_e_lit_pcba_enrichment_scorecard",
+        "public_benchmark_external_receipt_role_missing:"
+        "vina_gnina_comparison_adapter",
     ]
     coverage = result["receipt_coverage"]
     assert coverage["materialized_artifact_role_count"] == 1
@@ -211,7 +249,13 @@ def test_external_receipts_cli_writes_result(tmp_path: Path) -> None:
                 "--fail-blocked",
             ]
         )
-        == 0
+        == 1
     )
     payload = json.loads(out.read_text(encoding="utf-8"))
-    assert payload["public_benchmark_external_receipts_ready"] is True
+    assert payload["public_benchmark_external_receipts_ready"] is False
+    assert payload["blockers"] == [
+        "public_benchmark_external_receipt_role_missing:"
+        "dud_e_lit_pcba_enrichment_scorecard",
+        "public_benchmark_external_receipt_role_missing:"
+        "vina_gnina_comparison_adapter",
+    ]

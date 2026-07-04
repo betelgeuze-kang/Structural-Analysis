@@ -307,10 +307,22 @@ def validate_external_receipts(
         for row in receipt_rows
         for blocker in _as_list(row.get("blockers"))
     ]
+    receipt_coverage = receipt_coverage_summary(receipt_rows)
+    missing_expected_role_blockers = [
+        f"public_benchmark_external_receipt_role_missing:{role}"
+        for role in receipt_coverage["missing_expected_artifact_roles"]
+    ]
     if not receipt_rows:
         blockers.append("public_benchmark_external_receipts_missing")
-    ready = bool(receipt_rows and not blockers)
-    receipt_coverage = receipt_coverage_summary(receipt_rows)
+    else:
+        blockers.extend(missing_expected_role_blockers)
+    ready = bool(
+        receipt_rows
+        and not blockers
+        and receipt_coverage["missing_expected_artifact_role_count"] == 0
+        and receipt_coverage["receipt_complete_artifact_role_count"]
+        == receipt_coverage["expected_artifact_role_count"]
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         "status": "ready" if ready else "operator_receipts_required",

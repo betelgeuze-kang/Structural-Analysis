@@ -138,6 +138,81 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert source_access_rows["gnina"]["source_family"] == "GNINA"
     assert source_access_rows["autodock_vina"]["primary_http_status"] == 200
     assert source_access_rows["posebusters"]["blockers"] == []
+    external_validation = payload["external_receipts_validation"]
+    assert external_validation["artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_external_receipts_validation.json"
+    )
+    assert external_validation["present"] is True
+    assert external_validation["computed_from_materialized_artifacts"] is True
+    assert external_validation["persisted_artifact_status"] == (
+        "operator_receipts_required"
+    )
+    assert external_validation["persisted_artifact_materialized_row_count"] == 0
+    assert external_validation["materialized_artifact_inputs"] == [
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_subset_manifest.json",
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_enrichment_scorecard.json",
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_comparison_adapter.json",
+    ]
+    assert external_validation["status"] == "operator_receipts_required"
+    assert external_validation["public_benchmark_external_receipts_ready"] is False
+    assert external_validation["materialized_row_count"] == 13
+    assert external_validation["receipt_complete_row_count"] == 13
+    assert external_validation["expected_artifact_role_count"] == 3
+    assert external_validation["receipt_complete_artifact_role_count"] == 2
+    assert external_validation["missing_expected_artifact_roles"] == [
+        "vina_gnina_comparison_adapter"
+    ]
+    assert external_validation["blockers"] == [
+        "public_benchmark_external_receipt_role_missing:"
+        "vina_gnina_comparison_adapter"
+    ]
+    external_audit = payload["external_receipt_completion_audit"]
+    assert external_audit["status"] == "blocked_pending_vina_gnina_receipts"
+    assert external_audit["pass"] is False
+    assert external_audit["source_access_ready"] is True
+    assert external_audit["source_access_reachable_count"] == 6
+    assert external_audit["external_receipts_validation_status"] == (
+        "operator_receipts_required"
+    )
+    assert external_audit["all_expected_artifact_roles_complete"] is False
+    assert external_audit["receipt_complete_artifact_role_count"] == 2
+    assert external_audit["expected_artifact_role_count"] == 3
+    assert external_audit["ready_official_receipt_role_count"] == 3
+    assert external_audit["blocked_official_receipt_role_count"] == 1
+    assert external_audit["blocked_receipt_role_ids"] == [
+        "vina_gnina_engine_comparison_receipt"
+    ]
+    assert external_audit["remaining_row_inputs"] == ["vina_gnina_rows"]
+    assert external_audit["operator_action"] == (
+        "attach_vina_gnina_rows_and_receipts_then_refresh_external_receipts"
+    )
+    external_roles = {
+        row["row_input_id"]: row for row in external_audit["receipt_roles"]
+    }
+    assert set(external_roles) == set(payload["required_row_inputs"])
+    assert external_roles["subset_rows"]["status"] == "ready"
+    assert external_roles["pose_rows"]["row_source_actuality_ready"] is True
+    assert external_roles["enrichment_rows"]["artifact_receipts_complete"] is True
+    assert external_roles["vina_gnina_rows"]["status"] == (
+        "operator_receipt_required"
+    )
+    assert external_roles["vina_gnina_rows"]["source_access_ready"] is True
+    assert external_roles["vina_gnina_rows"]["source_ids"] == [
+        "pdbbind_plus_casf",
+        "autodock_vina",
+        "gnina",
+    ]
+    assert external_roles["vina_gnina_rows"]["blockers"] == [
+        "vina_gnina_rows_not_provided",
+        "public_benchmark_external_receipt_role_missing:"
+        "vina_gnina_comparison_adapter",
+        "public_benchmark_vina_gnina_input_manifest_not_detected",
+        "public_benchmark_vina_gnina_engine_runtime_not_ready",
+    ]
     assert receipt_plan["operator_review_order"] == [
         "casf_pdbbind_subset_source_receipt",
         "casf_pdbbind_pose_coordinate_receipt",
@@ -562,6 +637,19 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
         "source_access_preflight_reachable_count": 6,
         "source_access_preflight_blocked_count": 0,
         "source_access_preflight_network_probe_performed": True,
+        "external_receipts_validation_status": "operator_receipts_required",
+        "external_receipts_ready_for_materialized_rows": False,
+        "external_receipts_expected_artifact_role_count": 3,
+        "external_receipts_complete_artifact_role_count": 2,
+        "external_receipts_missing_expected_artifact_roles": [
+            "vina_gnina_comparison_adapter",
+        ],
+        "external_receipt_completion_audit_status": (
+            "blocked_pending_vina_gnina_receipts"
+        ),
+        "external_receipt_ready_official_role_count": 3,
+        "external_receipt_blocked_official_role_count": 1,
+        "external_receipt_all_expected_artifact_roles_complete": False,
         "phase2_exit_criterion_count": 5,
         "phase2_passing_exit_criterion_count": 4,
         "phase2_blocked_exit_criterion_count": 1,
@@ -858,6 +946,27 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert payload["source_access_preflight_receipt"]["status"] == "reachable"
     assert payload["source_access_preflight_receipt"]["reachable_count"] == 6
     assert payload["source_access_preflight_receipt"]["blocked_count"] == 0
+    assert payload["external_receipts_validation"]["status"] == (
+        "operator_receipts_required"
+    )
+    assert payload["external_receipts_validation"][
+        "computed_from_materialized_artifacts"
+    ] is True
+    assert payload["external_receipts_validation"][
+        "persisted_artifact_materialized_row_count"
+    ] == 0
+    assert payload["external_receipts_validation"][
+        "receipt_complete_artifact_role_count"
+    ] == 2
+    assert payload["external_receipts_validation"][
+        "missing_expected_artifact_roles"
+    ] == ["vina_gnina_comparison_adapter"]
+    assert payload["external_receipt_completion_audit"]["status"] == (
+        "blocked_pending_vina_gnina_receipts"
+    )
+    assert payload["external_receipt_completion_audit"][
+        "blocked_official_receipt_role_count"
+    ] == 1
     assert payload["phase2_exit_criterion_count"] == 5
     assert payload["phase2_harness_completion_audit"]["status"] == (
         "ready_except_vina_gnina_actual_rows"
@@ -890,6 +999,20 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "`source_access_preflight_blocked_count`: `0`" in markdown
     assert "| `pdbbind_plus_casf` | `CASF/PDBBind` | `primary_reachable` |" in markdown
     assert "| `gnina` | `GNINA` | `primary_reachable` |" in markdown
+    assert "`external_receipts_validation_status`: `operator_receipts_required`" in markdown
+    assert "`external_receipts_complete_artifact_roles`: `2/3`" in markdown
+    assert (
+        "`external_receipt_completion_audit_status`: "
+        "`blocked_pending_vina_gnina_receipts`"
+    ) in markdown
+    assert "## External Receipt Completion Audit" in markdown
+    assert "`external_receipts_ready_for_materialized_rows`: `False`" in markdown
+    assert "`missing_expected_artifact_roles`: `vina_gnina_comparison_adapter`" in markdown
+    assert (
+        "attach_vina_gnina_rows_and_receipts_then_refresh_external_receipts"
+        in markdown
+    )
+    assert "public_benchmark_external_receipt_role_missing:vina_gnina_comparison_adapter" in markdown
     assert "`phase2_exit_criterion_count`: `5`" in markdown
     assert "## Phase 2 Harness Completion Audit" in markdown
     assert (
