@@ -450,7 +450,12 @@
       "vina_gnina_actual_rows"
     ],
     "slot_id": "vina_gnina_rows",
-    "source_acquisition_blockers": [],
+    "source_acquisition_blockers": [
+      "public_benchmark_vina_gnina_rows_not_acquired",
+      "public_benchmark_vina_gnina_engine_runtime_not_ready",
+      "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
+      "public_benchmark_external_receipts_not_attached"
+    ],
     "status": "operator_rows_required",
     "target_id": "public_benchmark_phase2_actual_closure",
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
@@ -659,18 +664,23 @@
     ],
     "slot_id": "vina_gnina_rows",
     "slot_queue_priority": 1,
-    "source_acquisition_blockers": [],
+    "source_acquisition_blockers": [
+      "public_benchmark_vina_gnina_rows_not_acquired",
+      "public_benchmark_vina_gnina_engine_runtime_not_ready",
+      "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
+      "public_benchmark_external_receipts_not_attached"
+    ],
     "status": "operator_rows_required",
     "target_id": "public_benchmark_phase2_actual_closure",
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
     "validation_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked"
   },
-  "generated_at": "2026-07-04T09:54:27.906082+00:00",
+  "generated_at": "2026-07-04T09:59:32.586232+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:be05411d7bb174d8612aaa5a6d3c2ffbace0c16d1310fc0b6897f9fd9038c6d1",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:50113b04a758c06b720aa91a3b64639e1d31ba94f35334cf21494462930a7d2f",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:69285c5dcf0a4bdc30c7a71d48b86dabde7af6e458925f250a4e3f9b9616e109",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json": "sha256:dab87acf171f56d2b30f98e009c3d6fe3657ed95a78729fe848b69a7d40ee3c5",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json": "sha256:e92b6ef312a0e2ec552b77fda9dcf5df147d447888a5bc0ef90658aa2fa2d914",
     "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:42207d023c02bcdad4ac7b06e06e9abb306491e3cf0ed1ed987a70291eabefba",
     "implementation/phase1/release_evidence/productization/source_of_truth_gap_classification.json": "sha256:5fb3525b23f2e4bc7582cc16aace64fbb7cc506c28e086a21bede3de61ea1b3c",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:c1af83f1b410aca8536d5ab832c0ba6a86153436844e42152860f84ec0002328",
@@ -905,7 +915,12 @@
         "vina_gnina_actual_rows"
       ],
       "slot_id": "vina_gnina_rows",
-      "source_acquisition_blockers": [],
+      "source_acquisition_blockers": [
+        "public_benchmark_vina_gnina_rows_not_acquired",
+        "public_benchmark_vina_gnina_engine_runtime_not_ready",
+        "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
+        "public_benchmark_external_receipts_not_attached"
+      ],
       "status": "operator_rows_required",
       "target_id": "public_benchmark_phase2_actual_closure",
       "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
@@ -1114,7 +1129,12 @@
       ],
       "slot_id": "vina_gnina_rows",
       "slot_queue_priority": 1,
-      "source_acquisition_blockers": [],
+      "source_acquisition_blockers": [
+        "public_benchmark_vina_gnina_rows_not_acquired",
+        "public_benchmark_vina_gnina_engine_runtime_not_ready",
+        "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
+        "public_benchmark_external_receipts_not_attached"
+      ],
       "status": "operator_rows_required",
       "target_id": "public_benchmark_phase2_actual_closure",
       "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
@@ -1705,7 +1725,12 @@
         "vina_gnina_actual_rows"
       ],
       "slot_id": "vina_gnina_rows",
-      "source_acquisition_blockers": [],
+      "source_acquisition_blockers": [
+        "public_benchmark_vina_gnina_rows_not_acquired",
+        "public_benchmark_vina_gnina_engine_runtime_not_ready",
+        "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
+        "public_benchmark_external_receipts_not_attached"
+      ],
       "status": "operator_rows_required",
       "target_id": "public_benchmark_phase2_actual_closure",
       "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
@@ -1880,7 +1905,11 @@
         "top_k_refinement_rows"
       ],
       "slot_id": "pocketmd_rows",
-      "source_acquisition_blockers": [],
+      "source_acquisition_blockers": [
+        "pocketmd_lite_topk_rows_not_acquired",
+        "upstream_top_k_candidate_receipts_not_attached",
+        "lite_refinement_metric_receipts_not_attached"
+      ],
       "status": "operator_rows_required",
       "target_id": "pocketmd_lite_topk_actual_closure",
       "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
@@ -2093,7 +2122,12 @@
       ],
       "slot_id": "vina_gnina_rows",
       "slot_queue_priority": 1,
-      "source_acquisition_blockers": [],
+      "source_acquisition_blockers": [
+        "public_benchmark_vina_gnina_rows_not_acquired",
+        "public_benchmark_vina_gnina_engine_runtime_not_ready",
+        "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
+        "public_benchmark_external_receipts_not_attached"
+      ],
       "status": "operator_rows_required",
       "target_id": "public_benchmark_phase2_actual_closure",
       "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
@@ -2279,7 +2313,11 @@
       ],
       "slot_id": "pocketmd_rows",
       "slot_queue_priority": 1,
-      "source_acquisition_blockers": [],
+      "source_acquisition_blockers": [
+        "pocketmd_lite_topk_rows_not_acquired",
+        "upstream_top_k_candidate_receipts_not_attached",
+        "lite_refinement_metric_receipts_not_attached"
+      ],
       "status": "operator_rows_required",
       "target_id": "pocketmd_lite_topk_actual_closure",
       "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
@@ -3264,7 +3302,12 @@
             "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
           },
           "slot_id": "vina_gnina_rows",
-          "source_acquisition_blockers": [],
+          "source_acquisition_blockers": [
+            "public_benchmark_vina_gnina_rows_not_acquired",
+            "public_benchmark_vina_gnina_engine_runtime_not_ready",
+            "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
+            "public_benchmark_external_receipts_not_attached"
+          ],
           "status": "operator_rows_required",
           "target_id": "public_benchmark_phase2_actual_closure",
           "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
@@ -3453,7 +3496,12 @@
               "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json"
             },
             "slot_id": "vina_gnina_rows",
-            "source_acquisition_blockers": [],
+            "source_acquisition_blockers": [
+              "public_benchmark_vina_gnina_rows_not_acquired",
+              "public_benchmark_vina_gnina_engine_runtime_not_ready",
+              "public_benchmark_vina_gnina_engine_binaries_or_container_images_missing",
+              "public_benchmark_external_receipts_not_attached"
+            ],
             "status": "operator_rows_required",
             "target_id": "public_benchmark_phase2_actual_closure",
             "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
@@ -5034,7 +5082,11 @@
             "preferred_default_row_path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json"
           },
           "slot_id": "pocketmd_rows",
-          "source_acquisition_blockers": [],
+          "source_acquisition_blockers": [
+            "pocketmd_lite_topk_rows_not_acquired",
+            "upstream_top_k_candidate_receipts_not_attached",
+            "lite_refinement_metric_receipts_not_attached"
+          ],
           "status": "operator_rows_required",
           "target_id": "pocketmd_lite_topk_actual_closure",
           "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
@@ -5200,7 +5252,11 @@
               "preferred_default_row_path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json"
             },
             "slot_id": "pocketmd_rows",
-            "source_acquisition_blockers": [],
+            "source_acquisition_blockers": [
+              "pocketmd_lite_topk_rows_not_acquired",
+              "upstream_top_k_candidate_receipts_not_attached",
+              "lite_refinement_metric_receipts_not_attached"
+            ],
             "status": "operator_rows_required",
             "target_id": "pocketmd_lite_topk_actual_closure",
             "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
@@ -6082,7 +6138,7 @@
     ],
     "status": "operator_evidence_required"
   },
-  "source_commit_sha": "21f774a4ce36e4d0f779c13bef9e75db54272907",
+  "source_commit_sha": "66c4d843395c9c025b0cccfbc218be374f5ade4c",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
