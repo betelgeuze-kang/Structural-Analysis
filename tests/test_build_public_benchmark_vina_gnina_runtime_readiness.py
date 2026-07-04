@@ -374,6 +374,9 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
     assert payload["operator_commands"]["build_rows_template_preflight"].startswith(
         "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py"
     )
+    assert payload["operator_commands"]["materialize_rows_from_template"].startswith(
+        "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py"
+    )
     assert payload["blockers"] == [
         "vina_binary_missing",
         "gnina_binary_missing",
@@ -491,6 +494,9 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
         "--out-md implementation/phase1/release_evidence/productization/"
         "public_benchmark_vina_gnina_rows_template_preflight.md"
     )
+    assert unblock["commands"]["materialize_rows_from_template"].startswith(
+        "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py"
+    )
     assert unblock["case_input_slot_count"] == 1
     assert unblock["blocked_case_input_slot_count"] == 0
     assert unblock["required_engine_run_count"] == 2
@@ -512,6 +518,9 @@ def test_runtime_readiness_records_missing_binaries_and_rows(
     assert "review_public_benchmark_vina_gnina_rows_template_preflight" in unblock[
         "operator_sequence"
     ]
+    assert "materialize_public_benchmark_vina_gnina_rows_from_completed_template" in (
+        unblock["operator_sequence"]
+    )
     assert "does not run docking engines" in payload["claim_boundary"]
 
 

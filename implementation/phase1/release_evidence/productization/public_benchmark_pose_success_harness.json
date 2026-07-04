@@ -1427,10 +1427,10 @@
   "contract_pass": true,
   "dry_run_case_count": 0,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T07:34:08.284934+00:00",
+  "generated_at": "2026-07-04T07:44:52.894034+00:00",
   "input_checksums": {
-    "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json": "sha256:62a758c66745cd8d3e870d793569e3b71d75fa4fe86846a356727543af17a90f",
-    "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json": "sha256:4ff127fe2c3a42a6a2fb4a09afd2dd8683c31e221693ee11776ddd8322a99550",
+    "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json": "sha256:6c480c1ff28487f2dbce14ae616dfae8506db3d9dc0d40539aac7a5d904f22f9",
+    "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json": "sha256:8d74235f3e5b1dd9038fe04e4d6a2793b1df94b2049ed39cc9950a89b8d02c9d",
     "scripts/materialize_public_benchmark_pose_success_harness.py": "sha256:8a8eccfa010924ca874984fecc8a484a158d974dd7888ba9bf42a01009366e61"
   },
   "materialization_report": {
@@ -1467,6 +1467,6 @@
     }
   },
   "schema_version": "public-benchmark-pose-success-harness.v1",
-  "source_commit_sha": "7f6dcc71a427150a633c18db925a445aadbe4a9b",
+  "source_commit_sha": "a2e3fe28513166d00754d209e4ea2d01792f24b5",
   "status": "ready"
 }

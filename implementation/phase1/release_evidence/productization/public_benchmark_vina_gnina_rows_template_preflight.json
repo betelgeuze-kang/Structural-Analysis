@@ -3,6 +3,7 @@
   "claim_boundary": "This preflight audits the Vina/GNINA adapter rows template only. It does not promote the template to actual engine output rows, run Vina or GNINA, compute symmetry-aware RMSD, synthesize pose-success labels, or close Public Benchmark Phase 2.",
   "commands": {
     "materialize_adapter": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+    "materialize_rows_from_template": "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py --template implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv --out-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_template_report.json",
     "rerun_phase2_row_audit": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --vina-gnina-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --fail-blocked",
     "write_preflight": "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md"
   },
@@ -172,7 +173,7 @@
   ],
   "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
   "expected_rows_detected": false,
-  "generated_at": "2026-07-04T04:03:40.836802+00:00",
+  "generated_at": "2026-07-04T07:44:37.963425+00:00",
   "header_fields": [
     "case_id",
     "source_family",
@@ -196,8 +197,8 @@
   ],
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv": "sha256:3a106d2aa9f456eee7238523bf090db13e35d98afefa3952352a660f5b5e36ae",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:5eaa0791cbcbc2b19bbd06c01fcddd636026dcf2b1316447e044d463e4cf97c2",
-    "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:69b0ce594558bad457b052be33865b0abf90e8b4779dc31ff3a987b1eea7ef72",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:f57f0d5f7beeab8d1494d294ef00bad1c08e339b1a4865c7b392060da8e70da9",
+    "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:0258e681ddd419d9fba1bba595ffda481b77f710b5e645ac628c5f2bf1444cee",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:8c1ce46cbd085987f2923602424b666bb63e9edb6fdb2438158d36aee890dd41"
   },
   "missing_expected_slots": [],
@@ -208,7 +209,7 @@
     "fill_engine_version_config_checksum_rmsd_pose_success_and_score",
     "attach_engine_run_receipts",
     "attach_case_source_and_comparison_metric_receipts",
-    "copy_or_export_completed_rows_to_expected_rows_artifact",
+    "materialize_completed_rows_template_to_expected_rows_artifact",
     "materialize_public_benchmark_vina_gnina_comparison_adapter"
   ],
   "required_flat_row_fields": [
@@ -7441,7 +7442,7 @@
   ],
   "runtime_readiness_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
   "schema_version": "public-benchmark-vina-gnina-rows-template-preflight.v1",
-  "source_commit_sha": "17833231fa88003ad3988e3e8b624343eeb14555",
+  "source_commit_sha": "a2e3fe28513166d00754d209e4ea2d01792f24b5",
   "status": "operator_rows_completion_required",
   "summary": {
     "adapter_template_ready": false,

@@ -36,6 +36,9 @@ PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_RUNTIME_READINESS = PRODUCTIZATION / "public_benchmark_vina_gnina_runtime_readiness.json"
 DEFAULT_TEMPLATE = PRODUCTIZATION / "public_benchmark_vina_gnina_rows_template.csv"
 DEFAULT_EXPECTED_ROWS = PRODUCTIZATION / "public_benchmark_vina_gnina_rows.json"
+DEFAULT_ROWS_FROM_TEMPLATE_REPORT = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_rows_from_template_report.json"
+)
 DEFAULT_OUT = PRODUCTIZATION / "public_benchmark_vina_gnina_rows_template_preflight.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 SCHEMA_VERSION = "public-benchmark-vina-gnina-rows-template-preflight.v1"
@@ -594,13 +597,18 @@ def build_public_benchmark_vina_gnina_rows_template_preflight(
             "fill_engine_version_config_checksum_rmsd_pose_success_and_score",
             "attach_engine_run_receipts",
             "attach_case_source_and_comparison_metric_receipts",
-            "copy_or_export_completed_rows_to_expected_rows_artifact",
+            "materialize_completed_rows_template_to_expected_rows_artifact",
             "materialize_public_benchmark_vina_gnina_comparison_adapter",
         ],
         "commands": {
             "write_preflight": (
                 "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py "
                 f"--out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}"
+            ),
+            "materialize_rows_from_template": (
+                "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py "
+                f"--template {template} --out-rows {expected_rows} "
+                f"--out-report {DEFAULT_ROWS_FROM_TEMPLATE_REPORT}"
             ),
             "materialize_adapter": (
                 "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py "

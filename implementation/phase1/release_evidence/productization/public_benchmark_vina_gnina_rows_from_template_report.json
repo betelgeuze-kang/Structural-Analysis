@@ -1,0 +1,60 @@
+{
+  "adapter_validation_status": "not_run",
+  "adapter_validation_summary": {},
+  "blockers": [
+    "public_benchmark_vina_gnina_rows_template_not_ready"
+  ],
+  "case_count": 0,
+  "claim_boundary": "This helper only materializes rows from a completed operator template. It does not run Vina/GNINA, invent engine output checksums, synthesize symmetry-aware RMSD or pose-success labels, or close Public Benchmark Phase 2 without the downstream adapter and row audit.",
+  "commands": {
+    "materialize_adapter": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+    "rerun_phase2_row_audit": "python3 scripts/materialize_public_benchmark_phase2_from_rows.py --vina-gnina-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --fail-blocked",
+    "rerun_rows_materialization": "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py --template implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv --out-rows implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_template_report.json",
+    "rerun_template_preflight": "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md"
+  },
+  "contract_pass": false,
+  "engine_run_count": 0,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-07-04T07:44:33.110443+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv": "sha256:3a106d2aa9f456eee7238523bf090db13e35d98afefa3952352a660f5b5e36ae",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:f57f0d5f7beeab8d1494d294ef00bad1c08e339b1a4865c7b392060da8e70da9",
+    "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:0258e681ddd419d9fba1bba595ffda481b77f710b5e645ac628c5f2bf1444cee",
+    "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:8c1ce46cbd085987f2923602424b666bb63e9edb6fdb2438158d36aee890dd41",
+    "scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py": "sha256:f5182005b8a700d3533ecd2ae586827637afa687eaa6f40fe023eb344bd5452e"
+  },
+  "out_report_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_template_report.json",
+  "out_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+  "reuse_policy": "public_benchmark_vina_gnina_rows_from_template_materialization_report",
+  "reused_evidence": false,
+  "rows_materialized": false,
+  "runtime_readiness_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
+  "schema_version": "public-benchmark-vina-gnina-rows-from-template-materialization.v1",
+  "source_commit_sha": "a2e3fe28513166d00754d209e4ea2d01792f24b5",
+  "status": "template_not_ready",
+  "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+  "template_preflight_status": "operator_rows_completion_required",
+  "template_preflight_summary": {
+    "adapter_template_ready": false,
+    "duplicate_slot_count": 0,
+    "expected_engine_run_slot_count": 24,
+    "expected_rows_detected": false,
+    "invalid_checksum_count": 0,
+    "invalid_numeric_value_count": 0,
+    "invalid_pose_success_count": 24,
+    "invalid_score_direction_count": 0,
+    "missing_engine_run_receipt_value_count": 72,
+    "missing_expected_slot_count": 0,
+    "missing_header_field_count": 0,
+    "missing_local_ref_count": 48,
+    "missing_numeric_value_count": 48,
+    "missing_required_value_count": 144,
+    "role_receipt_blocked_count": 72,
+    "role_receipt_plan_count": 96,
+    "template_row_count": 24,
+    "template_slot_count": 24,
+    "template_slot_coverage_complete": true,
+    "unexpected_template_slot_count": 0
+  },
+  "template_ready": false
+}

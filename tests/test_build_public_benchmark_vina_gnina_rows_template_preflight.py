@@ -90,6 +90,9 @@ def test_current_vina_gnina_rows_template_preflight_surfaces_gaps() -> None:
     assert payload["template_safety_policy"][
         "operator_rows_must_be_real_engine_outputs"
     ] is True
+    assert payload["commands"]["materialize_rows_from_template"].startswith(
+        "python3 scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py"
+    )
     assert payload["role_receipt_plan"][0]["role_id"] == (
         "casf_pdbbind_case_source_receipt"
     )
