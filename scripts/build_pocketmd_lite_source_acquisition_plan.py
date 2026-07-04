@@ -467,6 +467,53 @@ def _pocketmd_rows_operator_action(
         "required_flat_row_fields": list(required_flat_row_fields),
         "required_minimum_rows_by_case": minimum_rows_by_case,
         "raw_row_candidate_status": raw_row_candidate_status,
+        "top_k_rows_action_packet": {
+            "status": (
+                "operator_rows_ready"
+                if raw_row_candidate_status.get("coverage_ready")
+                else "operator_rows_required"
+            ),
+            "template_artifact": str(DEFAULT_ROWS_TEMPLATE),
+            "expected_rows_artifact": str(DEFAULT_ROWS_OUT),
+            "supported_candidate_paths": [
+                str(row.get("path") or "")
+                for row in raw_row_candidate_status.get("candidate_paths", [])
+                if isinstance(row, dict)
+            ],
+            "review_template_command": commands["review_row_template"],
+            "import_rows_command": commands["import_rows"],
+            "materialize_survival_command": commands["materialize_survival"],
+            "verify_science_actual_closure_command": (
+                commands["science_actual_closure"]
+            ),
+            "operator_must_fill_or_verify": [
+                *required_flat_row_fields,
+                "operator_input_source.source_artifact",
+                "operator_input_source.source_artifact_sha256",
+                "operator_input_source.source_id",
+                "operator_input_source.source_url",
+                "operator_input_source.source_license",
+            ],
+            "required_receipt_roles": [
+                "upstream_top_k_candidate_scope_receipt",
+                "lite_refinement_run_receipt",
+                "interaction_persistence_receipt",
+                "uncertainty_interval_receipt",
+            ],
+            "template_safety_policy": {
+                "template_is_not_evidence": True,
+                "expected_rows_must_be_operator_reviewed": True,
+                "placeholder_or_fixture_rows_do_not_promote": True,
+                "summary_only_metrics_do_not_promote": True,
+                "broad_all_atom_or_fep_claims_remain_locked": True,
+            },
+            "claim_boundary": (
+                "The top-k rows scaffold is an operator checklist. It does not "
+                "prove bounded Lite refinement until real candidate rows, "
+                "source receipts, metric receipts, importer validation, and "
+                "survival materialization all pass."
+            ),
+        },
         "closes_phase4_criteria": [
             "top_k_refinement_rows_present",
             "top_k_refinement_case_coverage",
@@ -772,6 +819,43 @@ def _markdown(payload: dict[str, Any]) -> str:
                 f"`{row.get('default_row_artifact', '')}` | "
                 f"{row.get('required_candidate_slot_count', 0)} |"
             )
+        row_action_packets = [
+            row.get("top_k_rows_action_packet")
+            for row in missing_actions
+            if isinstance(row.get("top_k_rows_action_packet"), dict)
+        ]
+        if row_action_packets:
+            lines.extend(["", "### PocketMD Top-k Rows Action", ""])
+            for action in row_action_packets:
+                if not isinstance(action, dict):
+                    continue
+                safety_policy = action.get("template_safety_policy")
+                if not isinstance(safety_policy, dict):
+                    safety_policy = {}
+                required_fields = ", ".join(
+                    f"`{field}`"
+                    for field in action.get("operator_must_fill_or_verify", [])
+                )
+                receipt_roles = ", ".join(
+                    f"`{role}`"
+                    for role in action.get("required_receipt_roles", [])
+                )
+                lines.extend(
+                    [
+                        f"- `status`: `{action.get('status')}`",
+                        f"- `template_artifact`: `{action.get('template_artifact')}`",
+                        f"- `expected_rows_artifact`: `{action.get('expected_rows_artifact')}`",
+                        f"- `review_template_command`: `{action.get('review_template_command')}`",
+                        f"- `import_rows_command`: `{action.get('import_rows_command')}`",
+                        f"- `materialize_survival_command`: `{action.get('materialize_survival_command')}`",
+                        f"- `verify_science_actual_closure_command`: `{action.get('verify_science_actual_closure_command')}`",
+                        f"- `operator_must_fill_or_verify`: {required_fields}",
+                        f"- `required_receipt_roles`: {receipt_roles}",
+                        f"- `template_is_not_evidence`: `{safety_policy.get('template_is_not_evidence')}`",
+                        f"- `placeholder_or_fixture_rows_do_not_promote`: `{safety_policy.get('placeholder_or_fixture_rows_do_not_promote')}`",
+                        f"- `summary_only_metrics_do_not_promote`: `{safety_policy.get('summary_only_metrics_do_not_promote')}`",
+                    ]
+                )
     lines.extend(["", "## Commands", ""])
     for key, command in payload["commands"].items():
         lines.append(f"- `{key}`: `{command}`")

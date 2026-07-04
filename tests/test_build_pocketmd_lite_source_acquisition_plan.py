@@ -281,6 +281,39 @@ def test_pocketmd_lite_source_acquisition_plan_exposes_topk_row_contract() -> No
         "interaction_persistence_receipt",
         "uncertainty_interval_receipt",
     ]
+    top_k_action = row_action["top_k_rows_action_packet"]
+    assert top_k_action["status"] == "operator_rows_required"
+    assert top_k_action["template_artifact"].endswith(
+        "pocketmd_lite_topk_rows_template.csv"
+    )
+    assert top_k_action["expected_rows_artifact"].endswith(
+        "pocketmd_lite_topk_rows.json"
+    )
+    assert top_k_action["review_template_command"] == row_action["commands"][
+        "review_row_template"
+    ]
+    assert top_k_action["import_rows_command"] == row_action["commands"][
+        "import_rows"
+    ]
+    assert top_k_action["materialize_survival_command"] == row_action["commands"][
+        "materialize_survival"
+    ]
+    assert top_k_action["verify_science_actual_closure_command"] == row_action[
+        "commands"
+    ]["science_actual_closure"]
+    assert "operator_input_source.source_artifact_sha256" in top_k_action[
+        "operator_must_fill_or_verify"
+    ]
+    assert "uncertainty_interval_receipt" in top_k_action[
+        "required_receipt_roles"
+    ]
+    assert top_k_action["template_safety_policy"] == {
+        "broad_all_atom_or_fep_claims_remain_locked": True,
+        "expected_rows_must_be_operator_reviewed": True,
+        "placeholder_or_fixture_rows_do_not_promote": True,
+        "summary_only_metrics_do_not_promote": True,
+        "template_is_not_evidence": True,
+    }
     assert "uncertainty_summary_materialized" in row_action[
         "closes_phase4_criteria"
     ]
@@ -446,6 +479,11 @@ def test_pocketmd_lite_source_acquisition_plan_cli_writes_markdown(
     assert "pocketmd_lite_topk_rows_template.csv" in markdown
     assert "## Missing Row Input Actions" in markdown
     assert "attach_pocketmd_rows_at_" in markdown
+    assert "### PocketMD Top-k Rows Action" in markdown
+    assert "`template_is_not_evidence`: `True`" in markdown
+    assert "`placeholder_or_fixture_rows_do_not_promote`: `True`" in markdown
+    assert "operator_input_source.source_artifact_sha256" in markdown
+    assert "verify_science_actual_closure_command" in markdown
     assert "`pocketmd_lite_case_001` | 2 | `1,2`" in markdown
     assert "## Phase 4 Receipt Roles" in markdown
     assert "upstream_top_k_candidate_scope_receipt" in markdown
