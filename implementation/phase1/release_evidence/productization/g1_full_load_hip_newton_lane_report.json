@@ -1564,15 +1564,9 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-07-03T22:19:20.813284+00:00",
+  "generated_at": "2026-07-04T08:39:33.978389+00:00",
   "hip_consistency_proof": {
-    "changed_paths_since_source_commit": [
-      "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
-      "scripts/build_public_benchmark_operator_intake_packet.py",
-      "scripts/build_public_benchmark_vina_gnina_execution_plan.py",
-      "tests/test_build_public_benchmark_operator_intake_packet.py",
-      "tests/test_build_public_benchmark_vina_gnina_execution_plan.py"
-    ],
+    "changed_paths_since_source_commit": [],
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
     "execution_mode": "hip_required_direct_probe_no_cpu_fallback",
@@ -1648,16 +1642,16 @@
     "reused_evidence": false,
     "rocm_hip_required": true,
     "runtime_blockers": [],
-    "source_commit_sha": "df149d71e2a2a7a1db92a41683e84ffb151e92ec",
+    "source_commit_sha": "78538d6ecb7096aec38e7679ded4367b401d53e0",
     "source_state_fresh": true,
-    "source_state_kind": "non_g1_hip_paths_changed",
+    "source_state_kind": "exact",
     "status": "partial"
   },
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json": "sha256:b35be5bd18a33d52ec5afab1ee79b4953d6f9a8c933336e8a3680ddea36c4b24",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:92ca6c7d4e23dd89132e0fe834fbe16ca753e17ae860786ff5ad7bed97a27aad",
     "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:1ce5827e6a53ccda3427b48071c25d3b88aad5c0fd44ba6b2404686421cfda5b",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:42a7d1b58b1661177487e68a2018c0d2496245fda1425d3a5eb40935e5574c17",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:7dd1a1ff6b6bbbed58f8cb130709dcf95cac62b91e715a06756a394d6a585066",
     "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz": "sha256:e3a48e50edfb68648d1d7c5d720faec45f632de667061be71b30a57a042d1235",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:26231b6d8aea08199264cb3ee4e5f24417d58265664a18c88aa74c579a2ab5e3"
   },
@@ -1741,7 +1735,7 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "46030289d7c45be1f32344271041e575afecc8c9",
+  "source_commit_sha": "78538d6ecb7096aec38e7679ded4367b401d53e0",
   "status": "blocked",
   "terminal_requirement_breakdown": {
     "active_terminal_requirement_id": "full_load_checkpoint_1p0",
@@ -1806,7 +1800,7 @@
           "receipt_blocker_count": 8,
           "runtime_blocker_count": 0,
           "source_state_fresh": true,
-          "source_state_kind": "non_g1_hip_paths_changed"
+          "source_state_kind": "exact"
         },
         "ready": false,
         "rerun_command": "python3 implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py --require-hip-residual-engine --checkpoint-npz <full-load-checkpoint.npz> --output-json implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",

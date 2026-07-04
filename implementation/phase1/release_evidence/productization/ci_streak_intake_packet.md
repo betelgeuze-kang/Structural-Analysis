@@ -32,7 +32,7 @@
 
 | Workflow | Event | Counted Lane | Queued Minutes | Run | Owner Action |
 |---|---|---|---:|---|---|
-| `Nightly Full Quality` | `schedule` | `nightly` | `736.9` | `28680698586` | Bring the required self-hosted runner online, let queued Nightly Full Quality runs start, then refresh github_actions_ci_streak_evidence.json before collecting release streak credit. |
+| `Nightly Full Quality` | `schedule` | `nightly` | `774.4` | `28680698586` | Bring the required self-hosted runner online, let queued Nightly Full Quality runs start, then refresh github_actions_ci_streak_evidence.json before collecting release streak credit. |
 
 ## Validation Commands
 
@@ -81,7 +81,7 @@
 | Field | Current | Required | Pass |
 |---|---|---|---:|
 | `github_actions_ci_streak_evidence.schema_version` | `github-actions-ci-streak-evidence.v1` | `github-actions-ci-streak-evidence.v1` | `True` |
-| `github_actions_ci_streak_evidence.generated_at` | `2026-07-04T08:08:36.131920+00:00` | `timezone-aware timestamp no older than 168 hours` | `True` |
+| `github_actions_ci_streak_evidence.generated_at` | `2026-07-04T08:46:11.228076+00:00` | `timezone-aware timestamp no older than 168 hours` | `True` |
 | `github_actions_ci_streak_evidence.threshold` | `30` | `30` | `True` |
 | `lanes.pr.consecutive_pass_count` | `0` | `>= 30` | `False` |
 | `lanes.pr.threshold_pass` | `False` | `true` | `False` |

@@ -14,7 +14,7 @@
     "full_load_checkpoint_1p0_not_created_by_this_seed_report",
     "hip_residual_jvp_worker_not_executed_by_this_seed_report"
   ],
-  "case_count": 2,
+  "case_count": 11,
   "cases": [
     {
       "assembly_contract_check": {
@@ -507,9 +507,1836 @@
       "solution_contract_pass": true,
       "solution_status": "ready",
       "status": "ready"
+    },
+    {
+      "assembly_contract_check": {
+        "contract_pass": true,
+        "fixed_point_residual_used_as_physical": false,
+        "free_dof_count": 1,
+        "regularized_fixed_point_substitute": false,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_inf_norm": 0.0,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-contract-check.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_inf_norm": 40.0
+      },
+      "assembly_result": {
+        "external_forces": [
+          100.0
+        ],
+        "internal_forces": [
+          100.0
+        ],
+        "material_state_next": {
+          "algorithmic_tangent_kn_per_m": 40.0,
+          "assembly_scope": "state_updated_bilinear_material_1dof_seed",
+          "committed_state_next": {
+            "equivalent_plastic_displacement_m": 1.2,
+            "plastic_displacement_m": 1.2
+          },
+          "committed_state_previous": {
+            "equivalent_plastic_displacement_m": 0.0,
+            "plastic_displacement_m": 0.0
+          },
+          "material_case_kind": "monotonic_tension_yield",
+          "material_family": "reinforced_concrete",
+          "material_model": "bilinear_isotropic_hardening_1d_return_mapping",
+          "path_dependent_state": true,
+          "path_dependent_state_updated": true,
+          "plastic_increment_m": 1.2,
+          "return_mapping": "plastic_corrector",
+          "section_integration": "frame_fiber",
+          "state_persistence_label": "trial_state_to_committed_state",
+          "state_schema": "g1-material-state-next.state-updated-seed.v1",
+          "state_updated_material_newton": true,
+          "strain_mode": "axial",
+          "structural_component": "frame_fiber_axial",
+          "trial_state": {
+            "trial_displacement_m": 1.7,
+            "trial_force_kn": 340.0,
+            "yield_function_kn": 300.0,
+            "yielded": true
+          }
+        },
+        "metrics": {
+          "assembly_scope": "state_updated_bilinear_material_1dof_seed",
+          "fixed_point_residual_used_as_physical": false,
+          "free_dof_count": 1,
+          "free_dof_labels": [
+            "frame_fiber_axial_ux"
+          ],
+          "g1_closure_claim": false,
+          "map_residual_used_as_physical": false,
+          "material_algorithmic_tangent_source": "return_mapping_consistent_tangent",
+          "material_case_kind": "monotonic_tension_yield",
+          "material_family": "reinforced_concrete",
+          "material_state_persistence_required": true,
+          "path_dependent_state": true,
+          "path_dependent_state_updated": true,
+          "regularized_fixed_point_substitute": false,
+          "residual_inf_norm": 0.0,
+          "section_integration": "frame_fiber",
+          "solver_normalized_residual_used_as_physical": false,
+          "state_updated_material_newton": true,
+          "strain_mode": "axial",
+          "structural_component": "frame_fiber_axial",
+          "tangent_inf_norm": 40.0
+        },
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_free": [
+          0.0
+        ],
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-result.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_free": [
+          [
+            40.0
+          ]
+        ]
+      },
+      "assembly_scope": "state_updated_bilinear_material_1dof_seed",
+      "case_id": "g1_state_updated_bilinear_material_1dof_seed",
+      "contract_pass": true,
+      "direct_residual_newton_parity_check": {
+        "consistent_residual_jacobian_newton_gate_passed": false,
+        "cpu_diagnostic_substitute_used_as_g1_closure": false,
+        "cpu_seed_consistent_newton_gate_passed": true,
+        "direct_solver_residual_match": true,
+        "fallback_used": false,
+        "final_direct_residual_inf_norm": 0.0,
+        "final_relative_increment": 0.0,
+        "final_residual_max_abs_delta": 0.0,
+        "final_residual_relative_delta": 0.0,
+        "final_solver_residual_inf_norm": 0.0,
+        "history_replay": [
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 100.0,
+            "direct_solver_residual_match": true,
+            "iteration": 0,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 100.0
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 48.0,
+            "direct_solver_residual_match": true,
+            "iteration": 1,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 48.0
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 0.0,
+            "direct_solver_residual_match": true,
+            "iteration": 2,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 0.0
+          }
+        ],
+        "line_search_replay": [
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 0,
+            "residual_reduction_ratio": 0.48,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 100.0,
+            "trial_residual_inf_norm": 48.0
+          },
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 1,
+            "residual_reduction_ratio": 0.0,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 48.0,
+            "trial_residual_inf_norm": 0.0
+          }
+        ],
+        "phase": "phase2_cpu_seed_consistent_residual_jacobian_newton",
+        "promotes_g1_closure": false,
+        "regularization_used": false,
+        "regularized_fixed_point_substitute": false,
+        "relative_increment_gate_passed": true,
+        "relative_increment_tolerance": 1e-12,
+        "residual_descent_passed": true,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_gate_passed": true,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-direct-residual-newton-parity-check.v1"
+      },
+      "fallback_used": false,
+      "g1_closure_claim": false,
+      "jvp_finite_difference_check": {
+        "absolute_tolerance": 1e-08,
+        "analytic_jvp": [
+          40.0
+        ],
+        "direction": [
+          1.0
+        ],
+        "finite_difference_epsilon": 1e-07,
+        "finite_difference_jvp": [
+          40.000000041118255
+        ],
+        "finite_difference_scheme": "central",
+        "max_abs_error": 4.1118255467154086e-08,
+        "pass": true,
+        "relative_error": 1.0279563856221579e-09,
+        "relative_tolerance": 1e-06,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-jvp-finite-difference-check.v1",
+        "tangent_definition": "dR_du_consistent"
+      },
+      "material_state_persistence_replay_check": {
+        "absolute_tolerance": 1e-10,
+        "case_id": "g1_state_updated_bilinear_material_1dof_seed",
+        "external_force_replay_match": true,
+        "internal_force_replay_match": true,
+        "material_family": "reinforced_concrete",
+        "material_state_replay_match": true,
+        "pass": true,
+        "promotes_g1_closure": false,
+        "relative_tolerance": 1e-10,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_replay_match": true,
+        "schema_version": "g1-material-state-checkpoint-replay-check.v1",
+        "section_integration": "frame_fiber",
+        "state_persistence_label": "trial_state_to_committed_state",
+        "strain_mode": "axial",
+        "tangent_replay_match": true
+      },
+      "regularization_used": false,
+      "solution_contract_pass": true,
+      "solution_status": "ready",
+      "status": "ready"
+    },
+    {
+      "assembly_contract_check": {
+        "contract_pass": true,
+        "fixed_point_residual_used_as_physical": false,
+        "free_dof_count": 1,
+        "regularized_fixed_point_substitute": false,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_inf_norm": 0.0,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-contract-check.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_inf_norm": 30.0
+      },
+      "assembly_result": {
+        "external_forces": [
+          115.0
+        ],
+        "internal_forces": [
+          115.0
+        ],
+        "material_state_next": {
+          "algorithmic_tangent_kn_per_m": 30.0,
+          "assembly_scope": "state_updated_steel_frame_fiber_material_1dof_seed",
+          "committed_state_next": {
+            "equivalent_plastic_displacement_m": 1.4285714285714286,
+            "plastic_displacement_m": 1.4285714285714286
+          },
+          "committed_state_previous": {
+            "equivalent_plastic_displacement_m": 0.0,
+            "plastic_displacement_m": 0.0
+          },
+          "material_case_kind": "monotonic_steel_tension_yield",
+          "material_family": "steel",
+          "material_model": "bilinear_isotropic_hardening_1d_return_mapping",
+          "path_dependent_state": true,
+          "path_dependent_state_updated": true,
+          "plastic_increment_m": 1.4285714285714286,
+          "return_mapping": "plastic_corrector",
+          "section_integration": "frame_fiber",
+          "state_persistence_label": "trial_state_to_committed_state",
+          "state_schema": "g1-material-state-next.state-updated-seed.v1",
+          "state_updated_material_newton": true,
+          "strain_mode": "axial",
+          "structural_component": "steel_frame_fiber_axial",
+          "trial_state": {
+            "trial_displacement_m": 1.9761904761904763,
+            "trial_force_kn": 415.0,
+            "yield_function_kn": 350.0,
+            "yielded": true
+          }
+        },
+        "metrics": {
+          "assembly_scope": "state_updated_steel_frame_fiber_material_1dof_seed",
+          "fixed_point_residual_used_as_physical": false,
+          "free_dof_count": 1,
+          "free_dof_labels": [
+            "steel_frame_fiber_axial_ux"
+          ],
+          "g1_closure_claim": false,
+          "map_residual_used_as_physical": false,
+          "material_algorithmic_tangent_source": "return_mapping_consistent_tangent",
+          "material_case_kind": "monotonic_steel_tension_yield",
+          "material_family": "steel",
+          "material_state_persistence_required": true,
+          "path_dependent_state": true,
+          "path_dependent_state_updated": true,
+          "regularized_fixed_point_substitute": false,
+          "residual_inf_norm": 0.0,
+          "section_integration": "frame_fiber",
+          "solver_normalized_residual_used_as_physical": false,
+          "state_updated_material_newton": true,
+          "strain_mode": "axial",
+          "structural_component": "steel_frame_fiber_axial",
+          "tangent_inf_norm": 30.0
+        },
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_free": [
+          0.0
+        ],
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-result.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_free": [
+          [
+            30.0
+          ]
+        ]
+      },
+      "assembly_scope": "state_updated_steel_frame_fiber_material_1dof_seed",
+      "case_id": "g1_state_updated_steel_frame_fiber_yield_seed",
+      "contract_pass": true,
+      "direct_residual_newton_parity_check": {
+        "consistent_residual_jacobian_newton_gate_passed": false,
+        "cpu_diagnostic_substitute_used_as_g1_closure": false,
+        "cpu_seed_consistent_newton_gate_passed": true,
+        "direct_solver_residual_match": true,
+        "fallback_used": false,
+        "final_direct_residual_inf_norm": 0.0,
+        "final_relative_increment": 0.0,
+        "final_residual_max_abs_delta": 0.0,
+        "final_residual_relative_delta": 0.0,
+        "final_solver_residual_inf_norm": 0.0,
+        "history_replay": [
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 115.0,
+            "direct_solver_residual_match": true,
+            "iteration": 0,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 115.0
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 42.85714285714286,
+            "direct_solver_residual_match": true,
+            "iteration": 1,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 42.85714285714286
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 0.0,
+            "direct_solver_residual_match": true,
+            "iteration": 2,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 0.0
+          }
+        ],
+        "line_search_replay": [
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 0,
+            "residual_reduction_ratio": 0.3726708074534162,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 115.0,
+            "trial_residual_inf_norm": 42.85714285714286
+          },
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 1,
+            "residual_reduction_ratio": 0.0,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 42.85714285714286,
+            "trial_residual_inf_norm": 0.0
+          }
+        ],
+        "phase": "phase2_cpu_seed_consistent_residual_jacobian_newton",
+        "promotes_g1_closure": false,
+        "regularization_used": false,
+        "regularized_fixed_point_substitute": false,
+        "relative_increment_gate_passed": true,
+        "relative_increment_tolerance": 1e-12,
+        "residual_descent_passed": true,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_gate_passed": true,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-direct-residual-newton-parity-check.v1"
+      },
+      "fallback_used": false,
+      "g1_closure_claim": false,
+      "jvp_finite_difference_check": {
+        "absolute_tolerance": 1e-08,
+        "analytic_jvp": [
+          30.0
+        ],
+        "direction": [
+          1.0
+        ],
+        "finite_difference_epsilon": 1e-07,
+        "finite_difference_jvp": [
+          29.99999992425728
+        ],
+        "finite_difference_scheme": "central",
+        "max_abs_error": 7.574271876364946e-08,
+        "pass": true,
+        "relative_error": 2.5247572921216488e-09,
+        "relative_tolerance": 1e-06,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-jvp-finite-difference-check.v1",
+        "tangent_definition": "dR_du_consistent"
+      },
+      "material_state_persistence_replay_check": {
+        "absolute_tolerance": 1e-10,
+        "case_id": "g1_state_updated_steel_frame_fiber_yield_seed",
+        "external_force_replay_match": true,
+        "internal_force_replay_match": true,
+        "material_family": "steel",
+        "material_state_replay_match": true,
+        "pass": true,
+        "promotes_g1_closure": false,
+        "relative_tolerance": 1e-10,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_replay_match": true,
+        "schema_version": "g1-material-state-checkpoint-replay-check.v1",
+        "section_integration": "frame_fiber",
+        "state_persistence_label": "trial_state_to_committed_state",
+        "strain_mode": "axial",
+        "tangent_replay_match": true
+      },
+      "regularization_used": false,
+      "solution_contract_pass": true,
+      "solution_status": "ready",
+      "status": "ready"
+    },
+    {
+      "assembly_contract_check": {
+        "contract_pass": true,
+        "fixed_point_residual_used_as_physical": false,
+        "free_dof_count": 1,
+        "regularized_fixed_point_substitute": false,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_inf_norm": 0.0,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-contract-check.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_inf_norm": 210.0
+      },
+      "assembly_result": {
+        "external_forces": [
+          60.0
+        ],
+        "internal_forces": [
+          60.0
+        ],
+        "material_state_next": {
+          "algorithmic_tangent_kn_per_m": 210.0,
+          "assembly_scope": "state_updated_steel_elastic_material_1dof_seed",
+          "committed_state_next": {
+            "equivalent_plastic_displacement_m": 0.0,
+            "plastic_displacement_m": 0.0
+          },
+          "committed_state_previous": {
+            "equivalent_plastic_displacement_m": 0.0,
+            "plastic_displacement_m": 0.0
+          },
+          "material_case_kind": "elastic_only_replay",
+          "material_family": "steel",
+          "material_model": "bilinear_isotropic_hardening_1d_return_mapping",
+          "path_dependent_state": true,
+          "path_dependent_state_updated": false,
+          "plastic_increment_m": 0.0,
+          "return_mapping": "elastic_trial_state",
+          "section_integration": "frame_fiber",
+          "state_persistence_label": "trial_state_to_committed_state",
+          "state_schema": "g1-material-state-next.state-updated-seed.v1",
+          "state_updated_material_newton": true,
+          "strain_mode": "axial",
+          "structural_component": "steel_frame_fiber_axial",
+          "trial_state": {
+            "trial_displacement_m": 0.2857142857142857,
+            "trial_force_kn": 60.0,
+            "yield_function_kn": -60.0,
+            "yielded": false
+          }
+        },
+        "metrics": {
+          "assembly_scope": "state_updated_steel_elastic_material_1dof_seed",
+          "fixed_point_residual_used_as_physical": false,
+          "free_dof_count": 1,
+          "free_dof_labels": [
+            "steel_frame_fiber_axial_ux"
+          ],
+          "g1_closure_claim": false,
+          "map_residual_used_as_physical": false,
+          "material_algorithmic_tangent_source": "return_mapping_consistent_tangent",
+          "material_case_kind": "elastic_only_replay",
+          "material_family": "steel",
+          "material_state_persistence_required": true,
+          "path_dependent_state": true,
+          "path_dependent_state_updated": false,
+          "regularized_fixed_point_substitute": false,
+          "residual_inf_norm": 0.0,
+          "section_integration": "frame_fiber",
+          "solver_normalized_residual_used_as_physical": false,
+          "state_updated_material_newton": true,
+          "strain_mode": "axial",
+          "structural_component": "steel_frame_fiber_axial",
+          "tangent_inf_norm": 210.0
+        },
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_free": [
+          0.0
+        ],
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-result.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_free": [
+          [
+            210.0
+          ]
+        ]
+      },
+      "assembly_scope": "state_updated_steel_elastic_material_1dof_seed",
+      "case_id": "g1_state_updated_steel_elastic_replay_seed",
+      "contract_pass": true,
+      "direct_residual_newton_parity_check": {
+        "consistent_residual_jacobian_newton_gate_passed": false,
+        "cpu_diagnostic_substitute_used_as_g1_closure": false,
+        "cpu_seed_consistent_newton_gate_passed": true,
+        "direct_solver_residual_match": true,
+        "fallback_used": false,
+        "final_direct_residual_inf_norm": 0.0,
+        "final_relative_increment": 0.0,
+        "final_residual_max_abs_delta": 0.0,
+        "final_residual_relative_delta": 0.0,
+        "final_solver_residual_inf_norm": 0.0,
+        "history_replay": [
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 60.0,
+            "direct_solver_residual_match": true,
+            "iteration": 0,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 60.0
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 0.0,
+            "direct_solver_residual_match": true,
+            "iteration": 1,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 0.0
+          }
+        ],
+        "line_search_replay": [
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 0,
+            "residual_reduction_ratio": 0.0,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 60.0,
+            "trial_residual_inf_norm": 0.0
+          }
+        ],
+        "phase": "phase2_cpu_seed_consistent_residual_jacobian_newton",
+        "promotes_g1_closure": false,
+        "regularization_used": false,
+        "regularized_fixed_point_substitute": false,
+        "relative_increment_gate_passed": true,
+        "relative_increment_tolerance": 1e-12,
+        "residual_descent_passed": true,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_gate_passed": true,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-direct-residual-newton-parity-check.v1"
+      },
+      "fallback_used": false,
+      "g1_closure_claim": false,
+      "jvp_finite_difference_check": {
+        "absolute_tolerance": 1e-08,
+        "analytic_jvp": [
+          210.0
+        ],
+        "direction": [
+          1.0
+        ],
+        "finite_difference_epsilon": 1e-07,
+        "finite_difference_jvp": [
+          210.00000000270802
+        ],
+        "finite_difference_scheme": "central",
+        "max_abs_error": 2.708020474528894e-09,
+        "pass": true,
+        "relative_error": 1.2895335592828444e-11,
+        "relative_tolerance": 1e-06,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-jvp-finite-difference-check.v1",
+        "tangent_definition": "dR_du_consistent"
+      },
+      "material_state_persistence_replay_check": {
+        "absolute_tolerance": 1e-10,
+        "case_id": "g1_state_updated_steel_elastic_replay_seed",
+        "external_force_replay_match": true,
+        "internal_force_replay_match": true,
+        "material_family": "steel",
+        "material_state_replay_match": true,
+        "pass": true,
+        "promotes_g1_closure": false,
+        "relative_tolerance": 1e-10,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_replay_match": true,
+        "schema_version": "g1-material-state-checkpoint-replay-check.v1",
+        "section_integration": "frame_fiber",
+        "state_persistence_label": "trial_state_to_committed_state",
+        "strain_mode": "axial",
+        "tangent_replay_match": true
+      },
+      "regularization_used": false,
+      "solution_contract_pass": true,
+      "solution_status": "ready",
+      "status": "ready"
+    },
+    {
+      "assembly_contract_check": {
+        "contract_pass": true,
+        "fixed_point_residual_used_as_physical": false,
+        "free_dof_count": 1,
+        "regularized_fixed_point_substitute": false,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_inf_norm": 0.0,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-contract-check.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_inf_norm": 40.0
+      },
+      "assembly_result": {
+        "external_forces": [
+          -100.0
+        ],
+        "internal_forces": [
+          -100.0
+        ],
+        "material_state_next": {
+          "algorithmic_tangent_kn_per_m": 40.0,
+          "assembly_scope": "state_updated_shell_layer_material_1dof_seed",
+          "committed_state_next": {
+            "equivalent_plastic_displacement_m": 1.2,
+            "plastic_displacement_m": -1.2
+          },
+          "committed_state_previous": {
+            "equivalent_plastic_displacement_m": 0.0,
+            "plastic_displacement_m": 0.0
+          },
+          "material_case_kind": "monotonic_compression_yield",
+          "material_family": "reinforced_concrete",
+          "material_model": "bilinear_isotropic_hardening_1d_return_mapping",
+          "path_dependent_state": true,
+          "path_dependent_state_updated": true,
+          "plastic_increment_m": 1.2,
+          "return_mapping": "plastic_corrector",
+          "section_integration": "layered_shell",
+          "state_persistence_label": "trial_state_to_committed_state",
+          "state_schema": "g1-material-state-next.state-updated-seed.v1",
+          "state_updated_material_newton": true,
+          "strain_mode": "membrane",
+          "structural_component": "shell_layer_membrane",
+          "trial_state": {
+            "trial_displacement_m": -1.7,
+            "trial_force_kn": -340.0,
+            "yield_function_kn": 300.0,
+            "yielded": true
+          }
+        },
+        "metrics": {
+          "assembly_scope": "state_updated_shell_layer_material_1dof_seed",
+          "fixed_point_residual_used_as_physical": false,
+          "free_dof_count": 1,
+          "free_dof_labels": [
+            "shell_layer_membrane_ux"
+          ],
+          "g1_closure_claim": false,
+          "map_residual_used_as_physical": false,
+          "material_algorithmic_tangent_source": "return_mapping_consistent_tangent",
+          "material_case_kind": "monotonic_compression_yield",
+          "material_family": "reinforced_concrete",
+          "material_state_persistence_required": true,
+          "path_dependent_state": true,
+          "path_dependent_state_updated": true,
+          "regularized_fixed_point_substitute": false,
+          "residual_inf_norm": 0.0,
+          "section_integration": "layered_shell",
+          "solver_normalized_residual_used_as_physical": false,
+          "state_updated_material_newton": true,
+          "strain_mode": "membrane",
+          "structural_component": "shell_layer_membrane",
+          "tangent_inf_norm": 40.0
+        },
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_free": [
+          0.0
+        ],
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-result.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_free": [
+          [
+            40.0
+          ]
+        ]
+      },
+      "assembly_scope": "state_updated_shell_layer_material_1dof_seed",
+      "case_id": "g1_state_updated_shell_layer_compression_seed",
+      "contract_pass": true,
+      "direct_residual_newton_parity_check": {
+        "consistent_residual_jacobian_newton_gate_passed": false,
+        "cpu_diagnostic_substitute_used_as_g1_closure": false,
+        "cpu_seed_consistent_newton_gate_passed": true,
+        "direct_solver_residual_match": true,
+        "fallback_used": false,
+        "final_direct_residual_inf_norm": 0.0,
+        "final_relative_increment": 0.0,
+        "final_residual_max_abs_delta": 0.0,
+        "final_residual_relative_delta": 0.0,
+        "final_solver_residual_inf_norm": 0.0,
+        "history_replay": [
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 100.0,
+            "direct_solver_residual_match": true,
+            "iteration": 0,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 100.0
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 48.0,
+            "direct_solver_residual_match": true,
+            "iteration": 1,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 48.0
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 0.0,
+            "direct_solver_residual_match": true,
+            "iteration": 2,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 0.0
+          }
+        ],
+        "line_search_replay": [
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 0,
+            "residual_reduction_ratio": 0.48,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 100.0,
+            "trial_residual_inf_norm": 48.0
+          },
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 1,
+            "residual_reduction_ratio": 0.0,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 48.0,
+            "trial_residual_inf_norm": 0.0
+          }
+        ],
+        "phase": "phase2_cpu_seed_consistent_residual_jacobian_newton",
+        "promotes_g1_closure": false,
+        "regularization_used": false,
+        "regularized_fixed_point_substitute": false,
+        "relative_increment_gate_passed": true,
+        "relative_increment_tolerance": 1e-12,
+        "residual_descent_passed": true,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_gate_passed": true,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-direct-residual-newton-parity-check.v1"
+      },
+      "fallback_used": false,
+      "g1_closure_claim": false,
+      "jvp_finite_difference_check": {
+        "absolute_tolerance": 1e-08,
+        "analytic_jvp": [
+          40.0
+        ],
+        "direction": [
+          1.0
+        ],
+        "finite_difference_epsilon": 1e-07,
+        "finite_difference_jvp": [
+          40.000000041118255
+        ],
+        "finite_difference_scheme": "central",
+        "max_abs_error": 4.1118255467154086e-08,
+        "pass": true,
+        "relative_error": 1.0279563856221579e-09,
+        "relative_tolerance": 1e-06,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-jvp-finite-difference-check.v1",
+        "tangent_definition": "dR_du_consistent"
+      },
+      "material_state_persistence_replay_check": {
+        "absolute_tolerance": 1e-10,
+        "case_id": "g1_state_updated_shell_layer_compression_seed",
+        "external_force_replay_match": true,
+        "internal_force_replay_match": true,
+        "material_family": "reinforced_concrete",
+        "material_state_replay_match": true,
+        "pass": true,
+        "promotes_g1_closure": false,
+        "relative_tolerance": 1e-10,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_replay_match": true,
+        "schema_version": "g1-material-state-checkpoint-replay-check.v1",
+        "section_integration": "layered_shell",
+        "state_persistence_label": "trial_state_to_committed_state",
+        "strain_mode": "membrane",
+        "tangent_replay_match": true
+      },
+      "regularization_used": false,
+      "solution_contract_pass": true,
+      "solution_status": "ready",
+      "status": "ready"
+    },
+    {
+      "assembly_contract_check": {
+        "contract_pass": true,
+        "fixed_point_residual_used_as_physical": false,
+        "free_dof_count": 1,
+        "regularized_fixed_point_substitute": false,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_inf_norm": 0.0,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-contract-check.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_inf_norm": 25.263157894736842
+      },
+      "assembly_result": {
+        "external_forces": [
+          75.0
+        ],
+        "internal_forces": [
+          75.0
+        ],
+        "material_state_next": {
+          "algorithmic_tangent_kn_per_m": 25.263157894736842,
+          "assembly_scope": "state_updated_shell_layer_bending_material_1dof_seed",
+          "committed_state_next": {
+            "equivalent_plastic_displacement_m": 1.3333333333333333,
+            "plastic_displacement_m": 1.3333333333333333
+          },
+          "committed_state_previous": {
+            "equivalent_plastic_displacement_m": 0.0,
+            "plastic_displacement_m": 0.0
+          },
+          "material_case_kind": "monotonic_shell_bending_yield",
+          "material_family": "reinforced_concrete",
+          "material_model": "bilinear_isotropic_hardening_1d_return_mapping",
+          "path_dependent_state": true,
+          "path_dependent_state_updated": true,
+          "plastic_increment_m": 1.3333333333333333,
+          "return_mapping": "plastic_corrector",
+          "section_integration": "layered_shell",
+          "state_persistence_label": "trial_state_to_committed_state",
+          "state_schema": "g1-material-state-next.state-updated-seed.v1",
+          "state_updated_material_newton": true,
+          "strain_mode": "bending",
+          "structural_component": "shell_layer_bending",
+          "trial_state": {
+            "trial_displacement_m": 1.8020833333333333,
+            "trial_force_kn": 288.3333333333333,
+            "yield_function_kn": 253.33333333333331,
+            "yielded": true
+          }
+        },
+        "metrics": {
+          "assembly_scope": "state_updated_shell_layer_bending_material_1dof_seed",
+          "fixed_point_residual_used_as_physical": false,
+          "free_dof_count": 1,
+          "free_dof_labels": [
+            "shell_layer_bending_ux"
+          ],
+          "g1_closure_claim": false,
+          "map_residual_used_as_physical": false,
+          "material_algorithmic_tangent_source": "return_mapping_consistent_tangent",
+          "material_case_kind": "monotonic_shell_bending_yield",
+          "material_family": "reinforced_concrete",
+          "material_state_persistence_required": true,
+          "path_dependent_state": true,
+          "path_dependent_state_updated": true,
+          "regularized_fixed_point_substitute": false,
+          "residual_inf_norm": 0.0,
+          "section_integration": "layered_shell",
+          "solver_normalized_residual_used_as_physical": false,
+          "state_updated_material_newton": true,
+          "strain_mode": "bending",
+          "structural_component": "shell_layer_bending",
+          "tangent_inf_norm": 25.263157894736842
+        },
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_free": [
+          0.0
+        ],
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-result.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_free": [
+          [
+            25.263157894736842
+          ]
+        ]
+      },
+      "assembly_scope": "state_updated_shell_layer_bending_material_1dof_seed",
+      "case_id": "g1_state_updated_shell_layer_bending_seed",
+      "contract_pass": true,
+      "direct_residual_newton_parity_check": {
+        "consistent_residual_jacobian_newton_gate_passed": false,
+        "cpu_diagnostic_substitute_used_as_g1_closure": false,
+        "cpu_seed_consistent_newton_gate_passed": true,
+        "direct_solver_residual_match": true,
+        "fallback_used": false,
+        "final_direct_residual_inf_norm": 0.0,
+        "final_relative_increment": 0.0,
+        "final_residual_max_abs_delta": 0.0,
+        "final_residual_relative_delta": 0.0,
+        "final_solver_residual_inf_norm": 0.0,
+        "history_replay": [
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 75.0,
+            "direct_solver_residual_match": true,
+            "iteration": 0,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 75.0
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 33.68421052631579,
+            "direct_solver_residual_match": true,
+            "iteration": 1,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 33.68421052631579
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 0.0,
+            "direct_solver_residual_match": true,
+            "iteration": 2,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 0.0
+          }
+        ],
+        "line_search_replay": [
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 0,
+            "residual_reduction_ratio": 0.4491228070175438,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 75.0,
+            "trial_residual_inf_norm": 33.68421052631579
+          },
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 1,
+            "residual_reduction_ratio": 0.0,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 33.68421052631579,
+            "trial_residual_inf_norm": 0.0
+          }
+        ],
+        "phase": "phase2_cpu_seed_consistent_residual_jacobian_newton",
+        "promotes_g1_closure": false,
+        "regularization_used": false,
+        "regularized_fixed_point_substitute": false,
+        "relative_increment_gate_passed": true,
+        "relative_increment_tolerance": 1e-12,
+        "residual_descent_passed": true,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_gate_passed": true,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-direct-residual-newton-parity-check.v1"
+      },
+      "fallback_used": false,
+      "g1_closure_claim": false,
+      "jvp_finite_difference_check": {
+        "absolute_tolerance": 1e-08,
+        "analytic_jvp": [
+          25.263157894736842
+        ],
+        "direction": [
+          1.0
+        ],
+        "finite_difference_epsilon": 1e-07,
+        "finite_difference_jvp": [
+          25.263158107691197
+        ],
+        "finite_difference_scheme": "central",
+        "max_abs_error": 2.129543545947854e-07,
+        "pass": true,
+        "relative_error": 8.429443131654742e-09,
+        "relative_tolerance": 1e-06,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-jvp-finite-difference-check.v1",
+        "tangent_definition": "dR_du_consistent"
+      },
+      "material_state_persistence_replay_check": {
+        "absolute_tolerance": 1e-10,
+        "case_id": "g1_state_updated_shell_layer_bending_seed",
+        "external_force_replay_match": true,
+        "internal_force_replay_match": true,
+        "material_family": "reinforced_concrete",
+        "material_state_replay_match": true,
+        "pass": true,
+        "promotes_g1_closure": false,
+        "relative_tolerance": 1e-10,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_replay_match": true,
+        "schema_version": "g1-material-state-checkpoint-replay-check.v1",
+        "section_integration": "layered_shell",
+        "state_persistence_label": "trial_state_to_committed_state",
+        "strain_mode": "bending",
+        "tangent_replay_match": true
+      },
+      "regularization_used": false,
+      "solution_contract_pass": true,
+      "solution_status": "ready",
+      "status": "ready"
+    },
+    {
+      "assembly_contract_check": {
+        "contract_pass": true,
+        "fixed_point_residual_used_as_physical": false,
+        "free_dof_count": 1,
+        "regularized_fixed_point_substitute": false,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_inf_norm": 0.0,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-contract-check.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_inf_norm": 8.0
+      },
+      "assembly_result": {
+        "external_forces": [
+          1.2
+        ],
+        "internal_forces": [
+          1.2
+        ],
+        "material_state_next": {
+          "algorithmic_tangent_kn_per_m": 8.0,
+          "assembly_scope": "state_updated_shell_drilling_material_1dof_seed",
+          "committed_state_next": {
+            "equivalent_plastic_displacement_m": 0.0,
+            "plastic_displacement_m": 0.0
+          },
+          "committed_state_previous": {
+            "equivalent_plastic_displacement_m": 0.0,
+            "plastic_displacement_m": 0.0
+          },
+          "material_case_kind": "elastic_drilling_stiffness_replay",
+          "material_family": "shell_equivalent_plate",
+          "material_model": "bilinear_isotropic_hardening_1d_return_mapping",
+          "path_dependent_state": true,
+          "path_dependent_state_updated": false,
+          "plastic_increment_m": 0.0,
+          "return_mapping": "elastic_trial_state",
+          "section_integration": "layered_shell",
+          "state_persistence_label": "trial_state_to_committed_state",
+          "state_schema": "g1-material-state-next.state-updated-seed.v1",
+          "state_updated_material_newton": true,
+          "strain_mode": "drilling",
+          "structural_component": "shell_drilling_stiffness",
+          "trial_state": {
+            "trial_displacement_m": 0.15,
+            "trial_force_kn": 1.2,
+            "yield_function_kn": -2.8,
+            "yielded": false
+          }
+        },
+        "metrics": {
+          "assembly_scope": "state_updated_shell_drilling_material_1dof_seed",
+          "fixed_point_residual_used_as_physical": false,
+          "free_dof_count": 1,
+          "free_dof_labels": [
+            "shell_drilling_stiffness_ux"
+          ],
+          "g1_closure_claim": false,
+          "map_residual_used_as_physical": false,
+          "material_algorithmic_tangent_source": "return_mapping_consistent_tangent",
+          "material_case_kind": "elastic_drilling_stiffness_replay",
+          "material_family": "shell_equivalent_plate",
+          "material_state_persistence_required": true,
+          "path_dependent_state": true,
+          "path_dependent_state_updated": false,
+          "regularized_fixed_point_substitute": false,
+          "residual_inf_norm": 0.0,
+          "section_integration": "layered_shell",
+          "solver_normalized_residual_used_as_physical": false,
+          "state_updated_material_newton": true,
+          "strain_mode": "drilling",
+          "structural_component": "shell_drilling_stiffness",
+          "tangent_inf_norm": 8.0
+        },
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_free": [
+          0.0
+        ],
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-result.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_free": [
+          [
+            8.0
+          ]
+        ]
+      },
+      "assembly_scope": "state_updated_shell_drilling_material_1dof_seed",
+      "case_id": "g1_state_updated_shell_drilling_elastic_seed",
+      "contract_pass": true,
+      "direct_residual_newton_parity_check": {
+        "consistent_residual_jacobian_newton_gate_passed": false,
+        "cpu_diagnostic_substitute_used_as_g1_closure": false,
+        "cpu_seed_consistent_newton_gate_passed": true,
+        "direct_solver_residual_match": true,
+        "fallback_used": false,
+        "final_direct_residual_inf_norm": 0.0,
+        "final_relative_increment": 0.0,
+        "final_residual_max_abs_delta": 0.0,
+        "final_residual_relative_delta": 0.0,
+        "final_solver_residual_inf_norm": 0.0,
+        "history_replay": [
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 1.2,
+            "direct_solver_residual_match": true,
+            "iteration": 0,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 1.2
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 0.0,
+            "direct_solver_residual_match": true,
+            "iteration": 1,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 0.0
+          }
+        ],
+        "line_search_replay": [
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 0,
+            "residual_reduction_ratio": 0.0,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 1.2,
+            "trial_residual_inf_norm": 0.0
+          }
+        ],
+        "phase": "phase2_cpu_seed_consistent_residual_jacobian_newton",
+        "promotes_g1_closure": false,
+        "regularization_used": false,
+        "regularized_fixed_point_substitute": false,
+        "relative_increment_gate_passed": true,
+        "relative_increment_tolerance": 1e-12,
+        "residual_descent_passed": true,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_gate_passed": true,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-direct-residual-newton-parity-check.v1"
+      },
+      "fallback_used": false,
+      "g1_closure_claim": false,
+      "jvp_finite_difference_check": {
+        "absolute_tolerance": 1e-08,
+        "analytic_jvp": [
+          8.0
+        ],
+        "direction": [
+          1.0
+        ],
+        "finite_difference_epsilon": 1e-07,
+        "finite_difference_jvp": [
+          8.000000000230045
+        ],
+        "finite_difference_scheme": "central",
+        "max_abs_error": 2.3004531612969004e-10,
+        "pass": true,
+        "relative_error": 2.8755664515384365e-11,
+        "relative_tolerance": 1e-06,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-jvp-finite-difference-check.v1",
+        "tangent_definition": "dR_du_consistent"
+      },
+      "material_state_persistence_replay_check": {
+        "absolute_tolerance": 1e-10,
+        "case_id": "g1_state_updated_shell_drilling_elastic_seed",
+        "external_force_replay_match": true,
+        "internal_force_replay_match": true,
+        "material_family": "shell_equivalent_plate",
+        "material_state_replay_match": true,
+        "pass": true,
+        "promotes_g1_closure": false,
+        "relative_tolerance": 1e-10,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_replay_match": true,
+        "schema_version": "g1-material-state-checkpoint-replay-check.v1",
+        "section_integration": "layered_shell",
+        "state_persistence_label": "trial_state_to_committed_state",
+        "strain_mode": "drilling",
+        "tangent_replay_match": true
+      },
+      "regularization_used": false,
+      "solution_contract_pass": true,
+      "solution_status": "ready",
+      "status": "ready"
+    },
+    {
+      "assembly_contract_check": {
+        "contract_pass": true,
+        "fixed_point_residual_used_as_physical": false,
+        "free_dof_count": 1,
+        "regularized_fixed_point_substitute": false,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_inf_norm": 0.0,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-contract-check.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_inf_norm": 40.0
+      },
+      "assembly_result": {
+        "external_forces": [
+          140.0
+        ],
+        "internal_forces": [
+          140.0
+        ],
+        "material_state_next": {
+          "algorithmic_tangent_kn_per_m": 40.0,
+          "assembly_scope": "state_updated_composite_material_reloading_1dof_seed",
+          "committed_state_next": {
+            "equivalent_plastic_displacement_m": 2.0,
+            "plastic_displacement_m": 2.0
+          },
+          "committed_state_previous": {
+            "equivalent_plastic_displacement_m": 1.2,
+            "plastic_displacement_m": 1.2
+          },
+          "material_case_kind": "plastic_reloading_from_committed_state",
+          "material_family": "src_composite",
+          "material_model": "bilinear_isotropic_hardening_1d_return_mapping",
+          "path_dependent_state": true,
+          "path_dependent_state_updated": true,
+          "plastic_increment_m": 0.8000000000000003,
+          "return_mapping": "plastic_corrector",
+          "section_integration": "composite_fiber",
+          "state_persistence_label": "trial_state_to_committed_state",
+          "state_schema": "g1-material-state-next.state-updated-seed.v1",
+          "state_updated_material_newton": true,
+          "strain_mode": "axial",
+          "structural_component": "src_composite_axial",
+          "trial_state": {
+            "trial_displacement_m": 2.7,
+            "trial_force_kn": 300.00000000000006,
+            "yield_function_kn": 200.00000000000006,
+            "yielded": true
+          }
+        },
+        "metrics": {
+          "assembly_scope": "state_updated_composite_material_reloading_1dof_seed",
+          "fixed_point_residual_used_as_physical": false,
+          "free_dof_count": 1,
+          "free_dof_labels": [
+            "src_composite_axial_ux"
+          ],
+          "g1_closure_claim": false,
+          "map_residual_used_as_physical": false,
+          "material_algorithmic_tangent_source": "return_mapping_consistent_tangent",
+          "material_case_kind": "plastic_reloading_from_committed_state",
+          "material_family": "src_composite",
+          "material_state_persistence_required": true,
+          "path_dependent_state": true,
+          "path_dependent_state_updated": true,
+          "regularized_fixed_point_substitute": false,
+          "residual_inf_norm": 0.0,
+          "section_integration": "composite_fiber",
+          "solver_normalized_residual_used_as_physical": false,
+          "state_updated_material_newton": true,
+          "strain_mode": "axial",
+          "structural_component": "src_composite_axial",
+          "tangent_inf_norm": 40.0
+        },
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_free": [
+          0.0
+        ],
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-result.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_free": [
+          [
+            40.0
+          ]
+        ]
+      },
+      "assembly_scope": "state_updated_composite_material_reloading_1dof_seed",
+      "case_id": "g1_state_updated_composite_reloading_seed",
+      "contract_pass": true,
+      "direct_residual_newton_parity_check": {
+        "consistent_residual_jacobian_newton_gate_passed": false,
+        "cpu_diagnostic_substitute_used_as_g1_closure": false,
+        "cpu_seed_consistent_newton_gate_passed": true,
+        "direct_solver_residual_match": true,
+        "fallback_used": false,
+        "final_direct_residual_inf_norm": 0.0,
+        "final_relative_increment": 0.0,
+        "final_residual_max_abs_delta": 0.0,
+        "final_residual_relative_delta": 0.0,
+        "final_solver_residual_inf_norm": 0.0,
+        "history_replay": [
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 40.0,
+            "direct_solver_residual_match": true,
+            "iteration": 0,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 40.0
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 32.0,
+            "direct_solver_residual_match": true,
+            "iteration": 1,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 32.0
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 0.0,
+            "direct_solver_residual_match": true,
+            "iteration": 2,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 0.0
+          }
+        ],
+        "line_search_replay": [
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 0,
+            "residual_reduction_ratio": 0.8,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 40.0,
+            "trial_residual_inf_norm": 32.0
+          },
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 1,
+            "residual_reduction_ratio": 0.0,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 32.0,
+            "trial_residual_inf_norm": 0.0
+          }
+        ],
+        "phase": "phase2_cpu_seed_consistent_residual_jacobian_newton",
+        "promotes_g1_closure": false,
+        "regularization_used": false,
+        "regularized_fixed_point_substitute": false,
+        "relative_increment_gate_passed": true,
+        "relative_increment_tolerance": 1e-12,
+        "residual_descent_passed": true,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_gate_passed": true,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-direct-residual-newton-parity-check.v1"
+      },
+      "fallback_used": false,
+      "g1_closure_claim": false,
+      "jvp_finite_difference_check": {
+        "absolute_tolerance": 1e-08,
+        "analytic_jvp": [
+          40.0
+        ],
+        "direction": [
+          1.0
+        ],
+        "finite_difference_epsilon": 1e-07,
+        "finite_difference_jvp": [
+          40.000000041118255
+        ],
+        "finite_difference_scheme": "central",
+        "max_abs_error": 4.1118255467154086e-08,
+        "pass": true,
+        "relative_error": 1.0279563856221579e-09,
+        "relative_tolerance": 1e-06,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-jvp-finite-difference-check.v1",
+        "tangent_definition": "dR_du_consistent"
+      },
+      "material_state_persistence_replay_check": {
+        "absolute_tolerance": 1e-10,
+        "case_id": "g1_state_updated_composite_reloading_seed",
+        "external_force_replay_match": true,
+        "internal_force_replay_match": true,
+        "material_family": "src_composite",
+        "material_state_replay_match": true,
+        "pass": true,
+        "promotes_g1_closure": false,
+        "relative_tolerance": 1e-10,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_replay_match": true,
+        "schema_version": "g1-material-state-checkpoint-replay-check.v1",
+        "section_integration": "composite_fiber",
+        "state_persistence_label": "trial_state_to_committed_state",
+        "strain_mode": "axial",
+        "tangent_replay_match": true
+      },
+      "regularization_used": false,
+      "solution_contract_pass": true,
+      "solution_status": "ready",
+      "status": "ready"
+    },
+    {
+      "assembly_contract_check": {
+        "contract_pass": true,
+        "fixed_point_residual_used_as_physical": false,
+        "free_dof_count": 1,
+        "regularized_fixed_point_substitute": false,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_inf_norm": 2.842170943040401e-14,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-contract-check.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_inf_norm": 200.0
+      },
+      "assembly_result": {
+        "external_forces": [
+          20.0
+        ],
+        "internal_forces": [
+          19.99999999999997
+        ],
+        "material_state_next": {
+          "algorithmic_tangent_kn_per_m": 200.0,
+          "assembly_scope": "state_updated_composite_material_unloading_1dof_seed",
+          "committed_state_next": {
+            "equivalent_plastic_displacement_m": 1.2,
+            "plastic_displacement_m": 1.2
+          },
+          "committed_state_previous": {
+            "equivalent_plastic_displacement_m": 1.2,
+            "plastic_displacement_m": 1.2
+          },
+          "material_case_kind": "elastic_unloading_from_committed_state",
+          "material_family": "src_composite",
+          "material_model": "bilinear_isotropic_hardening_1d_return_mapping",
+          "path_dependent_state": true,
+          "path_dependent_state_updated": false,
+          "plastic_increment_m": 0.0,
+          "return_mapping": "elastic_trial_state",
+          "section_integration": "composite_fiber",
+          "state_persistence_label": "trial_state_to_committed_state",
+          "state_schema": "g1-material-state-next.state-updated-seed.v1",
+          "state_updated_material_newton": true,
+          "strain_mode": "axial",
+          "structural_component": "src_composite_axial",
+          "trial_state": {
+            "trial_displacement_m": 1.2999999999999998,
+            "trial_force_kn": 19.99999999999997,
+            "yield_function_kn": -80.00000000000003,
+            "yielded": false
+          }
+        },
+        "metrics": {
+          "assembly_scope": "state_updated_composite_material_unloading_1dof_seed",
+          "fixed_point_residual_used_as_physical": false,
+          "free_dof_count": 1,
+          "free_dof_labels": [
+            "src_composite_axial_ux"
+          ],
+          "g1_closure_claim": false,
+          "map_residual_used_as_physical": false,
+          "material_algorithmic_tangent_source": "return_mapping_consistent_tangent",
+          "material_case_kind": "elastic_unloading_from_committed_state",
+          "material_family": "src_composite",
+          "material_state_persistence_required": true,
+          "path_dependent_state": true,
+          "path_dependent_state_updated": false,
+          "regularized_fixed_point_substitute": false,
+          "residual_inf_norm": 2.842170943040401e-14,
+          "section_integration": "composite_fiber",
+          "solver_normalized_residual_used_as_physical": false,
+          "state_updated_material_newton": true,
+          "strain_mode": "axial",
+          "structural_component": "src_composite_axial",
+          "tangent_inf_norm": 200.0
+        },
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_free": [
+          -2.842170943040401e-14
+        ],
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-result.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_free": [
+          [
+            200.0
+          ]
+        ]
+      },
+      "assembly_scope": "state_updated_composite_material_unloading_1dof_seed",
+      "case_id": "g1_state_updated_composite_unloading_replay_seed",
+      "contract_pass": true,
+      "direct_residual_newton_parity_check": {
+        "consistent_residual_jacobian_newton_gate_passed": false,
+        "cpu_diagnostic_substitute_used_as_g1_closure": false,
+        "cpu_seed_consistent_newton_gate_passed": true,
+        "direct_solver_residual_match": true,
+        "fallback_used": false,
+        "final_direct_residual_inf_norm": 2.842170943040401e-14,
+        "final_relative_increment": 1.0931426704001543e-16,
+        "final_residual_max_abs_delta": 0.0,
+        "final_residual_relative_delta": 0.0,
+        "final_solver_residual_inf_norm": 2.842170943040401e-14,
+        "history_replay": [
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 80.0,
+            "direct_solver_residual_match": true,
+            "iteration": 0,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 80.0
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 2.842170943040401e-14,
+            "direct_solver_residual_match": true,
+            "iteration": 1,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 2.842170943040401e-14
+          }
+        ],
+        "line_search_replay": [
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 0,
+            "residual_reduction_ratio": 3.552713678800501e-16,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 80.0,
+            "trial_residual_inf_norm": 2.842170943040401e-14
+          }
+        ],
+        "phase": "phase2_cpu_seed_consistent_residual_jacobian_newton",
+        "promotes_g1_closure": false,
+        "regularization_used": false,
+        "regularized_fixed_point_substitute": false,
+        "relative_increment_gate_passed": true,
+        "relative_increment_tolerance": 1e-12,
+        "residual_descent_passed": true,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_gate_passed": true,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-direct-residual-newton-parity-check.v1"
+      },
+      "fallback_used": false,
+      "g1_closure_claim": false,
+      "jvp_finite_difference_check": {
+        "absolute_tolerance": 1e-08,
+        "analytic_jvp": [
+          200.0
+        ],
+        "direction": [
+          1.0
+        ],
+        "finite_difference_epsilon": 1e-07,
+        "finite_difference_jvp": [
+          200.00000011677344
+        ],
+        "finite_difference_scheme": "central",
+        "max_abs_error": 1.167734353657579e-07,
+        "pass": true,
+        "relative_error": 5.838671764878886e-10,
+        "relative_tolerance": 1e-06,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-jvp-finite-difference-check.v1",
+        "tangent_definition": "dR_du_consistent"
+      },
+      "material_state_persistence_replay_check": {
+        "absolute_tolerance": 1e-10,
+        "case_id": "g1_state_updated_composite_unloading_replay_seed",
+        "external_force_replay_match": true,
+        "internal_force_replay_match": true,
+        "material_family": "src_composite",
+        "material_state_replay_match": true,
+        "pass": true,
+        "promotes_g1_closure": false,
+        "relative_tolerance": 1e-10,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_replay_match": true,
+        "schema_version": "g1-material-state-checkpoint-replay-check.v1",
+        "section_integration": "composite_fiber",
+        "state_persistence_label": "trial_state_to_committed_state",
+        "strain_mode": "axial",
+        "tangent_replay_match": true
+      },
+      "regularization_used": false,
+      "solution_contract_pass": true,
+      "solution_status": "ready",
+      "status": "ready"
+    },
+    {
+      "assembly_contract_check": {
+        "contract_pass": true,
+        "fixed_point_residual_used_as_physical": false,
+        "free_dof_count": 1,
+        "regularized_fixed_point_substitute": false,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_inf_norm": 0.0,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-contract-check.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_inf_norm": 40.0
+      },
+      "assembly_result": {
+        "external_forces": [
+          -120.0
+        ],
+        "internal_forces": [
+          -120.0
+        ],
+        "material_state_next": {
+          "algorithmic_tangent_kn_per_m": 40.0,
+          "assembly_scope": "state_updated_rc_reverse_compression_1dof_seed",
+          "committed_state_next": {
+            "equivalent_plastic_displacement_m": 1.6,
+            "plastic_displacement_m": -0.4
+          },
+          "committed_state_previous": {
+            "equivalent_plastic_displacement_m": 0.6,
+            "plastic_displacement_m": 0.6
+          },
+          "material_case_kind": "reverse_compression_from_committed_state",
+          "material_family": "reinforced_concrete",
+          "material_model": "bilinear_isotropic_hardening_1d_return_mapping",
+          "path_dependent_state": true,
+          "path_dependent_state_updated": true,
+          "plastic_increment_m": 1.0,
+          "return_mapping": "plastic_corrector",
+          "section_integration": "frame_fiber",
+          "state_persistence_label": "trial_state_to_committed_state",
+          "state_schema": "g1-material-state-next.state-updated-seed.v1",
+          "state_updated_material_newton": true,
+          "strain_mode": "axial_reverse",
+          "structural_component": "rc_frame_fiber_axial",
+          "trial_state": {
+            "trial_displacement_m": -1.0,
+            "trial_force_kn": -320.0,
+            "yield_function_kn": 250.0,
+            "yielded": true
+          }
+        },
+        "metrics": {
+          "assembly_scope": "state_updated_rc_reverse_compression_1dof_seed",
+          "fixed_point_residual_used_as_physical": false,
+          "free_dof_count": 1,
+          "free_dof_labels": [
+            "rc_frame_fiber_axial_ux"
+          ],
+          "g1_closure_claim": false,
+          "map_residual_used_as_physical": false,
+          "material_algorithmic_tangent_source": "return_mapping_consistent_tangent",
+          "material_case_kind": "reverse_compression_from_committed_state",
+          "material_family": "reinforced_concrete",
+          "material_state_persistence_required": true,
+          "path_dependent_state": true,
+          "path_dependent_state_updated": true,
+          "regularized_fixed_point_substitute": false,
+          "residual_inf_norm": 0.0,
+          "section_integration": "frame_fiber",
+          "solver_normalized_residual_used_as_physical": false,
+          "state_updated_material_newton": true,
+          "strain_mode": "axial_reverse",
+          "structural_component": "rc_frame_fiber_axial",
+          "tangent_inf_norm": 40.0
+        },
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_free": [
+          0.0
+        ],
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-result.v1",
+        "tangent_definition": "dR_du_consistent",
+        "tangent_free": [
+          [
+            40.0
+          ]
+        ]
+      },
+      "assembly_scope": "state_updated_rc_reverse_compression_1dof_seed",
+      "case_id": "g1_state_updated_rc_reverse_compression_seed",
+      "contract_pass": true,
+      "direct_residual_newton_parity_check": {
+        "consistent_residual_jacobian_newton_gate_passed": false,
+        "cpu_diagnostic_substitute_used_as_g1_closure": false,
+        "cpu_seed_consistent_newton_gate_passed": true,
+        "direct_solver_residual_match": true,
+        "fallback_used": false,
+        "final_direct_residual_inf_norm": 0.0,
+        "final_relative_increment": 0.0,
+        "final_residual_max_abs_delta": 0.0,
+        "final_residual_relative_delta": 0.0,
+        "final_solver_residual_inf_norm": 0.0,
+        "history_replay": [
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 8.0,
+            "direct_solver_residual_match": true,
+            "iteration": 0,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 8.0
+          },
+          {
+            "accepted": true,
+            "direct_residual_inf_norm": 0.0,
+            "direct_solver_residual_match": true,
+            "iteration": 1,
+            "line_search_alpha": 1.0,
+            "max_abs_delta": 0.0,
+            "relative_delta": 0.0,
+            "solver_residual_inf_norm": 0.0
+          }
+        ],
+        "line_search_replay": [
+          {
+            "direct_residual_descent_passed": true,
+            "iteration": 0,
+            "residual_reduction_ratio": 0.0,
+            "selected_alpha": 1.0,
+            "starting_residual_inf_norm": 8.0,
+            "trial_residual_inf_norm": 0.0
+          }
+        ],
+        "phase": "phase2_cpu_seed_consistent_residual_jacobian_newton",
+        "promotes_g1_closure": false,
+        "regularization_used": false,
+        "regularized_fixed_point_substitute": false,
+        "relative_increment_gate_passed": true,
+        "relative_increment_tolerance": 1e-12,
+        "residual_descent_passed": true,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_gate_passed": true,
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-direct-residual-newton-parity-check.v1"
+      },
+      "fallback_used": false,
+      "g1_closure_claim": false,
+      "jvp_finite_difference_check": {
+        "absolute_tolerance": 1e-08,
+        "analytic_jvp": [
+          40.0
+        ],
+        "direction": [
+          1.0
+        ],
+        "finite_difference_epsilon": 1e-07,
+        "finite_difference_jvp": [
+          40.000000041118255
+        ],
+        "finite_difference_scheme": "central",
+        "max_abs_error": 4.1118255467154086e-08,
+        "pass": true,
+        "relative_error": 1.0279563856221579e-09,
+        "relative_tolerance": 1e-06,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_source": "physical_direct_residual",
+        "schema_version": "g1-assembly-jvp-finite-difference-check.v1",
+        "tangent_definition": "dR_du_consistent"
+      },
+      "material_state_persistence_replay_check": {
+        "absolute_tolerance": 1e-10,
+        "case_id": "g1_state_updated_rc_reverse_compression_seed",
+        "external_force_replay_match": true,
+        "internal_force_replay_match": true,
+        "material_family": "reinforced_concrete",
+        "material_state_replay_match": true,
+        "pass": true,
+        "promotes_g1_closure": false,
+        "relative_tolerance": 1e-10,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_replay_match": true,
+        "schema_version": "g1-material-state-checkpoint-replay-check.v1",
+        "section_integration": "frame_fiber",
+        "state_persistence_label": "trial_state_to_committed_state",
+        "strain_mode": "axial_reverse",
+        "tangent_replay_match": true
+      },
+      "regularization_used": false,
+      "solution_contract_pass": true,
+      "solution_status": "ready",
+      "status": "ready"
     }
   ],
-  "claim_boundary": "This report validates the shared AssemblyResult shape, physical R=F_internal-F_external convention, and central-difference JVP guard on two deterministic CPU seed assemblies. It also replays each seed Newton history through the same physical assembly to verify direct residual/Newton residual parity and residual descent. It does not create a full-load 1.0 checkpoint, prove full-mesh nonlinear equilibrium, close state-updated material Newton breadth, execute ROCm/HIP, or promote G1.",
+  "claim_boundary": "This report validates the shared AssemblyResult shape, physical R=F_internal-F_external convention, and central-difference JVP guard on deterministic CPU seed assemblies, including a path-dependent state-updated material return-mapping breadth seed suite. It also replays each seed Newton history through the same physical assembly to verify direct residual/Newton residual parity and residual descent. It does not create a full-load 1.0 checkpoint, prove full-mesh nonlinear equilibrium, close state-updated material Newton breadth, execute ROCm/HIP, or promote G1.",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "consistent_residual_jacobian_newton_gate_passed": false,
   "contract_pass": true,
@@ -517,17 +2344,23 @@
   "engine_version": "1.0.0",
   "fixed_point_residual_promoted_to_physical": false,
   "g1_closure_claim": false,
-  "generated_at": "2026-07-03T22:10:30.952465+00:00",
+  "generated_at": "2026-07-04T08:39:23.868926+00:00",
   "globalization": "backtracking_line_search",
   "input_checksums": {
-    "scripts/build_g1_assembly_contract_seed_report.py": "sha256:1002c277ac685bb27877be46aad280d4937af3e9e44b0d020d9377a23689a41e",
+    "scripts/build_g1_assembly_contract_seed_report.py": "sha256:98191f8bb1646d7d8b551519edf127eac9bad4fcd2a3a9872b8c73489d21bd69",
     "src/structural_analysis/assembly/coupled_static.py": "sha256:56e1c3f1b09b6e47181d3c877397d6a109af41b5dc3fa459973cf650df9e611a",
-    "src/structural_analysis/assembly/g1_contract.py": "sha256:934a271886c23fc900d81b25e0b72f6276725042c709491b9b8ac45b4a30d31e",
+    "src/structural_analysis/assembly/g1_contract.py": "sha256:efbf68dbb1e27a177af0763bc0e0af3ad54dce6469e4fcbf9b315d6cf6c11b87",
+    "src/structural_analysis/assembly/material_state.py": "sha256:48c2db734d7c65f47e57069417df511c93f6bfa54905fb2f0168c02f464160f3",
     "src/structural_analysis/assembly/nonlinear_static.py": "sha256:afc7ecf37b7fe7c2fc172b9b223d18640a44c22f6896aa47c20fdf35761fb41b",
     "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:c43772246853be09cacee662312fadac9de5d87b91e9ff2d105e9cb6342d16c6",
-    "tests/test_g1_assembly_contract.py": "sha256:3b527ae9be8ba6c53c947c5bd97c10791425d6ff2c8fc6fded3a895d7c2d6eb2"
+    "tests/test_g1_assembly_contract.py": "sha256:49d6cf2ec0e0e5a70b63d73faeaf7c26f6dab5e79c6790d814934cc93dbf2373"
   },
-  "phase_covered": "phase1_phase2_cpu_seed_contract_and_newton_parity",
+  "material_jvp_max_relative_error": 8.429443131654742e-09,
+  "material_state_persistence_replay_seed_case_count": 9,
+  "material_state_persistence_replay_seed_passed": true,
+  "path_dependent_material_replay_seed_case_count": 9,
+  "path_dependent_material_update_seed_case_count": 6,
+  "phase_covered": "phase1_phase2_cpu_seed_contract_newton_parity_and_state_updated_material_breadth_seeds",
   "prohibited_physical_residual_substitutes": [
     "fixed_point_residual",
     "map_residual",
@@ -546,6 +2379,48 @@
   ],
   "residual_formula": "F_internal_minus_F_external",
   "schema_version": "g1-assembly-contract-seed-report.v1",
-  "source_commit_sha": "df149d71e2a2a7a1db92a41683e84ffb151e92ec",
+  "source_commit_sha": "78538d6ecb7096aec38e7679ded4367b401d53e0",
+  "state_updated_material_newton_breadth_closed": false,
+  "state_updated_material_newton_breadth_seed_coverage_ready": true,
+  "state_updated_material_newton_seed_case_count": 9,
+  "state_updated_material_newton_seed_case_kinds": [
+    "monotonic_tension_yield",
+    "monotonic_steel_tension_yield",
+    "elastic_only_replay",
+    "monotonic_compression_yield",
+    "monotonic_shell_bending_yield",
+    "elastic_drilling_stiffness_replay",
+    "plastic_reloading_from_committed_state",
+    "elastic_unloading_from_committed_state",
+    "reverse_compression_from_committed_state"
+  ],
+  "state_updated_material_newton_seed_material_families": [
+    "reinforced_concrete",
+    "shell_equivalent_plate",
+    "src_composite",
+    "steel"
+  ],
+  "state_updated_material_newton_seed_passed": true,
+  "state_updated_material_newton_seed_section_integrations": [
+    "composite_fiber",
+    "frame_fiber",
+    "layered_shell"
+  ],
+  "state_updated_material_newton_seed_strain_modes": [
+    "axial",
+    "axial_reverse",
+    "bending",
+    "drilling",
+    "membrane"
+  ],
+  "state_updated_material_newton_seed_structural_components": [
+    "frame_fiber_axial",
+    "rc_frame_fiber_axial",
+    "shell_drilling_stiffness",
+    "shell_layer_bending",
+    "shell_layer_membrane",
+    "src_composite_axial",
+    "steel_frame_fiber_axial"
+  ],
   "status": "ready"
 }

@@ -194,6 +194,82 @@ def assembly_result_from_frame_shell_material_coupled_state(state: Any) -> Assem
     )
 
 
+def assembly_result_from_state_updated_material_newton_state(state: Any) -> AssemblyResult:
+    """Adapt the path-dependent material seed into the shared G1 envelope."""
+
+    material_update = dict(state.material_state_update)
+    assembly_scope = str(
+        material_update.get("assembly_scope")
+        or "state_updated_bilinear_material_1dof_seed"
+    )
+    return AssemblyResult(
+        residual_formula=state.residual_formula,
+        residual_free=state.residual_kn,
+        tangent_free=state.jacobian_kn_per_m,
+        internal_forces=state.internal_forces_kn,
+        external_forces=state.external_forces_kn,
+        material_state_next={
+            "state_schema": "g1-material-state-next.state-updated-seed.v1",
+            "assembly_scope": assembly_scope,
+            "state_updated_material_newton": True,
+            "path_dependent_state": True,
+            "path_dependent_state_updated": bool(
+                material_update.get("path_dependent_state_updated")
+            ),
+            "material_model": material_update.get("material_model"),
+            "material_family": material_update.get("material_family"),
+            "section_integration": material_update.get("section_integration"),
+            "strain_mode": material_update.get("strain_mode"),
+            "structural_component": material_update.get("structural_component"),
+            "material_case_kind": material_update.get("material_case_kind"),
+            "return_mapping": material_update.get("return_mapping"),
+            "committed_state_previous": material_update.get(
+                "committed_state_previous"
+            ),
+            "committed_state_next": material_update.get("committed_state_next"),
+            "trial_state": {
+                "trial_displacement_m": material_update.get(
+                    "trial_displacement_m"
+                ),
+                "trial_force_kn": material_update.get("trial_force_kn"),
+                "yield_function_kn": material_update.get("yield_function_kn"),
+                "yielded": material_update.get("yielded"),
+            },
+            "algorithmic_tangent_kn_per_m": material_update.get(
+                "algorithmic_tangent_kn_per_m"
+            ),
+            "plastic_increment_m": material_update.get("plastic_increment_m"),
+            "state_persistence_label": material_update.get(
+                "state_persistence_label"
+            ),
+        },
+        metrics={
+            "assembly_scope": assembly_scope,
+            "free_dof_labels": list(state.free_dof_labels),
+            "free_dof_count": len(state.free_dof_labels),
+            "residual_inf_norm": _inf_norm(state.residual_kn),
+            "tangent_inf_norm": _inf_norm(state.jacobian_kn_per_m),
+            "state_updated_material_newton": True,
+            "path_dependent_state": True,
+            "path_dependent_state_updated": bool(
+                material_update.get("path_dependent_state_updated")
+            ),
+            "material_family": material_update.get("material_family"),
+            "section_integration": material_update.get("section_integration"),
+            "strain_mode": material_update.get("strain_mode"),
+            "structural_component": material_update.get("structural_component"),
+            "material_case_kind": material_update.get("material_case_kind"),
+            "material_algorithmic_tangent_source": "return_mapping_consistent_tangent",
+            "material_state_persistence_required": True,
+            "fixed_point_residual_used_as_physical": False,
+            "map_residual_used_as_physical": False,
+            "regularized_fixed_point_substitute": False,
+            "solver_normalized_residual_used_as_physical": False,
+            "g1_closure_claim": False,
+        },
+    )
+
+
 def assemble_g1_state(model: Any, state: Any | None = None) -> AssemblyResult:
     """Dispatch an existing assembly state into the G1 physical contract.
 
@@ -203,6 +279,11 @@ def assemble_g1_state(model: Any, state: Any | None = None) -> AssemblyResult:
     """
 
     candidate = model if state is None else state
+    if hasattr(candidate, "material_state_update") and hasattr(
+        candidate,
+        "material_algorithm_tangent_kn_per_m",
+    ):
+        return assembly_result_from_state_updated_material_newton_state(candidate)
     if hasattr(candidate, "free_node_indices") and hasattr(candidate, "element_forces_kn"):
         return assembly_result_from_axial_chain_state(candidate)
     if hasattr(candidate, "free_dof_labels") and hasattr(candidate, "component_forces_kn"):

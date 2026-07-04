@@ -31,6 +31,13 @@ from structural_analysis.assembly.g1_contract import (  # noqa: E402
     direct_residual_newton_parity_check,
     finite_difference_g1_jvp_check,
 )
+from structural_analysis.assembly.material_state import (  # noqa: E402
+    assemble_state_updated_material_newton_state,
+    check_state_updated_material_checkpoint_replay,
+    default_state_updated_bilinear_material_breadth_problems,
+    material_state_checkpoint_payload,
+    solve_state_updated_material_newton,
+)
 from structural_analysis.assembly.nonlinear_static import (  # noqa: E402
     assemble_axial_chain_state,
     default_phase2_axial_chain_mesh_problem,
@@ -79,6 +86,7 @@ def _case_payload(
     assembly_result: Any,
     jvp_check: dict[str, Any],
     newton_parity_check: dict[str, Any],
+    material_state_persistence_replay_check: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     contract_check = assembly_result.contract_check()
     contract_pass = (
@@ -87,11 +95,15 @@ def _case_payload(
         and bool(contract_check["contract_pass"])
         and bool(jvp_check["pass"])
         and bool(newton_parity_check["cpu_seed_consistent_newton_gate_passed"])
+        and (
+            material_state_persistence_replay_check is None
+            or bool(material_state_persistence_replay_check["pass"])
+        )
         and solution.metrics.get("regularization_used") is False
         and solution.metrics.get("fallback_used") is False
         and assembly_result.metrics.get("g1_closure_claim") is False
     )
-    return {
+    payload = {
         "case_id": case_id,
         "assembly_scope": assembly_scope,
         "status": "ready" if contract_pass else "blocked",
@@ -106,6 +118,11 @@ def _case_payload(
         "direct_residual_newton_parity_check": newton_parity_check,
         "g1_closure_claim": False,
     }
+    if material_state_persistence_replay_check is not None:
+        payload["material_state_persistence_replay_check"] = (
+            material_state_persistence_replay_check
+        )
+    return payload
 
 
 def build_g1_assembly_contract_seed_report(
@@ -175,13 +192,140 @@ def build_g1_assembly_contract_seed_report(
         newton_parity_check=coupled_newton_parity,
     )
 
-    cases = [axial_case, coupled_case]
+    material_cases = []
+    for material_problem in default_state_updated_bilinear_material_breadth_problems():
+        material_solution, material_state = solve_state_updated_material_newton(
+            material_problem,
+            config=config,
+        )
+        material_assembly = assemble_g1_state(material_problem, material_state)
+        material_checkpoint = material_state_checkpoint_payload(
+            material_problem,
+            material_state,
+        )
+        material_checkpoint_roundtrip = json.loads(
+            json.dumps(material_checkpoint, ensure_ascii=False)
+        )
+        material_persistence_replay = (
+            check_state_updated_material_checkpoint_replay(
+                material_checkpoint_roundtrip
+            )
+        )
+        material_jvp = finite_difference_g1_jvp_check(
+            lambda free_u, problem=material_problem: assemble_g1_state(
+                problem,
+                assemble_state_updated_material_newton_state(problem, free_u),
+            ),
+            material_solution.free_displacements_m,
+        )
+        material_newton_parity = direct_residual_newton_parity_check(
+            lambda free_u, problem=material_problem: assemble_g1_state(
+                problem,
+                assemble_state_updated_material_newton_state(problem, free_u),
+            ),
+            material_solution,
+        )
+        material_cases.append(
+            _case_payload(
+                case_id=material_problem.case_id,
+                assembly_scope=material_problem.assembly_scope,
+                solution=material_solution,
+                assembly_result=material_assembly,
+                jvp_check=material_jvp,
+                newton_parity_check=material_newton_parity,
+                material_state_persistence_replay_check=(
+                    material_persistence_replay
+                ),
+            )
+        )
+
+    cases = [axial_case, coupled_case, *material_cases]
     contract_pass = all(row["contract_pass"] for row in cases)
     cpu_seed_newton_gate_passed = all(
         row["direct_residual_newton_parity_check"][
             "cpu_seed_consistent_newton_gate_passed"
         ]
         for row in cases
+    )
+    state_updated_material_seed_passed = all(
+        row["contract_pass"]
+        and bool(
+            row["assembly_result"]["material_state_next"].get(
+                "state_updated_material_newton"
+            )
+        )
+        for row in material_cases
+    )
+    material_case_kinds = [
+        str(
+            row["assembly_result"]["material_state_next"].get(
+                "material_case_kind"
+            )
+        )
+        for row in material_cases
+    ]
+    material_structural_components = sorted(
+        {
+            str(
+                row["assembly_result"]["material_state_next"].get(
+                    "structural_component"
+                )
+            )
+            for row in material_cases
+        }
+    )
+    material_families = sorted(
+        {
+            str(
+                row["assembly_result"]["material_state_next"].get(
+                    "material_family"
+                )
+            )
+            for row in material_cases
+        }
+    )
+    material_section_integrations = sorted(
+        {
+            str(
+                row["assembly_result"]["material_state_next"].get(
+                    "section_integration"
+                )
+            )
+            for row in material_cases
+        }
+    )
+    material_strain_modes = sorted(
+        {
+            str(row["assembly_result"]["material_state_next"].get("strain_mode"))
+            for row in material_cases
+        }
+    )
+    path_dependent_update_case_count = sum(
+        1
+        for row in material_cases
+        if row["assembly_result"]["material_state_next"].get(
+            "path_dependent_state_updated"
+        )
+        is True
+    )
+    path_dependent_replay_case_count = sum(
+        1
+        for row in material_cases
+        if row["assembly_result"]["material_state_next"].get(
+            "path_dependent_state"
+        )
+        is True
+    )
+    material_state_persistence_replay_passed = all(
+        row.get("material_state_persistence_replay_check", {}).get("pass") is True
+        for row in material_cases
+    )
+    material_jvp_max_relative_error = max(
+        (
+            float(row["jvp_finite_difference_check"]["relative_error"])
+            for row in material_cases
+        ),
+        default=0.0,
     )
     payload = {
         "schema_version": SCHEMA_VERSION,
@@ -194,6 +338,7 @@ def build_g1_assembly_contract_seed_report(
                 Path("src/structural_analysis/assembly/g1_contract.py"),
                 Path("src/structural_analysis/assembly/nonlinear_static.py"),
                 Path("src/structural_analysis/assembly/coupled_static.py"),
+                Path("src/structural_analysis/assembly/material_state.py"),
                 Path("src/structural_analysis/solvers/nonlinear/newton.py"),
                 Path("scripts/build_g1_assembly_contract_seed_report.py"),
                 Path("tests/test_g1_assembly_contract.py"),
@@ -204,7 +349,10 @@ def build_g1_assembly_contract_seed_report(
         "contract_pass": contract_pass,
         "promotes_g1_closure": False,
         "g1_closure_claim": False,
-        "phase_covered": "phase1_phase2_cpu_seed_contract_and_newton_parity",
+        "phase_covered": (
+            "phase1_phase2_cpu_seed_contract_newton_parity_and_"
+            "state_updated_material_breadth_seeds"
+        ),
         "assembly_contract_schema": G1_ASSEMBLY_CONTRACT_SCHEMA,
         "residual_formula": RESIDUAL_FORMULA,
         "globalization": GLOBALIZATION,
@@ -223,6 +371,42 @@ def build_g1_assembly_contract_seed_report(
         "regularized_fixed_point_substitute": False,
         "cpu_seed_consistent_newton_gate_passed": cpu_seed_newton_gate_passed,
         "consistent_residual_jacobian_newton_gate_passed": False,
+        "state_updated_material_newton_seed_passed": state_updated_material_seed_passed,
+        "state_updated_material_newton_seed_case_count": len(material_cases),
+        "state_updated_material_newton_seed_case_kinds": material_case_kinds,
+        "state_updated_material_newton_seed_structural_components": (
+            material_structural_components
+        ),
+        "state_updated_material_newton_seed_material_families": material_families,
+        "state_updated_material_newton_seed_section_integrations": (
+            material_section_integrations
+        ),
+        "state_updated_material_newton_seed_strain_modes": material_strain_modes,
+        "path_dependent_material_update_seed_case_count": (
+            path_dependent_update_case_count
+        ),
+        "path_dependent_material_replay_seed_case_count": (
+            path_dependent_replay_case_count
+        ),
+        "material_state_persistence_replay_seed_passed": (
+            material_state_persistence_replay_passed
+        ),
+        "material_state_persistence_replay_seed_case_count": len(material_cases),
+        "material_jvp_max_relative_error": material_jvp_max_relative_error,
+        "state_updated_material_newton_breadth_seed_coverage_ready": (
+            state_updated_material_seed_passed
+            and material_state_persistence_replay_passed
+            and {"reinforced_concrete", "steel", "src_composite"}.issubset(
+                set(material_families)
+            )
+            and {"frame_fiber", "layered_shell", "composite_fiber"}.issubset(
+                set(material_section_integrations)
+            )
+            and {"axial", "membrane", "bending", "drilling"}.issubset(
+                set(material_strain_modes)
+            )
+        ),
+        "state_updated_material_newton_breadth_closed": False,
         "case_count": len(cases),
         "cases": cases,
         "blockers_remaining": [
@@ -246,7 +430,8 @@ def build_g1_assembly_contract_seed_report(
         "claim_boundary": (
             "This report validates the shared AssemblyResult shape, physical "
             "R=F_internal-F_external convention, and central-difference JVP guard "
-            "on two deterministic CPU seed assemblies. It also replays each seed "
+            "on deterministic CPU seed assemblies, including a path-dependent "
+            "state-updated material return-mapping breadth seed suite. It also replays each seed "
             "Newton history through the same physical assembly to verify direct "
             "residual/Newton residual parity and residual descent. It does not "
             "create a full-load 1.0 checkpoint, prove full-mesh nonlinear "

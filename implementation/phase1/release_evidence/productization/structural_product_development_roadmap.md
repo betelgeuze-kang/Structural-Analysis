@@ -1,6 +1,6 @@
 # Structural Product Development Roadmap
 
-Structural product roadmap: BLOCKED | evidence_progress=63.5% | stage_average=54.7% | ready_stages=1/8 | primary_blocker=release_surface_owner_decision_pending_count=3
+Structural product roadmap: BLOCKED | evidence_progress=50.9% | stage_average=40.2% | ready_stages=0/8 | primary_blocker=freshness_or_snapshot_integrity_not_closed
 
 ## Current Position
 
@@ -9,23 +9,25 @@ Structural product roadmap: BLOCKED | evidence_progress=63.5% | stage_average=54
 - `g1_full_load_hip_newton_lane_ready`: `False`
 - `limited_commercial_ready`: `False`
 - `paid_pilot_ready`: `False`
-- `pm_milestones`: `5/5`
-- `pm_release_areas`: `12/16`
+- `pm_milestones`: `4/5`
+- `pm_release_areas`: `10/16`
 - `release_ready`: `False`
-- `snapshot_blocker_count`: `45`
-- `snapshot_status`: `blocked`
+- `snapshot_blocker_count`: `73`
+- `snapshot_status`: `stale_or_inconsistent`
 - `structural_scope_owner_decisions`: `0/86`
 - `structural_scope_release_surface_cleanup_decisions`: `0/3`
+- `structural_scope_release_surface_owner_handoff_check`: `pass`
 - `workstation_delivery_ready`: `True`
 
 ## Roadmap Stages
 
-- `evidence_freshness_and_snapshot_integrity`: ready (3/3, 100.0%)
+- `evidence_freshness_and_snapshot_integrity`: partial (1/3, 33.3%)
+  - first blocker: `freshness_or_snapshot_integrity_not_closed`
   - next action: `keep_release_evidence_freshness_report_green`
-- `structural_scope_cleanup`: partial (2/4, 50.0%)
+- `structural_scope_cleanup`: partial (3/5, 60.0%)
   - first blocker: `release_surface_owner_decision_pending_count=3`
   - next action: `record_release_surface_first_owner_delete_or_extract_decisions`
-- `pm_release_gate`: partial (17/21, 81.0%)
+- `pm_release_gate`: partial (14/21, 66.7%)
   - first blocker: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
   - next action: `collect_30_pr_ci_and_nightly_ci_streak_evidence`
 - `developer_preview_rc`: partial (6/9, 66.7%)
@@ -33,12 +35,12 @@ Structural product roadmap: BLOCKED | evidence_progress=63.5% | stage_average=54
   - next action: `close_medium_model_pass_or_approved_review_gate`
 - `g1_solver_closure`: partial (1/2, 50.0%)
   - first blocker: `checkpoint_load_scale_below_required_full_load`
-  - next action: `generate_full_load_1p0_checkpoint_candidate`
-- `paid_pilot_readiness`: partial (1/4, 25.0%)
+  - next action: `promote_g1_assembly_contract_to_live_runner`
+- `paid_pilot_readiness`: blocked (0/4, 0.0%)
   - first blocker: `customer_shadow_below_required:0/3`
   - next action: `complete_3_customer_shadow_cases`
-- `commercial_solver_claim_upgrade`: partial (2/5, 40.0%)
-  - first blocker: `independent_product_not_ready`
+- `commercial_solver_claim_upgrade`: partial (1/5, 20.0%)
+  - first blocker: `snapshot_source_state_not_consistent`
   - next action: `close_external_benchmark_receipts`
 - `enterprise_productization`: partial (1/4, 25.0%)
   - first blocker: `independent_product_ready_false`
