@@ -34,6 +34,24 @@ DEFAULT_HARNESS_REPORT_OUT = (
 )
 DEFAULT_ARTIFACT_BUNDLE_OUT = PRODUCTIZATION / "public_benchmark_harness_bundle.json"
 DEFAULT_OUT_DIR = PRODUCTIZATION
+DEFAULT_VINA_GNINA_RUNTIME_READINESS = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_runtime_readiness.json"
+)
+DEFAULT_VINA_GNINA_EXECUTION_PLAN = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_execution_plan.json"
+)
+DEFAULT_VINA_GNINA_ENGINE_RUN_BUNDLE = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_engine_run_bundle.json"
+)
+DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_rows_template_preflight.json"
+)
+DEFAULT_VINA_GNINA_ROWS_FROM_ENGINE_RUN_BUNDLE_REPORT = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json"
+)
+DEFAULT_VINA_GNINA_ROWS_FROM_TEMPLATE_REPORT = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_rows_from_template_report.json"
+)
 
 SCHEMA_VERSION = "public-benchmark-phase2-row-audit.v1"
 
@@ -94,8 +112,23 @@ def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
 def _resolve(repo_root: Path, path: Path) -> Path:
     return path if path.is_absolute() else repo_root / path
+
+
+def _load_json_artifact(*, repo_root: Path, path: Path) -> dict[str, Any]:
+    resolved = _resolve(repo_root, path)
+    if not resolved.exists():
+        return {}
+    try:
+        payload = json.loads(resolved.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+    return payload if isinstance(payload, dict) else {}
 
 
 def _write_json(repo_root: Path, path: Path, payload: dict[str, Any]) -> None:
@@ -114,6 +147,18 @@ def _artifact_paths_for_out_dir(repo_root: Path, out_dir: Path) -> list[Path]:
         resolved_out_dir / harness_bundle.ARTIFACT_FILENAMES[role]
         for role in ARTIFACT_BUNDLE_ROLES
     ]
+
+
+def _existing_vina_gnina_unblock_inputs(repo_root: Path) -> list[Path]:
+    paths = [
+        DEFAULT_VINA_GNINA_RUNTIME_READINESS,
+        DEFAULT_VINA_GNINA_EXECUTION_PLAN,
+        DEFAULT_VINA_GNINA_ENGINE_RUN_BUNDLE,
+        DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT,
+        DEFAULT_VINA_GNINA_ROWS_FROM_ENGINE_RUN_BUNDLE_REPORT,
+        DEFAULT_VINA_GNINA_ROWS_FROM_TEMPLATE_REPORT,
+    ]
+    return [path for path in paths if _resolve(repo_root, path).exists()]
 
 
 def _candidate_path_strings(row_input_id: str) -> list[str]:
@@ -1034,6 +1079,253 @@ def _row_input_status_summary(
     }
 
 
+def _compact_vina_gnina_blocked_slot(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "status": str(row.get("status") or ""),
+        "case_id": str(row.get("case_id") or ""),
+        "complex_id": str(row.get("complex_id") or ""),
+        "engine_id": str(row.get("engine_id") or ""),
+        "docking_run_id": str(row.get("docking_run_id") or ""),
+        "operator_action": str(row.get("operator_action") or ""),
+        "blockers": [str(item) for item in _as_list(row.get("blockers"))],
+        "case_blockers": [
+            str(item) for item in _as_list(row.get("case_blockers"))
+        ],
+        "expected_predicted_ligand_path_or_pose_ref": str(
+            row.get("expected_predicted_ligand_path_or_pose_ref") or ""
+        ),
+        "expected_engine_run_provenance_ref": str(
+            row.get("expected_engine_run_provenance_ref") or ""
+        ),
+    }
+
+
+def _compact_vina_gnina_blocker_family(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "family_id": str(row.get("family_id") or ""),
+        "status": str(row.get("status") or ""),
+        "operator_action": str(row.get("operator_action") or ""),
+        "next_action": str(row.get("next_action") or ""),
+        "command_key": str(row.get("command_key") or ""),
+        "missing_item_count": int(row.get("missing_item_count") or 0),
+        "blocked_case_count": int(row.get("blocked_case_count") or 0),
+        "first_missing_item": _as_dict(row.get("first_missing_item")),
+        "materialization_command": str(row.get("materialization_command") or ""),
+    }
+
+
+def _vina_gnina_unblock_summary(
+    *,
+    repo_root: Path,
+    row_input_statuses: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    row_status = _as_dict(row_input_statuses.get("vina_gnina_rows"))
+    runtime = _load_json_artifact(
+        repo_root=repo_root,
+        path=DEFAULT_VINA_GNINA_RUNTIME_READINESS,
+    )
+    execution_plan = _load_json_artifact(
+        repo_root=repo_root,
+        path=DEFAULT_VINA_GNINA_EXECUTION_PLAN,
+    )
+    engine_run_bundle = _load_json_artifact(
+        repo_root=repo_root,
+        path=DEFAULT_VINA_GNINA_ENGINE_RUN_BUNDLE,
+    )
+    template_preflight = _load_json_artifact(
+        repo_root=repo_root,
+        path=DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT,
+    )
+    rows_from_bundle_report = _load_json_artifact(
+        repo_root=repo_root,
+        path=DEFAULT_VINA_GNINA_ROWS_FROM_ENGINE_RUN_BUNDLE_REPORT,
+    )
+    rows_from_template_report = _load_json_artifact(
+        repo_root=repo_root,
+        path=DEFAULT_VINA_GNINA_ROWS_FROM_TEMPLATE_REPORT,
+    )
+
+    runtime_summary = _as_dict(runtime.get("summary"))
+    family_actions = [
+        _compact_vina_gnina_blocker_family(row)
+        for row in _as_list(runtime.get("operator_blocker_family_plan"))
+        if isinstance(row, dict)
+    ]
+    commands: dict[str, Any] = {}
+    for payload in (
+        runtime,
+        execution_plan,
+        engine_run_bundle,
+        rows_from_bundle_report,
+        rows_from_template_report,
+    ):
+        commands.update(_as_dict(payload.get("commands")))
+        commands.update(_as_dict(payload.get("operator_commands")))
+
+    missing = bool(row_status.get("missing"))
+    return {
+        "row_input_id": "vina_gnina_rows",
+        "status": (
+            "operator_runtime_or_rows_required"
+            if missing
+            else "rows_detected_review_adapter"
+        ),
+        "phase2_criterion": "vina_gnina_comparison_ready",
+        "rows_present": bool(row_status.get("provided")),
+        "rows_status": str(row_status.get("status") or ""),
+        "expected_rows_artifact": str(
+            row_status.get("preferred_default_row_path")
+            or DEFAULT_ROW_INPUT_CANDIDATES["vina_gnina_rows"][0]
+        ),
+        "operator_action": (
+            "complete_vina_gnina_runtime_inputs_and_attach_rows"
+            if missing
+            else "run_vina_gnina_adapter_and_phase2_row_audit"
+        ),
+        "runtime_readiness": {
+            "artifact": str(DEFAULT_VINA_GNINA_RUNTIME_READINESS),
+            "present": bool(runtime),
+            "status": str(runtime.get("status") or ""),
+            "contract_pass": bool(runtime.get("contract_pass")),
+            "runtime_ready_for_engine_execution": bool(
+                runtime.get("runtime_ready_for_engine_execution")
+            ),
+            "operator_execution_ready": bool(runtime.get("operator_execution_ready")),
+            "execution_plan_ready": bool(runtime.get("execution_plan_ready")),
+            "adapter_rows_ready": bool(runtime.get("adapter_rows_ready")),
+            "required_engine_run_count": int(
+                runtime.get("required_engine_run_count")
+                or runtime_summary.get("required_engine_run_count")
+                or 0
+            ),
+            "ready_engine_run_slot_count": int(
+                runtime.get("ready_engine_run_slot_count") or 0
+            ),
+            "blocked_engine_run_slot_count": int(
+                runtime.get("blocked_engine_run_slot_count")
+                or runtime_summary.get("blocked_engine_run_slot_count")
+                or 0
+            ),
+            "blocked_case_input_slot_count": int(
+                runtime.get("blocked_case_input_slot_count")
+                or runtime_summary.get("blocked_case_input_slot_count")
+                or 0
+            ),
+            "missing_engine_ids": [
+                str(item) for item in _as_list(runtime.get("missing_engine_ids"))
+            ],
+            "operator_blocker_family_count": int(
+                runtime.get("operator_blocker_family_count")
+                or runtime_summary.get("operator_blocker_family_count")
+                or 0
+            ),
+            "operator_blocker_family_blocked_count": int(
+                runtime.get("operator_blocker_family_blocked_count")
+                or runtime_summary.get("operator_blocker_family_blocked_count")
+                or 0
+            ),
+            "operator_blocker_family_missing_item_count": int(
+                runtime.get("operator_blocker_family_missing_item_count")
+                or runtime_summary.get("operator_blocker_family_missing_item_count")
+                or 0
+            ),
+            "first_blocked_case_input_slot": _compact_vina_gnina_blocked_slot(
+                _as_dict(runtime.get("first_blocked_case_input_slot"))
+            ),
+            "first_blocked_engine_run_slot": _compact_vina_gnina_blocked_slot(
+                _as_dict(runtime.get("first_blocked_engine_run_slot"))
+            ),
+            "first_operator_blocker_family": _compact_vina_gnina_blocker_family(
+                _as_dict(runtime.get("first_operator_blocker_family"))
+            ),
+        },
+        "execution_plan": {
+            "artifact": str(DEFAULT_VINA_GNINA_EXECUTION_PLAN),
+            "present": bool(execution_plan),
+            "status": str(execution_plan.get("status") or ""),
+            "contract_pass": bool(execution_plan.get("contract_pass")),
+            "execution_plan_ready": bool(
+                execution_plan.get("execution_plan_ready")
+            ),
+            "operator_execution_ready": bool(
+                execution_plan.get("operator_execution_ready")
+            ),
+            "case_count": int(execution_plan.get("case_count") or 0),
+            "required_engine_run_count": int(
+                _as_dict(execution_plan.get("summary")).get(
+                    "required_engine_run_count"
+                )
+                or 0
+            ),
+            "missing_engine_count": int(
+                _as_dict(execution_plan.get("summary")).get("missing_engine_count")
+                or 0
+            ),
+            "case_blocker_count": int(
+                _as_dict(execution_plan.get("summary")).get("case_blocker_count")
+                or 0
+            ),
+        },
+        "engine_run_bundle": {
+            "artifact": str(DEFAULT_VINA_GNINA_ENGINE_RUN_BUNDLE),
+            "present": bool(engine_run_bundle),
+            "status": str(engine_run_bundle.get("status") or ""),
+            "contract_pass": bool(engine_run_bundle.get("contract_pass")),
+            "bundle_materialized": bool(
+                engine_run_bundle.get("bundle_materialized")
+            ),
+            "case_count": int(engine_run_bundle.get("case_count") or 0),
+            "engine_run_count": int(engine_run_bundle.get("engine_run_count") or 0),
+            "config_count": int(engine_run_bundle.get("config_count") or 0),
+            "receipt_template_count": int(
+                engine_run_bundle.get("receipt_template_count") or 0
+            ),
+        },
+        "rows_template_preflight": {
+            "artifact": str(DEFAULT_VINA_GNINA_ROWS_TEMPLATE_PREFLIGHT),
+            "present": bool(template_preflight),
+            "status": str(template_preflight.get("status") or ""),
+            "contract_pass": bool(template_preflight.get("contract_pass")),
+            "adapter_template_ready": bool(
+                template_preflight.get("adapter_template_ready")
+            ),
+            "summary": _as_dict(template_preflight.get("summary")),
+        },
+        "rows_from_engine_run_bundle_report": {
+            "artifact": str(DEFAULT_VINA_GNINA_ROWS_FROM_ENGINE_RUN_BUNDLE_REPORT),
+            "present": bool(rows_from_bundle_report),
+            "status": str(rows_from_bundle_report.get("status") or ""),
+            "contract_pass": bool(rows_from_bundle_report.get("contract_pass")),
+            "rows_materialized": bool(
+                rows_from_bundle_report.get("rows_materialized")
+            ),
+            "blockers": [
+                str(item) for item in _as_list(rows_from_bundle_report.get("blockers"))
+            ],
+        },
+        "rows_from_template_report": {
+            "artifact": str(DEFAULT_VINA_GNINA_ROWS_FROM_TEMPLATE_REPORT),
+            "present": bool(rows_from_template_report),
+            "status": str(rows_from_template_report.get("status") or ""),
+            "contract_pass": bool(rows_from_template_report.get("contract_pass")),
+            "rows_materialized": bool(
+                rows_from_template_report.get("rows_materialized")
+            ),
+            "blockers": [
+                str(item) for item in _as_list(rows_from_template_report.get("blockers"))
+            ],
+        },
+        "operator_blocker_family_action_count": len(family_actions),
+        "operator_blocker_family_actions": family_actions,
+        "commands": commands,
+        "claim_boundary": (
+            "This is an operator unblock summary for the Vina/GNINA Phase 2 row "
+            "input. It does not run docking engines or promote template rows as "
+            "actual benchmark evidence."
+        ),
+    }
+
+
 def _attach_component_requirement_summaries(
     components: list[dict[str, Any]],
     requirements: list[dict[str, Any]],
@@ -1122,6 +1414,17 @@ def _markdown(payload: dict[str, Any]) -> str:
     missing_row_inputs = [
         str(item) for item in payload.get("missing_row_inputs", []) if str(item)
     ]
+    vina_gnina_unblock = _as_dict(payload.get("vina_gnina_unblock_summary"))
+    vina_gnina_runtime = _as_dict(vina_gnina_unblock.get("runtime_readiness"))
+    vina_gnina_first_case = _as_dict(
+        vina_gnina_runtime.get("first_blocked_case_input_slot")
+    )
+    vina_gnina_first_run = _as_dict(
+        vina_gnina_runtime.get("first_blocked_engine_run_slot")
+    )
+    vina_gnina_first_family = _as_dict(
+        vina_gnina_runtime.get("first_operator_blocker_family")
+    )
     lines = [
         "# Public Benchmark Phase 2 Row Audit",
         "",
@@ -1171,6 +1474,33 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"`{component.get('status', '')}` | "
             f"`{_comma_join(component.get('failed_criteria', []))}` | "
             f"`{requirement_summary.get('blocker_count', len(component.get('blockers', [])))}` |"
+        )
+    if vina_gnina_unblock:
+        lines.extend(
+            [
+                "",
+                "## Vina/GNINA Unblock",
+                "",
+                f"- `status`: `{vina_gnina_unblock.get('status', '')}`",
+                f"- `rows_present`: `{vina_gnina_unblock.get('rows_present', False)}`",
+                f"- `expected_rows_artifact`: `{vina_gnina_unblock.get('expected_rows_artifact', '')}`",
+                "- `runtime_status`: "
+                f"`{vina_gnina_runtime.get('status', '')}`",
+                "- `blocked_case_input_slot_count`: "
+                f"`{vina_gnina_runtime.get('blocked_case_input_slot_count', 0)}`",
+                "- `blocked_engine_run_slot_count`: "
+                f"`{vina_gnina_runtime.get('blocked_engine_run_slot_count', 0)}`",
+                "- `first_operator_blocker_family`: "
+                f"`{vina_gnina_first_family.get('family_id', '')}` / "
+                f"`{vina_gnina_first_family.get('operator_action', '')}`",
+                "- `first_blocked_case_input_slot`: "
+                f"`{vina_gnina_first_case.get('case_id', '')}` / "
+                f"`{_comma_join(vina_gnina_first_case.get('blockers', []))}`",
+                "- `first_blocked_engine_run_slot`: "
+                f"`{vina_gnina_first_run.get('case_id', '')}` / "
+                f"`{vina_gnina_first_run.get('engine_id', '')}` / "
+                f"`{_comma_join(vina_gnina_first_run.get('blockers', []))}`",
+            ]
         )
     lines.extend(["", str(payload.get("claim_boundary", "")), ""])
     return "\n".join(lines)
@@ -1245,10 +1575,15 @@ def build_public_benchmark_phase2_row_audit(
         Path("scripts/materialize_public_benchmark_harness_bundle.py"),
     ]
     input_paths.extend(path for path in row_inputs.values() if path is not None)
+    input_paths.extend(_existing_vina_gnina_unblock_inputs(repo_root))
 
     missing_input_ids = [
         input_id for input_id, path in row_inputs.items() if path is None
     ]
+    vina_gnina_unblock_summary = _vina_gnina_unblock_summary(
+        repo_root=repo_root,
+        row_input_statuses=row_input_statuses,
+    )
     if missing_input_ids:
         partial_source_actuality_check = _partial_operator_source_actuality_check(
             row_inputs,
@@ -1312,6 +1647,7 @@ def build_public_benchmark_phase2_row_audit(
             "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
             "row_input_statuses": row_input_statuses,
             "row_input_status_summary": row_input_status_summary,
+            "vina_gnina_unblock_summary": vina_gnina_unblock_summary,
             "partial_operator_source_actuality_check": partial_source_actuality_check,
             "operator_bundle_source_actuality_check": partial_source_actuality_check,
             "blockers": blockers,
@@ -1412,6 +1748,7 @@ def build_public_benchmark_phase2_row_audit(
             "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
             "row_input_statuses": row_input_statuses,
             "row_input_status_summary": row_input_status_summary,
+            "vina_gnina_unblock_summary": vina_gnina_unblock_summary,
             "blockers": blockers,
             "component_count": len(components),
             "component_ready_count": 0,
@@ -1517,6 +1854,7 @@ def build_public_benchmark_phase2_row_audit(
         "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
         "row_input_statuses": row_input_statuses,
         "row_input_status_summary": row_input_status_summary,
+        "vina_gnina_unblock_summary": vina_gnina_unblock_summary,
         "operator_bundle_materialization_report": operator_materialization_report,
         "operator_bundle_source_actuality_check": source_actuality_check,
         "phase2_exit_gate": phase2_exit_gate,

@@ -50,6 +50,7 @@ def _provenance_ref(*parts: str) -> str:
 
 
 def _write_json(path: Path, payload: object) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
 
 
@@ -294,6 +295,16 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
     assert audit["row_input_statuses"]["vina_gnina_rows"][
         "operator_blockers_if_missing"
     ] == ["vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"]
+    vina_unblock = audit["vina_gnina_unblock_summary"]
+    assert vina_unblock["status"] == "operator_runtime_or_rows_required"
+    assert vina_unblock["rows_present"] is False
+    assert vina_unblock["expected_rows_artifact"].endswith(
+        "public_benchmark_vina_gnina_rows.json"
+    )
+    assert vina_unblock["runtime_readiness"]["present"] is False
+    assert vina_unblock["operator_action"] == (
+        "complete_vina_gnina_runtime_inputs_and_attach_rows"
+    )
     closure_matrix = {
         row["row_input_id"]: row for row in audit["phase2_row_closure_matrix"]
     }
@@ -619,6 +630,182 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
             "must be a JSON boolean true/false; strings and numbers are rejected"
         )
     }
+
+
+def test_public_benchmark_phase2_row_audit_surfaces_vina_gnina_unblock_artifacts(
+    tmp_path: Path,
+) -> None:
+    productization = (
+        tmp_path / "implementation" / "phase1" / "release_evidence" / "productization"
+    )
+    _write_json(
+        productization / "public_benchmark_vina_gnina_runtime_readiness.json",
+        {
+            "status": "execution_plan_blocked",
+            "contract_pass": True,
+            "runtime_ready_for_engine_execution": False,
+            "operator_execution_ready": False,
+            "execution_plan_ready": False,
+            "adapter_rows_ready": False,
+            "required_engine_run_count": 24,
+            "blocked_case_input_slot_count": 12,
+            "blocked_engine_run_slot_count": 24,
+            "missing_engine_ids": ["vina", "gnina"],
+            "operator_blocker_family_count": 2,
+            "operator_blocker_family_blocked_count": 2,
+            "operator_blocker_family_missing_item_count": 60,
+            "first_blocked_case_input_slot": {
+                "status": "blocked",
+                "case_id": "casf2016_4llx",
+                "complex_id": "4llx",
+                "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_4llx",
+                "blockers": ["protein_structure_path_missing"],
+            },
+            "first_blocked_engine_run_slot": {
+                "status": "blocked",
+                "case_id": "casf2016_4llx",
+                "complex_id": "4llx",
+                "engine_id": "vina",
+                "docking_run_id": "casf2016_4llx_vina_run",
+                "operator_action": "run_vina_for_casf2016_4llx",
+                "blockers": ["vina_binary_missing"],
+                "case_blockers": ["protein_structure_path_missing"],
+                "expected_predicted_ligand_path_or_pose_ref": (
+                    "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf"
+                ),
+                "expected_engine_run_provenance_ref": (
+                    "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json"
+                ),
+            },
+            "first_operator_blocker_family": {
+                "family_id": "manifest_required_values",
+                "status": "blocked",
+                "operator_action": "complete_vina_gnina_input_manifest_required_values",
+                "next_action": "complete_vina_gnina_input_manifest_required_values",
+                "command_key": "build_input_manifest_template_preflight",
+                "missing_item_count": 36,
+                "blocked_case_count": 12,
+                "first_missing_item": {
+                    "case_id": "casf2016_4llx",
+                    "field": "prepared_receptor_checksum",
+                },
+                "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py",
+            },
+            "operator_blocker_family_plan": [
+                {
+                    "family_id": "manifest_required_values",
+                    "status": "blocked",
+                    "operator_action": "complete_vina_gnina_input_manifest_required_values",
+                    "next_action": "complete_vina_gnina_input_manifest_required_values",
+                    "command_key": "build_input_manifest_template_preflight",
+                    "missing_item_count": 36,
+                    "blocked_case_count": 12,
+                    "first_missing_item": {
+                        "case_id": "casf2016_4llx",
+                        "field": "prepared_receptor_checksum",
+                    },
+                    "materialization_command": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py",
+                }
+            ],
+            "operator_commands": {
+                "build_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py"
+            },
+        },
+    )
+    _write_json(
+        productization / "public_benchmark_vina_gnina_execution_plan.json",
+        {
+            "status": "engine_input_blocked",
+            "contract_pass": True,
+            "execution_plan_ready": False,
+            "operator_execution_ready": False,
+            "case_count": 12,
+            "summary": {
+                "required_engine_run_count": 24,
+                "missing_engine_count": 2,
+                "case_blocker_count": 48,
+            },
+        },
+    )
+    _write_json(
+        productization / "public_benchmark_vina_gnina_engine_run_bundle.json",
+        {
+            "status": "execution_plan_not_ready",
+            "contract_pass": False,
+            "bundle_materialized": False,
+            "case_count": 12,
+            "engine_run_count": 24,
+            "config_count": 0,
+            "receipt_template_count": 0,
+        },
+    )
+    _write_json(
+        productization / "public_benchmark_vina_gnina_rows_template_preflight.json",
+        {
+            "status": "operator_rows_completion_required",
+            "contract_pass": True,
+            "adapter_template_ready": False,
+            "summary": {
+                "template_row_count": 24,
+                "role_receipt_blocked_count": 72,
+            },
+        },
+    )
+    _write_json(
+        productization
+        / "public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+        {
+            "status": "engine_run_bundle_not_ready",
+            "contract_pass": False,
+            "rows_materialized": False,
+            "blockers": ["public_benchmark_vina_gnina_engine_run_bundle_not_ready"],
+        },
+    )
+    _write_json(
+        productization / "public_benchmark_vina_gnina_rows_from_template_report.json",
+        {
+            "status": "template_not_ready",
+            "contract_pass": False,
+            "rows_materialized": False,
+            "blockers": ["public_benchmark_vina_gnina_rows_template_not_ready"],
+        },
+    )
+
+    audit = module.build_public_benchmark_phase2_row_audit(
+        repo_root=tmp_path,
+        operator_bundle_out=tmp_path / "operator_bundle.json",
+        out_dir=tmp_path / "out",
+        harness_report_out=tmp_path / "harness_report.json",
+        artifact_bundle_out=tmp_path / "artifact_bundle.json",
+    )
+
+    unblock = audit["vina_gnina_unblock_summary"]
+    assert unblock["status"] == "operator_runtime_or_rows_required"
+    assert unblock["runtime_readiness"]["present"] is True
+    assert unblock["runtime_readiness"]["status"] == "execution_plan_blocked"
+    assert unblock["runtime_readiness"]["missing_engine_ids"] == ["vina", "gnina"]
+    assert unblock["runtime_readiness"]["blocked_case_input_slot_count"] == 12
+    assert unblock["runtime_readiness"]["blocked_engine_run_slot_count"] == 24
+    assert unblock["runtime_readiness"]["first_operator_blocker_family"][
+        "family_id"
+    ] == "manifest_required_values"
+    assert unblock["runtime_readiness"]["first_blocked_case_input_slot"][
+        "case_id"
+    ] == "casf2016_4llx"
+    assert unblock["runtime_readiness"]["first_blocked_engine_run_slot"][
+        "engine_id"
+    ] == "vina"
+    assert unblock["execution_plan"]["case_blocker_count"] == 48
+    assert unblock["engine_run_bundle"]["engine_run_count"] == 24
+    assert unblock["rows_template_preflight"]["summary"][
+        "role_receipt_blocked_count"
+    ] == 72
+    assert unblock["operator_blocker_family_action_count"] == 1
+    assert unblock["commands"]["build_runtime_readiness"].startswith(
+        "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py"
+    )
+    contracts = audit["row_intake_contracts"]
+    enrichment_contract = contracts["enrichment_rows"]
     assert enrichment_contract["numeric_value_policy"] == {
         "score": "must parse to a finite float; NaN and Infinity are rejected"
     }
