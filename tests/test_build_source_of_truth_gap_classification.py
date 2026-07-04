@@ -36,6 +36,9 @@ def test_source_of_truth_gap_classification_materializes_live_scan() -> None:
         "blocker_count": 0,
         "candidate_count": 5,
         "classification_bucket_count": 3,
+        "completion_audit_pass": True,
+        "completion_audit_requirement_count": 6,
+        "completion_audit_requirement_pass_count": 6,
         "classification_evidence_matrix_count": 5,
         "classification_evidence_matrix_pass_count": 5,
         "classification_index_candidate_count": 5,
@@ -72,6 +75,20 @@ def test_source_of_truth_gap_classification_materializes_live_scan() -> None:
             "keep_product_production_ai_checkpoint_readiness_as_direct_freshness_leaf"
         ),
     }
+    assert payload["completion_audit"]["status"] == "pass"
+    assert payload["completion_audit"]["pass"] is True
+    assert payload["completion_audit"]["blockers"] == []
+    assert [
+        row["requirement_id"] for row in payload["completion_audit"]["requirements"]
+    ] == [
+        "expected_candidate_set_complete",
+        "direct_fix_candidates_verified",
+        "aggregator_review_candidates_verified",
+        "no_noop_candidates_required_or_found",
+        "accuracy_parity_priority_review_verified",
+        "operator_actions_complete",
+    ]
+    assert all(row["pass"] for row in payload["completion_audit"]["requirements"])
     assert payload["classification_by_bucket"] == {
         "aggregator-review": {
             "candidate_ids": [
@@ -244,6 +261,8 @@ def test_source_of_truth_gap_classification_cli_writes_artifact(tmp_path: Path) 
     assert payload["classification_by_bucket"]["aggregator-review"]["count"] == 3
     assert payload["summary"]["classification_evidence_matrix_count"] == 5
     assert payload["summary"]["classification_evidence_matrix_pass_count"] == 5
+    assert payload["summary"]["completion_audit_pass"] is True
+    assert payload["completion_audit"]["requirement_pass_count"] == 6
     assert payload["classification_index"]["accuracy_parity_scorecard"][
         "science_scorecard_priority_review"
     ] is True

@@ -617,6 +617,164 @@
       ]
     }
   ],
+  "completion_audit": {
+    "blockers": [],
+    "claim_boundary": "This completion audit proves the five-candidate classification surface only. It does not prove Public Benchmark, GPCR, or PocketMD actual closure.",
+    "pass": true,
+    "requirement_count": 6,
+    "requirement_pass_count": 6,
+    "requirements": [
+      {
+        "evidence": {
+          "actual_candidates": [
+            "accuracy_parity_scorecard",
+            "goal_operator_action_board",
+            "goal_readiness_rollup",
+            "product_goal_completion_audit",
+            "product_production_ai_checkpoint_readiness"
+          ],
+          "expected_candidates": [
+            "accuracy_parity_scorecard",
+            "product_production_ai_checkpoint_readiness",
+            "goal_readiness_rollup",
+            "product_goal_completion_audit",
+            "goal_operator_action_board"
+          ]
+        },
+        "pass": true,
+        "requirement_id": "expected_candidate_set_complete",
+        "status": "pass"
+      },
+      {
+        "evidence": {
+          "actual_fix_candidates": [
+            "accuracy_parity_scorecard",
+            "product_production_ai_checkpoint_readiness"
+          ],
+          "expected_fix_candidates": [
+            "accuracy_parity_scorecard",
+            "product_production_ai_checkpoint_readiness"
+          ],
+          "fix_bucket": {
+            "candidate_ids": [
+              "accuracy_parity_scorecard",
+              "product_production_ai_checkpoint_readiness"
+            ],
+            "contract_pass_count": 2,
+            "count": 2
+          }
+        },
+        "pass": true,
+        "requirement_id": "direct_fix_candidates_verified",
+        "status": "pass"
+      },
+      {
+        "evidence": {
+          "actual_aggregator_review_candidates": [
+            "goal_readiness_rollup",
+            "product_goal_completion_audit",
+            "goal_operator_action_board"
+          ],
+          "aggregator_review_bucket": {
+            "candidate_ids": [
+              "goal_readiness_rollup",
+              "product_goal_completion_audit",
+              "goal_operator_action_board"
+            ],
+            "contract_pass_count": 3,
+            "count": 3
+          },
+          "expected_aggregator_review_candidates": [
+            "goal_readiness_rollup",
+            "product_goal_completion_audit",
+            "goal_operator_action_board"
+          ]
+        },
+        "pass": true,
+        "requirement_id": "aggregator_review_candidates_verified",
+        "status": "pass"
+      },
+      {
+        "evidence": {
+          "no_op_bucket": {
+            "candidate_ids": [],
+            "contract_pass_count": 0,
+            "count": 0
+          },
+          "no_op_candidates": []
+        },
+        "pass": true,
+        "requirement_id": "no_noop_candidates_required_or_found",
+        "status": "pass"
+      },
+      {
+        "evidence": {
+          "candidate": "accuracy_parity_scorecard",
+          "claim_boundary": "Accuracy parity is treated as a direct science scorecard fix only because the live scorecard exposes and passes the required science checks. This review does not rerun the heavy validation.",
+          "classification": "fix",
+          "contract_pass": true,
+          "current_repo_paths": [
+            "implementation/phase1/real_accuracy_validation_report.json"
+          ],
+          "decision": "Direct science scorecard receipt with freshness source tracking; the artifact itself carries overall_pass, benchmark contract/KPI pass, direct-metric/source-family/public-HF checks, and stability-suite pass.",
+          "operator_action": "keep_accuracy_parity_scorecard_as_direct_freshness_leaf",
+          "science_checks": {
+            "benchmark_contract_pass": true,
+            "benchmark_kpi_pass": true,
+            "direct_metric_source_pass": true,
+            "overall_pass": true,
+            "public_hf_case_count_pass": true,
+            "source_family_pass": true,
+            "stability_pass": true,
+            "stability_suite_pass": true
+          },
+          "science_contract_pass": true,
+          "status": "classified",
+          "validation_basis": [
+            "leaf_artifact_in_default_freshness_rows",
+            "science_scorecard_overall_pass_field",
+            "benchmark_contract_and_kpi_fields",
+            "public_hf_and_source_family_checks",
+            "stability_suite_pass_field"
+          ]
+        },
+        "pass": true,
+        "requirement_id": "accuracy_parity_priority_review_verified",
+        "status": "pass"
+      },
+      {
+        "evidence": {
+          "operator_action_count": 5,
+          "operator_actions": [
+            {
+              "candidate": "accuracy_parity_scorecard",
+              "operator_action": "keep_accuracy_parity_scorecard_as_direct_freshness_leaf"
+            },
+            {
+              "candidate": "product_production_ai_checkpoint_readiness",
+              "operator_action": "keep_product_production_ai_checkpoint_readiness_as_direct_freshness_leaf"
+            },
+            {
+              "candidate": "goal_readiness_rollup",
+              "operator_action": "review_goal_readiness_rollup_upstream_source_tracking"
+            },
+            {
+              "candidate": "product_goal_completion_audit",
+              "operator_action": "review_product_goal_completion_audit_upstream_source_tracking"
+            },
+            {
+              "candidate": "goal_operator_action_board",
+              "operator_action": "review_goal_operator_action_board_upstream_source_tracking"
+            }
+          ]
+        },
+        "pass": true,
+        "requirement_id": "operator_actions_complete",
+        "status": "pass"
+      }
+    ],
+    "status": "pass"
+  },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "expected_candidates": [
@@ -626,16 +784,16 @@
     "product_goal_completion_audit",
     "goal_operator_action_board"
   ],
-  "generated_at": "2026-07-04T00:27:26.067221+00:00",
+  "generated_at": "2026-07-04T03:06:35.041578+00:00",
   "input_checksums": {
-    "docs/source-of-truth-gap-classification.md": "sha256:e1aca34ff891f4591dbb295cff6f81876475003c67d08a9897ee6a9218df49e2",
+    "docs/source-of-truth-gap-classification.md": "sha256:1478ba07fc15f16de16b447ff3f45fe228ae0b1d836c83dadaaa453e0dc470b7",
     "implementation/phase1/real_accuracy_validation_report.json": "sha256:ca845f2afd861499dc1aa2457dd43546130272cbb595007548684a1b691780dd",
     "implementation/phase1/release_evidence/productization/ai_engine_productization_contracts.json": "sha256:0fe800e9ef001f809296db96515bced5389642b93e3217e58f47afc1221c35cf",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:5558e5f0d82be0cbcb22c4431c0247939a1a9f780938f6d40bcf8484561b0eed",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:189416fc44179d892e0fe0012a380fda9f1bbe1552256b53871db92a9a681360",
     "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json": "sha256:ef2c7ea4bc559336fc47b42e185ce64ce167557a8697809a4a9a47dcf7e6ed27",
     "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:c31a592285e990edbc4fa2a5c8db03f09ec9d65d0f01509f51f87436d63e134a",
-    "scripts/build_source_of_truth_gap_classification.py": "sha256:14cc1e6e012fad33dba5f762d7d3983fe532b1b4a168c1e532de35008a441b82",
+    "scripts/build_source_of_truth_gap_classification.py": "sha256:5ab1d181baaa929ff9bcd4b704f66042ffe8f4f9d9a9d283779321003188bd6e",
     "scripts/report_release_evidence_freshness.py": "sha256:f351ba020542bb073efe698856bf518d93a1e1abdd11009c340c136bc78d3a02"
   },
   "operator_action_index": {
@@ -863,7 +1021,7 @@
     }
   ],
   "schema_version": "source-of-truth-gap-classification.v1",
-  "source_commit_sha": "6af32c17e22a1bc3b886dbb3c13ed796bb5067a1",
+  "source_commit_sha": "372f34ccd93c7310fff9d9ade44cb7b3125343fe",
   "status": "ready",
   "summary": {
     "accuracy_parity_scorecard_science_contract_pass": true,
@@ -875,6 +1033,9 @@
     "classification_evidence_matrix_count": 5,
     "classification_evidence_matrix_pass_count": 5,
     "classification_index_candidate_count": 5,
+    "completion_audit_pass": true,
+    "completion_audit_requirement_count": 6,
+    "completion_audit_requirement_pass_count": 6,
     "expected_candidate_count": 5,
     "fix_count": 2,
     "fixed_count": 2,

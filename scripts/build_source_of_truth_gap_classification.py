@@ -340,6 +340,199 @@ def _classification_by_bucket(rows: list[dict[str, Any]]) -> dict[str, dict[str,
     }
 
 
+def _completion_requirement(
+    *,
+    requirement_id: str,
+    status: str,
+    passed: bool,
+    evidence: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "requirement_id": requirement_id,
+        "status": status,
+        "pass": passed,
+        "evidence": evidence,
+    }
+
+
+def _classification_completion_audit(
+    *,
+    rows: list[dict[str, Any]],
+    classification_by_bucket: dict[str, dict[str, Any]],
+    classification_evidence_matrix: list[dict[str, Any]],
+    operator_actions: list[dict[str, Any]],
+    accuracy_priority_review: dict[str, Any],
+) -> dict[str, Any]:
+    row_by_candidate = _classification_by_candidate(rows)
+    evidence_by_candidate = {
+        str(row.get("candidate") or ""): row
+        for row in classification_evidence_matrix
+    }
+    actual_candidates = sorted(row_by_candidate)
+    expected_candidates = list(EXPECTED_CANDIDATE_ORDER)
+    fix_candidates = [
+        str(row.get("candidate") or "")
+        for row in rows
+        if row.get("classification") == "fix"
+    ]
+    aggregator_candidates = [
+        str(row.get("candidate") or "")
+        for row in rows
+        if row.get("classification") == "aggregator-review"
+    ]
+    no_op_candidates = [
+        str(row.get("candidate") or "")
+        for row in rows
+        if row.get("classification") == "no-op"
+    ]
+    expected_fix_candidates = [
+        "accuracy_parity_scorecard",
+        "product_production_ai_checkpoint_readiness",
+    ]
+    expected_aggregator_candidates = [
+        "goal_readiness_rollup",
+        "product_goal_completion_audit",
+        "goal_operator_action_board",
+    ]
+    requirements = [
+        _completion_requirement(
+            requirement_id="expected_candidate_set_complete",
+            status="pass" if actual_candidates == sorted(EXPECTED_CANDIDATES) else "fail",
+            passed=actual_candidates == sorted(EXPECTED_CANDIDATES),
+            evidence={
+                "expected_candidates": expected_candidates,
+                "actual_candidates": actual_candidates,
+            },
+        ),
+        _completion_requirement(
+            requirement_id="direct_fix_candidates_verified",
+            status=(
+                "pass"
+                if sorted(fix_candidates) == sorted(expected_fix_candidates)
+                and all(
+                    bool(row_by_candidate[candidate].get("contract_pass"))
+                    and bool(row_by_candidate[candidate].get("freshness_label"))
+                    for candidate in expected_fix_candidates
+                )
+                else "fail"
+            ),
+            passed=(
+                sorted(fix_candidates) == sorted(expected_fix_candidates)
+                and all(
+                    bool(row_by_candidate[candidate].get("contract_pass"))
+                    and bool(row_by_candidate[candidate].get("freshness_label"))
+                    for candidate in expected_fix_candidates
+                )
+            ),
+            evidence={
+                "expected_fix_candidates": expected_fix_candidates,
+                "actual_fix_candidates": fix_candidates,
+                "fix_bucket": classification_by_bucket.get("fix", {}),
+            },
+        ),
+        _completion_requirement(
+            requirement_id="aggregator_review_candidates_verified",
+            status=(
+                "pass"
+                if sorted(aggregator_candidates) == sorted(expected_aggregator_candidates)
+                and all(
+                    bool(evidence_by_candidate[candidate].get("source_tracking_verified"))
+                    and not str(row_by_candidate[candidate].get("freshness_label") or "")
+                    for candidate in expected_aggregator_candidates
+                )
+                else "fail"
+            ),
+            passed=(
+                sorted(aggregator_candidates) == sorted(expected_aggregator_candidates)
+                and all(
+                    bool(evidence_by_candidate[candidate].get("source_tracking_verified"))
+                    and not str(row_by_candidate[candidate].get("freshness_label") or "")
+                    for candidate in expected_aggregator_candidates
+                )
+            ),
+            evidence={
+                "expected_aggregator_review_candidates": expected_aggregator_candidates,
+                "actual_aggregator_review_candidates": aggregator_candidates,
+                "aggregator_review_bucket": classification_by_bucket.get(
+                    "aggregator-review", {}
+                ),
+            },
+        ),
+        _completion_requirement(
+            requirement_id="no_noop_candidates_required_or_found",
+            status="pass" if not no_op_candidates else "fail",
+            passed=not no_op_candidates,
+            evidence={
+                "no_op_candidates": no_op_candidates,
+                "no_op_bucket": classification_by_bucket.get("no-op", {}),
+            },
+        ),
+        _completion_requirement(
+            requirement_id="accuracy_parity_priority_review_verified",
+            status=(
+                "pass"
+                if accuracy_priority_review.get("science_contract_pass") is True
+                and accuracy_priority_review.get("classification") == "fix"
+                and accuracy_priority_review.get("contract_pass") is True
+                else "fail"
+            ),
+            passed=(
+                accuracy_priority_review.get("science_contract_pass") is True
+                and accuracy_priority_review.get("classification") == "fix"
+                and accuracy_priority_review.get("contract_pass") is True
+            ),
+            evidence=accuracy_priority_review,
+        ),
+        _completion_requirement(
+            requirement_id="operator_actions_complete",
+            status=(
+                "pass"
+                if len(operator_actions) == len(EXPECTED_CANDIDATES)
+                and all(
+                    not str(row.get("operator_action") or "").startswith("repair_")
+                    for row in operator_actions
+                )
+                else "fail"
+            ),
+            passed=(
+                len(operator_actions) == len(EXPECTED_CANDIDATES)
+                and all(
+                    not str(row.get("operator_action") or "").startswith("repair_")
+                    for row in operator_actions
+                )
+            ),
+            evidence={
+                "operator_action_count": len(operator_actions),
+                "operator_actions": [
+                    {
+                        "candidate": str(row.get("candidate") or ""),
+                        "operator_action": str(row.get("operator_action") or ""),
+                    }
+                    for row in operator_actions
+                ],
+            },
+        ),
+    ]
+    blockers = [
+        row["requirement_id"]
+        for row in requirements
+        if not bool(row.get("pass"))
+    ]
+    return {
+        "status": "pass" if not blockers else "fail",
+        "pass": not blockers,
+        "requirement_count": len(requirements),
+        "requirement_pass_count": len(requirements) - len(blockers),
+        "blockers": blockers,
+        "requirements": requirements,
+        "claim_boundary": (
+            "This completion audit proves the five-candidate classification "
+            "surface only. It does not prove Public Benchmark, GPCR, or PocketMD "
+            "actual closure."
+        ),
+    }
+
+
 def build_source_of_truth_gap_classification(
     *,
     repo_root: Path = ROOT,
@@ -361,6 +554,13 @@ def build_source_of_truth_gap_classification(
     operator_actions = _operator_actions(rows)
     classification_evidence_matrix = _classification_evidence_matrix(rows)
     accuracy_priority_review = _accuracy_priority_review(rows)
+    completion_audit = _classification_completion_audit(
+        rows=rows,
+        classification_by_bucket=classification_by_bucket,
+        classification_evidence_matrix=classification_evidence_matrix,
+        operator_actions=operator_actions,
+        accuracy_priority_review=accuracy_priority_review,
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -395,6 +595,7 @@ def build_source_of_truth_gap_classification(
             for row in rows
         },
         "accuracy_parity_scorecard_priority_review": accuracy_priority_review,
+        "completion_audit": completion_audit,
         "summary": {
             "candidate_count": len(rows),
             "expected_candidate_count": len(EXPECTED_CANDIDATES),
@@ -424,6 +625,13 @@ def build_source_of_truth_gap_classification(
             "accuracy_parity_scorecard_science_contract_pass": bool(
                 accuracy_priority_review.get("science_contract_pass")
             ),
+            "completion_audit_requirement_count": completion_audit[
+                "requirement_count"
+            ],
+            "completion_audit_requirement_pass_count": completion_audit[
+                "requirement_pass_count"
+            ],
+            "completion_audit_pass": bool(completion_audit.get("pass")),
             "blocker_count": len(blockers),
         },
         "blockers": blockers,
