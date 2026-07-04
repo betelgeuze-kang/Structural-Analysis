@@ -27,6 +27,23 @@
 | `HTR2A` | `pass` | `1.0` | `0.6` | `0` | `False` | `none` |
 | `OPRM1` | `pass` | `1.0` | `0.6` | `0` | `False` | `none` |
 
+## Phase 3 Completion Audit
+
+- `status`: `pass`
+- `pass`: `True`
+- `requirement_pass_count`: `8/8`
+
+| Requirement | Status | Blockers |
+|---|---|---|
+| `expected_target_set_complete` | `pass` | `none` |
+| `operator_input_source_receipt_pass` | `pass` | `none` |
+| `all_target_rows_contract_pass` | `pass` | `none` |
+| `ranking_pr_auc_ci_low_min` | `pass` | `none` |
+| `top20_hit_rate_min` | `pass` | `none` |
+| `decoys_above_positive_count_max` | `pass` | `none` |
+| `no_positive_out_anchored_by_top_decoys` | `pass` | `none` |
+| `raw_hard_decoy_rows_actual_closure` | `pass` | `none` |
+
 ## Operator Next Actions
 
 

@@ -1240,6 +1240,141 @@ def _phase3_summary(
     }
 
 
+def _phase3_completion_requirement(
+    *,
+    requirement_id: str,
+    pass_value: bool,
+    evidence: dict[str, Any],
+    blockers: list[str] | None = None,
+) -> dict[str, Any]:
+    return {
+        "requirement_id": requirement_id,
+        "status": "pass" if pass_value else "blocked",
+        "pass": pass_value,
+        "evidence": evidence,
+        "blockers": [str(item) for item in (blockers or []) if str(item)],
+    }
+
+
+def _criterion_by_id(phase3_exit_gate: dict[str, Any], criterion_id: str) -> dict[str, Any]:
+    return next(
+        (
+            row
+            for row in _as_list(phase3_exit_gate.get("criteria"))
+            if isinstance(row, dict) and str(row.get("criterion_id") or "") == criterion_id
+        ),
+        {},
+    )
+
+
+def _phase3_completion_audit(
+    *,
+    target_rows: list[dict[str, Any]],
+    phase3_exit_gate: dict[str, Any],
+    summary: dict[str, Any],
+    operator_input_source_receipt: dict[str, Any],
+    broad_safe: bool,
+) -> dict[str, Any]:
+    target_ids = [str(row.get("target_id") or "") for row in target_rows]
+    target_row_contract_pass = {
+        str(row.get("target_id") or ""): bool(row.get("contract_pass"))
+        for row in target_rows
+    }
+    expected_targets = list(REQUIRED_TARGETS)
+    requirements = [
+        _phase3_completion_requirement(
+            requirement_id="expected_target_set_complete",
+            pass_value=target_ids == expected_targets,
+            evidence={
+                "expected_targets": expected_targets,
+                "actual_targets": target_ids,
+            },
+        ),
+        _phase3_completion_requirement(
+            requirement_id="operator_input_source_receipt_pass",
+            pass_value=bool(operator_input_source_receipt.get("contract_pass")),
+            evidence={
+                "status": str(operator_input_source_receipt.get("status") or ""),
+                "mode": str(operator_input_source_receipt.get("mode") or ""),
+                "source_artifact": str(
+                    operator_input_source_receipt.get("source_artifact") or ""
+                ),
+                "source_artifact_present": bool(
+                    operator_input_source_receipt.get("source_artifact_present")
+                ),
+                "source_artifact_sha256_matches": bool(
+                    operator_input_source_receipt.get(
+                        "source_artifact_sha256_matches"
+                    )
+                ),
+            },
+            blockers=[
+                str(item)
+                for item in _as_list(operator_input_source_receipt.get("blockers"))
+            ],
+        ),
+        _phase3_completion_requirement(
+            requirement_id="all_target_rows_contract_pass",
+            pass_value=all(target_row_contract_pass.values())
+            and len(target_row_contract_pass) == len(REQUIRED_TARGETS),
+            evidence={
+                "target_row_contract_pass": target_row_contract_pass,
+                "target_pass_count": int(summary.get("target_pass_count") or 0),
+                "target_count": int(summary.get("target_count") or 0),
+            },
+        ),
+    ]
+    for criterion_id in (
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+        ACTUAL_CLOSURE_CRITERION_ID,
+    ):
+        criterion = _criterion_by_id(phase3_exit_gate, criterion_id)
+        requirements.append(
+            _phase3_completion_requirement(
+                requirement_id=criterion_id,
+                pass_value=bool(criterion.get("pass")),
+                evidence={
+                    "current_by_target": _as_dict(criterion.get("current_by_target")),
+                    "required": criterion.get("required"),
+                    "failed_targets": [
+                        str(item)
+                        for item in _as_list(criterion.get("failed_targets"))
+                    ],
+                },
+                blockers=[str(item) for item in _as_list(criterion.get("blockers"))],
+            )
+        )
+    pass_count = sum(1 for row in requirements if bool(row.get("pass")))
+    blockers = [
+        f"{row['requirement_id']}::{blocker}"
+        for row in requirements
+        for blocker in _as_list(row.get("blockers"))
+    ]
+    blockers.extend(
+        str(row["requirement_id"])
+        for row in requirements
+        if not bool(row.get("pass")) and not _as_list(row.get("blockers"))
+    )
+    blockers = list(dict.fromkeys(blockers))
+    return {
+        "status": "pass" if broad_safe and pass_count == len(requirements) else "blocked",
+        "pass": bool(broad_safe and pass_count == len(requirements)),
+        "claim": "gpcr_hard_decoy_actual_closure",
+        "requirement_count": len(requirements),
+        "requirement_pass_count": pass_count,
+        "requirements": requirements,
+        "blockers": blockers,
+        "claim_boundary": (
+            "This audit proves only GPCR hard-decoy Phase 3 actual closure from "
+            "operator-attached raw ranking rows and their source receipt. It does "
+            "not prove broader GPCR activity modeling or docking generalization."
+        ),
+    }
+
+
 def _markdown_value(value: Any) -> str:
     if value is None:
         return "missing"
@@ -1251,6 +1386,7 @@ def _markdown_value(value: Any) -> str:
 def _markdown(payload: dict[str, Any]) -> str:
     gate = _as_dict(payload.get("phase3_exit_gate"))
     summary = _as_dict(payload.get("summary"))
+    completion_audit = _as_dict(payload.get("phase3_completion_audit"))
     lines = [
         "# GPCR Hard-Decoy Suite Report",
         "",
@@ -1302,6 +1438,31 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"`{_markdown_value(row.get('positive_out_anchored_by_top_decoys'))}` | "
             f"`{_comma_join(_as_list(row.get('blockers')))}` |"
         )
+    if completion_audit:
+        lines.extend(
+            [
+                "",
+                "## Phase 3 Completion Audit",
+                "",
+                f"- `status`: `{completion_audit.get('status', '')}`",
+                f"- `pass`: `{completion_audit.get('pass', False)}`",
+                "- `requirement_pass_count`: "
+                f"`{completion_audit.get('requirement_pass_count', 0)}/"
+                f"{completion_audit.get('requirement_count', 0)}`",
+                "",
+                "| Requirement | Status | Blockers |",
+                "|---|---|---|",
+            ]
+        )
+        for row in _as_list(completion_audit.get("requirements")):
+            if not isinstance(row, dict):
+                continue
+            lines.append(
+                "| "
+                f"`{row.get('requirement_id', '')}` | "
+                f"`{row.get('status', '')}` | "
+                f"`{_comma_join(_as_list(row.get('blockers')))}` |"
+            )
     lines.extend(
         [
             "",
@@ -1394,6 +1555,13 @@ def materialize_gpcr_hard_decoy_suite_report(
         blockers=blockers,
         broad_safe=broad_safe,
     )
+    phase3_completion_audit = _phase3_completion_audit(
+        target_rows=target_rows,
+        phase3_exit_gate=phase3_exit_gate,
+        summary=summary,
+        operator_input_source_receipt=operator_input_source_receipt,
+        broad_safe=broad_safe,
+    )
 
     payload = {
         "schema_version": SCHEMA_VERSION,
@@ -1416,6 +1584,7 @@ def materialize_gpcr_hard_decoy_suite_report(
         "phase3_exit_gate": phase3_exit_gate,
         "target_rows": target_rows,
         "summary": summary,
+        "phase3_completion_audit": phase3_completion_audit,
         "blockers": blockers,
         "operator_intake_route": GPCR_OPERATOR_INTAKE_ROUTE,
         "operator_intake_required_slot_count": len(REQUIRED_TARGETS),
@@ -1501,6 +1670,9 @@ def build_gpcr_evidence_surface(
         "exit_criteria": EXIT_CRITERIA,
         "phase3_exit_gate": _as_dict(report.get("phase3_exit_gate")),
         "summary": _as_dict(report.get("summary")),
+        "phase3_completion_audit": _as_dict(
+            report.get("phase3_completion_audit")
+        ),
         "operator_input_source_receipt": _as_dict(
             report.get("operator_input_source_receipt")
         ),

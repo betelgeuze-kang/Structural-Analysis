@@ -228,6 +228,41 @@ def test_gpcr_hard_decoy_suite_passes_required_targets(tmp_path: Path) -> None:
         "top20_hit_rate_min_observed": 0.2,
         "top20_hit_rate_min_required": 0.2,
     }
+    completion_audit = report["phase3_completion_audit"]
+    assert completion_audit["status"] == "pass"
+    assert completion_audit["pass"] is True
+    assert completion_audit["requirement_count"] == 8
+    assert completion_audit["requirement_pass_count"] == 8
+    completion_requirements = {
+        row["requirement_id"]: row for row in completion_audit["requirements"]
+    }
+    assert list(completion_requirements) == [
+        "expected_target_set_complete",
+        "operator_input_source_receipt_pass",
+        "all_target_rows_contract_pass",
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
+    ]
+    assert completion_requirements["operator_input_source_receipt_pass"][
+        "evidence"
+    ]["source_artifact_sha256_matches"] is True
+    assert completion_requirements["ranking_pr_auc_ci_low_min"]["evidence"][
+        "current_by_target"
+    ] == {
+        "DRD2": 1.0,
+        "HTR2A": 1.0,
+        "OPRM1": 1.0,
+    }
+    assert completion_requirements["raw_hard_decoy_rows_actual_closure"][
+        "evidence"
+    ]["current_by_target"] == {
+        "DRD2": "computed",
+        "HTR2A": "computed",
+        "OPRM1": "computed",
+    }
 
 
 def test_gpcr_hard_decoy_suite_blocks_summary_metrics_without_raw_rows() -> None:
@@ -249,6 +284,16 @@ def test_gpcr_hard_decoy_suite_blocks_summary_metrics_without_raw_rows() -> None
     assert report["phase3_exit_gate"]["failed_criteria"] == [
         "raw_hard_decoy_rows_actual_closure"
     ]
+    assert report["phase3_completion_audit"]["status"] == "blocked"
+    assert report["phase3_completion_audit"]["pass"] is False
+    assert (
+        "operator_input_source_receipt_pass::operator_input_source_receipt_required"
+        in report["phase3_completion_audit"]["blockers"]
+    )
+    assert (
+        "raw_hard_decoy_rows_actual_closure::DRD2:hard_decoy_rows_required_for_actual_closure"
+        in report["phase3_completion_audit"]["blockers"]
+    )
     raw_gate = report["phase3_exit_gate"]["criteria"][-1]
     assert raw_gate["failed_targets"] == ["DRD2", "HTR2A", "OPRM1"]
     assert raw_gate["required"] == (
@@ -798,6 +843,9 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
     assert "`decoys_above_positive_count_max`" in markdown
     assert "`no_positive_out_anchored_by_top_decoys`" in markdown
     assert "`raw_hard_decoy_rows_actual_closure`" in markdown
+    assert "## Phase 3 Completion Audit" in markdown
+    assert "`requirement_pass_count`: `1/8`" in markdown
+    assert "`operator_input_source_receipt_pass`" in markdown
     assert "`DRD2`" in markdown
     assert "`HTR2A`" in markdown
     assert "`OPRM1`" in markdown
@@ -808,6 +856,8 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
     assert surface["first_blocker"] == "DRD2:operator_metrics_required"
     assert surface["root_cause_tags"] == ["operator_values_required"]
     assert surface["phase3_exit_gate"]["status"] == "blocked"
+    assert surface["phase3_completion_audit"]["status"] == "blocked"
+    assert surface["phase3_completion_audit"]["requirement_count"] == 8
     assert surface["phase3_exit_gate"]["failed_criterion_count"] == 5
     assert surface["summary"]["actual_closure_ready"] is False
     assert surface["summary"]["phase3_failed_criterion_count"] == 5
