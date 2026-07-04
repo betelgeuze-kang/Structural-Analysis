@@ -432,7 +432,7 @@
   ],
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T16:17:30.522899+00:00",
+  "generated_at": "2026-07-04T16:36:57.637262+00:00",
   "input_checksums": {
     "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
     "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
@@ -1269,7 +1269,7 @@
         "ndjson",
         "csv"
       ],
-      "auto_detected": false,
+      "auto_detected": true,
       "claim_boundary": "This row documents which Phase 2 readiness criteria a real operator-attached row file can unblock; it is not evidence by itself.",
       "closes_phase2_criteria": [
         "vina_gnina_comparison_ready"
@@ -1405,14 +1405,14 @@
       "row_input_id": "subset_rows"
     },
     "vina_gnina_rows": {
-      "auto_detected": false,
+      "auto_detected": true,
       "candidate_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
         "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl",
         "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson",
         "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
       ],
-      "explicit_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+      "explicit_path": "",
       "missing": false,
       "resolved_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
       "row_input_id": "vina_gnina_rows"
@@ -1520,7 +1520,7 @@
       "status": "provided"
     },
     "vina_gnina_rows": {
-      "auto_detected": false,
+      "auto_detected": true,
       "closes_phase2_criteria": [
         "vina_gnina_comparison_ready"
       ],
@@ -2263,7 +2263,7 @@
     }
   },
   "schema_version": "public-benchmark-phase2-row-audit.v1",
-  "source_commit_sha": "eedcdb06f08318c4e19d93d9f3d66c935c056ac2",
+  "source_commit_sha": "0ff1421f63367f1fc32888f047ab727a8647462b",
   "status": "ready",
   "summary": {
     "blocked_component_ids": [],

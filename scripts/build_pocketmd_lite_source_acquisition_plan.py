@@ -1079,6 +1079,20 @@ def _phase4_operator_blocker_family_plan(
         for row in _as_list(raw_row_candidate_status.get("missing_required_slots"))
         if isinstance(row, dict)
     ]
+    required_slot_count = _as_int(
+        raw_row_candidate_status.get("required_candidate_slot_count")
+    )
+    ready_receipt_count = _as_int(
+        rows_from_receipt_bundle_report_summary.get("ready_receipt_count")
+    )
+    incomplete_receipt_count = _as_int(
+        rows_from_receipt_bundle_report_summary.get("incomplete_receipt_count")
+    )
+    receipt_bundle_complete = (
+        bool(rows_from_receipt_bundle_report_summary.get("rows_materialized"))
+        and ready_receipt_count >= required_slot_count
+        and incomplete_receipt_count == 0
+    )
     role_receipt_blocked_count = _as_int(
         template_preflight_summary.get("role_receipt_blocked_count")
     )
@@ -1087,6 +1101,9 @@ def _phase4_operator_blocker_family_plan(
             "operator_input_source_receipt_blocked_count"
         )
     )
+    if receipt_bundle_complete:
+        role_receipt_blocked_count = 0
+        source_receipt_blocked_count = 0
     metric_family_plan = [
         row
         for row in _as_list(
@@ -1120,8 +1137,10 @@ def _phase4_operator_blocker_family_plan(
             ),
             missing_item_count=role_receipt_blocked_count,
             blocked_case_count=_case_count(missing_slots),
-            first_missing_item=_as_dict(
-                template_preflight_summary.get("first_blocked_role_receipt")
+            first_missing_item=(
+                {}
+                if receipt_bundle_complete
+                else _as_dict(template_preflight_summary.get("first_blocked_role_receipt"))
             ),
             operator_action="complete_pocketmd_per_candidate_role_receipts",
             command_key="build_row_template_preflight",
@@ -1139,7 +1158,9 @@ def _phase4_operator_blocker_family_plan(
                 template_preflight_summary.get(
                     "first_blocked_operator_input_source_receipt"
                 )
-            ),
+            )
+            if not receipt_bundle_complete
+            else {},
             operator_action="complete_pocketmd_operator_input_source_receipt",
             command_key="build_row_template_preflight",
             commands=commands,
@@ -1205,11 +1226,26 @@ def _phase4_actual_evidence_audit(
     role_receipt_blocked_count = int(
         template_preflight_summary.get("role_receipt_blocked_count") or 0
     )
-    role_receipts_ready = (
+    receipt_bundle_ready_receipt_count = int(
+        rows_from_receipt_bundle_report_summary.get("ready_receipt_count") or 0
+    )
+    receipt_bundle_incomplete_receipt_count = int(
+        rows_from_receipt_bundle_report_summary.get("incomplete_receipt_count") or 0
+    )
+    receipt_bundle_rows_materialized = bool(
+        rows_from_receipt_bundle_report_summary.get("rows_materialized")
+    )
+    receipt_bundle_complete = (
+        receipt_bundle_rows_materialized
+        and receipt_bundle_ready_receipt_count >= required_slot_count
+        and receipt_bundle_incomplete_receipt_count == 0
+    )
+    template_role_receipts_ready = (
         bool(template_preflight_summary.get("present"))
         and role_receipt_plan_count >= required_role_receipt_count
         and role_receipt_blocked_count == 0
     )
+    role_receipts_ready = template_role_receipts_ready or receipt_bundle_complete
 
     operator_source_receipt = _as_dict(
         survival_report_status.get("operator_input_source_receipt")
@@ -1241,6 +1277,10 @@ def _phase4_actual_evidence_audit(
         bool(template_preflight_summary.get("present"))
         and template_source_requirement_count >= required_source_receipt_field_count
         and template_source_blocked_count == 0
+    )
+    source_receipt_ready = (
+        operator_source_receipt_ready
+        and (template_source_receipt_ready or receipt_bundle_complete)
     )
 
     survival_summary = _as_dict(survival_report_status.get("summary"))
@@ -1312,10 +1352,17 @@ def _phase4_actual_evidence_audit(
                 ),
                 "role_receipt_plan_count": role_receipt_plan_count,
                 "role_receipt_blocked_count": role_receipt_blocked_count,
+                "receipt_bundle_rows_materialized": receipt_bundle_rows_materialized,
+                "receipt_bundle_ready_receipt_count": receipt_bundle_ready_receipt_count,
+                "receipt_bundle_incomplete_receipt_count": (
+                    receipt_bundle_incomplete_receipt_count
+                ),
             },
             "required": {
                 "role_receipt_plan_count": required_role_receipt_count,
                 "role_receipt_blocked_count": 0,
+                "receipt_bundle_ready_receipt_count": required_slot_count,
+                "receipt_bundle_incomplete_receipt_count": 0,
             },
             "blockers": [] if role_receipts_ready else [
                 "pocketmd_lite_per_candidate_role_receipts_incomplete"
@@ -1325,10 +1372,10 @@ def _phase4_actual_evidence_audit(
             "component_id": "operator_input_source_receipt",
             "status": (
                 "ready"
-                if operator_source_receipt_ready and template_source_receipt_ready
+                if source_receipt_ready
                 else "blocked"
             ),
-            "pass": operator_source_receipt_ready and template_source_receipt_ready,
+            "pass": source_receipt_ready,
             "current": {
                 "survival_report_receipt_contract_pass": (
                     operator_source_receipt_ready
@@ -1343,6 +1390,11 @@ def _phase4_actual_evidence_audit(
                     template_source_requirement_count
                 ),
                 "template_preflight_blocked_count": template_source_blocked_count,
+                "receipt_bundle_rows_materialized": receipt_bundle_rows_materialized,
+                "receipt_bundle_ready_receipt_count": receipt_bundle_ready_receipt_count,
+                "receipt_bundle_incomplete_receipt_count": (
+                    receipt_bundle_incomplete_receipt_count
+                ),
             },
             "required": {
                 "survival_report_receipt_contract_pass": True,
@@ -1350,10 +1402,12 @@ def _phase4_actual_evidence_audit(
                     required_source_receipt_field_count
                 ),
                 "template_preflight_blocked_count": 0,
+                "receipt_bundle_ready_receipt_count": required_slot_count,
+                "receipt_bundle_incomplete_receipt_count": 0,
             },
             "blockers": (
                 []
-                if operator_source_receipt_ready and template_source_receipt_ready
+                if source_receipt_ready
                 else list(
                     dict.fromkeys(
                         [
@@ -1999,16 +2053,7 @@ def build_pocketmd_lite_source_acquisition_plan(
     )
     row_artifact_detected = raw_row_candidate_status["detected_row_artifact_count"] > 0
     operator_rows_ready = bool(raw_row_candidate_status["coverage_ready"])
-    blockers = []
     row_blocker = str(raw_row_candidate_status.get("blocker") or "")
-    if row_blocker:
-        blockers.append(row_blocker)
-    blockers.extend(
-        [
-            "upstream_top_k_candidate_receipts_not_attached",
-            "lite_refinement_metric_receipts_not_attached",
-        ]
-    )
     min_total = int(TOPK_ROW_QUALITY_CRITERIA["min_total_top_k_candidate_count"])
     min_cases = int(TOPK_ROW_QUALITY_CRITERIA["min_real_refinement_case_count"])
     phase4_refinement_receipt_plan = _phase4_refinement_receipt_plan()
@@ -2139,6 +2184,19 @@ def build_pocketmd_lite_source_acquisition_plan(
         if not raw_row_candidate_status.get("coverage_ready")
         else []
     )
+    actual_closure_ready = bool(
+        phase4_actual_evidence_audit.get("actual_closure_ready")
+    )
+    blockers = []
+    if row_blocker:
+        blockers.append(row_blocker)
+    if not actual_closure_ready:
+        blockers.extend(
+            str(blocker)
+            for blocker in phase4_actual_evidence_audit.get("remaining_blockers", [])
+            if str(blocker)
+        )
+    blockers = list(dict.fromkeys(blockers))
     operator_next_actions = [
         "review_phase4_refinement_receipt_plan",
         "build_pocketmd_lite_refinement_execution_plan",
@@ -2174,9 +2232,9 @@ def build_pocketmd_lite_source_acquisition_plan(
             reuse_policy="pocketmd_lite_source_acquisition_plan",
             repo_root=repo_root,
         ),
-        "status": "operator_acquisition_required",
+        "status": "ready" if actual_closure_ready else "operator_acquisition_required",
         "contract_pass": True,
-        "actual_closure_ready": False,
+        "actual_closure_ready": actual_closure_ready,
         "source_scope": "bounded_top_k_lite_refinement_rows",
         "supported_source_formats": list(SUPPORTED_ROW_FORMATS),
         "required_case_fields": list(REQUIRED_CASE_FIELDS),
@@ -2404,7 +2462,7 @@ def build_pocketmd_lite_source_acquisition_plan(
                 "detected_row_artifact_count"
             ],
             "missing_row_input_action_count": len(missing_row_input_actions),
-            "actual_closure_ready": False,
+            "actual_closure_ready": actual_closure_ready,
             "blocker_count": len(blockers),
         },
         "claim_boundary": (

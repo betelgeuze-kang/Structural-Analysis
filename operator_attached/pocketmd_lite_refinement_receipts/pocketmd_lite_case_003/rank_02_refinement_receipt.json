@@ -1,18 +1,19 @@
 {
-  "candidate_id": "pocketmd_lite_case_003_rank_02",
+  "candidate_id": "OPRM1_CHEMBL2335120",
   "case_id": "pocketmd_lite_case_003",
-  "claim_boundary": "This receipt template is not PocketMD Lite evidence. Complete it only with real upstream top-k provenance, bounded lite refinement metrics, interaction persistence metrics, uncertainty intervals, and source checksums for this one case/rank candidate.",
-  "clash_count_after": "",
-  "clash_count_before": "",
-  "contact_persistence_rate": "",
-  "h_bond_persistence_rate": "",
-  "local_min_survived": "",
+  "claim_boundary": "Receipt records bounded PocketMD Lite ligand-only RDKit minimization metrics for upstream GPCR ChEMBL top-k candidates. It does not assert receptor-bound all-atom MD, FEP, or long timescale dynamics.",
+  "clash_count_after": 0,
+  "clash_count_before": 0,
+  "completed_at": "2026-07-04T16:27:53.562034+00:00",
+  "contact_persistence_rate": 0.721519,
+  "h_bond_persistence_rate": 1.0,
+  "local_min_survived": true,
   "operator_input_source": {
-    "source_artifact": "",
-    "source_artifact_sha256": "",
-    "source_id": "",
-    "source_license": "",
-    "source_url": ""
+    "source_artifact": "implementation/phase1/release_evidence/productization/operator_attached/pocketmd_lite_refinement_sources/gpcr_chembl_topk_ligand_refinement_source.json",
+    "source_artifact_sha256": "sha256:29e30bf303c3008133acd812f54ae8f4824959b32f6b1e2d23ae948c7e6f64ee",
+    "source_id": "pocketmd_lite_gpcr_chembl_rdkit_refinement_2026_07_05",
+    "source_license": "ChEMBL public API data; use subject to EMBL-EBI and ChEMBL terms",
+    "source_url": "https://www.ebi.ac.uk/chembl/api/data/molecule"
   },
   "operator_required_fields": [
     "case_id",
@@ -39,9 +40,9 @@
     "operator_input_source.source_artifact",
     "operator_input_source.source_artifact_sha256"
   ],
-  "post_refinement_energy_proxy": "",
-  "pre_refinement_energy_proxy": "",
-  "provenance_ref": "",
+  "post_refinement_energy_proxy": 30.024023,
+  "pre_refinement_energy_proxy": 138.06991,
+  "provenance_ref": "https://www.ebi.ac.uk/chembl/api/data/molecule/CHEMBL2335120.json#pocketmd-lite-rdkit-refinement-pocketmd_lite_case_003-rank-02",
   "row_value_contract": {
     "boolean_value_policy": {
       "local_min_survived": "must parse to a boolean value"
@@ -66,13 +67,33 @@
     "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
   },
   "schema_version": "pocketmd-lite-refinement-receipt-template.v1",
-  "source_checksum": "",
-  "source_family": "upstream_ranked_top_k_candidate_set",
-  "status": "operator_refinement_receipt_required",
+  "source_checksum": "sha256:5ebf12070d0ac796ee05e3c6f19ed86d8a070eb4112200a2eab938864ee57616",
+  "source_family": "ChEMBL GPCR hard-decoy top-k ligand refinement",
+  "status": "complete",
   "top_k_rank": 2,
-  "uncertainty_high": "",
-  "uncertainty_low": "",
+  "top_k_refinement_row": {
+    "candidate_id": "OPRM1_CHEMBL2335120",
+    "case_id": "pocketmd_lite_case_003",
+    "clash_count_after": 0,
+    "clash_count_before": 0,
+    "contact_persistence_rate": 0.721519,
+    "h_bond_persistence_rate": 1.0,
+    "local_min_survived": true,
+    "post_refinement_energy_proxy": 30.024023,
+    "pre_refinement_energy_proxy": 138.06991,
+    "provenance_ref": "https://www.ebi.ac.uk/chembl/api/data/molecule/CHEMBL2335120.json#pocketmd-lite-rdkit-refinement-pocketmd_lite_case_003-rank-02",
+    "source_checksum": "sha256:5ebf12070d0ac796ee05e3c6f19ed86d8a070eb4112200a2eab938864ee57616",
+    "source_family": "ChEMBL GPCR hard-decoy top-k ligand refinement",
+    "top_k_rank": 2,
+    "uncertainty_high": -104.868391,
+    "uncertainty_low": -111.223383,
+    "uncertainty_unit": "energy_proxy_delta",
+    "upstream_top_k_provenance_ref": "https://www.ebi.ac.uk/chembl/api/data/activity/12676656.json",
+    "upstream_top_k_source_checksum": "sha256:685616608bf0b54abff667beaf8e9c12b39952b2d062f7d5a7fa7e6b6869ee1e"
+  },
+  "uncertainty_high": -104.868391,
+  "uncertainty_low": -111.223383,
   "uncertainty_unit": "energy_proxy_delta",
-  "upstream_top_k_provenance_ref": "",
-  "upstream_top_k_source_checksum": ""
+  "upstream_top_k_provenance_ref": "https://www.ebi.ac.uk/chembl/api/data/activity/12676656.json",
+  "upstream_top_k_source_checksum": "sha256:685616608bf0b54abff667beaf8e9c12b39952b2d062f7d5a7fa7e6b6869ee1e"
 }

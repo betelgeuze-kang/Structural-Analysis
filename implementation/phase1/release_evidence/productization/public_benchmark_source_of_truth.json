@@ -596,7 +596,7 @@
   "first_operator_evidence_gap": {},
   "first_operator_handoff": {},
   "first_required_operator_slot": "",
-  "generated_at": "2026-07-04T16:17:30.493886+00:00",
+  "generated_at": "2026-07-04T16:36:57.606372+00:00",
   "harness_bundle_index": {
     "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
     "artifact_index_command": "python3 scripts/materialize_public_benchmark_harness_bundle.py --out implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
@@ -6880,7 +6880,7 @@
       "status": "adapter_materialization_ready"
     }
   },
-  "source_commit_sha": "eedcdb06f08318c4e19d93d9f3d66c935c056ac2",
+  "source_commit_sha": "0ff1421f63367f1fc32888f047ab727a8647462b",
   "source_families": [
     {
       "family_id": "casf_pdbbind",

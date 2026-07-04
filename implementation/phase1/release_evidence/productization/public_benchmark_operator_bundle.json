@@ -4528,7 +4528,7 @@
     ]
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T16:17:30.427916+00:00",
+  "generated_at": "2026-07-04T16:36:57.539452+00:00",
   "input_checksums": {
     "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json": "sha256:05197b7e8c610b3a42315678b04ec67a6892f989cdd79c6d50467ecc09fb8f23",
     "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json": "sha256:be54baf78afd8239fb3d82981658170e899ca87ee186b98b3d3e8c89687b5f7c",
@@ -24610,7 +24610,7 @@
   "reuse_policy": "public_benchmark_operator_bundle_materialized_from_rows",
   "reused_evidence": false,
   "schema_version": "public-benchmark-operator-bundle.v1",
-  "source_commit_sha": "eedcdb06f08318c4e19d93d9f3d66c935c056ac2",
+  "source_commit_sha": "0ff1421f63367f1fc32888f047ab727a8647462b",
   "target_subset_case_count": 12,
   "vina_gnina_comparison_intake": {
     "cases": [

@@ -1,18 +1,18 @@
 # Science Actual Closure Row Audit
 
-- `status`: `operator_evidence_required`
-- `contract_pass`: `False`
-- `component_ready_count`: `2/3`
-- `requirement_pass_count`: `11/19`
+- `status`: `ready`
+- `contract_pass`: `True`
+- `component_ready_count`: `3/3`
+- `requirement_pass_count`: `19/19`
 - `completion_audit_status`: `operator_evidence_required`
-- `missing_row_inputs`: `pocketmd_rows`
-- `upstream_source_blockers`: `public_benchmark_phase2_source_acquisition::public_benchmark_external_receipts_not_attached, pocketmd_lite_source_acquisition::pocketmd_lite_topk_rows_not_acquired, pocketmd_lite_source_acquisition::upstream_top_k_candidate_receipts_not_attached, pocketmd_lite_source_acquisition::lite_refinement_metric_receipts_not_attached`
+- `missing_row_inputs`: `none`
+- `upstream_source_blockers`: `public_benchmark_phase2_source_acquisition::public_benchmark_external_receipts_not_attached`
 
 | Completion Component | Status | Requirements | Missing Row Inputs | Failed Criteria |
 |---|---|---|---|---|
 | `public_benchmark_phase2_actual_closure` | `complete` | `5/5` | `none` | `none` |
 | `gpcr_hard_decoy_actual_closure` | `complete` | `5/5` | `none` | `none` |
-| `pocketmd_lite_topk_actual_closure` | `operator_rows_required` | `1/9` | `pocketmd_rows` | `top_k_refinement_rows_present, top_k_refinement_case_coverage, local_min_survival_materialized, contact_persistence_materialized, h_bond_persistence_materialized, clash_relief_materialized, uncertainty_summary_materialized, report_blockers_resolved` |
+| `pocketmd_lite_topk_actual_closure` | `complete` | `9/9` | `none` | `none` |
 
 | Row Input | Status | Component | Closes Criteria | Default Path |
 |---|---|---|---|---|
@@ -21,14 +21,14 @@
 | `enrichment_rows` | `provided` | `public_benchmark_phase2_actual_closure` | `dud_e_or_lit_pcba_enrichment_ready` | `implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json` |
 | `vina_gnina_rows` | `provided` | `public_benchmark_phase2_actual_closure` | `vina_gnina_comparison_ready` | `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json` |
 | `gpcr_rows` | `provided` | `gpcr_hard_decoy_actual_closure` | `ranking_pr_auc_ci_low_min, top20_hit_rate_min, decoys_above_positive_count_max, no_positive_out_anchored_by_top_decoys, raw_hard_decoy_rows_actual_closure` | `implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json` |
-| `pocketmd_rows` | `missing` | `pocketmd_lite_topk_actual_closure` | `top_k_refinement_rows_present, top_k_refinement_case_coverage, local_min_survival_materialized, contact_persistence_materialized, h_bond_persistence_materialized, clash_relief_materialized, uncertainty_summary_materialized, report_blockers_resolved, broad_all_atom_fep_claims_locked` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` |
+| `pocketmd_rows` | `provided` | `pocketmd_lite_topk_actual_closure` | `top_k_refinement_rows_present, top_k_refinement_case_coverage, local_min_survival_materialized, contact_persistence_materialized, h_bond_persistence_materialized, clash_relief_materialized, uncertainty_summary_materialized, report_blockers_resolved, broad_all_atom_fep_claims_locked` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json` |
 
 | Component | Status | Failed Criteria | Blocker Count |
 |---|---|---|---|
 | `public_benchmark_phase2_actual_closure` | `ready` | `none` | `0` |
 | `gpcr_hard_decoy_actual_closure` | `ready` | `none` | `0` |
-| `pocketmd_lite_topk_actual_closure` | `operator_evidence_required` | `top_k_refinement_rows_present, top_k_refinement_case_coverage, local_min_survival_materialized, contact_persistence_materialized, h_bond_persistence_materialized, clash_relief_materialized, uncertainty_summary_materialized, report_blockers_resolved` | `13` |
+| `pocketmd_lite_topk_actual_closure` | `ready` | `none` | `0` |
 
-- `operator_next_actions`: `attach_pocketmd_rows, resolve_pocketmd_lite_source_acquisition_blockers, run_science_actual_closure_row_materializer, review_science_actual_closure_row_audit`
+- `operator_next_actions`: `review_ready_science_actual_closure_row_audit, refresh_release_freshness_after_science_closure`
 
 This runner only materializes operator-attached raw rows through the existing Public Benchmark, GPCR, and PocketMD Lite materializers. It does not download benchmark data, generate docking scores, run MD, infer missing metrics, or treat fixture/proxy rows as actual science closure evidence.

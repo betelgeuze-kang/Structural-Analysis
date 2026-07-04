@@ -13,9 +13,9 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_blocked_target": "",
-  "generated_at": "2026-07-04T16:17:30.473570+00:00",
+  "generated_at": "2026-07-04T16:36:57.584835+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json": "sha256:d4caae8594bf807f7751abccd728ee6cacc8dc1da3500c87b109f37d39a2940a",
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json": "sha256:b6d0ea619b231e2ab31c7353734db4537ea634c97dca56f468075f7bfd99d1b8",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6"
   },
   "materialization_report": {
@@ -83,7 +83,7 @@
     "blank_values": "rejected; no implicit default is applied",
     "required": true
   },
-  "source_commit_sha": "eedcdb06f08318c4e19d93d9f3d66c935c056ac2",
+  "source_commit_sha": "0ff1421f63367f1fc32888f047ab727a8647462b",
   "status": "ready",
   "summary": {
     "active_count": 25,

@@ -360,9 +360,9 @@
   ],
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T16:17:30.515122+00:00",
+  "generated_at": "2026-07-04T16:36:57.628569+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json": "sha256:d4caae8594bf807f7751abccd728ee6cacc8dc1da3500c87b109f37d39a2940a",
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json": "sha256:b6d0ea619b231e2ab31c7353734db4537ea634c97dca56f468075f7bfd99d1b8",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269"
   },
   "materialized_subset_case_count": 12,
@@ -690,7 +690,7 @@
   "reuse_policy": "public_benchmark_harness_materialized_from_operator_bundle",
   "reused_evidence": false,
   "schema_version": "public-benchmark-harness-bundle-materialization.v1",
-  "source_commit_sha": "eedcdb06f08318c4e19d93d9f3d66c935c056ac2",
+  "source_commit_sha": "0ff1421f63367f1fc32888f047ab727a8647462b",
   "source_of_truth_public_benchmark_ready": true,
   "source_of_truth_tier_beta_ready": true,
   "source_refresh_error": "",

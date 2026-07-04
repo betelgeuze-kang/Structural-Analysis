@@ -9890,10 +9890,10 @@
   "claim_boundary": "This input is materialized from a local subset manifest and operator-attached pose-coordinate intake. It validates coordinates, atom-order contracts, symmetry permutations, receptor context, and RMSD through the local validator, but it does not infer chemistry, download benchmark data, or claim benchmark performance.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T16:17:30.459322+00:00",
+  "generated_at": "2026-07-04T16:36:57.570530+00:00",
   "input_checksums": {
-    "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json": "sha256:acd7706d4106601e28b256a2653fa792b275be3618bf3372398c8a45698ff95a",
-    "implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json": "sha256:d4caae8594bf807f7751abccd728ee6cacc8dc1da3500c87b109f37d39a2940a",
+    "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json": "sha256:a1577d0359d711111bbfa194f1c6517965314cafe5b13f9400e1a927de02d2a4",
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json": "sha256:b6d0ea619b231e2ab31c7353734db4537ea634c97dca56f468075f7bfd99d1b8",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:f3f8ee12c7b15238da7a940bab4c4bfa2ba17cf270ea3522d000430dc20cd4a8",
     "scripts/validate_public_benchmark_pose_validity.py": "sha256:781e1a90205d6e04929d2bd29f7519427db86eefb708320e12a0ebc5559fea9d"
   },
@@ -9933,7 +9933,7 @@
     }
   },
   "schema_version": "public-benchmark-pose-validity-input.v1",
-  "source_commit_sha": "eedcdb06f08318c4e19d93d9f3d66c935c056ac2",
+  "source_commit_sha": "0ff1421f63367f1fc32888f047ab727a8647462b",
   "status": "ready",
   "unique_real_benchmark_case_count": 12,
   "validation": {

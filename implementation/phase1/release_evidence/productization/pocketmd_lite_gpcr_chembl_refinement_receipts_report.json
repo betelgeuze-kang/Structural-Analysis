@@ -1,0 +1,44 @@
+{
+  "blocker_count": 0,
+  "blockers": [],
+  "claim_boundary": "Ligand-only refinement proxy for PocketMD Lite top-k survival; not a receptor-bound all-atom MD, FEP, or de novo binding mode claim.",
+  "completed_receipt_count": 6,
+  "completed_receipts": [
+    "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
+    "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_02_refinement_receipt.json",
+    "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_002/rank_01_refinement_receipt.json",
+    "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_002/rank_02_refinement_receipt.json",
+    "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_003/rank_01_refinement_receipt.json",
+    "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_003/rank_02_refinement_receipt.json"
+  ],
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-07-04T16:27:53.562034+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json": "sha256:98255bfca71cb82c3146a11e74e90cc338836518d93672950cbec5defd7d7147",
+    "implementation/phase1/release_evidence/productization/operator_attached/pocketmd_lite_refinement_sources/gpcr_chembl_topk_ligand_refinement_source.json": "sha256:29e30bf303c3008133acd812f54ae8f4824959b32f6b1e2d23ae948c7e6f64ee",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json": "sha256:f3a9d289751dc029a78d83a07618784b043211b8890abc0201e6e9e140393d78",
+    "scripts/materialize_pocketmd_lite_gpcr_chembl_refinement_receipts.py": "sha256:81ebe689a5e94b66bb4289684a5116c21072b0261d2e8481980c1f65f07f34f5"
+  },
+  "next_commands": {
+    "materialize_rows_from_receipt_bundle": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked"
+  },
+  "required_receipt_count": 6,
+  "reuse_policy": "gpcr_chembl_topk_ligand_rdkit_refinement_receipts",
+  "reused_evidence": false,
+  "schema_version": "pocketmd-lite-gpcr-chembl-refinement-receipts.v1",
+  "source_artifact": "implementation/phase1/release_evidence/productization/operator_attached/pocketmd_lite_refinement_sources/gpcr_chembl_topk_ligand_refinement_source.json",
+  "source_artifact_sha256": "sha256:29e30bf303c3008133acd812f54ae8f4824959b32f6b1e2d23ae948c7e6f64ee",
+  "source_commit_sha": "0ff1421f63367f1fc32888f047ab727a8647462b",
+  "source_id": "pocketmd_lite_gpcr_chembl_rdkit_refinement_2026_07_05",
+  "source_license": "ChEMBL public API data; use subject to EMBL-EBI and ChEMBL terms",
+  "source_url": "https://www.ebi.ac.uk/chembl/api/data/molecule",
+  "source_version": "chembl_molecule_api_snapshot_rdkit_2022_09_5",
+  "status": "receipts_materialized",
+  "target_order": [
+    "DRD2",
+    "HTR2A",
+    "OPRM1"
+  ],
+  "top_k_refinement_row_count": 6
+}

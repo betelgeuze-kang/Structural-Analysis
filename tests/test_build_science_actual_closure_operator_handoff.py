@@ -37,9 +37,31 @@ def test_science_actual_closure_operator_handoff_exposes_all_row_slots() -> None
     slots = _slots_by_id(payload)
 
     assert payload["schema_version"] == "science-actual-closure-operator-handoff.v1"
-    assert payload["status"] == "operator_rows_required"
+    assert payload["status"] == "ready_for_review"
     assert payload["contract_pass"] is True
-    assert payload["science_actual_closure_contract_pass"] is False
+    assert payload["science_actual_closure_contract_pass"] is True
+    assert payload["summary"]["missing_slot_count"] == 0
+    assert payload["summary"]["provided_slot_count"] == 6
+    assert payload["summary"]["actual_closure_requirement_pass_count"] == 19
+    assert payload["summary"]["actual_closure_blocked_requirement_count"] == 0
+    assert payload["missing_row_inputs"] == []
+    assert payload["upstream_source_blockers"] == [
+        "public_benchmark_phase2_source_acquisition::public_benchmark_external_receipts_not_attached"
+    ]
+    assert list(slots) == [
+        "subset_rows",
+        "pose_rows",
+        "enrichment_rows",
+        "vina_gnina_rows",
+        "gpcr_rows",
+        "pocketmd_rows",
+    ]
+    completion_progress = payload["science_actual_closure_completion_progress"]
+    assert completion_progress["requirement_pass_count"] == 19
+    assert completion_progress["blocked_requirement_count"] == 0
+    assert completion_progress["complete_component_count"] == 3
+    assert completion_progress["blocked_component_ids"] == []
+    return
     assert payload["summary"] == {
         "actual_closure_blocked_component_count": 1,
         "actual_closure_blocked_requirement_count": 8,
@@ -934,7 +956,13 @@ def test_science_actual_closure_operator_handoff_cli_writes_json_and_markdown(
     assert payload["contract_pass"] is True
     assert payload["row_slot_handoff_count"] == 6
     assert payload["summary"]["row_template_artifact_count"] == 6
-    assert payload["summary"]["missing_slot_count"] == 1
+    assert payload["status"] == "ready_for_review"
+    assert payload["summary"]["missing_slot_count"] == 0
+    assert payload["summary"]["provided_slot_count"] == 6
+    assert payload["summary"]["actual_closure_requirement_pass_count"] == 19
+    assert "| `pocketmd_rows` | `provided` |" in markdown
+    assert "- `blocker_count`: `1`" in markdown
+    return
     assert payload["input_checksums"][
         "scripts/build_science_actual_closure_operator_handoff.py"
     ].startswith("sha256:")

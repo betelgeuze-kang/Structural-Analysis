@@ -1,0 +1,290 @@
+{
+  "cases": [
+    {
+      "candidate_id": "DRD2_CHEMBL267930",
+      "case_id": "pocketmd_lite_case_001",
+      "clash_count_after": 0,
+      "clash_count_before": 0,
+      "contact_persistence_rate": 0.862069,
+      "h_bond_persistence_rate": 1.0,
+      "local_min_survived": true,
+      "post_refinement_energy_proxy": 28.139616,
+      "pre_refinement_energy_proxy": 76.843934,
+      "provenance_ref": "https://www.ebi.ac.uk/chembl/api/data/molecule/CHEMBL267930.json#pocketmd-lite-rdkit-refinement-pocketmd_lite_case_001-rank-01",
+      "source_checksum": "sha256:5b0ab9dc1e08d176b57ba92eac4094e1deb327e1c9a8d5f669e8f1ef4b9a4a7e",
+      "source_family": "ChEMBL GPCR hard-decoy top-k ligand refinement",
+      "top_k_rank": 1,
+      "uncertainty_interval": {
+        "high": -44.783263,
+        "low": -52.625373,
+        "unit": "energy_proxy_delta"
+      },
+      "upstream_top_k_provenance_ref": "https://www.ebi.ac.uk/chembl/api/data/activity/738351.json",
+      "upstream_top_k_source_checksum": "sha256:ae0061387edcd0e3c15fc098871d4b8aa2ddf9b73e77432026354a6470e70b5a"
+    },
+    {
+      "candidate_id": "DRD2_CHEMBL225230",
+      "case_id": "pocketmd_lite_case_001",
+      "clash_count_after": 0,
+      "clash_count_before": 0,
+      "contact_persistence_rate": 0.862069,
+      "h_bond_persistence_rate": 1.0,
+      "local_min_survived": true,
+      "post_refinement_energy_proxy": 81.218852,
+      "pre_refinement_energy_proxy": 145.995387,
+      "provenance_ref": "https://www.ebi.ac.uk/chembl/api/data/molecule/CHEMBL225230.json#pocketmd-lite-rdkit-refinement-pocketmd_lite_case_001-rank-02",
+      "source_checksum": "sha256:bf988e3abf5ddce86520d00cacaa0fbc5d58c19d4b3a3817a624154a88adb35b",
+      "source_family": "ChEMBL GPCR hard-decoy top-k ligand refinement",
+      "top_k_rank": 2,
+      "uncertainty_interval": {
+        "high": -61.411061,
+        "low": -68.142009,
+        "unit": "energy_proxy_delta"
+      },
+      "upstream_top_k_provenance_ref": "https://www.ebi.ac.uk/chembl/api/data/activity/735584.json",
+      "upstream_top_k_source_checksum": "sha256:fde8555124745a828c406e6298549daac8df8cb56259e9454c56d8385e29ac8e"
+    },
+    {
+      "candidate_id": "HTR2A_CHEMBL5414859",
+      "case_id": "pocketmd_lite_case_002",
+      "clash_count_after": 0,
+      "clash_count_before": 0,
+      "contact_persistence_rate": 0.722222,
+      "h_bond_persistence_rate": 1.0,
+      "local_min_survived": true,
+      "post_refinement_energy_proxy": -30.370501,
+      "pre_refinement_energy_proxy": 46.79997,
+      "provenance_ref": "https://www.ebi.ac.uk/chembl/api/data/molecule/CHEMBL5414859.json#pocketmd-lite-rdkit-refinement-pocketmd_lite_case_002-rank-01",
+      "source_checksum": "sha256:f22cf0de36a1f5283a0a94eef5b1aeab21fef1b21ff7dd139fb30c64e81355d8",
+      "source_family": "ChEMBL GPCR hard-decoy top-k ligand refinement",
+      "top_k_rank": 1,
+      "uncertainty_interval": {
+        "high": -74.647117,
+        "low": -79.693826,
+        "unit": "energy_proxy_delta"
+      },
+      "upstream_top_k_provenance_ref": "https://www.ebi.ac.uk/chembl/api/data/activity/25511287.json",
+      "upstream_top_k_source_checksum": "sha256:10bfe4b8389ccf3c6fc2205fcc439741ca6fb3327b2b53332847cca1e225846c"
+    },
+    {
+      "candidate_id": "HTR2A_CHEMBL252818",
+      "case_id": "pocketmd_lite_case_002",
+      "clash_count_after": 0,
+      "clash_count_before": 0,
+      "contact_persistence_rate": 0.692308,
+      "h_bond_persistence_rate": 1.0,
+      "local_min_survived": true,
+      "post_refinement_energy_proxy": 96.809968,
+      "pre_refinement_energy_proxy": 168.349965,
+      "provenance_ref": "https://www.ebi.ac.uk/chembl/api/data/molecule/CHEMBL252818.json#pocketmd-lite-rdkit-refinement-pocketmd_lite_case_002-rank-02",
+      "source_checksum": "sha256:c25bebffa1a248215a4f8ac3cb91b60198c83ad60c5f1c5c09b20412f9a8fa76",
+      "source_family": "ChEMBL GPCR hard-decoy top-k ligand refinement",
+      "top_k_rank": 2,
+      "uncertainty_interval": {
+        "high": -70.425102,
+        "low": -72.654892,
+        "unit": "energy_proxy_delta"
+      },
+      "upstream_top_k_provenance_ref": "https://www.ebi.ac.uk/chembl/api/data/activity/2075833.json",
+      "upstream_top_k_source_checksum": "sha256:70e2590dffff965253a27b9a9a9e41ace5e29f60aae6019feff4d47cc4bd6a05"
+    },
+    {
+      "candidate_id": "OPRM1_CHEMBL5624874",
+      "case_id": "pocketmd_lite_case_003",
+      "clash_count_after": 0,
+      "clash_count_before": 0,
+      "contact_persistence_rate": 0.645161,
+      "h_bond_persistence_rate": 1.0,
+      "local_min_survived": true,
+      "post_refinement_energy_proxy": -5.760939,
+      "pre_refinement_energy_proxy": 58.837866,
+      "provenance_ref": "https://www.ebi.ac.uk/chembl/api/data/molecule/CHEMBL5624874.json#pocketmd-lite-rdkit-refinement-pocketmd_lite_case_003-rank-01",
+      "source_checksum": "sha256:d3bb17cc7b7c77ca31529caf052e4c72e200794ec0d33506d05bf7332e8e93a7",
+      "source_family": "ChEMBL GPCR hard-decoy top-k ligand refinement",
+      "top_k_rank": 1,
+      "uncertainty_interval": {
+        "high": -64.076279,
+        "low": -65.121332,
+        "unit": "energy_proxy_delta"
+      },
+      "upstream_top_k_provenance_ref": "https://www.ebi.ac.uk/chembl/api/data/activity/26146885.json",
+      "upstream_top_k_source_checksum": "sha256:b8dbf17bc291e691c7cdda59670df03dfcd0623e5d59486b0890535d92871450"
+    },
+    {
+      "candidate_id": "OPRM1_CHEMBL2335120",
+      "case_id": "pocketmd_lite_case_003",
+      "clash_count_after": 0,
+      "clash_count_before": 0,
+      "contact_persistence_rate": 0.721519,
+      "h_bond_persistence_rate": 1.0,
+      "local_min_survived": true,
+      "post_refinement_energy_proxy": 30.024023,
+      "pre_refinement_energy_proxy": 138.06991,
+      "provenance_ref": "https://www.ebi.ac.uk/chembl/api/data/molecule/CHEMBL2335120.json#pocketmd-lite-rdkit-refinement-pocketmd_lite_case_003-rank-02",
+      "source_checksum": "sha256:5ebf12070d0ac796ee05e3c6f19ed86d8a070eb4112200a2eab938864ee57616",
+      "source_family": "ChEMBL GPCR hard-decoy top-k ligand refinement",
+      "top_k_rank": 2,
+      "uncertainty_interval": {
+        "high": -104.868391,
+        "low": -111.223383,
+        "unit": "energy_proxy_delta"
+      },
+      "upstream_top_k_provenance_ref": "https://www.ebi.ac.uk/chembl/api/data/activity/12676656.json",
+      "upstream_top_k_source_checksum": "sha256:685616608bf0b54abff667beaf8e9c12b39952b2d062f7d5a7fa7e6b6869ee1e"
+    }
+  ],
+  "claim_boundary": "Operator intake materialized from bounded top-k refinement rows. The PocketMD Lite survival materializer must still pass Phase 4 before the bounded top-k refinement surface is ready; broad all-atom MD and FEP claims remain locked.",
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-07-04T16:36:57.674805+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json": "sha256:099f9b14abfa9165b96e3ea000a1bcd72e344ebcf2c0e4194569f3e9705efc57",
+    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:dad666c08fff6ec709e535de64fdc41121b7c93de5e19c42f0876d71a44a67c9"
+  },
+  "operator_input_source": {
+    "case_count": 3,
+    "case_row_counts": {
+      "pocketmd_lite_case_001": 2,
+      "pocketmd_lite_case_002": 2,
+      "pocketmd_lite_case_003": 2
+    },
+    "case_top_k_rank_prefixes": {
+      "pocketmd_lite_case_001": [
+        1,
+        2
+      ],
+      "pocketmd_lite_case_002": [
+        1,
+        2
+      ],
+      "pocketmd_lite_case_003": [
+        1,
+        2
+      ]
+    },
+    "flat_uncertainty_fields": [
+      "uncertainty_low",
+      "uncertainty_high",
+      "uncertainty_unit"
+    ],
+    "max_top_k": 20,
+    "mode": "raw_top_k_refinement_rows",
+    "required_case_fields": [
+      "case_id",
+      "source_family",
+      "top_k_rank",
+      "candidate_id",
+      "upstream_top_k_provenance_ref",
+      "upstream_top_k_source_checksum",
+      "pre_refinement_energy_proxy",
+      "post_refinement_energy_proxy",
+      "local_min_survived",
+      "contact_persistence_rate",
+      "h_bond_persistence_rate",
+      "clash_count_before",
+      "clash_count_after",
+      "uncertainty_interval",
+      "provenance_ref",
+      "source_checksum"
+    ],
+    "row_count": 6,
+    "row_value_contract": {
+      "boolean_value_policy": {
+        "local_min_survived": "must parse to a boolean value"
+      },
+      "integer_value_policy": {
+        "clash_count_after": "must parse to a non-negative integer",
+        "clash_count_before": "must parse to a non-negative integer"
+      },
+      "numeric_value_policy": {
+        "post_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+        "pre_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected"
+      },
+      "rate_value_policy": {
+        "contact_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0",
+        "h_bond_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0"
+      },
+      "row_integrity_policy": "case_id, source_family, and candidate_id must be nonblank and non-placeholder; candidate_id and top_k_rank must be unique per case.",
+      "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
+      "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
+      "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
+      "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit.",
+      "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
+    },
+    "source_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+    "source_artifact_sha256": "sha256:099f9b14abfa9165b96e3ea000a1bcd72e344ebcf2c0e4194569f3e9705efc57",
+    "source_id": "pocketmd_lite_gpcr_chembl_rdkit_refinement_2026_07_05",
+    "source_license": "ChEMBL public API data; use subject to EMBL-EBI and ChEMBL terms",
+    "source_receipt_requirements": {
+      "mode": "raw_top_k_refinement_rows",
+      "placeholder_block_policy": {
+        "text_markers": [
+          "<operator",
+          "fixture",
+          "synthetic",
+          "mock",
+          "placeholder",
+          "dummy",
+          "example",
+          "operator_supplied",
+          "unit-test",
+          "test-only"
+        ],
+        "url_markers": [
+          "://example.",
+          ".example/",
+          ".invalid",
+          ".test/",
+          "localhost",
+          "127.0.0.1",
+          "0.0.0.0"
+        ],
+        "url_prefixes": [
+          "operator://",
+          "local-evidence://",
+          "local://",
+          "fixture://",
+          "mock://",
+          "synthetic://",
+          "placeholder://",
+          "test://",
+          "unit-test://",
+          "file://"
+        ]
+      },
+      "required_fields": [
+        "source_id",
+        "source_url",
+        "source_license",
+        "source_artifact",
+        "source_artifact_sha256"
+      ],
+      "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached top-k row artifact"
+    },
+    "source_url": "https://www.ebi.ac.uk/chembl/api/data/molecule",
+    "source_version": "",
+    "supported_source_formats": [
+      "csv",
+      "tsv",
+      "json",
+      "jsonl",
+      "ndjson"
+    ],
+    "top_k_candidate_count": 6,
+    "top_k_rank_prefix_policy": "For each case, supplied ranks must form a contiguous prefix starting at rank 1; cherry-picked gaps are not valid top-k refinement input.",
+    "top_k_row_quality_minimums": {
+      "min_candidate_count_per_case": 2,
+      "min_real_refinement_case_count": 3,
+      "min_top_k_rank_coverage_per_case": 2,
+      "min_total_top_k_candidate_count": 6
+    },
+    "top_k_scope_policy": "Operator import is bounded to supplied upstream top-k candidates; top_k_rank must be between 1 and 20.",
+    "upstream_top_k_receipt_fields": [
+      "upstream_top_k_provenance_ref",
+      "upstream_top_k_source_checksum"
+    ]
+  },
+  "reuse_policy": "pocketmd_lite_operator_intake_materialized_from_raw_topk_refinement_rows",
+  "reused_evidence": false,
+  "schema_version": "pocketmd-lite-operator-intake.v1",
+  "source_commit_sha": "0ff1421f63367f1fc32888f047ab727a8647462b"
+}

@@ -14,9 +14,9 @@
   "first_blocked_target": "",
   "first_blocker": "",
   "first_operator_evidence_gap": {},
-  "generated_at": "2026-07-04T16:17:30.557101+00:00",
+  "generated_at": "2026-07-04T16:36:57.672435+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:35328cd172b60f2c76ae0830d81b08051fad0c629b6278df1964fe28f81f6145",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:a79a4de40e4e1e3280e24b04950ebd6cc9fc55f5cbc59b333441b137976b1e5c",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:e10b422d9624b8fb5b2bfdea18532bed53ac1c5e20ca8551aef99be97c768b46"
   },
   "locked": false,
@@ -301,7 +301,7 @@
   "root_cause_tags": [],
   "schema_version": "gpcr-hard-decoy-evidence-surface.v1",
   "science_surface_family": "gpcr",
-  "source_commit_sha": "eedcdb06f08318c4e19d93d9f3d66c935c056ac2",
+  "source_commit_sha": "0ff1421f63367f1fc32888f047ab727a8647462b",
   "status": "ready",
   "suite_report": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
   "summary": {
