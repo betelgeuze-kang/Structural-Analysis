@@ -786,7 +786,21 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     )
     assert evidence_gap_register["vina_gnina_comparison_intake"][
         "materialization_steps"
-    ] == ["materialize_vina_gnina_comparison_adapter"]
+    ] == [
+        "review_public_benchmark_vina_gnina_input_manifest_template_preflight",
+        "fill_public_benchmark_vina_gnina_input_manifest_from_template",
+        "build_public_benchmark_vina_gnina_execution_plan",
+        "configure_vina_gnina_binary_or_container_runtime",
+        "build_public_benchmark_vina_gnina_runtime_readiness",
+        "review_public_benchmark_vina_gnina_rows_template_preflight",
+        "attach_public_benchmark_vina_gnina_rows",
+        "materialize_vina_gnina_comparison_adapter",
+    ]
+    assert evidence_gap_register["vina_gnina_comparison_intake"][
+        "runtime_action_packet"
+    ]["rows_template_preflight_artifact"].endswith(
+        "public_benchmark_vina_gnina_rows_template_preflight.json"
+    )
     assert blocker_detail_register["vina_gnina_comparison_intake"]["blockers"] == [
         "vina_gnina_comparison_cases_missing",
         "vina_gnina_engine_runs_missing",
@@ -822,8 +836,23 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "casf_pdbbind_pose_success_harness_ready",
     ]
     assert gate_plan["vina_gnina_comparison_intake"]["materialization_steps"] == [
-        "materialize_vina_gnina_comparison_adapter"
+        "review_public_benchmark_vina_gnina_input_manifest_template_preflight",
+        "fill_public_benchmark_vina_gnina_input_manifest_from_template",
+        "build_public_benchmark_vina_gnina_execution_plan",
+        "configure_vina_gnina_binary_or_container_runtime",
+        "build_public_benchmark_vina_gnina_runtime_readiness",
+        "review_public_benchmark_vina_gnina_rows_template_preflight",
+        "attach_public_benchmark_vina_gnina_rows",
+        "materialize_vina_gnina_comparison_adapter",
     ]
+    assert gate_plan["vina_gnina_comparison_intake"]["runtime_action_packet"][
+        "input_manifest_template_preflight_artifact"
+    ].endswith("public_benchmark_vina_gnina_input_manifest_template_preflight.json")
+    assert gate_plan["vina_gnina_comparison_intake"]["runtime_action_packet"][
+        "commands"
+    ]["build_rows_template_preflight"].startswith(
+        "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py"
+    )
     assert source["operator_intake_packet"]["acceptance_criteria"][-1] == (
         "public_benchmark_source_of_truth.public_benchmark_ready == true"
     )

@@ -881,8 +881,7 @@ def _operator_evidence_gap_register(
         manifest_contract = slot.get("manifest_contract")
         if not isinstance(manifest_contract, dict):
             manifest_contract = {}
-        rows.append(
-            {
+        row = {
                 "slot_priority": index,
                 "slot_id": slot_id,
                 "status": str(slot.get("status") or ""),
@@ -908,7 +907,12 @@ def _operator_evidence_gap_register(
                 ),
                 "validation_command": str(slot.get("validation_command") or ""),
             }
+        runtime_action_packet = _as_dict(
+            plan.get("runtime_action_packet") or slot.get("runtime_action_packet")
         )
+        if runtime_action_packet:
+            row["runtime_action_packet"] = runtime_action_packet
+        rows.append(row)
     return rows
 
 
@@ -943,8 +947,7 @@ def _operator_blocker_detail_register(
                 }
             )
         unique_blockers = list(dict.fromkeys(blockers))
-        rows.append(
-            {
+        row = {
                 "slot_priority": int(gap.get("slot_priority") or 0),
                 "slot_id": str(gap.get("slot_id") or ""),
                 "status": str(gap.get("status") or ""),
@@ -967,7 +970,10 @@ def _operator_blocker_detail_register(
                 "materialization_command": str(gap.get("materialization_command") or ""),
                 "validation_command": str(gap.get("validation_command") or ""),
             }
-        )
+        runtime_action_packet = _as_dict(gap.get("runtime_action_packet"))
+        if runtime_action_packet:
+            row["runtime_action_packet"] = runtime_action_packet
+        rows.append(row)
     return rows
 
 

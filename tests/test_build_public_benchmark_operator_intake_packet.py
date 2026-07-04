@@ -541,6 +541,32 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert gate_plan["vina_gnina_comparison_intake"][
         "row_validation_policies"
     ] == comparison["row_validation_policies"]
+    assert gate_plan["vina_gnina_comparison_intake"]["materialization_steps"] == [
+        "review_public_benchmark_vina_gnina_input_manifest_template_preflight",
+        "fill_public_benchmark_vina_gnina_input_manifest_from_template",
+        "build_public_benchmark_vina_gnina_execution_plan",
+        "configure_vina_gnina_binary_or_container_runtime",
+        "build_public_benchmark_vina_gnina_runtime_readiness",
+        "review_public_benchmark_vina_gnina_rows_template_preflight",
+        "attach_public_benchmark_vina_gnina_rows",
+        "materialize_vina_gnina_comparison_adapter",
+    ]
+    runtime_action = gate_plan["vina_gnina_comparison_intake"][
+        "runtime_action_packet"
+    ]
+    assert runtime_action["expected_rows_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_vina_gnina_rows.json"
+    )
+    assert runtime_action["rows_template_preflight_artifact"].endswith(
+        "public_benchmark_vina_gnina_rows_template_preflight.json"
+    )
+    assert runtime_action["input_manifest_template_preflight_artifact"].endswith(
+        "public_benchmark_vina_gnina_input_manifest_template_preflight.json"
+    )
+    assert runtime_action["commands"]["build_rows_template_preflight"].startswith(
+        "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py"
+    )
     row_matrix = {
         row["row_input_id"]: row for row in packet["phase2_row_closure_matrix"]
     }
@@ -590,6 +616,9 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "ndjson",
         "csv",
     ]
+    assert row_matrix["vina_gnina_rows"]["runtime_action_packet"][
+        "rows_template_preflight_artifact"
+    ].endswith("public_benchmark_vina_gnina_rows_template_preflight.json")
 
     gap_register = {
         row["slot_id"]: row for row in packet["operator_evidence_gap_register"]
@@ -603,6 +632,9 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert gap_register["vina_gnina_comparison_intake"]["depends_on"] == comparison[
         "depends_on"
     ]
+    assert gap_register["vina_gnina_comparison_intake"]["runtime_action_packet"][
+        "operator_sequence"
+    ][0] == "review_public_benchmark_vina_gnina_input_manifest_template_preflight"
 
 
 def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ordered() -> (

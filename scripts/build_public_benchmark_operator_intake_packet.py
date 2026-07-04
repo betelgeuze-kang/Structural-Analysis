@@ -355,6 +355,69 @@ def _source_acquisition_plan_summary(
     }
 
 
+def _vina_gnina_runtime_action_packet(
+    source_acquisition_summary: dict[str, Any],
+) -> dict[str, Any]:
+    runtime = _as_dict(source_acquisition_summary.get("vina_gnina_runtime_readiness"))
+    unblock = _as_dict(runtime.get("operator_unblock_packet"))
+    commands = _as_dict(unblock.get("commands"))
+    if not runtime and not unblock:
+        return {}
+    return {
+        "artifact": str(runtime.get("artifact") or ""),
+        "status": str(runtime.get("status") or ""),
+        "runtime_ready_for_engine_execution": bool(
+            runtime.get("runtime_ready_for_engine_execution")
+        ),
+        "operator_execution_ready": bool(runtime.get("operator_execution_ready")),
+        "adapter_rows_ready": bool(runtime.get("adapter_rows_ready")),
+        "required_engine_run_count": int(
+            runtime.get("required_engine_run_count")
+            or unblock.get("required_engine_run_count")
+            or 0
+        ),
+        "ready_engine_run_slot_count": int(
+            runtime.get("ready_engine_run_slot_count")
+            or unblock.get("ready_engine_run_slot_count")
+            or 0
+        ),
+        "case_input_slot_count": int(
+            runtime.get("case_input_slot_count")
+            or unblock.get("case_input_slot_count")
+            or 0
+        ),
+        "blocked_case_input_slot_count": int(
+            runtime.get("blocked_case_input_slot_count")
+            or unblock.get("blocked_case_input_slot_count")
+            or 0
+        ),
+        "blocked_engine_run_slot_count": int(
+            runtime.get("blocked_engine_run_slot_count")
+            or unblock.get("blocked_engine_run_slot_count")
+            or 0
+        ),
+        "expected_rows_artifact": str(unblock.get("expected_rows_artifact") or ""),
+        "input_manifest_template_artifact": str(
+            unblock.get("input_manifest_template_artifact") or ""
+        ),
+        "input_manifest_template_preflight_artifact": str(
+            unblock.get("input_manifest_template_preflight_artifact") or ""
+        ),
+        "rows_template_artifact": str(unblock.get("rows_template_artifact") or ""),
+        "rows_template_preflight_artifact": str(
+            unblock.get("rows_template_preflight_artifact") or ""
+        ),
+        "operator_sequence": [
+            str(row) for row in _as_list(unblock.get("operator_sequence")) if str(row)
+        ],
+        "commands": commands,
+        "claim_boundary": (
+            "This packet mirrors the Vina/GNINA runtime readiness unblock path. "
+            "It does not run docking engines or synthesize comparison rows."
+        ),
+    }
+
+
 def _input_paths(source_of_truth_path: Path) -> list[Path]:
     return [
         Path("scripts/build_public_benchmark_operator_intake_packet.py"),
@@ -924,8 +987,9 @@ def _slot(
     row_validation_policies: dict[str, Any] | None = None,
     materialization_steps: list[str] | None = None,
     manifest_contract: dict[str, Any] | None = None,
+    runtime_action_packet: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    return {
+    payload = {
         "slot_id": slot_id,
         "title": title,
         "status": status,
@@ -945,29 +1009,32 @@ def _slot(
         "validation_command": validation_command,
         "materialization_command": materialization_command,
     }
+    if runtime_action_packet:
+        payload["runtime_action_packet"] = runtime_action_packet
+    return payload
 
 
 def _gate_unblock_plan(slots: list[dict[str, Any]]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for slot in slots:
         manifest_contract = _as_dict(slot.get("manifest_contract"))
-        rows.append(
-            {
-                "slot_id": str(slot["slot_id"]),
-                "title": str(slot["title"]),
-                "status": str(slot["status"]),
-                "unblocks_tier_beta_criteria": list(
-                    slot["unblocks_tier_beta_criteria"]
-                ),
-                "minimum_evidence": dict(slot["minimum_evidence"]),
-                "row_validation_policies": _as_dict(
-                    slot.get("row_validation_policies")
-                ),
-                "template_artifact": str(slot.get("template_artifact") or ""),
-                "materialization_steps": list(slot["materialization_steps"]),
-                "manifest_contract_id": str(manifest_contract.get("contract_id") or ""),
-            }
-        )
+        row = {
+            "slot_id": str(slot["slot_id"]),
+            "title": str(slot["title"]),
+            "status": str(slot["status"]),
+            "unblocks_tier_beta_criteria": list(
+                slot["unblocks_tier_beta_criteria"]
+            ),
+            "minimum_evidence": dict(slot["minimum_evidence"]),
+            "row_validation_policies": _as_dict(slot.get("row_validation_policies")),
+            "template_artifact": str(slot.get("template_artifact") or ""),
+            "materialization_steps": list(slot["materialization_steps"]),
+            "manifest_contract_id": str(manifest_contract.get("contract_id") or ""),
+        }
+        runtime_action_packet = _as_dict(slot.get("runtime_action_packet"))
+        if runtime_action_packet:
+            row["runtime_action_packet"] = runtime_action_packet
+        rows.append(row)
     return rows
 
 
@@ -981,8 +1048,7 @@ def _phase2_row_closure_matrix(slots: list[dict[str, Any]]) -> list[dict[str, An
         for component_id in PHASE2_ROW_COMPONENTS[row_input_id]:
             gate = dict(PHASE2_COMPONENT_GATE_CRITERIA[component_id])
             required_components.append({"component_id": component_id, **gate})
-        rows.append(
-            {
+        closure_row = {
                 "row_input_id": row_input_id,
                 "description": description,
                 "status": "operator_input_required",
@@ -1013,7 +1079,10 @@ def _phase2_row_closure_matrix(slots: list[dict[str, Any]]) -> list[dict[str, An
                     "real rows and receipts are materialized."
                 ),
             }
-        )
+        runtime_action_packet = _as_dict(slot.get("runtime_action_packet"))
+        if runtime_action_packet:
+            closure_row["runtime_action_packet"] = runtime_action_packet
+        rows.append(closure_row)
     return rows
 
 
@@ -1024,8 +1093,7 @@ def _operator_evidence_gap_register(
     for index, slot in enumerate(slots, start=1):
         owner_actions = [str(action) for action in _as_list(slot.get("owner_actions"))]
         manifest_contract = _as_dict(slot.get("manifest_contract"))
-        rows.append(
-            {
+        row = {
                 "slot_priority": index,
                 "slot_id": str(slot.get("slot_id") or ""),
                 "status": str(slot.get("status") or ""),
@@ -1049,7 +1117,10 @@ def _operator_evidence_gap_register(
                 ),
                 "validation_command": str(slot.get("validation_command") or ""),
             }
-        )
+        runtime_action_packet = _as_dict(slot.get("runtime_action_packet"))
+        if runtime_action_packet:
+            row["runtime_action_packet"] = runtime_action_packet
+        rows.append(row)
     return rows
 
 
@@ -1327,6 +1398,9 @@ def build_public_benchmark_operator_intake_packet(
     )
     source_acquisition_summary = _source_acquisition_plan_summary(
         source_acquisition_plan
+    )
+    vina_gnina_runtime_action_packet = _vina_gnina_runtime_action_packet(
+        source_acquisition_summary
     )
 
     subset_materialization = (
@@ -1665,7 +1739,17 @@ def build_public_benchmark_operator_intake_packet(
                 "engine_pair_policy": ENGINE_PAIR_POLICY,
                 "row_integrity_policy": VINA_GNINA_ROW_INTEGRITY_POLICY,
             },
-            materialization_steps=["materialize_vina_gnina_comparison_adapter"],
+            materialization_steps=[
+                "review_public_benchmark_vina_gnina_input_manifest_template_preflight",
+                "fill_public_benchmark_vina_gnina_input_manifest_from_template",
+                "build_public_benchmark_vina_gnina_execution_plan",
+                "configure_vina_gnina_binary_or_container_runtime",
+                "build_public_benchmark_vina_gnina_runtime_readiness",
+                "review_public_benchmark_vina_gnina_rows_template_preflight",
+                "attach_public_benchmark_vina_gnina_rows",
+                "materialize_vina_gnina_comparison_adapter",
+            ],
+            runtime_action_packet=vina_gnina_runtime_action_packet,
         ),
     ]
     gate_unblock_plan = _gate_unblock_plan(slots)
