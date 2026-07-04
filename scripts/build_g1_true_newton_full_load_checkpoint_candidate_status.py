@@ -29,8 +29,9 @@ PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "g1_true_newton_full_load_checkpoint_candidate_status.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_CHECKPOINT_NPZ = PRODUCTIZATION / "g1_true_newton_full_load_checkpoint_candidate.npz"
+DEFAULT_INITIAL_CHECKPOINT_NPZ: Path | None = None
 DEFAULT_LOAD_SCALE = 1.0
-DEFAULT_MAX_NEWTON_STEPS = 24
+DEFAULT_MAX_NEWTON_STEPS = 36
 DEFAULT_RESIDUAL_GATE_N = 5.0e-4
 
 
@@ -69,6 +70,7 @@ def build_g1_true_newton_full_load_checkpoint_candidate_status(
     *,
     repo_root: Path = ROOT,
     checkpoint_npz: Path = DEFAULT_CHECKPOINT_NPZ,
+    initial_checkpoint_npz: Path | None = DEFAULT_INITIAL_CHECKPOINT_NPZ,
     load_scale: float = DEFAULT_LOAD_SCALE,
     max_newton_steps: int = DEFAULT_MAX_NEWTON_STEPS,
     residual_gate_n: float = DEFAULT_RESIDUAL_GATE_N,
@@ -78,6 +80,11 @@ def build_g1_true_newton_full_load_checkpoint_candidate_status(
         load_scale=float(load_scale),
         max_newton_steps=int(max_newton_steps),
         residual_gate_n=float(residual_gate_n),
+        initial_checkpoint_npz=(
+            _resolve(repo_root, initial_checkpoint_npz)
+            if initial_checkpoint_npz is not None
+            else None
+        ),
         output_json=None,
         output_final_checkpoint_npz=resolved_checkpoint,
     )
@@ -149,6 +156,12 @@ def build_g1_true_newton_full_load_checkpoint_candidate_status(
         "required_load_scale": float(load_scale),
         "max_newton_steps": int(max_newton_steps),
         "residual_gate_n": float(residual_gate_n),
+        "initial_checkpoint_npz": (
+            _repo_relative_string(repo_root, str(_resolve(repo_root, initial_checkpoint_npz)))
+            if initial_checkpoint_npz is not None
+            else None
+        ),
+        "initial_state": _dict(candidate.get("initial_state")),
         "true_newton_candidate": {
             "status": candidate.get("status"),
             "reason_code": candidate.get("reason_code"),
@@ -210,6 +223,7 @@ def write_g1_true_newton_full_load_checkpoint_candidate_status(
     *,
     repo_root: Path = ROOT,
     checkpoint_npz: Path = DEFAULT_CHECKPOINT_NPZ,
+    initial_checkpoint_npz: Path | None = DEFAULT_INITIAL_CHECKPOINT_NPZ,
     out: Path = DEFAULT_OUT,
     out_md: Path = DEFAULT_OUT_MD,
     load_scale: float = DEFAULT_LOAD_SCALE,
@@ -219,6 +233,7 @@ def write_g1_true_newton_full_load_checkpoint_candidate_status(
     payload = build_g1_true_newton_full_load_checkpoint_candidate_status(
         repo_root=repo_root,
         checkpoint_npz=checkpoint_npz,
+        initial_checkpoint_npz=initial_checkpoint_npz,
         load_scale=load_scale,
         max_newton_steps=max_newton_steps,
         residual_gate_n=residual_gate_n,
@@ -236,6 +251,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
     parser.add_argument("--checkpoint-npz", type=Path, default=DEFAULT_CHECKPOINT_NPZ)
+    parser.add_argument("--initial-checkpoint-npz", type=Path, default=DEFAULT_INITIAL_CHECKPOINT_NPZ)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
     parser.add_argument("--load-scale", type=float, default=DEFAULT_LOAD_SCALE)
@@ -251,6 +267,7 @@ def main(argv: list[str] | None = None) -> int:
     payload = write_g1_true_newton_full_load_checkpoint_candidate_status(
         repo_root=args.repo_root,
         checkpoint_npz=args.checkpoint_npz,
+        initial_checkpoint_npz=args.initial_checkpoint_npz,
         out=args.out,
         out_md=args.out_md,
         load_scale=args.load_scale,

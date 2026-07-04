@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -44,9 +45,11 @@ HERE = Path(__file__).resolve().parent
 PRODUCTIZATION = HERE / "release_evidence" / "productization"
 DEFAULT_OUTPUT_JSON = PRODUCTIZATION / "g1_true_newton_reference_candidate.local.json"
 DEFAULT_FINAL_CHECKPOINT_NPZ: Path | None = None
+DEFAULT_INITIAL_CHECKPOINT_NPZ: Path | None = None
 
 PARITY_TOLERANCE = 5.0e-2
 CHECKPOINT_SCHEMA = "mgt-direct-residual-newton-state.v1"
+LOAD_SCALE_TOLERANCE = 1.0e-12
 
 
 def _max_abs(values: np.ndarray) -> float:
@@ -63,6 +66,92 @@ def _translation_metrics(u: np.ndarray) -> dict[str, float]:
         "max_translation_m": float(np.max(np.linalg.norm(translations, axis=1)))
         if translations.size
         else 0.0
+    }
+
+
+def _scalar_string(value: Any) -> str:
+    arr = np.asarray(value)
+    if arr.shape == ():
+        return str(arr.item())
+    return str(value)
+
+
+def _scalar_float(value: Any, default: float = 0.0) -> float:
+    try:
+        return float(np.asarray(value).item())
+    except Exception:
+        return default
+
+
+def _scalar_int(value: Any, default: int = 0) -> int:
+    try:
+        return int(np.asarray(value).item())
+    except Exception:
+        return default
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _load_initial_checkpoint_state(
+    *,
+    path: Path,
+    free: np.ndarray,
+    dof_count: int,
+    load_scale: float,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    content_sha256 = _file_sha256(path)
+    with np.load(path, allow_pickle=False) as archive:
+        schema = _scalar_string(archive["checkpoint_schema"])
+        checkpoint_load_scale = _scalar_float(archive["load_scale"])
+        displacement = np.asarray(archive["displacement_u"], dtype=np.float64)
+        residual_key = (
+            "direct_residual_inf_n"
+            if "direct_residual_inf_n" in archive.files
+            else "residual_inf_n"
+            if "residual_inf_n" in archive.files
+            else ""
+        )
+        direct_residual_inf = (
+            _scalar_float(archive[residual_key], default=float("nan"))
+            if residual_key
+            else float("nan")
+        )
+        accepted_iteration_count = _scalar_int(
+            archive["accepted_iteration_count"]
+            if "accepted_iteration_count" in archive.files
+            else 0
+        )
+    if schema != CHECKPOINT_SCHEMA:
+        raise ValueError(
+            f"initial checkpoint schema {schema!r} does not match {CHECKPOINT_SCHEMA!r}"
+        )
+    if abs(float(checkpoint_load_scale) - float(load_scale)) > LOAD_SCALE_TOLERANCE:
+        raise ValueError(
+            "initial checkpoint load_scale "
+            f"{checkpoint_load_scale} does not match requested {load_scale}"
+        )
+    if int(displacement.size) != int(dof_count):
+        raise ValueError(
+            f"initial checkpoint dof_count {displacement.size} does not match {dof_count}"
+        )
+    free_idx = np.asarray(free, dtype=np.int64)
+    if free_idx.size and int(np.max(free_idx)) >= int(displacement.size):
+        raise ValueError("initial checkpoint free DOF map is out of bounds")
+    return displacement[free_idx].copy(), {
+        "path": str(path),
+        "content_sha256": content_sha256,
+        "schema": schema,
+        "load_scale": float(checkpoint_load_scale),
+        "dof_count": int(displacement.size),
+        "free_dof_count": int(free_idx.size),
+        "accepted_iteration_count": int(accepted_iteration_count),
+        "direct_residual_inf_n": float(direct_residual_inf),
     }
 
 
@@ -191,6 +280,7 @@ def run_g1_true_newton_reference_candidate(
     regularization_mu: float = 0.1,
     max_newton_steps: int = 12,
     residual_gate_n: float = 5.0e-4,
+    initial_checkpoint_npz: Path | None = DEFAULT_INITIAL_CHECKPOINT_NPZ,
     output_json: Path | None = DEFAULT_OUTPUT_JSON,
     output_final_checkpoint_npz: Path | None = DEFAULT_FINAL_CHECKPOINT_NPZ,
 ) -> dict[str, Any]:
@@ -203,6 +293,7 @@ def run_g1_true_newton_reference_candidate(
             "is_candidate_only": True,
             "promotes_g1_closure": False,
             "load_scale": load_scale,
+            "initial_checkpoint_npz": str(initial_checkpoint_npz) if initial_checkpoint_npz else None,
             "frame_service_tangent_source": frame_service_tangent_source,
             "regularization": {"mode": regularization_mode, "mu": regularization_mu, "fixed_or_adaptive": "fixed"},
             "newton_mode": "true_newton_per_step_relinearization",
@@ -233,14 +324,28 @@ def run_g1_true_newton_reference_candidate(
         else:
             k_free = meta["tangent_free_csr"]
             tangent_rebuild_fn = meta["tangent_rebuild_fn"]
+            initial_checkpoint: dict[str, Any] | None = None
+            x_start = x0
+            if initial_checkpoint_npz is not None:
+                x_start, initial_checkpoint = _load_initial_checkpoint_state(
+                    path=Path(initial_checkpoint_npz),
+                    free=np.asarray(meta["free"], dtype=np.int64),
+                    dof_count=int(meta["dof_count"]),
+                    load_scale=float(load_scale),
+                )
+            initial_iteration_count = (
+                int(initial_checkpoint.get("accepted_iteration_count", 0))
+                if initial_checkpoint is not None
+                else 0
+            )
 
             # modified-Newton baseline (reference tangent reused)
             mod_dir = _make_modified_direction_fn(k_free, regularization_mode, regularization_mu)
-            mod = run_multistep_newton(residual_fn, x0, mod_dir,
+            mod = run_multistep_newton(residual_fn, x_start, mod_dir,
                                        max_newton_steps=max_newton_steps, residual_gate_n=residual_gate_n)
             # true-Newton candidate (per-step re-linearization)
             true_dir = _make_true_direction_fn(residual_fn, tangent_rebuild_fn, regularization_mode, regularization_mu)
-            true = run_multistep_newton(residual_fn, x0, true_dir,
+            true = run_multistep_newton(residual_fn, x_start, true_dir,
                                         max_newton_steps=max_newton_steps, residual_gate_n=residual_gate_n,
                                         return_final_state=output_final_checkpoint_npz is not None)
 
@@ -257,7 +362,7 @@ def run_g1_true_newton_reference_candidate(
                     final_residual=final_residual,
                     meta=meta,
                     residual_gate_n=float(residual_gate_n),
-                    steps_taken=int(ts["steps_taken"]),
+                    steps_taken=initial_iteration_count + int(ts["steps_taken"]),
                     residual_gate_passed=bool(ts["residual_gate_passed"]),
                 )
 
@@ -267,6 +372,13 @@ def run_g1_true_newton_reference_candidate(
                 "reason_code": ts["stop_reason"],
                 "uses_real_mgt_model": True,
                 "mgt_source": str(mgt_model),
+                "initial_state": {
+                    "source": (
+                        "checkpoint" if initial_checkpoint is not None else "zero_reference_state"
+                    ),
+                    "checkpoint": initial_checkpoint,
+                    "initial_iteration_count": initial_iteration_count,
+                },
                 "modified_newton_baseline": {
                     "steps": mod["summary"]["steps_taken"],
                     "initial_residual_n": mod["summary"]["initial_residual_n"],
@@ -277,6 +389,10 @@ def run_g1_true_newton_reference_candidate(
                 },
                 "true_newton_candidate": {
                     "steps": ts["steps_taken"],
+                    "initial_checkpoint_iteration_count": initial_iteration_count,
+                    "total_steps_including_initial_checkpoint": (
+                        initial_iteration_count + int(ts["steps_taken"])
+                    ),
                     "initial_residual_n": ts["initial_residual_n"],
                     "final_residual_n": ts["final_residual_n"],
                     "total_reduction_ratio": ts["total_reduction_ratio"],
@@ -320,6 +436,7 @@ def main() -> int:
     parser.add_argument("--regularization-mu", type=float, default=0.1)
     parser.add_argument("--max-newton-steps", type=int, default=12)
     parser.add_argument("--residual-gate-n", type=float, default=5.0e-4)
+    parser.add_argument("--initial-checkpoint-npz", type=Path, default=DEFAULT_INITIAL_CHECKPOINT_NPZ)
     parser.add_argument("--out", "--output-json", dest="output_json", type=Path, default=DEFAULT_OUTPUT_JSON)
     parser.add_argument("--output-final-checkpoint-npz", type=Path, default=DEFAULT_FINAL_CHECKPOINT_NPZ)
     args = parser.parse_args()
@@ -328,6 +445,7 @@ def main() -> int:
         frame_service_tangent_source=args.frame_service_tangent_source,
         regularization_mode=args.regularization_mode, regularization_mu=args.regularization_mu,
         max_newton_steps=args.max_newton_steps, residual_gate_n=args.residual_gate_n,
+        initial_checkpoint_npz=args.initial_checkpoint_npz,
         output_json=args.output_json,
         output_final_checkpoint_npz=args.output_final_checkpoint_npz,
     )

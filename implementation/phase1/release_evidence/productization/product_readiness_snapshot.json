@@ -758,9 +758,7 @@
           "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_gate_not_passed": "g1::material_newton_breadth_not_closed",
           "g1_full_load_lane::hip_consistency_proof_has_blockers": "g1::production_rocm_hip_residency_not_closed",
-          "g1_full_load_lane::hip_consistency_proof_residual_jvp_worker_path_not_ready": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed": "g1::material_newton_breadth_not_closed",
-          "g1_full_load_lane::hip_consistency_proof_worker::global_krylov_accepted_state_tangent_refresh_hip_not_proven": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready": "g1::material_newton_breadth_not_closed",
           "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_mesh_full_load_not_closed": "g1::full_mesh_nonlinear_equilibrium_not_closed"
@@ -791,11 +789,11 @@
           {
             "active": true,
             "closure_dimension": "gpu_hip_followup_performance_and_residency",
-            "represented_detail_blocker_count": 7,
+            "represented_detail_blocker_count": 5,
             "root_blocker": "g1::production_rocm_hip_residency_not_closed"
           }
         ],
-        "suppressed_detail_blocker_count": 19,
+        "suppressed_detail_blocker_count": 17,
         "unmatched_detail_blockers": []
       },
       "cause_narrowing_claim_boundary": "This receipt narrows the next G1 diagnostic direction from existing F2g/F2h evidence. It does not close G1, promote full-load 1.0, or prove production ROCm/HIP residency.",
@@ -872,7 +870,7 @@
           "full_load_hip_newton_lane_ready": false,
           "full_mesh_full_load_ready": false,
           "hip_consistency_proof_ready": false,
-          "hip_residual_jvp_worker_path_ready": false,
+          "hip_residual_jvp_worker_path_ready": true,
           "hip_worker_g1_closure_gate_ready": false
         },
         "gpu_hip_followup_scope": [
@@ -899,9 +897,7 @@
         "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_gate_not_passed": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_has_blockers": "g1::*",
-        "g1_full_load_lane::hip_consistency_proof_residual_jvp_worker_path_not_ready": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed": "g1::*",
-        "g1_full_load_lane::hip_consistency_proof_worker::global_krylov_accepted_state_tangent_refresh_hip_not_proven": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready": "g1::*",
         "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready": "g1::*",
         "g1_full_mesh_full_load_not_closed": "g1::*"
@@ -2117,9 +2113,7 @@
         "blockers": [
           "hip_consistency_proof_gate_not_passed",
           "hip_consistency_proof_has_blockers",
-          "hip_consistency_proof_residual_jvp_worker_path_not_ready",
           "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
-          "hip_consistency_proof_worker::global_krylov_accepted_state_tangent_refresh_hip_not_proven",
           "hip_consistency_proof_worker_g1_closure_gate_not_ready"
         ],
         "changed_paths_since_source_commit": [],
@@ -2131,8 +2125,7 @@
         "production_hip_residual_jacobian_path": true,
         "production_rocm_hip_residual_jvp_worker": {
           "blockers": [
-            "consistent_residual_jacobian_newton_gate_not_passed",
-            "global_krylov_accepted_state_tangent_refresh_hip_not_proven"
+            "consistent_residual_jacobian_newton_gate_not_passed"
           ],
           "g1_closure_gate_blockers": [
             "consistent_residual_jacobian_newton_gate_not_passed"
@@ -2140,10 +2133,8 @@
           "g1_closure_gate_ready": false,
           "present": true,
           "ready": false,
-          "residual_jvp_worker_path_blockers": [
-            "global_krylov_accepted_state_tangent_refresh_hip_not_proven"
-          ],
-          "residual_jvp_worker_path_ready": false,
+          "residual_jvp_worker_path_blockers": [],
+          "residual_jvp_worker_path_ready": true,
           "status": "blocked",
           "worker_id": "consistent_residual_jacobian_newton_rocm_worker"
         },
@@ -2153,21 +2144,14 @@
           "consistent_residual_jacobian::state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency",
           "hip_direct_probe::consistent_jacobian_or_globalization_required",
           "hip_direct_probe::direct_residual_gate_not_closed",
-          "hip_direct_probe::g1_fallback_zero_audit_not_closed",
-          "hip_direct_probe::hip_residual_engine::matrix_free_global_krylov::accepted_state_tangent_refresh_not_hip",
-          "hip_direct_probe::hip_residual_engine_contract_not_closed",
           "hip_direct_probe::regularized_fixed_point_residual_must_not_be_used_as_physical_residual",
           "hip_direct_probe_consistent_residual_jacobian_not_closed",
-          "hip_direct_probe_fallback_zero_not_closed",
-          "hip_direct_probe_hip_residual_engine_contract_not_closed",
-          "hip_residual_engine::matrix_free_global_krylov::accepted_state_tangent_refresh_not_hip",
-          "production_rocm_hip_residual_jvp_worker::consistent_residual_jacobian_newton_gate_not_passed",
-          "production_rocm_hip_residual_jvp_worker::global_krylov_accepted_state_tangent_refresh_hip_not_proven"
+          "production_rocm_hip_residual_jvp_worker::consistent_residual_jacobian_newton_gate_not_passed"
         ],
         "reused_evidence": false,
         "rocm_hip_required": true,
         "runtime_blockers": [],
-        "source_commit_sha": "34d27a0a8a623619f0dc5ba8258203de4bb9d7a6",
+        "source_commit_sha": "c7f10c2f1f1e465b7b83d3c0dfb2a24c6a263c7a",
         "source_state_fresh": true,
         "source_state_kind": "exact",
         "status": "partial"
@@ -2181,7 +2165,7 @@
       "full_load_hip_newton_lane_reused_evidence": false,
       "full_load_hip_newton_lane_status": "blocked",
       "full_mesh_full_load_ready": false,
-      "suppressed_detail_blocker_count": 19,
+      "suppressed_detail_blocker_count": 17,
       "suppressed_detail_blockers": [
         "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven",
         "g1_full_load_lane::child_current_tangent_residual_row_component_missing",
@@ -2196,9 +2180,7 @@
         "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready",
         "g1_full_load_lane::hip_consistency_proof_gate_not_passed",
         "g1_full_load_lane::hip_consistency_proof_has_blockers",
-        "g1_full_load_lane::hip_consistency_proof_residual_jvp_worker_path_not_ready",
         "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
-        "g1_full_load_lane::hip_consistency_proof_worker::global_krylov_accepted_state_tangent_refresh_hip_not_proven",
         "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready",
         "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready",
         "g1_full_mesh_full_load_not_closed"
@@ -2741,14 +2723,14 @@
       "cleanup_plan_status": "ready",
       "cleanup_plan_track_or_add_required_path_count": 0,
       "codex_commit_or_push_performed": false,
-      "dirty_path_count": 22,
+      "dirty_path_count": 15,
       "human_git_action_required": false,
       "human_handoff_next_action": "rerun_git_clean_clone_reproduction",
       "human_handoff_push_or_release_command_included": false,
       "human_handoff_status": "ready",
       "human_handoff_suggested_command_count": 3,
       "local_worktree_dirty": true,
-      "non_receipt_dirty_path_count": 22,
+      "non_receipt_dirty_path_count": 15,
       "remote_github_sync_blocker_count": 5,
       "remote_github_sync_blockers": [
         "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
@@ -3112,7 +3094,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-04T10:09:09.868771+00:00",
+  "generated_at": "2026-07-04T11:19:31.679014+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
@@ -3128,7 +3110,7 @@
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:36dffe2b727f7a9a3ebc4813ca26f7f5c3055f56eb10e07f4c525c4a91349c3f",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:f4439e243cf0374399a41242517a78a4e750d121fed4141d28a414f89291d87c",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:92ca6c7d4e23dd89132e0fe834fbe16ca753e17ae860786ff5ad7bed97a27aad",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:2615431e5b53cc82cea0d1499a99c97a8575c8e8c6bda2e026eb3a21af09703e",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:2a1b147fe9208dbe9441fe78b97749bebe7888c6a69e1d8db9ee67cd0fa2e4d2",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:1323287d9e1036bcd4295ed14407b6636de307cf4df55756213164a4706cab52",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:e776e30590f9792e0999730c4df8f3a859bf32da344158e96744882da70bc74c",
     "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:a55d57e87a73bfc49ef749ca88c36ec29be64b62780c465d340ff9960d7473ae",
@@ -3484,7 +3466,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "34d27a0a8a623619f0dc5ba8258203de4bb9d7a6",
+  "source_commit_sha": "c7f10c2f1f1e465b7b83d3c0dfb2a24c6a263c7a",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3582,6 +3564,11 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py"
         ],
@@ -3597,7 +3584,12 @@
       {
         "artifact": "gap_closure_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -3616,7 +3608,12 @@
       {
         "artifact": "commercial_gap_ledger_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -3637,7 +3634,12 @@
       {
         "artifact": "gap_ledger_evidence_audit",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -3658,7 +3660,12 @@
       {
         "artifact": "phase1_core_api_contract",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -3679,7 +3686,12 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -3700,7 +3712,12 @@
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "src/structural_analysis/assembly/g1_contract.py",
@@ -3718,7 +3735,12 @@
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -3739,7 +3761,12 @@
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -3760,19 +3787,24 @@
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-04T10:08:53.254743+00:00",
+        "generated_at": "2026-07-04T11:19:11.497995+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "34d27a0a8a623619f0dc5ba8258203de4bb9d7a6",
+        "source_commit_sha": "c7f10c2f1f1e465b7b83d3c0dfb2a24c6a263c7a",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "g1_f2g_f2h_cause_narrowing_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -3793,7 +3825,12 @@
       {
         "artifact": "customer_shadow_evidence_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -3814,7 +3851,12 @@
       {
         "artifact": "workstation_delivery_readiness",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -3835,7 +3877,12 @@
       {
         "artifact": "independent_product_readiness",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -3856,6 +3903,11 @@
       {
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py"
         ],
@@ -3871,7 +3923,12 @@
       {
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -3892,7 +3949,12 @@
       {
         "artifact": "license_status_closure_report",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -3913,7 +3975,12 @@
       {
         "artifact": "paid_pilot_scope_guard_report",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -3934,7 +4001,12 @@
       {
         "artifact": "external_benchmark_submission_readiness",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -3955,7 +4027,12 @@
       {
         "artifact": "external_benchmark_submission_updates",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -3976,7 +4053,12 @@
       {
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -3997,7 +4079,12 @@
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -4018,7 +4105,12 @@
       {
         "artifact": "structural_scope_owner_decision_application_plan",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -4039,7 +4131,12 @@
       {
         "artifact": "structural_scope_release_surface_owner_handoff_check",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -4061,7 +4158,12 @@
       {
         "artifact": "developer_preview_final_gate_owner_packet",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+          "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
+          "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
+          "implementation/phase1/run_g1_true_newton_reference_candidate.py",
           "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
           "scripts/build_g1_true_newton_load_sweep_status.py",
           "scripts/build_public_benchmark_phase2_source_acquisition_plan.py",
           "scripts/build_public_benchmark_source_access_preflight_receipt.py",
@@ -4102,8 +4204,6 @@
     "worktree": {
       "dirty": true,
       "dirty_paths": [
-        "README.md",
-        "docs/commercialization-gap-current-state.md",
         "implementation/phase1/open_data/korea/korean_source_catalog.json",
         "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt_real_section_lateral_pushover_test.json",
         "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.model_derived_test.json",
@@ -4130,6 +4230,9 @@
         "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
         "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.md",
         "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
+        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json",
+        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.md",
         "implementation/phase1/release_evidence/productization/gap_closure_status.json",
         "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
         "implementation/phase1/release_evidence/productization/kds_clause_member_extraction_receipt.json",
@@ -4144,31 +4247,20 @@
         "implementation/phase1/release_evidence/productization/optimization_productization_audit.json",
         "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.md",
         "implementation/phase1/release_evidence/productization/rh_signed_closure_packets_test/RH-001.signed_closure.json",
         "implementation/phase1/release_evidence/productization/rh_signed_closure_packets_test/RH-002.signed_closure.json",
         "implementation/phase1/release_evidence/productization/rh_signed_closure_packets_test/RH-003.signed_closure.json",
         "implementation/phase1/release_evidence/productization/rh_signed_closure_packets_test/rh_updates_test.json",
         "implementation/phase1/release_evidence/productization/solver_governance_support_contract.json",
         "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
-        "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
-        "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
         "implementation/phase1/run_g1_true_newton_reference_candidate.py",
-        "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        "scripts/build_structural_product_development_roadmap.py",
-        "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        "tests/test_build_structural_product_development_roadmap.py",
-        "tests/test_g1_regularized_reference_newton_candidate.py",
-        "tests/test_g1_true_newton_reference_candidate.py",
-        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
-        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_1step.local.md",
-        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_1step.local.npz",
-        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_24step.local.md",
-        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_24step.local.npz",
-        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json",
-        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.md",
+        "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
         "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
-        "tests/test_build_g1_true_newton_full_load_checkpoint_candidate_status.py"
+        "tests/test_build_g1_true_newton_full_load_checkpoint_candidate_status.py",
+        "tests/test_g1_true_newton_reference_candidate.py",
+        "tests/test_mgt_residual_jacobian_consistency_probe.py"
       ],
       "non_receipt_dirty_paths": [
         "implementation/phase1/open_data/korea/korean_source_catalog.json",
@@ -4179,20 +4271,13 @@
         "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result_test.json",
         "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
         "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.parse_report.json",
-        "implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
-        "implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
-        "implementation/phase1/run_g1_true_newton_reference_candidate.py",
-        "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        "scripts/build_structural_product_development_roadmap.py",
-        "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        "tests/test_build_structural_product_development_roadmap.py",
-        "tests/test_g1_regularized_reference_newton_candidate.py",
-        "tests/test_g1_true_newton_reference_candidate.py",
         "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
-        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_1step.local.npz",
-        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_24step.local.npz",
+        "implementation/phase1/run_g1_true_newton_reference_candidate.py",
+        "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
         "scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
-        "tests/test_build_g1_true_newton_full_load_checkpoint_candidate_status.py"
+        "tests/test_build_g1_true_newton_full_load_checkpoint_candidate_status.py",
+        "tests/test_g1_true_newton_reference_candidate.py",
+        "tests/test_mgt_residual_jacobian_consistency_probe.py"
       ],
       "phase3_release_control_cleanup_plan": {
         "candidate_release_control_commit_set_count": 0,
@@ -4216,8 +4301,6 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M README.md",
-        " M docs/commercialization-gap-current-state.md",
         " M implementation/phase1/open_data/korea/korean_source_catalog.json",
         " M implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt_real_section_lateral_pushover_test.json",
         " M implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.model_derived_test.json",
@@ -4244,6 +4327,9 @@
         " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
         " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.md",
         " M implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
+        " M implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+        " M implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json",
+        " M implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.md",
         " M implementation/phase1/release_evidence/productization/gap_closure_status.json",
         " M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
         " M implementation/phase1/release_evidence/productization/kds_clause_member_extraction_receipt.json",
@@ -4258,31 +4344,20 @@
         " M implementation/phase1/release_evidence/productization/optimization_productization_audit.json",
         " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         " M implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
+        " M implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.json",
+        " M implementation/phase1/release_evidence/productization/public_benchmark_phase2_source_acquisition_plan.md",
         " M implementation/phase1/release_evidence/productization/rh_signed_closure_packets_test/RH-001.signed_closure.json",
         " M implementation/phase1/release_evidence/productization/rh_signed_closure_packets_test/RH-002.signed_closure.json",
         " M implementation/phase1/release_evidence/productization/rh_signed_closure_packets_test/RH-003.signed_closure.json",
         " M implementation/phase1/release_evidence/productization/rh_signed_closure_packets_test/rh_updates_test.json",
         " M implementation/phase1/release_evidence/productization/solver_governance_support_contract.json",
         " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
-        " M implementation/phase1/run_g1_mgt_physical_line_search_smoke.py",
-        " M implementation/phase1/run_g1_regularized_reference_newton_candidate.py",
         " M implementation/phase1/run_g1_true_newton_reference_candidate.py",
-        " M scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        " M scripts/build_structural_product_development_roadmap.py",
-        " M tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        " M tests/test_build_structural_product_development_roadmap.py",
-        " M tests/test_g1_regularized_reference_newton_candidate.py",
+        " M implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
+        " M scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
+        " M tests/test_build_g1_true_newton_full_load_checkpoint_candidate_status.py",
         " M tests/test_g1_true_newton_reference_candidate.py",
-        "?? implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
-        "?? implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_1step.local.md",
-        "?? implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_1step.local.npz",
-        "?? implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_24step.local.md",
-        "?? implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_24step.local.npz",
-        "?? implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json",
-        "?? implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.md",
-        "?? scripts/build_g1_true_newton_full_load_checkpoint_candidate_status.py",
-        "?? tests/test_build_g1_true_newton_full_load_checkpoint_candidate_status.py"
+        " M tests/test_mgt_residual_jacobian_consistency_probe.py"
       ]
     }
   },

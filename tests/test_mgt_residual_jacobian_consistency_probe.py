@@ -29,6 +29,45 @@ from run_mgt_residual_jacobian_consistency_probe import (  # noqa: E402
 from run_mgt_full_frame_6dof_sparse_equilibrium import FrameElement  # noqa: E402
 
 
+def test_hip_required_direct_probe_kwargs_broaden_row_fd_refresh_lane(
+    tmp_path: Path,
+) -> None:
+    kwargs = probe_module._hip_required_direct_probe_kwargs(
+        mgt_path=tmp_path / "model.mgt",
+        checkpoint_npz=tmp_path / "checkpoint.npz",
+        shell_pressure_load_path_policy="all_components",
+    )
+
+    assert kwargs["enable_matrix_free_global_krylov"] is True
+    assert kwargs["matrix_free_global_krylov_max_iterations"] == 1
+    assert kwargs["matrix_free_global_krylov_batch_replay_backend"] == (
+        "hip_full_residual_resident"
+    )
+    assert kwargs["matrix_free_global_krylov_linear_solver_backend"] == (
+        "torch_hip_gmres"
+    )
+    assert kwargs["enable_current_tangent_residual_row_correction"] is True
+    assert kwargs["max_current_tangent_residual_row_corrections"] == 1
+    assert kwargs["current_tangent_residual_row_target_counts"] == (2,)
+    assert kwargs["current_tangent_residual_row_support_column_counts"] == (4,)
+    assert kwargs["current_tangent_residual_row_support_selection"] == "target_rows"
+    assert kwargs["current_tangent_residual_row_jacobian_mode"] == (
+        "finite_difference"
+    )
+    assert kwargs["current_tangent_residual_row_fd_max_support_columns"] == 4
+    assert kwargs["current_tangent_residual_row_batch_fd_replay"] is True
+    assert kwargs["current_tangent_residual_row_batch_replay_backend"] == (
+        "hip_full_residual"
+    )
+    assert kwargs["current_tangent_residual_row_require_hip_batch_replay"] is True
+    assert kwargs["current_tangent_residual_row_allow_negative_alphas"] is True
+    assert kwargs["current_tangent_residual_row_alpha_values"] == (
+        0.125,
+        0.0625,
+        0.03125,
+    )
+
+
 def test_evaluate_residual_jacobian_direction_matches_linear_residual() -> None:
     stiffness = coo_matrix(
         ([4.0, 2.0], ([0, 1], [0, 1])),

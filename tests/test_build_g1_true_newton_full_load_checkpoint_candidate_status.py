@@ -32,6 +32,15 @@ def _fake_candidate(**kwargs: object) -> dict:
         "reason_code": "max_steps",
         "uses_real_mgt_model": True,
         "load_scale": kwargs.get("load_scale", 1.0),
+        "initial_state": {
+            "source": "checkpoint" if kwargs.get("initial_checkpoint_npz") else "zero_reference_state",
+            "checkpoint": (
+                {"path": str(kwargs["initial_checkpoint_npz"]), "accepted_iteration_count": 36}
+                if kwargs.get("initial_checkpoint_npz")
+                else None
+            ),
+            "initial_iteration_count": 36 if kwargs.get("initial_checkpoint_npz") else 0,
+        },
         "true_newton_candidate": {
             "steps": kwargs.get("max_newton_steps", 12),
             "initial_residual_n": 22323.093943383923,
@@ -105,3 +114,23 @@ def test_full_load_checkpoint_candidate_status_writes_json_and_markdown(
     assert "# G1 True-Newton Full-Load Checkpoint Candidate Status" in markdown
     assert "464.56223807569995" in markdown
     assert "full_load_true_newton_checkpoint_residual_gate_not_passed" in markdown
+
+
+def test_full_load_checkpoint_candidate_status_records_initial_checkpoint(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(module, "run_g1_true_newton_reference_candidate", _fake_candidate)
+    initial = tmp_path / "initial.npz"
+    initial.write_bytes(b"fixture")
+
+    payload = module.build_g1_true_newton_full_load_checkpoint_candidate_status(
+        repo_root=REPO_ROOT,
+        checkpoint_npz=tmp_path / "candidate.npz",
+        initial_checkpoint_npz=initial,
+        max_newton_steps=12,
+    )
+
+    assert payload["initial_checkpoint_npz"].endswith("initial.npz")
+    assert payload["initial_state"]["source"] == "checkpoint"
+    assert payload["initial_state"]["initial_iteration_count"] == 36

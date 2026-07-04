@@ -196,6 +196,57 @@ def test_true_newton_checkpoint_writer_is_loadable_and_non_promoting(tmp_path):
         assert bool(np.asarray(archive["promotes_g1_closure"]).item()) is False
 
 
+def test_initial_checkpoint_state_loader_validates_and_extracts_free_state(tmp_path):
+    drv = _load("run_g1_true_newton_reference_candidate")
+    path = tmp_path / "initial.npz"
+    displacement = np.asarray([0.0, 0.1, 0.2, 0.3, 0.4, 0.5], dtype=np.float64)
+    np.savez_compressed(
+        path,
+        checkpoint_schema=np.asarray(drv.CHECKPOINT_SCHEMA),
+        load_scale=np.asarray(1.0, dtype=np.float64),
+        displacement_u=displacement,
+        direct_residual_inf_n=np.asarray(12.5, dtype=np.float64),
+        accepted_iteration_count=np.asarray(36, dtype=np.int64),
+    )
+
+    free_state, meta = drv._load_initial_checkpoint_state(
+        path=path,
+        free=np.asarray([1, 4], dtype=np.int64),
+        dof_count=6,
+        load_scale=1.0,
+    )
+
+    np.testing.assert_allclose(free_state, [0.1, 0.4])
+    assert meta["schema"] == drv.CHECKPOINT_SCHEMA
+    assert meta["content_sha256"].startswith("sha256:")
+    assert meta["accepted_iteration_count"] == 36
+    assert meta["direct_residual_inf_n"] == 12.5
+
+
+def test_initial_checkpoint_state_loader_rejects_load_scale_mismatch(tmp_path):
+    drv = _load("run_g1_true_newton_reference_candidate")
+    path = tmp_path / "initial.npz"
+    np.savez_compressed(
+        path,
+        checkpoint_schema=np.asarray(drv.CHECKPOINT_SCHEMA),
+        load_scale=np.asarray(0.75, dtype=np.float64),
+        displacement_u=np.zeros(6, dtype=np.float64),
+        accepted_iteration_count=np.asarray(1, dtype=np.int64),
+    )
+
+    try:
+        drv._load_initial_checkpoint_state(
+            path=path,
+            free=np.asarray([0], dtype=np.int64),
+            dof_count=6,
+            load_scale=1.0,
+        )
+    except ValueError as exc:
+        assert "load_scale" in str(exc)
+    else:
+        raise AssertionError("expected load_scale mismatch to raise")
+
+
 def test_candidate_defaults():
     drv = _load("run_g1_true_newton_reference_candidate")
     sig = inspect.signature(drv.run_g1_true_newton_reference_candidate)
@@ -204,6 +255,7 @@ def test_candidate_defaults():
     assert sig.parameters["frame_service_tangent_source"].default == "real_per_element"
     assert sig.parameters["max_newton_steps"].default == 12
     assert sig.parameters["load_scale"].default == 0.1
+    assert sig.parameters["initial_checkpoint_npz"].default is None
     assert sig.parameters["output_final_checkpoint_npz"].default is None
 
 

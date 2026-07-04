@@ -145,17 +145,24 @@ def _hip_required_direct_probe_kwargs(
         "matrix_free_global_krylov_linear_solver_backend": "torch_hip_gmres",
         "matrix_free_global_krylov_full_assembly_trial_replay": False,
         "enable_current_tangent_residual_row_correction": True,
-        "max_current_tangent_residual_row_corrections": 2,
-        "current_tangent_residual_row_target_counts": (1,),
-        "current_tangent_residual_row_support_column_counts": (1,),
+        "max_current_tangent_residual_row_corrections": 1,
+        "current_tangent_residual_row_target_counts": (2,),
+        "current_tangent_residual_row_support_column_counts": (4,),
         "current_tangent_residual_row_support_selection": "target_rows",
         "current_tangent_residual_row_jacobian_mode": "finite_difference",
+        "current_tangent_residual_row_fd_max_support_columns": 4,
         "current_tangent_residual_row_use_residual_only_assembly": True,
         "current_tangent_residual_row_per_state_batch_replay": True,
         "current_tangent_residual_row_batch_alpha_replay": True,
         "current_tangent_residual_row_batch_fd_replay": True,
         "current_tangent_residual_row_batch_replay_backend": "hip_full_residual",
         "current_tangent_residual_row_require_hip_batch_replay": True,
+        "current_tangent_residual_row_allow_negative_alphas": True,
+        "current_tangent_residual_row_alpha_values": (
+            0.125,
+            0.0625,
+            0.03125,
+        ),
     }
 
 
