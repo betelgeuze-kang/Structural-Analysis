@@ -250,6 +250,21 @@ def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _as_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
+def _as_int(value: Any) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
 def _source_acquisition_blockers(
     phase2_row_audit_summary: dict[str, Any],
     vina_gnina_execution_plan_summary: dict[str, Any],
@@ -1320,6 +1335,94 @@ def _row_input_contract_map(
     }
 
 
+def _vina_gnina_runtime_action_packet(
+    vina_gnina_runtime_readiness_summary: dict[str, Any],
+) -> dict[str, Any]:
+    unblock = _as_dict(
+        vina_gnina_runtime_readiness_summary.get("operator_unblock_packet")
+    )
+    commands = _as_dict(unblock.get("commands"))
+    if not vina_gnina_runtime_readiness_summary and not unblock:
+        return {}
+    return {
+        "artifact": str(
+            vina_gnina_runtime_readiness_summary.get("artifact") or ""
+        ),
+        "status": str(
+            unblock.get("status")
+            or vina_gnina_runtime_readiness_summary.get("status")
+            or ""
+        ),
+        "runtime_ready_for_engine_execution": bool(
+            vina_gnina_runtime_readiness_summary.get(
+                "runtime_ready_for_engine_execution"
+            )
+        ),
+        "operator_execution_ready": bool(
+            vina_gnina_runtime_readiness_summary.get("operator_execution_ready")
+        ),
+        "adapter_rows_ready": bool(
+            vina_gnina_runtime_readiness_summary.get("adapter_rows_ready")
+        ),
+        "case_input_slot_count": _as_int(
+            unblock.get("case_input_slot_count")
+            or vina_gnina_runtime_readiness_summary.get(
+                "case_input_slot_matrix_count"
+            )
+        ),
+        "blocked_case_input_slot_count": _as_int(
+            unblock.get("blocked_case_input_slot_count")
+            or vina_gnina_runtime_readiness_summary.get(
+                "blocked_case_input_slot_count"
+            )
+        ),
+        "required_engine_run_count": _as_int(
+            unblock.get("required_engine_run_count")
+            or vina_gnina_runtime_readiness_summary.get(
+                "required_engine_run_count"
+            )
+        ),
+        "ready_engine_run_slot_count": _as_int(
+            unblock.get("ready_engine_run_slot_count")
+            or vina_gnina_runtime_readiness_summary.get(
+                "ready_engine_run_slot_count"
+            )
+        ),
+        "blocked_engine_run_slot_count": _as_int(
+            unblock.get("blocked_engine_run_slot_count")
+            or vina_gnina_runtime_readiness_summary.get(
+                "blocked_engine_run_slot_count"
+            )
+        ),
+        "expected_rows_artifact": str(
+            unblock.get("expected_rows_artifact") or DEFAULT_VINA_GNINA_ROWS
+        ),
+        "input_manifest_template_artifact": str(
+            unblock.get("input_manifest_template_artifact")
+            or DEFAULT_VINA_GNINA_INPUT_MANIFEST_TEMPLATE
+        ),
+        "input_manifest_template_preflight_artifact": str(
+            unblock.get("input_manifest_template_preflight_artifact") or ""
+        ),
+        "rows_template_artifact": str(
+            unblock.get("rows_template_artifact")
+            or DEFAULT_VINA_GNINA_ROWS_TEMPLATE
+        ),
+        "rows_template_preflight_artifact": str(
+            unblock.get("rows_template_preflight_artifact") or ""
+        ),
+        "operator_sequence": [
+            str(row) for row in _as_list(unblock.get("operator_sequence")) if str(row)
+        ],
+        "commands": commands,
+        "claim_boundary": (
+            "This packet mirrors the Vina/GNINA runtime unblock path for the "
+            "missing source-acquisition action. It does not run engines or "
+            "synthesize comparison rows."
+        ),
+    }
+
+
 def _missing_row_input_actions(
     *,
     missing_row_inputs: list[str],
@@ -1389,6 +1492,9 @@ def _missing_row_input_actions(
                 {
                     "engine_input_manifest_template": str(
                         contract.get("engine_input_manifest_template") or ""
+                    ),
+                    "runtime_action_packet": _vina_gnina_runtime_action_packet(
+                        vina_gnina_runtime_readiness_summary
                     ),
                     "engine_input_manifest_expected_path": str(
                         DEFAULT_VINA_GNINA_INPUT_MANIFEST
@@ -2038,6 +2144,37 @@ def render_public_benchmark_phase2_source_acquisition_markdown(
                 f"`{row.get('materialization_command', '')}` | "
                 f"`{row.get('direct_adapter_materialization_command', '')}` |"
             )
+        runtime_actions = [
+            row.get("runtime_action_packet")
+            for row in missing_actions
+            if isinstance(row.get("runtime_action_packet"), dict)
+        ]
+        if runtime_actions:
+            lines.extend(["", "### Vina/GNINA Runtime Action Packet", ""])
+            for action in runtime_actions:
+                if not isinstance(action, dict):
+                    continue
+                commands = action.get("commands")
+                if not isinstance(commands, dict):
+                    commands = {}
+                operator_sequence = ", ".join(
+                    f"`{step}`"
+                    for step in action.get("operator_sequence", [])
+                    if str(step)
+                )
+                lines.extend(
+                    [
+                        f"- `status`: `{action.get('status')}`",
+                        f"- `expected_rows_artifact`: `{action.get('expected_rows_artifact')}`",
+                        f"- `input_manifest_template_preflight_artifact`: `{action.get('input_manifest_template_preflight_artifact')}`",
+                        f"- `rows_template_preflight_artifact`: `{action.get('rows_template_preflight_artifact')}`",
+                        f"- `first_operator_sequence_step`: `{(action.get('operator_sequence') or [''])[0]}`",
+                        f"- `operator_sequence`: {operator_sequence or '`none`'}",
+                        f"- `build_input_manifest_template_preflight_command`: `{commands.get('build_input_manifest_template_preflight', '')}`",
+                        f"- `build_rows_template_preflight_command`: `{commands.get('build_rows_template_preflight', '')}`",
+                        f"- `materialize_adapter_command`: `{commands.get('materialize_adapter', '')}`",
+                    ]
+                )
         manifest_actions = [
             row.get("engine_input_manifest_action_packet")
             for row in missing_actions

@@ -554,6 +554,25 @@ def test_public_benchmark_phase2_source_plan_exposes_required_row_contracts() ->
     assert missing_action["engine_input_manifest_current_blockers"] == [
         "public_benchmark_vina_gnina_input_manifest_not_detected"
     ]
+    runtime_action = missing_action["runtime_action_packet"]
+    assert runtime_action["status"] == "engine_inputs_required"
+    assert runtime_action["expected_rows_artifact"].endswith(
+        "public_benchmark_vina_gnina_rows.json"
+    )
+    assert runtime_action["input_manifest_template_preflight_artifact"].endswith(
+        "public_benchmark_vina_gnina_input_manifest_template_preflight.json"
+    )
+    assert runtime_action["rows_template_preflight_artifact"].endswith(
+        "public_benchmark_vina_gnina_rows_template_preflight.json"
+    )
+    assert runtime_action["operator_sequence"][0] == (
+        "review_public_benchmark_vina_gnina_input_manifest_template_preflight"
+    )
+    assert runtime_action["case_input_slot_count"] == 12
+    assert runtime_action["blocked_engine_run_slot_count"] == 24
+    assert runtime_action["commands"]["build_rows_template_preflight"].startswith(
+        "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py"
+    )
     manifest_action = missing_action["engine_input_manifest_action_packet"]
     assert manifest_action["template_artifact"].endswith(
         "public_benchmark_vina_gnina_input_manifest_template.csv"
@@ -709,6 +728,11 @@ def test_public_benchmark_phase2_source_plan_cli_writes_markdown(
     assert "`vina_gnina_comparison_ready`" in markdown
     assert "materialize_public_benchmark_vina_gnina_comparison_adapter.py" in markdown
     assert "<operator-vina-gnina-run-rows.csv|json|jsonl|ndjson>" in markdown
+    assert "### Vina/GNINA Runtime Action Packet" in markdown
+    assert "review_public_benchmark_vina_gnina_input_manifest_template_preflight" in (
+        markdown
+    )
+    assert "`first_operator_sequence_step`: `review_public_benchmark_vina_gnina_input_manifest_template_preflight`" in markdown
     assert "### Vina/GNINA Adapter Row Preflight Action" in markdown
     assert "public_benchmark_vina_gnina_rows_template_preflight.json" in markdown
     assert "build_public_benchmark_vina_gnina_rows_template_preflight.py" in markdown

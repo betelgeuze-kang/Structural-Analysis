@@ -24,14 +24,14 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T02:28:50.046703+00:00",
+  "generated_at": "2026-07-04T02:55:35.258450+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json": "sha256:3f53708e67d1dd76f5f313307ce46a2971b748ef1938925bc44318b40e52709d",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json": "sha256:d91bbc8402c86796ce3d60d0a053610cceea2dcbbb0f5faf00adeaad7698bea4",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv": "sha256:3a106d2aa9f456eee7238523bf090db13e35d98afefa3952352a660f5b5e36ae",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json": "sha256:6bec6de5e48420d37dd84ee2f8b59b890113bf094c742fe6cdb93831d2eb14f5",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:a062ca10c1b4edeb84810fb3e773212d0a378da71f8aa0a2ff3780fea839e0cf",
-    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:99b3779f09d4a91ad3e1f52815312aa4d5a465a62d96a8a996699635b761f42c",
+    "scripts/build_public_benchmark_phase2_source_acquisition_plan.py": "sha256:ef63bd5f4e7adb30152fc29ea1cb10ed2ea8c1bbf2a175a4d65b29d6d923ae4c",
     "scripts/build_public_benchmark_source_access_preflight_receipt.py": "sha256:47b23a61ea7eb470f8ab4b48337b4382ad3523a646b81c8bdddedf3451d1c2d1",
     "scripts/build_public_benchmark_vina_gnina_execution_plan.py": "sha256:4b3d5a16af6cc8559cf581cf4a38339c62872cd5ed45f07e3fb1872349f4a8f1",
     "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py": "sha256:76416a1ee29b947fd510fc0f22f38031eeb335e1ad4a18a2c6144b42cfa50453",
@@ -214,6 +214,41 @@
         "gnina"
       ],
       "row_input_id": "vina_gnina_rows",
+      "runtime_action_packet": {
+        "adapter_rows_ready": false,
+        "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
+        "blocked_case_input_slot_count": 12,
+        "blocked_engine_run_slot_count": 24,
+        "case_input_slot_count": 12,
+        "claim_boundary": "This packet mirrors the Vina/GNINA runtime unblock path for the missing source-acquisition action. It does not run engines or synthesize comparison rows.",
+        "commands": {
+          "build_input_manifest_template_preflight": "python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+          "build_rows_template_preflight": "python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md",
+          "materialize_adapter": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+          "rerun_execution_plan": "python3 scripts/build_public_benchmark_vina_gnina_execution_plan.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+          "rerun_runtime_readiness": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json"
+        },
+        "expected_rows_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "input_manifest_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+        "input_manifest_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json",
+        "operator_execution_ready": false,
+        "operator_sequence": [
+          "review_public_benchmark_vina_gnina_input_manifest_template_preflight",
+          "fill_public_benchmark_vina_gnina_input_manifest_from_template",
+          "rerun_public_benchmark_vina_gnina_execution_plan",
+          "configure_vina_gnina_binary_or_container_runtime",
+          "rerun_public_benchmark_vina_gnina_runtime_readiness",
+          "review_public_benchmark_vina_gnina_rows_template_preflight",
+          "attach_public_benchmark_vina_gnina_rows",
+          "materialize_public_benchmark_vina_gnina_comparison_adapter"
+        ],
+        "ready_engine_run_slot_count": 0,
+        "required_engine_run_count": 24,
+        "rows_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+        "rows_template_preflight_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
+        "runtime_ready_for_engine_execution": false,
+        "status": "engine_inputs_required"
+      },
       "runtime_readiness_command": "python3 scripts/build_public_benchmark_vina_gnina_runtime_readiness.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
       "source_checksum_policy": {
         "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
@@ -1423,7 +1458,7 @@
     }
   ],
   "schema_version": "public-benchmark-phase2-source-acquisition-plan.v1",
-  "source_commit_sha": "a75428f1c24179517d16ee7ed360069d733d8820",
+  "source_commit_sha": "e89ac04707d515f991eeb421ff64212f7da47e7d",
   "status": "operator_acquisition_required",
   "summary": {
     "actual_closure_ready": false,

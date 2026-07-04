@@ -65,6 +65,18 @@
 |---|---|---|---|---|---|
 | `vina_gnina_rows` | `attach_vina_gnina_rows_then_run_phase2_row_audit` | `vina_gnina_comparison_ready` | `vina_gnina_comparison_adapter` | `python3 scripts/materialize_public_benchmark_phase2_from_rows.py --fail-blocked` | `python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-run-rows.csv|json|jsonl|ndjson> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked` |
 
+### Vina/GNINA Runtime Action Packet
+
+- `status`: `engine_inputs_required`
+- `expected_rows_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json`
+- `input_manifest_template_preflight_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json`
+- `rows_template_preflight_artifact`: `implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json`
+- `first_operator_sequence_step`: `review_public_benchmark_vina_gnina_input_manifest_template_preflight`
+- `operator_sequence`: `review_public_benchmark_vina_gnina_input_manifest_template_preflight`, `fill_public_benchmark_vina_gnina_input_manifest_from_template`, `rerun_public_benchmark_vina_gnina_execution_plan`, `configure_vina_gnina_binary_or_container_runtime`, `rerun_public_benchmark_vina_gnina_runtime_readiness`, `review_public_benchmark_vina_gnina_rows_template_preflight`, `attach_public_benchmark_vina_gnina_rows`, `materialize_public_benchmark_vina_gnina_comparison_adapter`
+- `build_input_manifest_template_preflight_command`: `python3 scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md`
+- `build_rows_template_preflight_command`: `python3 scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py --out implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json --out-md implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md`
+- `materialize_adapter_command`: `python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked`
+
 ### Vina/GNINA Input Manifest Action
 
 - `status`: `operator_manifest_required`
