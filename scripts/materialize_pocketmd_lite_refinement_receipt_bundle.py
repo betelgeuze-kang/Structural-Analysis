@@ -223,6 +223,80 @@ def _slot_rows(
     return rows, list(dict.fromkeys(blockers))
 
 
+def _write_receipt_template_files(
+    *,
+    repo_root: Path,
+    bundle_rows: list[dict[str, Any]],
+    overwrite: bool,
+) -> tuple[list[dict[str, Any]], list[str]]:
+    statuses: list[dict[str, Any]] = []
+    blockers: list[str] = []
+    for row in bundle_rows:
+        case_id = str(row.get("case_id") or "")
+        rank = str(row.get("top_k_rank") or "")
+        receipt_ref = str(row.get("receipt_ref") or "")
+        receipt_template = row.get("receipt_template_payload")
+        if not receipt_ref or not isinstance(receipt_template, dict):
+            blocker = f"{case_id}::rank_{rank}:receipt_template_missing"
+            blockers.append(blocker)
+            statuses.append(
+                {
+                    "case_id": case_id,
+                    "top_k_rank": row.get("top_k_rank"),
+                    "receipt_ref": receipt_ref,
+                    "status": "template_missing",
+                    "written": False,
+                    "skipped_existing": False,
+                    "blockers": [blocker],
+                }
+            )
+            continue
+        resolved = _resolve(repo_root, Path(receipt_ref))
+        if resolved.exists() and not overwrite:
+            statuses.append(
+                {
+                    "case_id": case_id,
+                    "top_k_rank": row.get("top_k_rank"),
+                    "receipt_ref": receipt_ref,
+                    "status": "skipped_existing",
+                    "written": False,
+                    "skipped_existing": True,
+                    "blockers": [],
+                }
+            )
+            continue
+        try:
+            resolved.parent.mkdir(parents=True, exist_ok=True)
+            resolved.write_text(_json_text(receipt_template), encoding="utf-8")
+        except OSError as exc:
+            blocker = f"{case_id}::rank_{rank}:{exc.__class__.__name__}"
+            blockers.append(blocker)
+            statuses.append(
+                {
+                    "case_id": case_id,
+                    "top_k_rank": row.get("top_k_rank"),
+                    "receipt_ref": receipt_ref,
+                    "status": "write_failed",
+                    "written": False,
+                    "skipped_existing": False,
+                    "blockers": [blocker],
+                }
+            )
+        else:
+            statuses.append(
+                {
+                    "case_id": case_id,
+                    "top_k_rank": row.get("top_k_rank"),
+                    "receipt_ref": receipt_ref,
+                    "status": "template_file_written",
+                    "written": True,
+                    "skipped_existing": False,
+                    "blockers": [],
+                }
+            )
+    return statuses, list(dict.fromkeys(blockers))
+
+
 def materialize_pocketmd_lite_refinement_receipt_bundle(
     *,
     repo_root: Path = ROOT,
@@ -231,6 +305,8 @@ def materialize_pocketmd_lite_refinement_receipt_bundle(
     receipt_root: Path = DEFAULT_RECEIPT_ROOT,
     rows_out: Path = DEFAULT_ROWS_OUT,
     max_top_k: int = DEFAULT_MAX_TOP_K,
+    write_template_files: bool = False,
+    overwrite_template_files: bool = False,
 ) -> dict[str, Any]:
     if max_top_k < 1:
         raise ValueError("max_top_k_must_be_positive")
@@ -242,11 +318,21 @@ def materialize_pocketmd_lite_refinement_receipt_bundle(
         max_top_k=max_top_k,
     )
     bundle_materialized = execution_plan_ready and not row_blockers
+    template_file_statuses: list[dict[str, Any]] = []
+    template_file_blockers: list[str] = []
+    if bundle_materialized and write_template_files:
+        template_file_statuses, template_file_blockers = _write_receipt_template_files(
+            repo_root=repo_root,
+            bundle_rows=bundle_rows,
+            overwrite=overwrite_template_files,
+        )
     blockers: list[str] = []
     if not execution_plan_ready:
         blockers.append("pocketmd_lite_refinement_execution_plan_not_ready")
     blockers.extend(row_blockers)
+    blockers.extend(template_file_blockers)
     blockers = list(dict.fromkeys(blockers))
+    materialization_pass = bundle_materialized and not template_file_blockers
     if bundle_materialized:
         status = "receipt_bundle_materialized"
     elif execution_plan_ready:
@@ -265,10 +351,18 @@ def materialize_pocketmd_lite_refinement_receipt_bundle(
             repo_root=repo_root,
         ),
         "status": status,
-        "contract_pass": bundle_materialized,
+        "contract_pass": materialization_pass,
         "bundle_materialized": bundle_materialized,
         "execution_plan_ready": execution_plan_ready,
         "operator_receipts_ready": False,
+        "template_files_requested": write_template_files,
+        "template_files_written": sum(
+            1 for row in template_file_statuses if row.get("written")
+        ),
+        "template_files_skipped_existing": sum(
+            1 for row in template_file_statuses if row.get("skipped_existing")
+        ),
+        "template_file_statuses": template_file_statuses,
         "refinement_plan_artifact": str(refinement_plan),
         "out_artifact": str(out),
         "receipt_root": str(receipt_root),
@@ -286,6 +380,11 @@ def materialize_pocketmd_lite_refinement_receipt_bundle(
                 "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py "
                 f"--refinement-plan {refinement_plan} --out {out} "
                 f"--receipt-root {receipt_root}"
+            ),
+            "write_receipt_template_files": (
+                "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py "
+                f"--refinement-plan {refinement_plan} --out {out} "
+                f"--receipt-root {receipt_root} --write-template-files"
             ),
             "materialize_rows_from_receipt_bundle": (
                 "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py "
@@ -318,6 +417,13 @@ def materialize_pocketmd_lite_refinement_receipt_bundle(
             "bundle_materialized": bundle_materialized,
             "required_candidate_slot_count": len(bundle_rows),
             "receipt_template_count": len(bundle_rows) if bundle_materialized else 0,
+            "template_files_requested": write_template_files,
+            "template_files_written": sum(
+                1 for row in template_file_statuses if row.get("written")
+            ),
+            "template_files_skipped_existing": sum(
+                1 for row in template_file_statuses if row.get("skipped_existing")
+            ),
             "blocker_count": len(blockers),
         },
         "claim_boundary": (
@@ -339,6 +445,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--receipt-root", type=Path, default=DEFAULT_RECEIPT_ROOT)
     parser.add_argument("--rows-out", type=Path, default=DEFAULT_ROWS_OUT)
     parser.add_argument("--max-top-k", type=int, default=DEFAULT_MAX_TOP_K)
+    parser.add_argument("--write-template-files", action="store_true")
+    parser.add_argument("--overwrite-template-files", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     parser.add_argument("--json", action="store_true")
     return parser
@@ -353,6 +461,8 @@ def main(argv: list[str] | None = None) -> int:
         receipt_root=args.receipt_root,
         rows_out=args.rows_out,
         max_top_k=args.max_top_k,
+        write_template_files=args.write_template_files,
+        overwrite_template_files=args.overwrite_template_files,
     )
     if args.json:
         print(_json_text(payload), end="")

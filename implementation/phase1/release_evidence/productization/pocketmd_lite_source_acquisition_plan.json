@@ -19,12 +19,12 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-04T08:16:45.783025+00:00",
+  "generated_at": "2026-07-04T08:22:16.068301+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv": "sha256:4fac3161714e8bf0444ee3e085a3c34d2f9841acaf9b4427bd8de2224294e196",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:dc39006a0ed93c7141d4421294cb9d47e1af8a3c6fc2fe3531aeae754de53c89",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:09354cd520764e9fb23e9a23e1eed17a38e73328687154c5d35c5411731af093",
-    "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:6b67965bb3674212325e20f0e3a1f0c1ef98ea1f3de6983c675ed98bde039e6d",
+    "scripts/build_pocketmd_lite_refinement_execution_plan.py": "sha256:950ae4ecdfc630bf6d2558548bd42c8ff962efa1e5db9ffdf7d78fb2a22aff30",
     "scripts/build_pocketmd_lite_source_acquisition_plan.py": "sha256:bdf81932a0c35f4363b7b36de8ad064b8073f4cb06b792c2c24694f5c6fc83ed",
     "scripts/build_pocketmd_lite_topk_rows_template_preflight.py": "sha256:15b5808c26ccc005162e3b693f88272ddb83cd696b1f54d0005872ce20294c55",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:dad666c08fff6ec709e535de64fdc41121b7c93de5e19c42f0876d71a44a67c9",
@@ -2757,7 +2757,7 @@
     "template_usage_policy": "The template enumerates required columns and minimum case/rank slots only. Operators must replace placeholder blanks with real top-k refinement rows and receipts before writing rows to the default output."
   },
   "schema_version": "pocketmd-lite-source-acquisition-plan.v1",
-  "source_commit_sha": "a643319775cc9434d6158f4162bf63b694cc9650",
+  "source_commit_sha": "fa32ae270001380d06a740bdbc98af4d082e6b6d",
   "source_scope": "bounded_top_k_lite_refinement_rows",
   "status": "operator_acquisition_required",
   "summary": {

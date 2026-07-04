@@ -323,6 +323,7 @@ def test_refinement_execution_plan_enumerates_candidate_slots(
     assert unblock["operator_sequence"] == [
         "preflight_pocketmd_lite_topk_rows_template",
         "materialize_pocketmd_lite_refinement_receipt_bundle",
+        "write_pocketmd_lite_refinement_receipt_template_files",
         "fill_pocketmd_lite_refinement_receipts",
         "materialize_pocketmd_lite_topk_rows_from_receipt_bundle",
         "fill_pocketmd_lite_topk_rows_from_template",
@@ -335,6 +336,9 @@ def test_refinement_execution_plan_enumerates_candidate_slots(
     assert "materialize_pocketmd_lite_refinement_receipt_bundle.py" in unblock[
         "commands"
     ]["materialize_refinement_receipt_bundle"]
+    assert "--write-template-files" in unblock["commands"][
+        "write_refinement_receipt_template_files"
+    ]
     assert "materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py" in unblock[
         "commands"
     ]["materialize_rows_from_receipt_bundle"]

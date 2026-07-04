@@ -119,6 +119,51 @@ def test_materializes_pocketmd_refinement_receipt_bundle(
     )
 
 
+def test_pocketmd_refinement_receipt_bundle_writes_template_files(
+    tmp_path: Path,
+) -> None:
+    refinement_plan = tmp_path / "refinement_plan.json"
+    out = tmp_path / "receipt_bundle.json"
+    receipt_root = Path("operator_receipts")
+    _write_plan(refinement_plan)
+
+    payload = module.materialize_pocketmd_lite_refinement_receipt_bundle(
+        repo_root=tmp_path,
+        refinement_plan=refinement_plan,
+        out=out,
+        receipt_root=receipt_root,
+        write_template_files=True,
+    )
+
+    assert payload["status"] == "receipt_bundle_materialized"
+    assert payload["contract_pass"] is True
+    assert payload["template_files_requested"] is True
+    assert payload["template_files_written"] == 6
+    assert payload["template_files_skipped_existing"] == 0
+    first_row = payload["bundle_rows"][0]
+    receipt_path = tmp_path / first_row["receipt_ref"]
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert receipt["status"] == "operator_refinement_receipt_required"
+    assert receipt["case_id"] == "case_a"
+
+    receipt_path.write_text(
+        json.dumps({"status": "operator_modified"}, sort_keys=True),
+        encoding="utf-8",
+    )
+    second_payload = module.materialize_pocketmd_lite_refinement_receipt_bundle(
+        repo_root=tmp_path,
+        refinement_plan=refinement_plan,
+        out=out,
+        receipt_root=receipt_root,
+        write_template_files=True,
+    )
+    assert second_payload["template_files_written"] == 0
+    assert second_payload["template_files_skipped_existing"] == 6
+    assert json.loads(receipt_path.read_text(encoding="utf-8"))["status"] == (
+        "operator_modified"
+    )
+
+
 def test_pocketmd_refinement_receipt_bundle_blocks_unready_plan(
     tmp_path: Path,
 ) -> None:

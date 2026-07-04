@@ -215,3 +215,38 @@ def test_pocketmd_topk_rows_from_receipt_bundle_blocks_missing_receipts(
     assert json.loads(out_report.read_text(encoding="utf-8"))["status"] == (
         "operator_receipts_completion_required"
     )
+
+
+def test_pocketmd_topk_rows_from_receipt_bundle_reports_incomplete_templates(
+    tmp_path: Path,
+) -> None:
+    refinement_plan = tmp_path / "refinement_plan.json"
+    receipt_bundle = tmp_path / "receipt_bundle.json"
+    _write_plan(refinement_plan)
+    bundle_module.materialize_pocketmd_lite_refinement_receipt_bundle(
+        repo_root=tmp_path,
+        refinement_plan=refinement_plan,
+        out=receipt_bundle,
+        receipt_root=Path("operator_receipts"),
+        rows_out=tmp_path / "pocketmd_lite_topk_rows.json",
+        write_template_files=True,
+    )
+    out_rows = tmp_path / "pocketmd_lite_topk_rows.json"
+    out_report = tmp_path / "rows_report.json"
+
+    report = rows_module.materialize_pocketmd_lite_topk_rows_from_receipt_bundle(
+        repo_root=tmp_path,
+        receipt_bundle=receipt_bundle,
+        out_rows=out_rows,
+        out_report=out_report,
+    )
+
+    blockers_text = "\n".join(report["blockers"])
+    assert report["status"] == "operator_receipts_completion_required"
+    assert report["receipt_count"] == 6
+    assert report["ready_receipt_count"] == 0
+    assert "receipt_not_complete" in blockers_text
+    assert "receipt_file_missing" not in blockers_text
+    assert "operator_input_source" not in blockers_text
+    assert "row_normalization_failed" not in blockers_text
+    assert not out_rows.exists()

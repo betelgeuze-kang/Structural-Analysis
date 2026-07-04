@@ -270,6 +270,7 @@ def _operator_unblock_packet(
         "operator_sequence": [
             "preflight_pocketmd_lite_topk_rows_template",
             "materialize_pocketmd_lite_refinement_receipt_bundle",
+            "write_pocketmd_lite_refinement_receipt_template_files",
             "fill_pocketmd_lite_refinement_receipts",
             "materialize_pocketmd_lite_topk_rows_from_receipt_bundle",
             "fill_pocketmd_lite_topk_rows_from_template",
@@ -340,6 +341,11 @@ def build_pocketmd_lite_refinement_execution_plan(
             "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py "
             f"--refinement-plan {DEFAULT_OUT} "
             f"--out {DEFAULT_RECEIPT_BUNDLE}"
+        ),
+        "write_refinement_receipt_template_files": (
+            "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py "
+            f"--refinement-plan {DEFAULT_OUT} "
+            f"--out {DEFAULT_RECEIPT_BUNDLE} --write-template-files"
         ),
         "materialize_rows_from_receipt_bundle": (
             "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py "

@@ -1,0 +1,78 @@
+{
+  "candidate_id": "pocketmd_lite_case_001_rank_01",
+  "case_id": "pocketmd_lite_case_001",
+  "claim_boundary": "This receipt template is not PocketMD Lite evidence. Complete it only with real upstream top-k provenance, bounded lite refinement metrics, interaction persistence metrics, uncertainty intervals, and source checksums for this one case/rank candidate.",
+  "clash_count_after": "",
+  "clash_count_before": "",
+  "contact_persistence_rate": "",
+  "h_bond_persistence_rate": "",
+  "local_min_survived": "",
+  "operator_input_source": {
+    "source_artifact": "",
+    "source_artifact_sha256": "",
+    "source_id": "",
+    "source_license": "",
+    "source_url": ""
+  },
+  "operator_required_fields": [
+    "case_id",
+    "source_family",
+    "top_k_rank",
+    "candidate_id",
+    "upstream_top_k_provenance_ref",
+    "upstream_top_k_source_checksum",
+    "pre_refinement_energy_proxy",
+    "post_refinement_energy_proxy",
+    "local_min_survived",
+    "contact_persistence_rate",
+    "h_bond_persistence_rate",
+    "clash_count_before",
+    "clash_count_after",
+    "uncertainty_low",
+    "uncertainty_high",
+    "uncertainty_unit",
+    "provenance_ref",
+    "source_checksum",
+    "operator_input_source.source_id",
+    "operator_input_source.source_url",
+    "operator_input_source.source_license",
+    "operator_input_source.source_artifact",
+    "operator_input_source.source_artifact_sha256"
+  ],
+  "post_refinement_energy_proxy": "",
+  "pre_refinement_energy_proxy": "",
+  "provenance_ref": "",
+  "row_value_contract": {
+    "boolean_value_policy": {
+      "local_min_survived": "must parse to a boolean value"
+    },
+    "integer_value_policy": {
+      "clash_count_after": "must parse to a non-negative integer",
+      "clash_count_before": "must parse to a non-negative integer"
+    },
+    "numeric_value_policy": {
+      "post_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+      "pre_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected"
+    },
+    "rate_value_policy": {
+      "contact_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0",
+      "h_bond_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0"
+    },
+    "row_integrity_policy": "case_id, source_family, and candidate_id must be nonblank and non-placeholder; candidate_id and top_k_rank must be unique per case.",
+    "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
+    "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
+    "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
+    "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit.",
+    "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
+  },
+  "schema_version": "pocketmd-lite-refinement-receipt-template.v1",
+  "source_checksum": "",
+  "source_family": "upstream_ranked_top_k_candidate_set",
+  "status": "operator_refinement_receipt_required",
+  "top_k_rank": 1,
+  "uncertainty_high": "",
+  "uncertainty_low": "",
+  "uncertainty_unit": "energy_proxy_delta",
+  "upstream_top_k_provenance_ref": "",
+  "upstream_top_k_source_checksum": ""
+}

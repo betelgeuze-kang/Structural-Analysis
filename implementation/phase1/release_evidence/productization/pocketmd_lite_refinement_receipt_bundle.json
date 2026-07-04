@@ -784,15 +784,16 @@
     "materialize_rows_from_template": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_template.py --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --fail-blocked",
     "materialize_survival_report": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
     "rerun_receipt_bundle": "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py --refinement-plan implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --receipt-root operator_attached/pocketmd_lite_refinement_receipts",
-    "rerun_refinement_execution_plan": "python3 scripts/build_pocketmd_lite_refinement_execution_plan.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json"
+    "rerun_refinement_execution_plan": "python3 scripts/build_pocketmd_lite_refinement_execution_plan.py --out implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json",
+    "write_receipt_template_files": "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py --refinement-plan implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --receipt-root operator_attached/pocketmd_lite_refinement_receipts --write-template-files"
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "execution_plan_ready": true,
-  "generated_at": "2026-07-04T08:16:45.703871+00:00",
+  "generated_at": "2026-07-04T08:22:15.985159+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:34cff1b0cddb8be920a59df8b36c8492406a634b4bf26cd2db023cf0ac4cd866",
-    "scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py": "sha256:1459d2fe5dd3ca0a8118b4abe87d02654294ae768ce5b39d24fea084a9a27970"
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:a6fa0328fbbdc35c1ff47f966c085b5ae0fc5e6dfa2f1aba17e647681cdc246a",
+    "scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py": "sha256:98b64ccda7f42657a1be21b7e2917948e9e11275fb86da9221b89e10a988604f"
   },
   "operator_receipts_ready": false,
   "out_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json",
@@ -804,13 +805,75 @@
   "reuse_policy": "pocketmd_lite_refinement_receipt_bundle_from_execution_plan",
   "reused_evidence": false,
   "schema_version": "pocketmd-lite-refinement-receipt-bundle.v1",
-  "source_commit_sha": "a643319775cc9434d6158f4162bf63b694cc9650",
+  "source_commit_sha": "fa32ae270001380d06a740bdbc98af4d082e6b6d",
   "status": "receipt_bundle_materialized",
   "summary": {
     "blocker_count": 0,
     "bundle_materialized": true,
     "execution_plan_ready": true,
     "receipt_template_count": 6,
-    "required_candidate_slot_count": 6
-  }
+    "required_candidate_slot_count": 6,
+    "template_files_requested": true,
+    "template_files_skipped_existing": 0,
+    "template_files_written": 6
+  },
+  "template_file_statuses": [
+    {
+      "blockers": [],
+      "case_id": "pocketmd_lite_case_001",
+      "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
+      "skipped_existing": false,
+      "status": "template_file_written",
+      "top_k_rank": 1,
+      "written": true
+    },
+    {
+      "blockers": [],
+      "case_id": "pocketmd_lite_case_001",
+      "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_02_refinement_receipt.json",
+      "skipped_existing": false,
+      "status": "template_file_written",
+      "top_k_rank": 2,
+      "written": true
+    },
+    {
+      "blockers": [],
+      "case_id": "pocketmd_lite_case_002",
+      "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_002/rank_01_refinement_receipt.json",
+      "skipped_existing": false,
+      "status": "template_file_written",
+      "top_k_rank": 1,
+      "written": true
+    },
+    {
+      "blockers": [],
+      "case_id": "pocketmd_lite_case_002",
+      "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_002/rank_02_refinement_receipt.json",
+      "skipped_existing": false,
+      "status": "template_file_written",
+      "top_k_rank": 2,
+      "written": true
+    },
+    {
+      "blockers": [],
+      "case_id": "pocketmd_lite_case_003",
+      "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_003/rank_01_refinement_receipt.json",
+      "skipped_existing": false,
+      "status": "template_file_written",
+      "top_k_rank": 1,
+      "written": true
+    },
+    {
+      "blockers": [],
+      "case_id": "pocketmd_lite_case_003",
+      "receipt_ref": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_003/rank_02_refinement_receipt.json",
+      "skipped_existing": false,
+      "status": "template_file_written",
+      "top_k_rank": 2,
+      "written": true
+    }
+  ],
+  "template_files_requested": true,
+  "template_files_skipped_existing": 0,
+  "template_files_written": 6
 }

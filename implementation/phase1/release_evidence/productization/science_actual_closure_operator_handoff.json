@@ -2377,7 +2377,8 @@
         "materialize_refinement_receipt_bundle": "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py --refinement-plan implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json",
         "materialize_rows_from_receipt_bundle": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
         "materialize_rows_from_template": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_template.py --template implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_template_report.json --fail-blocked",
-        "materialize_survival_report": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
+        "materialize_survival_report": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+        "write_refinement_receipt_template_files": "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py --refinement-plan implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --write-template-files"
       },
       "component_id": "pocketmd_lite_topk_actual_closure",
       "counts": {
@@ -2431,6 +2432,7 @@
       "operator_sequence": [
         "preflight_pocketmd_lite_topk_rows_template",
         "materialize_pocketmd_lite_refinement_receipt_bundle",
+        "write_pocketmd_lite_refinement_receipt_template_files",
         "fill_pocketmd_lite_refinement_receipts",
         "materialize_pocketmd_lite_topk_rows_from_receipt_bundle",
         "fill_pocketmd_lite_topk_rows_from_template",
@@ -2448,7 +2450,8 @@
           "materialize_refinement_receipt_bundle": "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py --refinement-plan implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json",
           "materialize_rows_from_receipt_bundle": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
           "materialize_rows_from_template": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_template.py --template implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_template_report.json --fail-blocked",
-          "materialize_survival_report": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
+          "materialize_survival_report": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+          "write_refinement_receipt_template_files": "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py --refinement-plan implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --write-template-files"
         },
         "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
         "first_blocked_operator_input_source_receipt": {
@@ -5606,14 +5609,14 @@
     ],
     "upstream_source_id": "public_benchmark_phase2"
   },
-  "generated_at": "2026-07-04T08:16:45.832615+00:00",
+  "generated_at": "2026-07-04T08:22:16.118109+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:65472ef2e428d5489e1c1681d1e8309e959daca4c0ae185362bf115966536bc4",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:34cff1b0cddb8be920a59df8b36c8492406a634b4bf26cd2db023cf0ac4cd866",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:86198e034f7edd40f87f92cafc4af6df65a8979a2e306e4cb5cbb16196f9da52",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json": "sha256:a6fa0328fbbdc35c1ff47f966c085b5ae0fc5e6dfa2f1aba17e647681cdc246a",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json": "sha256:dc39006a0ed93c7141d4421294cb9d47e1af8a3c6fc2fe3531aeae754de53c89",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:09354cd520764e9fb23e9a23e1eed17a38e73328687154c5d35c5411731af093",
     "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json": "sha256:0252ff361623b5f3011177634c55d6826868ef9d51e770602c74f7fda74f12a5",
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:d40a1c99e4f9fbe661d1ee9416f648394e5f1645c0ec5c3682e53e1bc2e058d3",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:78a0edc4ff8c726f757d759073996fe609da7b09f1d86a753edd1316cd810a85",
     "scripts/build_science_actual_closure_operator_handoff.py": "sha256:e421130fd064b5d3372981d3c7478cac2577df9f62cd78a6a0d6467b90bb6ab8"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
@@ -5985,7 +5988,8 @@
               "materialize_refinement_receipt_bundle": "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py --refinement-plan implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json",
               "materialize_rows_from_receipt_bundle": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
               "materialize_rows_from_template": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_template.py --template implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_template_report.json --fail-blocked",
-              "materialize_survival_report": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
+              "materialize_survival_report": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+              "write_refinement_receipt_template_files": "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py --refinement-plan implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --write-template-files"
             },
             "expected_operator_intake_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json",
             "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
@@ -5999,6 +6003,7 @@
             "operator_sequence": [
               "preflight_pocketmd_lite_topk_rows_template",
               "materialize_pocketmd_lite_refinement_receipt_bundle",
+              "write_pocketmd_lite_refinement_receipt_template_files",
               "fill_pocketmd_lite_refinement_receipts",
               "materialize_pocketmd_lite_topk_rows_from_receipt_bundle",
               "fill_pocketmd_lite_topk_rows_from_template",
@@ -7896,7 +7901,8 @@
             "materialize_refinement_receipt_bundle": "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py --refinement-plan implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json",
             "materialize_rows_from_receipt_bundle": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
             "materialize_rows_from_template": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_template.py --template implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_template_report.json --fail-blocked",
-            "materialize_survival_report": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
+            "materialize_survival_report": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+            "write_refinement_receipt_template_files": "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py --refinement-plan implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --write-template-files"
           },
           "expected_operator_intake_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json",
           "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
@@ -7910,6 +7916,7 @@
           "operator_sequence": [
             "preflight_pocketmd_lite_topk_rows_template",
             "materialize_pocketmd_lite_refinement_receipt_bundle",
+            "write_pocketmd_lite_refinement_receipt_template_files",
             "fill_pocketmd_lite_refinement_receipts",
             "materialize_pocketmd_lite_topk_rows_from_receipt_bundle",
             "fill_pocketmd_lite_topk_rows_from_template",
@@ -16950,7 +16957,8 @@
             "materialize_refinement_receipt_bundle": "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py --refinement-plan implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json",
             "materialize_rows_from_receipt_bundle": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py --receipt-bundle implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json --fail-blocked",
             "materialize_rows_from_template": "python3 scripts/materialize_pocketmd_lite_topk_rows_from_template.py --template implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv --out-rows implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_template_report.json --fail-blocked",
-            "materialize_survival_report": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
+            "materialize_survival_report": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+            "write_refinement_receipt_template_files": "python3 scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py --refinement-plan implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json --out implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json --write-template-files"
           },
           "expected_operator_intake_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json",
           "expected_rows_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
@@ -16964,6 +16972,7 @@
           "operator_sequence": [
             "preflight_pocketmd_lite_topk_rows_template",
             "materialize_pocketmd_lite_refinement_receipt_bundle",
+            "write_pocketmd_lite_refinement_receipt_template_files",
             "fill_pocketmd_lite_refinement_receipts",
             "materialize_pocketmd_lite_topk_rows_from_receipt_bundle",
             "fill_pocketmd_lite_topk_rows_from_template",
@@ -19028,7 +19037,7 @@
   },
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "a643319775cc9434d6158f4162bf63b694cc9650",
+  "source_commit_sha": "fa32ae270001380d06a740bdbc98af4d082e6b6d",
   "status": "operator_rows_required",
   "summary": {
     "actual_closure_blocked_component_count": 2,

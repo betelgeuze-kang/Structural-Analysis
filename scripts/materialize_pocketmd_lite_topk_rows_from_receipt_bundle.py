@@ -180,14 +180,15 @@ def _row_from_bundle_receipt(
     if receipt_blocker:
         blockers.append(receipt_blocker)
     receipt_status = _text(receipt.get("status")).lower()
-    if receipt and receipt_status not in COMPLETED_RECEIPT_STATUSES:
+    receipt_complete = bool(receipt) and receipt_status in COMPLETED_RECEIPT_STATUSES
+    if receipt and not receipt_complete:
         blockers.append("receipt_not_complete")
     operator_input_source = {field: "" for field in OPERATOR_INPUT_SOURCE_FIELDS}
-    if receipt:
+    if receipt_complete:
         operator_input_source, source_blockers = _operator_input_source_status(receipt)
         blockers.extend(source_blockers)
     normalized_row: dict[str, Any] = {}
-    if receipt:
+    if receipt_complete:
         raw_row = _raw_row_from_receipt(receipt=receipt, bundle_row=bundle_row)
         try:
             normalized_row = _normalize_row(
