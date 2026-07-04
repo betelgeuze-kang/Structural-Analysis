@@ -525,6 +525,7 @@ def _vina_gnina_engine_run_slot_detail(
             runtime_readiness.get("operator_execution_ready")
         ),
         "adapter_rows_ready": bool(runtime_readiness.get("adapter_rows_ready")),
+        "runtime_readiness_blocker_count": _as_int(summary.get("blocker_count")),
         "required_engine_run_count": _as_int(
             runtime_readiness.get("required_engine_run_count")
             or summary.get("required_engine_run_count")
@@ -900,9 +901,8 @@ def _unblock_plan_runtime_action_packet(
     unblock: dict[str, Any],
 ) -> dict[str, Any]:
     source_action = _as_dict(slot.get("source_acquisition_row_action"))
-    runtime_action_packet = _as_dict(source_action.get("runtime_action_packet"))
-    if runtime_action_packet:
-        return runtime_action_packet
+    source_runtime_action_packet = _as_dict(source_action.get("runtime_action_packet"))
+    detail = _as_dict(slot.get("row_input_slot_detail"))
 
     runtime_keys = (
         "case_input_slot_count",
@@ -921,29 +921,87 @@ def _unblock_plan_runtime_action_packet(
         not first_blocked_case_input_slot
         and not first_blocked_engine_run_slot
         and not any(key in unblock for key in runtime_keys)
+        and not source_runtime_action_packet
     ):
         return {}
 
     return {
-        "artifact": str(unblock.get("artifact") or ""),
-        "status": str(unblock.get("status") or ""),
-        "case_input_slot_count": _as_int(unblock.get("case_input_slot_count")),
+        **source_runtime_action_packet,
+        "artifact": str(
+            source_runtime_action_packet.get("artifact")
+            or detail.get("artifact")
+            or unblock.get("artifact")
+            or ""
+        ),
+        "status": str(
+            source_runtime_action_packet.get("status")
+            or unblock.get("status")
+            or detail.get("status")
+            or ""
+        ),
+        "runtime_readiness_blocker_count": _as_int(
+            detail.get("runtime_readiness_blocker_count")
+        ),
+        "case_input_slot_count": _as_int(
+            source_runtime_action_packet.get("case_input_slot_count")
+            or unblock.get("case_input_slot_count")
+        ),
         "blocked_case_input_slot_count": _as_int(
-            unblock.get("blocked_case_input_slot_count")
+            source_runtime_action_packet.get("blocked_case_input_slot_count")
+            or unblock.get("blocked_case_input_slot_count")
         ),
         "required_engine_run_count": _as_int(
-            unblock.get("required_engine_run_count")
+            source_runtime_action_packet.get("required_engine_run_count")
+            or unblock.get("required_engine_run_count")
         ),
         "ready_engine_run_slot_count": _as_int(
-            unblock.get("ready_engine_run_slot_count")
+            source_runtime_action_packet.get("ready_engine_run_slot_count")
+            or unblock.get("ready_engine_run_slot_count")
         ),
         "blocked_engine_run_slot_count": _as_int(
-            unblock.get("blocked_engine_run_slot_count")
+            source_runtime_action_packet.get("blocked_engine_run_slot_count")
+            or unblock.get("blocked_engine_run_slot_count")
         ),
-        "first_blocked_case_input_slot": first_blocked_case_input_slot,
-        "first_blocked_engine_run_slot": first_blocked_engine_run_slot,
-        "commands": _as_dict(unblock.get("commands")),
-        "claim_boundary": str(unblock.get("claim_boundary") or ""),
+        "missing_engine_ids": [
+            str(item)
+            for item in _as_list(
+                source_runtime_action_packet.get("missing_engine_ids")
+                or detail.get("missing_engine_ids")
+                or unblock.get("missing_engine_ids")
+            )
+        ],
+        "engine_runtime_actions": [
+            row
+            for row in _as_list(
+                source_runtime_action_packet.get("engine_runtime_actions")
+                or unblock.get("engine_runtime_actions")
+            )
+            if isinstance(row, dict)
+        ],
+        "first_blocked_case_input_slot": _as_dict(
+            source_runtime_action_packet.get("first_blocked_case_input_slot")
+            or first_blocked_case_input_slot
+        ),
+        "first_blocked_engine_run_slot": _as_dict(
+            source_runtime_action_packet.get("first_blocked_engine_run_slot")
+            or first_blocked_engine_run_slot
+        ),
+        "detected_row_artifact_count": _as_int(
+            unblock.get("detected_row_artifact_count")
+        ),
+        "selected_row_path": str(unblock.get("selected_row_path") or ""),
+        "adapter_row_preflight_status": str(
+            unblock.get("adapter_row_preflight_status") or ""
+        ),
+        "commands": {
+            **_as_dict(source_runtime_action_packet.get("commands")),
+            **_as_dict(unblock.get("commands")),
+        },
+        "claim_boundary": str(
+            source_runtime_action_packet.get("claim_boundary")
+            or unblock.get("claim_boundary")
+            or ""
+        ),
     }
 
 
@@ -1766,9 +1824,20 @@ def _markdown(payload: dict[str, Any]) -> str:
                     f"`{engine_run_summary.get('blocked_engine_run_slot_count')}`"
                 )
                 if operator_unblock:
+                    engine_runtime_actions = [
+                        row
+                        for row in _as_list(operator_unblock.get("engine_runtime_actions"))
+                        if isinstance(row, dict)
+                    ]
                     lines.extend(
                         [
                             f"- `operator_unblock_status`: `{operator_unblock.get('status')}`",
+                            "- `missing_engine_ids`: "
+                            f"{_code_join(_as_list(operator_unblock.get('missing_engine_ids')))}",
+                            "- `runtime_readiness_blocker_count`: "
+                            f"`{engine_run_detail.get('runtime_readiness_blocker_count')}`",
+                            "- `adapter_row_preflight_status`: "
+                            f"`{operator_unblock.get('adapter_row_preflight_status')}`",
                             f"- `input_manifest_template_artifact`: `{operator_unblock.get('input_manifest_template_artifact')}`",
                             "- `input_manifest_template_preflight_artifact`: "
                             f"`{operator_unblock.get('input_manifest_template_preflight_artifact')}`",
@@ -1776,6 +1845,22 @@ def _markdown(payload: dict[str, Any]) -> str:
                             f"`{_as_dict(operator_unblock.get('commands')).get('build_input_manifest_template_preflight', '')}`",
                         ]
                     )
+                    if engine_runtime_actions:
+                        lines.extend(
+                            [
+                                "",
+                                "| Engine | Runtime Action | Binary Env | Container Env |",
+                                "| --- | --- | --- | --- |",
+                            ]
+                        )
+                        for action in engine_runtime_actions:
+                            lines.append(
+                                "| "
+                                f"`{action.get('engine_id')}` | "
+                                f"`{action.get('operator_action')}` | "
+                                f"`{action.get('binary_env_var')}` | "
+                                f"`{action.get('container_image_env_var')}` |"
+                            )
                 lines.extend(
                     [
                         "",
