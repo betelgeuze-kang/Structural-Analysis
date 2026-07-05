@@ -5564,8 +5564,31 @@ def build_runner_packet(
                 is True
             ),
             "phase2_material_mesh_newton_broad_material_closure_claim": (
+                (
+                    phase2_material_mesh_newton_summary.get(
+                        "broad_material_closure_claim"
+                    )
+                    or phase2_material_mesh_newton_summary.get(
+                        "material_newton_closure_claim"
+                    )
+                )
+                is True
+            ),
+            "phase2_material_mesh_newton_broad_material_seed_cross_check_pass": (
                 phase2_material_mesh_newton_summary.get(
-                    "material_newton_closure_claim"
+                    "broad_material_newton_breadth_seed_cross_check_pass"
+                )
+                is True
+            ),
+            "phase2_material_mesh_newton_broad_material_path_history_chain_replay_pass": (
+                phase2_material_mesh_newton_summary.get(
+                    "broad_material_path_history_chain_replay_pass"
+                )
+                is True
+            ),
+            "phase2_material_mesh_newton_broad_material_frame_shell_coupled_seed_pass": (
+                phase2_material_mesh_newton_summary.get(
+                    "broad_material_frame_shell_coupled_seed_pass"
                 )
                 is True
             ),
@@ -6361,6 +6384,10 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"`{material_mesh.get('narrow_sparse_backend_equivalence_gate_passed')}`",
         "- `phase2_material_mesh_newton_full_mesh_closure_claim`: "
         f"`{material_mesh.get('full_mesh_closure_claim')}`",
+        "- `phase2_material_mesh_newton_broad_material_seed_cross_check_pass`: "
+        f"`{material_mesh.get('broad_material_newton_breadth_seed_cross_check_pass')}`",
+        "- `phase2_material_mesh_newton_broad_material_path_history_chain_replay_pass`: "
+        f"`{material_mesh.get('broad_material_path_history_chain_replay_pass')}`",
         f"- `worker_path_ready`: `{hip.get('residual_jvp_worker_path_ready')}`",
         f"- `worker_g1_closure_gate_ready`: `{hip.get('g1_closure_gate_ready')}`",
         f"- `assembly_contract_seed_ready`: `{assembly.get('contract_pass')}`",

@@ -443,6 +443,10 @@ def _phase2_material_mesh_newton_summary_payload() -> dict:
         "load_step_gate_passed": True,
         "narrow_mesh_refinement_gate_passed": True,
         "narrow_sparse_backend_equivalence_gate_passed": True,
+        "broad_material_newton_breadth_seed_cross_check_pass": True,
+        "broad_material_path_history_chain_replay_pass": True,
+        "broad_material_frame_shell_coupled_seed_pass": True,
+        "broad_material_closure_claim": False,
         "sparse_backend_equivalence_matrix_backend": "scipy_sparse_spsolve_cpu",
         "blockers_remaining": [
             "full_mesh_full_load_nonlinear_equilibrium_not_closed",
@@ -3906,6 +3910,24 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
             "phase2_material_mesh_newton_broad_material_closure_claim"
         ]
         is False
+    )
+    assert (
+        payload["summary"][
+            "phase2_material_mesh_newton_broad_material_seed_cross_check_pass"
+        ]
+        is True
+    )
+    assert (
+        payload["summary"][
+            "phase2_material_mesh_newton_broad_material_path_history_chain_replay_pass"
+        ]
+        is True
+    )
+    assert (
+        payload["summary"][
+            "phase2_material_mesh_newton_broad_material_frame_shell_coupled_seed_pass"
+        ]
+        is True
     )
     assert payload["phase2_material_mesh_newton_summary"][
         "load_step_gate_passed"

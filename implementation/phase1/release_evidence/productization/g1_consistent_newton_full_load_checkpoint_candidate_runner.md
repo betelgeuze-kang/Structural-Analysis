@@ -95,6 +95,8 @@
 - `phase2_material_mesh_newton_load_step_gate_passed`: `True`
 - `phase2_material_mesh_newton_sparse_cpu_equivalence_passed`: `True`
 - `phase2_material_mesh_newton_full_mesh_closure_claim`: `False`
+- `phase2_material_mesh_newton_broad_material_seed_cross_check_pass`: `True`
+- `phase2_material_mesh_newton_broad_material_path_history_chain_replay_pass`: `True`
 - `worker_path_ready`: `False`
 - `worker_g1_closure_gate_ready`: `False`
 - `assembly_contract_seed_ready`: `True`

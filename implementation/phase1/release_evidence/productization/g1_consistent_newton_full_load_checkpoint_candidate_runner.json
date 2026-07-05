@@ -981,7 +981,7 @@
     "residual_inf_n": 0.42740724991695345,
     "status": "ready"
   },
-  "generated_at": "2026-07-05T20:09:44.332502+00:00",
+  "generated_at": "2026-07-05T20:14:20.335783+00:00",
   "global_tangent_scaled_sweep": {
     "base_residual_inf_n": 0.4278304040181992,
     "best_alpha": 0.00390625,
@@ -1428,10 +1428,10 @@
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz": "sha256:865e2daee190803fb8349aff5f08d170b6b88794ac6cfb3ca4f43f912b30239a",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step16_material_active_set_ls_rows32_child_direct_no_descent_probe.json": "sha256:20fcc89b4f29a58699f88509e4e186c7b632441f243e75467a9a2656f744570f",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step16_scaled_global_krylov_direct_probe.json": "sha256:e7eb74f06319595eb5f99cc22decd68976819a0020317713335f9b659cd0a860",
-    "implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_summary.json": "sha256:5afb7fca63ca67334a10fa0f7c5b6139e55172154a438a2516d77cc0a1d492eb",
+    "implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_summary.json": "sha256:287b9c1b3d8f3a94cb316e61950f1e7f13038604e442a57c389c53a218a2e64b",
     "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_state_updated_seeds.json": "sha256:361277ce1c0aca1e59d15c7ccc164b780ba910f0bb3ae804eae361708ab57ed4",
     "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json": "sha256:1bce6a8641c818d4fd1a5cec238577b0f6653e9827c1e4347dec528fc96b8705",
-    "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:12e22835a90055ae9e108bb75d847c092122d5b72f2e2aba8510fbc7a7e95990"
+    "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:e65004130ebb28d8945c04776dc1d34eb283cc234a70c7b0847cc3885a5e63ed"
   },
   "live_g1_assembly_contract": {
     "assembly_result_schema": "",
@@ -1528,6 +1528,15 @@
       "production_rocm_hip_parity_not_closed",
       "broad_material_newton_breadth_not_closed"
     ],
+    "broad_material_closure_claim": false,
+    "broad_material_frame_shell_coupled_seed_pass": true,
+    "broad_material_jvp_relative_error_pass": true,
+    "broad_material_newton_breadth_closed": false,
+    "broad_material_newton_breadth_seed_coverage_ready": true,
+    "broad_material_newton_breadth_seed_cross_check_pass": true,
+    "broad_material_path_history_chain_replay_pass": true,
+    "broad_material_path_history_whole_checkpoint_replay_pass": true,
+    "broad_material_state_persistence_replay_seed_passed": true,
     "claim_boundary": "This records one tiny 1D axial mesh where scalar material laws are assembled into global residual/Jacobian and solved with Newton residual/increment gates without regularization or fallback false PASS. It does not close G1 full-mesh/full-load nonlinear equilibrium, general frame/shell/material coupling, sparse production matrix backends, broad material Newton breadth, or GPU/HIP parity.",
     "claim_boundary_version": "developer-preview-core-api-v1",
     "contract_pass": true,
@@ -1536,16 +1545,17 @@
     "final_tip_displacement_spread_m": 1.1102230246251565e-16,
     "full_mesh_closure_claim": false,
     "g1_closure_claim": false,
-    "generated_at": "2026-07-05T14:27:47.529098+00:00",
+    "generated_at": "2026-07-05T20:14:20.236039+00:00",
     "globalization": "backtracking_line_search",
     "input_checksums": {
-      "scripts/build_phase2_material_mesh_newton_artifacts.py": "sha256:9f5619c056e7f0b9ecf89d918869e65a7d0bfbaeab7bac62d013330a6488349d",
+      "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json": "sha256:1bce6a8641c818d4fd1a5cec238577b0f6653e9827c1e4347dec528fc96b8705",
+      "scripts/build_phase2_material_mesh_newton_artifacts.py": "sha256:db5ca33f0c1d2d9cc7e61202b61f36928e721372f5f6d55376c63cf789d9bcd9",
       "scripts/verify_quality_gate.py": "sha256:589ff71bb2c56a188c18273926646e38f8c2070157e349d1dd64028fab99b5fc",
-      "src/structural_analysis/assembly/__init__.py": "sha256:ccb7e9b1de89661f8fdecee0e68c659478d36a4374c2a8a45b13cf9a1aad31f8",
+      "src/structural_analysis/assembly/__init__.py": "sha256:a6c0c90d5a9e73e34eb85600cd2d9bfe8a3ef9941709d6397df2267932b7f2f2",
       "src/structural_analysis/assembly/nonlinear_static.py": "sha256:afc7ecf37b7fe7c2fc172b9b223d18640a44c22f6896aa47c20fdf35761fb41b",
       "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:00ca9b4fddc088aafb6a536e0f6190172772e25af8f7ad5faefdb5c2a65567f5",
       "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:c43772246853be09cacee662312fadac9de5d87b91e9ff2d105e9cb6342d16c6",
-      "tests/test_build_phase2_material_mesh_newton_artifacts.py": "sha256:6cbf762c49d5596aafa5298b6b27b40793d65c4d2170cd3347dbf8261970cc17"
+      "tests/test_build_phase2_material_mesh_newton_artifacts.py": "sha256:d4d00ee746e32df5734914b964c353821a95d06222040e4f3a2bf814065f0c29"
     },
     "load_step_gate_passed": true,
     "material_newton_closure_claim": false,
@@ -1560,11 +1570,28 @@
     "narrow_mesh_refinement_gate_passed": true,
     "narrow_sparse_backend_equivalence_gate_passed": true,
     "node_count": 3,
+    "related_material_newton_breadth_cross_check": {
+      "broad_material_closure_claim": false,
+      "claim_boundary": "Cross-checks the separate state-updated material Newton breadth seed receipt before the material-mesh Newton summary is consumed by G1 runner rollups. This does not turn the 1D material mesh seed into broad full-mesh material Newton closure.",
+      "contract_pass": true,
+      "cross_check_pass": true,
+      "frame_shell_coupled_material_seed_pass": true,
+      "material_jvp_relative_error_pass": true,
+      "material_state_persistence_replay_seed_passed": true,
+      "path": "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json",
+      "path_history_chain_replay_pass": true,
+      "path_history_whole_checkpoint_replay_pass": true,
+      "present": true,
+      "schema_version": "phase2-material-mesh-breadth-cross-check.v1",
+      "seed_coverage_ready": true,
+      "state_updated_material_newton_breadth_closed": false,
+      "status": "ready"
+    },
     "residual_contract": "F_internal_minus_F_external",
     "residual_formula": "F_internal_minus_F_external",
     "schema_version": "phase2-material-mesh-newton-artifacts.v1",
     "series_force_gate_passed": true,
-    "source_commit_sha": "6a4085c424e821cd29b2620dfb4d604198d5936e",
+    "source_commit_sha": "db2ba42da504c1362e4620219a83fb8e7ece4f8c",
     "sparse_backend_equivalence_matrix_backend": "scipy_sparse_spsolve_cpu",
     "sparse_backend_used": false,
     "status": "ready",
@@ -3488,7 +3515,7 @@
     "row_count": 8,
     "status": "ready"
   },
-  "source_commit_sha": "4e701abc984bf52a09f4f612ef784884d0761226",
+  "source_commit_sha": "db2ba42da504c1362e4620219a83fb8e7ece4f8c",
   "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe": {
     "assembled_tangent_parity_max_absolute_error": 0.006011962890625,
     "assembled_tangent_parity_max_relative_error": 2.683381287585585e-15,
@@ -4180,6 +4207,9 @@
       "prove_production_rocm_hip_residual_jvp_worker"
     ],
     "phase2_material_mesh_newton_broad_material_closure_claim": false,
+    "phase2_material_mesh_newton_broad_material_frame_shell_coupled_seed_pass": true,
+    "phase2_material_mesh_newton_broad_material_path_history_chain_replay_pass": true,
+    "phase2_material_mesh_newton_broad_material_seed_cross_check_pass": true,
     "phase2_material_mesh_newton_full_mesh_closure_claim": false,
     "phase2_material_mesh_newton_load_step_gate_passed": true,
     "phase2_material_mesh_newton_ready": true,

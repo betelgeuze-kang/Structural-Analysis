@@ -39,6 +39,9 @@ from structural_analysis.solvers.nonlinear.newton import (  # noqa: E402
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_MESH_OUT = PRODUCTIZATION / "phase2_material_mesh_newton_axial_chain_result.json"
 DEFAULT_SUMMARY_OUT = PRODUCTIZATION / "phase2_material_mesh_newton_summary.json"
+DEFAULT_MATERIAL_BREADTH_SUMMARY = (
+    PRODUCTIZATION / "phase2_material_newton_breadth_summary.json"
+)
 SCHEMA_VERSION = "phase2-material-mesh-newton-artifacts.v1"
 DISPLACEMENT_TOLERANCE_M = 1.0e-10
 LOAD_STEP_FACTORS = (0.5, 1.0)
@@ -48,6 +51,96 @@ MESH_REFINEMENT_TOLERANCE_M = 1.0e-10
 
 def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+
+
+def _read_json_or_empty(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _material_breadth_cross_check(
+    *,
+    repo_root: Path,
+    material_breadth_summary: Path,
+) -> dict[str, Any]:
+    resolved = (
+        material_breadth_summary
+        if material_breadth_summary.is_absolute()
+        else repo_root / material_breadth_summary
+    )
+    payload = _read_json_or_empty(resolved)
+    state_updated_seed_coverage_ready = (
+        payload.get("state_updated_material_newton_breadth_seed_coverage_ready")
+        is True
+    )
+    state_persistence_replay_passed = (
+        payload.get("material_state_persistence_replay_seed_passed") is True
+    )
+    path_history_chain_replay_passed = (
+        payload.get("state_updated_material_path_history_chain_replay_pass")
+        is True
+    )
+    path_history_whole_checkpoint_replay_passed = (
+        payload.get(
+            "state_updated_material_path_history_whole_checkpoint_replay_pass"
+        )
+        is True
+    )
+    frame_shell_coupled_seed_passed = (
+        payload.get("state_updated_frame_shell_coupled_material_seed_pass") is True
+    )
+    material_jvp_passed = payload.get("material_jvp_relative_error_pass") is True
+    broad_material_closure_claim = (
+        payload.get("state_updated_material_newton_breadth_closed") is True
+        or payload.get("material_newton_closure_claim") is True
+    )
+    cross_check_passed = (
+        bool(payload)
+        and payload.get("contract_pass") is True
+        and payload.get("g1_closure_claim") is False
+        and broad_material_closure_claim is False
+        and state_updated_seed_coverage_ready
+        and state_persistence_replay_passed
+        and path_history_chain_replay_passed
+        and path_history_whole_checkpoint_replay_passed
+        and frame_shell_coupled_seed_passed
+        and material_jvp_passed
+    )
+    return {
+        "schema_version": "phase2-material-mesh-breadth-cross-check.v1",
+        "path": material_breadth_summary.as_posix(),
+        "present": bool(payload),
+        "status": str(payload.get("status") or "missing"),
+        "contract_pass": payload.get("contract_pass") is True,
+        "seed_coverage_ready": state_updated_seed_coverage_ready,
+        "material_state_persistence_replay_seed_passed": (
+            state_persistence_replay_passed
+        ),
+        "path_history_chain_replay_pass": path_history_chain_replay_passed,
+        "path_history_whole_checkpoint_replay_pass": (
+            path_history_whole_checkpoint_replay_passed
+        ),
+        "frame_shell_coupled_material_seed_pass": (
+            frame_shell_coupled_seed_passed
+        ),
+        "material_jvp_relative_error_pass": material_jvp_passed,
+        "broad_material_closure_claim": broad_material_closure_claim,
+        "state_updated_material_newton_breadth_closed": (
+            payload.get("state_updated_material_newton_breadth_closed") is True
+        ),
+        "cross_check_pass": cross_check_passed,
+        "claim_boundary": (
+            "Cross-checks the separate state-updated material Newton breadth "
+            "seed receipt before the material-mesh Newton summary is consumed "
+            "by G1 runner rollups. This does not turn the 1D material mesh seed "
+            "into broad full-mesh material Newton closure."
+        ),
+    }
 
 
 def _material_law_payload(material: Any) -> dict[str, Any]:
@@ -322,6 +415,7 @@ def build_material_mesh_newton_artifacts(
     repo_root: Path = ROOT,
     mesh_out: Path = DEFAULT_MESH_OUT,
     summary_out: Path = DEFAULT_SUMMARY_OUT,
+    material_breadth_summary: Path = DEFAULT_MATERIAL_BREADTH_SUMMARY,
 ) -> dict[str, dict[str, Any]]:
     repo_root = repo_root.resolve()
     mesh_problem = default_phase2_axial_chain_mesh_problem()
@@ -365,6 +459,10 @@ def build_material_mesh_newton_artifacts(
     )
     narrow_sparse_backend_gate_passed = bool(
         sparse_backend_equivalence["narrow_sparse_backend_equivalence_gate_passed"]
+    )
+    material_breadth_cross_check = _material_breadth_cross_check(
+        repo_root=repo_root,
+        material_breadth_summary=material_breadth_summary,
     )
 
     residual_gate_passed = bool(metrics.get("residual_gate_passed"))
@@ -446,6 +544,7 @@ def build_material_mesh_newton_artifacts(
                 Path("scripts/build_phase2_material_mesh_newton_artifacts.py"),
                 Path("scripts/verify_quality_gate.py"),
                 Path("tests/test_build_phase2_material_mesh_newton_artifacts.py"),
+                material_breadth_summary,
             ],
             repo_root=repo_root,
         ),
@@ -472,6 +571,41 @@ def build_material_mesh_newton_artifacts(
         "load_step_gate_passed": load_step_gate_passed,
         "narrow_mesh_refinement_gate_passed": narrow_mesh_refinement_gate_passed,
         "narrow_sparse_backend_equivalence_gate_passed": narrow_sparse_backend_gate_passed,
+        "broad_material_newton_breadth_seed_cross_check_pass": (
+            material_breadth_cross_check["cross_check_pass"]
+        ),
+        "broad_material_newton_breadth_seed_coverage_ready": (
+            material_breadth_cross_check["seed_coverage_ready"]
+        ),
+        "broad_material_path_history_chain_replay_pass": (
+            material_breadth_cross_check["path_history_chain_replay_pass"]
+        ),
+        "broad_material_path_history_whole_checkpoint_replay_pass": (
+            material_breadth_cross_check[
+                "path_history_whole_checkpoint_replay_pass"
+            ]
+        ),
+        "broad_material_frame_shell_coupled_seed_pass": (
+            material_breadth_cross_check[
+                "frame_shell_coupled_material_seed_pass"
+            ]
+        ),
+        "broad_material_state_persistence_replay_seed_passed": (
+            material_breadth_cross_check[
+                "material_state_persistence_replay_seed_passed"
+            ]
+        ),
+        "broad_material_jvp_relative_error_pass": (
+            material_breadth_cross_check["material_jvp_relative_error_pass"]
+        ),
+        "broad_material_closure_claim": (
+            material_breadth_cross_check["broad_material_closure_claim"]
+        ),
+        "broad_material_newton_breadth_closed": (
+            material_breadth_cross_check[
+                "state_updated_material_newton_breadth_closed"
+            ]
+        ),
         "final_tip_displacement_spread_m": load_step_spread_m,
         "mesh_refinement_tip_displacement_spread_m": mesh_refinement_suite[
             "tip_displacement_spread_m"
@@ -488,10 +622,11 @@ def build_material_mesh_newton_artifacts(
         "artifacts": {
             "axial_chain_result": str(mesh_out),
             "summary": str(summary_out),
-            "related_material_newton_breadth_summary": str(
-                PRODUCTIZATION / "phase2_material_newton_breadth_summary.json"
-            ),
+            "related_material_newton_breadth_summary": str(material_breadth_summary),
         },
+        "related_material_newton_breadth_cross_check": (
+            material_breadth_cross_check
+        ),
         "claim_boundary": mesh_payload["claim_boundary"],
     }
     return {
@@ -524,11 +659,13 @@ def check_material_mesh_newton_artifacts(
     repo_root: Path = ROOT,
     mesh_out: Path = DEFAULT_MESH_OUT,
     summary_out: Path = DEFAULT_SUMMARY_OUT,
+    material_breadth_summary: Path = DEFAULT_MATERIAL_BREADTH_SUMMARY,
 ) -> tuple[bool, str]:
     expected = build_material_mesh_newton_artifacts(
         repo_root=repo_root,
         mesh_out=mesh_out,
         summary_out=summary_out,
+        material_breadth_summary=material_breadth_summary,
     )
     targets = {
         "mesh": mesh_out,
@@ -555,11 +692,13 @@ def write_material_mesh_newton_artifacts(
     repo_root: Path = ROOT,
     mesh_out: Path = DEFAULT_MESH_OUT,
     summary_out: Path = DEFAULT_SUMMARY_OUT,
+    material_breadth_summary: Path = DEFAULT_MATERIAL_BREADTH_SUMMARY,
 ) -> dict[str, dict[str, Any]]:
     artifacts = build_material_mesh_newton_artifacts(
         repo_root=repo_root,
         mesh_out=mesh_out,
         summary_out=summary_out,
+        material_breadth_summary=material_breadth_summary,
     )
     for key, path in {
         "mesh": mesh_out,
@@ -575,6 +714,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mesh-out", type=Path, default=DEFAULT_MESH_OUT)
     parser.add_argument("--summary-out", type=Path, default=DEFAULT_SUMMARY_OUT)
+    parser.add_argument(
+        "--material-breadth-summary",
+        type=Path,
+        default=DEFAULT_MATERIAL_BREADTH_SUMMARY,
+    )
     parser.add_argument("--check", action="store_true")
     return parser
 
@@ -585,12 +729,14 @@ def main(argv: list[str] | None = None) -> int:
         ok, message = check_material_mesh_newton_artifacts(
             mesh_out=args.mesh_out,
             summary_out=args.summary_out,
+            material_breadth_summary=args.material_breadth_summary,
         )
         print(f"Phase 2 material mesh Newton check: {message}")
         return 0 if ok else 1
     artifacts = write_material_mesh_newton_artifacts(
         mesh_out=args.mesh_out,
         summary_out=args.summary_out,
+        material_breadth_summary=args.material_breadth_summary,
     )
     summary = artifacts["summary"]
     print(

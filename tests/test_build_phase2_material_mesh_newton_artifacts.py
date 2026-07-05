@@ -47,11 +47,21 @@ def test_phase2_material_mesh_newton_builds_honest_seed_artifacts() -> None:
     assert summary["load_step_gate_passed"] is True
     assert summary["narrow_mesh_refinement_gate_passed"] is True
     assert summary["narrow_sparse_backend_equivalence_gate_passed"] is True
+    assert summary["broad_material_newton_breadth_seed_cross_check_pass"] is True
+    assert summary["broad_material_newton_breadth_seed_coverage_ready"] is True
+    assert summary["broad_material_path_history_chain_replay_pass"] is True
+    assert summary["broad_material_path_history_whole_checkpoint_replay_pass"] is True
+    assert summary["broad_material_frame_shell_coupled_seed_pass"] is True
+    assert summary["broad_material_state_persistence_replay_seed_passed"] is True
+    assert summary["broad_material_jvp_relative_error_pass"] is True
+    assert summary["broad_material_closure_claim"] is False
+    assert summary["broad_material_newton_breadth_closed"] is False
     assert summary["final_tip_displacement_spread_m"] <= 1.0e-10
     assert summary["mesh_refinement_tip_displacement_spread_m"] <= 1.0e-10
     assert summary["mesh_refinement_element_counts"] == [1, 2, 4]
     assert summary["sparse_backend_equivalence_matrix_backend"] == "scipy_sparse_spsolve_cpu"
     assert sorted(summary["input_checksums"]) == [
+        "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json",
         "scripts/build_phase2_material_mesh_newton_artifacts.py",
         "scripts/verify_quality_gate.py",
         "src/structural_analysis/assembly/__init__.py",
@@ -68,6 +78,15 @@ def test_phase2_material_mesh_newton_builds_honest_seed_artifacts() -> None:
         "production_rocm_hip_parity_not_closed",
         "broad_material_newton_breadth_not_closed",
     ]
+    cross_check = summary["related_material_newton_breadth_cross_check"]
+    assert cross_check["present"] is True
+    assert cross_check["contract_pass"] is True
+    assert cross_check["seed_coverage_ready"] is True
+    assert cross_check["path_history_chain_replay_pass"] is True
+    assert cross_check["path_history_whole_checkpoint_replay_pass"] is True
+    assert cross_check["frame_shell_coupled_material_seed_pass"] is True
+    assert cross_check["broad_material_closure_claim"] is False
+    assert cross_check["cross_check_pass"] is True
 
     assert mesh_payload["status"] == "ready"
     assert mesh_payload["contract_pass"] is True
