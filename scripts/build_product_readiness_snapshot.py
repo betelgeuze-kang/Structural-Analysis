@@ -368,6 +368,12 @@ def _receipt_commit_allowed_path(path: str, allowed_paths: set[str]) -> bool:
         and path.endswith(".csv")
     ):
         return True
+    if (
+        path
+        == "implementation/phase1/release_evidence/productization/"
+        "g1_true_newton_full_load_checkpoint_candidate.npz"
+    ):
+        return True
     if path.startswith("implementation/phase1/release_evidence/productization/"):
         return path.endswith((".json", ".md"))
     if (

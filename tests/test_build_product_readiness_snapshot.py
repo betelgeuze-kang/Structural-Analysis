@@ -4130,6 +4130,18 @@ def test_snapshot_allows_gpu_release_evidence_json_as_generated_receipt() -> Non
     )
 
 
+def test_snapshot_allows_only_g1_true_newton_candidate_npz_receipt() -> None:
+    assert build_product_readiness_snapshot._receipt_commit_allowed_path(
+        "implementation/phase1/release_evidence/productization/"
+        "g1_true_newton_full_load_checkpoint_candidate.npz",
+        set(),
+    )
+    assert not build_product_readiness_snapshot._receipt_commit_allowed_path(
+        "implementation/phase1/release_evidence/productization/other_checkpoint.npz",
+        set(),
+    )
+
+
 def test_snapshot_developer_preview_owner_packet_helper_does_not_stale_leaf_receipts(
     tmp_path: Path,
 ) -> None:
