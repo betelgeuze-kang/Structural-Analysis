@@ -482,8 +482,20 @@ def _cpu_live_assembly_contract_probe_summary(
 ) -> dict[str, Any]:
     live_contract = _as_dict(payload.get("live_g1_assembly_contract"))
     checkpoint = _as_dict(payload.get("checkpoint"))
+    base_residual = _as_dict(payload.get("base_direct_residual"))
     final_residual = _as_dict(payload.get("final_direct_residual"))
     gate = _as_dict(payload.get("gate_assessment"))
+    trust_region = _as_dict(payload.get("trust_region_line_search"))
+    best_trust_candidate = _as_dict(trust_region.get("best_gate_eligible_candidate"))
+    if not best_trust_candidate:
+        best_trust_candidate = _as_dict(trust_region.get("best_candidate"))
+    final_breakdown = _as_dict(final_residual.get("residual_component_breakdown"))
+    base_breakdown = _as_dict(base_residual.get("residual_component_breakdown"))
+    breakdown = final_breakdown or base_breakdown
+    top_rows = [
+        row for row in _as_list(breakdown.get("top_rows")) if isinstance(row, dict)
+    ]
+    top_row = _as_dict(top_rows[0] if top_rows else {})
     blockers = _strings(live_contract.get("blockers"))
     contract_pass = bool(
         live_contract.get("contract_pass") is True
@@ -512,19 +524,51 @@ def _cpu_live_assembly_contract_probe_summary(
         "load_scale": _as_float(checkpoint.get("load_scale")),
         "direct_residual_newton_ready": payload.get("direct_residual_newton_ready")
         is True,
+        "full_load_closure_passed": gate.get("full_load_closure_passed") is True,
         "direct_residual_gate_passed": gate.get("direct_residual_gate_passed")
         is True
         or final_residual.get("residual_gate_passed") is True,
         "relative_increment_gate_passed": gate.get("relative_increment_gate_passed")
         is True,
+        "consistent_residual_jacobian_newton_passed": gate.get(
+            "consistent_residual_jacobian_newton_passed"
+        )
+        is True,
         "material_newton_breadth_passed": gate.get("material_newton_breadth_passed")
         is True,
         "fallback_zero_passed": gate.get("fallback_zero_passed") is True,
+        "base_residual_inf_n": _as_float(
+            base_residual.get("direct_residual_inf_n")
+        ),
         "residual_inf_n": _as_float(
             final_residual.get("direct_residual_inf_n")
             if final_residual
             else live_contract.get("residual_inf_norm")
         ),
+        "direct_relative_residual_inf": _as_float(
+            final_residual.get("direct_relative_residual_inf")
+        ),
+        "improvement_inf_n": _as_float(
+            base_residual.get("direct_residual_inf_n")
+        )
+        - _as_float(final_residual.get("direct_residual_inf_n")),
+        "accepted_trust_region_iteration_count": _as_int(
+            final_residual.get("accepted_trust_region_iteration_count")
+            or trust_region.get("accepted_iteration_count")
+        ),
+        "best_trust_alpha": _as_float(best_trust_candidate.get("alpha")),
+        "best_trust_alpha_source": str(
+            best_trust_candidate.get("alpha_source") or ""
+        ),
+        "best_trust_relative_increment": _as_float(
+            best_trust_candidate.get("relative_increment")
+        ),
+        "residual_component_breakdown_included": bool(breakdown),
+        "top_row_global_dof": _as_int(top_row.get("global_dof")),
+        "top_row_node_index": _as_int(top_row.get("node_index")),
+        "top_row_dof": str(top_row.get("dof") or ""),
+        "top_row_residual_n": _as_float(top_row.get("residual_n")),
+        "top_row_dominant_component": str(top_row.get("dominant_component") or ""),
         "assembly_result_schema": str(
             live_contract.get("assembly_result_schema") or ""
         ),
@@ -5204,6 +5248,37 @@ def build_runner_packet(
             ),
             "cpu_live_g1_assembly_contract_residual_inf_n": (
                 cpu_live_assembly_contract_probe_summary["residual_inf_n"]
+            ),
+            "cpu_live_g1_assembly_contract_full_load_closure_passed": (
+                cpu_live_assembly_contract_probe_summary["full_load_closure_passed"]
+            ),
+            "cpu_live_g1_assembly_contract_direct_residual_gate_passed": (
+                cpu_live_assembly_contract_probe_summary[
+                    "direct_residual_gate_passed"
+                ]
+            ),
+            "cpu_live_g1_assembly_contract_relative_increment_gate_passed": (
+                cpu_live_assembly_contract_probe_summary[
+                    "relative_increment_gate_passed"
+                ]
+            ),
+            "cpu_live_g1_assembly_contract_consistent_residual_jacobian_newton_passed": (
+                cpu_live_assembly_contract_probe_summary[
+                    "consistent_residual_jacobian_newton_passed"
+                ]
+            ),
+            "cpu_live_g1_assembly_contract_material_newton_breadth_passed": (
+                cpu_live_assembly_contract_probe_summary[
+                    "material_newton_breadth_passed"
+                ]
+            ),
+            "cpu_live_g1_assembly_contract_fallback_zero_passed": (
+                cpu_live_assembly_contract_probe_summary["fallback_zero_passed"]
+            ),
+            "cpu_live_g1_assembly_contract_top_row_dominant_component": (
+                cpu_live_assembly_contract_probe_summary[
+                    "top_row_dominant_component"
+                ]
             ),
             "live_g1_assembly_contract_present": _live_assembly_contract_summary(
                 hip_probe

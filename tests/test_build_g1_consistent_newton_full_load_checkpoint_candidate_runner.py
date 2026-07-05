@@ -224,15 +224,41 @@ def _cpu_live_assembly_contract_probe_payload() -> dict:
         "status": "partial",
         "direct_residual_newton_ready": False,
         "checkpoint": {"load_scale": 1.0},
+        "base_direct_residual": {
+            "direct_residual_inf_n": 1384.26,
+        },
         "final_direct_residual": {
             "direct_residual_inf_n": 1384.25,
+            "direct_relative_residual_inf": 0.10466,
             "residual_gate_passed": False,
+            "accepted_trust_region_iteration_count": 1,
+            "residual_component_breakdown": {
+                "top_rows": [
+                    {
+                        "global_dof": 7412,
+                        "node_index": 1235,
+                        "dof": "uz",
+                        "residual_n": 1384.25,
+                        "dominant_component": "frame",
+                    }
+                ]
+            },
         },
         "gate_assessment": {
             "direct_residual_gate_passed": False,
-            "relative_increment_gate_passed": False,
+            "relative_increment_gate_passed": True,
+            "full_load_closure_passed": True,
+            "consistent_residual_jacobian_newton_passed": False,
             "material_newton_breadth_passed": False,
-            "fallback_zero_passed": False,
+            "fallback_zero_passed": True,
+        },
+        "trust_region_line_search": {
+            "accepted_iteration_count": 1,
+            "best_gate_eligible_candidate": {
+                "alpha_source": "trust_region_gate_limited",
+                "alpha": 1.9e-08,
+                "relative_increment": 9.5e-05,
+            },
         },
         "live_g1_assembly_contract": {
             "contract_pass": True,
@@ -2756,9 +2782,40 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
         payload["summary"]["cpu_live_g1_assembly_contract_residual_inf_n"]
         == 1384.25
     )
+    assert (
+        payload["summary"]["cpu_live_g1_assembly_contract_full_load_closure_passed"]
+        is True
+    )
+    assert (
+        payload["summary"]["cpu_live_g1_assembly_contract_direct_residual_gate_passed"]
+        is False
+    )
+    assert (
+        payload["summary"][
+            "cpu_live_g1_assembly_contract_consistent_residual_jacobian_newton_passed"
+        ]
+        is False
+    )
+    assert (
+        payload["summary"][
+            "cpu_live_g1_assembly_contract_top_row_dominant_component"
+        ]
+        == "frame"
+    )
     cpu_live = payload["cpu_live_g1_assembly_contract_probe"]
     assert cpu_live["contract_pass"] is True
     assert cpu_live["cpu_diagnostic_assembler_used"] is True
+    assert cpu_live["full_load_closure_passed"] is True
+    assert cpu_live["direct_residual_gate_passed"] is False
+    assert cpu_live["relative_increment_gate_passed"] is True
+    assert cpu_live["consistent_residual_jacobian_newton_passed"] is False
+    assert cpu_live["material_newton_breadth_passed"] is False
+    assert cpu_live["fallback_zero_passed"] is True
+    assert cpu_live["accepted_trust_region_iteration_count"] == 1
+    assert cpu_live["best_trust_alpha_source"] == "trust_region_gate_limited"
+    assert cpu_live["residual_component_breakdown_included"] is True
+    assert cpu_live["top_row_global_dof"] == 7412
+    assert cpu_live["top_row_dominant_component"] == "frame"
     assert cpu_live["promotes_g1_closure"] is False
     assert "HIP-required" in cpu_live["claim_boundary"]
     assert payload["true_newton_load_sweep"]["path"] == paths["sweep"].as_posix()
