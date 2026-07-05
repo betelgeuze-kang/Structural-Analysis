@@ -480,11 +480,11 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-05T17:42:44.525166+00:00",
+  "generated_at": "2026-07-05T17:49:41.676428+00:00",
   "input_checksums": {
     ".github/workflows/dp-windows-parity.yml": "sha256:1a25e658ec3fabfa5fee9fcdaee8c708b145989df373759424eea78914c4e5cd",
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:6a221e95cdf848534a89416151d87d6ec4f30c3cc4ef52c88dd4f848c3f730ff",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:9e7bce621a28ad90ffe010b7fc0e0161243933b01da0ed61caf50d399ea60a7d",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:2d8ec6ac75d210af270cbb3dc04686889324695216ea1544c5d75d4741dd6ef9",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:93e3c17ffa7073d354e213aeb562c8bfe8515034d6904d102de683885d0103d1",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:d2378d95155a66e3cfa3b48424b04a1d0a841cb098cac78d3ee7edc7f71cec91",
@@ -1272,9 +1272,8 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 10,
+    "developer_preview_blocker_count": 9,
     "developer_preview_blockers": [
-      "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
@@ -3235,6 +3234,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "a973f6f9bc2bc4c01d8793cc32794d25fb7bda51",
+  "source_commit_sha": "5ca12d4abfc26eac90e60e5811889a3c52df699e",
   "status": "blocked"
 }

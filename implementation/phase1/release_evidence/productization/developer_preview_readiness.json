@@ -4,9 +4,8 @@
     "phase1_core_api_contract": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
     "product_readiness_snapshot": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
   },
-  "blocker_count": 10,
+  "blocker_count": 9,
   "blockers": [
-    "g1::full_load_gate_not_closed",
     "g1::full_mesh_nonlinear_equilibrium_not_closed",
     "g1::material_newton_breadth_not_closed",
     "g1::production_rocm_hip_residency_not_closed",
@@ -69,9 +68,8 @@
     },
     "numerical": {
       "blocked": true,
-      "blocker_count": 4,
+      "blocker_count": 3,
       "blockers": [
-        "g1::full_load_gate_not_closed",
         "g1::full_mesh_nonlinear_equilibrium_not_closed",
         "g1::material_newton_breadth_not_closed",
         "g1::production_rocm_hip_residency_not_closed"
@@ -209,7 +207,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-07-05T17:42:44.463822+00:00",
+  "generated_at": "2026-07-05T17:49:41.614269+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -228,11 +226,11 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:7edd8072bec48101f346adad824e777826adc7600ace716a88c1bda303b3b8f0",
+      "input_checksum": "sha256:a596bec52f897bdc3370787ed0e8bfb631eb6e4231efbb3bdd1bdf6e7a8e714c",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "a973f6f9bc2bc4c01d8793cc32794d25fb7bda51",
+      "source_commit_sha": "5ca12d4abfc26eac90e60e5811889a3c52df699e",
       "status": "blocked"
     }
   },
@@ -240,7 +238,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:d2378d95155a66e3cfa3b48424b04a1d0a841cb098cac78d3ee7edc7f71cec91",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:7edd8072bec48101f346adad824e777826adc7600ace716a88c1bda303b3b8f0"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:a596bec52f897bdc3370787ed0e8bfb631eb6e4231efbb3bdd1bdf6e7a8e714c"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "blocked",
@@ -416,10 +414,10 @@
         "detail_blockers_remain_visible": true,
         "grouping_policy": "G1 receipt/lane blockers are grouped under claim-dimension root blockers to avoid duplicate root status rows. Suppressed details remain visible, counted, and non-promoting.",
         "grouping_promotes_status": false,
-        "root_blocker_count": 4,
+        "root_blocker_count": 3,
         "root_groups": [
           {
-            "active": true,
+            "active": false,
             "closure_dimension": "cpu_full_load_1_0_residual_increment_gate",
             "represented_detail_blocker_count": 0,
             "root_blocker": "g1::full_load_gate_not_closed"
@@ -1899,8 +1897,8 @@
         "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready",
         "g1_full_mesh_full_load_not_closed"
       ],
+      "top_level_blocker_source": "commercial_gap_ledger_status.rows.G1.blockers",
       "top_level_blockers": [
-        "g1::full_load_gate_not_closed",
         "g1::full_mesh_nonlinear_equilibrium_not_closed",
         "g1::material_newton_breadth_not_closed",
         "g1::production_rocm_hip_residency_not_closed"
@@ -1943,9 +1941,8 @@
       },
       "G1 solver": {
         "blocked": true,
-        "blocker_count": 4,
+        "blocker_count": 3,
         "blockers": [
-          "g1::full_load_gate_not_closed",
           "g1::full_mesh_nonlinear_equilibrium_not_closed",
           "g1::material_newton_breadth_not_closed",
           "g1::production_rocm_hip_residency_not_closed"
@@ -2221,6 +2218,6 @@
       }
     }
   },
-  "source_commit_sha": "a973f6f9bc2bc4c01d8793cc32794d25fb7bda51",
+  "source_commit_sha": "5ca12d4abfc26eac90e60e5811889a3c52df699e",
   "status": "blocked"
 }
