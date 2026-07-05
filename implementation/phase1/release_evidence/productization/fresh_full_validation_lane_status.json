@@ -96,10 +96,10 @@
     }
   ],
   "fresh_full_validation_ready": false,
-  "generated_at": "2026-07-05T16:52:31.405387+00:00",
+  "generated_at": "2026-07-05T21:34:05.821691+00:00",
   "input_checksums": {
     "/home/betelgeuze/건축구조분석/implementation/phase1/fresh_validation_receipt.schema.json": "sha256:9d90d216af33096c6a14aa8208482abf0ff5e03b17b2004f79086037d7aab047",
-    "docs/commercialization-gap-current-state.md": "sha256:d3554f8f1fedd9c96d3c7fb05ee0eb72985613371153c7900e67581aa338d960",
+    "docs/commercialization-gap-current-state.md": "sha256:27373619ea99a0fbf5521ad6875d750b5da7a2df25eebb86183c0f36a2eeb51d",
     "docs/release-publication-runbook.md": "sha256:e531952925d22c141e57757c58b428c23330cef11dee71017c162d312fe8ddfb",
     "implementation/phase1/release_evidence/commercial/commercial_readiness_report.json": "sha256:df8a39ee7ecdff234d494c9d8a008b8eca525d524300d2da4ce253432872bdc5",
     "implementation/phase1/release_evidence/full_validation": "dir-sha256:83ce7968ecd1423cfd0867492da5f831e9fd4b9d05cb7a3e025a445dcab1a68e",
@@ -646,7 +646,7 @@
     }
   ],
   "schema_version": "fresh-full-validation-lane-status.v1",
-  "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
+  "source_commit_sha": "c4d33df27e9d438bae0b89f6e9b95e866affe6cd",
   "status": "blocked",
   "summary": {
     "blocker_count": 2,

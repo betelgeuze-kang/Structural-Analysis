@@ -1,7 +1,7 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-07-05T21:27:23.594709+00:00",
-  "source_commit_sha": "2a76b52538e1b653d779fb09483c28dcbbc725df",
+  "generated_at": "2026-07-05T21:37:22.929119+00:00",
+  "source_commit_sha": "c4d33df27e9d438bae0b89f6e9b95e866affe6cd",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "input_checksums": {
     "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b8f1b140751f430e4c7dc594f3440320433be9b3e3f055f3e7fad62a2999b8af",

@@ -9,7 +9,7 @@
     "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
   ],
-  "generated_at": "2026-07-05T16:53:09.109783+00:00",
+  "generated_at": "2026-07-05T21:34:08.790844+00:00",
   "handoff_check_pass": true,
   "handoff_surfaces": {
     "application_plan_action_packet_ready": true,
@@ -22,7 +22,7 @@
   },
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:108fc5734e3bf3b268375bc275c2b1a872c4d7cdaff3d599a801c78b7c095a33",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:c21e60d83865c11e55f9732b4e91d11b100c65a78b9084f603699bde42da86dd",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:2220c8a3bfa7f28e622b6eb995c3dd8c8af710c19c4c45a2ec39e8af626629c0",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.csv": "sha256:7e8d084885bd6f98fd62af4cd83d812dd4426c83e35d67152f39129cf7d106ba",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv": "sha256:7f99c21fcf9f754da96ae9a9c7534f6ac9e56ebfdb72161adf8195679b1e09d9",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json": "sha256:07d58eb10d7a68995f758decfa4141c1919d757c4357696612ca7e6bea983261",
@@ -67,7 +67,7 @@
   "reuse_policy": "non_mutating_release_surface_first_owner_handoff_consistency_check",
   "reused_evidence": true,
   "schema_version": "structural-scope-release-surface-owner-handoff-check.v1",
-  "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
+  "source_commit_sha": "c4d33df27e9d438bae0b89f6e9b95e866affe6cd",
   "status": "ready_for_owner_review",
   "template_paths": {
     "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",

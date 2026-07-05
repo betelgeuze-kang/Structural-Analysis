@@ -209,7 +209,7 @@
     "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing",
     "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing"
   ],
-  "generated_at": "2026-07-05T16:52:30.462486+00:00",
+  "generated_at": "2026-07-05T21:37:13.933886+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -291,12 +291,12 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json": "sha256:7f47cb5692f2112c8a3cef54cb83c8a1d3b2fc0514e9a985b497f4ddc66cae6a",
     "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:e18438d69a6f45a18cc8cd0afd15c2b30dd81228ec70b58b8e38204a942a62df",
-    "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:3c9a71b062aa928ab34153e1e2093355d423c2cdb30720f94ce80268941cd33a",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:b21a399564ab236d66f37fc1d549d455bb3a01c77599ef1b0454566be190f8f3",
+    "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:1684ee395b19049777b2a3f7a6be32561dc8927419de4ba093785789d90c5a76",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:40252b8513f8fc1315094cb297b50ae032e62b0607e93fe79168f5f3aa9258a7",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:42f77c9c6856a124859510d049d0419cf5fa41a7d71e8f15f2f8c883f7301c73",
     "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:b39062c3bb3ad05d34a4fa67e2126f264d545dbe08ccbd1fe42f625f0bb6e13d",
     "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:377a28138c1df12b87fa61a31ad94806794a0aa3ad636fe1f529dc5d83c42e07",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:9d2186a1f4fb11700d53f7b7dcf052f49a2e32ba64208c061d6eb07b1f51dc7e",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:3b03a07578d8d79b2ad5a6607f81dc6c1b5ec0dedeba253b685abd1c7db3c10a",
     "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:d29d0d37a3f84ab027144a3998b9a3a451e2e350e1e8be4fc26397b7315b34b9"
   },
   "next_actions": [
@@ -472,7 +472,7 @@
     "solver_hip_strict_probe_pass": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
+  "source_commit_sha": "c4d33df27e9d438bae0b89f6e9b95e866affe6cd",
   "status": "ready",
   "summary": {
     "dominant_near_null_rows": 64,
