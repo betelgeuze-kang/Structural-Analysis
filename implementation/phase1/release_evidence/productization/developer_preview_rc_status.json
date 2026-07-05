@@ -480,14 +480,14 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-05T15:35:15.424129+00:00",
+  "generated_at": "2026-07-05T15:37:05.553398+00:00",
   "input_checksums": {
     ".github/workflows/dp-windows-parity.yml": "sha256:1a25e658ec3fabfa5fee9fcdaee8c708b145989df373759424eea78914c4e5cd",
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:dfc205a90d5f6498b4c4de34ea12b8788cb3b441f7328942355315b2068df9c9",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:4016a45a9262782407da47304fd11f9008b2307bfa9f064253d0ba66866a5836",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:c9387081dd42e14fa175f0a18626999509188c47a04ee448df257e4239d5d5a4",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:40b1b46562249340f70f9c1aeb2364b5efbefd0a0b348b781b1417e444ec0e5e",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:0eb46884be3a49589b6ee6700af119fda8ce19945d9a3768f6a753352c326e08",
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:393aaccf5942b921e58c8a1fe903a750c0ad6a4f966fdcafb09147a45f155f94",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:500f9bbd82c6983a2a5e0ac22afa21f92c6ade3bc399e7e08a52c665268091e3",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:2c8e8f61015ac45c829d2c585da1fce9c33745ecb7be9c8c274fd8c4053ac41a",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:8ee1b59e56a2dfd5638a39d8321f0c3f44812807437ec96c92cb9931784f7b92",
@@ -3245,6 +3245,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "794f0b7fc5f88d2a147b20071279765882550579",
+  "source_commit_sha": "2235c69028f426de69e98755f9cfbbbf3eaa2b0e",
   "status": "blocked"
 }
