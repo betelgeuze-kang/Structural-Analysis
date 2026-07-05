@@ -1163,7 +1163,13 @@ def _g1_blocker_grouping_metadata(
             "closure_dimension": "gpu_hip_followup_performance_and_residency",
             "representative_detail_prefixes": (
                 "g1_full_load_lane::child_global_krylov_component_missing",
+                "g1_full_load_lane::child_global_krylov_hip_not_required",
+                "g1_full_load_lane::child_global_krylov_hip_residual_refresh_not_proven",
+                "g1_full_load_lane::child_global_krylov_not_promoted_to_final_state",
                 "g1_full_load_lane::child_current_tangent_residual_row_component_missing",
+                "g1_full_load_lane::child_current_tangent_residual_row_hip_not_required",
+                "g1_full_load_lane::child_current_tangent_residual_row_hip_residual_refresh_not_proven",
+                "g1_full_load_lane::child_current_tangent_residual_row_not_promoted_to_final_state",
                 "g1_full_load_lane::hip_consistency_proof",
                 "g1_full_load_lane::matrix_free_global_krylov",
                 "g1_full_load_lane::current_tangent_residual_row_correction",
