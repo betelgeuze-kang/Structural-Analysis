@@ -6393,7 +6393,7 @@
   "engine_version": "1.0.0",
   "fixed_point_residual_promoted_to_physical": false,
   "g1_closure_claim": false,
-  "generated_at": "2026-07-05T20:58:20.314913+00:00",
+  "generated_at": "2026-07-05T21:43:34.004520+00:00",
   "globalization": "backtracking_line_search",
   "input_checksums": {
     "scripts/build_g1_assembly_contract_seed_report.py": "sha256:9e3c7482cd9af120f91b44365f099686e8e0fbf1fd065b6f960723b8dfa58561",
@@ -6428,7 +6428,7 @@
   ],
   "residual_formula": "F_internal_minus_F_external",
   "schema_version": "g1-assembly-contract-seed-report.v1",
-  "source_commit_sha": "874189c6936c3d0ed58571026ed5d93272a2a768",
+  "source_commit_sha": "2e524a5e2536cfd9fba0d21f15082ea920a75a6b",
   "state_updated_frame_shell_coupled_load_step_history_chain_replay_pass": true,
   "state_updated_frame_shell_coupled_load_step_history_checkpoint_replay_pass": true,
   "state_updated_frame_shell_coupled_load_step_history_direct_parity_pass": true,

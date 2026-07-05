@@ -980,7 +980,7 @@
     "residual_inf_n": 0.42740724991695345,
     "status": "ready"
   },
-  "generated_at": "2026-07-05T21:23:49.434692+00:00",
+  "generated_at": "2026-07-05T21:43:38.290551+00:00",
   "global_tangent_scaled_sweep": {
     "base_residual_inf_n": 0.4278304040181992,
     "best_alpha": 0.00390625,
@@ -1392,9 +1392,9 @@
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_residual_gradient_tiny_sweep_probe.json": "sha256:e106b463733e101d2840d0dbed7b2f90bd7cd5bc8c207055b416f481fe231a43",
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_shell_diag_sweep_probe.json": "sha256:3fb896191af710575f7c4a7198de670b974250b26c3e6a93682ec033677f5ac6",
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_shell_jvp_probe.json": "sha256:1f50ad798a79bccf5a36b3f3fe4306ea17ab4305eca998703f41ae849b88da5e",
-    "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json": "sha256:01a572b83bac366d113d894710e6f5410ae882c560358243d93297175028a5ae",
+    "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json": "sha256:8b827f030e31467809cc8dbc8f7aadcd522ef8cac50149e9179b9b3a2191d29c",
     "implementation/phase1/release_evidence/productization/g1_current_frontier_operator_mismatch_audit.json": "sha256:0868801f649300a959a5d8fecafc0de5243e9961e44aa182c41ce16110380c54",
-    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:382956916ff532ef84df6648062a284d6899e7e62b48b9b8386142e7d4411235",
+    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:4365e9ff4f694775759704966b3418bf630f8637479c7cc7cee59ed11e341ff9",
     "implementation/phase1/release_evidence/productization/g1_frame_tangent_fd_epsilon_sweep_probe.json": "sha256:81c2ad32a078db886d09c6637cd7d1369719d2ed6c8f5fac88ae5ac410c4291d",
     "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe.json": "sha256:5c21b1f8f1d0da7dd2fe223c1457fd63a61707dad2a25289848a9992a0f7c96d",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:40252b8513f8fc1315094cb297b50ae032e62b0607e93fe79168f5f3aa9258a7",
@@ -4832,7 +4832,7 @@
     "row_count": 8,
     "status": "ready"
   },
-  "source_commit_sha": "e3962d1a5465c5b52f79e1aa94b94986764a242f",
+  "source_commit_sha": "2e524a5e2536cfd9fba0d21f15082ea920a75a6b",
   "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe": {
     "assembled_tangent_parity_max_absolute_error": 0.006011962890625,
     "assembled_tangent_parity_max_relative_error": 2.683381287585585e-15,
