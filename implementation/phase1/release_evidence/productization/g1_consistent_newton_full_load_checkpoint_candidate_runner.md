@@ -598,7 +598,7 @@
 - `present`: `False`
 - `executed`: `False`
 - `status`: `partial`
-- `load_scale`: `0.0`
+- `load_scale`: `1.0`
 - `base_direct_residual_inf_n`: `0.0`
 - `final_direct_residual_inf_n`: `0.0`
 - `direct_residual_gate_passed`: `False`

@@ -1,7 +1,7 @@
 {
   "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
-  "generated_at": "2026-07-05T17:15:23.130749+00:00",
-  "source_commit_sha": "777e42c7b97d4670726701099c2c7f497f9a8964",
+  "generated_at": "2026-07-05T19:14:57.129677+00:00",
+  "source_commit_sha": "49990694c8affff1114aea09d3b1bb6aead62cc0",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "reused_evidence": false,
   "status": "partial",
@@ -13,7 +13,7 @@
   "cpu_diagnostic_assembler_used": false,
   "production_hip_residual_jacobian_path": false,
   "rocm_hip_runtime_preflight": {
-    "checked_at": "2026-07-05T17:15:23.132609+00:00",
+    "checked_at": "2026-07-05T19:14:57.131482+00:00",
     "hip_available": false,
     "torch_importable": true,
     "torch_rocm_build": true,
@@ -62,7 +62,7 @@
   "production_rocm_hip_residual_jvp_worker": {
     "schema_version": "production-rocm-hip-residual-jvp-worker-contract.v1",
     "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
-    "source_commit_sha": "777e42c7b97d4670726701099c2c7f497f9a8964",
+    "source_commit_sha": "49990694c8affff1114aea09d3b1bb6aead62cc0",
     "ready": false,
     "status": "blocked",
     "blockers": [
@@ -118,9 +118,9 @@
       },
       "checkpoint_gate": {
         "full_load_required": true,
-        "load_scale": null,
-        "full_load_candidate": false,
-        "gap_to_full_load": null,
+        "load_scale": 1.0,
+        "full_load_candidate": true,
+        "gap_to_full_load": 0.0,
         "full_load_closure_passed": false
       },
       "direct_residual_gate": {
@@ -208,16 +208,23 @@
   },
   "component_only": false,
   "checkpoint": {
-    "path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz"
+    "path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_gate_candidate_step2_candidate.npz",
+    "schema": "mgt-direct-residual-newton-state.v1",
+    "load_scale": 1.0,
+    "full_load_required": true,
+    "full_load_candidate": true,
+    "gap_to_full_load": 0.0,
+    "direct_residual_inf_n": 3.42023849952966e-05,
+    "direct_residual_gate_passed": true
   },
-  "load_scale": null,
-  "shell_pressure_load_path_policy": "all_components",
+  "load_scale": 1.0,
+  "shell_pressure_load_path_policy": "structural_components_only",
   "direction_rows": [],
   "state_scale_sweep": [],
   "runtime_metrics": {
     "setup_and_reference_seconds": 0.0,
     "base_assembly_seconds": 0.0,
-    "total_seconds": 0.8281763370005137
+    "total_seconds": 0.858678101998521
   },
   "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested, but no usable HIP runtime was available. The probe did not fall back to the CPU diagnostic path and does not close G1.",
   "blockers": [

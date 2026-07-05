@@ -207,7 +207,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-07-05T19:08:30.969689+00:00",
+  "generated_at": "2026-07-05T19:16:16.780075+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -226,11 +226,11 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:89244452e11d9d312b43f09684fce29911b4dad50ebdb0711af99df3228c741b",
+      "input_checksum": "sha256:6553d1d485b4513bd49a79fe639f5fb86e65f5ea8c312aea346b6e1d40e7894a",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "787a2e75adeed55c3eaae8aa8e037c7208d38bfa",
+      "source_commit_sha": "49990694c8affff1114aea09d3b1bb6aead62cc0",
       "status": "blocked"
     }
   },
@@ -238,7 +238,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:d2378d95155a66e3cfa3b48424b04a1d0a841cb098cac78d3ee7edc7f71cec91",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:89244452e11d9d312b43f09684fce29911b4dad50ebdb0711af99df3228c741b"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:6553d1d485b4513bd49a79fe639f5fb86e65f5ea8c312aea346b6e1d40e7894a"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "blocked",
@@ -1795,22 +1795,7 @@
           "hip_consistency_proof_worker::runtime::dev_kfd_missing",
           "hip_consistency_proof_worker_g1_closure_gate_not_ready"
         ],
-        "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
-        ],
+        "changed_paths_since_source_commit": [],
         "consistent_residual_jacobian_newton_gate_passed": false,
         "cpu_diagnostic_assembler_used": false,
         "execution_mode": "hip_required_runtime_unavailable_no_cpu_fallback",
@@ -1864,9 +1849,9 @@
           "dev_kfd_missing",
           "dev_dri_missing"
         ],
-        "source_commit_sha": "777e42c7b97d4670726701099c2c7f497f9a8964",
+        "source_commit_sha": "49990694c8affff1114aea09d3b1bb6aead62cc0",
         "source_state_fresh": true,
-        "source_state_kind": "non_g1_hip_paths_changed",
+        "source_state_kind": "exact",
         "status": "partial"
       },
       "full_load_hip_newton_hip_consistency_proof_ready": false,
@@ -2232,6 +2217,6 @@
       }
     }
   },
-  "source_commit_sha": "787a2e75adeed55c3eaae8aa8e037c7208d38bfa",
+  "source_commit_sha": "49990694c8affff1114aea09d3b1bb6aead62cc0",
   "status": "blocked"
 }
