@@ -4,7 +4,7 @@
     "phase1_core_api_contract": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
     "product_readiness_snapshot": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
   },
-  "blocker_count": 27,
+  "blocker_count": 26,
   "blockers": [
     "g1::full_load_gate_not_closed",
     "g1::full_mesh_nonlinear_equilibrium_not_closed",
@@ -17,7 +17,6 @@
     "stale_or_inconsistent:source_commit_mismatch:developer_preview_final_gate_owner_packet",
     "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
     "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-    "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
     "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
     "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
     "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
@@ -96,14 +95,13 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 21,
+      "blocker_count": 20,
       "blockers": [
         "human_ux::observation_file_missing",
         "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
         "stale_or_inconsistent:source_commit_mismatch:developer_preview_final_gate_owner_packet",
         "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
         "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-        "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
         "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
         "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
         "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
@@ -243,7 +241,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-07-05T15:37:05.492501+00:00",
+  "generated_at": "2026-07-05T15:41:19.547247+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -262,11 +260,11 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:7bf4595a44f2ef55fb6b1ee5c60b689b61e00dbb25c0d06e5504b7d21c8dd770",
+      "input_checksum": "sha256:e1cbd26fb8ef1207b4d18b5199522abe87c3df1173aa1d5bea181113a991920f",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "2235c69028f426de69e98755f9cfbbbf3eaa2b0e",
+      "source_commit_sha": "59fc1a7ef83707ddcd1e610a6a1e65280406ab69",
       "status": "stale_or_inconsistent"
     }
   },
@@ -274,7 +272,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:393aaccf5942b921e58c8a1fe903a750c0ad6a4f966fdcafb09147a45f155f94",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:7bf4595a44f2ef55fb6b1ee5c60b689b61e00dbb25c0d06e5504b7d21c8dd770"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:e1cbd26fb8ef1207b4d18b5199522abe87c3df1173aa1d5bea181113a991920f"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "stale_or_inconsistent",
@@ -2037,7 +2035,7 @@
       },
       "release freshness/sync": {
         "blocked": true,
-        "blocker_count": 21,
+        "blocker_count": 20,
         "blockers": [
           "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
           "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
@@ -2047,7 +2045,6 @@
           "stale_or_inconsistent:source_commit_mismatch:developer_preview_final_gate_owner_packet",
           "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
           "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-          "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
           "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
           "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
           "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
@@ -2265,6 +2262,6 @@
       }
     }
   },
-  "source_commit_sha": "2235c69028f426de69e98755f9cfbbbf3eaa2b0e",
+  "source_commit_sha": "59fc1a7ef83707ddcd1e610a6a1e65280406ab69",
   "status": "blocked"
 }
