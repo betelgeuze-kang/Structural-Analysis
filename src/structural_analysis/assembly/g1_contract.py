@@ -270,6 +270,67 @@ def assembly_result_from_state_updated_material_newton_state(state: Any) -> Asse
     )
 
 
+def assembly_result_from_state_updated_frame_shell_coupled_material_state(
+    state: Any,
+) -> AssemblyResult:
+    """Adapt a coupled frame/shell state-updated material seed into G1."""
+
+    component_material_states = dict(state.component_material_states)
+    frame_material = dict(component_material_states.get("frame") or {})
+    shell_material = dict(component_material_states.get("shell") or {})
+    frame_updated = frame_material.get("path_dependent_state_updated") is True
+    shell_updated = shell_material.get("path_dependent_state_updated") is True
+    component_return_mappings = {
+        "frame": frame_material.get("return_mapping"),
+        "shell": shell_material.get("return_mapping"),
+    }
+    return AssemblyResult(
+        residual_formula=state.residual_formula,
+        residual_free=state.residual_kn,
+        tangent_free=state.jacobian_kn_per_m,
+        internal_forces=state.internal_forces_kn,
+        external_forces=state.external_forces_kn,
+        material_state_next={
+            "state_schema": "g1-material-state-next.frame-shell-coupled-state-updated-seed.v1",
+            "assembly_scope": "state_updated_frame_shell_coupled_material_seed",
+            "state_updated_material_newton": True,
+            "path_dependent_state": True,
+            "path_dependent_state_updated": frame_updated or shell_updated,
+            "frame_shell_state_updated_material_coupling": True,
+            "frame_shell_coupling_stiffness_kn_per_m": (
+                state.frame_shell_coupling_stiffness_kn_per_m
+            ),
+            "component_return_mappings": component_return_mappings,
+            "component_material_states": component_material_states,
+            "component_internal_forces_kn": dict(state.component_internal_forces_kn),
+            "frame_material_state_updated": frame_updated,
+            "shell_material_state_updated": shell_updated,
+        },
+        metrics={
+            "assembly_scope": "state_updated_frame_shell_coupled_material_seed",
+            "free_dof_labels": list(state.free_dof_labels),
+            "free_dof_count": len(state.free_dof_labels),
+            "residual_inf_norm": _inf_norm(state.residual_kn),
+            "tangent_inf_norm": _inf_norm(state.jacobian_kn_per_m),
+            "state_updated_material_newton": True,
+            "path_dependent_state": True,
+            "path_dependent_state_updated": frame_updated or shell_updated,
+            "frame_shell_state_updated_material_coupling": True,
+            "frame_material_state_updated": frame_updated,
+            "shell_material_state_updated": shell_updated,
+            "material_algorithmic_tangent_source": (
+                "component_return_mapping_consistent_tangent_plus_coupling"
+            ),
+            "material_state_persistence_required": True,
+            "fixed_point_residual_used_as_physical": False,
+            "map_residual_used_as_physical": False,
+            "regularized_fixed_point_substitute": False,
+            "solver_normalized_residual_used_as_physical": False,
+            "g1_closure_claim": False,
+        },
+    )
+
+
 def assemble_g1_state(model: Any, state: Any | None = None) -> AssemblyResult:
     """Dispatch an existing assembly state into the G1 physical contract.
 
@@ -279,6 +340,13 @@ def assemble_g1_state(model: Any, state: Any | None = None) -> AssemblyResult:
     """
 
     candidate = model if state is None else state
+    if hasattr(candidate, "component_material_states") and hasattr(
+        candidate,
+        "frame_shell_coupling_stiffness_kn_per_m",
+    ):
+        return assembly_result_from_state_updated_frame_shell_coupled_material_state(
+            candidate
+        )
     if hasattr(candidate, "material_state_update") and hasattr(
         candidate,
         "material_algorithm_tangent_kn_per_m",
@@ -290,7 +358,7 @@ def assemble_g1_state(model: Any, state: Any | None = None) -> AssemblyResult:
         return assembly_result_from_frame_shell_material_coupled_state(candidate)
     raise TypeError(
         "assemble_g1_state supports AxialChainAssemblyState and "
-        "FrameShellMaterialCoupledState seeds only."
+        "FrameShellMaterialCoupledState and state-updated material seeds only."
     )
 
 

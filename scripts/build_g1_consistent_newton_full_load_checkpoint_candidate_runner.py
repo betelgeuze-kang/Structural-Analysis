@@ -5453,6 +5453,87 @@ def build_runner_packet(
                 )
                 is True
             ),
+            "phase2_state_updated_material_path_history_pass": (
+                phase2_material_newton_breadth_summary.get(
+                    "state_updated_material_path_history_passed"
+                )
+                is True
+            ),
+            "phase2_state_updated_material_path_history_count": int(
+                _as_float(
+                    phase2_material_newton_breadth_summary.get(
+                        "state_updated_material_path_history_count"
+                    )
+                )
+            ),
+            "phase2_state_updated_material_path_history_step_count": int(
+                _as_float(
+                    phase2_material_newton_breadth_summary.get(
+                        "state_updated_material_path_history_step_count"
+                    )
+                )
+            ),
+            "phase2_state_updated_material_path_history_update_step_count": int(
+                _as_float(
+                    phase2_material_newton_breadth_summary.get(
+                        "state_updated_material_path_history_update_step_count"
+                    )
+                )
+            ),
+            "phase2_state_updated_material_path_history_committed_chain_pass": (
+                phase2_material_newton_breadth_summary.get(
+                    "state_updated_material_path_history_committed_chain_pass"
+                )
+                is True
+            ),
+            "phase2_state_updated_material_path_history_checkpoint_replay_pass": (
+                phase2_material_newton_breadth_summary.get(
+                    "state_updated_material_path_history_checkpoint_replay_pass"
+                )
+                is True
+            ),
+            "phase2_state_updated_material_path_history_chain_replay_pass": (
+                phase2_material_newton_breadth_summary.get(
+                    "state_updated_material_path_history_chain_replay_pass"
+                )
+                is True
+            ),
+            "phase2_state_updated_material_path_history_jvp_pass": (
+                phase2_material_newton_breadth_summary.get(
+                    "state_updated_material_path_history_jvp_pass"
+                )
+                is True
+            ),
+            "phase2_state_updated_material_path_history_direct_parity_pass": (
+                phase2_material_newton_breadth_summary.get(
+                    "state_updated_material_path_history_direct_parity_pass"
+                )
+                is True
+            ),
+            "phase2_state_updated_frame_shell_coupled_material_pass": (
+                phase2_material_newton_breadth_summary.get(
+                    "state_updated_frame_shell_coupled_material_seed_pass"
+                )
+                is True
+            ),
+            "phase2_state_updated_frame_shell_coupled_material_jvp_pass": (
+                phase2_material_newton_breadth_summary.get(
+                    "state_updated_frame_shell_coupled_material_jvp_pass"
+                )
+                is True
+            ),
+            "phase2_state_updated_frame_shell_coupled_material_direct_parity_pass": (
+                phase2_material_newton_breadth_summary.get(
+                    "state_updated_frame_shell_coupled_material_direct_parity_pass"
+                )
+                is True
+            ),
+            "phase2_state_updated_frame_shell_coupled_material_component_updates_pass": (
+                phase2_material_newton_breadth_summary.get(
+                    "state_updated_frame_shell_coupled_material_component_updates_pass"
+                )
+                is True
+            ),
             "phase2_state_updated_material_breadth_closed": (
                 phase2_material_newton_breadth_summary.get(
                     "state_updated_material_newton_breadth_closed"
@@ -6258,6 +6339,20 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"`{material_breadth.get('state_updated_material_newton_breadth_seed_coverage_ready')}`",
         "- `phase2_state_updated_material_seed_case_count`: "
         f"`{material_breadth.get('state_updated_material_newton_seed_case_count')}`",
+        "- `phase2_state_updated_material_path_history_passed`: "
+        f"`{material_breadth.get('state_updated_material_path_history_passed')}`",
+        "- `phase2_state_updated_material_path_history_step_count`: "
+        f"`{material_breadth.get('state_updated_material_path_history_step_count')}`",
+        "- `phase2_state_updated_material_path_history_committed_chain_pass`: "
+        f"`{material_breadth.get('state_updated_material_path_history_committed_chain_pass')}`",
+        "- `phase2_state_updated_material_path_history_chain_replay_pass`: "
+        f"`{material_breadth.get('state_updated_material_path_history_chain_replay_pass')}`",
+        "- `phase2_state_updated_frame_shell_coupled_material_seed_pass`: "
+        f"`{material_breadth.get('state_updated_frame_shell_coupled_material_seed_pass')}`",
+        "- `phase2_state_updated_frame_shell_coupled_material_jvp_pass`: "
+        f"`{material_breadth.get('state_updated_frame_shell_coupled_material_jvp_pass')}`",
+        "- `phase2_state_updated_frame_shell_coupled_material_component_updates_pass`: "
+        f"`{material_breadth.get('state_updated_frame_shell_coupled_material_component_updates_pass')}`",
         "- `phase2_state_updated_material_breadth_closed`: "
         f"`{material_breadth.get('state_updated_material_newton_breadth_closed')}`",
         "- `phase2_material_mesh_newton_load_step_gate_passed`: "

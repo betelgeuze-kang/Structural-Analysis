@@ -10,6 +10,8 @@ from pathlib import Path
 import sys
 from typing import Any
 
+import numpy as np
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = Path(__file__).resolve().parents[1]
 SRC_ROOT = ROOT / "src"
@@ -25,10 +27,16 @@ from structural_analysis.assembly.g1_contract import (  # noqa: E402
     finite_difference_g1_jvp_check,
 )
 from structural_analysis.assembly.material_state import (  # noqa: E402
+    assemble_state_updated_frame_shell_coupled_material_state,
     assemble_state_updated_material_newton_state,
     check_state_updated_material_checkpoint_replay,
+    check_state_updated_material_path_history_replay,
+    default_state_updated_frame_shell_coupled_material_problem,
     default_state_updated_bilinear_material_breadth_problems,
+    material_path_history_checkpoint_payload,
     material_state_checkpoint_payload,
+    solve_default_state_updated_material_path_histories,
+    solve_state_updated_frame_shell_coupled_material_newton,
     solve_state_updated_material_newton,
 )
 from structural_analysis.solvers.nonlinear.newton import (  # noqa: E402
@@ -183,8 +191,11 @@ def _state_updated_material_seed_row(
     problem: Any,
     *,
     config: NewtonRaphsonConfig,
+    solution: Any | None = None,
+    state: Any | None = None,
 ) -> dict[str, Any]:
-    solution, state = solve_state_updated_material_newton(problem, config=config)
+    if solution is None or state is None:
+        solution, state = solve_state_updated_material_newton(problem, config=config)
     assembly_result = assemble_g1_state(problem, state)
     checkpoint = material_state_checkpoint_payload(problem, state)
     checkpoint_replay = check_state_updated_material_checkpoint_replay(
@@ -257,6 +268,8 @@ def _state_updated_material_seed_row(
         "material_state_replay_match": bool(
             checkpoint_replay["material_state_replay_match"]
         ),
+        "final_displacement_m": float(solution.free_displacements_m[0]),
+        "material_state_next": material_state,
         "g1_closure_claim": False,
         "material_newton_closure_claim": False,
         "promotes_g1_closure": False,
@@ -265,6 +278,235 @@ def _state_updated_material_seed_row(
 
 def _sorted_unique(rows: list[dict[str, Any]], key: str) -> list[str]:
     return sorted({str(row.get(key) or "") for row in rows})
+
+
+def _state_updated_frame_shell_coupled_material_seed_payload(
+    *,
+    config: NewtonRaphsonConfig,
+) -> dict[str, Any]:
+    problem = default_state_updated_frame_shell_coupled_material_problem()
+    solution, final_state = solve_state_updated_frame_shell_coupled_material_newton(
+        problem,
+        config=config,
+    )
+    assembly_result = assemble_g1_state(problem, final_state)
+    jvp_check = finite_difference_g1_jvp_check(
+        lambda free_u: assemble_g1_state(
+            problem,
+            assemble_state_updated_frame_shell_coupled_material_state(
+                problem,
+                free_u,
+            ),
+        ),
+        solution.free_displacements_m,
+    )
+    direct_parity = direct_residual_newton_parity_check(
+        lambda free_u: assemble_g1_state(
+            problem,
+            assemble_state_updated_frame_shell_coupled_material_state(
+                problem,
+                free_u,
+            ),
+        ),
+        solution,
+    )
+    direct_parity_payload = {
+        **direct_parity,
+        "pass": bool(direct_parity["cpu_seed_consistent_newton_gate_passed"]),
+    }
+    material_state = dict(assembly_result.material_state_next)
+    frame_material = dict(
+        material_state.get("component_material_states", {}).get("frame") or {}
+    )
+    shell_material = dict(
+        material_state.get("component_material_states", {}).get("shell") or {}
+    )
+    metrics = solution.metrics
+    frame_shell_coupled_material_pass = (
+        solution.status == "ready"
+        and bool(metrics.get("contract_pass"))
+        and bool(metrics.get("residual_gate_passed"))
+        and bool(metrics.get("increment_gate_passed"))
+        and metrics.get("regularization_used") is False
+        and metrics.get("fallback_used") is False
+        and bool(jvp_check["pass"])
+        and bool(direct_parity_payload["pass"])
+        and material_state.get("frame_material_state_updated") is True
+        and material_state.get("shell_material_state_updated") is True
+    )
+    return {
+        "schema_version": "phase2-state-updated-frame-shell-coupled-material-seed.v1",
+        "status": "ready" if frame_shell_coupled_material_pass else "blocked",
+        "contract_pass": frame_shell_coupled_material_pass,
+        "case_id": problem.case_id,
+        "residual_contract": RESIDUAL_FORMULA,
+        "residual_formula": RESIDUAL_FORMULA,
+        "globalization": GLOBALIZATION,
+        "state_updated_material_newton": True,
+        "frame_shell_state_updated_material_coupling_seed_pass": (
+            frame_shell_coupled_material_pass
+        ),
+        "frame_material_state_updated": (
+            material_state.get("frame_material_state_updated") is True
+        ),
+        "shell_material_state_updated": (
+            material_state.get("shell_material_state_updated") is True
+        ),
+        "residual_gate_passed": bool(metrics.get("residual_gate_passed")),
+        "increment_gate_passed": bool(metrics.get("increment_gate_passed")),
+        "regularization_used": metrics.get("regularization_used"),
+        "fallback_used": metrics.get("fallback_used"),
+        "jvp_finite_difference_pass": bool(jvp_check["pass"]),
+        "direct_residual_newton_parity_pass": bool(direct_parity_payload["pass"]),
+        "free_dof_count": 2,
+        "final_free_displacements_m": [
+            float(value) for value in solution.free_displacements_m
+        ],
+        "final_residual_inf_kn": float(np.max(np.abs(assembly_result.residual_free))),
+        "final_jacobian_kn_per_m": assembly_result.tangent_free.tolist(),
+        "component_return_mappings": material_state["component_return_mappings"],
+        "component_material_states": material_state["component_material_states"],
+        "component_internal_forces_kn": material_state[
+            "component_internal_forces_kn"
+        ],
+        "jvp_finite_difference_check": jvp_check,
+        "direct_residual_newton_parity_check": direct_parity_payload,
+        "convergence_history": solution.convergence_history,
+        "g1_closure_claim": False,
+        "material_newton_closure_claim": False,
+        "claim_boundary": (
+            "Two-DOF frame/shell coupled seed where each component uses a "
+            "state-updated material return mapping and the global residual/Jacobian "
+            "includes a symmetric frame-shell coupling tangent. This is still a "
+            "small deterministic seed and does not close full-mesh/full-load G1 "
+            "material Newton breadth."
+        ),
+    }
+
+
+def _build_state_updated_material_path_history_payload(
+    *,
+    config: NewtonRaphsonConfig,
+) -> dict[str, Any]:
+    histories: list[dict[str, Any]] = []
+    for history in solve_default_state_updated_material_path_histories(
+        config=config,
+    ):
+        history_checkpoint = material_path_history_checkpoint_payload(history)
+        history_checkpoint_roundtrip = json.loads(
+            json.dumps(history_checkpoint, ensure_ascii=False)
+        )
+        history_checkpoint_replay = check_state_updated_material_path_history_replay(
+            history_checkpoint_roundtrip
+        )
+        step_rows: list[dict[str, Any]] = []
+        for step in history.steps:
+            row = _state_updated_material_seed_row(
+                step.problem,
+                config=config,
+                solution=step.solution,
+                state=step.state,
+            )
+            step_rows.append(
+                {
+                    **row,
+                    "history_step_index": step.history_step_index,
+                    "external_force_kn": step.external_force_kn,
+                    "carried_committed_state_previous": (
+                        step.carried_committed_state_previous
+                    ),
+                    "previous_committed_state_matches_carried_state": (
+                        step.previous_committed_state_matches_carried_state
+                    ),
+                }
+            )
+
+        history_passed = history.committed_state_chain_pass and all(
+            row["checkpoint_replay_pass"]
+            and row["jvp_finite_difference_pass"]
+            and row["direct_residual_newton_parity_pass"]
+            and row["regularization_used"] is False
+            and row["fallback_used"] is False
+            for row in step_rows
+        ) and bool(history_checkpoint_replay["pass"])
+        histories.append(
+            {
+                "history_id": history.history_id,
+                "status": "ready" if history_passed else "blocked",
+                "contract_pass": history_passed,
+                "step_count": len(step_rows),
+                "committed_state_chain_pass": history.committed_state_chain_pass,
+                "path_dependent_update_step_count": (
+                    history.path_dependent_update_step_count
+                ),
+                "checkpoint_replay_pass": all(
+                    row["checkpoint_replay_pass"] for row in step_rows
+                )
+                and bool(history_checkpoint_replay["step_replay_pass"]),
+                "chain_replay_pass": bool(
+                    history_checkpoint_replay[
+                        "committed_state_chain_replay_pass"
+                    ]
+                ),
+                "path_history_checkpoint_replay_pass": bool(
+                    history_checkpoint_replay["pass"]
+                ),
+                "path_history_checkpoint_replay_check": (
+                    history_checkpoint_replay
+                ),
+                "jvp_finite_difference_pass": all(
+                    row["jvp_finite_difference_pass"] for row in step_rows
+                ),
+                "direct_residual_newton_parity_pass": all(
+                    row["direct_residual_newton_parity_pass"] for row in step_rows
+                ),
+                "steps": step_rows,
+            }
+        )
+
+    history_contract_pass = all(history["contract_pass"] for history in histories)
+    return {
+        "schema_version": "phase2-material-newton-breadth-path-history-seeds.v1",
+        "status": "ready" if history_contract_pass else "blocked",
+        "contract_pass": history_contract_pass,
+        "residual_contract": RESIDUAL_FORMULA,
+        "residual_formula": RESIDUAL_FORMULA,
+        "globalization": GLOBALIZATION,
+        "g1_closure_claim": False,
+        "material_newton_closure_claim": False,
+        "history_count": len(histories),
+        "step_count": sum(int(history["step_count"]) for history in histories),
+        "path_dependent_update_step_count": sum(
+            int(history["path_dependent_update_step_count"])
+            for history in histories
+        ),
+        "checkpoint_replay_pass": all(
+            history["checkpoint_replay_pass"] for history in histories
+        ),
+        "chain_replay_pass": all(
+            history["chain_replay_pass"] for history in histories
+        ),
+        "path_history_checkpoint_replay_pass": all(
+            history["path_history_checkpoint_replay_pass"] for history in histories
+        ),
+        "jvp_finite_difference_pass": all(
+            history["jvp_finite_difference_pass"] for history in histories
+        ),
+        "direct_residual_newton_parity_pass": all(
+            history["direct_residual_newton_parity_pass"] for history in histories
+        ),
+        "committed_state_chain_pass": all(
+            history["committed_state_chain_pass"] for history in histories
+        ),
+        "histories": histories,
+        "claim_boundary": (
+            "Path-history material Newton seed suite that carries committed "
+            "material state from one load step into the next across unload, "
+            "reverse-yield, and reload steps. It strengthens path-dependent "
+            "state replay evidence but remains a deterministic seed artifact, "
+            "not a full-mesh/full-load G1 material Newton breadth closure."
+        ),
+    }
 
 
 def _build_state_updated_material_seed_payload(
@@ -288,10 +530,18 @@ def _build_state_updated_material_seed_payload(
     material_state_persistence_replay_passed = all(
         row["checkpoint_replay_pass"] for row in rows
     )
+    path_history_payload = _build_state_updated_material_path_history_payload(
+        config=config,
+    )
+    frame_shell_coupled_payload = (
+        _state_updated_frame_shell_coupled_material_seed_payload(config=config)
+    )
     coverage_ready = (
         state_updated_seed_passed
         and material_state_persistence_replay_passed
         and material_jvp_max_relative_error <= MATERIAL_JVP_RELATIVE_ERROR_TOLERANCE
+        and path_history_payload["contract_pass"]
+        and frame_shell_coupled_payload["contract_pass"]
         and {"reinforced_concrete", "steel", "src_composite"}.issubset(
             set(material_families)
         )
@@ -331,6 +581,55 @@ def _build_state_updated_material_seed_payload(
         "material_state_persistence_replay_seed_passed": (
             material_state_persistence_replay_passed
         ),
+        "state_updated_material_path_history_passed": (
+            path_history_payload["contract_pass"]
+        ),
+        "state_updated_material_path_history_count": (
+            path_history_payload["history_count"]
+        ),
+        "state_updated_material_path_history_step_count": (
+            path_history_payload["step_count"]
+        ),
+        "state_updated_material_path_history_update_step_count": (
+            path_history_payload["path_dependent_update_step_count"]
+        ),
+        "state_updated_material_path_history_checkpoint_replay_pass": (
+            path_history_payload["checkpoint_replay_pass"]
+        ),
+        "state_updated_material_path_history_chain_replay_pass": (
+            path_history_payload["chain_replay_pass"]
+        ),
+        "state_updated_material_path_history_whole_checkpoint_replay_pass": (
+            path_history_payload["path_history_checkpoint_replay_pass"]
+        ),
+        "state_updated_material_path_history_jvp_pass": (
+            path_history_payload["jvp_finite_difference_pass"]
+        ),
+        "state_updated_material_path_history_direct_parity_pass": (
+            path_history_payload["direct_residual_newton_parity_pass"]
+        ),
+        "state_updated_material_path_history_committed_chain_pass": (
+            path_history_payload["committed_state_chain_pass"]
+        ),
+        "state_updated_frame_shell_coupled_material_seed_pass": (
+            frame_shell_coupled_payload["contract_pass"]
+        ),
+        "state_updated_frame_shell_coupled_material_jvp_pass": (
+            frame_shell_coupled_payload["jvp_finite_difference_pass"]
+        ),
+        "state_updated_frame_shell_coupled_material_direct_parity_pass": (
+            frame_shell_coupled_payload["direct_residual_newton_parity_pass"]
+        ),
+        "state_updated_frame_shell_coupled_material_residual_gate_passed": (
+            frame_shell_coupled_payload["residual_gate_passed"]
+        ),
+        "state_updated_frame_shell_coupled_material_increment_gate_passed": (
+            frame_shell_coupled_payload["increment_gate_passed"]
+        ),
+        "state_updated_frame_shell_coupled_material_component_updates_pass": (
+            frame_shell_coupled_payload["frame_material_state_updated"]
+            and frame_shell_coupled_payload["shell_material_state_updated"]
+        ),
         "material_jvp_max_relative_error": material_jvp_max_relative_error,
         "material_jvp_relative_error_tolerance": (
             MATERIAL_JVP_RELATIVE_ERROR_TOLERANCE
@@ -351,6 +650,10 @@ def _build_state_updated_material_seed_payload(
         "state_updated_material_newton_breadth_seed_coverage_ready": coverage_ready,
         "state_updated_material_newton_breadth_closed": False,
         "state_updated_seed_cases": rows,
+        "state_updated_path_history_seeds": path_history_payload,
+        "state_updated_frame_shell_coupled_material_seed": (
+            frame_shell_coupled_payload
+        ),
         "blockers_remaining": [
             "full_mesh_full_load_nonlinear_equilibrium_not_closed",
             "frame_shell_material_coupling_not_closed",
@@ -367,9 +670,11 @@ def _build_state_updated_material_seed_payload(
             "compression return-mapping cases. Each seed uses the physical "
             "F_internal_minus_F_external residual, a consistent algorithmic tangent, "
             "finite-difference JVP, direct residual/Newton residual parity, and "
-            "checkpoint replay. This remains a deterministic seed artifact; it does "
-            "not close full-mesh/full-load material Newton breadth, sparse production "
-            "assembly, or ROCm/HIP parity."
+            "checkpoint replay. It also carries committed material state through "
+            "small unload/reverse/reload path histories and a two-DOF frame/shell "
+            "coupled state-updated material seed. This remains a deterministic seed "
+            "artifact; it does not close full-mesh/full-load material Newton breadth, "
+            "sparse production assembly, or ROCm/HIP parity."
         ),
     }
 
@@ -502,6 +807,82 @@ def build_material_newton_breadth_artifacts(
         "material_state_persistence_replay_seed_passed": (
             state_updated_seed_payload["material_state_persistence_replay_seed_passed"]
         ),
+        "state_updated_material_path_history_passed": (
+            state_updated_seed_payload["state_updated_material_path_history_passed"]
+        ),
+        "state_updated_material_path_history_count": (
+            state_updated_seed_payload["state_updated_material_path_history_count"]
+        ),
+        "state_updated_material_path_history_step_count": (
+            state_updated_seed_payload[
+                "state_updated_material_path_history_step_count"
+            ]
+        ),
+        "state_updated_material_path_history_update_step_count": (
+            state_updated_seed_payload[
+                "state_updated_material_path_history_update_step_count"
+            ]
+        ),
+        "state_updated_material_path_history_checkpoint_replay_pass": (
+            state_updated_seed_payload[
+                "state_updated_material_path_history_checkpoint_replay_pass"
+            ]
+        ),
+        "state_updated_material_path_history_chain_replay_pass": (
+            state_updated_seed_payload[
+                "state_updated_material_path_history_chain_replay_pass"
+            ]
+        ),
+        "state_updated_material_path_history_whole_checkpoint_replay_pass": (
+            state_updated_seed_payload[
+                "state_updated_material_path_history_whole_checkpoint_replay_pass"
+            ]
+        ),
+        "state_updated_material_path_history_jvp_pass": (
+            state_updated_seed_payload[
+                "state_updated_material_path_history_jvp_pass"
+            ]
+        ),
+        "state_updated_material_path_history_direct_parity_pass": (
+            state_updated_seed_payload[
+                "state_updated_material_path_history_direct_parity_pass"
+            ]
+        ),
+        "state_updated_material_path_history_committed_chain_pass": (
+            state_updated_seed_payload[
+                "state_updated_material_path_history_committed_chain_pass"
+            ]
+        ),
+        "state_updated_frame_shell_coupled_material_seed_pass": (
+            state_updated_seed_payload[
+                "state_updated_frame_shell_coupled_material_seed_pass"
+            ]
+        ),
+        "state_updated_frame_shell_coupled_material_jvp_pass": (
+            state_updated_seed_payload[
+                "state_updated_frame_shell_coupled_material_jvp_pass"
+            ]
+        ),
+        "state_updated_frame_shell_coupled_material_direct_parity_pass": (
+            state_updated_seed_payload[
+                "state_updated_frame_shell_coupled_material_direct_parity_pass"
+            ]
+        ),
+        "state_updated_frame_shell_coupled_material_residual_gate_passed": (
+            state_updated_seed_payload[
+                "state_updated_frame_shell_coupled_material_residual_gate_passed"
+            ]
+        ),
+        "state_updated_frame_shell_coupled_material_increment_gate_passed": (
+            state_updated_seed_payload[
+                "state_updated_frame_shell_coupled_material_increment_gate_passed"
+            ]
+        ),
+        "state_updated_frame_shell_coupled_material_component_updates_pass": (
+            state_updated_seed_payload[
+                "state_updated_frame_shell_coupled_material_component_updates_pass"
+            ]
+        ),
         "material_jvp_max_relative_error": (
             state_updated_seed_payload["material_jvp_max_relative_error"]
         ),
@@ -562,7 +943,9 @@ def build_material_newton_breadth_artifacts(
             "F_internal_minus_F_external residual contract. This includes scalar "
             "analytic material laws plus a state-updated frame/shell/composite "
             "return-mapping seed suite with material-state checkpoint replay and "
-            "finite-difference JVP checks. It does not close G1 full-mesh/full-load "
+            "finite-difference JVP checks, plus committed-state path histories for "
+            "unload/reverse/reload sequences and a two-DOF frame/shell coupled "
+            "state-updated material seed. It does not close G1 full-mesh/full-load "
             "nonlinear equilibrium, sparse production matrix backends, or production "
             "GPU/HIP gates."
         ),

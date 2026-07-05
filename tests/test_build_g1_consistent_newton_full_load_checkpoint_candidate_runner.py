@@ -327,6 +327,19 @@ def _phase2_material_newton_breadth_summary_payload() -> dict:
         "path_dependent_material_update_seed_case_count": 6,
         "path_dependent_material_replay_seed_case_count": 9,
         "material_state_persistence_replay_seed_passed": True,
+        "state_updated_material_path_history_passed": True,
+        "state_updated_material_path_history_count": 2,
+        "state_updated_material_path_history_step_count": 7,
+        "state_updated_material_path_history_update_step_count": 4,
+        "state_updated_material_path_history_checkpoint_replay_pass": True,
+        "state_updated_material_path_history_chain_replay_pass": True,
+        "state_updated_material_path_history_jvp_pass": True,
+        "state_updated_material_path_history_direct_parity_pass": True,
+        "state_updated_material_path_history_committed_chain_pass": True,
+        "state_updated_frame_shell_coupled_material_seed_pass": True,
+        "state_updated_frame_shell_coupled_material_jvp_pass": True,
+        "state_updated_frame_shell_coupled_material_direct_parity_pass": True,
+        "state_updated_frame_shell_coupled_material_component_updates_pass": True,
         "material_jvp_relative_error_pass": True,
         "material_jvp_max_relative_error": 8.429443131654742e-09,
         "frame_material_newton_seed_pass": True,
@@ -352,6 +365,55 @@ def _phase2_material_newton_breadth_state_updated_seeds_payload() -> dict:
         "state_updated_material_newton_seed_case_count": 9,
         "state_updated_material_newton_breadth_seed_coverage_ready": True,
         "state_updated_material_newton_breadth_closed": False,
+        "state_updated_material_path_history_passed": True,
+        "state_updated_material_path_history_count": 2,
+        "state_updated_material_path_history_step_count": 7,
+        "state_updated_material_path_history_update_step_count": 4,
+        "state_updated_material_path_history_checkpoint_replay_pass": True,
+        "state_updated_material_path_history_chain_replay_pass": True,
+        "state_updated_material_path_history_jvp_pass": True,
+        "state_updated_material_path_history_direct_parity_pass": True,
+        "state_updated_material_path_history_committed_chain_pass": True,
+        "state_updated_frame_shell_coupled_material_seed_pass": True,
+        "state_updated_frame_shell_coupled_material_jvp_pass": True,
+        "state_updated_frame_shell_coupled_material_direct_parity_pass": True,
+        "state_updated_frame_shell_coupled_material_component_updates_pass": True,
+        "state_updated_path_history_seeds": {
+            "schema_version": (
+                "phase2-material-newton-breadth-path-history-seeds.v1"
+            ),
+            "status": "ready",
+            "contract_pass": True,
+            "history_count": 2,
+            "step_count": 7,
+            "path_dependent_update_step_count": 4,
+            "checkpoint_replay_pass": True,
+            "chain_replay_pass": True,
+            "path_history_checkpoint_replay_pass": True,
+            "jvp_finite_difference_pass": True,
+            "direct_residual_newton_parity_pass": True,
+            "committed_state_chain_pass": True,
+            "histories": [
+                {
+                    "history_id": "rc_frame_fiber_cyclic_reversal_history",
+                    "contract_pass": True,
+                    "step_count": 4,
+                    "path_dependent_update_step_count": 2,
+                }
+            ],
+        },
+        "state_updated_frame_shell_coupled_material_seed": {
+            "schema_version": (
+                "phase2-state-updated-frame-shell-coupled-material-seed.v1"
+            ),
+            "status": "ready",
+            "contract_pass": True,
+            "frame_shell_state_updated_material_coupling_seed_pass": True,
+            "frame_material_state_updated": True,
+            "shell_material_state_updated": True,
+            "jvp_finite_difference_pass": True,
+            "direct_residual_newton_parity_pass": True,
+        },
         "state_updated_seed_cases": [
             {
                 "case_id": "g1_state_updated_shell_layer_bending_seed",
@@ -3734,6 +3796,70 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     assert payload["summary"]["phase2_state_updated_material_seed_case_count"] == 9
     assert payload["summary"]["phase2_state_updated_material_jvp_pass"] is True
     assert payload["summary"]["phase2_state_updated_material_replay_pass"] is True
+    assert payload["summary"]["phase2_state_updated_material_path_history_pass"] is True
+    assert payload["summary"]["phase2_state_updated_material_path_history_count"] == 2
+    assert (
+        payload["summary"]["phase2_state_updated_material_path_history_step_count"]
+        == 7
+    )
+    assert (
+        payload["summary"][
+            "phase2_state_updated_material_path_history_update_step_count"
+        ]
+        == 4
+    )
+    assert (
+        payload["summary"][
+            "phase2_state_updated_material_path_history_committed_chain_pass"
+        ]
+        is True
+    )
+    assert (
+        payload["summary"][
+            "phase2_state_updated_material_path_history_checkpoint_replay_pass"
+        ]
+        is True
+    )
+    assert (
+        payload["summary"][
+            "phase2_state_updated_material_path_history_chain_replay_pass"
+        ]
+        is True
+    )
+    assert (
+        payload["summary"]["phase2_state_updated_material_path_history_jvp_pass"]
+        is True
+    )
+    assert (
+        payload["summary"][
+            "phase2_state_updated_material_path_history_direct_parity_pass"
+        ]
+        is True
+    )
+    assert (
+        payload["summary"][
+            "phase2_state_updated_frame_shell_coupled_material_pass"
+        ]
+        is True
+    )
+    assert (
+        payload["summary"][
+            "phase2_state_updated_frame_shell_coupled_material_jvp_pass"
+        ]
+        is True
+    )
+    assert (
+        payload["summary"][
+            "phase2_state_updated_frame_shell_coupled_material_direct_parity_pass"
+        ]
+        is True
+    )
+    assert (
+        payload["summary"][
+            "phase2_state_updated_frame_shell_coupled_material_component_updates_pass"
+        ]
+        is True
+    )
     assert payload["summary"]["phase2_state_updated_material_breadth_closed"] is False
     assert payload["phase2_material_newton_breadth_summary"][
         "state_updated_material_newton_breadth_seed_coverage_ready"
@@ -3744,6 +3870,18 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     assert payload["phase2_material_newton_breadth_state_updated_seeds"][
         "state_updated_material_newton_seed_case_count"
     ] == 9
+    assert payload["phase2_material_newton_breadth_state_updated_seeds"][
+        "state_updated_material_path_history_passed"
+    ] is True
+    assert payload["phase2_material_newton_breadth_state_updated_seeds"][
+        "state_updated_path_history_seeds"
+    ]["committed_state_chain_pass"] is True
+    assert payload["phase2_material_newton_breadth_state_updated_seeds"][
+        "state_updated_path_history_seeds"
+    ]["chain_replay_pass"] is True
+    assert payload["phase2_material_newton_breadth_state_updated_seeds"][
+        "state_updated_frame_shell_coupled_material_seed"
+    ]["frame_shell_state_updated_material_coupling_seed_pass"] is True
     assert payload["summary"]["phase2_material_mesh_newton_ready"] is True
     assert (
         payload["summary"]["phase2_material_mesh_newton_load_step_gate_passed"]

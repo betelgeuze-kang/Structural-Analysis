@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from typing import Any
 
 import numpy as np
@@ -49,6 +49,62 @@ class StateUpdatedMaterialNewtonState:
     external_forces_kn: np.ndarray
     material_state_update: dict[str, Any]
     material_algorithm_tangent_kn_per_m: float
+
+
+@dataclass(frozen=True)
+class StateUpdatedFrameShellCoupledMaterialProblem:
+    """Two-DOF frame/shell seed with componentwise state-updated materials."""
+
+    case_id: str
+    frame_problem: StateUpdatedBilinearMaterialProblem
+    shell_problem: StateUpdatedBilinearMaterialProblem
+    frame_shell_coupling_stiffness_kn_per_m: float
+    external_force_kn: tuple[float, float]
+    initial_free_displacements_m: tuple[float, float]
+
+    def reference_force_scale(self) -> float:
+        return max(max(abs(force) for force in self.external_force_kn), 1.0)
+
+
+@dataclass(frozen=True)
+class StateUpdatedFrameShellCoupledMaterialState:
+    residual_formula: str
+    free_dof_labels: tuple[str, str]
+    free_displacements_m: np.ndarray
+    residual_kn: np.ndarray
+    jacobian_kn_per_m: np.ndarray
+    internal_forces_kn: np.ndarray
+    external_forces_kn: np.ndarray
+    frame_shell_coupling_stiffness_kn_per_m: float
+    component_material_states: dict[str, dict[str, Any]]
+    component_internal_forces_kn: dict[str, float]
+
+
+@dataclass(frozen=True)
+class StateUpdatedMaterialPathHistorySpec:
+    history_id: str
+    base_problem: StateUpdatedBilinearMaterialProblem
+    steps: tuple[tuple[str, float], ...]
+
+
+@dataclass(frozen=True)
+class StateUpdatedMaterialPathHistoryStep:
+    history_step_index: int
+    step_kind: str
+    external_force_kn: float
+    problem: StateUpdatedBilinearMaterialProblem
+    solution: Any
+    state: StateUpdatedMaterialNewtonState
+    carried_committed_state_previous: dict[str, float]
+    previous_committed_state_matches_carried_state: bool
+
+
+@dataclass(frozen=True)
+class StateUpdatedMaterialPathHistoryResult:
+    history_id: str
+    steps: tuple[StateUpdatedMaterialPathHistoryStep, ...]
+    committed_state_chain_pass: bool
+    path_dependent_update_step_count: int
 
 
 def default_state_updated_bilinear_material_problem() -> StateUpdatedBilinearMaterialProblem:
@@ -274,6 +330,271 @@ def solve_state_updated_material_newton(
     return solution, final_state
 
 
+def default_state_updated_material_path_history_specs() -> tuple[
+    StateUpdatedMaterialPathHistorySpec,
+    ...,
+]:
+    """Return small unload/reverse/reload histories with carried material state."""
+
+    rc_base = default_state_updated_bilinear_material_problem()
+    shell_base = StateUpdatedBilinearMaterialProblem(
+        case_id="g1_state_updated_shell_membrane_cyclic_history_base",
+        assembly_scope="state_updated_shell_membrane_cyclic_history_seed",
+        structural_component="shell_layer_membrane",
+        material_case_kind="path_history_base",
+        elastic_stiffness_kn_per_m=180.0,
+        hardening_stiffness_kn_per_m=45.0,
+        yield_force_kn=36.0,
+        external_force_kn=0.0,
+        initial_displacement_m=0.0,
+        committed_plastic_displacement_m=0.0,
+        committed_equivalent_plastic_displacement_m=0.0,
+        material_family="reinforced_concrete",
+        section_integration="layered_shell",
+        strain_mode="membrane",
+    )
+    return (
+        StateUpdatedMaterialPathHistorySpec(
+            history_id="rc_frame_fiber_cyclic_reversal_history",
+            base_problem=rc_base,
+            steps=(
+                ("step01_tension_yield", 100.0),
+                ("step02_elastic_unload", 20.0),
+                ("step03_reverse_compression_yield", -120.0),
+                ("step04_tension_reload", 80.0),
+            ),
+        ),
+        StateUpdatedMaterialPathHistorySpec(
+            history_id="shell_membrane_cyclic_reversal_history",
+            base_problem=shell_base,
+            steps=(
+                ("step01_membrane_tension_yield", 84.0),
+                ("step02_membrane_unload", 12.0),
+                ("step03_membrane_reverse_yield", -96.0),
+            ),
+        ),
+    )
+
+
+def solve_state_updated_material_path_history(
+    spec: StateUpdatedMaterialPathHistorySpec,
+    *,
+    config: NewtonRaphsonConfig | None = None,
+) -> StateUpdatedMaterialPathHistoryResult:
+    """Solve a path history while carrying committed material state forward."""
+
+    previous_displacement = float(spec.base_problem.initial_displacement_m)
+    previous_committed = {
+        "plastic_displacement_m": float(
+            spec.base_problem.committed_plastic_displacement_m
+        ),
+        "equivalent_plastic_displacement_m": float(
+            spec.base_problem.committed_equivalent_plastic_displacement_m
+        ),
+    }
+    step_results: list[StateUpdatedMaterialPathHistoryStep] = []
+    committed_state_chain_pass = True
+    solver_config = config or NewtonRaphsonConfig()
+    for step_index, (step_kind, external_force_kn) in enumerate(spec.steps, start=1):
+        problem = replace(
+            spec.base_problem,
+            case_id=f"g1_{spec.history_id}_{step_index:02d}_{step_kind}",
+            assembly_scope=f"state_updated_material_path_history_{spec.history_id}",
+            material_case_kind=step_kind,
+            external_force_kn=external_force_kn,
+            initial_displacement_m=previous_displacement,
+            committed_plastic_displacement_m=previous_committed[
+                "plastic_displacement_m"
+            ],
+            committed_equivalent_plastic_displacement_m=previous_committed[
+                "equivalent_plastic_displacement_m"
+            ],
+            state_persistence_label=f"{spec.history_id}:{step_kind}",
+        )
+        solution, state = solve_state_updated_material_newton(
+            problem,
+            config=solver_config,
+        )
+        material_update = state.material_state_update
+        committed_previous = dict(material_update["committed_state_previous"])
+        committed_next = dict(material_update["committed_state_next"])
+        previous_matches = committed_previous == previous_committed
+        committed_state_chain_pass = (
+            committed_state_chain_pass
+            and previous_matches
+            and bool(solution.metrics.get("contract_pass"))
+        )
+        step_results.append(
+            StateUpdatedMaterialPathHistoryStep(
+                history_step_index=step_index,
+                step_kind=step_kind,
+                external_force_kn=float(external_force_kn),
+                problem=problem,
+                solution=solution,
+                state=state,
+                carried_committed_state_previous=dict(previous_committed),
+                previous_committed_state_matches_carried_state=previous_matches,
+            )
+        )
+        previous_displacement = float(solution.free_displacements_m[0])
+        previous_committed = {
+            "plastic_displacement_m": float(committed_next["plastic_displacement_m"]),
+            "equivalent_plastic_displacement_m": float(
+                committed_next["equivalent_plastic_displacement_m"]
+            ),
+        }
+    return StateUpdatedMaterialPathHistoryResult(
+        history_id=spec.history_id,
+        steps=tuple(step_results),
+        committed_state_chain_pass=committed_state_chain_pass,
+        path_dependent_update_step_count=sum(
+            1
+            for step in step_results
+            if step.state.material_state_update.get("path_dependent_state_updated")
+            is True
+        ),
+    )
+
+
+def solve_default_state_updated_material_path_histories(
+    *,
+    config: NewtonRaphsonConfig | None = None,
+) -> tuple[StateUpdatedMaterialPathHistoryResult, ...]:
+    return tuple(
+        solve_state_updated_material_path_history(spec, config=config)
+        for spec in default_state_updated_material_path_history_specs()
+    )
+
+
+def default_state_updated_frame_shell_coupled_material_problem() -> (
+    StateUpdatedFrameShellCoupledMaterialProblem
+):
+    """Return a small frame/shell coupled state-updated material seed."""
+
+    frame = replace(
+        default_state_updated_bilinear_material_problem(),
+        case_id="g1_state_updated_frame_fiber_coupled_seed",
+        assembly_scope="state_updated_frame_shell_coupled_material_seed",
+        material_case_kind="coupled_frame_fiber_yield",
+        external_force_kn=90.0,
+        state_persistence_label="frame_shell_coupled_trial_to_committed_state",
+    )
+    shell = StateUpdatedBilinearMaterialProblem(
+        case_id="g1_state_updated_shell_layer_membrane_coupled_seed",
+        assembly_scope="state_updated_frame_shell_coupled_material_seed",
+        structural_component="shell_layer_membrane",
+        material_case_kind="coupled_shell_membrane_yield",
+        elastic_stiffness_kn_per_m=160.0,
+        hardening_stiffness_kn_per_m=30.0,
+        yield_force_kn=35.0,
+        external_force_kn=70.0,
+        initial_displacement_m=0.0,
+        committed_plastic_displacement_m=0.0,
+        committed_equivalent_plastic_displacement_m=0.0,
+        material_family="reinforced_concrete",
+        section_integration="layered_shell",
+        strain_mode="membrane",
+        state_persistence_label="frame_shell_coupled_trial_to_committed_state",
+    )
+    return StateUpdatedFrameShellCoupledMaterialProblem(
+        case_id="g1_state_updated_frame_shell_coupled_material_2dof_seed",
+        frame_problem=frame,
+        shell_problem=shell,
+        frame_shell_coupling_stiffness_kn_per_m=8.0,
+        external_force_kn=(90.0, 70.0),
+        initial_free_displacements_m=(0.0, 0.0),
+    )
+
+
+def assemble_state_updated_frame_shell_coupled_material_state(
+    problem: StateUpdatedFrameShellCoupledMaterialProblem,
+    free_displacements_m: np.ndarray,
+) -> StateUpdatedFrameShellCoupledMaterialState:
+    """Assemble coupled frame/shell R and J from state-updated materials."""
+
+    free_displacements = np.asarray(free_displacements_m, dtype=float)
+    frame_state = assemble_state_updated_material_newton_state(
+        problem.frame_problem,
+        np.array([float(free_displacements[0])], dtype=float),
+    )
+    shell_state = assemble_state_updated_material_newton_state(
+        problem.shell_problem,
+        np.array([float(free_displacements[1])], dtype=float),
+    )
+    coupling = float(problem.frame_shell_coupling_stiffness_kn_per_m)
+    internal = np.array(
+        [
+            float(frame_state.internal_forces_kn[0]) + coupling * free_displacements[1],
+            float(shell_state.internal_forces_kn[0]) + coupling * free_displacements[0],
+        ],
+        dtype=float,
+    )
+    external = np.array(problem.external_force_kn, dtype=float)
+    jacobian = np.array(
+        [
+            [float(frame_state.jacobian_kn_per_m[0, 0]), coupling],
+            [coupling, float(shell_state.jacobian_kn_per_m[0, 0])],
+        ],
+        dtype=float,
+    )
+    return StateUpdatedFrameShellCoupledMaterialState(
+        residual_formula=RESIDUAL_FORMULA,
+        free_dof_labels=("frame_node_ux", "shell_node_uy"),
+        free_displacements_m=free_displacements,
+        residual_kn=internal - external,
+        jacobian_kn_per_m=jacobian,
+        internal_forces_kn=internal,
+        external_forces_kn=external,
+        frame_shell_coupling_stiffness_kn_per_m=coupling,
+        component_material_states={
+            "frame": frame_state.material_state_update,
+            "shell": shell_state.material_state_update,
+        },
+        component_internal_forces_kn={
+            "frame_material": float(frame_state.internal_forces_kn[0]),
+            "shell_material": float(shell_state.internal_forces_kn[0]),
+            "frame_coupling_from_shell": coupling * float(free_displacements[1]),
+            "shell_coupling_from_frame": coupling * float(free_displacements[0]),
+        },
+    )
+
+
+@dataclass(frozen=True)
+class StateUpdatedFrameShellCoupledMaterialNewtonAdapter:
+    problem: StateUpdatedFrameShellCoupledMaterialProblem
+
+    @property
+    def case_id(self) -> str:
+        return self.problem.case_id
+
+    def reference_force_scale(self) -> float:
+        return self.problem.reference_force_scale()
+
+    def initial_free_displacements_m(self) -> np.ndarray:
+        return np.array(self.problem.initial_free_displacements_m, dtype=float)
+
+    def assemble(self, free_displacements_m: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        state = assemble_state_updated_frame_shell_coupled_material_state(
+            self.problem,
+            free_displacements_m,
+        )
+        return state.residual_kn, state.jacobian_kn_per_m
+
+
+def solve_state_updated_frame_shell_coupled_material_newton(
+    problem: StateUpdatedFrameShellCoupledMaterialProblem,
+    *,
+    config: NewtonRaphsonConfig | None = None,
+) -> tuple[Any, StateUpdatedFrameShellCoupledMaterialState]:
+    adapter = StateUpdatedFrameShellCoupledMaterialNewtonAdapter(problem=problem)
+    solution = newton_raphson_vector(adapter, config=config or NewtonRaphsonConfig())
+    final_state = assemble_state_updated_frame_shell_coupled_material_state(
+        problem,
+        solution.free_displacements_m,
+    )
+    return solution, final_state
+
+
 def material_state_checkpoint_payload(
     problem: StateUpdatedBilinearMaterialProblem,
     state: StateUpdatedMaterialNewtonState,
@@ -291,6 +612,46 @@ def material_state_checkpoint_payload(
         "internal_forces_kn": state.internal_forces_kn.tolist(),
         "external_forces_kn": state.external_forces_kn.tolist(),
         "material_state_update": state.material_state_update,
+    }
+
+
+def material_path_history_checkpoint_payload(
+    history: StateUpdatedMaterialPathHistoryResult,
+) -> dict[str, Any]:
+    """Build a JSON-ready checkpoint for a carried material path history."""
+
+    return {
+        "schema_version": "g1-material-path-history-checkpoint.seed.v1",
+        "history_id": history.history_id,
+        "residual_formula": RESIDUAL_FORMULA,
+        "step_count": len(history.steps),
+        "committed_state_chain_pass": history.committed_state_chain_pass,
+        "path_dependent_update_step_count": (
+            history.path_dependent_update_step_count
+        ),
+        "steps": [
+            {
+                "history_step_index": step.history_step_index,
+                "step_kind": step.step_kind,
+                "case_id": step.problem.case_id,
+                "external_force_kn": step.external_force_kn,
+                "problem": asdict(step.problem),
+                "free_displacements_m": step.state.free_displacements_m.tolist(),
+                "residual_formula": step.state.residual_formula,
+                "residual_kn": step.state.residual_kn.tolist(),
+                "jacobian_kn_per_m": step.state.jacobian_kn_per_m.tolist(),
+                "internal_forces_kn": step.state.internal_forces_kn.tolist(),
+                "external_forces_kn": step.state.external_forces_kn.tolist(),
+                "material_state_update": step.state.material_state_update,
+                "carried_committed_state_previous": (
+                    step.carried_committed_state_previous
+                ),
+                "previous_committed_state_matches_carried_state": (
+                    step.previous_committed_state_matches_carried_state
+                ),
+            }
+            for step in history.steps
+        ],
     }
 
 
@@ -362,6 +723,195 @@ def check_state_updated_material_checkpoint_replay(
         "absolute_tolerance": absolute_tolerance,
         "relative_tolerance": relative_tolerance,
         "state_persistence_label": problem.state_persistence_label,
+        "promotes_g1_closure": False,
+    }
+
+
+def check_state_updated_material_path_history_replay(
+    checkpoint: dict[str, Any],
+    *,
+    absolute_tolerance: float = 1.0e-10,
+    relative_tolerance: float = 1.0e-10,
+) -> dict[str, Any]:
+    """Replay a serialized material path history and its committed-state chain."""
+
+    prior_committed_next: dict[str, Any] | None = None
+    step_checks: list[dict[str, Any]] = []
+    for step_payload in list(checkpoint.get("steps") or []):
+        problem = StateUpdatedBilinearMaterialProblem(
+            **dict(step_payload["problem"])
+        )
+        free_displacements = np.asarray(
+            step_payload["free_displacements_m"],
+            dtype=float,
+        )
+        replay = assemble_state_updated_material_newton_state(
+            problem,
+            free_displacements,
+        )
+        residual_replay_match = _allclose_payload(
+            replay.residual_kn,
+            step_payload["residual_kn"],
+            absolute_tolerance=absolute_tolerance,
+            relative_tolerance=relative_tolerance,
+        )
+        tangent_replay_match = _allclose_payload(
+            replay.jacobian_kn_per_m,
+            step_payload["jacobian_kn_per_m"],
+            absolute_tolerance=absolute_tolerance,
+            relative_tolerance=relative_tolerance,
+        )
+        internal_replay_match = _allclose_payload(
+            replay.internal_forces_kn,
+            step_payload["internal_forces_kn"],
+            absolute_tolerance=absolute_tolerance,
+            relative_tolerance=relative_tolerance,
+        )
+        external_replay_match = _allclose_payload(
+            replay.external_forces_kn,
+            step_payload["external_forces_kn"],
+            absolute_tolerance=absolute_tolerance,
+            relative_tolerance=relative_tolerance,
+        )
+        state_replay_match = _material_update_matches(
+            replay.material_state_update,
+            dict(step_payload["material_state_update"]),
+            absolute_tolerance=absolute_tolerance,
+            relative_tolerance=relative_tolerance,
+        )
+        carried_previous = dict(
+            step_payload.get("carried_committed_state_previous") or {}
+        )
+        committed_previous = dict(
+            replay.material_state_update.get("committed_state_previous") or {}
+        )
+        committed_next = dict(
+            replay.material_state_update.get("committed_state_next") or {}
+        )
+        first_step_initial_state_match = True
+        if prior_committed_next is None:
+            first_step_initial_state_match = _material_update_matches(
+                carried_previous,
+                {
+                    "plastic_displacement_m": (
+                        problem.committed_plastic_displacement_m
+                    ),
+                    "equivalent_plastic_displacement_m": (
+                        problem.committed_equivalent_plastic_displacement_m
+                    ),
+                },
+                absolute_tolerance=absolute_tolerance,
+                relative_tolerance=relative_tolerance,
+            )
+        chain_link_from_previous_step_pass = True
+        if prior_committed_next is not None:
+            chain_link_from_previous_step_pass = _material_update_matches(
+                carried_previous,
+                prior_committed_next,
+                absolute_tolerance=absolute_tolerance,
+                relative_tolerance=relative_tolerance,
+            )
+        committed_previous_matches_carried_state = _material_update_matches(
+            committed_previous,
+            carried_previous,
+            absolute_tolerance=absolute_tolerance,
+            relative_tolerance=relative_tolerance,
+        )
+        committed_state_chain_replay_pass = (
+            step_payload.get("previous_committed_state_matches_carried_state")
+            is True
+            and first_step_initial_state_match
+            and chain_link_from_previous_step_pass
+            and committed_previous_matches_carried_state
+        )
+        step_passed = (
+            step_payload.get("residual_formula") == RESIDUAL_FORMULA
+            and residual_replay_match
+            and tangent_replay_match
+            and internal_replay_match
+            and external_replay_match
+            and state_replay_match
+            and committed_state_chain_replay_pass
+        )
+        step_checks.append(
+            {
+                "pass": step_passed,
+                "history_step_index": int(step_payload["history_step_index"]),
+                "step_kind": str(step_payload["step_kind"]),
+                "case_id": problem.case_id,
+                "residual_formula": step_payload.get("residual_formula"),
+                "residual_replay_match": residual_replay_match,
+                "tangent_replay_match": tangent_replay_match,
+                "internal_force_replay_match": internal_replay_match,
+                "external_force_replay_match": external_replay_match,
+                "material_state_replay_match": state_replay_match,
+                "first_step_initial_state_match": first_step_initial_state_match,
+                "chain_link_from_previous_step_pass": (
+                    chain_link_from_previous_step_pass
+                ),
+                "committed_previous_matches_carried_state": (
+                    committed_previous_matches_carried_state
+                ),
+                "committed_state_chain_replay_pass": (
+                    committed_state_chain_replay_pass
+                ),
+                "path_dependent_state_updated": (
+                    replay.material_state_update.get(
+                        "path_dependent_state_updated"
+                    )
+                    is True
+                ),
+            }
+        )
+        prior_committed_next = committed_next
+
+    step_replay_pass = all(step["pass"] for step in step_checks)
+    committed_state_chain_replay_pass = all(
+        step["committed_state_chain_replay_pass"] for step in step_checks
+    )
+    residual_replay_match = all(
+        step["residual_replay_match"] for step in step_checks
+    )
+    tangent_replay_match = all(
+        step["tangent_replay_match"] for step in step_checks
+    )
+    internal_replay_match = all(
+        step["internal_force_replay_match"] for step in step_checks
+    )
+    external_replay_match = all(
+        step["external_force_replay_match"] for step in step_checks
+    )
+    material_state_replay_match = all(
+        step["material_state_replay_match"] for step in step_checks
+    )
+    passed = (
+        checkpoint.get("schema_version")
+        == "g1-material-path-history-checkpoint.seed.v1"
+        and checkpoint.get("residual_formula") == RESIDUAL_FORMULA
+        and int(checkpoint.get("step_count") or 0) == len(step_checks)
+        and checkpoint.get("committed_state_chain_pass") is True
+        and step_replay_pass
+        and committed_state_chain_replay_pass
+    )
+    return {
+        "schema_version": "g1-material-path-history-checkpoint-replay-check.v1",
+        "pass": passed,
+        "history_id": str(checkpoint.get("history_id") or ""),
+        "step_count": len(step_checks),
+        "path_dependent_update_step_count": sum(
+            1 for step in step_checks if step["path_dependent_state_updated"]
+        ),
+        "residual_formula": checkpoint.get("residual_formula"),
+        "step_replay_pass": step_replay_pass,
+        "committed_state_chain_replay_pass": committed_state_chain_replay_pass,
+        "residual_replay_match": residual_replay_match,
+        "tangent_replay_match": tangent_replay_match,
+        "internal_force_replay_match": internal_replay_match,
+        "external_force_replay_match": external_replay_match,
+        "material_state_replay_match": material_state_replay_match,
+        "absolute_tolerance": absolute_tolerance,
+        "relative_tolerance": relative_tolerance,
+        "steps": step_checks,
         "promotes_g1_closure": False,
     }
 

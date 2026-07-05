@@ -82,6 +82,37 @@ def test_phase2_material_newton_breadth_builds_honest_seed_artifacts() -> None:
     assert summary["path_dependent_material_update_seed_case_count"] == 6
     assert summary["path_dependent_material_replay_seed_case_count"] == 9
     assert summary["material_state_persistence_replay_seed_passed"] is True
+    assert summary["state_updated_material_path_history_passed"] is True
+    assert summary["state_updated_material_path_history_count"] == 2
+    assert summary["state_updated_material_path_history_step_count"] == 7
+    assert summary["state_updated_material_path_history_update_step_count"] == 4
+    assert summary["state_updated_material_path_history_checkpoint_replay_pass"] is True
+    assert summary["state_updated_material_path_history_chain_replay_pass"] is True
+    assert (
+        summary["state_updated_material_path_history_whole_checkpoint_replay_pass"]
+        is True
+    )
+    assert summary["state_updated_material_path_history_jvp_pass"] is True
+    assert summary["state_updated_material_path_history_direct_parity_pass"] is True
+    assert summary["state_updated_material_path_history_committed_chain_pass"] is True
+    assert summary["state_updated_frame_shell_coupled_material_seed_pass"] is True
+    assert summary["state_updated_frame_shell_coupled_material_jvp_pass"] is True
+    assert (
+        summary["state_updated_frame_shell_coupled_material_direct_parity_pass"]
+        is True
+    )
+    assert (
+        summary["state_updated_frame_shell_coupled_material_residual_gate_passed"]
+        is True
+    )
+    assert (
+        summary["state_updated_frame_shell_coupled_material_increment_gate_passed"]
+        is True
+    )
+    assert (
+        summary["state_updated_frame_shell_coupled_material_component_updates_pass"]
+        is True
+    )
     assert summary["material_jvp_relative_error_pass"] is True
     assert summary["material_jvp_max_relative_error"] <= 1.0e-6
     assert summary["frame_material_newton_seed_pass"] is True
@@ -132,6 +163,70 @@ def test_phase2_material_newton_breadth_builds_honest_seed_artifacts() -> None:
     assert state_updated_payload["path_dependent_material_update_seed_case_count"] == 6
     assert state_updated_payload["path_dependent_material_replay_seed_case_count"] == 9
     assert state_updated_payload["material_state_persistence_replay_seed_passed"] is True
+    assert state_updated_payload["state_updated_material_path_history_passed"] is True
+    assert state_updated_payload["state_updated_material_path_history_count"] == 2
+    assert state_updated_payload["state_updated_material_path_history_step_count"] == 7
+    assert (
+        state_updated_payload["state_updated_material_path_history_update_step_count"]
+        == 4
+    )
+    assert (
+        state_updated_payload[
+            "state_updated_material_path_history_checkpoint_replay_pass"
+        ]
+        is True
+    )
+    assert (
+        state_updated_payload["state_updated_material_path_history_chain_replay_pass"]
+        is True
+    )
+    assert (
+        state_updated_payload[
+            "state_updated_material_path_history_whole_checkpoint_replay_pass"
+        ]
+        is True
+    )
+    assert state_updated_payload["state_updated_material_path_history_jvp_pass"] is True
+    assert (
+        state_updated_payload["state_updated_material_path_history_direct_parity_pass"]
+        is True
+    )
+    assert (
+        state_updated_payload["state_updated_material_path_history_committed_chain_pass"]
+        is True
+    )
+    assert (
+        state_updated_payload["state_updated_frame_shell_coupled_material_seed_pass"]
+        is True
+    )
+    assert (
+        state_updated_payload["state_updated_frame_shell_coupled_material_jvp_pass"]
+        is True
+    )
+    assert (
+        state_updated_payload[
+            "state_updated_frame_shell_coupled_material_direct_parity_pass"
+        ]
+        is True
+    )
+    assert (
+        state_updated_payload[
+            "state_updated_frame_shell_coupled_material_residual_gate_passed"
+        ]
+        is True
+    )
+    assert (
+        state_updated_payload[
+            "state_updated_frame_shell_coupled_material_increment_gate_passed"
+        ]
+        is True
+    )
+    assert (
+        state_updated_payload[
+            "state_updated_frame_shell_coupled_material_component_updates_pass"
+        ]
+        is True
+    )
     assert state_updated_payload["material_jvp_relative_error_pass"] is True
     assert state_updated_payload["frame_material_newton_seed_pass"] is True
     assert state_updated_payload["shell_material_newton_seed_pass"] is True
@@ -150,6 +245,90 @@ def test_phase2_material_newton_breadth_builds_honest_seed_artifacts() -> None:
         "plastic_corrector",
         "elastic_trial_state",
     }
+    assert all("final_displacement_m" in row for row in state_rows)
+    assert all("material_state_next" in row for row in state_rows)
+
+    path_history = state_updated_payload["state_updated_path_history_seeds"]
+    assert path_history["status"] == "ready"
+    assert path_history["contract_pass"] is True
+    assert path_history["history_count"] == 2
+    assert path_history["step_count"] == 7
+    assert path_history["path_dependent_update_step_count"] == 4
+    assert path_history["checkpoint_replay_pass"] is True
+    assert path_history["chain_replay_pass"] is True
+    assert path_history["path_history_checkpoint_replay_pass"] is True
+    assert path_history["jvp_finite_difference_pass"] is True
+    assert path_history["direct_residual_newton_parity_pass"] is True
+    assert path_history["committed_state_chain_pass"] is True
+    histories = {row["history_id"]: row for row in path_history["histories"]}
+    assert set(histories) == {
+        "rc_frame_fiber_cyclic_reversal_history",
+        "shell_membrane_cyclic_reversal_history",
+    }
+    assert histories["rc_frame_fiber_cyclic_reversal_history"]["step_count"] == 4
+    assert (
+        histories["rc_frame_fiber_cyclic_reversal_history"][
+            "path_dependent_update_step_count"
+        ]
+        == 2
+    )
+    assert histories["shell_membrane_cyclic_reversal_history"]["step_count"] == 3
+    assert (
+        histories["shell_membrane_cyclic_reversal_history"][
+            "path_dependent_update_step_count"
+        ]
+        == 2
+    )
+    for history in histories.values():
+        assert history["contract_pass"] is True
+        assert history["committed_state_chain_pass"] is True
+        assert history["checkpoint_replay_pass"] is True
+        assert history["chain_replay_pass"] is True
+        assert history["path_history_checkpoint_replay_pass"] is True
+        assert history["path_history_checkpoint_replay_check"]["pass"] is True
+        assert (
+            history["path_history_checkpoint_replay_check"][
+                "committed_state_chain_replay_pass"
+            ]
+            is True
+        )
+        assert history["jvp_finite_difference_pass"] is True
+        assert history["direct_residual_newton_parity_pass"] is True
+        assert all(
+            row["previous_committed_state_matches_carried_state"] is True
+            for row in history["steps"]
+        )
+        assert all(row["regularization_used"] is False for row in history["steps"])
+        assert all(row["fallback_used"] is False for row in history["steps"])
+
+    coupled_seed = state_updated_payload[
+        "state_updated_frame_shell_coupled_material_seed"
+    ]
+    assert coupled_seed["status"] == "ready"
+    assert coupled_seed["contract_pass"] is True
+    assert (
+        coupled_seed["case_id"]
+        == "g1_state_updated_frame_shell_coupled_material_2dof_seed"
+    )
+    assert coupled_seed["free_dof_count"] == 2
+    assert coupled_seed["residual_gate_passed"] is True
+    assert coupled_seed["increment_gate_passed"] is True
+    assert coupled_seed["regularization_used"] is False
+    assert coupled_seed["fallback_used"] is False
+    assert coupled_seed["jvp_finite_difference_pass"] is True
+    assert coupled_seed["direct_residual_newton_parity_pass"] is True
+    assert coupled_seed["frame_material_state_updated"] is True
+    assert coupled_seed["shell_material_state_updated"] is True
+    assert coupled_seed["final_residual_inf_kn"] <= 1.0e-10
+    assert len(coupled_seed["final_free_displacements_m"]) == 2
+    assert coupled_seed["component_return_mappings"] == {
+        "frame": "plastic_corrector",
+        "shell": "plastic_corrector",
+    }
+    assert (
+        coupled_seed["jvp_finite_difference_check"]["relative_error"]
+        <= 1.0e-6
+    )
 
     for row in law_results:
         result = row["result"]
