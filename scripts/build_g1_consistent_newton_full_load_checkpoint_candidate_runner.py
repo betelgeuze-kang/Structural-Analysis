@@ -24,6 +24,9 @@ DEFAULT_CAUSE_NARROWING = PRODUCTIZATION / "g1_f2g_f2h_cause_narrowing_status.js
 DEFAULT_HIP_PROBE = PRODUCTIZATION / "mgt_residual_jacobian_consistency_hip_required_probe.json"
 DEFAULT_GLOBAL_CONNECTIVITY = PRODUCTIZATION / "g1_global_connectivity_load_path_audit.json"
 DEFAULT_ASSEMBLY_CONTRACT_SEED = PRODUCTIZATION / "g1_assembly_contract_seed_report.json"
+DEFAULT_CPU_LIVE_ASSEMBLY_CONTRACT_PROBE = (
+    PRODUCTIZATION / "g1_full_load_cpu_live_assembly_contract_probe.json"
+)
 DEFAULT_TRUE_NEWTON_LOAD_SWEEP = PRODUCTIZATION / "g1_true_newton_load_sweep_status.json"
 DEFAULT_TRUE_NEWTON_FULL_LOAD_CHECKPOINT_CANDIDATE = (
     PRODUCTIZATION / "g1_true_newton_full_load_checkpoint_candidate_status.json"
@@ -468,6 +471,73 @@ def _live_assembly_contract_summary(hip_probe: dict[str, Any]) -> dict[str, Any]
             "The HIP/full-load residual-Jacobian proof must also report that "
             "the live G1 runner used the same residual_free/tangent_free/"
             "internal_forces/external_forces/material_state_next contract."
+        ),
+    }
+
+
+def _cpu_live_assembly_contract_probe_summary(
+    *,
+    payload: dict[str, Any],
+    path: Path,
+) -> dict[str, Any]:
+    live_contract = _as_dict(payload.get("live_g1_assembly_contract"))
+    checkpoint = _as_dict(payload.get("checkpoint"))
+    final_residual = _as_dict(payload.get("final_direct_residual"))
+    gate = _as_dict(payload.get("gate_assessment"))
+    blockers = _strings(live_contract.get("blockers"))
+    contract_pass = bool(
+        live_contract.get("contract_pass") is True
+        and live_contract.get("uses_assembly_result_contract") is True
+        and str(live_contract.get("assembly_result_schema") or "")
+        == LIVE_ASSEMBLY_CONTRACT_SCHEMA
+        and str(live_contract.get("residual_formula") or "")
+        == "F_internal_minus_F_external"
+        and str(live_contract.get("residual_source") or "")
+        == LIVE_ASSEMBLY_RESIDUAL_SOURCE
+        and str(live_contract.get("tangent_definition") or "")
+        == LIVE_ASSEMBLY_TANGENT_DEFINITION
+        and live_contract.get("required_fields_present") is True
+        and live_contract.get("fixed_point_residual_promoted_to_physical") is False
+        and live_contract.get("regularized_fixed_point_substitute") is False
+        and not blockers
+    )
+    return {
+        "path": path.as_posix(),
+        "present": bool(payload),
+        "status": str(payload.get("status") or "missing"),
+        "source_commit_sha": str(payload.get("source_commit_sha") or ""),
+        "contract_pass": contract_pass,
+        "promotes_g1_closure": False,
+        "cpu_diagnostic_assembler_used": True,
+        "load_scale": _as_float(checkpoint.get("load_scale")),
+        "direct_residual_newton_ready": payload.get("direct_residual_newton_ready")
+        is True,
+        "direct_residual_gate_passed": gate.get("direct_residual_gate_passed")
+        is True
+        or final_residual.get("residual_gate_passed") is True,
+        "relative_increment_gate_passed": gate.get("relative_increment_gate_passed")
+        is True,
+        "material_newton_breadth_passed": gate.get("material_newton_breadth_passed")
+        is True,
+        "fallback_zero_passed": gate.get("fallback_zero_passed") is True,
+        "residual_inf_n": _as_float(
+            final_residual.get("direct_residual_inf_n")
+            if final_residual
+            else live_contract.get("residual_inf_norm")
+        ),
+        "assembly_result_schema": str(
+            live_contract.get("assembly_result_schema") or ""
+        ),
+        "residual_formula": str(live_contract.get("residual_formula") or ""),
+        "residual_source": str(live_contract.get("residual_source") or ""),
+        "tangent_definition": str(live_contract.get("tangent_definition") or ""),
+        "free_dof_count": _as_int(live_contract.get("free_dof_count")),
+        "blockers": blockers,
+        "claim_boundary": (
+            "CPU diagnostic full-load live AssemblyResult contract evidence only. "
+            "This does not satisfy the HIP-required live G1 assembly contract, "
+            "production ROCm/HIP residual/JVP residency, residual convergence, "
+            "or material Newton breadth closure gates."
         ),
     }
 
@@ -2922,6 +2992,9 @@ def build_runner_packet(
     hip_probe_path: Path = DEFAULT_HIP_PROBE,
     global_connectivity_path: Path = DEFAULT_GLOBAL_CONNECTIVITY,
     assembly_contract_seed_path: Path = DEFAULT_ASSEMBLY_CONTRACT_SEED,
+    cpu_live_assembly_contract_probe_path: Path = (
+        DEFAULT_CPU_LIVE_ASSEMBLY_CONTRACT_PROBE
+    ),
     true_newton_load_sweep_path: Path = DEFAULT_TRUE_NEWTON_LOAD_SWEEP,
     true_newton_full_load_checkpoint_candidate_path: Path = (
         DEFAULT_TRUE_NEWTON_FULL_LOAD_CHECKPOINT_CANDIDATE
@@ -3100,6 +3173,9 @@ def build_runner_packet(
     )
     global_connectivity = _load_json(repo_root, global_connectivity_path)
     assembly_contract_seed = _load_json(repo_root, assembly_contract_seed_path)
+    cpu_live_assembly_contract_probe = _load_json(
+        repo_root, cpu_live_assembly_contract_probe_path
+    )
     true_newton_load_sweep = _load_json(repo_root, true_newton_load_sweep_path)
     true_newton_full_load_checkpoint_candidate = _load_json(
         repo_root, true_newton_full_load_checkpoint_candidate_path
@@ -3672,6 +3748,12 @@ def build_runner_packet(
     hip_required_consistency_direct_probe_summary = (
         _hip_required_consistency_direct_probe_summary(payload=hip_probe)
     )
+    cpu_live_assembly_contract_probe_summary = (
+        _cpu_live_assembly_contract_probe_summary(
+            payload=cpu_live_assembly_contract_probe,
+            path=cpu_live_assembly_contract_probe_path,
+        )
+    )
     hip_required_frontier_no_descent_receipts = [
         _hip_required_consistency_no_descent_summary(
             payload=hip_required_consistency_no_descent_probe,
@@ -3699,6 +3781,7 @@ def build_runner_packet(
                 hip_probe_path,
                 global_connectivity_path,
                 true_newton_load_sweep_path,
+                cpu_live_assembly_contract_probe_path,
                 true_newton_full_load_checkpoint_candidate_path,
                 adaptive_all_components_frontier_path,
                 shell_hotspot_tangent_fd_jvp_probe_path,
@@ -5113,6 +5196,15 @@ def build_runner_packet(
                 "cpu_seed_consistent_newton_gate_passed"
             )
             is True,
+            "cpu_live_g1_assembly_contract_present": (
+                cpu_live_assembly_contract_probe_summary["present"]
+            ),
+            "cpu_live_g1_assembly_contract_passed": (
+                cpu_live_assembly_contract_probe_summary["contract_pass"]
+            ),
+            "cpu_live_g1_assembly_contract_residual_inf_n": (
+                cpu_live_assembly_contract_probe_summary["residual_inf_n"]
+            ),
             "live_g1_assembly_contract_present": _live_assembly_contract_summary(
                 hip_probe
             )["present"],
@@ -5567,6 +5659,9 @@ def build_runner_packet(
         ),
         "hip_required_consistency_direct_probe": (
             hip_required_consistency_direct_probe_summary
+        ),
+        "cpu_live_g1_assembly_contract_probe": (
+            cpu_live_assembly_contract_probe_summary
         ),
         "hip_required_frontier_no_descent_receipts": (
             hip_required_frontier_no_descent_receipts
@@ -7477,6 +7572,9 @@ def write_runner_packet(
     hip_probe_path: Path = DEFAULT_HIP_PROBE,
     global_connectivity_path: Path = DEFAULT_GLOBAL_CONNECTIVITY,
     assembly_contract_seed_path: Path = DEFAULT_ASSEMBLY_CONTRACT_SEED,
+    cpu_live_assembly_contract_probe_path: Path = (
+        DEFAULT_CPU_LIVE_ASSEMBLY_CONTRACT_PROBE
+    ),
     true_newton_load_sweep_path: Path = DEFAULT_TRUE_NEWTON_LOAD_SWEEP,
     true_newton_full_load_checkpoint_candidate_path: Path = (
         DEFAULT_TRUE_NEWTON_FULL_LOAD_CHECKPOINT_CANDIDATE
@@ -7638,6 +7736,7 @@ def write_runner_packet(
         hip_probe_path=hip_probe_path,
         global_connectivity_path=global_connectivity_path,
         assembly_contract_seed_path=assembly_contract_seed_path,
+        cpu_live_assembly_contract_probe_path=cpu_live_assembly_contract_probe_path,
         true_newton_load_sweep_path=true_newton_load_sweep_path,
         true_newton_full_load_checkpoint_candidate_path=(
             true_newton_full_load_checkpoint_candidate_path
@@ -7808,6 +7907,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--assembly-contract-seed",
         type=Path,
         default=DEFAULT_ASSEMBLY_CONTRACT_SEED,
+    )
+    parser.add_argument(
+        "--cpu-live-assembly-contract-probe",
+        type=Path,
+        default=DEFAULT_CPU_LIVE_ASSEMBLY_CONTRACT_PROBE,
     )
     parser.add_argument(
         "--true-newton-load-sweep",
@@ -8054,6 +8158,7 @@ def main(argv: list[str] | None = None) -> int:
         hip_probe_path=args.hip_probe,
         global_connectivity_path=args.global_connectivity,
         assembly_contract_seed_path=args.assembly_contract_seed,
+        cpu_live_assembly_contract_probe_path=args.cpu_live_assembly_contract_probe,
         true_newton_load_sweep_path=args.true_newton_load_sweep,
         true_newton_full_load_checkpoint_candidate_path=(
             args.true_newton_full_load_checkpoint_candidate

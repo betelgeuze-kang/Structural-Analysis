@@ -217,6 +217,48 @@ def _assembly_contract_seed_payload() -> dict:
     }
 
 
+def _cpu_live_assembly_contract_probe_payload() -> dict:
+    return {
+        "schema_version": "mgt-direct-residual-newton-probe.v1",
+        "source_commit_sha": "fixture-cpu-live",
+        "status": "partial",
+        "direct_residual_newton_ready": False,
+        "checkpoint": {"load_scale": 1.0},
+        "final_direct_residual": {
+            "direct_residual_inf_n": 1384.25,
+            "residual_gate_passed": False,
+        },
+        "gate_assessment": {
+            "direct_residual_gate_passed": False,
+            "relative_increment_gate_passed": False,
+            "material_newton_breadth_passed": False,
+            "fallback_zero_passed": False,
+        },
+        "live_g1_assembly_contract": {
+            "contract_pass": True,
+            "uses_assembly_result_contract": True,
+            "assembly_result_schema": "g1-assembly-result.v1",
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_source": "physical_direct_residual",
+            "tangent_definition": "dR_du_consistent",
+            "required_fields_present": True,
+            "required_fields": [
+                "residual_free",
+                "tangent_free",
+                "internal_forces",
+                "external_forces",
+                "material_state_next",
+                "metrics",
+            ],
+            "fixed_point_residual_promoted_to_physical": False,
+            "regularized_fixed_point_substitute": False,
+            "free_dof_count": 58998,
+            "residual_inf_norm": 1384.25,
+            "blockers": [],
+        },
+    }
+
+
 def _phase2_material_newton_breadth_summary_payload() -> dict:
     return {
         "schema_version": "phase2-material-newton-breadth-artifacts.v1",
@@ -2308,6 +2350,9 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
         "hip": tmp_path / "mgt_residual_jacobian_consistency_hip_required_probe.json",
         "global": tmp_path / "g1_global_connectivity_load_path_audit.json",
         "assembly": tmp_path / "g1_assembly_contract_seed_report.json",
+        "cpu_live_assembly": (
+            tmp_path / runner.DEFAULT_CPU_LIVE_ASSEMBLY_CONTRACT_PROBE
+        ),
         "sweep": tmp_path / "g1_true_newton_load_sweep_status.json",
         "checkpoint_candidate": (
             tmp_path / "g1_true_newton_full_load_checkpoint_candidate_status.json"
@@ -2477,6 +2522,7 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
     _write_json(paths["hip"], _hip_probe_payload())
     _write_json(paths["global"], _global_connectivity_payload())
     _write_json(paths["assembly"], _assembly_contract_seed_payload())
+    _write_json(paths["cpu_live_assembly"], _cpu_live_assembly_contract_probe_payload())
     _write_json(paths["sweep"], _true_newton_load_sweep_payload())
     _write_json(paths["checkpoint_candidate"], _true_newton_checkpoint_candidate_payload())
     _write_json(paths["true_newton_from_active"], _true_newton_from_active_set_payload())
@@ -2704,6 +2750,17 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     assert payload["summary"]["full_load_true_newton_final_residual_n"] == (
         716.2398790963002
     )
+    assert payload["summary"]["cpu_live_g1_assembly_contract_present"] is True
+    assert payload["summary"]["cpu_live_g1_assembly_contract_passed"] is True
+    assert (
+        payload["summary"]["cpu_live_g1_assembly_contract_residual_inf_n"]
+        == 1384.25
+    )
+    cpu_live = payload["cpu_live_g1_assembly_contract_probe"]
+    assert cpu_live["contract_pass"] is True
+    assert cpu_live["cpu_diagnostic_assembler_used"] is True
+    assert cpu_live["promotes_g1_closure"] is False
+    assert "HIP-required" in cpu_live["claim_boundary"]
     assert payload["true_newton_load_sweep"]["path"] == paths["sweep"].as_posix()
     assert payload["true_newton_load_sweep"]["present"] is True
     assert payload["true_newton_load_sweep"]["promotes_g1_closure"] is False
