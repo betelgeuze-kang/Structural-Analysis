@@ -32,11 +32,11 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-05T16:07:17.719100+00:00",
+  "generated_at": "2026-07-05T16:12:47.279804+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:43ba7edb98c39c8a6cbac5a227573090f3f4761bf8e6e52de695a76296b9bc18",
-    "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:4e292e214108da681bd4e02425a91626cfdf1f55ff04a08e989d14e87a9f7812",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:2c0713ca0750dc874ca3ca32856cdbec9fa4ff84ae86552f01f1e3180516cf2f",
+    "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:31e3755b5baac8bb32e8044b01ea2e10c9b9c34ff54b58419fc2dc751450fc2a",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:594b79df13da3a12decb9f029486360d81992be0e1409d023e0851658fe223a4",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:69285c5dcf0a4bdc30c7a71d48b86dabde7af6e458925f250a4e3f9b9616e109",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:2dd335461534767886bc08ce07d463d36e2617cab30e8306d9da5e0e51e8aa3b",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:6ff8dceb28c2ea5ee700ecf5d6065e099c326c1da50bf13775979a622450c0c7",
@@ -1200,7 +1200,7 @@
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
-        "current_head_sha": "b2f9a0f73d86b6f7a78bece06827b6c16c7fe253",
+        "current_head_sha": "8377b99cd7dc66cd902035bfab3b4bb73f793bc4",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 230,
@@ -1247,7 +1247,7 @@
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
-        "current_head_sha": "b2f9a0f73d86b6f7a78bece06827b6c16c7fe253",
+        "current_head_sha": "8377b99cd7dc66cd902035bfab3b4bb73f793bc4",
         "feature_ahead_count": 0,
         "feature_fast_forward_possible": true,
         "feature_synced_to_head": true,
@@ -1359,7 +1359,7 @@
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
-        "current_head_sha": "b2f9a0f73d86b6f7a78bece06827b6c16c7fe253",
+        "current_head_sha": "8377b99cd7dc66cd902035bfab3b4bb73f793bc4",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 230,
@@ -1406,7 +1406,7 @@
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
-        "current_head_sha": "b2f9a0f73d86b6f7a78bece06827b6c16c7fe253",
+        "current_head_sha": "8377b99cd7dc66cd902035bfab3b4bb73f793bc4",
         "feature_ahead_count": 0,
         "feature_fast_forward_possible": true,
         "feature_synced_to_head": true,
@@ -1518,7 +1518,7 @@
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
-        "current_head_sha": "b2f9a0f73d86b6f7a78bece06827b6c16c7fe253",
+        "current_head_sha": "8377b99cd7dc66cd902035bfab3b4bb73f793bc4",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 230,
@@ -1565,7 +1565,7 @@
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
-        "current_head_sha": "b2f9a0f73d86b6f7a78bece06827b6c16c7fe253",
+        "current_head_sha": "8377b99cd7dc66cd902035bfab3b4bb73f793bc4",
         "feature_ahead_count": 0,
         "feature_fast_forward_possible": true,
         "feature_synced_to_head": true,
@@ -1677,7 +1677,7 @@
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
-        "current_head_sha": "b2f9a0f73d86b6f7a78bece06827b6c16c7fe253",
+        "current_head_sha": "8377b99cd7dc66cd902035bfab3b4bb73f793bc4",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 230,
@@ -1724,7 +1724,7 @@
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
-        "current_head_sha": "b2f9a0f73d86b6f7a78bece06827b6c16c7fe253",
+        "current_head_sha": "8377b99cd7dc66cd902035bfab3b4bb73f793bc4",
         "feature_ahead_count": 0,
         "feature_fast_forward_possible": true,
         "feature_synced_to_head": true,
@@ -2306,7 +2306,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "b2f9a0f73d86b6f7a78bece06827b6c16c7fe253",
+  "source_commit_sha": "8377b99cd7dc66cd902035bfab3b4bb73f793bc4",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 14,
