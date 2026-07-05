@@ -1,7 +1,7 @@
 {
   "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
-  "generated_at": "2026-07-05T07:14:43.635654+00:00",
-  "source_commit_sha": "8671416366878591fe768ca283ee8d4c777440ee",
+  "generated_at": "2026-07-05T07:27:08.297068+00:00",
+  "source_commit_sha": "42eccb4207eaba2b209cf59d2773554f1ca52477",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "reused_evidence": false,
   "status": "partial",
@@ -13,7 +13,7 @@
   "cpu_diagnostic_assembler_used": false,
   "production_hip_residual_jacobian_path": true,
   "rocm_hip_runtime_preflight": {
-    "checked_at": "2026-07-05T07:14:43.637409+00:00",
+    "checked_at": "2026-07-05T07:27:08.298857+00:00",
     "hip_available": true,
     "torch_importable": true,
     "torch_rocm_build": true,
@@ -83,7 +83,7 @@
   "production_rocm_hip_residual_jvp_worker": {
     "schema_version": "production-rocm-hip-residual-jvp-worker-contract.v1",
     "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
-    "source_commit_sha": "8671416366878591fe768ca283ee8d4c777440ee",
+    "source_commit_sha": "42eccb4207eaba2b209cf59d2773554f1ca52477",
     "ready": false,
     "status": "blocked",
     "blockers": [
@@ -197,8 +197,8 @@
     "schema_version": "mgt-residual-jacobian-consistency-hip-direct-proof.v1",
     "executed": true,
     "execution_error": null,
-    "elapsed_seconds": 316.00433713797247,
-    "source_commit_sha": "8671416366878591fe768ca283ee8d4c777440ee",
+    "elapsed_seconds": 309.01339288498275,
+    "source_commit_sha": "42eccb4207eaba2b209cf59d2773554f1ca52477",
     "status": "partial",
     "direct_residual_newton_ready": false,
     "production_hip_residual_jacobian_path": true,
@@ -312,7 +312,7 @@
   "runtime_metrics": {
     "setup_and_reference_seconds": 0.0,
     "base_assembly_seconds": 0.0,
-    "total_seconds": 317.11207982501946
+    "total_seconds": 310.2282473630039
   },
   "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested and routed to the HIP-required direct residual Newton proof path. The probe does not use this module's CPU diagnostic assembler. This receipt closes neither full G1 nor release readiness unless the child HIP residual engine contract and consistent residual/Jacobian Newton gate both pass without blockers.",
   "blockers": [

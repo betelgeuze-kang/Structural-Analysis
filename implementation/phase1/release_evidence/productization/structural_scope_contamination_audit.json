@@ -4,19 +4,19 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "family_counts": {
-    "molecular_docking": 48,
-    "molecular_dynamics": 25,
+    "molecular_docking": 185,
+    "molecular_dynamics": 57,
     "molecular_science_evidence": 13
   },
   "first_non_structural_path": "implementation/phase1/md3bead_scientific_validity_report.md",
   "first_unquarantined_non_structural_path": "",
-  "generated_at": "2026-07-03T02:14:49.138115+00:00",
+  "generated_at": "2026-07-05T07:45:18.457129+00:00",
   "git_state_counts": {
-    "tracked": 86
+    "tracked": 251
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:845291407dc2610da53f247424595a05c782dc7f54f72d337a5ae4dde7be3626",
-    "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:64c6d94f32cdf1b5076515fcb0497cf0be545e37046dfc6e9160c140c1794fa1",
+    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:64601c5bc6b82b98aab0a21d1cb39127e45d5de7a2a5fcb1391741a7439ff4f4",
+    "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:30d36b24d8e8daf5a442815ef10fb38fcc047410df23a0acca691c192bde86a2",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:280b3fdd93663a891e0ae5b6c505dd51c13ced5aea460943c0207f6fd953ef09",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
@@ -33,7 +33,7 @@
     "keep_quarantine_manifest_exact_until_non_structural_paths_are_deleted_or_extracted",
     "owner_review_quarantined_paths_for_delete_or_repository_extract_decision"
   ],
-  "non_structural_path_count": 86,
+  "non_structural_path_count": 251,
   "non_structural_rows": [
     {
       "excluded_from_structural_release_surface": true,
@@ -76,6 +76,70 @@
       "matched_tokens": [
         "gpcr"
       ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
       "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
@@ -124,6 +188,38 @@
       "matched_tokens": [
         "gpcr"
       ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
       "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
@@ -140,7 +236,71 @@
       "matched_tokens": [
         "gpcr"
       ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
       "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.md",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
       "rule_ids": [
@@ -214,6 +374,26 @@
     {
       "excluded_from_structural_release_surface": true,
       "families": [
+        "molecular_docking",
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr",
+        "ligand",
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/operator_attached/pocketmd_lite_refinement_sources/gpcr_chembl_topk_ligand_refinement_source.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface",
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
         "molecular_dynamics"
       ],
       "git_state": "tracked",
@@ -237,6 +417,41 @@
         "pocketmd"
       ],
       "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking",
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr",
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_gpcr_chembl_refinement_receipts_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface",
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
       "rule_ids": [
@@ -316,7 +531,151 @@
       "matched_tokens": [
         "pocketmd"
       ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_template_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
       "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
       "rule_ids": [
@@ -397,6 +756,22 @@
       "matched_tokens": [
         "public_benchmark_enrichment"
       ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "public_benchmark_enrichment"
+      ],
       "path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows_template.csv",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
@@ -445,6 +820,22 @@
       "matched_tokens": [
         "public_benchmark_pose"
       ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
       "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows_template.csv",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
@@ -477,6 +868,22 @@
       "matched_tokens": [
         "public_benchmark_pose"
       ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
       "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
@@ -494,6 +901,22 @@
         "public_benchmark_subset"
       ],
       "path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
       "rule_ids": [
@@ -562,6 +985,196 @@
         "public_benchmark_vina_gnina",
         "vina"
       ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_receipts_completion_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_template_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
       "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
@@ -581,7 +1194,140 @@
         "public_benchmark_vina_gnina",
         "vina"
       ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_prepared_inputs_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_template_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
       "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
       "rule_ids": [
@@ -816,6 +1562,1358 @@
     {
       "excluded_from_structural_release_surface": true,
       "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_02_refinement_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_002/rank_01_refinement_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_002/rank_02_refinement_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_003/rank_01_refinement_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_003/rank_02_refinement_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_2v00/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_2v00/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_2v00/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_2v00/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_2v00/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_2v00/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3prs/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3prs/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3prs/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3prs/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3prs/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3prs/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3pww/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3pww/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3pww/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3pww/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3pww/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3pww/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3ui7/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3ui7/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3ui7/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3ui7/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3ui7/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3ui7/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uri/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uri/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uri/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uri/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uri/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uri/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uuo/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uuo/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uuo/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uuo/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uuo/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uuo/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3wz8/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3wz8/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3wz8/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3wz8/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3wz8/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3wz8/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4llx/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4llx/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4llx/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0y/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0y/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0y/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0y/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0y/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0y/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0z/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0z/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0z/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0z/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0z/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0z/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c28/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c28/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c28/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c28/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c28/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c28/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c2h/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c2h/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c2h/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c2h/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c2h/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c2h/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "scripts/build_gpcr_hard_decoy_chembl_activity_rows.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "scripts/build_gpcr_hard_decoy_decoy_source_snapshot.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
         "molecular_docking"
       ],
       "git_state": "tracked",
@@ -838,7 +2936,39 @@
       "matched_tokens": [
         "gpcr"
       ],
+      "path": "scripts/build_gpcr_hard_decoy_positive_source_snapshot.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
       "path": "scripts/build_gpcr_hard_decoy_product_report.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "scripts/build_gpcr_hard_decoy_source_acquisition_plan.py",
       "path_area": "script",
       "quarantine_status": "quarantined",
       "rule_ids": [
@@ -875,6 +3005,130 @@
       "quarantine_status": "quarantined",
       "rule_ids": [
         "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "scripts/build_pocketmd_lite_refinement_execution_plan.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "scripts/build_pocketmd_lite_source_acquisition_plan.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "scripts/build_pocketmd_lite_topk_rows_template_preflight.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/build_public_benchmark_vina_gnina_execution_plan.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
       ]
     },
     {
@@ -928,6 +3182,25 @@
     {
       "excluded_from_structural_release_surface": true,
       "families": [
+        "molecular_docking",
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr",
+        "pocketmd"
+      ],
+      "path": "scripts/materialize_pocketmd_lite_gpcr_chembl_refinement_receipts.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface",
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
         "molecular_dynamics"
       ],
       "git_state": "tracked",
@@ -935,6 +3208,54 @@
         "pocketmd"
       ],
       "path": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "scripts/materialize_pocketmd_lite_topk_rows_from_template.py",
       "path_area": "script",
       "quarantine_status": "quarantined",
       "rule_ids": [
@@ -1060,6 +3381,120 @@
     {
       "excluded_from_structural_release_surface": true,
       "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_template.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/materialize_public_benchmark_vina_gnina_prepared_inputs.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
         "molecular_science_evidence"
       ],
       "git_state": "tracked",
@@ -1071,6 +3506,25 @@
       "quarantine_status": "quarantined",
       "rule_ids": [
         "molecular_science_closure"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/run_public_benchmark_vina_gnina_engine_run_receipts.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
       ]
     },
     {
@@ -1132,6 +3586,38 @@
       "matched_tokens": [
         "gpcr"
       ],
+      "path": "tests/test_build_gpcr_hard_decoy_chembl_activity_rows.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "tests/test_build_gpcr_hard_decoy_decoy_source_snapshot.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
       "path": "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
       "path_area": "test",
       "quarantine_status": "quarantined",
@@ -1148,7 +3634,39 @@
       "matched_tokens": [
         "gpcr"
       ],
+      "path": "tests/test_build_gpcr_hard_decoy_positive_source_snapshot.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
       "path": "tests/test_build_gpcr_hard_decoy_product_report.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "tests/test_build_gpcr_hard_decoy_source_acquisition_plan.py",
       "path_area": "test",
       "quarantine_status": "quarantined",
       "rule_ids": [
@@ -1185,6 +3703,130 @@
       "quarantine_status": "quarantined",
       "rule_ids": [
         "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "tests/test_build_pocketmd_lite_refinement_execution_plan.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "tests/test_build_pocketmd_lite_source_acquisition_plan.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "tests/test_build_pocketmd_lite_topk_rows_template_preflight.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_build_public_benchmark_vina_gnina_execution_plan.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_build_public_benchmark_vina_gnina_input_manifest_template_preflight.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_build_public_benchmark_vina_gnina_rows_template_preflight.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_build_public_benchmark_vina_gnina_runtime_readiness.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
       ]
     },
     {
@@ -1238,6 +3880,25 @@
     {
       "excluded_from_structural_release_surface": true,
       "families": [
+        "molecular_docking",
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr",
+        "pocketmd"
+      ],
+      "path": "tests/test_materialize_pocketmd_lite_gpcr_chembl_refinement_receipts.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface",
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
         "molecular_dynamics"
       ],
       "git_state": "tracked",
@@ -1245,6 +3906,54 @@
         "pocketmd"
       ],
       "path": "tests/test_materialize_pocketmd_lite_operator_intake_from_rows.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "tests/test_materialize_pocketmd_lite_refinement_receipt_bundle.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "tests/test_materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "tests/test_materialize_pocketmd_lite_topk_rows_from_template.py",
       "path_area": "test",
       "quarantine_status": "quarantined",
       "rule_ids": [
@@ -1370,6 +4079,120 @@
     {
       "excluded_from_structural_release_surface": true,
       "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_engine_run_bundle.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_input_manifest_from_template.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_prepared_inputs.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_rows_from_template.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
         "molecular_science_evidence"
       ],
       "git_state": "tracked",
@@ -1381,6 +4204,25 @@
       "quarantine_status": "quarantined",
       "rule_ids": [
         "molecular_science_closure"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_run_public_benchmark_vina_gnina_engine_run_receipts.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
       ]
     },
     {
@@ -1434,34 +4276,35 @@
       ]
     }
   ],
-  "non_structural_tracked_path_count": 86,
+  "non_structural_tracked_path_count": 251,
   "non_structural_untracked_path_count": 0,
   "owner_cleanup_closure_blockers": [
-    "quarantined_non_structural_owner_cleanup_pending_count=86",
+    "quarantined_non_structural_owner_cleanup_pending_count=251",
     "release_surface_quarantined_owner_cleanup_pending_count=3"
   ],
   "owner_cleanup_closure_ready": false,
-  "owner_cleanup_pending_path_count": 86,
+  "owner_cleanup_pending_path_count": 251,
   "path_area_counts": {
     "implementation_phase1": 9,
-    "productization_evidence": 36,
+    "other": 78,
+    "productization_evidence": 79,
     "release_surface": 3,
-    "script": 19,
-    "test": 19
+    "script": 41,
+    "test": 41
   },
   "quarantine_manifest": {
     "active": true,
     "path": "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json",
     "present": true,
-    "quarantined_path_count": 86,
+    "quarantined_path_count": 251,
     "schema_version": "structural-scope-quarantine-manifest.v1"
   },
   "quarantined_family_counts": {
-    "molecular_docking": 48,
-    "molecular_dynamics": 25,
+    "molecular_docking": 185,
+    "molecular_dynamics": 57,
     "molecular_science_evidence": 13
   },
-  "quarantined_non_structural_path_count": 86,
+  "quarantined_non_structural_path_count": 251,
   "quarantined_non_structural_rows": [
     {
       "excluded_from_structural_release_surface": true,
@@ -1504,6 +4347,70 @@
       "matched_tokens": [
         "gpcr"
       ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
       "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
@@ -1552,6 +4459,38 @@
       "matched_tokens": [
         "gpcr"
       ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
       "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
@@ -1568,7 +4507,71 @@
       "matched_tokens": [
         "gpcr"
       ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
       "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.md",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
       "rule_ids": [
@@ -1642,6 +4645,26 @@
     {
       "excluded_from_structural_release_surface": true,
       "families": [
+        "molecular_docking",
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr",
+        "ligand",
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/operator_attached/pocketmd_lite_refinement_sources/gpcr_chembl_topk_ligand_refinement_source.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface",
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
         "molecular_dynamics"
       ],
       "git_state": "tracked",
@@ -1665,6 +4688,41 @@
         "pocketmd"
       ],
       "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking",
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr",
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_gpcr_chembl_refinement_receipts_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface",
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
       "rule_ids": [
@@ -1744,7 +4802,151 @@
       "matched_tokens": [
         "pocketmd"
       ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_template_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
       "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
       "rule_ids": [
@@ -1825,6 +5027,22 @@
       "matched_tokens": [
         "public_benchmark_enrichment"
       ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "public_benchmark_enrichment"
+      ],
       "path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows_template.csv",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
@@ -1873,6 +5091,22 @@
       "matched_tokens": [
         "public_benchmark_pose"
       ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
       "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows_template.csv",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
@@ -1905,6 +5139,22 @@
       "matched_tokens": [
         "public_benchmark_pose"
       ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
       "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
@@ -1922,6 +5172,22 @@
         "public_benchmark_subset"
       ],
       "path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
       "rule_ids": [
@@ -1990,6 +5256,196 @@
         "public_benchmark_vina_gnina",
         "vina"
       ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_receipts_completion_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_template_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
       "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
@@ -2009,7 +5465,140 @@
         "public_benchmark_vina_gnina",
         "vina"
       ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_prepared_inputs_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_template_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
       "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
       "path_area": "productization_evidence",
       "quarantine_status": "quarantined",
       "rule_ids": [
@@ -2244,6 +5833,1358 @@
     {
       "excluded_from_structural_release_surface": true,
       "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_02_refinement_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_002/rank_01_refinement_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_002/rank_02_refinement_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_003/rank_01_refinement_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_003/rank_02_refinement_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_2v00/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_2v00/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_2v00/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_2v00/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_2v00/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_2v00/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3prs/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3prs/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3prs/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3prs/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3prs/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3prs/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3pww/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3pww/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3pww/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3pww/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3pww/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3pww/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3ui7/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3ui7/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3ui7/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3ui7/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3ui7/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3ui7/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uri/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uri/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uri/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uri/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uri/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uri/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uuo/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uuo/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uuo/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uuo/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uuo/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3uuo/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3wz8/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3wz8/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3wz8/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3wz8/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3wz8/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_3wz8/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4llx/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4llx/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4llx/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0y/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0y/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0y/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0y/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0y/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0y/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0z/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0z/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0z/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0z/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0z/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_4m0z/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c28/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c28/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c28/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c28/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c28/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c28/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c2h/gnina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c2h/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c2h/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c2h/vina_config.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c2h/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "path": "operator_attached/vina_gnina/casf2016_5c2h/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "scripts/build_gpcr_hard_decoy_chembl_activity_rows.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "scripts/build_gpcr_hard_decoy_decoy_source_snapshot.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
         "molecular_docking"
       ],
       "git_state": "tracked",
@@ -2266,7 +7207,39 @@
       "matched_tokens": [
         "gpcr"
       ],
+      "path": "scripts/build_gpcr_hard_decoy_positive_source_snapshot.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
       "path": "scripts/build_gpcr_hard_decoy_product_report.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "scripts/build_gpcr_hard_decoy_source_acquisition_plan.py",
       "path_area": "script",
       "quarantine_status": "quarantined",
       "rule_ids": [
@@ -2303,6 +7276,130 @@
       "quarantine_status": "quarantined",
       "rule_ids": [
         "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "scripts/build_pocketmd_lite_refinement_execution_plan.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "scripts/build_pocketmd_lite_source_acquisition_plan.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "scripts/build_pocketmd_lite_topk_rows_template_preflight.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/build_public_benchmark_vina_gnina_execution_plan.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
       ]
     },
     {
@@ -2356,6 +7453,25 @@
     {
       "excluded_from_structural_release_surface": true,
       "families": [
+        "molecular_docking",
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr",
+        "pocketmd"
+      ],
+      "path": "scripts/materialize_pocketmd_lite_gpcr_chembl_refinement_receipts.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface",
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
         "molecular_dynamics"
       ],
       "git_state": "tracked",
@@ -2363,6 +7479,54 @@
         "pocketmd"
       ],
       "path": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "scripts/materialize_pocketmd_lite_topk_rows_from_template.py",
       "path_area": "script",
       "quarantine_status": "quarantined",
       "rule_ids": [
@@ -2488,6 +7652,120 @@
     {
       "excluded_from_structural_release_surface": true,
       "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_template.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/materialize_public_benchmark_vina_gnina_prepared_inputs.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
         "molecular_science_evidence"
       ],
       "git_state": "tracked",
@@ -2499,6 +7777,25 @@
       "quarantine_status": "quarantined",
       "rule_ids": [
         "molecular_science_closure"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "scripts/run_public_benchmark_vina_gnina_engine_run_receipts.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
       ]
     },
     {
@@ -2560,6 +7857,38 @@
       "matched_tokens": [
         "gpcr"
       ],
+      "path": "tests/test_build_gpcr_hard_decoy_chembl_activity_rows.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "tests/test_build_gpcr_hard_decoy_decoy_source_snapshot.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
       "path": "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
       "path_area": "test",
       "quarantine_status": "quarantined",
@@ -2576,7 +7905,39 @@
       "matched_tokens": [
         "gpcr"
       ],
+      "path": "tests/test_build_gpcr_hard_decoy_positive_source_snapshot.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
       "path": "tests/test_build_gpcr_hard_decoy_product_report.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "path": "tests/test_build_gpcr_hard_decoy_source_acquisition_plan.py",
       "path_area": "test",
       "quarantine_status": "quarantined",
       "rule_ids": [
@@ -2613,6 +7974,130 @@
       "quarantine_status": "quarantined",
       "rule_ids": [
         "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "tests/test_build_pocketmd_lite_refinement_execution_plan.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "tests/test_build_pocketmd_lite_source_acquisition_plan.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "tests/test_build_pocketmd_lite_topk_rows_template_preflight.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_build_public_benchmark_vina_gnina_execution_plan.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_build_public_benchmark_vina_gnina_input_manifest_template_preflight.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_build_public_benchmark_vina_gnina_rows_template_preflight.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_build_public_benchmark_vina_gnina_runtime_readiness.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
       ]
     },
     {
@@ -2666,6 +8151,25 @@
     {
       "excluded_from_structural_release_surface": true,
       "families": [
+        "molecular_docking",
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr",
+        "pocketmd"
+      ],
+      "path": "tests/test_materialize_pocketmd_lite_gpcr_chembl_refinement_receipts.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface",
+        "gpcr_ligand_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
         "molecular_dynamics"
       ],
       "git_state": "tracked",
@@ -2673,6 +8177,54 @@
         "pocketmd"
       ],
       "path": "tests/test_materialize_pocketmd_lite_operator_intake_from_rows.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "tests/test_materialize_pocketmd_lite_refinement_receipt_bundle.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "tests/test_materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "pocketmd_product_surface"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "path": "tests/test_materialize_pocketmd_lite_topk_rows_from_template.py",
       "path_area": "test",
       "quarantine_status": "quarantined",
       "rule_ids": [
@@ -2798,6 +8350,120 @@
     {
       "excluded_from_structural_release_surface": true,
       "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_engine_run_bundle.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_input_manifest_from_template.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_prepared_inputs.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_rows_from_template.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
         "molecular_science_evidence"
       ],
       "git_state": "tracked",
@@ -2809,6 +8475,25 @@
       "quarantine_status": "quarantined",
       "rule_ids": [
         "molecular_science_closure"
+      ]
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "path": "tests/test_run_public_benchmark_vina_gnina_engine_run_receipts.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "rule_ids": [
+        "gpcr_ligand_benchmark",
+        "molecular_public_benchmark"
       ]
     },
     {
@@ -2862,13 +8547,14 @@
       ]
     }
   ],
-  "quarantined_owner_cleanup_pending_path_count": 86,
+  "quarantined_owner_cleanup_pending_path_count": 251,
   "quarantined_path_area_counts": {
     "implementation_phase1": 9,
-    "productization_evidence": 36,
+    "other": 78,
+    "productization_evidence": 79,
     "release_surface": 3,
-    "script": 19,
-    "test": 19
+    "script": 41,
+    "test": 41
   },
   "release_surface_owner_cleanup_pending_path_count": 3,
   "release_surface_quarantine_boundary": {
@@ -2912,9 +8598,9 @@
   "reuse_policy": "structural_scope_contamination_audit_from_tracked_paths_with_release_surface_quarantine_manifest",
   "reused_evidence": false,
   "schema_version": "structural-scope-contamination-audit.v1",
-  "source_commit_sha": "c4fe128a1dae015b431d4de72c2afccfd0a6d43d",
+  "source_commit_sha": "42eccb4207eaba2b209cf59d2773554f1ca52477",
   "status": "quarantined",
-  "tracked_path_count": 5792,
+  "tracked_path_count": 6269,
   "unquarantined_family_counts": {},
   "unquarantined_git_state_counts": {},
   "unquarantined_non_structural_path_count": 0,

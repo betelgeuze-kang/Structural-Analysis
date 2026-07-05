@@ -1,12 +1,12 @@
 # Structural Scope Owner Decision Application Plan
 
-- `summary_line`: `Structural scope owner decision application plan: PENDING_OWNER_DECISIONS | recorded=0 | pending=86 | cleanup_pending=0 | delete=0 | extract=0 | retain=0 | unquarantined=0`
+- `summary_line`: `Structural scope owner decision application plan: PENDING_OWNER_DECISIONS | recorded=0 | pending=251 | cleanup_pending=0 | delete=0 | extract=0 | retain=0 | unquarantined=0`
 - `status`: `pending_owner_decisions`
 - `contract_pass`: `True`
 - `application_ready`: `False`
 - `evidence_closure_pass`: `False`
 - `owner_decision_validation_pass`: `False`
-- `owner_decision_pending_count`: `86`
+- `owner_decision_pending_count`: `251`
 - `post_decision_cleanup_pending_count`: `0`
 - `post_decision_cleanup_applied_count`: `0`
 - `cleanup_required_count`: `0`
@@ -18,12 +18,12 @@
 
 ## Pending Owner Decision Buckets
 
-- `pending_owner_decision_path_area_counts`: `{'implementation_phase1': 9, 'productization_evidence': 36, 'release_surface': 3, 'script': 19, 'test': 19}`
-- `pending_owner_decision_family_counts`: `{'molecular_docking': 48, 'molecular_dynamics': 25, 'molecular_science_evidence': 13}`
-- `pending_owner_decision_recommended_owner_decision_counts`: `{'delete_from_structural_repository_or_extract_only_if_owner_requires_history': 39, 'extract_to_molecular_or_science_repository_or_delete_if_obsolete': 47}`
-- `pending_owner_decision_primary_counts`: `{'delete_from_structural_repository': 39, 'extract_to_molecular_or_science_repository': 47}`
+- `pending_owner_decision_path_area_counts`: `{'implementation_phase1': 9, 'other': 78, 'productization_evidence': 79, 'release_surface': 3, 'script': 41, 'test': 41}`
+- `pending_owner_decision_family_counts`: `{'molecular_docking': 185, 'molecular_dynamics': 57, 'molecular_science_evidence': 13}`
+- `pending_owner_decision_recommended_owner_decision_counts`: `{'delete_from_structural_repository_or_extract_only_if_owner_requires_history': 82, 'extract_to_molecular_or_science_repository_or_delete_if_obsolete': 91, 'owner_decision_required': 78}`
+- `pending_owner_decision_primary_counts`: `{'delete_from_structural_repository': 82, 'extract_to_molecular_or_science_repository': 91}`
 - `next_owner_review_batch`: `release_surface_first` paths=`3` area=`release_surface`
-- `owner_review_priority_batches`: `5`
+- `owner_review_priority_batches`: `6`
 
 ## Release Surface First Batch Intake
 
@@ -88,11 +88,11 @@
 ## Owner Decision Validation Blockers
 
 - `owner_decisions_missing`
-- `owner_decision_pending_count=86`
+- `owner_decision_pending_count=251`
 
 ## Plan Blockers
 
-- `owner_decision_pending_count=86`
+- `owner_decision_pending_count=251`
 
 ## Cleanup Rows
 

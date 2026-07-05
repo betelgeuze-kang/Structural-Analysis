@@ -3,9 +3,9 @@
 - `status`: `blocked`
 - `developer_preview_ready`: `False`
 - `commercial_release_ready`: `False`
-- `blocker_count`: `10`
-- `future_commercial_blocker_count`: `35`
-- `source_commit_sha`: `c4fe128a1dae015b431d4de72c2afccfd0a6d43d`
+- `blocker_count`: `15`
+- `future_commercial_blocker_count`: `36`
+- `source_commit_sha`: `42eccb4207eaba2b209cf59d2773554f1ca52477`
 - `reuse_policy`: `derived_readiness_judgment_from_product_snapshot_and_dataset_license_manifest; does_not_create_authoritative_closure_evidence`
 - `input_checksum_policy`: `product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata`
 
@@ -15,15 +15,15 @@
 |---|---:|---|
 | numerical | 4 | yes |
 | benchmark | 2 | yes |
-| software product | 4 | yes |
-| future commercial | 35 | no, future commercial only |
+| software product | 9 | yes |
+| future commercial | 36 | no, future commercial only |
 
 ## Gap Ledger Closure Requirement Visibility
 
 - `source_status`: `ready`
 - `source_full_gap_ledger_ready`: `False`
-- `closure_requirements`: `3/19`
-- `failed_closure_requirements`: `16`
+- `closure_requirements`: `4/19`
+- `failed_closure_requirements`: `15`
 - `nonclosed_rows_with_failed_closure_requirements`: `3`
 
 Failed requirement IDs:
@@ -33,7 +33,6 @@ Failed requirement IDs:
 - `G1:full_line_mesh_nonlinear_equilibrium_closed`
 - `G1:full_load_scale_1_0_reached`
 - `G1:state_updated_material_newton_breadth_closed`
-- `G1:strict_full_load_hip_newton_checkpoint_available`
 - `G6:eb_receipt_hardest_external_10case`
 - `G6:eb_receipt_korean_public_structures`
 - `G6:eb_receipt_peer_spd_hinge`

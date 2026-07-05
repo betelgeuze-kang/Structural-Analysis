@@ -1,5 +1,5 @@
 {
-  "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events. Job-start annotations, stale queued self-hosted runs, and workflow queue backlog rows are read-only GitHub metadata and may identify external account, billing, or runner-availability blockers, but they do not create CI streak credit.",
+  "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events. Job-start annotations, stale queued self-hosted runs, and workflow queue backlog rows are read-only GitHub metadata and may identify external account, billing, or runner-availability blockers, but they do not create CI streak credit. Local workflow trigger metadata is parsed from the current checkout and does not refresh or replace GitHub Actions run-history evidence.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_workflow_queue_backlog": {
@@ -18,7 +18,8 @@
   },
   "generated_at": "2026-07-04T09:02:06.092465+00:00",
   "input_checksums": {
-    ".github/workflows": "dir-sha256:bf7d902412a1f2216afd7baa1b12ca45023e1c58cd35e32774b434d40160bdff"
+    ".github/workflows": "dir-sha256:bf7d902412a1f2216afd7baa1b12ca45023e1c58cd35e32774b434d40160bdff",
+    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:a55d57e87a73bfc49ef749ca88c36ec29be64b62780c465d340ff9960d7473ae"
   },
   "lanes": {
     "nightly": {
@@ -362,9 +363,9 @@
   "limit": 500,
   "reason_code": "ERR_CI_STREAK_INCOMPLETE",
   "repo": "betelgeuze-kang/Structural-Analysis",
-  "reused_evidence": false,
+  "reused_evidence": true,
   "schema_version": "github-actions-ci-streak-evidence.v1",
-  "source_commit_sha": "20c62f437c0fd135f7d87e5f2e20749f7c0b2381",
+  "source_commit_sha": "42eccb4207eaba2b209cf59d2773554f1ca52477",
   "summary": {
     "nightly_consecutive_pass_count": 0,
     "nightly_job_start_blocker_count": 1,
@@ -384,6 +385,7 @@
   "threshold": 30,
   "workflow_discovery": {
     "local_workflow_count": 9,
+    "local_workflow_metadata_generated_at": "2026-07-05T07:35:29.789358+00:00",
     "local_workflows": [
       {
         "exists": true,

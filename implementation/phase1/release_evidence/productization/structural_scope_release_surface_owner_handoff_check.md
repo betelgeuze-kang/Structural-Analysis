@@ -12,7 +12,7 @@
 
 ## Owner Decision State
 
-- `owner_decision_pending_count`: `86`
+- `owner_decision_pending_count`: `251`
 - `owner_decision_recorded_count`: `0`
 - `release_surface_owner_decision_required_count`: `3`
 - `release_surface_first_batch_application_ready`: `False`

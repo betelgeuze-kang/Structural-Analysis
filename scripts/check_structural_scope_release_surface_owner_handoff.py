@@ -348,7 +348,9 @@ def build_handoff_check(
                 Path("scripts/check_structural_scope_release_surface_owner_handoff.py"),
                 application_plan_path,
                 pm_register_path,
-                roadmap_path,
+                # Roadmap is read for semantic cross-checking, but not checksummed
+                # here; it already depends on the product snapshot that consumes
+                # this handoff receipt, so including it creates a freshness cycle.
                 template_csv_path,
                 template_json_path,
                 overrides_csv_path,

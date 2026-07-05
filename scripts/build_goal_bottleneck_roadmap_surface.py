@@ -136,21 +136,27 @@ def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
-def _input_paths() -> list[Path]:
-    return [
+def _input_paths(*, include_science_beta_roadmap: bool = True) -> list[Path]:
+    paths = [
         Path("scripts/build_goal_bottleneck_roadmap_surface.py"),
         DEFAULT_PM_REPORT,
         DEFAULT_ACTION_REGISTER,
         DEFAULT_FRESHNESS_REPORT,
         DEFAULT_SOURCE_OF_TRUTH_GAP_CLASSIFICATION,
-        DEFAULT_SCIENCE_ACTUAL_CLOSURE_ROW_AUDIT,
-        DEFAULT_SCIENCE_ACTUAL_CLOSURE_OPERATOR_HANDOFF,
-        DEFAULT_PUBLIC_BENCHMARK_PHASE2_ROW_AUDIT,
-        DEFAULT_POCKETMD_TOPK_SURVIVAL_REPORT,
         DEFAULT_PRODUCT_CAPABILITIES,
         DEFAULT_UX_OBSERVATION_REPORT,
         DEFAULT_UX_OBSERVATION_INTAKE_PACKET,
     ]
+    if include_science_beta_roadmap:
+        paths.extend(
+            [
+                DEFAULT_SCIENCE_ACTUAL_CLOSURE_ROW_AUDIT,
+                DEFAULT_SCIENCE_ACTUAL_CLOSURE_OPERATOR_HANDOFF,
+                DEFAULT_PUBLIC_BENCHMARK_PHASE2_ROW_AUDIT,
+                DEFAULT_POCKETMD_TOPK_SURVIVAL_REPORT,
+            ]
+        )
+    return paths
 
 
 def _first_str(rows: list[Any]) -> str:
@@ -2129,6 +2135,7 @@ def _non_expert_release_briefing(
     primary_bottleneck_row: dict[str, Any],
     ux_observation_report: dict[str, Any],
     ux_observation_intake_packet: dict[str, Any],
+    include_science_beta_roadmap: bool = True,
 ) -> dict[str, Any]:
     release_area_blockers = [
         str(row) for row in _as_list(pm_report.get("release_area_blockers")) if str(row)
@@ -2208,12 +2215,40 @@ def _non_expert_release_briefing(
         "claim_boundaries": [
             "do_not_claim_limited_commercial_release_until_release_allowed_true",
             "do_not_replace_human_ux_observation_with_templates_or_automation",
-            "do_not_claim_science_actual_closure_until_operator_rows_pass",
+            *(
+                ["do_not_claim_science_actual_closure_until_operator_rows_pass"]
+                if include_science_beta_roadmap
+                else []
+            ),
         ],
     }
 
 
-def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str, Any]:
+def _structural_release_only_audit() -> dict[str, Any]:
+    return {
+        "scope_policy": "structural_release_surface_only",
+        "status": "not_applicable",
+        "actual_closure_ready": False,
+        "priority_count": 0,
+        "complete_priority_count": 0,
+        "blocked_priority_count": 0,
+        "complete_priority_ids": [],
+        "blocked_priority_ids": [],
+        "operator_row_inputs_required": [],
+        "priority_rows": [],
+        "claim_boundary": (
+            "Non-structural beta roadmap details are quarantined outside this "
+            "structural release surface and are not counted as structural solver "
+            "release evidence."
+        ),
+    }
+
+
+def build_goal_bottleneck_roadmap_surface(
+    *,
+    repo_root: Path = ROOT,
+    include_science_beta_roadmap: bool = True,
+) -> dict[str, Any]:
     pm_report = _load_json(repo_root, DEFAULT_PM_REPORT)
     action_register = _load_json(repo_root, DEFAULT_ACTION_REGISTER)
     freshness = _load_json(repo_root, DEFAULT_FRESHNESS_REPORT)
@@ -2221,18 +2256,25 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         repo_root,
         DEFAULT_SOURCE_OF_TRUTH_GAP_CLASSIFICATION,
     )
-    science_row_audit = _load_json(repo_root, DEFAULT_SCIENCE_ACTUAL_CLOSURE_ROW_AUDIT)
-    science_handoff = _load_json(
-        repo_root,
-        DEFAULT_SCIENCE_ACTUAL_CLOSURE_OPERATOR_HANDOFF,
+    science_row_audit = (
+        _load_json(repo_root, DEFAULT_SCIENCE_ACTUAL_CLOSURE_ROW_AUDIT)
+        if include_science_beta_roadmap
+        else {}
     )
-    public_phase2_row_audit = _load_json(
-        repo_root,
-        DEFAULT_PUBLIC_BENCHMARK_PHASE2_ROW_AUDIT,
+    science_handoff = (
+        _load_json(repo_root, DEFAULT_SCIENCE_ACTUAL_CLOSURE_OPERATOR_HANDOFF)
+        if include_science_beta_roadmap
+        else {}
     )
-    pocketmd_survival_report = _load_json(
-        repo_root,
-        DEFAULT_POCKETMD_TOPK_SURVIVAL_REPORT,
+    public_phase2_row_audit = (
+        _load_json(repo_root, DEFAULT_PUBLIC_BENCHMARK_PHASE2_ROW_AUDIT)
+        if include_science_beta_roadmap
+        else {}
+    )
+    pocketmd_survival_report = (
+        _load_json(repo_root, DEFAULT_POCKETMD_TOPK_SURVIVAL_REPORT)
+        if include_science_beta_roadmap
+        else {}
     )
     product_capabilities = _load_json(repo_root, DEFAULT_PRODUCT_CAPABILITIES)
     ux_observation_report = _load_json(repo_root, DEFAULT_UX_OBSERVATION_REPORT)
@@ -2263,9 +2305,13 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
             action_register=action_register,
             product_capabilities=product_capabilities,
         ),
-        *_science_actual_closure_rows(
-            science_handoff=science_handoff,
-            science_row_audit=science_row_audit,
+        *(
+            _science_actual_closure_rows(
+                science_handoff=science_handoff,
+                science_row_audit=science_row_audit,
+            )
+            if include_science_beta_roadmap
+            else []
         ),
     ]
     blocked_roadmap_rows = [row for row in roadmap_rows if row["state"] != "ready"]
@@ -2346,13 +2392,17 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
             freshness_summary.get("source_of_truth_gap_aggregator_review_count")
         ),
     }
-    active_thread_goal_objective_audit = _active_thread_goal_objective_audit(
-        roadmap_rows=roadmap_rows,
-        source_of_truth_gap_summary=source_of_truth_gap_summary,
-        source_of_truth_gap_evidence_matrix=source_of_truth_gap_evidence_matrix,
-        science_handoff=science_handoff,
-        public_phase2_row_audit=public_phase2_row_audit,
-        pocketmd_survival_report=pocketmd_survival_report,
+    active_thread_goal_objective_audit = (
+        _active_thread_goal_objective_audit(
+            roadmap_rows=roadmap_rows,
+            source_of_truth_gap_summary=source_of_truth_gap_summary,
+            source_of_truth_gap_evidence_matrix=source_of_truth_gap_evidence_matrix,
+            science_handoff=science_handoff,
+            public_phase2_row_audit=public_phase2_row_audit,
+            pocketmd_survival_report=pocketmd_survival_report,
+        )
+        if include_science_beta_roadmap
+        else _structural_release_only_audit()
     )
     handoff_source_rows = roadmap_rows
     operator_evidence_handoff_queue = _operator_evidence_handoff_queue(handoff_source_rows)
@@ -2375,12 +2425,15 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         primary_bottleneck_row=primary_bottleneck_row,
         ux_observation_report=ux_observation_report,
         ux_observation_intake_packet=ux_observation_intake_packet,
+        include_science_beta_roadmap=include_science_beta_roadmap,
     )
 
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
-            input_paths=_input_paths(),
+            input_paths=_input_paths(
+                include_science_beta_roadmap=include_science_beta_roadmap
+            ),
             reused_evidence=True,
             reuse_policy="goal_bottleneck_roadmap_surface_aggregates_structural_release_inputs",
             repo_root=repo_root,
@@ -2478,8 +2531,12 @@ def write_goal_bottleneck_roadmap_surface(
     *,
     repo_root: Path = ROOT,
     out: Path = DEFAULT_OUT,
+    include_science_beta_roadmap: bool = False,
 ) -> dict[str, Any]:
-    payload = build_goal_bottleneck_roadmap_surface(repo_root=repo_root)
+    payload = build_goal_bottleneck_roadmap_surface(
+        repo_root=repo_root,
+        include_science_beta_roadmap=include_science_beta_roadmap,
+    )
     resolved = out if out.is_absolute() else repo_root / out
     resolved.parent.mkdir(parents=True, exist_ok=True)
     resolved.write_text(_json_text(payload), encoding="utf-8")
@@ -2490,13 +2547,26 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
+    parser.add_argument(
+        "--include-science-beta-roadmap",
+        action="store_true",
+        help=(
+            "Include quarantined non-structural beta roadmap details. The default "
+            "CLI/write output is structural release-only so release-surface guards "
+            "do not ingest those details."
+        ),
+    )
     parser.add_argument("--json", action="store_true")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    payload = write_goal_bottleneck_roadmap_surface(repo_root=args.repo_root, out=args.out)
+    payload = write_goal_bottleneck_roadmap_surface(
+        repo_root=args.repo_root,
+        out=args.out,
+        include_science_beta_roadmap=args.include_science_beta_roadmap,
+    )
     print(_json_text(payload), end="") if args.json else print(payload["summary_line"])
     return 0
 

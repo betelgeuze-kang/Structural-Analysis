@@ -604,7 +604,7 @@
     "residual_inf_n": 0.42740724991695345,
     "status": "ready"
   },
-  "generated_at": "2026-07-05T07:21:58.158069+00:00",
+  "generated_at": "2026-07-05T07:32:35.606264+00:00",
   "global_tangent_scaled_sweep": {
     "base_residual_inf_n": 0.4278304040181992,
     "best_alpha": 0.00390625,
@@ -716,10 +716,10 @@
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_residual_gradient_tiny_sweep_probe.json": "sha256:e106b463733e101d2840d0dbed7b2f90bd7cd5bc8c207055b416f481fe231a43",
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_shell_diag_sweep_probe.json": "sha256:3fb896191af710575f7c4a7198de670b974250b26c3e6a93682ec033677f5ac6",
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_shell_jvp_probe.json": "sha256:1f50ad798a79bccf5a36b3f3fe4306ea17ab4305eca998703f41ae849b88da5e",
-    "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json": "sha256:fdbd991be7d1f9021f3a523790f203cc8f0b2297f3d5dfd335d3a5c5c829bcb9",
+    "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json": "sha256:d22636072d5e435c501577f2e98c0d296292ff1971b76e7066e0e8584a0214eb",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:92ca6c7d4e23dd89132e0fe834fbe16ca753e17ae860786ff5ad7bed97a27aad",
     "implementation/phase1/release_evidence/productization/g1_frame_tangent_fd_epsilon_sweep_probe.json": "sha256:81c2ad32a078db886d09c6637cd7d1369719d2ed6c8f5fac88ae5ac410c4291d",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:ca3badc13f48a44f63deecdbded13c39575cfd1c2d0e6c79f798abeb1fce211e",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:f90dfbb6fc41796719b97fafd8e4ab6badc801439bcdbe409ca60b0b28a7992b",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:461c82706d56e914cd27e1781e2bbfc9bbeb6b58e266952918766d2e00963858",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.json": "sha256:e6582053c0d7dc2c99c3737f0c7ffa94579855a5520cdb416efc2abd01aa3ee9",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe.json": "sha256:83a0e92b346a14a6f8833bb39b572437f405fdafe62e631d55da9d7c7c3fa4da",
@@ -743,7 +743,7 @@
     "implementation/phase1/release_evidence/productization/g1_true_newton_from_active_set_mu_sweep_probe.json": "sha256:37c65291c66cb545b17330ba59c0b7b51ea251382f4165406b5b57898f1c6ed7",
     "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:a5b58790d91923c379c57834bcc71bcc6440af1800aebe525391e05442188318",
     "implementation/phase1/release_evidence/productization/g1_true_newton_load_sweep_status.json": "sha256:c1a862c28a6f31163f15f8cbe03334e0060a6cbb81138b9e3819d53fad497aca",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:86f317c735066a64e3adeb99d31a1849d5df76587becaadd8e673bcb64343968",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:525f0eac1fd33e40b6764d37ad6885e910d9f1e78ade80ae750828fd73b82945",
     "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:d79842b09bed586a3667f0b6f086546c7a58f344a3cf5504a08da36b15c5849e"
   },
   "next_actions": [
@@ -948,7 +948,7 @@
     "row_count": 8,
     "status": "ready"
   },
-  "source_commit_sha": "8671416366878591fe768ca283ee8d4c777440ee",
+  "source_commit_sha": "42eccb4207eaba2b209cf59d2773554f1ca52477",
   "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe": {
     "assembled_tangent_parity_max_absolute_error": 0.006011962890625,
     "assembled_tangent_parity_max_relative_error": 2.683381287585585e-15,

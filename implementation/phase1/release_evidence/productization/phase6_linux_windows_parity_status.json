@@ -75,7 +75,7 @@
     "status": "pass"
   },
   "expected_stable_artifact_checksums": {
-    "acquisition_plan": "sha256:ee8fc1bbf6f3ec11e5ee8a169a130cec20947ccc669e0902cacf53a089594e33",
+    "acquisition_plan": "sha256:bf007f37b48364f2d6cd3d92df0c8d142975d90c01db269613181350f787207b",
     "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:ad48bd01ec19d476563c7553c8157863bae5a067e9b5bc40db5607c251c789b6",
     "buildingsmart_ifc_acquisition_receipt": "sha256:c79dea3ca47b7383bbe465976d584277bbaf82a30a971eddc2ed061f83dde2e3",
     "commercial_comparison_import_template": "sha256:37dd0e219d8eee66b2d2e3c84ab13ba63a7f27334a727346dca577c231b2cb67",
@@ -120,7 +120,7 @@
           "return_code": 0
         }
       ],
-      "required_source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+      "required_source_commit_sha": "95d9c7e12eeb16efe4ceed434e9f58aeb63fcbe4",
       "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
       "slot_id": "attach_windows_platform_replay_receipt",
       "validation_commands_after_attachment": [
@@ -143,12 +143,12 @@
     }
   ],
   "gate_unblock_plan_count": 2,
-  "generated_at": "2026-07-02T21:31:49.129547+00:00",
+  "generated_at": "2026-07-05T07:35:29.557746+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:a1e86d8ff00587e679ce8caf5ea651aff128a7b676e679d9ef493aa70b56d401",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:fd123502c0ba1dbe040509aed3e042a11fe7bf91bac52c52152e8fa18801db28",
-    "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json": "sha256:5793b127f4d1d5cf6ee829934133bf0ec0f2dea9b6b661e558546e0254f8264b",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:2c8e8f61015ac45c829d2c585da1fce9c33745ecb7be9c8c274fd8c4053ac41a",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:8ee1b59e56a2dfd5638a39d8321f0c3f44812807437ec96c92cb9931784f7b92",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:c77091d8cf107a4e47581bb2c78aebbb966a9c0b5e98c5722513235d046cb264",
+    "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json": "sha256:fed361b69c45e88473360a3fc92c8f7b45bb3301dadc945883d4960006ac8270",
     "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json": "missing",
     "scripts/build_phase6_linux_windows_parity_status.py": "sha256:47098596657f5ddb2aead9eff459b8c2e6e85c3ebbf45d1f7bdcdab19d455c4c"
   },
@@ -231,10 +231,10 @@
           "return_code": 0
         }
       ],
-      "required_source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+      "required_source_commit_sha": "95d9c7e12eeb16efe4ceed434e9f58aeb63fcbe4",
       "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
       "stable_artifact_checksums": {
-        "acquisition_plan": "sha256:ee8fc1bbf6f3ec11e5ee8a169a130cec20947ccc669e0902cacf53a089594e33",
+        "acquisition_plan": "sha256:bf007f37b48364f2d6cd3d92df0c8d142975d90c01db269613181350f787207b",
         "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:ad48bd01ec19d476563c7553c8157863bae5a067e9b5bc40db5607c251c789b6",
         "buildingsmart_ifc_acquisition_receipt": "sha256:c79dea3ca47b7383bbe465976d584277bbaf82a30a971eddc2ed061f83dde2e3",
         "commercial_comparison_import_template": "sha256:37dd0e219d8eee66b2d2e3c84ab13ba63a7f27334a727346dca577c231b2cb67",
@@ -293,7 +293,7 @@
           "return_code": 0
         }
       ],
-      "required_source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+      "required_source_commit_sha": "95d9c7e12eeb16efe4ceed434e9f58aeb63fcbe4",
       "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
       "slot_id": "attach_windows_platform_replay_receipt",
       "validation_commands_after_attachment": [
@@ -415,13 +415,13 @@
       "python_version": "OPERATOR_RECORDED_PYTHON_VERSION",
       "receipt_origin": "OPERATOR_RECORDED_RECEIPT_ORIGIN",
       "replay_environment": "OPERATOR_RECORDED_REPLAY_ENVIRONMENT",
-      "source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d"
+      "source_commit_sha": "95d9c7e12eeb16efe4ceed434e9f58aeb63fcbe4"
     },
     "python_version": "OPERATOR_RECORDED_PYTHON_VERSION",
     "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
-    "source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+    "source_commit_sha": "95d9c7e12eeb16efe4ceed434e9f58aeb63fcbe4",
     "stable_artifact_checksums": {
-      "acquisition_plan": "sha256:ee8fc1bbf6f3ec11e5ee8a169a130cec20947ccc669e0902cacf53a089594e33",
+      "acquisition_plan": "sha256:bf007f37b48364f2d6cd3d92df0c8d142975d90c01db269613181350f787207b",
       "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:ad48bd01ec19d476563c7553c8157863bae5a067e9b5bc40db5607c251c789b6",
       "buildingsmart_ifc_acquisition_receipt": "sha256:c79dea3ca47b7383bbe465976d584277bbaf82a30a971eddc2ed061f83dde2e3",
       "commercial_comparison_import_template": "sha256:37dd0e219d8eee66b2d2e3c84ab13ba63a7f27334a727346dca577c231b2cb67",
@@ -488,7 +488,7 @@
           "return_code": 0
         }
       ],
-      "required_source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+      "required_source_commit_sha": "95d9c7e12eeb16efe4ceed434e9f58aeb63fcbe4",
       "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
       "slot_id": "attach_windows_platform_replay_receipt",
       "validation_commands_after_attachment": [
@@ -524,7 +524,7 @@
   "reuse_policy": "phase6_parity_status_aggregates_phase3_seed_replay_expectations",
   "reused_evidence": true,
   "schema_version": "phase6-linux-windows-parity-status.v1",
-  "source_commit_sha": "1c32b972b956f66da79c463d28495980dc083285",
+  "source_commit_sha": "42eccb4207eaba2b209cf59d2773554f1ca52477",
   "status": "blocked",
   "summary": {
     "blocked_platforms": [],

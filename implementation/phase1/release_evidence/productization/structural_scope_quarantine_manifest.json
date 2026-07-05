@@ -1,11 +1,11 @@
 {
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T18:28:42.481325+00:00",
+  "generated_at": "2026-07-05T07:45:18.401522+00:00",
   "input_checksums": {
-    "scripts/check_structural_scope_contamination.py": "sha256:29e0bac1df2cc166be8e5ef2d80e3bc570a7a6dc32ed91c3537f66bde38688b5"
+    "scripts/check_structural_scope_contamination.py": "sha256:ca67b99d28202d9cfca6cede1d49d220e8fac6e0f78dd613d86579c68eb4098e"
   },
   "owner_review_status": "owner_requested_release_surface_quarantine",
-  "path_count": 86,
+  "path_count": 251,
   "paths": [
     {
       "excluded_from_structural_release_surface": true,
@@ -33,6 +33,62 @@
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "implementation/phase1/md3bead_soa.py",
       "path_area": "implementation_phase1",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_chembl_activity_rows.md",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_decoy_source_snapshot.md",
+      "path_area": "productization_evidence",
       "quarantine_reason": "non_structural_product_domain"
     },
     {
@@ -87,6 +143,34 @@
         "gpcr"
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_positive_source_snapshot.md",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json",
       "path_area": "productization_evidence",
       "quarantine_reason": "non_structural_product_domain"
@@ -101,7 +185,63 @@
         "gpcr"
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.md",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_source_acquisition_plan.md",
       "path_area": "productization_evidence",
       "quarantine_reason": "non_structural_product_domain"
     },
@@ -164,6 +304,23 @@
     {
       "excluded_from_structural_release_surface": true,
       "families": [
+        "molecular_docking",
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr",
+        "ligand",
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/operator_attached/pocketmd_lite_refinement_sources/gpcr_chembl_topk_ligand_refinement_source.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
         "molecular_dynamics"
       ],
       "git_state": "tracked",
@@ -186,6 +343,36 @@
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking",
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr",
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_gpcr_chembl_refinement_receipts_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json",
       "path_area": "productization_evidence",
       "quarantine_reason": "non_structural_product_domain"
     },
@@ -255,7 +442,133 @@
         "pocketmd"
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_execution_plan.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_refinement_receipt_bundle.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_source_acquisition_plan.md",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_receipt_bundle_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_from_template_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template_preflight.md",
       "path_area": "productization_evidence",
       "quarantine_reason": "non_structural_product_domain"
     },
@@ -326,6 +639,20 @@
         "public_benchmark_enrichment"
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "public_benchmark_enrichment"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows_template.csv",
       "path_area": "productization_evidence",
       "quarantine_reason": "non_structural_product_domain"
@@ -368,6 +695,20 @@
         "public_benchmark_pose"
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows_template.csv",
       "path_area": "productization_evidence",
       "quarantine_reason": "non_structural_product_domain"
@@ -396,6 +737,20 @@
         "public_benchmark_pose"
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
       "path_area": "productization_evidence",
       "quarantine_reason": "non_structural_product_domain"
@@ -411,6 +766,20 @@
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
       "path_area": "productization_evidence",
       "quarantine_reason": "non_structural_product_domain"
     },
@@ -470,6 +839,166 @@
         "vina"
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_bundle.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_commands.sh",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_engine_run_receipts_completion_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_execution_plan.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest.csv",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_casf_archive_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_from_template_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template.csv",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_input_manifest_template_preflight.md",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
       "path_area": "productization_evidence",
       "quarantine_reason": "non_structural_product_domain"
@@ -486,7 +1015,119 @@
         "vina"
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_prepared_inputs_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_engine_run_bundle_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_from_template_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.json",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template_preflight.md",
+      "path_area": "productization_evidence",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_runtime_readiness.json",
       "path_area": "productization_evidence",
       "quarantine_reason": "non_structural_product_domain"
     },
@@ -689,6 +1330,1198 @@
     {
       "excluded_from_structural_release_surface": true,
       "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_01_refinement_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_001/rank_02_refinement_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_002/rank_01_refinement_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_002/rank_02_refinement_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_003/rank_01_refinement_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/pocketmd_lite_refinement_receipts/pocketmd_lite_case_003/rank_02_refinement_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_2v00/gnina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_2v00/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_2v00/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_2v00/vina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_2v00/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_2v00/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3prs/gnina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3prs/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3prs/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3prs/vina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3prs/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3prs/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3pww/gnina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3pww/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3pww/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3pww/vina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3pww/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3pww/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3ui7/gnina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3ui7/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3ui7/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3ui7/vina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3ui7/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3ui7/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3uri/gnina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3uri/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3uri/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3uri/vina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3uri/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3uri/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3uuo/gnina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3uuo/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3uuo/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3uuo/vina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3uuo/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3uuo/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3wz8/gnina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3wz8/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3wz8/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3wz8/vina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3wz8/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_3wz8/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_4llx/gnina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_4llx/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_4llx/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_4llx/vina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_4llx/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_4llx/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_4m0y/gnina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_4m0y/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_4m0y/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_4m0y/vina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_4m0y/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_4m0y/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_4m0z/gnina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_4m0z/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_4m0z/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_4m0z/vina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_4m0z/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_4m0z/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_5c28/gnina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_5c28/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_5c28/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_5c28/vina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_5c28/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_5c28/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_5c2h/gnina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_5c2h/gnina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_5c2h/gnina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_5c2h/vina_config.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_5c2h/vina_pose.sdf",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "operator_attached/vina_gnina/casf2016_5c2h/vina_run_receipt.json",
+      "path_area": "other",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/build_gpcr_hard_decoy_chembl_activity_rows.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/build_gpcr_hard_decoy_decoy_source_snapshot.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
         "molecular_docking"
       ],
       "git_state": "tracked",
@@ -710,7 +2543,35 @@
         "gpcr"
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/build_gpcr_hard_decoy_positive_source_snapshot.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "scripts/build_gpcr_hard_decoy_product_report.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/build_gpcr_hard_decoy_source_acquisition_plan.py",
       "path_area": "script",
       "quarantine_reason": "non_structural_product_domain"
     },
@@ -739,6 +2600,112 @@
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "scripts/build_pocketmd_lite_product_surface.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/build_pocketmd_lite_refinement_execution_plan.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/build_pocketmd_lite_source_acquisition_plan.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/build_pocketmd_lite_topk_rows_template_preflight.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/build_public_benchmark_vina_gnina_execution_plan.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/build_public_benchmark_vina_gnina_input_manifest_template_preflight.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/build_public_benchmark_vina_gnina_rows_template_preflight.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/build_public_benchmark_vina_gnina_runtime_readiness.py",
       "path_area": "script",
       "quarantine_reason": "non_structural_product_domain"
     },
@@ -787,6 +2754,22 @@
     {
       "excluded_from_structural_release_surface": true,
       "families": [
+        "molecular_docking",
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr",
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/materialize_pocketmd_lite_gpcr_chembl_refinement_receipts.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
         "molecular_dynamics"
       ],
       "git_state": "tracked",
@@ -795,6 +2778,48 @@
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/materialize_pocketmd_lite_refinement_receipt_bundle.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/materialize_pocketmd_lite_topk_rows_from_template.py",
       "path_area": "script",
       "quarantine_reason": "non_structural_product_domain"
     },
@@ -902,6 +2927,102 @@
     {
       "excluded_from_structural_release_surface": true,
       "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/materialize_public_benchmark_vina_gnina_engine_run_bundle.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/materialize_public_benchmark_vina_gnina_input_manifest_from_template.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/materialize_public_benchmark_vina_gnina_prepared_inputs.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/materialize_public_benchmark_vina_gnina_rows_from_template.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
         "molecular_science_evidence"
       ],
       "git_state": "tracked",
@@ -910,6 +3031,22 @@
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "scripts/materialize_science_actual_closure_from_rows.py",
+      "path_area": "script",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "scripts/run_public_benchmark_vina_gnina_engine_run_receipts.py",
       "path_area": "script",
       "quarantine_reason": "non_structural_product_domain"
     },
@@ -966,6 +3103,34 @@
         "gpcr"
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_build_gpcr_hard_decoy_chembl_activity_rows.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_build_gpcr_hard_decoy_decoy_source_snapshot.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
       "path_area": "test",
       "quarantine_reason": "non_structural_product_domain"
@@ -980,7 +3145,35 @@
         "gpcr"
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_build_gpcr_hard_decoy_positive_source_snapshot.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "tests/test_build_gpcr_hard_decoy_product_report.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_build_gpcr_hard_decoy_source_acquisition_plan.py",
       "path_area": "test",
       "quarantine_reason": "non_structural_product_domain"
     },
@@ -1009,6 +3202,112 @@
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "tests/test_build_pocketmd_lite_product_surface.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_build_pocketmd_lite_refinement_execution_plan.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_build_pocketmd_lite_source_acquisition_plan.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_build_pocketmd_lite_topk_rows_template_preflight.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_build_public_benchmark_vina_gnina_execution_plan.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_build_public_benchmark_vina_gnina_input_manifest_template_preflight.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_build_public_benchmark_vina_gnina_rows_template_preflight.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_build_public_benchmark_vina_gnina_runtime_readiness.py",
       "path_area": "test",
       "quarantine_reason": "non_structural_product_domain"
     },
@@ -1057,6 +3356,22 @@
     {
       "excluded_from_structural_release_surface": true,
       "families": [
+        "molecular_docking",
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gpcr",
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_materialize_pocketmd_lite_gpcr_chembl_refinement_receipts.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
         "molecular_dynamics"
       ],
       "git_state": "tracked",
@@ -1065,6 +3380,48 @@
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "tests/test_materialize_pocketmd_lite_operator_intake_from_rows.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_materialize_pocketmd_lite_refinement_receipt_bundle.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_materialize_pocketmd_lite_topk_rows_from_template.py",
       "path_area": "test",
       "quarantine_reason": "non_structural_product_domain"
     },
@@ -1172,6 +3529,102 @@
     {
       "excluded_from_structural_release_surface": true,
       "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_engine_run_bundle.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_input_manifest_from_casf_archive.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_input_manifest_from_template.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_prepared_inputs.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_rows_from_engine_run_bundle.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_rows_from_template.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
         "molecular_science_evidence"
       ],
       "git_state": "tracked",
@@ -1180,6 +3633,22 @@
       ],
       "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
       "path": "tests/test_materialize_science_actual_closure_from_rows.py",
+      "path_area": "test",
+      "quarantine_reason": "non_structural_product_domain"
+    },
+    {
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_action_required": "delete_or_extract_from_structural_repository_after_review",
+      "path": "tests/test_run_public_benchmark_vina_gnina_engine_run_receipts.py",
       "path_area": "test",
       "quarantine_reason": "non_structural_product_domain"
     },
@@ -1231,6 +3700,6 @@
   "reuse_policy": "structural_scope_quarantine_manifest_from_owner_requested_scope_cleanup",
   "reused_evidence": false,
   "schema_version": "structural-scope-quarantine-manifest.v1",
-  "source_commit_sha": "a60eaa2c143d9a08af333fe15382dbaa8d94ff73",
+  "source_commit_sha": "42eccb4207eaba2b209cf59d2773554f1ca52477",
   "status": "active"
 }

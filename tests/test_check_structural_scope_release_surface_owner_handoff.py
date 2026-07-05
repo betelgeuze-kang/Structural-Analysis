@@ -231,6 +231,9 @@ def test_release_surface_owner_handoff_check_passes_consistent_handoff(
     assert payload["contract_pass"] is True
     assert payload["blockers"] == []
     assert payload["expected_release_surface_paths"] == PATHS
+    assert not any(
+        key.endswith("roadmap.json") for key in payload["input_checksums"]
+    )
     assert payload["owner_decision_state"] == {
         "owner_decision_pending_count": 86,
         "owner_decision_recorded_count": 0,

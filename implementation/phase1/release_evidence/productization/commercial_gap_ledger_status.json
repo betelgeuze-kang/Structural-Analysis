@@ -1,7 +1,7 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-07-03T02:14:46.145108+00:00",
-  "source_commit_sha": "c4fe128a1dae015b431d4de72c2afccfd0a6d43d",
+  "generated_at": "2026-07-05T07:42:21.644037+00:00",
+  "source_commit_sha": "42eccb4207eaba2b209cf59d2773554f1ca52477",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "input_checksums": {
     "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b8f1b140751f430e4c7dc594f3440320433be9b3e3f055f3e7fad62a2999b8af",
@@ -109,16 +109,16 @@
           {
             "id": "strict_full_load_hip_newton_checkpoint_available",
             "observed": {
-              "full_load_candidate_count": 0,
-              "highest_observed_load_scale": 0.656,
-              "loadable_count": 42,
-              "candidate_count": 50
+              "full_load_candidate_count": 1,
+              "highest_observed_load_scale": 1.0,
+              "loadable_count": 1,
+              "candidate_count": 1
             },
             "target": {
               "full_load_candidate_count": ">=1",
               "required_load_scale": 1.0
             },
-            "passed": false,
+            "passed": true,
             "blocker": "full_load_gate_not_closed"
           },
           {
@@ -195,14 +195,13 @@
             },
             "observed": {
               "load_scale_reached": 0.5,
-              "full_load_candidate_count": 0,
-              "highest_observed_load_scale": 0.656,
+              "full_load_candidate_count": 1,
+              "highest_observed_load_scale": 1.0,
               "child_full_load_closure_passed": false,
               "child_relative_increment_gate_passed": false
             },
             "non_closing_reasons": [
               "load_scale_below_full_load",
-              "full_load_checkpoint_candidate_missing",
               "child_full_load_closure_not_proven"
             ]
           },
@@ -276,38 +275,27 @@
             },
             "observed": {
               "production_hip_residual_jacobian_path": false,
-              "raw_production_hip_residual_jacobian_path": false,
+              "raw_production_hip_residual_jacobian_path": true,
               "consistent_residual_jacobian_newton_gate_passed": false,
-              "runtime_blockers": [
-                "dev_kfd_missing",
-                "dev_dri_missing"
-              ],
+              "runtime_blockers": [],
               "receipt_blockers": [
-                "rocm_hip_runtime_unavailable",
-                "hip_runtime::dev_kfd_missing",
-                "hip_runtime::dev_dri_missing",
-                "hip_residual_jacobian_consistency_preflight_only",
-                "hip_residual_jacobian_consistency_not_executed"
+                "consistent_residual_jacobian::consistent_residual_jacobian_newton_not_proven",
+                "consistent_residual_jacobian::state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency",
+                "hip_direct_probe::consistent_jacobian_or_globalization_required",
+                "hip_direct_probe::direct_residual_gate_not_closed",
+                "hip_direct_probe::regularized_fixed_point_residual_must_not_be_used_as_physical_residual",
+                "hip_direct_probe_consistent_residual_jacobian_not_closed",
+                "production_rocm_hip_residual_jvp_worker::consistent_residual_jacobian_newton_gate_not_passed"
               ],
               "production_rocm_hip_residual_jvp_worker_ready": false,
               "production_rocm_hip_residual_jvp_worker_blockers": [
-                "consistent_residual_jacobian_newton_gate_not_passed",
-                "current_tangent_residual_row_hip_replay_not_proven",
-                "direct_probe_not_executed_preflight_only",
-                "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
-                "global_krylov_hip_solver_not_proven",
-                "global_krylov_jvp_rows_not_retained",
-                "production_hip_residual_jacobian_path_not_proven",
-                "rocm_hip_runtime_unavailable",
-                "runtime::dev_dri_missing",
-                "runtime::dev_kfd_missing"
+                "consistent_residual_jacobian_newton_gate_not_passed"
               ],
-              "execution_mode": "hip_required_runtime_preflight_only_no_child_execution"
+              "execution_mode": "hip_required_direct_probe_no_cpu_fallback"
             },
             "non_closing_reasons": [
               "production_hip_path_not_proven",
               "consistent_residual_jacobian_newton_not_proven",
-              "hip_runtime_blockers_present",
               "hip_receipt_blockers_present",
               "production_rocm_hip_residual_jvp_worker_not_ready"
             ]
@@ -330,44 +318,27 @@
           "material_newton_direct_residual_gate_passed": false,
           "full_load_hip_newton_lane_status": "blocked",
           "full_load_hip_newton_lane_blockers": [
-            "checkpoint_load_scale_below_required_full_load",
-            "checkpoint_resolution_no_full_load_candidate",
-            "hip_consistency_proof_production_hip_path_not_proven",
             "hip_consistency_proof_gate_not_passed",
-            "hip_consistency_proof_residual_jvp_worker_path_not_ready",
             "hip_consistency_proof_worker_g1_closure_gate_not_ready",
             "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
-            "hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven",
-            "hip_consistency_proof_worker::direct_probe_not_executed_preflight_only",
-            "hip_consistency_proof_worker::global_krylov_accepted_state_tangent_refresh_hip_not_proven",
-            "hip_consistency_proof_worker::global_krylov_hip_solver_not_proven",
-            "hip_consistency_proof_worker::global_krylov_jvp_rows_not_retained",
-            "hip_consistency_proof_worker::production_hip_residual_jacobian_path_not_proven",
-            "hip_consistency_proof_worker::rocm_hip_runtime_unavailable",
-            "hip_consistency_proof_worker::runtime::dev_dri_missing",
-            "hip_consistency_proof_worker::runtime::dev_kfd_missing",
-            "hip_consistency_proof_has_blockers",
-            "hip_consistency_proof_runtime::dev_kfd_missing",
-            "hip_consistency_proof_runtime::dev_dri_missing"
+            "hip_consistency_proof_has_blockers"
           ],
           "full_load_hip_newton_checkpoint_resolution_gate": {
-            "blockers": [
-              "checkpoint_resolution_no_full_load_candidate"
-            ],
-            "candidate_count": 50,
+            "blockers": [],
+            "candidate_count": 1,
             "claim_boundary": "This gate proves only whether the scanned checkpoint evidence contains a loadable checkpoint at the required full-load scale. It does not prove residual, increment, material Newton, or production ROCm/HIP closure.",
-            "full_load_candidate_count": 0,
+            "full_load_candidate_count": 1,
             "full_load_tolerance": 1e-12,
-            "highest_observed_gap_to_required_load_scale": 0.344,
-            "highest_observed_load_scale": 0.656,
-            "loadable_count": 42,
-            "mode": "auto_select",
-            "passed": false,
+            "highest_observed_gap_to_required_load_scale": 0.0,
+            "highest_observed_load_scale": 1.0,
+            "loadable_count": 1,
+            "mode": "explicit",
+            "passed": true,
             "required_load_scale": 1.0,
             "schema_version": "g1-checkpoint-resolution-gate.v1",
-            "selected_checkpoint_load_scale": 0.656,
-            "selected_checkpoint_meets_full_load": false,
-            "unloadable_count": 8
+            "selected_checkpoint_load_scale": 1.0,
+            "selected_checkpoint_meets_full_load": true,
+            "unloadable_count": 0
           },
           "full_load_gate_closed": false,
           "material_newton_breadth_closed": false,
