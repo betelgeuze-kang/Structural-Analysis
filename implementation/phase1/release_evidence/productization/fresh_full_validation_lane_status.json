@@ -96,16 +96,16 @@
     }
   ],
   "fresh_full_validation_ready": false,
-  "generated_at": "2026-07-05T15:41:19.072984+00:00",
+  "generated_at": "2026-07-05T16:32:52.353727+00:00",
   "input_checksums": {
     "/home/betelgeuze/건축구조분석/implementation/phase1/fresh_validation_receipt.schema.json": "sha256:9d90d216af33096c6a14aa8208482abf0ff5e03b17b2004f79086037d7aab047",
-    "docs/commercialization-gap-current-state.md": "sha256:eeb6e146ef6c069193e818d5b98401c7dc52f88c1db04addcb211a9b04a410e3",
+    "docs/commercialization-gap-current-state.md": "sha256:d3554f8f1fedd9c96d3c7fb05ee0eb72985613371153c7900e67581aa338d960",
     "docs/release-publication-runbook.md": "sha256:e531952925d22c141e57757c58b428c23330cef11dee71017c162d312fe8ddfb",
     "implementation/phase1/release_evidence/commercial/commercial_readiness_report.json": "sha256:df8a39ee7ecdff234d494c9d8a008b8eca525d524300d2da4ce253432872bdc5",
-    "implementation/phase1/release_evidence/full_validation": "dir-sha256:c946698879b0d936c10e30910512a95bc56e28731204c960cbb9b1e883c17a2d",
-    "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json": "sha256:51fcb241f9223f1055fb222f08cedf7e004abb7b3227116defd73232505d3089",
+    "implementation/phase1/release_evidence/full_validation": "dir-sha256:83ce7968ecd1423cfd0867492da5f831e9fd4b9d05cb7a3e025a445dcab1a68e",
+    "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json": "sha256:7f47cb5692f2112c8a3cef54cb83c8a1d3b2fc0514e9a985b497f4ddc66cae6a",
     "implementation/phase1/release_evidence/midas": "dir-sha256:4d5b1f694f85ba3f2eadf2b2fd2ad2fe6ee5972d8d29ad277157d15d5e29ef78",
-    "implementation/phase1/release_evidence/performance": "dir-sha256:af0c77f9c1d6e3c466b86d8abcc22c5893099a28d9e12b85c4af31bb4bd6fe61",
+    "implementation/phase1/release_evidence/performance": "dir-sha256:6f78d3dc9eddf44a9642d90069a9e3796c5b00b772fed8c20e6d518a581505ab",
     "implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_smoke_report.json": "sha256:1bf89382ea13a179c00b67ca756a95ad4009456f43627bebe97b4c6750c6266c",
     "implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json": "sha256:52bee2fd112f2c2635f25a90c7691645e5d6da242174bb4252c5c590bf32082b",
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
@@ -275,7 +275,7 @@
       "fresh_validation_result_contract_pass": false,
       "fresh_validation_result_failure_class": "rocm_runtime_unavailable",
       "fresh_validation_result_latest_tail_reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE",
-      "fresh_validation_result_mtime_ns": 1783011126426640725,
+      "fresh_validation_result_mtime_ns": 1783269090190277408,
       "fresh_validation_result_present": true,
       "fresh_validation_result_reason_code": "ERR_FRESH_VALIDATION_COMMAND_FAILED",
       "fresh_validation_result_remediation": {
@@ -337,7 +337,7 @@
       "fresh_validation_receipt_fresh": true,
       "fresh_validation_receipt_lane_matches": true,
       "fresh_validation_receipt_metadata_present": true,
-      "fresh_validation_receipt_mtime_ns": 1783013473876214482,
+      "fresh_validation_receipt_mtime_ns": 1783269165326208624,
       "fresh_validation_receipt_path_alias_count": 0,
       "fresh_validation_receipt_path_aliases": [],
       "fresh_validation_receipt_present": true,
@@ -352,7 +352,7 @@
       "fresh_validation_result_contract_pass": true,
       "fresh_validation_result_failure_class": "",
       "fresh_validation_result_latest_tail_reason_code": "",
-      "fresh_validation_result_mtime_ns": 1783013473876214482,
+      "fresh_validation_result_mtime_ns": 1783269165326208624,
       "fresh_validation_result_present": true,
       "fresh_validation_result_reason_code": "PASS",
       "fresh_validation_result_remediation": {
@@ -646,7 +646,7 @@
     }
   ],
   "schema_version": "fresh-full-validation-lane-status.v1",
-  "source_commit_sha": "59fc1a7ef83707ddcd1e610a6a1e65280406ab69",
+  "source_commit_sha": "6c0aa28f5b6149885dd39f5817c85c553e6fc52f",
   "status": "blocked",
   "summary": {
     "blocker_count": 2,

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "run_id": "phase1-performance-profiling-gate",
-  "generated_at": "2026-07-02T17:31:13.818269+00:00",
+  "generated_at": "2026-07-05T16:32:45.264778+00:00",
   "checks": {
     "p0_engine_baseline_pass": true,
     "gpu_bottleneck_audit_pass": true,

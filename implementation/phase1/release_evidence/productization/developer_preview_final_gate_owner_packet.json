@@ -18,10 +18,10 @@
   "evidence_refresh_command_count": 12,
   "final_gate_count": 9,
   "final_gate_pass_count": 6,
-  "generated_at": "2026-07-05T16:26:11.092190+00:00",
+  "generated_at": "2026-07-05T16:33:06.354186+00:00",
   "input_checksums": {
     "docs/developer_preview_final_gate_action_register.md": "sha256:25abda7d736edfe0f37503a7f00a6125b37f7c448be98b5cde8dbe8949a460cb",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:92a9082e02ec03b3ff753b1331df2307d34a6bc59f254f20f7029fb41e5c3ca9",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:b7836f0506498ff55bec34dccf65879500ae695f0ce93b34e2d9faa168e901af",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:6ff8dceb28c2ea5ee700ecf5d6065e099c326c1da50bf13775979a622450c0c7",
     "scripts/build_developer_preview_final_gate_owner_packet.py": "sha256:199c0ec9a351a377203728c9651ffb2a94fd198448371f5772146a89f42bd821"
   },
@@ -1835,7 +1835,7 @@
   "reuse_policy": "developer_preview_final_gate_owner_packet_from_rc_status",
   "reused_evidence": false,
   "schema_version": "developer-preview-final-gate-owner-packet.v1",
-  "source_commit_sha": "cc9d0e344185a5dfbe21d14b9d7ffae97b6c5044",
+  "source_commit_sha": "6c0aa28f5b6149885dd39f5817c85c553e6fc52f",
   "status": "ready_for_owner_review",
   "summary_line": "Developer Preview final gate owner packet: READY_FOR_OWNER_REVIEW | blocked_gates=3/9 | handoff_rows=3"
 }
