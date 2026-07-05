@@ -1441,7 +1441,7 @@
   },
   "full_load_input_pass": true,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-07-05T15:24:43.110693+00:00",
+  "generated_at": "2026-07-05T15:30:05.139966+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [],
     "consistent_residual_jacobian_newton_gate_passed": false,
@@ -1551,7 +1551,7 @@
       "dev_kfd_missing",
       "dev_dri_missing"
     ],
-    "source_commit_sha": "e66e45eacd6d6f26871ef10284e2addbd1504edd",
+    "source_commit_sha": "83d23d0e0e3d053f62338fff59efaae7badf0874",
     "source_state_fresh": true,
     "source_state_kind": "exact",
     "status": "partial"
@@ -1561,7 +1561,7 @@
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:b9ab6438e333f6051985ab5a73e2615a36abebbda2a2aaacb9f2a981dd96b553",
     "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz": "sha256:59e4ec6720751f42864c0c8bb2647b120d22ae666f6c90e62a80672f8d24c955",
     "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:826ccc4f116c02d8d75c8b0d78d77b63a70371ef3cb8e7e516126a75ed008dc3",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:665017320af7c366fd841507a29bb619eed9fa7c3a1d01583068aef37f5dd465",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:cac9052b94f4c52c9c7b913f7e8f5b13994e006dfae68e287357c2dc34a360b8",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:715b40736e3f4b5420a2edc5e3f7b533d72d9f7d3da8887ee4d1d3334167c17d"
   },
   "lane_next_actions": [
@@ -1677,7 +1677,7 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "e66e45eacd6d6f26871ef10284e2addbd1504edd",
+  "source_commit_sha": "83d23d0e0e3d053f62338fff59efaae7badf0874",
   "status": "blocked",
   "terminal_requirement_breakdown": {
     "active_terminal_requirement_id": "hip_consistent_residual_jacobian_newton_proof",

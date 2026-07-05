@@ -1,7 +1,7 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-07-05T15:17:13.211076+00:00",
-  "source_commit_sha": "3454f2afc59f2fcc7bb19a123b15204bc8eb2fa3",
+  "generated_at": "2026-07-05T15:30:06.297104+00:00",
+  "source_commit_sha": "83d23d0e0e3d053f62338fff59efaae7badf0874",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "input_checksums": {
     "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b8f1b140751f430e4c7dc594f3440320433be9b3e3f055f3e7fad62a2999b8af",
@@ -275,27 +275,37 @@
             },
             "observed": {
               "production_hip_residual_jacobian_path": false,
-              "raw_production_hip_residual_jacobian_path": true,
+              "raw_production_hip_residual_jacobian_path": false,
               "consistent_residual_jacobian_newton_gate_passed": false,
-              "runtime_blockers": [],
+              "runtime_blockers": [
+                "dev_kfd_missing",
+                "dev_dri_missing"
+              ],
               "receipt_blockers": [
-                "consistent_residual_jacobian::consistent_residual_jacobian_newton_not_proven",
-                "consistent_residual_jacobian::state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency",
-                "hip_direct_probe::consistent_jacobian_or_globalization_required",
-                "hip_direct_probe::direct_residual_gate_not_closed",
-                "hip_direct_probe::regularized_fixed_point_residual_must_not_be_used_as_physical_residual",
-                "hip_direct_probe_consistent_residual_jacobian_not_closed",
-                "production_rocm_hip_residual_jvp_worker::consistent_residual_jacobian_newton_gate_not_passed"
+                "rocm_hip_runtime_unavailable",
+                "hip_runtime::dev_kfd_missing",
+                "hip_runtime::dev_dri_missing",
+                "hip_residual_jacobian_consistency_not_executed"
               ],
               "production_rocm_hip_residual_jvp_worker_ready": false,
               "production_rocm_hip_residual_jvp_worker_blockers": [
-                "consistent_residual_jacobian_newton_gate_not_passed"
+                "consistent_residual_jacobian_newton_gate_not_passed",
+                "current_tangent_residual_row_hip_replay_not_proven",
+                "direct_probe_not_executed",
+                "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
+                "global_krylov_hip_solver_not_proven",
+                "global_krylov_jvp_rows_not_retained",
+                "production_hip_residual_jacobian_path_not_proven",
+                "rocm_hip_runtime_unavailable",
+                "runtime::dev_dri_missing",
+                "runtime::dev_kfd_missing"
               ],
-              "execution_mode": "hip_required_direct_probe_no_cpu_fallback"
+              "execution_mode": "hip_required_runtime_unavailable_no_cpu_fallback"
             },
             "non_closing_reasons": [
               "production_hip_path_not_proven",
               "consistent_residual_jacobian_newton_not_proven",
+              "hip_runtime_blockers_present",
               "hip_receipt_blockers_present",
               "production_rocm_hip_residual_jvp_worker_not_ready"
             ]
@@ -318,11 +328,23 @@
           "material_newton_direct_residual_gate_passed": false,
           "full_load_hip_newton_lane_status": "blocked",
           "full_load_hip_newton_lane_blockers": [
-            "hip_consistency_proof_source_commit_sha_mismatch",
+            "hip_consistency_proof_production_hip_path_not_proven",
             "hip_consistency_proof_gate_not_passed",
+            "hip_consistency_proof_residual_jvp_worker_path_not_ready",
             "hip_consistency_proof_worker_g1_closure_gate_not_ready",
             "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
-            "hip_consistency_proof_has_blockers"
+            "hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven",
+            "hip_consistency_proof_worker::direct_probe_not_executed",
+            "hip_consistency_proof_worker::global_krylov_accepted_state_tangent_refresh_hip_not_proven",
+            "hip_consistency_proof_worker::global_krylov_hip_solver_not_proven",
+            "hip_consistency_proof_worker::global_krylov_jvp_rows_not_retained",
+            "hip_consistency_proof_worker::production_hip_residual_jacobian_path_not_proven",
+            "hip_consistency_proof_worker::rocm_hip_runtime_unavailable",
+            "hip_consistency_proof_worker::runtime::dev_dri_missing",
+            "hip_consistency_proof_worker::runtime::dev_kfd_missing",
+            "hip_consistency_proof_has_blockers",
+            "hip_consistency_proof_runtime::dev_kfd_missing",
+            "hip_consistency_proof_runtime::dev_dri_missing"
           ],
           "full_load_hip_newton_checkpoint_resolution_gate": {
             "blockers": [],
