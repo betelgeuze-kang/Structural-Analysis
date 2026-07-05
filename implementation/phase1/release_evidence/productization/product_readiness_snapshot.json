@@ -683,15 +683,14 @@
       "blocker_grouping_metadata": {
         "detail_blocker_represented_by_root_group": {
           "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven": "g1::material_newton_breadth_not_closed",
-          "g1_full_load_lane::child_current_tangent_residual_row_hip_not_required": "g1::production_rocm_hip_residency_not_closed",
-          "g1_full_load_lane::child_current_tangent_residual_row_hip_residual_refresh_not_proven": "g1::production_rocm_hip_residency_not_closed",
-          "g1_full_load_lane::child_current_tangent_residual_row_not_promoted_to_final_state": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::child_current_tangent_residual_row_component_missing": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::child_direct_residual_gate_not_proven": "g1::full_mesh_nonlinear_equilibrium_not_closed",
           "g1_full_load_lane::child_direct_residual_newton_ready_not_proven": "g1::full_mesh_nonlinear_equilibrium_not_closed",
-          "g1_full_load_lane::child_global_krylov_hip_not_required": "g1::production_rocm_hip_residency_not_closed",
-          "g1_full_load_lane::child_global_krylov_hip_residual_refresh_not_proven": "g1::production_rocm_hip_residency_not_closed",
-          "g1_full_load_lane::child_global_krylov_not_promoted_to_final_state": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::child_fallback_zero_not_proven": "g1::material_newton_breadth_not_closed",
+          "g1_full_load_lane::child_full_load_closure_not_proven": "g1::full_load_gate_not_closed",
+          "g1_full_load_lane::child_global_krylov_component_missing": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::child_material_newton_breadth_not_proven": "g1::material_newton_breadth_not_closed",
+          "g1_full_load_lane::child_observed_load_scale_below_required_full_load": "g1::full_load_gate_not_closed",
           "g1_full_load_lane::child_relative_increment_gate_not_proven": "g1::full_mesh_nonlinear_equilibrium_not_closed",
           "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_gate_not_passed": "g1::material_newton_breadth_not_closed",
@@ -722,7 +721,7 @@
           {
             "active": false,
             "closure_dimension": "cpu_full_load_1_0_residual_increment_gate",
-            "represented_detail_blocker_count": 0,
+            "represented_detail_blocker_count": 2,
             "root_blocker": "g1::full_load_gate_not_closed"
           },
           {
@@ -734,17 +733,17 @@
           {
             "active": true,
             "closure_dimension": "cpu_material_newton_consistent_residual_jacobian",
-            "represented_detail_blocker_count": 5,
+            "represented_detail_blocker_count": 6,
             "root_blocker": "g1::material_newton_breadth_not_closed"
           },
           {
             "active": true,
             "closure_dimension": "gpu_hip_followup_performance_and_residency",
-            "represented_detail_blocker_count": 22,
+            "represented_detail_blocker_count": 18,
             "root_blocker": "g1::production_rocm_hip_residency_not_closed"
           }
         ],
-        "suppressed_detail_blocker_count": 31,
+        "suppressed_detail_blocker_count": 30,
         "unmatched_detail_blockers": []
       },
       "cause_narrowing_claim_boundary": "This receipt narrows the next G1 diagnostic direction from existing F2g/F2h evidence. It does not close G1, promote full-load 1.0, or prove production ROCm/HIP residency.",
@@ -836,15 +835,14 @@
       "contract_pass": true,
       "detail_blocker_represented_by": {
         "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven": "g1::*",
-        "g1_full_load_lane::child_current_tangent_residual_row_hip_not_required": "g1::*",
-        "g1_full_load_lane::child_current_tangent_residual_row_hip_residual_refresh_not_proven": "g1::*",
-        "g1_full_load_lane::child_current_tangent_residual_row_not_promoted_to_final_state": "g1::*",
+        "g1_full_load_lane::child_current_tangent_residual_row_component_missing": "g1::*",
         "g1_full_load_lane::child_direct_residual_gate_not_proven": "g1::*",
         "g1_full_load_lane::child_direct_residual_newton_ready_not_proven": "g1::*",
-        "g1_full_load_lane::child_global_krylov_hip_not_required": "g1::*",
-        "g1_full_load_lane::child_global_krylov_hip_residual_refresh_not_proven": "g1::*",
-        "g1_full_load_lane::child_global_krylov_not_promoted_to_final_state": "g1::*",
+        "g1_full_load_lane::child_fallback_zero_not_proven": "g1::*",
+        "g1_full_load_lane::child_full_load_closure_not_proven": "g1::*",
+        "g1_full_load_lane::child_global_krylov_component_missing": "g1::*",
         "g1_full_load_lane::child_material_newton_breadth_not_proven": "g1::*",
+        "g1_full_load_lane::child_observed_load_scale_below_required_full_load": "g1::*",
         "g1_full_load_lane::child_relative_increment_gate_not_proven": "g1::*",
         "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_gate_not_passed": "g1::*",
@@ -873,7 +871,10 @@
           "child_consistent_residual_jacobian_newton_not_proven",
           "child_direct_residual_gate_not_proven",
           "child_direct_residual_newton_ready_not_proven",
+          "child_fallback_zero_not_proven",
+          "child_full_load_closure_not_proven",
           "child_material_newton_breadth_not_proven",
+          "child_observed_load_scale_below_required_full_load",
           "child_relative_increment_gate_not_proven"
         ],
         "evidence": {
@@ -881,18 +882,21 @@
             "child_consistent_residual_jacobian_newton_not_proven",
             "child_direct_residual_gate_not_proven",
             "child_direct_residual_newton_ready_not_proven",
+            "child_fallback_zero_not_proven",
+            "child_full_load_closure_not_proven",
             "child_material_newton_breadth_not_proven",
+            "child_observed_load_scale_below_required_full_load",
             "child_relative_increment_gate_not_proven"
           ],
           "consistent_residual_jacobian_newton_passed": false,
           "direct_residual_gate_passed": false,
           "direct_residual_newton_ready": false,
-          "fallback_zero_passed": true,
-          "full_load_closure_passed": true,
+          "fallback_zero_passed": false,
+          "full_load_closure_passed": false,
           "full_load_tolerance": 1e-12,
-          "load_scale_passed": true,
+          "load_scale_passed": false,
           "material_newton_breadth_passed": false,
-          "observed_load_scale": 1.0,
+          "observed_load_scale": null,
           "ready": false,
           "relative_increment_gate_passed": false,
           "required_load_scale": 1.0,
@@ -903,12 +907,8 @@
       "full_load_hip_newton_child_gate_ready": false,
       "full_load_hip_newton_child_hip_residual_refresh": {
         "blockers": [
-          "child_current_tangent_residual_row_hip_not_required",
-          "child_current_tangent_residual_row_hip_residual_refresh_not_proven",
-          "child_current_tangent_residual_row_not_promoted_to_final_state",
-          "child_global_krylov_hip_not_required",
-          "child_global_krylov_hip_residual_refresh_not_proven",
-          "child_global_krylov_not_promoted_to_final_state",
+          "child_current_tangent_residual_row_component_missing",
+          "child_global_krylov_component_missing",
           "current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready",
           "matrix_free_global_krylov_child_hip_residual_refresh_not_ready"
         ],
@@ -918,7 +918,7 @@
             "accepted_state_refresh_cpu_used": false,
             "accepted_state_refresh_hip_used": false,
             "hip_required": false,
-            "present": true,
+            "present": false,
             "promoted_to_final_state": false,
             "ready": false
           },
@@ -927,7 +927,7 @@
             "accepted_state_refresh_cpu_used": false,
             "accepted_state_refresh_hip_used": false,
             "hip_required": false,
-            "present": true,
+            "present": false,
             "promoted_to_final_state": false,
             "ready": false
           }
@@ -2052,6 +2052,12 @@
             "has_non_promoting_launch_receipts": true,
             "path": "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json",
             "present": true
+          },
+          {
+            "has_frontier_chain": false,
+            "has_non_promoting_launch_receipts": false,
+            "path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json",
+            "present": true
           }
         ],
         "source_claim_boundary": {
@@ -2093,11 +2099,20 @@
           "hip_consistency_proof_worker_g1_closure_gate_not_ready"
         ],
         "changed_paths_since_source_commit": [
+          "implementation/phase1/parse_opensees_to_csr.py",
+          "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
+          "scripts/build_developer_preview_rc_status.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_developer_preview_rc_status.py",
+          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
+          "tests/test_build_phase6_benchmark_scale_status.py",
+          "tests/test_build_product_readiness_snapshot.py",
           "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py"
+          "tests/test_opensees_topology_parser.py",
+          "tests/test_run_g1_full_load_hip_newton_lane.py",
+          "tests/test_run_opensees_canonical_breadth_gate.py"
         ],
         "consistent_residual_jacobian_newton_gate_passed": false,
         "cpu_diagnostic_assembler_used": false,
@@ -2166,18 +2181,17 @@
       "full_load_hip_newton_lane_reused_evidence": false,
       "full_load_hip_newton_lane_status": "blocked",
       "full_mesh_full_load_ready": false,
-      "suppressed_detail_blocker_count": 31,
+      "suppressed_detail_blocker_count": 30,
       "suppressed_detail_blockers": [
         "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven",
-        "g1_full_load_lane::child_current_tangent_residual_row_hip_not_required",
-        "g1_full_load_lane::child_current_tangent_residual_row_hip_residual_refresh_not_proven",
-        "g1_full_load_lane::child_current_tangent_residual_row_not_promoted_to_final_state",
+        "g1_full_load_lane::child_current_tangent_residual_row_component_missing",
         "g1_full_load_lane::child_direct_residual_gate_not_proven",
         "g1_full_load_lane::child_direct_residual_newton_ready_not_proven",
-        "g1_full_load_lane::child_global_krylov_hip_not_required",
-        "g1_full_load_lane::child_global_krylov_hip_residual_refresh_not_proven",
-        "g1_full_load_lane::child_global_krylov_not_promoted_to_final_state",
+        "g1_full_load_lane::child_fallback_zero_not_proven",
+        "g1_full_load_lane::child_full_load_closure_not_proven",
+        "g1_full_load_lane::child_global_krylov_component_missing",
         "g1_full_load_lane::child_material_newton_breadth_not_proven",
+        "g1_full_load_lane::child_observed_load_scale_below_required_full_load",
         "g1_full_load_lane::child_relative_increment_gate_not_proven",
         "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready",
         "g1_full_load_lane::hip_consistency_proof_gate_not_passed",
@@ -3110,7 +3124,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-05T18:13:05.679044+00:00",
+  "generated_at": "2026-07-05T18:38:47.948128+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
@@ -3122,11 +3136,11 @@
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:a882fdc28b53aec9b385a1261a78a99a4544f655155db6d5fdb5ab2f0ef2c98b",
     "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:49ec54619265af87163ed7435f6b1df2a86889519d637e829c7bea497a4caa78",
     "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:a26045cef019244868f397d79d4ff3f6b40a980215014754b7495e712f27b2d0",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:42c40c607961af15d58b707ca542babec09a1d6744f0910d24370f81c8eab3e5",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:0c89cd212178db747af0c57798bcc29b385cc50167ac135a47fc5af2a83cb1a9",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:fa3806bcf6e163bf42e5263a3deee30886c9972be7e8f53c1d5c3982ae8da89c",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:5681fe6c6a0f259605d8d3d9c97ff37564c76a02a1d8fb24873edc32e53b4442",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:382956916ff532ef84df6648062a284d6899e7e62b48b9b8386142e7d4411235",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:31e6b2cc009b07e435bb692b4d42fe2f88c5275d720e16f1182c49f4dc2b0614",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:a17a741fb556d8bad025d3cf401a21416158b2ddb3864c2306e0060228a05231",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:dec51cbc2801d0714fa04b126f285f3b057f46561abd5243f17617a83c9d770c",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:93e3c17ffa7073d354e213aeb562c8bfe8515034d6904d102de683885d0103d1",
     "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:fcf17441d9a61d79f0d686cdf489571c660f92f61521f803e5b68e8bbdae7aed",
@@ -3146,7 +3160,7 @@
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:1dba6081d0f47a99a9dd2a6684b94d7eb21bfbb0cc0bb36c6a38a35b182f3bcb",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
-    "scripts/build_product_readiness_snapshot.py": "sha256:166b7961b7a3c1666a1434a50f5a4f8bdd295427c9e0dc4ded8f3be41f1ce916"
+    "scripts/build_product_readiness_snapshot.py": "sha256:4d97a4554b9dd632b5cf3f1eb061a448593137fc1b9da3c4343a97c58233d11a"
   },
   "limited_commercial_ready": false,
   "paid_pilot_ready": false,
@@ -3452,7 +3466,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "a0e02505e852f54dd0e0bb77a9cf845574fa5621",
+  "source_commit_sha": "d6d5c9ab5dddcde48964736d526bfbc042e470ed",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3554,11 +3568,13 @@
           "implementation/phase1/run_opensees_canonical_breadth_gate.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
           "tests/test_build_phase6_benchmark_scale_status.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_opensees_topology_parser.py",
+          "tests/test_run_g1_full_load_hip_newton_lane.py",
           "tests/test_run_opensees_canonical_breadth_gate.py"
         ],
         "generated_at": "2026-07-05T17:49:42.009350+00:00",
@@ -3577,11 +3593,13 @@
           "implementation/phase1/run_opensees_canonical_breadth_gate.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
           "tests/test_build_phase6_benchmark_scale_status.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_opensees_topology_parser.py",
+          "tests/test_run_g1_full_load_hip_newton_lane.py",
           "tests/test_run_opensees_canonical_breadth_gate.py"
         ],
         "generated_at": "2026-07-05T17:42:43.992067+00:00",
@@ -3600,11 +3618,13 @@
           "implementation/phase1/run_opensees_canonical_breadth_gate.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
           "tests/test_build_phase6_benchmark_scale_status.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_opensees_topology_parser.py",
+          "tests/test_run_g1_full_load_hip_newton_lane.py",
           "tests/test_run_opensees_canonical_breadth_gate.py"
         ],
         "generated_at": "2026-07-05T17:42:43.663619+00:00",
@@ -3623,11 +3643,13 @@
           "implementation/phase1/run_opensees_canonical_breadth_gate.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
           "tests/test_build_phase6_benchmark_scale_status.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_opensees_topology_parser.py",
+          "tests/test_run_g1_full_load_hip_newton_lane.py",
           "tests/test_run_opensees_canonical_breadth_gate.py"
         ],
         "generated_at": "2026-07-05T17:42:44.092704+00:00",
@@ -3668,26 +3690,31 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-05T18:13:05.468372+00:00",
+        "generated_at": "2026-07-05T18:38:47.718202+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "a0e02505e852f54dd0e0bb77a9cf845574fa5621",
+        "source_commit_sha": "d6d5c9ab5dddcde48964736d526bfbc042e470ed",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "developer_preview_rc_status",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/run_g1_full_load_hip_newton_lane.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_run_g1_full_load_hip_newton_lane.py"
+        ],
         "generated_at": "2026-07-05T18:13:05.297698+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "a0e02505e852f54dd0e0bb77a9cf845574fa5621",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
@@ -3744,23 +3771,15 @@
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
           "scripts/build_product_readiness_snapshot.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "tests/test_build_product_readiness_snapshot.py"
         ],
-        "generated_at": "2026-07-05T17:42:42.419096+00:00",
+        "generated_at": "2026-07-05T18:34:50.883421+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "a973f6f9bc2bc4c01d8793cc32794d25fb7bda51",
+        "source_commit_sha": "7c8a44e7bc8377a919c40539cece07634c8602cf",
         "source_state_fresh": true,
         "source_state_kind": "non_artifact_source_paths_changed"
       },
@@ -4135,11 +4154,13 @@
           "implementation/phase1/run_opensees_canonical_breadth_gate.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
           "tests/test_build_phase6_benchmark_scale_status.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_opensees_topology_parser.py",
+          "tests/test_run_g1_full_load_hip_newton_lane.py",
           "tests/test_run_opensees_canonical_breadth_gate.py"
         ],
         "generated_at": "2026-07-05T17:49:41.723166+00:00",
@@ -4174,14 +4195,8 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "README.md",
-        "docs/commercialization-gap-current-state.md",
-        "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
-        "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
         "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
         "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
-        "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
-        "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json",
         "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ],
       "non_receipt_dirty_paths": [],
@@ -4207,14 +4222,8 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M README.md",
-        " M docs/commercialization-gap-current-state.md",
-        " M implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
-        " M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
         " M implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
         " M implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
-        " M implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
-        " M implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json",
         " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ]
     }
