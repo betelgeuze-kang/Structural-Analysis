@@ -8,7 +8,7 @@
     "general_newton_jacobian_assembly_not_closed",
     "full_load_g1_material_newton_breadth_not_closed_by_seed_artifact"
   ],
-  "claim_boundary": "State-updated material Newton breadth seed suite across frame fiber, layered shell membrane/bending/drilling, steel, reinforced concrete, SRC/composite, yielded, elastic, unloading, reloading, and reverse compression return-mapping cases. Each seed uses the physical F_internal_minus_F_external residual, a consistent algorithmic tangent, finite-difference JVP, direct residual/Newton residual parity, and checkpoint replay. It also carries committed material state through small unload/reverse/reload path histories and a two-DOF frame/shell coupled state-updated material seed. This remains a deterministic seed artifact; it does not close full-mesh/full-load material Newton breadth, sparse production assembly, or ROCm/HIP parity.",
+  "claim_boundary": "State-updated material Newton breadth seed suite across frame fiber, layered shell membrane/bending/drilling, steel, reinforced concrete, SRC/composite, yielded, elastic, unloading, reloading, and reverse compression return-mapping cases. Each seed uses the physical F_internal_minus_F_external residual, a consistent algorithmic tangent, finite-difference JVP, direct residual/Newton residual parity, and checkpoint replay. It also carries committed material state through small unload/reverse/reload path histories and a two-DOF frame/shell coupled state-updated material seed, plus a coupled frame/shell load-step history across yield/unload/reverse/reload. This remains a deterministic seed artifact; it does not close full-mesh/full-load material Newton breadth, sparse production assembly, or ROCm/HIP parity.",
   "contract_pass": true,
   "frame_material_newton_seed_pass": true,
   "g1_closure_claim": false,
@@ -24,6 +24,616 @@
   "residual_formula": "F_internal_minus_F_external",
   "schema_version": "phase2-material-newton-breadth-state-updated-seeds.v1",
   "shell_material_newton_seed_pass": true,
+  "state_updated_frame_shell_coupled_load_step_history_chain_replay_pass": true,
+  "state_updated_frame_shell_coupled_load_step_history_checkpoint_replay_pass": true,
+  "state_updated_frame_shell_coupled_load_step_history_direct_parity_pass": true,
+  "state_updated_frame_shell_coupled_load_step_history_jvp_pass": true,
+  "state_updated_frame_shell_coupled_load_step_history_pass": true,
+  "state_updated_frame_shell_coupled_load_step_history_seed": {
+    "chain_replay_pass": true,
+    "checkpoint_replay_pass": true,
+    "claim_boundary": "Small coupled frame/shell state-updated material load-step history that carries committed frame and shell material states across yield, unload, reverse yield, and reload steps while checking physical R=F_internal-F_external JVP and Newton parity at each step. This strengthens load-step material-state evidence but remains a seed and does not close full-mesh/full-load material Newton breadth.",
+    "committed_component_state_chain_pass": true,
+    "component_update_step_count": 4,
+    "contract_pass": true,
+    "direct_residual_newton_parity_pass": true,
+    "frame_shell_load_step_checkpoint_replay_check": {
+      "absolute_tolerance": 1e-10,
+      "committed_component_state_chain_replay_pass": true,
+      "component_material_state_replay_match": true,
+      "external_force_replay_match": true,
+      "history_id": "frame_shell_coupled_material_load_step_reversal_history",
+      "internal_force_replay_match": true,
+      "pass": true,
+      "path_dependent_update_step_count": 4,
+      "promotes_g1_closure": false,
+      "relative_tolerance": 1e-10,
+      "residual_formula": "F_internal_minus_F_external",
+      "residual_replay_match": true,
+      "schema_version": "g1-frame-shell-coupled-material-load-step-replay-check.v1",
+      "step_count": 4,
+      "step_replay_pass": true,
+      "steps": [
+        {
+          "case_id": "g1_frame_shell_coupled_material_load_step_reversal_history_01_step01_coupled_frame_shell_yield",
+          "chain_link_from_previous_step_pass": true,
+          "committed_component_state_chain_replay_pass": true,
+          "committed_previous_matches_carried_state": true,
+          "component_material_state_replay_match": true,
+          "external_force_replay_match": true,
+          "first_step_initial_state_match": true,
+          "frame_path_dependent_state_updated": true,
+          "history_step_index": 1,
+          "internal_force_replay_match": true,
+          "pass": true,
+          "residual_formula": "F_internal_minus_F_external",
+          "residual_replay_match": true,
+          "shell_path_dependent_state_updated": true,
+          "step_kind": "step01_coupled_frame_shell_yield",
+          "tangent_replay_match": true
+        },
+        {
+          "case_id": "g1_frame_shell_coupled_material_load_step_reversal_history_02_step02_coupled_service_unload",
+          "chain_link_from_previous_step_pass": true,
+          "committed_component_state_chain_replay_pass": true,
+          "committed_previous_matches_carried_state": true,
+          "component_material_state_replay_match": true,
+          "external_force_replay_match": true,
+          "first_step_initial_state_match": true,
+          "frame_path_dependent_state_updated": false,
+          "history_step_index": 2,
+          "internal_force_replay_match": true,
+          "pass": true,
+          "residual_formula": "F_internal_minus_F_external",
+          "residual_replay_match": true,
+          "shell_path_dependent_state_updated": false,
+          "step_kind": "step02_coupled_service_unload",
+          "tangent_replay_match": true
+        },
+        {
+          "case_id": "g1_frame_shell_coupled_material_load_step_reversal_history_03_step03_coupled_reverse_yield",
+          "chain_link_from_previous_step_pass": true,
+          "committed_component_state_chain_replay_pass": true,
+          "committed_previous_matches_carried_state": true,
+          "component_material_state_replay_match": true,
+          "external_force_replay_match": true,
+          "first_step_initial_state_match": true,
+          "frame_path_dependent_state_updated": true,
+          "history_step_index": 3,
+          "internal_force_replay_match": true,
+          "pass": true,
+          "residual_formula": "F_internal_minus_F_external",
+          "residual_replay_match": true,
+          "shell_path_dependent_state_updated": true,
+          "step_kind": "step03_coupled_reverse_yield",
+          "tangent_replay_match": true
+        },
+        {
+          "case_id": "g1_frame_shell_coupled_material_load_step_reversal_history_04_step04_coupled_reload",
+          "chain_link_from_previous_step_pass": true,
+          "committed_component_state_chain_replay_pass": true,
+          "committed_previous_matches_carried_state": true,
+          "component_material_state_replay_match": true,
+          "external_force_replay_match": true,
+          "first_step_initial_state_match": true,
+          "frame_path_dependent_state_updated": false,
+          "history_step_index": 4,
+          "internal_force_replay_match": true,
+          "pass": true,
+          "residual_formula": "F_internal_minus_F_external",
+          "residual_replay_match": true,
+          "shell_path_dependent_state_updated": false,
+          "step_kind": "step04_coupled_reload",
+          "tangent_replay_match": true
+        }
+      ],
+      "tangent_replay_match": true
+    },
+    "g1_closure_claim": false,
+    "globalization": "backtracking_line_search",
+    "history_id": "frame_shell_coupled_material_load_step_reversal_history",
+    "jvp_finite_difference_pass": true,
+    "material_newton_closure_claim": false,
+    "path_dependent_update_step_count": 4,
+    "residual_contract": "F_internal_minus_F_external",
+    "residual_formula": "F_internal_minus_F_external",
+    "schema_version": "phase2-frame-shell-coupled-material-load-step-history-seed.v1",
+    "status": "ready",
+    "step_count": 4,
+    "step_replay_pass": true,
+    "steps": [
+      {
+        "carried_component_committed_state_previous": {
+          "frame": {
+            "equivalent_plastic_displacement_m": 0.0,
+            "plastic_displacement_m": 0.0
+          },
+          "shell": {
+            "equivalent_plastic_displacement_m": 0.0,
+            "plastic_displacement_m": 0.0
+          }
+        },
+        "case_id": "g1_frame_shell_coupled_material_load_step_reversal_history_01_step01_coupled_frame_shell_yield",
+        "contract_pass": true,
+        "direct_residual_newton_parity_pass": true,
+        "direct_solver_residual_match": true,
+        "external_force_kn": [
+          90.0,
+          70.0
+        ],
+        "fallback_used": false,
+        "final_free_displacements_m": [
+          1.2055160142348753,
+          1.222419928825623
+        ],
+        "final_residual_inf_kn": 1.4210854715202004e-14,
+        "frame_material_state_updated": true,
+        "frame_return_mapping": "plastic_corrector",
+        "g1_closure_claim": false,
+        "history_step_index": 1,
+        "increment_gate_passed": true,
+        "jvp_finite_difference_pass": true,
+        "jvp_relative_error": 4.103741149366316e-09,
+        "material_newton_closure_claim": false,
+        "material_state_next": {
+          "assembly_scope": "state_updated_frame_shell_coupled_material_seed",
+          "component_internal_forces_kn": {
+            "frame_coupling_from_shell": 9.779359430604984,
+            "frame_material": 80.22064056939502,
+            "shell_coupling_from_frame": 9.644128113879002,
+            "shell_material": 60.35587188612101
+          },
+          "component_material_states": {
+            "frame": {
+              "algorithmic_tangent_kn_per_m": 40.0,
+              "assembly_scope": "state_updated_frame_shell_coupled_material_load_step_history",
+              "committed_state_next": {
+                "equivalent_plastic_displacement_m": 0.8044128113879002,
+                "plastic_displacement_m": 0.8044128113879002
+              },
+              "committed_state_previous": {
+                "equivalent_plastic_displacement_m": 0.0,
+                "plastic_displacement_m": 0.0
+              },
+              "internal_force_kn": 80.22064056939502,
+              "material_case_kind": "step01_coupled_frame_shell_yield_frame",
+              "material_family": "reinforced_concrete",
+              "material_model": "bilinear_isotropic_hardening_1d_return_mapping",
+              "path_dependent_state_updated": true,
+              "plastic_increment_m": 0.8044128113879002,
+              "return_mapping": "plastic_corrector",
+              "section_integration": "frame_fiber",
+              "state_persistence_label": "frame_shell_coupled_material_load_step_reversal_history:step01_coupled_frame_shell_yield:frame",
+              "strain_mode": "axial",
+              "structural_component": "frame_fiber_axial",
+              "trial_displacement_m": 1.2055160142348753,
+              "trial_force_kn": 241.10320284697505,
+              "yield_function_kn": 201.10320284697505,
+              "yielded": true
+            },
+            "shell": {
+              "algorithmic_tangent_kn_per_m": 25.263157894736842,
+              "assembly_scope": "state_updated_frame_shell_coupled_material_load_step_history",
+              "committed_state_next": {
+                "equivalent_plastic_displacement_m": 0.8451957295373668,
+                "plastic_displacement_m": 0.8451957295373668
+              },
+              "committed_state_previous": {
+                "equivalent_plastic_displacement_m": 0.0,
+                "plastic_displacement_m": 0.0
+              },
+              "internal_force_kn": 60.35587188612101,
+              "material_case_kind": "step01_coupled_frame_shell_yield_shell",
+              "material_family": "reinforced_concrete",
+              "material_model": "bilinear_isotropic_hardening_1d_return_mapping",
+              "path_dependent_state_updated": true,
+              "plastic_increment_m": 0.8451957295373668,
+              "return_mapping": "plastic_corrector",
+              "section_integration": "layered_shell",
+              "state_persistence_label": "frame_shell_coupled_material_load_step_reversal_history:step01_coupled_frame_shell_yield:shell",
+              "strain_mode": "membrane",
+              "structural_component": "shell_layer_membrane",
+              "trial_displacement_m": 1.222419928825623,
+              "trial_force_kn": 195.58718861209968,
+              "yield_function_kn": 160.58718861209968,
+              "yielded": true
+            }
+          },
+          "component_return_mappings": {
+            "frame": "plastic_corrector",
+            "shell": "plastic_corrector"
+          },
+          "frame_material_state_updated": true,
+          "frame_shell_coupling_stiffness_kn_per_m": 8.0,
+          "frame_shell_state_updated_material_coupling": true,
+          "path_dependent_state": true,
+          "path_dependent_state_updated": true,
+          "shell_material_state_updated": true,
+          "state_schema": "g1-material-state-next.frame-shell-coupled-state-updated-seed.v1",
+          "state_updated_material_newton": true
+        },
+        "previous_component_committed_state_matches_carried_state": true,
+        "promotes_g1_closure": false,
+        "regularization_used": false,
+        "residual_descent_passed": true,
+        "residual_gate_passed": true,
+        "shell_material_state_updated": true,
+        "shell_return_mapping": "plastic_corrector",
+        "solution_contract_pass": true,
+        "solution_status": "ready",
+        "status": "ready",
+        "step_kind": "step01_coupled_frame_shell_yield"
+      },
+      {
+        "carried_component_committed_state_previous": {
+          "frame": {
+            "equivalent_plastic_displacement_m": 0.8044128113879002,
+            "plastic_displacement_m": 0.8044128113879002
+          },
+          "shell": {
+            "equivalent_plastic_displacement_m": 0.8451957295373668,
+            "plastic_displacement_m": 0.8451957295373668
+          }
+        },
+        "case_id": "g1_frame_shell_coupled_material_load_step_reversal_history_02_step02_coupled_service_unload",
+        "contract_pass": true,
+        "direct_residual_newton_parity_pass": true,
+        "direct_solver_residual_match": true,
+        "external_force_kn": [
+          28.0,
+          18.0
+        ],
+        "fallback_used": false,
+        "final_free_displacements_m": [
+          0.9079208238541138,
+          0.912299688344661
+        ],
+        "final_residual_inf_kn": 1.0658141036401503e-14,
+        "frame_material_state_updated": false,
+        "frame_return_mapping": "elastic_trial_state",
+        "g1_closure_claim": false,
+        "history_step_index": 2,
+        "increment_gate_passed": true,
+        "jvp_finite_difference_pass": true,
+        "jvp_relative_error": 5.490134605438192e-10,
+        "material_newton_closure_claim": false,
+        "material_state_next": {
+          "assembly_scope": "state_updated_frame_shell_coupled_material_seed",
+          "component_internal_forces_kn": {
+            "frame_coupling_from_shell": 7.298397506757288,
+            "frame_material": 20.70160249324271,
+            "shell_coupling_from_frame": 7.26336659083291,
+            "shell_material": 10.73663340916708
+          },
+          "component_material_states": {
+            "frame": {
+              "algorithmic_tangent_kn_per_m": 200.0,
+              "assembly_scope": "state_updated_frame_shell_coupled_material_load_step_history",
+              "committed_state_next": {
+                "equivalent_plastic_displacement_m": 0.8044128113879002,
+                "plastic_displacement_m": 0.8044128113879002
+              },
+              "committed_state_previous": {
+                "equivalent_plastic_displacement_m": 0.8044128113879002,
+                "plastic_displacement_m": 0.8044128113879002
+              },
+              "internal_force_kn": 20.70160249324271,
+              "material_case_kind": "step02_coupled_service_unload_frame",
+              "material_family": "reinforced_concrete",
+              "material_model": "bilinear_isotropic_hardening_1d_return_mapping",
+              "path_dependent_state_updated": false,
+              "plastic_increment_m": 0.0,
+              "return_mapping": "elastic_trial_state",
+              "section_integration": "frame_fiber",
+              "state_persistence_label": "frame_shell_coupled_material_load_step_reversal_history:step02_coupled_service_unload:frame",
+              "strain_mode": "axial",
+              "structural_component": "frame_fiber_axial",
+              "trial_displacement_m": 0.9079208238541138,
+              "trial_force_kn": 20.70160249324271,
+              "yield_function_kn": -59.519038076152306,
+              "yielded": false
+            },
+            "shell": {
+              "algorithmic_tangent_kn_per_m": 160.0,
+              "assembly_scope": "state_updated_frame_shell_coupled_material_load_step_history",
+              "committed_state_next": {
+                "equivalent_plastic_displacement_m": 0.8451957295373668,
+                "plastic_displacement_m": 0.8451957295373668
+              },
+              "committed_state_previous": {
+                "equivalent_plastic_displacement_m": 0.8451957295373668,
+                "plastic_displacement_m": 0.8451957295373668
+              },
+              "internal_force_kn": 10.73663340916708,
+              "material_case_kind": "step02_coupled_service_unload_shell",
+              "material_family": "reinforced_concrete",
+              "material_model": "bilinear_isotropic_hardening_1d_return_mapping",
+              "path_dependent_state_updated": false,
+              "plastic_increment_m": 0.0,
+              "return_mapping": "elastic_trial_state",
+              "section_integration": "layered_shell",
+              "state_persistence_label": "frame_shell_coupled_material_load_step_reversal_history:step02_coupled_service_unload:shell",
+              "strain_mode": "membrane",
+              "structural_component": "shell_layer_membrane",
+              "trial_displacement_m": 0.912299688344661,
+              "trial_force_kn": 10.73663340916708,
+              "yield_function_kn": -49.619238476953925,
+              "yielded": false
+            }
+          },
+          "component_return_mappings": {
+            "frame": "elastic_trial_state",
+            "shell": "elastic_trial_state"
+          },
+          "frame_material_state_updated": false,
+          "frame_shell_coupling_stiffness_kn_per_m": 8.0,
+          "frame_shell_state_updated_material_coupling": true,
+          "path_dependent_state": true,
+          "path_dependent_state_updated": false,
+          "shell_material_state_updated": false,
+          "state_schema": "g1-material-state-next.frame-shell-coupled-state-updated-seed.v1",
+          "state_updated_material_newton": true
+        },
+        "previous_component_committed_state_matches_carried_state": true,
+        "promotes_g1_closure": false,
+        "regularization_used": false,
+        "residual_descent_passed": true,
+        "residual_gate_passed": true,
+        "shell_material_state_updated": false,
+        "shell_return_mapping": "elastic_trial_state",
+        "solution_contract_pass": true,
+        "solution_status": "ready",
+        "status": "ready",
+        "step_kind": "step02_coupled_service_unload"
+      },
+      {
+        "carried_component_committed_state_previous": {
+          "frame": {
+            "equivalent_plastic_displacement_m": 0.8044128113879002,
+            "plastic_displacement_m": 0.8044128113879002
+          },
+          "shell": {
+            "equivalent_plastic_displacement_m": 0.8451957295373668,
+            "plastic_displacement_m": 0.8451957295373668
+          }
+        },
+        "case_id": "g1_frame_shell_coupled_material_load_step_reversal_history_03_step03_coupled_reverse_yield",
+        "contract_pass": true,
+        "direct_residual_newton_parity_pass": true,
+        "direct_solver_residual_match": true,
+        "external_force_kn": [
+          -96.0,
+          -82.0
+        ],
+        "fallback_used": false,
+        "final_free_displacements_m": [
+          0.09243487291194366,
+          -0.4180462506807151
+        ],
+        "final_residual_inf_kn": 1.4210854715202004e-14,
+        "frame_material_state_updated": true,
+        "frame_return_mapping": "plastic_corrector",
+        "g1_closure_claim": false,
+        "history_step_index": 3,
+        "increment_gate_passed": true,
+        "jvp_finite_difference_pass": true,
+        "jvp_relative_error": 3.5866708056833605e-09,
+        "material_newton_closure_claim": false,
+        "material_state_next": {
+          "assembly_scope": "state_updated_frame_shell_coupled_material_seed",
+          "component_internal_forces_kn": {
+            "frame_coupling_from_shell": -3.344370005445721,
+            "frame_material": -92.65562999455429,
+            "shell_coupling_from_frame": 0.7394789832955493,
+            "shell_material": -82.73947898329556
+          },
+          "component_material_states": {
+            "frame": {
+              "algorithmic_tangent_kn_per_m": 40.0,
+              "assembly_scope": "state_updated_frame_shell_coupled_material_load_step_history",
+              "committed_state_next": {
+                "equivalent_plastic_displacement_m": 1.0531125998910855,
+                "plastic_displacement_m": 0.555713022884715
+              },
+              "committed_state_previous": {
+                "equivalent_plastic_displacement_m": 0.8044128113879002,
+                "plastic_displacement_m": 0.8044128113879002
+              },
+              "internal_force_kn": -92.65562999455429,
+              "material_case_kind": "step03_coupled_reverse_yield_frame",
+              "material_family": "reinforced_concrete",
+              "material_model": "bilinear_isotropic_hardening_1d_return_mapping",
+              "path_dependent_state_updated": true,
+              "plastic_increment_m": 0.24869978850318522,
+              "return_mapping": "plastic_corrector",
+              "section_integration": "frame_fiber",
+              "state_persistence_label": "frame_shell_coupled_material_load_step_reversal_history:step03_coupled_reverse_yield:frame",
+              "strain_mode": "axial",
+              "structural_component": "frame_fiber_axial",
+              "trial_displacement_m": 0.09243487291194366,
+              "trial_force_kn": -142.39558769519132,
+              "yield_function_kn": 62.17494712579631,
+              "yielded": true
+            },
+            "shell": {
+              "algorithmic_tangent_kn_per_m": 25.263157894736842,
+              "assembly_scope": "state_updated_frame_shell_coupled_material_load_step_history",
+              "committed_state_next": {
+                "equivalent_plastic_displacement_m": 1.5913159661098515,
+                "plastic_displacement_m": 0.09907549296488216
+              },
+              "committed_state_previous": {
+                "equivalent_plastic_displacement_m": 0.8451957295373668,
+                "plastic_displacement_m": 0.8451957295373668
+              },
+              "internal_force_kn": -82.73947898329556,
+              "material_case_kind": "step03_coupled_reverse_yield_shell",
+              "material_family": "reinforced_concrete",
+              "material_model": "bilinear_isotropic_hardening_1d_return_mapping",
+              "path_dependent_state_updated": true,
+              "plastic_increment_m": 0.7461202365724846,
+              "return_mapping": "plastic_corrector",
+              "section_integration": "layered_shell",
+              "state_persistence_label": "frame_shell_coupled_material_load_step_reversal_history:step03_coupled_reverse_yield:shell",
+              "strain_mode": "membrane",
+              "structural_component": "shell_layer_membrane",
+              "trial_displacement_m": -0.4180462506807151,
+              "trial_force_kn": -202.1187168348931,
+              "yield_function_kn": 141.76284494877208,
+              "yielded": true
+            }
+          },
+          "component_return_mappings": {
+            "frame": "plastic_corrector",
+            "shell": "plastic_corrector"
+          },
+          "frame_material_state_updated": true,
+          "frame_shell_coupling_stiffness_kn_per_m": 8.0,
+          "frame_shell_state_updated_material_coupling": true,
+          "path_dependent_state": true,
+          "path_dependent_state_updated": true,
+          "shell_material_state_updated": true,
+          "state_schema": "g1-material-state-next.frame-shell-coupled-state-updated-seed.v1",
+          "state_updated_material_newton": true
+        },
+        "previous_component_committed_state_matches_carried_state": true,
+        "promotes_g1_closure": false,
+        "regularization_used": false,
+        "residual_descent_passed": true,
+        "residual_gate_passed": true,
+        "shell_material_state_updated": true,
+        "shell_return_mapping": "plastic_corrector",
+        "solution_contract_pass": true,
+        "solution_status": "ready",
+        "status": "ready",
+        "step_kind": "step03_coupled_reverse_yield"
+      },
+      {
+        "carried_component_committed_state_previous": {
+          "frame": {
+            "equivalent_plastic_displacement_m": 1.0531125998910855,
+            "plastic_displacement_m": 0.555713022884715
+          },
+          "shell": {
+            "equivalent_plastic_displacement_m": 1.5913159661098515,
+            "plastic_displacement_m": 0.09907549296488216
+          }
+        },
+        "case_id": "g1_frame_shell_coupled_material_load_step_reversal_history_04_step04_coupled_reload",
+        "contract_pass": true,
+        "direct_residual_newton_parity_pass": true,
+        "direct_solver_residual_match": true,
+        "external_force_kn": [
+          72.0,
+          56.0
+        ],
+        "fallback_used": false,
+        "final_free_displacements_m": [
+          0.8995491013688575,
+          0.4040980378964393
+        ],
+        "final_residual_inf_kn": 0.0,
+        "frame_material_state_updated": false,
+        "frame_return_mapping": "elastic_trial_state",
+        "g1_closure_claim": false,
+        "history_step_index": 4,
+        "increment_gate_passed": true,
+        "jvp_finite_difference_pass": true,
+        "jvp_relative_error": 6.396439115336279e-10,
+        "material_newton_closure_claim": false,
+        "material_state_next": {
+          "assembly_scope": "state_updated_frame_shell_coupled_material_seed",
+          "component_internal_forces_kn": {
+            "frame_coupling_from_shell": 3.232784303171514,
+            "frame_material": 68.76721569682849,
+            "shell_coupling_from_frame": 7.19639281095086,
+            "shell_material": 48.80360718904914
+          },
+          "component_material_states": {
+            "frame": {
+              "algorithmic_tangent_kn_per_m": 200.0,
+              "assembly_scope": "state_updated_frame_shell_coupled_material_load_step_history",
+              "committed_state_next": {
+                "equivalent_plastic_displacement_m": 1.0531125998910855,
+                "plastic_displacement_m": 0.555713022884715
+              },
+              "committed_state_previous": {
+                "equivalent_plastic_displacement_m": 1.0531125998910855,
+                "plastic_displacement_m": 0.555713022884715
+              },
+              "internal_force_kn": 68.76721569682849,
+              "material_case_kind": "step04_coupled_reload_frame",
+              "material_family": "reinforced_concrete",
+              "material_model": "bilinear_isotropic_hardening_1d_return_mapping",
+              "path_dependent_state_updated": false,
+              "plastic_increment_m": 0.0,
+              "return_mapping": "elastic_trial_state",
+              "section_integration": "frame_fiber",
+              "state_persistence_label": "frame_shell_coupled_material_load_step_reversal_history:step04_coupled_reload:frame",
+              "strain_mode": "axial",
+              "structural_component": "frame_fiber_axial",
+              "trial_displacement_m": 0.8995491013688575,
+              "trial_force_kn": 68.76721569682849,
+              "yield_function_kn": -23.888414297725788,
+              "yielded": false
+            },
+            "shell": {
+              "algorithmic_tangent_kn_per_m": 160.0,
+              "assembly_scope": "state_updated_frame_shell_coupled_material_load_step_history",
+              "committed_state_next": {
+                "equivalent_plastic_displacement_m": 1.5913159661098515,
+                "plastic_displacement_m": 0.09907549296488216
+              },
+              "committed_state_previous": {
+                "equivalent_plastic_displacement_m": 1.5913159661098515,
+                "plastic_displacement_m": 0.09907549296488216
+              },
+              "internal_force_kn": 48.80360718904914,
+              "material_case_kind": "step04_coupled_reload_shell",
+              "material_family": "reinforced_concrete",
+              "material_model": "bilinear_isotropic_hardening_1d_return_mapping",
+              "path_dependent_state_updated": false,
+              "plastic_increment_m": 0.0,
+              "return_mapping": "elastic_trial_state",
+              "section_integration": "layered_shell",
+              "state_persistence_label": "frame_shell_coupled_material_load_step_reversal_history:step04_coupled_reload:shell",
+              "strain_mode": "membrane",
+              "structural_component": "shell_layer_membrane",
+              "trial_displacement_m": 0.4040980378964393,
+              "trial_force_kn": 48.80360718904914,
+              "yield_function_kn": -33.9358717942464,
+              "yielded": false
+            }
+          },
+          "component_return_mappings": {
+            "frame": "elastic_trial_state",
+            "shell": "elastic_trial_state"
+          },
+          "frame_material_state_updated": false,
+          "frame_shell_coupling_stiffness_kn_per_m": 8.0,
+          "frame_shell_state_updated_material_coupling": true,
+          "path_dependent_state": true,
+          "path_dependent_state_updated": false,
+          "shell_material_state_updated": false,
+          "state_schema": "g1-material-state-next.frame-shell-coupled-state-updated-seed.v1",
+          "state_updated_material_newton": true
+        },
+        "previous_component_committed_state_matches_carried_state": true,
+        "promotes_g1_closure": false,
+        "regularization_used": false,
+        "residual_descent_passed": true,
+        "residual_gate_passed": true,
+        "shell_material_state_updated": false,
+        "shell_return_mapping": "elastic_trial_state",
+        "solution_contract_pass": true,
+        "solution_status": "ready",
+        "status": "ready",
+        "step_kind": "step04_coupled_reload"
+      }
+    ]
+  },
+  "state_updated_frame_shell_coupled_load_step_history_step_count": 4,
+  "state_updated_frame_shell_coupled_load_step_history_update_step_count": 4,
   "state_updated_frame_shell_coupled_material_component_updates_pass": true,
   "state_updated_frame_shell_coupled_material_direct_parity_pass": true,
   "state_updated_frame_shell_coupled_material_increment_gate_passed": true,

@@ -91,6 +91,9 @@
 - `phase2_state_updated_frame_shell_coupled_material_seed_pass`: `True`
 - `phase2_state_updated_frame_shell_coupled_material_jvp_pass`: `True`
 - `phase2_state_updated_frame_shell_coupled_material_component_updates_pass`: `True`
+- `phase2_state_updated_frame_shell_coupled_load_step_history_pass`: `True`
+- `phase2_state_updated_frame_shell_coupled_load_step_history_step_count`: `4`
+- `phase2_state_updated_frame_shell_coupled_load_step_history_chain_replay_pass`: `True`
 - `phase2_state_updated_material_breadth_closed`: `False`
 - `phase2_material_mesh_newton_load_step_gate_passed`: `True`
 - `phase2_material_mesh_newton_sparse_cpu_equivalence_passed`: `True`
@@ -672,7 +675,7 @@
 - `material_jvp_relative_error_pass`: `True`
 - `state_updated_material_newton_breadth_closed`: `False`
 - `state_updated_seed_suite_case_count`: `9`
-- `claim_boundary`: `Deterministic material-Newton breadth seeds using the explicit F_internal_minus_F_external residual contract. This includes scalar analytic material laws plus a state-updated frame/shell/composite return-mapping seed suite with material-state checkpoint replay and finite-difference JVP checks, plus committed-state path histories for unload/reverse/reload sequences and a two-DOF frame/shell coupled state-updated material seed. It does not close G1 full-mesh/full-load nonlinear equilibrium, sparse production matrix backends, or production GPU/HIP gates.`
+- `claim_boundary`: `Deterministic material-Newton breadth seeds using the explicit F_internal_minus_F_external residual contract. This includes scalar analytic material laws plus a state-updated frame/shell/composite return-mapping seed suite with material-state checkpoint replay and finite-difference JVP checks, plus committed-state path histories for unload/reverse/reload sequences and a two-DOF frame/shell coupled state-updated material seed. It also includes a small coupled frame/shell load-step history carrying committed material state across yield/unload/reverse/reload. It does not close G1 full-mesh/full-load nonlinear equilibrium, sparse production matrix backends, or production GPU/HIP gates.`
 
 ## Next Actions
 
