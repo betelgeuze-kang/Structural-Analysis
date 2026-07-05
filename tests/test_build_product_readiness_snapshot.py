@@ -4856,13 +4856,18 @@ def test_snapshot_opensees_canonical_gate_change_only_stales_dp_rc_artifact(
     ]
 
 
-def test_snapshot_opensees_canonical_report_change_only_stales_dp_rc_artifact(
+def test_snapshot_opensees_canonical_report_change_is_receipt_only_fresh(
     tmp_path: Path,
 ) -> None:
     _init_git_repo(tmp_path)
     _write_stable_non_receipt_inputs(tmp_path)
     source_commit = _commit_all(tmp_path, "source")
     _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _write_text(
+        tmp_path
+        / "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+        '{"summary_line":"OpenSees canonical breadth baseline"}\n',
+    )
     _commit_all(tmp_path, "receipt")
     _write_text(
         tmp_path
@@ -4881,13 +4886,11 @@ def test_snapshot_opensees_canonical_report_change_only_stales_dp_rc_artifact(
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
-    assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is False
-    assert [
+    assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is True
+    assert not [
         blocker
         for blocker in payload["blockers"]
         if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
-    ] == [
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"
     ]
 
 
@@ -4898,6 +4901,11 @@ def test_snapshot_medium_scorecard_runner_change_only_stales_dp_rc_artifact(
     _write_stable_non_receipt_inputs(tmp_path)
     source_commit = _commit_all(tmp_path, "source")
     _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _write_text(
+        tmp_path
+        / "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+        '{"summary_line":"OpenSees canonical breadth baseline"}\n',
+    )
     _commit_all(tmp_path, "receipt")
     _write_text(
         tmp_path / "scripts/run_phase3_medium_model_scorecard_receipt.py",
@@ -5127,6 +5135,35 @@ def test_snapshot_blocks_dirty_worktree_even_when_committed_boundary_is_receipt_
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
         == "receipt_only_commit"
     )
+
+
+def test_snapshot_allows_dirty_opensees_canonical_breadth_receipt(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _write_text(
+        tmp_path
+        / "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+        '{"summary_line":"OpenSees canonical breadth baseline"}\n',
+    )
+    _commit_all(tmp_path, "receipt")
+    _write_text(
+        tmp_path
+        / "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+        '{"summary_line":"OpenSees canonical breadth dirty receipt"}\n',
+    )
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+
+    assert "stale_or_inconsistent:worktree_dirty" not in payload["blockers"]
+    assert payload["state_consistency"]["worktree"]["dirty"] is False
+    assert payload["state_consistency"]["worktree"]["non_receipt_dirty_paths"] == []
 
 
 def test_snapshot_attaches_phase3_release_control_cleanup_plan_summary(tmp_path: Path) -> None:

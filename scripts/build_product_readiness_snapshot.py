@@ -356,6 +356,8 @@ def _receipt_commit_allowed_path(path: str, allowed_paths: set[str]) -> bool:
         return True
     if path == "docs/developer_preview_final_gate_action_register.md":
         return True
+    if path == "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json":
+        return True
     if path.startswith("docs/ai/dispatch/") and path.endswith(".md"):
         return True
     if (
