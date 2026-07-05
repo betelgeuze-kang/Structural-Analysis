@@ -801,11 +801,11 @@
     "path": "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe.json",
     "present": true,
     "promotes_g1_closure": false,
-    "relative_increment_gate_passed": false,
+    "relative_increment_gate_passed": true,
     "residual_formula": "F_internal_minus_F_external",
-    "residual_inf_n": 1384.2531989367426,
+    "residual_inf_n": 1384.25319546905,
     "residual_source": "physical_direct_residual",
-    "source_commit_sha": "68bbfcb50a1dced53de55080a1c898cc7ae77fd5",
+    "source_commit_sha": "5c5dbcba2b3789ce169c1c916ddffd660720cb35",
     "status": "partial",
     "tangent_definition": "dR_du_consistent"
   },
@@ -965,7 +965,7 @@
     "residual_inf_n": 0.42740724991695345,
     "status": "ready"
   },
-  "generated_at": "2026-07-05T18:48:42.469278+00:00",
+  "generated_at": "2026-07-05T18:58:49.555252+00:00",
   "global_tangent_scaled_sweep": {
     "base_residual_inf_n": 0.4278304040181992,
     "best_alpha": 0.00390625,
@@ -1381,7 +1381,7 @@
     "implementation/phase1/release_evidence/productization/g1_current_frontier_operator_mismatch_audit.json": "sha256:0868801f649300a959a5d8fecafc0de5243e9961e44aa182c41ce16110380c54",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:382956916ff532ef84df6648062a284d6899e7e62b48b9b8386142e7d4411235",
     "implementation/phase1/release_evidence/productization/g1_frame_tangent_fd_epsilon_sweep_probe.json": "sha256:81c2ad32a078db886d09c6637cd7d1369719d2ed6c8f5fac88ae5ac410c4291d",
-    "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe.json": "sha256:d5fc8aaf3078f28c07832256e9345360a2490ea3f7f46a5103c2565877243d75",
+    "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe.json": "sha256:20cf5661abe9f859a3fecc659ecbf35d480f5020ab3030fb667d6c93d1a4245e",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:a17a741fb556d8bad025d3cf401a21416158b2ddb3864c2306e0060228a05231",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:42f77c9c6856a124859510d049d0419cf5fa41a7d71e8f15f2f8c883f7301c73",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.json": "sha256:e6582053c0d7dc2c99c3737f0c7ffa94579855a5520cdb416efc2abd01aa3ee9",
@@ -2119,7 +2119,7 @@
     "row_count": 8,
     "status": "ready"
   },
-  "source_commit_sha": "68bbfcb50a1dced53de55080a1c898cc7ae77fd5",
+  "source_commit_sha": "5c5dbcba2b3789ce169c1c916ddffd660720cb35",
   "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe": {
     "assembled_tangent_parity_max_absolute_error": 0.006011962890625,
     "assembled_tangent_parity_max_relative_error": 2.683381287585585e-15,
@@ -2753,7 +2753,7 @@
     "contract_status": "blocked_runner_contract",
     "cpu_live_g1_assembly_contract_passed": true,
     "cpu_live_g1_assembly_contract_present": true,
-    "cpu_live_g1_assembly_contract_residual_inf_n": 1384.2531989367426,
+    "cpu_live_g1_assembly_contract_residual_inf_n": 1384.25319546905,
     "current_frontier_full_load_no_descent": true,
     "current_frontier_next_required_operator": "physical_consistent_frame_shell_material_geometric_with_state_updated_material_tangent_and_full_residual_globalization",
     "current_frontier_operator_family_no_descent": true,
