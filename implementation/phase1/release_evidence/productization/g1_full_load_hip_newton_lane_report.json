@@ -39,7 +39,7 @@
         "dev_kfd_missing",
         "dev_dri_missing"
       ],
-      "source_state_fresh": false
+      "source_state_fresh": true
     },
     "load_path_provenance": {
       "blockers": [],
@@ -135,7 +135,6 @@
     "schema_version": "g1-full-load-hip-newton-blocker-partition.v1"
   },
   "blockers": [
-    "hip_consistency_proof_source_commit_sha_mismatch",
     "hip_consistency_proof_production_hip_path_not_proven",
     "hip_consistency_proof_gate_not_passed",
     "hip_consistency_proof_residual_jvp_worker_path_not_ready",
@@ -1449,15 +1448,9 @@
   },
   "full_load_input_pass": true,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-07-05T21:11:24.191299+00:00",
+  "generated_at": "2026-07-05T21:23:43.765302+00:00",
   "hip_consistency_proof": {
-    "changed_paths_since_source_commit": [
-      "scripts/build_g1_assembly_contract_seed_report.py",
-      "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-      "src/structural_analysis/assembly/__init__.py",
-      "src/structural_analysis/assembly/g1_contract.py",
-      "src/structural_analysis/assembly/material_state.py"
-    ],
+    "changed_paths_since_source_commit": [],
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
     "execution_mode": "hip_required_runtime_unavailable_no_cpu_fallback",
@@ -1565,34 +1558,22 @@
       "dev_kfd_missing",
       "dev_dri_missing"
     ],
-    "source_commit_sha": "49990694c8affff1114aea09d3b1bb6aead62cc0",
-    "source_state_fresh": false,
-    "source_state_kind": "g1_hip_paths_changed",
+    "source_commit_sha": "e3962d1a5465c5b52f79e1aa94b94986764a242f",
+    "source_state_fresh": true,
+    "source_state_kind": "exact",
     "status": "partial"
   },
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json": "sha256:b35be5bd18a33d52ec5afab1ee79b4953d6f9a8c933336e8a3680ddea36c4b24",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:382956916ff532ef84df6648062a284d6899e7e62b48b9b8386142e7d4411235",
-    "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe.json": "sha256:362f976438e1af9164b9f12e490407ef0973fcdca266eb2622d8d83f0ead80fb",
+    "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe.json": "sha256:5c21b1f8f1d0da7dd2fe223c1457fd63a61707dad2a25289848a9992a0f7c96d",
     "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz": "sha256:2056faa56a1ae988b37ebbdfb0c822faf9cfbc319daae6219520a7569783c663",
     "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:ddce67fd21c8c076e559c94bcbd54bfd87d1205db5db1aacf212f979e419f75a",
     "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:89b6c804be6e75aac5e79ad05849660cc5e99437d67b29e35ac77f2e22ec75aa",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:e5c6962fcda29f92312d34ee560cf9f2e04ce5ff8a882b9564d00849f2886d03",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:3b03a07578d8d79b2ad5a6607f81dc6c1b5ec0dedeba253b685abd1c7db3c10a",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:715b40736e3f4b5420a2edc5e3f7b533d72d9f7d3da8887ee4d1d3334167c17d"
   },
   "lane_next_actions": [
-    {
-      "changed_paths_since_source_commit": [
-        "scripts/build_g1_assembly_contract_seed_report.py",
-        "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        "src/structural_analysis/assembly/__init__.py",
-        "src/structural_analysis/assembly/g1_contract.py",
-        "src/structural_analysis/assembly/material_state.py"
-      ],
-      "id": "refresh_hip_consistency_proof_for_current_head",
-      "reason": "hip_consistency_proof_source_commit_sha_mismatch",
-      "source_state_kind": "g1_hip_paths_changed"
-    },
     {
       "cause_narrowing_primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
       "cause_narrowing_required_next_receipts": [
@@ -1718,14 +1699,14 @@
     "reused_evidence": false,
     "schema_version": "g1-preexisting-child-probe-evidence.v1",
     "source_commit_matches_lane": true,
-    "source_commit_sha": "3008c04eab0f648eb40fbfeb35ba7fd0d382feb2",
+    "source_commit_sha": "e3962d1a5465c5b52f79e1aa94b94986764a242f",
     "status": "partial",
     "usable_as_deferred_child_evidence": true
   },
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "3008c04eab0f648eb40fbfeb35ba7fd0d382feb2",
+  "source_commit_sha": "e3962d1a5465c5b52f79e1aa94b94986764a242f",
   "status": "blocked",
   "terminal_requirement_breakdown": {
     "active_terminal_requirement_id": "hip_consistent_residual_jacobian_newton_proof",
@@ -1770,7 +1751,6 @@
       {
         "acceptance_evidence": "mgt_residual_jacobian_consistency_hip_required_probe.json passes the consistent residual/Jacobian Newton gate on the production ROCm/HIP path with no CPU diagnostic assembler or receipt blockers.",
         "blockers": [
-          "hip_consistency_proof_source_commit_sha_mismatch",
           "hip_consistency_proof_production_hip_path_not_proven",
           "hip_consistency_proof_gate_not_passed",
           "hip_consistency_proof_has_blockers",
@@ -1788,8 +1768,8 @@
           "present": true,
           "receipt_blocker_count": 4,
           "runtime_blocker_count": 2,
-          "source_state_fresh": false,
-          "source_state_kind": "g1_hip_paths_changed"
+          "source_state_fresh": true,
+          "source_state_kind": "exact"
         },
         "ready": false,
         "rerun_command": "python3 implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py --require-hip-residual-engine --checkpoint-npz <full-load-checkpoint.npz> --output-json implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",

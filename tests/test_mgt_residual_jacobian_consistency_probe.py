@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -898,6 +899,82 @@ def test_hip_required_probe_without_runtime_blocker_list_keeps_generic_blockers(
     ]
     assert payload["cpu_diagnostic_assembler_used"] is False
     assert payload["production_hip_residual_jacobian_path"] is False
+
+
+def test_hip_required_runtime_unavailable_can_attach_live_contract_source(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    def build_direct_residual_assembler(**_kwargs):
+        raise AssertionError("HIP-required probe must not use the CPU diagnostic assembler")
+
+    def run_mgt_direct_residual_newton_probe(**_kwargs):
+        raise AssertionError("HIP-unavailable proof must not run the child probe")
+
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+    monkeypatch.setattr(
+        probe_module,
+        "run_mgt_direct_residual_newton_probe",
+        run_mgt_direct_residual_newton_probe,
+    )
+    monkeypatch.setattr(probe_module, "_git_head", lambda: "fixture-commit")
+    monkeypatch.setattr(
+        probe_module,
+        "_rocm_hip_runtime_preflight",
+        lambda: {
+            "checked_at": "fixture-time",
+            "hip_available": False,
+            "unavailable_reason": "fixture_no_hip",
+            "runtime_blockers": ["dev_kfd_missing"],
+        },
+    )
+    source = tmp_path / "cpu-live-contract.json"
+    source.write_text(
+        json.dumps(
+            {
+                "status": "partial",
+                "source_commit_sha": "cpu-source-commit",
+                "live_g1_assembly_contract": _live_g1_assembly_contract_fixture(),
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    payload = probe_module.run_mgt_residual_jacobian_consistency_probe(
+        output_json=None,
+        component_only=True,
+        require_hip_residual_engine=True,
+        live_assembly_contract_source_json=source,
+    )
+
+    assert payload["status"] == "partial"
+    assert payload["execution_mode"] == "hip_required_runtime_unavailable_no_cpu_fallback"
+    assert payload["cpu_diagnostic_assembler_used"] is False
+    assert payload["production_hip_residual_jacobian_path"] is False
+    assert payload["live_g1_assembly_contract"]["contract_pass"] is True
+    assert payload["live_g1_assembly_contract"]["production_hip_claim"] is False
+    assert payload["live_g1_assembly_contract"]["promotes_g1_closure"] is False
+    assert payload["live_g1_assembly_contract_source"] == {
+        "path": str(source),
+        "attached": True,
+        "source_kind": "existing_live_assembly_contract_receipt",
+        "hip_direct_probe_executed": False,
+        "production_hip_claim": False,
+        "promotes_g1_closure": False,
+        "blockers": [],
+        "source_status": "partial",
+        "source_commit_sha": "cpu-source-commit",
+        "contract_pass": True,
+    }
+    assert payload["blockers"] == [
+        "rocm_hip_runtime_unavailable",
+        "hip_runtime::dev_kfd_missing",
+        "hip_residual_jacobian_consistency_not_executed",
+    ]
 
 
 def test_hip_required_preflight_only_skips_cpu_assembler_and_child_probe(

@@ -1,7 +1,7 @@
 {
   "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
-  "generated_at": "2026-07-05T19:14:57.129677+00:00",
-  "source_commit_sha": "49990694c8affff1114aea09d3b1bb6aead62cc0",
+  "generated_at": "2026-07-05T21:23:35.201704+00:00",
+  "source_commit_sha": "e3962d1a5465c5b52f79e1aa94b94986764a242f",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "reused_evidence": false,
   "status": "partial",
@@ -13,7 +13,7 @@
   "cpu_diagnostic_assembler_used": false,
   "production_hip_residual_jacobian_path": false,
   "rocm_hip_runtime_preflight": {
-    "checked_at": "2026-07-05T19:14:57.131482+00:00",
+    "checked_at": "2026-07-05T21:23:35.203559+00:00",
     "hip_available": false,
     "torch_importable": true,
     "torch_rocm_build": true,
@@ -62,7 +62,7 @@
   "production_rocm_hip_residual_jvp_worker": {
     "schema_version": "production-rocm-hip-residual-jvp-worker-contract.v1",
     "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
-    "source_commit_sha": "49990694c8affff1114aea09d3b1bb6aead62cc0",
+    "source_commit_sha": "e3962d1a5465c5b52f79e1aa94b94986764a242f",
     "ready": false,
     "status": "blocked",
     "blockers": [
@@ -206,25 +206,94 @@
     },
     "claim_boundary": "This is a production-worker readiness contract for the HIP-required residual/JVP lane. It records required device-resident residual/JVP behavior and blocks G1 promotion unless the child proof retains global JVP rows, uses HIP for the accepted-state tangent refresh, avoids CPU fallback, and the consistent residual/Jacobian Newton gate passes. residual_jvp_worker_path_ready isolates the HIP residual/JVP worker proof from the remaining G1 closure gate."
   },
+  "live_g1_assembly_contract": {
+    "receipt_schema_version": "g1-live-assembly-contract-receipt.v1",
+    "uses_assembly_result_contract": true,
+    "assembly_result_schema": "g1-assembly-result.v1",
+    "residual_formula": "F_internal_minus_F_external",
+    "residual_source": "physical_direct_residual",
+    "tangent_definition": "dR_du_consistent",
+    "required_fields_present": true,
+    "required_fields": [
+      "residual_free",
+      "tangent_free",
+      "internal_forces",
+      "external_forces",
+      "material_state_next",
+      "metrics"
+    ],
+    "fixed_point_residual_promoted_to_physical": false,
+    "regularized_fixed_point_substitute": false,
+    "contract_pass": true,
+    "blockers": [],
+    "field_shapes": {
+      "residual_free": [
+        58998
+      ],
+      "tangent_free": [
+        58998,
+        58998
+      ],
+      "internal_forces": [
+        58998
+      ],
+      "external_forces": [
+        58998
+      ]
+    },
+    "field_sources": {
+      "residual_free": "assemble_physical_residual(f_int[free] - f_ext[free])",
+      "tangent_free": "assemble_newton_tangent_stiffness()[free, free]",
+      "internal_forces": "residual_free + external_forces on free DOFs",
+      "external_forces": "assemble_physical_residual rhs == f_ext[free]",
+      "material_state_next": "direct_probe_material_state_metadata",
+      "metrics": "direct_probe_assembly_metrics"
+    },
+    "free_dof_count": 58998,
+    "load_scale": 1.0,
+    "residual_inf_norm": 1384.2531989367426,
+    "tangent_inf_norm": 263305013223928.78,
+    "physical_internal_force_model": "corotational_force_based_6dof_plus_force_consistent_shell_plus_springs_with_shell_material_tangent",
+    "external_load_source": "reference_configuration",
+    "shell_material_tangent_applied": true,
+    "state_dependent_shell_material_tangent_hip_replay": false,
+    "claim_boundary": "Attached live AssemblyResult contract evidence from an existing direct residual probe. This clears only the missing contract receipt boundary; it is not a production ROCm/HIP residual/JVP proof and does not close G1.",
+    "present": true,
+    "attached_to_hip_required_receipt_from": "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe.json",
+    "production_hip_claim": false,
+    "promotes_g1_closure": false
+  },
+  "live_g1_assembly_contract_source": {
+    "path": "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe.json",
+    "attached": true,
+    "source_kind": "existing_live_assembly_contract_receipt",
+    "hip_direct_probe_executed": false,
+    "production_hip_claim": false,
+    "promotes_g1_closure": false,
+    "blockers": [],
+    "source_status": "partial",
+    "source_commit_sha": "e3962d1a5465c5b52f79e1aa94b94986764a242f",
+    "contract_pass": true
+  },
   "component_only": false,
   "checkpoint": {
-    "path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_gate_candidate_step2_candidate.npz",
+    "path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
     "schema": "mgt-direct-residual-newton-state.v1",
     "load_scale": 1.0,
     "full_load_required": true,
     "full_load_candidate": true,
     "gap_to_full_load": 0.0,
-    "direct_residual_inf_n": 3.42023849952966e-05,
-    "direct_residual_gate_passed": true
+    "direct_residual_inf_n": 1384.2531989367426,
+    "direct_residual_gate_passed": false
   },
   "load_scale": 1.0,
-  "shell_pressure_load_path_policy": "structural_components_only",
+  "shell_pressure_load_path_policy": "all_components",
   "direction_rows": [],
   "state_scale_sweep": [],
   "runtime_metrics": {
     "setup_and_reference_seconds": 0.0,
     "base_assembly_seconds": 0.0,
-    "total_seconds": 0.858678101998521
+    "total_seconds": 0.8335653659996751
   },
   "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested, but no usable HIP runtime was available. The probe did not fall back to the CPU diagnostic path and does not close G1.",
   "blockers": [

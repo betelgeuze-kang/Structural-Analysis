@@ -1,7 +1,7 @@
 {
   "schema_version": "mgt-direct-residual-newton-probe.v1",
-  "generated_at": "2026-07-05T21:06:17.289441+00:00",
-  "source_commit_sha": "3008c04eab0f648eb40fbfeb35ba7fd0d382feb2",
+  "generated_at": "2026-07-05T21:20:06.156179+00:00",
+  "source_commit_sha": "e3962d1a5465c5b52f79e1aa94b94986764a242f",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "reused_evidence": false,
   "status": "partial",
@@ -1706,7 +1706,7 @@
               ]
             },
             "linear_least_squares_residual_sum": [],
-            "linear_solve_seconds": 0.00010810300227603875,
+            "linear_solve_seconds": 0.00011139400157844648,
             "solve_error": "",
             "best_candidate": {
               "row_correction_pass": 1,
@@ -2370,8 +2370,8 @@
     "residual_descent": true
   },
   "runtime_metrics": {
-    "initial_assembly_seconds": 38.161613002001104,
-    "total_seconds": 203.3756098749982
+    "initial_assembly_seconds": 38.05800072599959,
+    "total_seconds": 203.33455389699884
   },
   "output_final_checkpoint": {
     "written": true,

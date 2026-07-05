@@ -318,6 +318,80 @@ def _live_g1_assembly_contract_from_child_payload(
     }
 
 
+def _live_g1_assembly_contract_from_source_json(
+    source_json: Path | None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    if source_json is None:
+        return {}, {}
+    source = {
+        "path": str(source_json),
+        "attached": False,
+        "source_kind": "existing_live_assembly_contract_receipt",
+        "hip_direct_probe_executed": False,
+        "production_hip_claim": False,
+        "promotes_g1_closure": False,
+        "blockers": [],
+    }
+    try:
+        raw = json.loads(source_json.read_text(encoding="utf-8"))
+    except Exception as exc:
+        blocker = f"live_g1_assembly_contract_source_unreadable:{exc.__class__.__name__}"
+        source["blockers"] = [blocker]
+        return {
+            "present": False,
+            "contract_pass": False,
+            "blockers": [blocker],
+            "uses_assembly_result_contract": False,
+            "assembly_result_schema": "",
+            "residual_formula": "",
+            "residual_source": "",
+            "tangent_definition": "",
+            "required_fields_present": False,
+            "required_fields": [],
+            "fixed_point_residual_promoted_to_physical": False,
+            "regularized_fixed_point_substitute": False,
+        }, source
+    if not isinstance(raw, dict):
+        blocker = "live_g1_assembly_contract_source_not_json_object"
+        source["blockers"] = [blocker]
+        return {
+            "present": False,
+            "contract_pass": False,
+            "blockers": [blocker],
+            "uses_assembly_result_contract": False,
+            "assembly_result_schema": "",
+            "residual_formula": "",
+            "residual_source": "",
+            "tangent_definition": "",
+            "required_fields_present": False,
+            "required_fields": [],
+            "fixed_point_residual_promoted_to_physical": False,
+            "regularized_fixed_point_substitute": False,
+        }, source
+    contract = _live_g1_assembly_contract_from_child_payload(raw)
+    source["attached"] = bool(contract.get("present"))
+    source["source_status"] = str(raw.get("status") or "")
+    source["source_commit_sha"] = str(raw.get("source_commit_sha") or "")
+    source["contract_pass"] = bool(contract.get("contract_pass"))
+    source["blockers"] = [
+        str(item)
+        for item in contract.get("blockers", [])
+        if isinstance(item, str) and item
+    ]
+    return {
+        **contract,
+        "attached_to_hip_required_receipt_from": str(source_json),
+        "production_hip_claim": False,
+        "promotes_g1_closure": False,
+        "claim_boundary": (
+            "Attached live AssemblyResult contract evidence from an existing "
+            "direct residual probe. This clears only the missing contract "
+            "receipt boundary; it is not a production ROCm/HIP residual/JVP "
+            "proof and does not close G1."
+        ),
+    }, source
+
+
 def _assess_hip_required_direct_probe_payload(
     child_payload: dict[str, Any],
 ) -> dict[str, Any]:
@@ -3177,6 +3251,7 @@ def run_mgt_residual_jacobian_consistency_probe(
     require_hip_residual_engine: bool = False,
     hip_runtime_preflight_only: bool = False,
     hip_direct_output_checkpoint_npz: Path | None = None,
+    live_assembly_contract_source_json: Path | None = None,
 ) -> dict[str, Any]:
     started = time.perf_counter()
     generated_at = datetime.now(timezone.utc).isoformat()
@@ -3192,6 +3267,11 @@ def run_mgt_residual_jacobian_consistency_probe(
         }
     )
     checkpoint_gate = _checkpoint_gate_from_npz(checkpoint_npz)
+    attached_live_contract, attached_live_contract_source = (
+        _live_g1_assembly_contract_from_source_json(
+            live_assembly_contract_source_json
+        )
+    )
     if require_hip_residual_engine and hip_runtime_preflight_only:
         runtime_blockers = hip_preflight.get("runtime_blockers")
         runtime_blocker_names = (
@@ -3240,6 +3320,14 @@ def run_mgt_residual_jacobian_consistency_probe(
             "production_hip_residual_jacobian_path": False,
             "rocm_hip_runtime_preflight": hip_preflight,
             "production_rocm_hip_residual_jvp_worker": worker_contract,
+            **(
+                {
+                    "live_g1_assembly_contract": attached_live_contract,
+                    "live_g1_assembly_contract_source": attached_live_contract_source,
+                }
+                if attached_live_contract
+                else {}
+            ),
             "component_only": bool(component_only),
             "checkpoint": checkpoint_gate,
             "load_scale": checkpoint_gate["load_scale"],
@@ -3257,6 +3345,11 @@ def run_mgt_residual_jacobian_consistency_probe(
                 "production_hip_residual_jacobian_path": False,
                 "hip_residual_engine_contract_passed": False,
                 "consistent_residual_jacobian_newton_gate_passed": False,
+                **(
+                    {"live_g1_assembly_contract": attached_live_contract}
+                    if attached_live_contract
+                    else {}
+                ),
             },
             "direction_rows": [],
             "state_scale_sweep": [],
@@ -3314,6 +3407,14 @@ def run_mgt_residual_jacobian_consistency_probe(
             "production_hip_residual_jacobian_path": False,
             "rocm_hip_runtime_preflight": hip_preflight,
             "production_rocm_hip_residual_jvp_worker": worker_contract,
+            **(
+                {
+                    "live_g1_assembly_contract": attached_live_contract,
+                    "live_g1_assembly_contract_source": attached_live_contract_source,
+                }
+                if attached_live_contract
+                else {}
+            ),
             "component_only": bool(component_only),
             "checkpoint": checkpoint_gate,
             "load_scale": checkpoint_gate["load_scale"],
@@ -3976,6 +4077,16 @@ def main(argv: list[str] | None = None) -> int:
             "direct residual probe when it finds an improved accepted state."
         ),
     )
+    parser.add_argument(
+        "--live-assembly-contract-source-json",
+        type=Path,
+        default=None,
+        help=(
+            "Optional existing direct-probe JSON whose live AssemblyResult contract "
+            "is attached to a blocked HIP-required receipt without claiming HIP "
+            "execution or G1 closure."
+        ),
+    )
     args = parser.parse_args(argv)
     state_scale_values = tuple(
         float(value.strip())
@@ -4050,6 +4161,7 @@ def main(argv: list[str] | None = None) -> int:
         require_hip_residual_engine=bool(args.require_hip_residual_engine),
         hip_runtime_preflight_only=bool(args.hip_runtime_preflight_only),
         hip_direct_output_checkpoint_npz=args.hip_direct_output_checkpoint_npz,
+        live_assembly_contract_source_json=args.live_assembly_contract_source_json,
     )
     print(
         "mgt-residual-jacobian-consistency:",

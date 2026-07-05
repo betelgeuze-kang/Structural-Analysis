@@ -1,6 +1,6 @@
 # G1 Consistent Newton Full-Load Runner Contract
 
-- `summary_line`: `G1 consistent Newton full-load runner contract: BLOCKED_RUNNER_CONTRACT | contract_pass=False | observed_load=1/1 | closure_blockers=24`
+- `summary_line`: `G1 consistent Newton full-load runner contract: BLOCKED_RUNNER_CONTRACT | contract_pass=False | observed_load=1/1 | closure_blockers=23`
 - `contract_pass`: `False`
 - `evidence_closure_pass`: `False`
 - `runner_id`: `build_consistent_newton_full_load_checkpoint_candidate_runner`
@@ -694,7 +694,6 @@
 
 ## Contract Blockers
 
-- `live_g1_assembly_contract_receipt_missing`
 - `production_rocm_hip_residual_jvp_worker_path_not_ready`
 
 ## Worker Path Repair Plan
@@ -716,7 +715,6 @@
 
 ## Closure Blockers
 
-- `hip_consistency_proof_source_commit_sha_mismatch`
 - `hip_consistency_proof_production_hip_path_not_proven`
 - `hip_consistency_proof_gate_not_passed`
 - `hip_consistency_proof_residual_jvp_worker_path_not_ready`
