@@ -53,8 +53,10 @@ HIP_CHILD_RESIDUAL_COMPONENTS: tuple[tuple[str, str], ...] = (
 CHECKPOINT_EVIDENCE_SOURCES: tuple[Path, ...] = (
     PRODUCTIZATION / "g1_checkpoint_retention_manifest.json",
     PRODUCTIZATION / "mgt_g1_followup387_shell_material_budgeted_continuation_status.json",
+    PRODUCTIZATION / "g1_true_newton_full_load_checkpoint_candidate_status.json",
 )
 NPZ_PATH_KEYS: tuple[str, ...] = (
+    "checkpoint_candidate",
     "compact_checkpoint",
     "latest_frontier_compact_checkpoint",
     "retained_checkpoint",

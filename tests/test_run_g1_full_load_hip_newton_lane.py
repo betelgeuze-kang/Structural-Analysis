@@ -3188,6 +3188,49 @@ def test_auto_select_picks_full_load_candidate(tmp_path: Path) -> None:
     assert Path(payload["checkpoint"]["path"]) == full
 
 
+def test_auto_select_picks_true_newton_checkpoint_candidate_status(
+    tmp_path: Path,
+) -> None:
+    full = _checkpoint(tmp_path / "true_newton_full.npz", load_scale=1.0)
+    source = tmp_path / "true-newton-status.json"
+    source.write_text(
+        json.dumps(
+            {
+                "schema_version": "g1-true-newton-full-load-checkpoint-candidate.v1",
+                "checkpoint_candidate": {
+                    "path": str(full),
+                    "load_scale": 1.0,
+                    "schema": "mgt-direct-residual-newton-state.v1",
+                    "promotes_g1_closure": False,
+                    "residual_gate_passed": False,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        output_json=tmp_path / "child.json",
+        dry_run=True,
+        evidence_sources=(source,),
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 0
+    assert payload["status"] == "ready_to_run"
+    resolution = payload["checkpoint_resolution"]["selection"]
+    assert resolution["candidate_count"] == 1
+    assert resolution["selected_checkpoint"]["path"] == str(full)
+    assert resolution["selection_reason"] == "full_load_candidate_selected"
+    assert payload["checkpoint_resolution_gate"]["passed"] is True
+    assert Path(payload["checkpoint"]["path"]) == full
+
+
 def test_auto_select_blocks_full_load_checkpoint_with_sub_full_load_provenance(
     tmp_path: Path,
 ) -> None:
