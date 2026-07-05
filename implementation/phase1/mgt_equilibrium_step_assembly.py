@@ -144,6 +144,9 @@ def build_equilibrium_step_assembler(
                 base_axial_forces=base_axial_forces,
                 frame_gravity_load_scale=frame_gravity_load_scale,
                 load_scale=load_scale,
+                apply_shell_material_tangent=(
+                    build_equilibrium_step_assembler_apply_shell_material_tangent
+                ),
                 include_component_forces=include_component_forces,
                 shell_operator_cache=shell_operator_cache,
                 frame_force_cache=frame_force_cache,
@@ -162,6 +165,30 @@ def build_equilibrium_step_assembler(
                 "frozen_external_load": bool("reference_f_ext" in reference_holder),
                 "shell_pressure_load_path_meta": pressure_load_path_meta,
                 "shell_operator_cache_size": int(len(shell_operator_cache)),
+                "shell_material_tangent_residual_applied": bool(
+                    build_equilibrium_step_assembler_apply_shell_material_tangent
+                ),
+            }
+        shell_material_tangent: dict[int, float] | None = None
+        shell_material_tangent_meta: dict[str, Any] = {
+            "shell_material_tangent_applied": False,
+        }
+        if build_equilibrium_step_assembler_apply_shell_material_tangent:
+            shell_material_tangent, shell_material_tangent_meta = (
+                shell_material_tangent_by_surface_index(
+                    node_xyz=node_xyz,
+                    u=u,
+                    elem_type_code=elem_type_code,
+                    elem_material_id=elem_material_id,
+                    conn_ptr=conn_ptr,
+                    conn_idx=conn_idx,
+                    material_props=material_props,
+                    controlled_probe=False,
+                )
+            )
+            shell_material_tangent_meta = {
+                **shell_material_tangent_meta,
+                "shell_material_tangent_applied": True,
             }
         stiffness, assembled_f_ext, tangent_meta = assemble_equilibrium_operator_stiffness(
             u=u,
@@ -181,6 +208,7 @@ def build_equilibrium_step_assembler(
             load_scale=load_scale,
             restrained=restrained,
             shell_pressure_load_allowed_surface_elements=pressure_allowed_surface_elements,
+            material_tangent_by_surface_index_mpa=shell_material_tangent,
         )
         _active, free = _active_free(stiffness, restrained)
         f_int, physical_meta = assemble_physical_internal_forces(
@@ -199,6 +227,9 @@ def build_equilibrium_step_assembler(
             base_axial_forces=base_axial_forces,
             frame_gravity_load_scale=frame_gravity_load_scale,
             load_scale=load_scale,
+            apply_shell_material_tangent=(
+                build_equilibrium_step_assembler_apply_shell_material_tangent
+            ),
             include_component_forces=include_component_forces,
             shell_operator_cache=shell_operator_cache,
             frame_force_cache=frame_force_cache,
@@ -223,6 +254,10 @@ def build_equilibrium_step_assembler(
             "free_dof_count": int(free.size),
             "frozen_external_load": bool("reference_f_ext" in reference_holder),
             "shell_operator_cache_size": int(len(shell_operator_cache)),
+            "shell_material_tangent_residual_applied": bool(
+                build_equilibrium_step_assembler_apply_shell_material_tangent
+            ),
+            "shell_material_tangent_meta": shell_material_tangent_meta,
         }
 
     _reference_stiffness, reference_f_ext, _reference_free, _reference_residual, _reference_rhs, _ = (
@@ -449,6 +484,11 @@ def build_equilibrium_step_assembler(
             load_scale=load_scale,
             shell_operator_cache=shell_operator_cache,
             frame_force_cache=frame_force_cache,
+            apply_shell_material_tangent=(
+                bool(apply_shell_material_tangent)
+                if apply_shell_material_tangent is not None
+                else bool(build_equilibrium_step_assembler_apply_shell_material_tangent)
+            ),
         )
         residual_batch = np.asarray(f_int_batch[:, free] - f_ext[free], dtype=np.float64)
         rhs = np.asarray(f_ext[free], dtype=np.float64)

@@ -30,6 +30,7 @@ from run_mgt_direct_residual_newton_probe import (  # noqa: E402
 )
 from run_mgt_equilibrium_newton_setup import build_direct_residual_assembler  # noqa: E402
 from run_mgt_full_frame_6dof_sparse_equilibrium import (  # noqa: E402
+    DOF_PER_NODE,
     FrameElement,
     _element_end_points,
     _frame_props,
@@ -2621,6 +2622,10 @@ def _active_set_least_squares_sweep(
     trust_radius_m: float = 1.0e-8,
     relative_increment_tolerance: float = 1.0e-4,
     residual_tolerance_n: float = 5.0e-4,
+    output_checkpoint_npz: Path | None = None,
+    source_checkpoint_npz: Path | None = None,
+    checkpoint_meta: dict[str, Any] | None = None,
+    shell_pressure_load_path_policy: str = "all_components",
 ) -> dict[str, Any]:
     free_idx = np.asarray(free, dtype=np.int64)
     base_u = np.asarray(u, dtype=np.float64)
@@ -2807,6 +2812,95 @@ def _active_set_least_squares_sweep(
     active_improvement = float(
         best_active_inf_candidate.get("active_improvement_inf_n") or 0.0
     )
+    output_checkpoint: dict[str, Any] = {
+        "requested": output_checkpoint_npz is not None,
+        "written": False,
+        "path": str(output_checkpoint_npz) if output_checkpoint_npz is not None else "",
+        "reason": "not_requested" if output_checkpoint_npz is None else "not_improved",
+        "claim_boundary": (
+            "Diagnostic active-set least-squares checkpoint only. It is a continuation "
+            "candidate for later proof runs and does not close G1, material Newton "
+            "breadth, or production ROCm/HIP residency."
+        ),
+    }
+    if output_checkpoint_npz is not None and best_full_inf_candidate and full_improvement > 0.0:
+        best_alpha = float(best_full_inf_candidate["alpha"])
+        candidate_u = base_u + best_alpha * direction
+        if candidate_u.size % DOF_PER_NODE == 0:
+            translations = candidate_u.reshape((-1, DOF_PER_NODE))[:, :3]
+            max_translation_m = _max_abs(translations)
+        else:
+            max_translation_m = _max_abs(candidate_u)
+        meta = checkpoint_meta if isinstance(checkpoint_meta, dict) else {}
+        source_accepted_iteration_count = int(
+            meta.get("accepted_iteration_count", 0) or 0
+        )
+        output_checkpoint_npz.parent.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(
+            output_checkpoint_npz,
+            checkpoint_schema=np.asarray("mgt-direct-residual-newton-state.v1"),
+            source_schema_version=np.asarray(SCHEMA_VERSION),
+            load_scale=np.asarray(float(meta.get("load_scale", 1.0)), dtype=np.float64),
+            displacement_u=np.asarray(candidate_u, dtype=np.float64),
+            residual_inf_n=np.asarray(
+                float(best_full_inf_candidate["direct_residual_inf_n"]),
+                dtype=np.float64,
+            ),
+            direct_residual_inf_n=np.asarray(
+                float(best_full_inf_candidate["direct_residual_inf_n"]),
+                dtype=np.float64,
+            ),
+            direct_relative_residual_inf=np.asarray(
+                float(best_full_inf_candidate["direct_relative_residual_inf"]),
+                dtype=np.float64,
+            ),
+            max_translation_m=np.asarray(max_translation_m, dtype=np.float64),
+            accepted_history_count=np.asarray(0, dtype=np.int64),
+            accepted_iteration_count=np.asarray(
+                source_accepted_iteration_count + 1,
+                dtype=np.int64,
+            ),
+            source_accepted_iteration_count=np.asarray(
+                source_accepted_iteration_count,
+                dtype=np.int64,
+            ),
+            accepted_iteration_increment=np.asarray(1, dtype=np.int64),
+            source_checkpoint_path=np.asarray(
+                str(source_checkpoint_npz or meta.get("path", ""))
+            ),
+            shell_pressure_load_path_policy=np.asarray(
+                str(shell_pressure_load_path_policy)
+            ),
+            compact_checkpoint=np.asarray(True),
+            diagnostic_active_set_least_squares_checkpoint=np.asarray(True),
+            active_set_selected_row_count=np.asarray(
+                int(len(selected_rows)),
+                dtype=np.int64,
+            ),
+            active_set_best_alpha=np.asarray(best_alpha, dtype=np.float64),
+        )
+        output_checkpoint = {
+            **output_checkpoint,
+            "written": True,
+            "reason": "",
+            "schema": "mgt-direct-residual-newton-state.v1",
+            "load_scale": float(meta.get("load_scale", 1.0)),
+            "dof_count": int(candidate_u.size),
+            "direct_residual_inf_n": float(
+                best_full_inf_candidate["direct_residual_inf_n"]
+            ),
+            "direct_relative_residual_inf": float(
+                best_full_inf_candidate["direct_relative_residual_inf"]
+            ),
+            "alpha": best_alpha,
+            "selected_hotspot_row_count": int(len(selected_rows)),
+            "max_translation_m": float(max_translation_m),
+            "source_checkpoint_path": str(source_checkpoint_npz or meta.get("path", "")),
+            "accepted_iteration_count": int(source_accepted_iteration_count + 1),
+            "source_accepted_iteration_count": int(source_accepted_iteration_count),
+            "accepted_iteration_increment": 1,
+            "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
+        }
     return {
         "enabled": True,
         "evaluated": True,
@@ -2838,6 +2932,7 @@ def _active_set_least_squares_sweep(
         "best_full_inf_candidate": best_full_inf_candidate,
         "best_active_inf_candidate": best_active_inf_candidate,
         "best_gate_eligible_full_inf_candidate": best_gate_eligible_full_inf_candidate,
+        "output_checkpoint": output_checkpoint,
         "claim_boundary": (
             "CPU diagnostic active-set least-squares sweep only. It targets top "
             "residual rows over the global free-DOF space and does not close G1."
@@ -2972,7 +3067,11 @@ def run_mgt_residual_jacobian_consistency_probe(
     ),
     active_set_ls_trust_radius_m: float = 1.0e-8,
     active_set_ls_max_iterations: int = 128,
+    active_set_ls_output_checkpoint_npz: Path | None = None,
     shell_pressure_load_path_policy: str = "all_components",
+    apply_shell_material_tangent: bool = False,
+    allow_frozen_shell_material_tangent_hip_replay: bool = False,
+    allow_state_dependent_shell_material_tangent_hip_replay: bool = False,
     require_hip_residual_engine: bool = False,
     hip_runtime_preflight_only: bool = False,
 ) -> dict[str, Any]:
@@ -3262,6 +3361,13 @@ def run_mgt_residual_jacobian_consistency_probe(
         mgt_path=mgt_path,
         checkpoint_npz=checkpoint_npz,
         shell_pressure_load_path_policy=str(shell_pressure_load_path_policy),
+        apply_shell_material_tangent=bool(apply_shell_material_tangent),
+        allow_frozen_shell_material_tangent_hip_replay=bool(
+            allow_frozen_shell_material_tangent_hip_replay
+        ),
+        allow_state_dependent_shell_material_tangent_hip_replay=bool(
+            allow_state_dependent_shell_material_tangent_hip_replay
+        ),
     )
     u0 = np.asarray(setup_meta["u0"], dtype=np.float64)
     assembly_started = time.perf_counter()
@@ -3401,6 +3507,12 @@ def run_mgt_residual_jacobian_consistency_probe(
             max_rows=int(active_set_ls_max_rows),
             max_iterations=int(active_set_ls_max_iterations),
             trust_radius_m=float(active_set_ls_trust_radius_m),
+            output_checkpoint_npz=active_set_ls_output_checkpoint_npz,
+            source_checkpoint_npz=checkpoint_npz,
+            checkpoint_meta=setup_meta.get("checkpoint")
+            if isinstance(setup_meta.get("checkpoint"), dict)
+            else {},
+            shell_pressure_load_path_policy=str(shell_pressure_load_path_policy),
         )
         if active_set_ls_sweep
         else {"enabled": False}
@@ -3479,6 +3591,13 @@ def run_mgt_residual_jacobian_consistency_probe(
         "checkpoint": setup_meta.get("checkpoint"),
         "load_scale": setup_meta.get("load_scale"),
         "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
+        "apply_shell_material_tangent": bool(apply_shell_material_tangent),
+        "allow_frozen_shell_material_tangent_hip_replay": bool(
+            allow_frozen_shell_material_tangent_hip_replay
+        ),
+        "allow_state_dependent_shell_material_tangent_hip_replay": bool(
+            allow_state_dependent_shell_material_tangent_hip_replay
+        ),
         "base_residual_inf_n": base_residual_inf,
         "base_relative_residual_inf": base_residual_inf / max(rhs_inf, 1.0),
         "rhs_inf_n": rhs_inf,
@@ -3512,6 +3631,13 @@ def run_mgt_residual_jacobian_consistency_probe(
             "equilibrium_geometry_contract": base_meta.get("equilibrium_geometry_contract"),
             "stiffness_unit_audit": base_meta.get("stiffness_unit_audit"),
             "shell_pressure_load_path_meta": base_meta.get("shell_pressure_load_path_meta"),
+            "shell_material_tangent_residual_applied": base_meta.get(
+                "shell_material_tangent_residual_applied"
+            ),
+            "shell_material_tangent_applied_to_operator": base_meta.get(
+                "shell_material_tangent_applied_to_operator"
+            ),
+            "shell_material_tangent_meta": base_meta.get("shell_material_tangent_meta"),
         },
         "runtime_metrics": {
             "setup_and_reference_seconds": float(assembly_started - started),
@@ -3673,10 +3799,43 @@ def main(argv: list[str] | None = None) -> int:
         help="Maximum LSMR iterations for --active-set-ls-sweep.",
     )
     parser.add_argument(
+        "--active-set-ls-output-checkpoint-npz",
+        type=Path,
+        default=None,
+        help=(
+            "Optional compact diagnostic checkpoint written from the best full "
+            "residual active-set LS candidate when it improves the base residual."
+        ),
+    )
+    parser.add_argument(
         "--shell-pressure-load-path-policy",
         choices=("all_components", "attached_components_only", "structural_components_only"),
         default="all_components",
         help="Diagnostic shell pressure load policy for the frozen external load.",
+    )
+    parser.add_argument(
+        "--apply-shell-material-tangent",
+        action="store_true",
+        help=(
+            "Apply the state-dependent shell material tangent residual contract in "
+            "the CPU diagnostic assembler."
+        ),
+    )
+    parser.add_argument(
+        "--allow-frozen-shell-material-tangent-hip-replay",
+        action="store_true",
+        help=(
+            "Permit frozen shell material tangent HIP replay metadata in the "
+            "diagnostic assembler when shell material tangent is enabled."
+        ),
+    )
+    parser.add_argument(
+        "--allow-state-dependent-shell-material-tangent-hip-replay",
+        action="store_true",
+        help=(
+            "Permit state-dependent shell material tangent HIP replay metadata in "
+            "the diagnostic assembler when shell material tangent is enabled."
+        ),
     )
     parser.add_argument(
         "--require-hip-residual-engine",
@@ -3756,7 +3915,15 @@ def main(argv: list[str] | None = None) -> int:
         ),
         active_set_ls_trust_radius_m=float(args.active_set_ls_trust_radius_m),
         active_set_ls_max_iterations=int(args.active_set_ls_max_iterations),
+        active_set_ls_output_checkpoint_npz=args.active_set_ls_output_checkpoint_npz,
         shell_pressure_load_path_policy=str(args.shell_pressure_load_path_policy),
+        apply_shell_material_tangent=bool(args.apply_shell_material_tangent),
+        allow_frozen_shell_material_tangent_hip_replay=bool(
+            args.allow_frozen_shell_material_tangent_hip_replay
+        ),
+        allow_state_dependent_shell_material_tangent_hip_replay=bool(
+            args.allow_state_dependent_shell_material_tangent_hip_replay
+        ),
         require_hip_residual_engine=bool(args.require_hip_residual_engine),
         hip_runtime_preflight_only=bool(args.hip_runtime_preflight_only),
     )

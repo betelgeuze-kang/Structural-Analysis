@@ -585,7 +585,9 @@ def test_residual_norm_gradient_sweep_reduces_linear_residual() -> None:
     assert row["best_l2_candidate"]["direct_residual_l2_n"] < np.linalg.norm([-1.0, -2.0])
 
 
-def test_active_set_least_squares_sweep_reduces_active_and_full_residual() -> None:
+def test_active_set_least_squares_sweep_reduces_active_and_full_residual(
+    tmp_path: Path,
+) -> None:
     stiffness = coo_matrix(([2.0, 4.0], ([0, 1], [0, 1])), shape=(2, 2)).tocsc()
     free = np.asarray([0, 1], dtype=np.int64)
 
@@ -595,6 +597,9 @@ def test_active_set_least_squares_sweep_reduces_active_and_full_residual() -> No
             dtype=np.float64,
         )
         return stiffness, np.asarray([3.0, 6.0], dtype=np.float64), free, residual, np.asarray([3.0, 6.0]), {}
+
+    output_checkpoint = tmp_path / "active-set-candidate.npz"
+    source_checkpoint = tmp_path / "source.npz"
 
     row = _active_set_least_squares_sweep(
         u=np.asarray([1.0, 1.0], dtype=np.float64),
@@ -617,6 +622,9 @@ def test_active_set_least_squares_sweep_reduces_active_and_full_residual() -> No
         max_iterations=8,
         trust_radius_m=1.0,
         relative_increment_tolerance=1.0,
+        output_checkpoint_npz=output_checkpoint,
+        source_checkpoint_npz=source_checkpoint,
+        checkpoint_meta={"load_scale": 1.0, "accepted_iteration_count": 4},
     )
 
     assert row["evaluated"] is True
@@ -626,6 +634,25 @@ def test_active_set_least_squares_sweep_reduces_active_and_full_residual() -> No
     assert row["full_inf_descent_observed"] is True
     assert row["best_active_inf_candidate"]["active_residual_inf_n"] <= 1.0e-10
     assert row["best_full_inf_candidate"]["direct_residual_inf_n"] == 1.0
+    assert row["output_checkpoint"]["written"] is True
+    assert row["output_checkpoint"]["direct_residual_inf_n"] == 1.0
+    assert row["output_checkpoint"]["source_checkpoint_path"] == str(source_checkpoint)
+
+    with np.load(output_checkpoint, allow_pickle=False) as archive:
+        assert str(np.asarray(archive["checkpoint_schema"]).item()) == (
+            "mgt-direct-residual-newton-state.v1"
+        )
+        assert np.asarray(archive["displacement_u"]).tolist() == [1.0, 1.5]
+        assert float(np.asarray(archive["direct_residual_inf_n"]).item()) == 1.0
+        assert int(np.asarray(archive["accepted_iteration_count"]).item()) == 5
+        assert (
+            bool(
+                np.asarray(
+                    archive["diagnostic_active_set_least_squares_checkpoint"]
+                ).item()
+            )
+            is True
+        )
 
 
 def test_component_only_probe_skips_jvp_and_state_scale(monkeypatch) -> None:
@@ -668,6 +695,59 @@ def test_component_only_probe_skips_jvp_and_state_scale(monkeypatch) -> None:
     assert payload["state_scale_sweep"] == []
     assert payload["residual_component_breakdown"]["component_inf_n"]["frame"] == 4.0
     assert payload["blockers"] == ["component_only_diagnostic_not_consistency_closure"]
+
+
+def test_diagnostic_probe_passes_shell_material_tangent_contract(
+    monkeypatch,
+) -> None:
+    stiffness = coo_matrix(([10.0], ([0], [0])), shape=(1, 1)).tocsc()
+    free = np.asarray([0], dtype=np.int64)
+    captured: dict[str, object] = {}
+
+    def assemble_residual(u: np.ndarray, *, include_component_forces: bool = False):
+        residual = np.asarray([5.0], dtype=np.float64)
+        meta = {
+            "physical_internal_force_model": (
+                "fixture_with_shell_material_tangent"
+            ),
+            "shell_material_tangent_residual_applied": True,
+        }
+        if include_component_forces:
+            meta["component_forces"] = {
+                "shell_bending_drilling": np.asarray([5.0], dtype=np.float64),
+            }
+        return stiffness, np.zeros(1), free, residual, np.ones(1), meta
+
+    def build_direct_residual_assembler(**kwargs):
+        captured.update(kwargs)
+        return assemble_residual, {
+            "u0": np.asarray([0.0], dtype=np.float64),
+            "checkpoint": {"path": "fixture.npz"},
+            "load_scale": 1.0,
+        }
+
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+
+    payload = probe_module.run_mgt_residual_jacobian_consistency_probe(
+        output_json=None,
+        component_only=True,
+        apply_shell_material_tangent=True,
+        allow_state_dependent_shell_material_tangent_hip_replay=True,
+    )
+
+    assert captured["apply_shell_material_tangent"] is True
+    assert captured["allow_frozen_shell_material_tangent_hip_replay"] is False
+    assert captured["allow_state_dependent_shell_material_tangent_hip_replay"] is True
+    assert payload["apply_shell_material_tangent"] is True
+    assert payload["allow_state_dependent_shell_material_tangent_hip_replay"] is True
+    assert payload["base_meta"]["physical_internal_force_model"] == (
+        "fixture_with_shell_material_tangent"
+    )
+    assert payload["base_meta"]["shell_material_tangent_residual_applied"] is True
 
 
 def test_hip_required_probe_blocks_without_cpu_fallback(monkeypatch) -> None:

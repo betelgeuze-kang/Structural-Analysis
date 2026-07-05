@@ -502,6 +502,7 @@ def assemble_equilibrium_operator_stiffness(
     load_scale: float,
     restrained: set[int] | None = None,
     shell_pressure_load_allowed_surface_elements: set[int] | None = None,
+    material_tangent_by_surface_index_mpa: dict[int, float] | None = None,
 ) -> tuple[Any, np.ndarray, dict[str, Any]]:
     """Assemble K_eq consistent with force-based F_int at the reference geometry map."""
     assembly_xyz = assembly_node_xyz(node_xyz=node_xyz, u=u)
@@ -527,6 +528,7 @@ def assemble_equilibrium_operator_stiffness(
         material_props=material_props,
         plate_thickness_props=plate_thickness_props,
         pressure_load_allowed_surface_elements=shell_pressure_load_allowed_surface_elements,
+        material_tangent_by_surface_index_mpa=material_tangent_by_surface_index_mpa,
     )
     stiffness = frame_stiffness + shell_stiffness + spring_stiffness
     assembled_f_ext = (frame_f * float(frame_gravity_load_scale) + shell_f) * float(load_scale)
@@ -539,6 +541,9 @@ def assemble_equilibrium_operator_stiffness(
         "coupled_stiffness_nnz": int(stiffness.nnz),
         "frame_equilibrium_meta": frame_meta,
         "shell_meta": shell_meta,
+        "shell_material_tangent_applied_to_operator": bool(
+            material_tangent_by_surface_index_mpa
+        ),
     }
     if restrained is not None:
         from run_mgt_direct_residual_newton_probe import _active_free

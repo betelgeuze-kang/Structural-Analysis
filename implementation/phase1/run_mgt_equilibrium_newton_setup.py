@@ -43,6 +43,9 @@ def build_direct_residual_assembler(
     frame_gravity_load_scale: float = 0.01,
     stiffness_scale_to_si: float = 1000.0,
     shell_pressure_load_path_policy: str = "all_components",
+    apply_shell_material_tangent: bool = False,
+    allow_frozen_shell_material_tangent_hip_replay: bool = False,
+    allow_state_dependent_shell_material_tangent_hip_replay: bool = False,
 ) -> tuple[
     Callable[..., tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]],
     dict[str, Any],
@@ -125,6 +128,13 @@ def build_direct_residual_assembler(
         load_scale=load_scale,
         restrained=restrained,
         shell_pressure_load_path_policy=shell_pressure_load_path_policy,
+        apply_shell_material_tangent=bool(apply_shell_material_tangent),
+        allow_frozen_shell_material_tangent_hip_replay=bool(
+            allow_frozen_shell_material_tangent_hip_replay
+        ),
+        allow_state_dependent_shell_material_tangent_hip_replay=bool(
+            allow_state_dependent_shell_material_tangent_hip_replay
+        ),
     )
 
     setup_meta = {
@@ -140,6 +150,13 @@ def build_direct_residual_assembler(
         "parser_run": parser_run,
         "equilibrium_step_meta": step_meta,
         "frame_gravity_load_scale": float(frame_gravity_load_scale),
+        "apply_shell_material_tangent": bool(apply_shell_material_tangent),
+        "allow_frozen_shell_material_tangent_hip_replay": bool(
+            allow_frozen_shell_material_tangent_hip_replay
+        ),
+        "allow_state_dependent_shell_material_tangent_hip_replay": bool(
+            allow_state_dependent_shell_material_tangent_hip_replay
+        ),
         "_node_xyz": node_xyz,
         "_node_id": node_id,
         "_elem_id": elem_id,
