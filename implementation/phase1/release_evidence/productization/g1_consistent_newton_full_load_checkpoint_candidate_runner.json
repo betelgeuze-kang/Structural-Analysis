@@ -178,9 +178,35 @@
     "path": "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_direct_probe.json",
     "present": true,
     "promotes_g1_closure": false,
-    "source_commit_sha": "1de8f1a9a0c80698b9db5f7808bf767fdcb683d6",
+    "residual_component_breakdown_included": true,
+    "residual_component_inf_n": {
+      "frame": 239015.45965449896,
+      "material_stress_correction": 0.0,
+      "shell_bending_drilling": 239103.9000580624,
+      "shell_membrane": 72233.54910141167,
+      "spring": 0.0003548815598929402
+    },
+    "source_commit_sha": "c104e74295f263077ceb61d620fbff665895439e",
     "state_updated_material_direct_residual_inf_n": 44.08048153349253,
-    "status": "partial"
+    "status": "partial",
+    "top_row_component_values_n": {
+      "frame": 0.0,
+      "material_stress_correction": 0.0,
+      "shell_bending_drilling": 72301.96203944516,
+      "shell_membrane": -72233.54910141167,
+      "spring": 0.0
+    },
+    "top_row_dof": "uz",
+    "top_row_dominant_component": "shell_bending_drilling",
+    "top_row_dominant_component_counts": {
+      "shell_bending_drilling": 14,
+      "shell_membrane": 10
+    },
+    "top_row_external_load_n": 24.332456500000006,
+    "top_row_global_dof": 13610,
+    "top_row_internal_sum_n": 68.41293803349254,
+    "top_row_node_index": 2268,
+    "top_row_residual_n": 44.08048153349253
   },
   "active_frontier_structural_policy_linearized_active_set_after_two_step_probe": {
     "base_relative_residual_inf": 5.4480554772287545e-06,
@@ -628,7 +654,7 @@
     "residual_inf_n": 0.42740724991695345,
     "status": "ready"
   },
-  "generated_at": "2026-07-05T12:04:43.797095+00:00",
+  "generated_at": "2026-07-05T12:12:58.945566+00:00",
   "global_tangent_scaled_sweep": {
     "base_residual_inf_n": 0.4278304040181992,
     "best_alpha": 0.00390625,
@@ -741,7 +767,7 @@
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_shell_diag_sweep_probe.json": "sha256:3fb896191af710575f7c4a7198de670b974250b26c3e6a93682ec033677f5ac6",
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_shell_jvp_probe.json": "sha256:1f50ad798a79bccf5a36b3f3fe4306ea17ab4305eca998703f41ae849b88da5e",
     "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json": "sha256:d22636072d5e435c501577f2e98c0d296292ff1971b76e7066e0e8584a0214eb",
-    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:6f20c9cd3b95729a9564eb6916a12faf13b1e6cfeca522a66156cbcc53777eec",
+    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:b5301d7616ff40239f47d43f5fb9d7dfc064d87c35525b4943027879c0f200a7",
     "implementation/phase1/release_evidence/productization/g1_frame_tangent_fd_epsilon_sweep_probe.json": "sha256:81c2ad32a078db886d09c6637cd7d1369719d2ed6c8f5fac88ae5ac410c4291d",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:d234a41b8361426321f387573e8ef976ee53b6cfa801e170836cb58123b56d36",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:42f77c9c6856a124859510d049d0419cf5fa41a7d71e8f15f2f8c883f7301c73",
@@ -768,7 +794,7 @@
     "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:ae97e161c5fdc4d9fb8764972b900f4d69afe55381c9015e2bcc778e67732345",
     "implementation/phase1/release_evidence/productization/g1_true_newton_load_sweep_status.json": "sha256:c1a862c28a6f31163f15f8cbe03334e0060a6cbb81138b9e3819d53fad497aca",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:55a28ce5255823f78b29d4c1ca8f15894632c4f208c92e23da3795ff756446d8",
-    "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:b9f08f5d6fb2d0a08e121e13120baea18d9548ec28b65f73018e64a22fe5ce3e"
+    "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:b585ea18aacfc784089840d4e37d7c60540baffd2f5ac88804df366a2c3170ad"
   },
   "live_g1_assembly_contract": {
     "assembly_result_schema": "g1-assembly-result.v1",
@@ -995,7 +1021,7 @@
     "row_count": 8,
     "status": "ready"
   },
-  "source_commit_sha": "1de8f1a9a0c80698b9db5f7808bf767fdcb683d6",
+  "source_commit_sha": "c104e74295f263077ceb61d620fbff665895439e",
   "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe": {
     "assembled_tangent_parity_max_absolute_error": 0.006011962890625,
     "assembled_tangent_parity_max_relative_error": 2.683381287585585e-15,
@@ -1525,6 +1551,9 @@
     "active_frontier_structural_policy_active_set_state_updated_direct_replay_gate": false,
     "active_frontier_structural_policy_active_set_state_updated_direct_replay_present": true,
     "active_frontier_structural_policy_active_set_state_updated_direct_replay_residual_n": 44.08048153349253,
+    "active_frontier_structural_policy_active_set_state_updated_direct_replay_top_row_component": "shell_bending_drilling",
+    "active_frontier_structural_policy_active_set_state_updated_direct_replay_top_row_global_dof": 13610,
+    "active_frontier_structural_policy_active_set_state_updated_direct_replay_top_row_residual_n": 44.08048153349253,
     "active_frontier_structural_policy_linearized_after_two_step_best_after_inf_n": 3.396605913197348e-13,
     "active_frontier_structural_policy_linearized_after_two_step_descent_observed": true,
     "active_frontier_structural_policy_linearized_after_two_step_direct_replay_required": true,

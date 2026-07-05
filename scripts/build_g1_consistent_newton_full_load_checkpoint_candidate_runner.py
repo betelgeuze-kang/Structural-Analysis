@@ -2127,6 +2127,13 @@ def _active_frontier_direct_material_replay_summary(
     residual_contract = _as_dict(payload.get("residual_contract"))
     blockers = _as_list(gate.get("consistent_residual_jacobian_newton_blockers"))
     material_blockers = _as_list(gate.get("material_newton_breadth_blockers"))
+    base_breakdown = _as_dict(base.get("residual_component_breakdown"))
+    final_breakdown = _as_dict(final.get("residual_component_breakdown"))
+    breakdown = final_breakdown or base_breakdown
+    top_rows = [
+        row for row in _as_list(breakdown.get("top_rows")) if isinstance(row, dict)
+    ]
+    top_row = _as_dict(top_rows[0] if top_rows else {})
     return {
         "path": path.as_posix(),
         "present": bool(payload),
@@ -2161,6 +2168,22 @@ def _active_frontier_direct_material_replay_summary(
         "material_newton_breadth_blockers": [
             str(item) for item in material_blockers
         ],
+        "residual_component_breakdown_included": (
+            residual_contract.get("residual_component_breakdown_included") is True
+            or bool(breakdown)
+        ),
+        "residual_component_inf_n": _as_dict(breakdown.get("component_inf_n")),
+        "top_row_dominant_component_counts": _as_dict(
+            breakdown.get("top_row_dominant_component_counts")
+        ),
+        "top_row_global_dof": _as_int(top_row.get("global_dof")),
+        "top_row_node_index": _as_int(top_row.get("node_index")),
+        "top_row_dof": str(top_row.get("dof") or ""),
+        "top_row_residual_n": _as_float(top_row.get("residual_n")),
+        "top_row_external_load_n": _as_float(top_row.get("external_load_n")),
+        "top_row_internal_sum_n": _as_float(top_row.get("internal_sum_n")),
+        "top_row_dominant_component": str(top_row.get("dominant_component") or ""),
+        "top_row_component_values_n": _as_dict(top_row.get("component_values_n")),
         "claim_boundary": str(payload.get("claim_boundary") or ""),
     }
 
@@ -3557,6 +3580,21 @@ def build_runner_packet(
                         "final_residual_n"
                     ]
                 )
+            ),
+            "active_frontier_structural_policy_active_set_state_updated_direct_replay_top_row_component": (
+                active_frontier_structural_policy_active_set_direct_material_replay_summary[
+                    "top_row_dominant_component"
+                ]
+            ),
+            "active_frontier_structural_policy_active_set_state_updated_direct_replay_top_row_residual_n": (
+                active_frontier_structural_policy_active_set_direct_material_replay_summary[
+                    "top_row_residual_n"
+                ]
+            ),
+            "active_frontier_structural_policy_active_set_state_updated_direct_replay_top_row_global_dof": (
+                active_frontier_structural_policy_active_set_direct_material_replay_summary[
+                    "top_row_global_dof"
+                ]
             ),
             "active_frontier_structural_policy_residual_ownership_present": bool(
                 active_frontier_structural_policy_residual_ownership_probe
@@ -4963,6 +5001,7 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `active_frontier_structural_policy_active_set_alpha_sweep_stop`: `{structural_policy_alpha_sweep.get('stop_reason')}`",
         f"- `active_frontier_structural_policy_active_set_state_updated_direct_replay_residual_n`: `{structural_policy_direct_replay.get('state_updated_material_direct_residual_inf_n')}`",
         f"- `active_frontier_structural_policy_active_set_state_updated_direct_replay_gate`: `{structural_policy_direct_replay.get('direct_residual_gate_passed')}`",
+        f"- `active_frontier_structural_policy_active_set_state_updated_direct_replay_top_component`: `{structural_policy_direct_replay.get('top_row_dominant_component')}`",
         f"- `active_frontier_structural_policy_top_component`: `{structural_policy_ownership.get('top_row_dominant_internal_component')}`",
         f"- `active_frontier_structural_policy_top_balance_driver`: `{structural_policy_ownership.get('top_row_balance_driver')}`",
         f"- `active_frontier_shell_rotation_candidate_residual_n`: `{shell_rotation_candidate.get('best_direct_residual_inf_n')}`",
@@ -5346,6 +5385,26 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.append(
             "- `consistent_residual_jacobian_newton_passed`: "
             f"`{structural_policy_direct_replay.get('consistent_residual_jacobian_newton_passed')}`"
+        )
+        lines.append(
+            "- `residual_component_breakdown_included`: "
+            f"`{structural_policy_direct_replay.get('residual_component_breakdown_included')}`"
+        )
+        lines.append(
+            "- `top_row_dominant_component`: "
+            f"`{structural_policy_direct_replay.get('top_row_dominant_component')}`"
+        )
+        lines.append(
+            "- `top_row_residual_n`: "
+            f"`{structural_policy_direct_replay.get('top_row_residual_n')}`"
+        )
+        lines.append(
+            "- `top_row_global_dof`: "
+            f"`{structural_policy_direct_replay.get('top_row_global_dof')}`"
+        )
+        lines.append(
+            "- `top_row_component_values_n`: "
+            f"`{structural_policy_direct_replay.get('top_row_component_values_n')}`"
         )
     if structural_policy_ownership:
         lines.extend(["", "## Active Frontier Structural Policy Residual Ownership", ""])

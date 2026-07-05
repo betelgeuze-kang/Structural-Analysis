@@ -959,6 +959,32 @@ def _active_frontier_structural_policy_direct_material_replay_payload() -> dict:
             "load_scale": 1.0,
             "direct_residual_inf_n": 44.08048153349253,
             "fixed_point_receipt_residual_inf_n": 0.07205064005823536,
+            "residual_component_breakdown": {
+                "component_inf_n": {
+                    "frame": 239015.45965449896,
+                    "shell_bending_drilling": 239103.9000580624,
+                    "shell_membrane": 72233.54910141167,
+                },
+                "top_row_dominant_component_counts": {
+                    "shell_bending_drilling": 14,
+                    "shell_membrane": 10,
+                },
+                "top_rows": [
+                    {
+                        "global_dof": 13610,
+                        "node_index": 2268,
+                        "dof": "uz",
+                        "residual_n": 44.08048153349253,
+                        "external_load_n": 24.332456500000006,
+                        "internal_sum_n": 68.41293803349254,
+                        "dominant_component": "shell_bending_drilling",
+                        "component_values_n": {
+                            "shell_bending_drilling": 72301.96203944516,
+                            "shell_membrane": -72233.54910141167,
+                        },
+                    }
+                ],
+            },
         },
         "final_direct_residual": {
             "direct_residual_inf_n": 44.08048153349253,
@@ -983,6 +1009,7 @@ def _active_frontier_structural_policy_direct_material_replay_payload() -> dict:
         },
         "residual_contract": {
             "consistent_residual_jacobian_newton_gate_passed": False,
+            "residual_component_breakdown_included": True,
         },
         "claim_boundary": "state-updated material direct replay fixture",
     }
@@ -2300,6 +2327,15 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     assert payload["summary"][
         "active_frontier_structural_policy_active_set_state_updated_direct_replay_gap_n"
     ] == 44.08048153349253 - 0.07205501101467937
+    assert payload["summary"][
+        "active_frontier_structural_policy_active_set_state_updated_direct_replay_top_row_component"
+    ] == "shell_bending_drilling"
+    assert payload["summary"][
+        "active_frontier_structural_policy_active_set_state_updated_direct_replay_top_row_residual_n"
+    ] == 44.08048153349253
+    assert payload["summary"][
+        "active_frontier_structural_policy_active_set_state_updated_direct_replay_top_row_global_dof"
+    ] == 13610
     assert (
         payload["summary"][
             "active_frontier_structural_policy_residual_ownership_present"
@@ -2864,6 +2900,15 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
         "active_frontier_structural_policy_active_set_state_updated_direct_replay_probe"
     ]["consistent_residual_jacobian_newton_passed"] is False
     assert payload[
+        "active_frontier_structural_policy_active_set_state_updated_direct_replay_probe"
+    ]["residual_component_breakdown_included"] is True
+    assert payload[
+        "active_frontier_structural_policy_active_set_state_updated_direct_replay_probe"
+    ]["top_row_dominant_component"] == "shell_bending_drilling"
+    assert payload[
+        "active_frontier_structural_policy_active_set_state_updated_direct_replay_probe"
+    ]["top_row_component_values_n"]["shell_membrane"] == -72233.54910141167
+    assert payload[
         "active_frontier_structural_policy_residual_ownership_probe"
     ]["top_row_balance_driver"] == "shell_bending_drilling_internal_force"
     assert payload[
@@ -3406,6 +3451,8 @@ def test_runner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
         "active_frontier_structural_policy_active_set_state_updated_direct_replay_residual_n"
         in markdown
     )
+    assert "active_frontier_structural_policy_active_set_state_updated_direct_replay_top_component" in markdown
+    assert "top_row_component_values_n" in markdown
     assert "## Active Frontier Structural Policy Residual Ownership" in markdown
     assert "shell_bending_drilling_internal_force" in markdown
     assert "## Active Frontier Structural Policy Linearized After Two-Step" in markdown
