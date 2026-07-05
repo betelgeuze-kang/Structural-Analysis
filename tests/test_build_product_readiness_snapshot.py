@@ -4856,6 +4856,41 @@ def test_snapshot_opensees_canonical_gate_change_only_stales_dp_rc_artifact(
     ]
 
 
+def test_snapshot_opensees_canonical_report_change_only_stales_dp_rc_artifact(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_text(
+        tmp_path
+        / "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+        '{"summary_line":"OpenSees canonical breadth changed"}\n',
+    )
+    _commit_all(tmp_path, "opensees canonical report change")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is False
+    assert [
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ] == [
+        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"
+    ]
+
+
 def test_snapshot_medium_scorecard_runner_change_only_stales_dp_rc_artifact(
     tmp_path: Path,
 ) -> None:
