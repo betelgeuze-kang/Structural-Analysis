@@ -3124,7 +3124,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-05T18:59:50.902490+00:00",
+  "generated_at": "2026-07-05T19:08:35.925096+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
@@ -3136,7 +3136,7 @@
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:a882fdc28b53aec9b385a1261a78a99a4544f655155db6d5fdb5ab2f0ef2c98b",
     "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:49ec54619265af87163ed7435f6b1df2a86889519d637e829c7bea497a4caa78",
     "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:a26045cef019244868f397d79d4ff3f6b40a980215014754b7495e712f27b2d0",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:c13463d8f63b872d7d6f31aaa39943f4c152307b6ad3e66ae91692de138f4b65",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:52ea31d71a9e1ac3c75c91e74775f948693dbe90780a4a71b6fdf825a791968a",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:fa3806bcf6e163bf42e5263a3deee30886c9972be7e8f53c1d5c3982ae8da89c",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:5681fe6c6a0f259605d8d3d9c97ff37564c76a02a1d8fb24873edc32e53b4442",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:382956916ff532ef84df6648062a284d6899e7e62b48b9b8386142e7d4411235",
@@ -3466,7 +3466,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "5c5dbcba2b3789ce169c1c916ddffd660720cb35",
+  "source_commit_sha": "787a2e75adeed55c3eaae8aa8e037c7208d38bfa",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3700,12 +3700,12 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-05T18:59:47.160401+00:00",
+        "generated_at": "2026-07-05T19:08:30.969689+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "5c5dbcba2b3789ce169c1c916ddffd660720cb35",
+        "source_commit_sha": "787a2e75adeed55c3eaae8aa8e037c7208d38bfa",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -4247,7 +4247,6 @@
         "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
         "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json",
         "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
-        "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe.json",
         "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ],
       "non_receipt_dirty_paths": [],
@@ -4277,7 +4276,6 @@
         " M implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
         " M implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json",
         " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
-        " M implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe.json",
         " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ]
     }
