@@ -462,3 +462,26 @@ def test_g1_assembly_contract_seed_report_check_detects_missing_output(
 
     assert ok is False
     assert message.startswith("g1_assembly_contract_seed_report_missing:")
+
+
+def test_g1_assembly_contract_seed_report_check_allows_evidence_commit_sha(
+    tmp_path: Path,
+) -> None:
+    out = tmp_path / "g1_assembly_contract_seed_report.json"
+    payload = module.write_g1_assembly_contract_seed_report(
+        repo_root=REPO_ROOT,
+        out=out,
+    )
+    payload["source_commit_sha"] = "evidence-only-commit-after-source"
+    out.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    ok, message = module.check_g1_assembly_contract_seed_report(
+        repo_root=REPO_ROOT,
+        out=out,
+    )
+
+    assert ok is True
+    assert message == "g1_assembly_contract_seed_report_consistent"
