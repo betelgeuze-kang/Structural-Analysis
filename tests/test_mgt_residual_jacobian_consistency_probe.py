@@ -57,6 +57,25 @@ def _live_g1_assembly_contract_fixture() -> dict[str, object]:
     }
 
 
+def _checkpoint_fixture(
+    path: Path,
+    *,
+    load_scale: float = 1.0,
+    direct_residual_inf_n: float = 3.4e-5,
+    residual_gate_passed: bool = True,
+) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(
+        path,
+        checkpoint_schema=np.asarray("mgt-direct-residual-newton-state.v1"),
+        load_scale=np.asarray(load_scale, dtype=np.float64),
+        displacement_u=np.zeros(12, dtype=np.float64),
+        direct_residual_inf_n=np.asarray(direct_residual_inf_n, dtype=np.float64),
+        residual_gate_passed=np.asarray(bool(residual_gate_passed)),
+    )
+    return path
+
+
 def test_hip_required_direct_probe_kwargs_broaden_row_fd_refresh_lane(
     tmp_path: Path,
 ) -> None:
@@ -775,7 +794,10 @@ def test_diagnostic_probe_passes_shell_material_tangent_contract(
     assert payload["base_meta"]["shell_material_tangent_residual_applied"] is True
 
 
-def test_hip_required_probe_blocks_without_cpu_fallback(monkeypatch) -> None:
+def test_hip_required_probe_blocks_without_cpu_fallback(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
     def build_direct_residual_assembler(**_kwargs):
         raise AssertionError("HIP-required probe must not use the CPU diagnostic assembler")
 
@@ -799,9 +821,11 @@ def test_hip_required_probe_blocks_without_cpu_fallback(monkeypatch) -> None:
             "runtime_blockers": ["dev_kfd_missing", "dev_dri_missing"],
         },
     )
+    checkpoint = _checkpoint_fixture(tmp_path / "full-load-candidate.npz")
 
     payload = probe_module.run_mgt_residual_jacobian_consistency_probe(
         output_json=None,
+        checkpoint_npz=checkpoint,
         component_only=True,
         require_hip_residual_engine=True,
     )
@@ -816,6 +840,22 @@ def test_hip_required_probe_blocks_without_cpu_fallback(monkeypatch) -> None:
     assert payload["residual_jacobian_consistency_ready"] is False
     assert payload["consistent_residual_jacobian_newton_passed"] is False
     assert payload["consistent_residual_jacobian_newton_gate_passed"] is False
+    assert payload["load_scale"] == 1.0
+    assert payload["checkpoint"]["path"] == str(checkpoint)
+    assert payload["checkpoint"]["schema"] == "mgt-direct-residual-newton-state.v1"
+    assert payload["checkpoint"]["load_scale"] == 1.0
+    assert payload["checkpoint"]["full_load_candidate"] is True
+    assert payload["checkpoint"]["gap_to_full_load"] == 0.0
+    assert payload["checkpoint"]["direct_residual_inf_n"] == pytest.approx(3.4e-5)
+    assert payload["checkpoint"]["direct_residual_gate_passed"] is True
+    partition = payload["production_rocm_hip_residual_jvp_worker"][
+        "terminal_gate_partition"
+    ]
+    assert partition["checkpoint_gate"]["load_scale"] == 1.0
+    assert partition["checkpoint_gate"]["full_load_candidate"] is True
+    assert partition["checkpoint_gate"]["gap_to_full_load"] == 0.0
+    assert partition["checkpoint_gate"]["full_load_closure_passed"] is False
+    assert partition["next_action"]["id"] == "repair_production_rocm_hip_residual_jvp_worker_path"
     assert payload["blockers"] == [
         "rocm_hip_runtime_unavailable",
         "hip_runtime::dev_kfd_missing",

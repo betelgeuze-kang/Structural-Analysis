@@ -117,6 +117,49 @@ def _direct_residual_summary(child_payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _read_npz_scalar(path: Path, key: str) -> Any:
+    try:
+        with np.load(path, allow_pickle=False) as archive:
+            if key not in archive.files:
+                return None
+            raw = np.asarray(archive[key])
+            if raw.shape != ():
+                return None
+            return raw.item()
+    except Exception:
+        return None
+
+
+def _checkpoint_gate_from_npz(path: Path) -> dict[str, Any]:
+    load_scale_raw = _read_npz_scalar(path, "load_scale")
+    try:
+        load_scale = float(load_scale_raw) if load_scale_raw is not None else None
+    except (TypeError, ValueError):
+        load_scale = None
+    direct_residual_raw = _read_npz_scalar(path, "direct_residual_inf_n")
+    try:
+        direct_residual_inf_n = (
+            float(direct_residual_raw) if direct_residual_raw is not None else None
+        )
+    except (TypeError, ValueError):
+        direct_residual_inf_n = None
+    schema = str(_read_npz_scalar(path, "checkpoint_schema") or "")
+    residual_gate_raw = _read_npz_scalar(path, "residual_gate_passed")
+    full_load_candidate = bool(load_scale is not None and load_scale >= 1.0)
+    return {
+        "path": str(path),
+        "schema": schema,
+        "load_scale": load_scale,
+        "full_load_required": True,
+        "full_load_candidate": full_load_candidate,
+        "gap_to_full_load": (
+            max(0.0, 1.0 - load_scale) if load_scale is not None else None
+        ),
+        "direct_residual_inf_n": direct_residual_inf_n,
+        "direct_residual_gate_passed": bool(residual_gate_raw is True),
+    }
+
+
 def _direction_top_residual_sign(
     *,
     residual: np.ndarray,
@@ -3148,6 +3191,7 @@ def run_mgt_residual_jacobian_consistency_probe(
             "unavailable_reason": "not_required_for_legacy_cpu_diagnostic",
         }
     )
+    checkpoint_gate = _checkpoint_gate_from_npz(checkpoint_npz)
     if require_hip_residual_engine and hip_runtime_preflight_only:
         runtime_blockers = hip_preflight.get("runtime_blockers")
         runtime_blocker_names = (
@@ -3165,6 +3209,7 @@ def run_mgt_residual_jacobian_consistency_probe(
             source_commit_sha=source_commit_sha,
             hip_preflight=hip_preflight,
             child_kwargs=child_kwargs,
+            hip_proof={"checkpoint": checkpoint_gate},
             child_executed=False,
             child_error=None,
             preflight_only=True,
@@ -3196,8 +3241,8 @@ def run_mgt_residual_jacobian_consistency_probe(
             "rocm_hip_runtime_preflight": hip_preflight,
             "production_rocm_hip_residual_jvp_worker": worker_contract,
             "component_only": bool(component_only),
-            "checkpoint": {"path": str(checkpoint_npz)},
-            "load_scale": None,
+            "checkpoint": checkpoint_gate,
+            "load_scale": checkpoint_gate["load_scale"],
             "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
             "hip_direct_probe": {
                 "schema_version": (
@@ -3248,6 +3293,7 @@ def run_mgt_residual_jacobian_consistency_probe(
             source_commit_sha=source_commit_sha,
             hip_preflight=hip_preflight,
             child_kwargs=child_kwargs,
+            hip_proof={"checkpoint": checkpoint_gate},
             child_executed=False,
             child_error=None,
             preflight_only=False,
@@ -3269,8 +3315,8 @@ def run_mgt_residual_jacobian_consistency_probe(
             "rocm_hip_runtime_preflight": hip_preflight,
             "production_rocm_hip_residual_jvp_worker": worker_contract,
             "component_only": bool(component_only),
-            "checkpoint": {"path": str(checkpoint_npz)},
-            "load_scale": None,
+            "checkpoint": checkpoint_gate,
+            "load_scale": checkpoint_gate["load_scale"],
             "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
             "direction_rows": [],
             "state_scale_sweep": [],
