@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-05T17:58:36.990256+00:00",
+  "generated_at": "2026-07-05T18:09:57.180034+00:00",
   "contract_pass": true,
   "reason_code": "PASS",
   "reason": "committed OpenSees canonical asset breadth is sufficient for P1 breadth surfacing",
