@@ -3161,7 +3161,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-05T20:43:48.578220+00:00",
+  "generated_at": "2026-07-05T20:58:20.825771+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
@@ -3528,7 +3528,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "5b37430944d7905a658422e7bf7e95e46f5e1bb1",
+  "source_commit_sha": "874189c6936c3d0ed58571026ed5d93272a2a768",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3725,6 +3725,7 @@
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
           "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
           "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T20:21:46.512522+00:00",
@@ -3743,6 +3744,7 @@
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
           "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
           "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T20:21:46.296332+00:00",
@@ -3894,6 +3896,7 @@
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
           "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
           "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T08:31:37.173121+00:00",
@@ -4083,6 +4086,7 @@
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
           "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
           "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T20:21:46.341138+00:00",
@@ -4122,7 +4126,8 @@
         "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.md",
         "implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_summary.json",
         "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_state_updated_seeds.json",
-        "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json"
+        "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json",
+        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -4152,7 +4157,8 @@
         " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.md",
         " M implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_summary.json",
         " M implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_state_updated_seeds.json",
-        " M implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json"
+        " M implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json",
+        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ]
     }
   },
