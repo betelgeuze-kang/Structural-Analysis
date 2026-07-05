@@ -3294,8 +3294,12 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
         and not g1_full_load_hip_receipt_blockers
         and g1_full_load_hip_worker_ready
     )
-    g1_full_load_gate_closed = bool(
+    g1_strict_full_load_checkpoint_available = bool(
         g1_full_load_hip_newton_lane.get("full_load_input_pass")
+        and g1_full_load_checkpoint_resolution_gate.get("passed")
+    )
+    g1_full_load_gate_closed = bool(
+        g1_strict_full_load_checkpoint_available
         and _get(g1_full_load_child_gate, "full_load_closure_passed", default=False)
     )
     g1_material_newton_breadth_closed = bool(
@@ -3458,7 +3462,7 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                             "full_load_candidate_count": ">=1",
                             "required_load_scale": 1.0,
                         },
-                        "passed": bool(g1_full_load_gate_closed),
+                        "passed": bool(g1_strict_full_load_checkpoint_available),
                         "blocker": "full_load_gate_not_closed",
                     },
                     {
@@ -3620,6 +3624,15 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                                 if not _get(
                                     g1_full_load_child_gate,
                                     "full_load_closure_passed",
+                                    default=False,
+                                )
+                                else []
+                            ),
+                            *(
+                                ["child_relative_increment_gate_not_proven"]
+                                if not _get(
+                                    g1_full_load_child_gate,
+                                    "relative_increment_gate_passed",
                                     default=False,
                                 )
                                 else []

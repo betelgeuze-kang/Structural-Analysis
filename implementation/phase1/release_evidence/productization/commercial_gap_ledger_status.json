@@ -1,12 +1,12 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-07-05T21:37:22.929119+00:00",
-  "source_commit_sha": "c4d33df27e9d438bae0b89f6e9b95e866affe6cd",
+  "generated_at": "2026-07-05T22:00:09.450408+00:00",
+  "source_commit_sha": "c85fa87d070b84b697686fec69cfb43c06ec0a82",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "input_checksums": {
     "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b8f1b140751f430e4c7dc594f3440320433be9b3e3f055f3e7fad62a2999b8af",
     "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:b57d2296755145322bbad09abb1a471a18da9051eb202185d8bbfbddcb2b4c24",
-    "implementation/phase1/commercial_gap_ledger_status.py": "sha256:77e1653ca85357ffc238d1fe9595727108c748069d84efbaf70799064bbde38f"
+    "implementation/phase1/commercial_gap_ledger_status.py": "sha256:8b8e0d7824c2d69e10105f23622d68f7045e5d395c1372a40e343bead8b051c3"
   },
   "reused_evidence": true,
   "reuse_policy": "summarizes_existing_gap_ledgers_and_productization_receipts; does_not_create_authoritative_closure_evidence",
@@ -80,6 +80,7 @@
       "closed": false,
       "locally_closable": true,
       "blockers": [
+        "full_load_gate_not_closed",
         "full_mesh_nonlinear_equilibrium_not_closed",
         "material_newton_breadth_not_closed",
         "production_rocm_hip_residency_not_closed"
@@ -181,7 +182,7 @@
         "blocker_terminal_requirements": [
           {
             "blocker": "full_load_gate_not_closed",
-            "terminal_requirement_satisfied": true,
+            "terminal_requirement_satisfied": false,
             "source_receipts": [
               "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
               "implementation/phase1/release_evidence/productization/mgt_full_frame_6dof_sparse_equilibrium.json"
@@ -196,10 +197,14 @@
               "load_scale_reached": 0.5,
               "full_load_candidate_count": 1,
               "highest_observed_load_scale": 1.0,
-              "child_full_load_closure_passed": true,
-              "child_relative_increment_gate_passed": true
+              "child_full_load_closure_passed": false,
+              "child_relative_increment_gate_passed": false
             },
-            "non_closing_reasons": []
+            "non_closing_reasons": [
+              "load_scale_below_full_load",
+              "child_full_load_closure_not_proven",
+              "child_relative_increment_gate_not_proven"
+            ]
           },
           {
             "blocker": "full_mesh_nonlinear_equilibrium_not_closed",
@@ -359,7 +364,7 @@
             "selected_checkpoint_meets_full_load": true,
             "unloadable_count": 0
           },
-          "full_load_gate_closed": true,
+          "full_load_gate_closed": false,
           "material_newton_breadth_closed": false,
           "production_rocm_hip_residency_closed": false,
           "closure_claim_allowed": false,
@@ -99195,6 +99200,7 @@
     }
   ],
   "blockers": [
+    "G1:full_load_gate_not_closed",
     "G1:full_mesh_nonlinear_equilibrium_not_closed",
     "G1:material_newton_breadth_not_closed",
     "G1:production_rocm_hip_residency_not_closed",

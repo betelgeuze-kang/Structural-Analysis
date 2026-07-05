@@ -83,7 +83,7 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     payload = build_commercial_gap_ledger_status()
     rows = {row["id"]: row for row in payload["rows"]}
     assert rows["G1"]["status"] in {"open", "partial"}
-    assert "full_load_gate_not_closed" not in rows["G1"]["blockers"]
+    assert "full_load_gate_not_closed" in rows["G1"]["blockers"]
     assert "full_mesh_nonlinear_equilibrium_not_closed" in rows["G1"]["blockers"]
     assert "material_newton_breadth_not_closed" in rows["G1"]["blockers"]
     assert "production_rocm_hip_residency_not_closed" in rows["G1"]["blockers"]
@@ -98,7 +98,7 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     }
     assert terminal_requirements["full_load_gate_not_closed"][
         "terminal_requirement_satisfied"
-    ] is True
+    ] is False
     assert terminal_requirements["full_load_gate_not_closed"]["observed"][
         "full_load_candidate_count"
     ] >= 1
@@ -243,7 +243,7 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         g1_blocker_terminal_requirements["full_load_gate_not_closed"][
             "terminal_requirement_satisfied"
         ]
-        is True
+        is False
     )
     assert all(
         row["terminal_requirement_satisfied"] is False
@@ -264,7 +264,10 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert "full_load_checkpoint_candidate_missing" not in full_load_terminal[
         "non_closing_reasons"
     ]
-    assert "child_full_load_closure_not_proven" not in full_load_terminal[
+    assert "child_full_load_closure_not_proven" in full_load_terminal[
+        "non_closing_reasons"
+    ]
+    assert "child_relative_increment_gate_not_proven" in full_load_terminal[
         "non_closing_reasons"
     ]
     mesh_terminal = g1_blocker_terminal_requirements[
@@ -325,7 +328,7 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     )
     assert g1_gap["full_load_scale_reached"] == 0.5
     assert g1_gap["full_load_target"] == 1.0
-    assert g1_gap["full_load_gate_closed"] is True
+    assert g1_gap["full_load_gate_closed"] is False
     assert g1_gap["full_line_mesh_nonlinear_equilibrium"] is False
     assert g1_gap["full_frame_6dof_nonlinear_equilibrium"] is False
     assert g1_gap["coupled_frame_surface_nonlinear_equilibrium"] is False

@@ -13,15 +13,15 @@
         "child_consistent_residual_jacobian_newton_not_proven",
         "child_direct_residual_gate_not_proven",
         "child_direct_residual_newton_ready_not_proven",
-        "child_material_newton_breadth_not_proven"
+        "child_fallback_zero_not_proven",
+        "child_full_load_closure_not_proven",
+        "child_material_newton_breadth_not_proven",
+        "child_observed_load_scale_below_required_full_load",
+        "child_relative_increment_gate_not_proven"
       ],
       "hip_residual_refresh_blockers": [
-        "child_global_krylov_hip_not_required",
-        "child_global_krylov_not_promoted_to_final_state",
-        "child_global_krylov_hip_residual_refresh_not_proven",
-        "child_current_tangent_residual_row_hip_not_required",
-        "child_current_tangent_residual_row_hip_residual_refresh_not_proven",
-        "child_current_tangent_residual_row_cpu_residual_refresh_used"
+        "child_global_krylov_component_missing",
+        "child_current_tangent_residual_row_component_missing"
       ],
       "hip_residual_refresh_ready": false,
       "ready": false
@@ -159,13 +159,13 @@
     "frontier_load_scale": null,
     "load_path_provenance_present": false,
     "load_scale": 1.0,
-    "path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+    "path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_gate_candidate_step2_candidate.npz",
     "schema": "mgt-direct-residual-newton-state.v1",
-    "shell_pressure_load_path_policy": ""
+    "shell_pressure_load_path_policy": "structural_components_only"
   },
   "checkpoint_resolution": {
     "mode": "explicit",
-    "requested_path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+    "requested_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_gate_candidate_step2_candidate.npz",
     "selection": null
   },
   "checkpoint_resolution_gate": {
@@ -191,39 +191,39 @@
       "child_consistent_residual_jacobian_newton_not_proven",
       "child_direct_residual_gate_not_proven",
       "child_direct_residual_newton_ready_not_proven",
-      "child_material_newton_breadth_not_proven"
+      "child_fallback_zero_not_proven",
+      "child_full_load_closure_not_proven",
+      "child_material_newton_breadth_not_proven",
+      "child_observed_load_scale_below_required_full_load",
+      "child_relative_increment_gate_not_proven"
     ],
     "consistent_residual_jacobian_newton_passed": false,
     "direct_residual_gate_passed": false,
     "direct_residual_newton_ready": false,
-    "fallback_zero_passed": true,
-    "full_load_closure_passed": true,
+    "fallback_zero_passed": false,
+    "full_load_closure_passed": false,
     "full_load_tolerance": 1e-12,
-    "load_scale_passed": true,
+    "load_scale_passed": false,
     "material_newton_breadth_passed": false,
-    "observed_load_scale": 1.0,
+    "observed_load_scale": null,
     "ready": false,
-    "relative_increment_gate_passed": true,
+    "relative_increment_gate_passed": false,
     "required_load_scale": 1.0,
     "schema_version": "g1-child-gate-evidence.v1"
   },
   "child_hip_residual_refresh_evidence": {
     "blockers": [
-      "child_global_krylov_hip_not_required",
-      "child_global_krylov_not_promoted_to_final_state",
-      "child_global_krylov_hip_residual_refresh_not_proven",
-      "child_current_tangent_residual_row_hip_not_required",
-      "child_current_tangent_residual_row_hip_residual_refresh_not_proven",
-      "child_current_tangent_residual_row_cpu_residual_refresh_used"
+      "child_global_krylov_component_missing",
+      "child_current_tangent_residual_row_component_missing"
     ],
     "components": {
       "current_tangent_residual_row_correction": {
-        "accepted_state_refresh_backend": "cpu_full_assembly",
-        "accepted_state_refresh_cpu_used": true,
+        "accepted_state_refresh_backend": "",
+        "accepted_state_refresh_cpu_used": false,
         "accepted_state_refresh_hip_used": false,
         "hip_required": false,
-        "present": true,
-        "promoted_to_final_state": true,
+        "present": false,
+        "promoted_to_final_state": false,
         "ready": false
       },
       "matrix_free_global_krylov": {
@@ -231,7 +231,7 @@
         "accepted_state_refresh_cpu_used": false,
         "accepted_state_refresh_hip_used": false,
         "hip_required": false,
-        "present": true,
+        "present": false,
         "promoted_to_final_state": false,
         "ready": false
       }
@@ -239,7 +239,7 @@
     "ready": false,
     "schema_version": "g1-child-hip-residual-refresh-evidence.v1"
   },
-  "child_output_json": "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe.json",
+  "child_output_json": "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_direct_probe.json",
   "child_safety_requirements": [
     "child_reused_evidence_false",
     "child_source_commit_matches_lane",
@@ -257,11 +257,11 @@
     "/usr/bin/python3",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
     "--checkpoint-npz",
-    "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+    "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_gate_candidate_step2_candidate.npz",
     "--output-json",
-    "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe.json",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_direct_probe.json",
     "--shell-pressure-load-path-policy",
-    "all_components",
+    "structural_components_only",
     "--apply-shell-material-tangent",
     "--allow-state-dependent-shell-material-tangent-hip-replay",
     "--enable-matrix-free-global-krylov",
@@ -282,7 +282,7 @@
     "finite_difference"
   ],
   "contract_pass": false,
-  "dry_run": true,
+  "dry_run": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "f2g_f2h_cause_narrowing_context": {
     "blockers": [],
@@ -298,7 +298,7 @@
     ],
     "row_only_correction_loop_stopped": true,
     "schema_version": "g1-full-load-cause-narrowing-context.v1",
-    "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
+    "source_commit_sha": "c4d33df27e9d438bae0b89f6e9b95e866affe6cd",
     "status": "ready",
     "summary_line": "G1 F2g/F2h cause narrowing: READY | support_or_link_row_gap_disfavored=True | f2h_0p4_ready=True | next=consistent_residual_jacobian_newton_rocm_worker",
     "support_or_link_row_gap_disfavored": true
@@ -1448,7 +1448,7 @@
   },
   "full_load_input_pass": true,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-07-05T21:23:43.765302+00:00",
+  "generated_at": "2026-07-05T21:53:02.480892+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [],
     "consistent_residual_jacobian_newton_gate_passed": false,
@@ -1558,19 +1558,19 @@
       "dev_kfd_missing",
       "dev_dri_missing"
     ],
-    "source_commit_sha": "e3962d1a5465c5b52f79e1aa94b94986764a242f",
+    "source_commit_sha": "c85fa87d070b84b697686fec69cfb43c06ec0a82",
     "source_state_fresh": true,
     "source_state_kind": "exact",
     "status": "partial"
   },
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json": "sha256:b35be5bd18a33d52ec5afab1ee79b4953d6f9a8c933336e8a3680ddea36c4b24",
-    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:382956916ff532ef84df6648062a284d6899e7e62b48b9b8386142e7d4411235",
-    "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe.json": "sha256:5c21b1f8f1d0da7dd2fe223c1457fd63a61707dad2a25289848a9992a0f7c96d",
-    "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz": "sha256:2056faa56a1ae988b37ebbdfb0c822faf9cfbc319daae6219520a7569783c663",
+    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:4365e9ff4f694775759704966b3418bf630f8637479c7cc7cee59ed11e341ff9",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_direct_probe.json": "sha256:6ff6e43bffc25ffc6bc812a7ce21bb1232545bcd356062d7fe923397d28ffc30",
+    "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_gate_candidate_step2_candidate.npz": "sha256:51809d7174a91d539a8e5ca91406dc418b3dfa30b1a9ddb9bccd9d390a68bafb",
     "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:ddce67fd21c8c076e559c94bcbd54bfd87d1205db5db1aacf212f979e419f75a",
     "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:89b6c804be6e75aac5e79ad05849660cc5e99437d67b29e35ac77f2e22ec75aa",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:3b03a07578d8d79b2ad5a6607f81dc6c1b5ec0dedeba253b685abd1c7db3c10a",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:eca53e98aa6d8397698bfdd6fe4c9e1c7a1d0b2b70be518f16b83044729d553c",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:715b40736e3f4b5420a2edc5e3f7b533d72d9f7d3da8887ee4d1d3334167c17d"
   },
   "lane_next_actions": [
@@ -1624,11 +1624,11 @@
         "/usr/bin/python3",
         "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
         "--checkpoint-npz",
-        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+        "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_gate_candidate_step2_candidate.npz",
         "--output-json",
-        "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe.json",
+        "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_direct_probe.json",
         "--shell-pressure-load-path-policy",
-        "all_components",
+        "structural_components_only",
         "--apply-shell-material-tangent",
         "--allow-state-dependent-shell-material-tangent-hip-replay",
         "--enable-matrix-free-global-krylov",
@@ -1655,15 +1655,15 @@
         "child_consistent_residual_jacobian_newton_not_proven",
         "child_direct_residual_gate_not_proven",
         "child_direct_residual_newton_ready_not_proven",
-        "child_material_newton_breadth_not_proven"
+        "child_fallback_zero_not_proven",
+        "child_full_load_closure_not_proven",
+        "child_material_newton_breadth_not_proven",
+        "child_observed_load_scale_below_required_full_load",
+        "child_relative_increment_gate_not_proven"
       ],
       "required_hip_refresh_blockers": [
-        "child_global_krylov_hip_not_required",
-        "child_global_krylov_not_promoted_to_final_state",
-        "child_global_krylov_hip_residual_refresh_not_proven",
-        "child_current_tangent_residual_row_hip_not_required",
-        "child_current_tangent_residual_row_hip_residual_refresh_not_proven",
-        "child_current_tangent_residual_row_cpu_residual_refresh_used"
+        "child_global_krylov_component_missing",
+        "child_current_tangent_residual_row_component_missing"
       ],
       "upstream_blocking_requirement_ids": [
         "hip_consistent_residual_jacobian_newton_proof",
@@ -1684,7 +1684,9 @@
   },
   "load_path_provenance_pass": true,
   "preexisting_child_probe_evidence": {
-    "blockers": [],
+    "blockers": [
+      "preexisting_child_probe_source_commit_mismatch"
+    ],
     "claim_boundary": "This is deferred child-probe observation only. It does not bypass HIP proof, production ROCm/HIP residual/JVP residency, or the lane's child execution safety gates.",
     "consistent_residual_jacobian_newton_passed": false,
     "direct_residual_gate_passed": false,
@@ -1693,20 +1695,20 @@
     "full_load_closure_passed": true,
     "material_newton_breadth_passed": false,
     "observed_load_scale": 1.0,
-    "path": "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe.json",
+    "path": "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_direct_probe.json",
     "present": true,
-    "relative_increment_gate_passed": true,
+    "relative_increment_gate_passed": false,
     "reused_evidence": false,
     "schema_version": "g1-preexisting-child-probe-evidence.v1",
-    "source_commit_matches_lane": true,
-    "source_commit_sha": "e3962d1a5465c5b52f79e1aa94b94986764a242f",
+    "source_commit_matches_lane": false,
+    "source_commit_sha": "a973f6f9bc2bc4c01d8793cc32794d25fb7bda51",
     "status": "partial",
-    "usable_as_deferred_child_evidence": true
+    "usable_as_deferred_child_evidence": false
   },
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "e3962d1a5465c5b52f79e1aa94b94986764a242f",
+  "source_commit_sha": "c85fa87d070b84b697686fec69cfb43c06ec0a82",
   "status": "blocked",
   "terminal_requirement_breakdown": {
     "active_terminal_requirement_id": "hip_consistent_residual_jacobian_newton_proof",
@@ -1877,13 +1879,13 @@
           "child_consistent_residual_jacobian_newton_not_proven",
           "child_direct_residual_gate_not_proven",
           "child_direct_residual_newton_ready_not_proven",
+          "child_fallback_zero_not_proven",
+          "child_full_load_closure_not_proven",
           "child_material_newton_breadth_not_proven",
-          "child_global_krylov_hip_not_required",
-          "child_global_krylov_not_promoted_to_final_state",
-          "child_global_krylov_hip_residual_refresh_not_proven",
-          "child_current_tangent_residual_row_hip_not_required",
-          "child_current_tangent_residual_row_hip_residual_refresh_not_proven",
-          "child_current_tangent_residual_row_cpu_residual_refresh_used"
+          "child_observed_load_scale_below_required_full_load",
+          "child_relative_increment_gate_not_proven",
+          "child_global_krylov_component_missing",
+          "child_current_tangent_residual_row_component_missing"
         ],
         "id": "full_load_child_direct_probe",
         "label": "Full-load child direct residual Newton probe",
@@ -1896,11 +1898,11 @@
             "/usr/bin/python3",
             "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
             "--checkpoint-npz",
-            "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+            "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_gate_candidate_step2_candidate.npz",
             "--output-json",
-            "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe.json",
+            "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_direct_probe.json",
             "--shell-pressure-load-path-policy",
-            "all_components",
+            "structural_components_only",
             "--apply-shell-material-tangent",
             "--allow-state-dependent-shell-material-tangent-hip-replay",
             "--enable-matrix-free-global-krylov",
