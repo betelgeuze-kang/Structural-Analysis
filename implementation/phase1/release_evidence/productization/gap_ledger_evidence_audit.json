@@ -15,11 +15,11 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "full_gap_ledger_ready": false,
-  "generated_at": "2026-07-05T07:42:22.083023+00:00",
+  "generated_at": "2026-07-05T15:49:18.588953+00:00",
   "input_checksums": {
     "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b8f1b140751f430e4c7dc594f3440320433be9b3e3f055f3e7fad62a2999b8af",
     "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:b57d2296755145322bbad09abb1a471a18da9051eb202185d8bbfbddcb2b4c24",
-    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:ed32dcfc42e783e07320ea30a9e3e6417cb295df174b5625d3eaff344e6d4865",
+    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:1b51a0aa929255d74bcceefede89f9a20d3dec213fb31cc68ce106f84957bd5d",
     "scripts/build_gap_ledger_evidence_audit.py": "sha256:cce4f67978d3c2d7c4bced3ab6473157a062353fe5ee6f0994f3c0ee7ad34648"
   },
   "ledger_status": "open",
@@ -42,16 +42,17 @@
       "claim_boundary_present": true,
       "closed": false,
       "closure_requirement_count": 9,
-      "closure_requirement_fail_count": 6,
+      "closure_requirement_fail_count": 7,
       "closure_requirement_failed_ids": [
         "full_load_scale_1_0_reached",
+        "strict_full_load_hip_newton_checkpoint_available",
         "full_line_mesh_nonlinear_equilibrium_closed",
         "full_frame_6dof_nonlinear_equilibrium_closed",
         "coupled_frame_surface_nonlinear_equilibrium_closed",
         "state_updated_material_newton_breadth_closed",
         "fallback_and_regularization_free_full_path"
       ],
-      "closure_requirement_pass_count": 3,
+      "closure_requirement_pass_count": 2,
       "evidence_key_count": 643,
       "evidence_present": true,
       "id": "G1",
@@ -417,7 +418,7 @@
     }
   ],
   "schema_version": "gap-ledger-evidence-audit.v1",
-  "source_commit_sha": "42eccb4207eaba2b209cf59d2773554f1ca52477",
+  "source_commit_sha": "609760285ee52ce548557184f780433cfdd3ed49",
   "source_receipt_path_coverage": {
     "claim_boundary": "This checks only explicit source_receipts and *_source_receipts paths that the ledger status advertises as evidence or guard inputs. It does not require terminal closure-evidence paths that are intentionally absent for partial or external-blocked rows.",
     "source_receipt_absent_row_count": 0,

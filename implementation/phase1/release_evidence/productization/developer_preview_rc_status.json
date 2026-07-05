@@ -480,13 +480,13 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-05T15:41:19.607870+00:00",
+  "generated_at": "2026-07-05T15:51:24.181521+00:00",
   "input_checksums": {
     ".github/workflows/dp-windows-parity.yml": "sha256:1a25e658ec3fabfa5fee9fcdaee8c708b145989df373759424eea78914c4e5cd",
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:c6029517015f215dc8d141c9233543ec568340c737edce0be63fc840cd6529dd",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:2d58ae4d8e72d9df2f0ad4c68c3bacee31bfbe018328dc4bd6fcb49d71899c65",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:c9387081dd42e14fa175f0a18626999509188c47a04ee448df257e4239d5d5a4",
-    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:40b1b46562249340f70f9c1aeb2364b5efbefd0a0b348b781b1417e444ec0e5e",
+    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:6ddef5d4664d46f37b3756172bfa868bd7b3b699fbbece7ba228015b48326c16",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:393aaccf5942b921e58c8a1fe903a750c0ad6a4f966fdcafb09147a45f155f94",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:500f9bbd82c6983a2a5e0ac22afa21f92c6ade3bc399e7e08a52c665268091e3",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:2c8e8f61015ac45c829d2c585da1fce9c33745ecb7be9c8c274fd8c4053ac41a",
@@ -1272,7 +1272,7 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 26,
+    "developer_preview_blocker_count": 24,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
@@ -1285,15 +1285,15 @@
       "stale_or_inconsistent:source_commit_mismatch:developer_preview_final_gate_owner_packet",
       "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
       "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-      "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
-      "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
       "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
       "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
       "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
       "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
       "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
       "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
-      "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet"
+      "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
+      "stale_or_inconsistent:source_commit_mismatch:structural_scope_release_surface_owner_handoff_check",
+      "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report"
     ],
     "final_gate_blockers": [
       "final_gate_blocked:selected_medium_models_pass_or_approved_review",
@@ -1311,8 +1311,8 @@
       "autonomous_ai_engine_claim_ready": false,
       "claim_boundary": "This is a visibility summary for existing gap-ledger closure requirements. It does not add Developer Preview blockers, close G1/G6/G7, create external receipts, promote commercial readiness, or promote autonomous AI engine claims.",
       "closure_requirement_count": 19,
-      "closure_requirement_fail_count": 15,
-      "closure_requirement_pass_count": 4,
+      "closure_requirement_fail_count": 16,
+      "closure_requirement_pass_count": 3,
       "ledgers": {
         "ai_engine": {
           "closure_requirement_count": 0,
@@ -1325,8 +1325,8 @@
         },
         "commercial_solver": {
           "closure_requirement_count": 19,
-          "closure_requirement_fail_count": 15,
-          "closure_requirement_pass_count": 4,
+          "closure_requirement_fail_count": 16,
+          "closure_requirement_pass_count": 3,
           "nonclosed_failed_closure_requirement_ids": [
             "G1:coupled_frame_surface_nonlinear_equilibrium_closed",
             "G1:fallback_and_regularization_free_full_path",
@@ -1334,6 +1334,7 @@
             "G1:full_line_mesh_nonlinear_equilibrium_closed",
             "G1:full_load_scale_1_0_reached",
             "G1:state_updated_material_newton_breadth_closed",
+            "G1:strict_full_load_hip_newton_checkpoint_available",
             "G6:eb_receipt_hardest_external_10case",
             "G6:eb_receipt_korean_public_structures",
             "G6:eb_receipt_peer_spd_hinge",
@@ -1356,6 +1357,7 @@
         "G1:full_line_mesh_nonlinear_equilibrium_closed",
         "G1:full_load_scale_1_0_reached",
         "G1:state_updated_material_newton_breadth_closed",
+        "G1:strict_full_load_hip_newton_checkpoint_available",
         "G6:eb_receipt_hardest_external_10case",
         "G6:eb_receipt_korean_public_structures",
         "G6:eb_receipt_peer_spd_hinge",
@@ -3245,6 +3247,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "59fc1a7ef83707ddcd1e610a6a1e65280406ab69",
+  "source_commit_sha": "609760285ee52ce548557184f780433cfdd3ed49",
   "status": "blocked"
 }
