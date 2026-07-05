@@ -554,9 +554,7 @@
     "residual_formula": "F_internal_minus_F_external",
     "status": "ready"
   },
-  "blockers": [
-    "production_rocm_hip_residual_jvp_worker_path_not_ready"
-  ],
+  "blockers": [],
   "checkpoint_gap": {
     "checkpoint_resolution_passed": true,
     "full_load_candidate_count": 1,
@@ -568,24 +566,21 @@
   },
   "claim_boundary": "This packet defines the next G1 runner contract for generating a consistent residual/Jacobian Newton full-load checkpoint candidate. It does not create the checkpoint, close the consistent Newton gate, prove full-load 1.0 equilibrium, promote G1 closure, or allow an exhausted row-only support/link retuning loop to count as progress.",
   "closure_blockers": [
-    "hip_consistency_proof_production_hip_path_not_proven",
     "hip_consistency_proof_gate_not_passed",
-    "hip_consistency_proof_residual_jvp_worker_path_not_ready",
     "hip_consistency_proof_worker_g1_closure_gate_not_ready",
     "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
-    "hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven",
-    "hip_consistency_proof_worker::direct_probe_not_executed_preflight_only",
-    "hip_consistency_proof_worker::global_krylov_accepted_state_tangent_refresh_hip_not_proven",
-    "hip_consistency_proof_worker::global_krylov_hip_solver_not_proven",
-    "hip_consistency_proof_worker::global_krylov_jvp_rows_not_retained",
-    "hip_consistency_proof_worker::production_hip_residual_jacobian_path_not_proven",
     "hip_consistency_proof_has_blockers",
-    "hip_residual_jacobian_consistency_preflight_only",
-    "hip_residual_jacobian_consistency_not_executed",
+    "consistent_residual_jacobian::consistent_residual_jacobian_newton_not_proven",
+    "consistent_residual_jacobian::state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency",
+    "hip_direct_probe::consistent_jacobian_or_globalization_required",
+    "hip_direct_probe::direct_residual_gate_not_closed",
+    "hip_direct_probe::regularized_fixed_point_residual_must_not_be_used_as_physical_residual",
+    "hip_direct_probe_consistent_residual_jacobian_not_closed",
+    "production_rocm_hip_residual_jvp_worker::consistent_residual_jacobian_newton_gate_not_passed",
     "consistent_residual_jacobian_newton_gate_not_passed",
     "production_rocm_hip_worker_g1_closure_gate_not_ready"
   ],
-  "contract_pass": false,
+  "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
   "frame_tangent_fd_epsilon_sweep": {
@@ -609,7 +604,7 @@
     "residual_inf_n": 0.42740724991695345,
     "status": "ready"
   },
-  "generated_at": "2026-07-05T02:48:46.806370+00:00",
+  "generated_at": "2026-07-05T04:33:28.782185+00:00",
   "global_tangent_scaled_sweep": {
     "base_residual_inf_n": 0.4278304040181992,
     "best_alpha": 0.00390625,
@@ -637,22 +632,22 @@
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
     "g1_closure_gate_ready": false,
-    "production_hip_residual_jacobian_path": false,
-    "residual_jvp_worker_path_ready": false,
+    "production_hip_residual_jacobian_path": true,
+    "residual_jvp_worker_path_ready": true,
     "terminal_gate_partition": {
       "checkpoint_gate": {
-        "full_load_candidate": false,
-        "full_load_closure_passed": false,
+        "full_load_candidate": true,
+        "full_load_closure_passed": true,
         "full_load_required": true,
-        "gap_to_full_load": null,
-        "load_scale": null
+        "gap_to_full_load": 0.0,
+        "load_scale": 1.0
       },
       "claim_boundary": "Partition only: this separates the HIP residual/JVP worker path from the remaining full-load and consistent Newton G1 closure gates. It does not promote G1 readiness.",
       "direct_residual_gate": {
-        "fallback_zero_passed": false,
+        "fallback_zero_passed": true,
         "material_newton_breadth_passed": false,
         "passed": false,
-        "relative_increment_gate_passed": false
+        "relative_increment_gate_passed": true
       },
       "g1_closure_gate": {
         "blockers": [
@@ -663,138 +658,40 @@
       },
       "next_action": {
         "blockers": [
-          "current_tangent_residual_row_hip_replay_not_proven",
-          "direct_probe_not_executed_preflight_only",
-          "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
-          "global_krylov_hip_solver_not_proven",
-          "global_krylov_jvp_rows_not_retained",
-          "production_hip_residual_jacobian_path_not_proven"
+          "direct_residual_gate_not_passed"
         ],
         "disallowed_retry_action_ids": [],
-        "id": "repair_production_rocm_hip_residual_jvp_worker_path",
+        "id": "close_direct_residual_gate_on_full_load_checkpoint",
         "preferred_candidate_generator": null,
         "rerun_command": ""
       },
       "schema_version": "production-rocm-hip-worker-terminal-gate-partition.v1",
       "worker_path": {
-        "blockers": [
-          "current_tangent_residual_row_hip_replay_not_proven",
-          "direct_probe_not_executed_preflight_only",
-          "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
-          "global_krylov_hip_solver_not_proven",
-          "global_krylov_jvp_rows_not_retained",
-          "production_hip_residual_jacobian_path_not_proven"
-        ],
-        "ready": false
+        "blockers": [],
+        "ready": true
       }
     },
     "worker_blockers": [
-      "consistent_residual_jacobian_newton_gate_not_passed",
-      "current_tangent_residual_row_hip_replay_not_proven",
-      "direct_probe_not_executed_preflight_only",
-      "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
-      "global_krylov_hip_solver_not_proven",
-      "global_krylov_jvp_rows_not_retained",
-      "production_hip_residual_jacobian_path_not_proven"
+      "consistent_residual_jacobian_newton_gate_not_passed"
     ],
     "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
-    "worker_path_blockers": [
-      "current_tangent_residual_row_hip_replay_not_proven",
-      "direct_probe_not_executed_preflight_only",
-      "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
-      "global_krylov_hip_solver_not_proven",
-      "global_krylov_jvp_rows_not_retained",
-      "production_hip_residual_jacobian_path_not_proven"
-    ],
+    "worker_path_blockers": [],
     "worker_path_repair_plan": {
-      "blocker_count": 6,
-      "blockers": [
-        "current_tangent_residual_row_hip_replay_not_proven",
-        "direct_probe_not_executed_preflight_only",
-        "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
-        "global_krylov_hip_solver_not_proven",
-        "global_krylov_jvp_rows_not_retained",
-        "production_hip_residual_jacobian_path_not_proven"
-      ],
-      "categories": {
-        "current_tangent_residual_row_replay": {
-          "acceptance": [
-            "current tangent residual row correction attempted with HIP batch replay",
-            "accepted-state tangent refresh CPU fallback remains false"
-          ],
-          "blocker_count": 1,
-          "blockers": [
-            "current_tangent_residual_row_hip_replay_not_proven"
-          ],
-          "required_receipts": [
-            "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
-          ]
-        },
-        "hip_required_direct_probe": {
-          "acceptance": [
-            "HIP-required direct probe executed, not preflight-only",
-            "cpu_diagnostic_assembler_used == false"
-          ],
-          "blocker_count": 1,
-          "blockers": [
-            "direct_probe_not_executed_preflight_only"
-          ],
-          "required_receipts": [
-            "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
-          ]
-        },
-        "matrix_free_global_krylov": {
-          "acceptance": [
-            "matrix_free_global_krylov.proof.hip_krylov_solver_used == true",
-            "matrix_free_global_krylov.proof.jvp_rows_retained == true",
-            "accepted-state tangent refresh uses HIP, not CPU"
-          ],
-          "blocker_count": 3,
-          "blockers": [
-            "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
-            "global_krylov_hip_solver_not_proven",
-            "global_krylov_jvp_rows_not_retained"
-          ],
-          "required_receipts": [
-            "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
-          ]
-        },
-        "production_hip_residual_jacobian_path": {
-          "acceptance": [
-            "production_hip_residual_jacobian_path == true",
-            "no CPU fallback path is counted as production HIP"
-          ],
-          "blocker_count": 1,
-          "blockers": [
-            "production_hip_residual_jacobian_path_not_proven"
-          ],
-          "required_receipts": [
-            "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
-          ]
-        }
-      },
-      "category_count": 4,
-      "category_counts": {
-        "current_tangent_residual_row_replay": 1,
-        "hip_required_direct_probe": 1,
-        "matrix_free_global_krylov": 3,
-        "production_hip_residual_jacobian_path": 1
-      },
-      "category_order": [
-        "hip_required_direct_probe",
-        "production_hip_residual_jacobian_path",
-        "matrix_free_global_krylov",
-        "current_tangent_residual_row_replay"
-      ],
+      "blocker_count": 0,
+      "blockers": [],
+      "categories": {},
+      "category_count": 0,
+      "category_counts": {},
+      "category_order": [],
       "claim_boundary": "This repair plan classifies the missing production ROCm/HIP residual/JVP worker path. It does not execute HIP, prove device residency, create a full-load checkpoint, or promote G1 closure.",
-      "next_action_id": "repair_production_rocm_hip_residual_jvp_worker_path",
+      "next_action_id": "rerun_g1_full_load_hip_newton_lane",
       "required_receipts": [
         "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
         "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json"
       ],
       "runtime_blockers": [],
       "schema_version": "g1-production-rocm-hip-worker-path-repair-plan.v1",
-      "status": "blocked"
+      "status": "ready"
     }
   },
   "input_checksums": {
@@ -822,7 +719,7 @@
     "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json": "sha256:78554ec85bd6751670a6529578abc411dab5b7bb7f7f30140c099ad18de23407",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:92ca6c7d4e23dd89132e0fe834fbe16ca753e17ae860786ff5ad7bed97a27aad",
     "implementation/phase1/release_evidence/productization/g1_frame_tangent_fd_epsilon_sweep_probe.json": "sha256:81c2ad32a078db886d09c6637cd7d1369719d2ed6c8f5fac88ae5ac410c4291d",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:f8d9f6819b7d89a5430d11decd1d833fa93ed68c676dee4f9c08dc651b3cd6c1",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:d0ee7a7befa337fb96932d874a17954876f3d956c05dbc38503c0f4979957edb",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:461c82706d56e914cd27e1781e2bbfc9bbeb6b58e266952918766d2e00963858",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.json": "sha256:e6582053c0d7dc2c99c3737f0c7ffa94579855a5520cdb416efc2abd01aa3ee9",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe.json": "sha256:83a0e92b346a14a6f8833bb39b572437f405fdafe62e631d55da9d7c7c3fa4da",
@@ -846,7 +743,7 @@
     "implementation/phase1/release_evidence/productization/g1_true_newton_from_active_set_mu_sweep_probe.json": "sha256:37c65291c66cb545b17330ba59c0b7b51ea251382f4165406b5b57898f1c6ed7",
     "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:a5b58790d91923c379c57834bcc71bcc6440af1800aebe525391e05442188318",
     "implementation/phase1/release_evidence/productization/g1_true_newton_load_sweep_status.json": "sha256:c1a862c28a6f31163f15f8cbe03334e0060a6cbb81138b9e3819d53fad497aca",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:19bd610a874fcb520b2b3785f85ce0672294e56a0793babbb891c36b84440c41",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:26233fb525abb8433931ede827f0caecb5c5cfcb9f764d3d1f36688a5a491d8b",
     "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:d79842b09bed586a3667f0b6f086546c7a58f344a3cf5504a08da36b15c5849e"
   },
   "next_actions": [
@@ -1051,7 +948,7 @@
     "row_count": 8,
     "status": "ready"
   },
-  "source_commit_sha": "4760f23489f3b5e98cfec61f1ab36eddaf901933",
+  "source_commit_sha": "2061a8184c37d8934d2345f0c11784dae63d57fa",
   "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe": {
     "assembled_tangent_parity_max_absolute_error": 0.006011962890625,
     "assembled_tangent_parity_max_relative_error": 2.683381287585585e-15,
@@ -1530,7 +1427,7 @@
     "shifted_operator_shift_mu": 0.0001,
     "status": "ready"
   },
-  "status": "blocked_runner_contract",
+  "status": "ready_for_runner_implementation",
   "summary": {
     "active_frontier_residual_ownership_present": true,
     "active_frontier_residual_ownership_top_residual_inf_n": 0.42740724991695345,
@@ -1653,11 +1550,11 @@
     "adaptive_all_components_frontier_residual_gate_passed": false,
     "assembly_contract_cpu_seed_newton_gate_passed": true,
     "assembly_contract_seed_ready": true,
-    "closure_blocker_count": 16,
+    "closure_blocker_count": 13,
     "consistent_residual_jacobian_newton_gate_passed": false,
-    "contract_blocker_count": 1,
-    "contract_pass": false,
-    "contract_status": "blocked_runner_contract",
+    "contract_blocker_count": 0,
+    "contract_pass": true,
+    "contract_status": "ready_for_runner_implementation",
     "evidence_closure_pass": false,
     "frame_tangent_fd_epsilon_sweep_best_eps": 0.001,
     "frame_tangent_fd_epsilon_sweep_best_gap_relative_inf": 0.003379869645939948,
@@ -1687,7 +1584,7 @@
     "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
     "promotes_g1_closure": false,
     "required_load_scale": 1.0,
-    "residual_jvp_worker_path_ready": false,
+    "residual_jvp_worker_path_ready": true,
     "residual_norm_gradient_tiny_sweep_best_l2_improvement_n": 0.16379561248899166,
     "residual_norm_gradient_tiny_sweep_best_l2_residual_n": 1.2159739821333575,
     "residual_norm_gradient_tiny_sweep_inf_descent_observed": false,
@@ -1843,11 +1740,11 @@
     "true_newton_full_load_checkpoint_candidate_written": true,
     "true_newton_load_sweep_present": true,
     "worker_path_operator_sequence_count": 4,
-    "worker_path_repair_blocker_count": 6,
-    "worker_path_repair_category_count": 4,
-    "worker_path_repair_next_action_id": "repair_production_rocm_hip_residual_jvp_worker_path"
+    "worker_path_repair_blocker_count": 0,
+    "worker_path_repair_category_count": 0,
+    "worker_path_repair_next_action_id": "rerun_g1_full_load_hip_newton_lane"
   },
-  "summary_line": "G1 consistent Newton full-load runner contract: BLOCKED_RUNNER_CONTRACT | contract_pass=False | observed_load=1/1 | closure_blockers=16",
+  "summary_line": "G1 consistent Newton full-load runner contract: READY_FOR_RUNNER_IMPLEMENTATION | contract_pass=True | observed_load=1/1 | closure_blockers=13",
   "true_newton_frame_tangent_source_comparison": {
     "both_dominant_gap_component_frame": true,
     "both_line_search_no_descent": true,
@@ -2049,7 +1946,7 @@
       "required_receipts": [
         "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
       ],
-      "status": "required",
+      "status": "ready",
       "step_id": "run_hip_required_direct_probe"
     },
     {
@@ -2064,7 +1961,7 @@
         "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
         "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
       ],
-      "status": "required",
+      "status": "ready",
       "step_id": "refresh_runner_contract_after_hip_probe"
     },
     {
@@ -2085,93 +1982,20 @@
     }
   ],
   "worker_path_repair_plan": {
-    "blocker_count": 6,
-    "blockers": [
-      "current_tangent_residual_row_hip_replay_not_proven",
-      "direct_probe_not_executed_preflight_only",
-      "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
-      "global_krylov_hip_solver_not_proven",
-      "global_krylov_jvp_rows_not_retained",
-      "production_hip_residual_jacobian_path_not_proven"
-    ],
-    "categories": {
-      "current_tangent_residual_row_replay": {
-        "acceptance": [
-          "current tangent residual row correction attempted with HIP batch replay",
-          "accepted-state tangent refresh CPU fallback remains false"
-        ],
-        "blocker_count": 1,
-        "blockers": [
-          "current_tangent_residual_row_hip_replay_not_proven"
-        ],
-        "required_receipts": [
-          "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
-        ]
-      },
-      "hip_required_direct_probe": {
-        "acceptance": [
-          "HIP-required direct probe executed, not preflight-only",
-          "cpu_diagnostic_assembler_used == false"
-        ],
-        "blocker_count": 1,
-        "blockers": [
-          "direct_probe_not_executed_preflight_only"
-        ],
-        "required_receipts": [
-          "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
-        ]
-      },
-      "matrix_free_global_krylov": {
-        "acceptance": [
-          "matrix_free_global_krylov.proof.hip_krylov_solver_used == true",
-          "matrix_free_global_krylov.proof.jvp_rows_retained == true",
-          "accepted-state tangent refresh uses HIP, not CPU"
-        ],
-        "blocker_count": 3,
-        "blockers": [
-          "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
-          "global_krylov_hip_solver_not_proven",
-          "global_krylov_jvp_rows_not_retained"
-        ],
-        "required_receipts": [
-          "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
-        ]
-      },
-      "production_hip_residual_jacobian_path": {
-        "acceptance": [
-          "production_hip_residual_jacobian_path == true",
-          "no CPU fallback path is counted as production HIP"
-        ],
-        "blocker_count": 1,
-        "blockers": [
-          "production_hip_residual_jacobian_path_not_proven"
-        ],
-        "required_receipts": [
-          "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
-        ]
-      }
-    },
-    "category_count": 4,
-    "category_counts": {
-      "current_tangent_residual_row_replay": 1,
-      "hip_required_direct_probe": 1,
-      "matrix_free_global_krylov": 3,
-      "production_hip_residual_jacobian_path": 1
-    },
-    "category_order": [
-      "hip_required_direct_probe",
-      "production_hip_residual_jacobian_path",
-      "matrix_free_global_krylov",
-      "current_tangent_residual_row_replay"
-    ],
+    "blocker_count": 0,
+    "blockers": [],
+    "categories": {},
+    "category_count": 0,
+    "category_counts": {},
+    "category_order": [],
     "claim_boundary": "This repair plan classifies the missing production ROCm/HIP residual/JVP worker path. It does not execute HIP, prove device residency, create a full-load checkpoint, or promote G1 closure.",
-    "next_action_id": "repair_production_rocm_hip_residual_jvp_worker_path",
+    "next_action_id": "rerun_g1_full_load_hip_newton_lane",
     "required_receipts": [
       "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
       "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json"
     ],
     "runtime_blockers": [],
     "schema_version": "g1-production-rocm-hip-worker-path-repair-plan.v1",
-    "status": "blocked"
+    "status": "ready"
   }
 }

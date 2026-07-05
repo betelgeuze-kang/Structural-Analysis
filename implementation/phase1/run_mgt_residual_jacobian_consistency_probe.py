@@ -71,6 +71,50 @@ def _max_abs(values: np.ndarray) -> float:
     return float(np.max(np.abs(arr))) if arr.size else 0.0
 
 
+def _float_or_none(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _direct_residual_summary(child_payload: dict[str, Any]) -> dict[str, Any]:
+    base = child_payload.get("base_direct_residual")
+    base = base if isinstance(base, dict) else {}
+    final = child_payload.get("final_direct_residual")
+    final = final if isinstance(final, dict) else {}
+    output_checkpoint = child_payload.get("output_final_checkpoint")
+    output_checkpoint = output_checkpoint if isinstance(output_checkpoint, dict) else {}
+    base_inf = _float_or_none(base.get("direct_residual_inf_n"))
+    final_inf = _float_or_none(final.get("direct_residual_inf_n"))
+    return {
+        "base_direct_residual_inf_n": base_inf,
+        "base_direct_relative_residual_inf": _float_or_none(
+            base.get("direct_relative_residual_inf")
+        ),
+        "final_direct_residual_inf_n": final_inf,
+        "final_direct_relative_residual_inf": _float_or_none(
+            final.get("direct_relative_residual_inf")
+        ),
+        "residual_tolerance_n": _float_or_none(
+            (child_payload.get("gate_assessment") or {}).get("residual_tolerance_n")
+            if isinstance(child_payload.get("gate_assessment"), dict)
+            else None
+        ),
+        "improvement_factor": _float_or_none(final.get("improvement_factor")),
+        "output_final_checkpoint": {
+            "written": bool(output_checkpoint.get("written")),
+            "path": str(output_checkpoint.get("path") or ""),
+            "direct_residual_inf_n": _float_or_none(
+                output_checkpoint.get("direct_residual_inf_n")
+            ),
+            "load_scale": _float_or_none(output_checkpoint.get("load_scale")),
+        },
+    }
+
+
 def _direction_top_residual_sign(
     *,
     residual: np.ndarray,
@@ -139,12 +183,22 @@ def _hip_required_direct_probe_kwargs(
         "enable_matrix_free_jacobian_subspace": False,
         "max_matrix_free_jacobian_subspace_promotions": 0,
         "enable_matrix_free_global_krylov": True,
-        "matrix_free_global_krylov_max_iterations": 1,
+        "matrix_free_global_krylov_max_iterations": 3,
         "matrix_free_global_krylov_batch_replay_backend": (
             "hip_full_residual_resident"
         ),
         "matrix_free_global_krylov_require_hip_batch_replay": True,
         "matrix_free_global_krylov_linear_solver_backend": "torch_hip_gmres",
+        "matrix_free_global_krylov_allow_negative_alphas": True,
+        "matrix_free_global_krylov_alpha_values": (
+            0.5,
+            0.375,
+            0.3125,
+            0.25,
+            0.1875,
+            0.125,
+            0.0625,
+        ),
         "matrix_free_global_krylov_full_assembly_trial_replay": False,
         "enable_current_tangent_residual_row_correction": True,
         "max_current_tangent_residual_row_corrections": 1,
@@ -260,6 +314,7 @@ def _assess_hip_required_direct_probe_payload(
         "hip_residual_engine_contract_passed": hip_contract_passed,
         "consistent_residual_jacobian_newton_gate_passed": consistent_gate_passed,
         "blockers": sorted(dict.fromkeys(blockers)),
+        "direct_residual_summary": _direct_residual_summary(child_payload),
         "checkpoint": {
             "load_scale": (
                 float(checkpoint["load_scale"])
@@ -3175,6 +3230,7 @@ def run_mgt_residual_jacobian_consistency_probe(
                 "hip_residual_engine_contract": hip_proof[
                     "hip_residual_engine_contract"
                 ],
+                "direct_residual_summary": hip_proof["direct_residual_summary"],
                 "gate_assessment": hip_proof["gate_assessment"],
                 "matrix_free_global_krylov": hip_proof[
                     "matrix_free_global_krylov"

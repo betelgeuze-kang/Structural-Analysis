@@ -16,7 +16,7 @@ import time
 from typing import Any
 
 import numpy as np
-from scipy.sparse import eye
+from scipy.sparse import eye, issparse
 from scipy.sparse.linalg import LinearOperator, gmres, spsolve
 
 from parse_mgt_section_material_properties import (
@@ -83,6 +83,36 @@ ROCM_VISIBILITY_SETTING_KEYS = (
     "CUDA_VISIBLE_DEVICES",
     "HSA_OVERRIDE_GFX_VERSION",
 )
+
+
+def _json_safe(value: Any) -> Any:
+    """Convert diagnostic payload values to JSON-safe summaries for receipts."""
+    if isinstance(value, dict):
+        return {str(key): _json_safe(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_safe(item) for item in value]
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    if isinstance(value, np.generic):
+        return value.item()
+    if isinstance(value, Path):
+        return str(value)
+    if issparse(value):
+        matrix = value
+        return {
+            "sparse_matrix": matrix.__class__.__name__,
+            "shape": [int(matrix.shape[0]), int(matrix.shape[1])],
+            "nnz": int(matrix.nnz),
+        }
+    return value
+
+
+def _write_json_payload(output_json: Path, payload: dict[str, Any]) -> None:
+    output_json.parent.mkdir(parents=True, exist_ok=True)
+    output_json.write_text(
+        json.dumps(_json_safe(payload), indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
 
 
 def _git_head() -> str:
@@ -1927,11 +1957,7 @@ def run_mgt_direct_residual_newton_probe(
                 hip_preflight=hip_preflight,
             )
             if output_json is not None:
-                output_json.parent.mkdir(parents=True, exist_ok=True)
-                output_json.write_text(
-                    json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
-                    encoding="utf-8",
-                )
+                _write_json_payload(output_json, payload)
             return payload
     if not mgt_path.is_file():
         return {"schema_version": SCHEMA_VERSION, "generated_at": generated_at, "status": "blocked", "blockers": ["mgt_missing"]}
@@ -7953,8 +7979,7 @@ def run_mgt_direct_residual_newton_probe(
         ],
     }
     if output_json is not None:
-        output_json.parent.mkdir(parents=True, exist_ok=True)
-        output_json.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        _write_json_payload(output_json, payload)
     return payload
 
 

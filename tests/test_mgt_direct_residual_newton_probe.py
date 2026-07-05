@@ -27,6 +27,7 @@ from run_mgt_direct_residual_newton_probe import (  # noqa: E402
     _load_checkpoint,
     _load_frontier_component_top_rows,
     _parse_matrix_free_basis_sources,
+    _write_json_payload,
     _select_residual_element_block_rows,
     _select_residual_node_block_rows,
     _skipped_output_final_checkpoint_meta,
@@ -36,6 +37,27 @@ from run_mgt_direct_residual_newton_probe import (  # noqa: E402
     parse_args,
     run_mgt_direct_residual_newton_probe,
 )
+
+
+def test_write_json_payload_summarizes_sparse_matrices(tmp_path: Path) -> None:
+    output = tmp_path / "receipt.json"
+    _write_json_payload(
+        output,
+        {
+            "matrix": diags([1.0, 2.0, 3.0], format="csr"),
+            "nested": {"value": np.float64(1.25), "path": tmp_path / "x"},
+        },
+    )
+
+    payload = json.loads(output.read_text())
+
+    assert payload["matrix"] == {
+        "sparse_matrix": "csr_matrix",
+        "shape": [3, 3],
+        "nnz": 3,
+    }
+    assert payload["nested"]["value"] == 1.25
+    assert payload["nested"]["path"].endswith("x")
 
 
 def test_active_free_excludes_restrained_dofs() -> None:

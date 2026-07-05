@@ -42,12 +42,22 @@ def test_hip_required_direct_probe_kwargs_broaden_row_fd_refresh_lane(
     )
 
     assert kwargs["enable_matrix_free_global_krylov"] is True
-    assert kwargs["matrix_free_global_krylov_max_iterations"] == 1
+    assert kwargs["matrix_free_global_krylov_max_iterations"] == 3
     assert kwargs["matrix_free_global_krylov_batch_replay_backend"] == (
         "hip_full_residual_resident"
     )
     assert kwargs["matrix_free_global_krylov_linear_solver_backend"] == (
         "torch_hip_gmres"
+    )
+    assert kwargs["matrix_free_global_krylov_allow_negative_alphas"] is True
+    assert kwargs["matrix_free_global_krylov_alpha_values"] == (
+        0.5,
+        0.375,
+        0.3125,
+        0.25,
+        0.1875,
+        0.125,
+        0.0625,
     )
     assert kwargs["enable_current_tangent_residual_row_correction"] is True
     assert kwargs["max_current_tangent_residual_row_corrections"] == 1
@@ -836,6 +846,21 @@ def test_hip_required_probe_with_runtime_still_does_not_use_cpu_assembler(
             "status": "partial",
             "direct_residual_newton_ready": False,
             "checkpoint": {"load_scale": 0.656},
+            "base_direct_residual": {
+                "direct_residual_inf_n": 44.0,
+                "direct_relative_residual_inf": 0.0044,
+            },
+            "final_direct_residual": {
+                "direct_residual_inf_n": 11.0,
+                "direct_relative_residual_inf": 0.0011,
+                "improvement_factor": 4.0,
+            },
+            "output_final_checkpoint": {
+                "written": True,
+                "path": "candidate.npz",
+                "direct_residual_inf_n": 11.0,
+                "load_scale": 0.656,
+            },
             "residual_contract": {
                 "hip_residual_engine_required": True,
                 "hip_residual_engine_contract_passed": False,
@@ -1146,6 +1171,21 @@ def test_hip_required_probe_separates_worker_path_from_consistent_newton_gate(
             "status": "partial",
             "direct_residual_newton_ready": False,
             "checkpoint": {"load_scale": 0.656},
+            "base_direct_residual": {
+                "direct_residual_inf_n": 44.0,
+                "direct_relative_residual_inf": 0.0044,
+            },
+            "final_direct_residual": {
+                "direct_residual_inf_n": 11.0,
+                "direct_relative_residual_inf": 0.0011,
+                "improvement_factor": 4.0,
+            },
+            "output_final_checkpoint": {
+                "written": True,
+                "path": "candidate.npz",
+                "direct_residual_inf_n": 11.0,
+                "load_scale": 0.656,
+            },
             "residual_contract": {
                 "hip_residual_engine_required": True,
                 "hip_residual_engine_contract_passed": True,
@@ -1294,6 +1334,20 @@ def test_hip_required_probe_separates_worker_path_from_consistent_newton_gate(
     direct = payload["hip_direct_probe"]
     assert direct["hip_residual_engine_contract"]["passed"] is True
     assert direct["hip_residual_engine_contract"]["required_lane_count"] == 2
+    assert direct["direct_residual_summary"] == {
+        "base_direct_residual_inf_n": 44.0,
+        "base_direct_relative_residual_inf": 0.0044,
+        "final_direct_residual_inf_n": 11.0,
+        "final_direct_relative_residual_inf": 0.0011,
+        "residual_tolerance_n": None,
+        "improvement_factor": 4.0,
+        "output_final_checkpoint": {
+            "written": True,
+            "path": "candidate.npz",
+            "direct_residual_inf_n": 11.0,
+            "load_scale": 0.656,
+        },
+    }
     assert direct["gate_assessment"]["fallback_zero_passed"] is True
     assert (
         "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"

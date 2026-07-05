@@ -1,7 +1,7 @@
 {
   "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
-  "generated_at": "2026-07-05T02:47:15.232510+00:00",
-  "source_commit_sha": "4760f23489f3b5e98cfec61f1ab36eddaf901933",
+  "generated_at": "2026-07-05T04:27:55.753550+00:00",
+  "source_commit_sha": "2061a8184c37d8934d2345f0c11784dae63d57fa",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "reused_evidence": false,
   "status": "partial",
@@ -9,11 +9,11 @@
   "consistent_residual_jacobian_newton_passed": false,
   "consistent_residual_jacobian_newton_gate_passed": false,
   "rocm_hip_required": true,
-  "execution_mode": "hip_required_runtime_preflight_only_no_child_execution",
+  "execution_mode": "hip_required_direct_probe_no_cpu_fallback",
   "cpu_diagnostic_assembler_used": false,
-  "production_hip_residual_jacobian_path": false,
+  "production_hip_residual_jacobian_path": true,
   "rocm_hip_runtime_preflight": {
-    "checked_at": "2026-07-05T02:47:15.234546+00:00",
+    "checked_at": "2026-07-05T04:27:55.755461+00:00",
     "hip_available": true,
     "torch_importable": true,
     "torch_rocm_build": true,
@@ -83,27 +83,14 @@
   "production_rocm_hip_residual_jvp_worker": {
     "schema_version": "production-rocm-hip-residual-jvp-worker-contract.v1",
     "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
-    "source_commit_sha": "4760f23489f3b5e98cfec61f1ab36eddaf901933",
+    "source_commit_sha": "2061a8184c37d8934d2345f0c11784dae63d57fa",
     "ready": false,
     "status": "blocked",
     "blockers": [
-      "consistent_residual_jacobian_newton_gate_not_passed",
-      "current_tangent_residual_row_hip_replay_not_proven",
-      "direct_probe_not_executed_preflight_only",
-      "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
-      "global_krylov_hip_solver_not_proven",
-      "global_krylov_jvp_rows_not_retained",
-      "production_hip_residual_jacobian_path_not_proven"
+      "consistent_residual_jacobian_newton_gate_not_passed"
     ],
-    "residual_jvp_worker_path_ready": false,
-    "residual_jvp_worker_path_blockers": [
-      "current_tangent_residual_row_hip_replay_not_proven",
-      "direct_probe_not_executed_preflight_only",
-      "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
-      "global_krylov_hip_solver_not_proven",
-      "global_krylov_jvp_rows_not_retained",
-      "production_hip_residual_jacobian_path_not_proven"
-    ],
+    "residual_jvp_worker_path_ready": true,
+    "residual_jvp_worker_path_blockers": [],
     "g1_closure_gate_ready": false,
     "g1_closure_gate_blockers": [
       "consistent_residual_jacobian_newton_gate_not_passed"
@@ -111,15 +98,8 @@
     "terminal_gate_partition": {
       "schema_version": "production-rocm-hip-worker-terminal-gate-partition.v1",
       "worker_path": {
-        "ready": false,
-        "blockers": [
-          "current_tangent_residual_row_hip_replay_not_proven",
-          "direct_probe_not_executed_preflight_only",
-          "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
-          "global_krylov_hip_solver_not_proven",
-          "global_krylov_jvp_rows_not_retained",
-          "production_hip_residual_jacobian_path_not_proven"
-        ]
+        "ready": true,
+        "blockers": []
       },
       "g1_closure_gate": {
         "ready": false,
@@ -130,26 +110,21 @@
       },
       "checkpoint_gate": {
         "full_load_required": true,
-        "load_scale": null,
-        "full_load_candidate": false,
-        "gap_to_full_load": null,
-        "full_load_closure_passed": false
+        "load_scale": 1.0,
+        "full_load_candidate": true,
+        "gap_to_full_load": 0.0,
+        "full_load_closure_passed": true
       },
       "direct_residual_gate": {
         "passed": false,
-        "relative_increment_gate_passed": false,
+        "relative_increment_gate_passed": true,
         "material_newton_breadth_passed": false,
-        "fallback_zero_passed": false
+        "fallback_zero_passed": true
       },
       "next_action": {
-        "id": "repair_production_rocm_hip_residual_jvp_worker_path",
+        "id": "close_direct_residual_gate_on_full_load_checkpoint",
         "blockers": [
-          "current_tangent_residual_row_hip_replay_not_proven",
-          "direct_probe_not_executed_preflight_only",
-          "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
-          "global_krylov_hip_solver_not_proven",
-          "global_krylov_jvp_rows_not_retained",
-          "production_hip_residual_jacobian_path_not_proven"
+          "direct_residual_gate_not_passed"
         ],
         "preferred_candidate_generator": null,
         "disallowed_retry_action_ids": [],
@@ -165,8 +140,8 @@
       "runtime_blockers": []
     },
     "execution": {
-      "child_direct_probe_executed": false,
-      "preflight_only": true,
+      "child_direct_probe_executed": true,
+      "preflight_only": false,
       "child_error": null
     },
     "matrix_free_global_krylov": {
@@ -175,20 +150,20 @@
         "batch_replay_backend": "hip_full_residual_resident",
         "require_hip_batch_replay": true,
         "linear_solver_backend": "torch_hip_gmres",
-        "max_iterations": 1,
+        "max_iterations": 3,
         "jvp_rows_required": true
       },
       "proof": {
-        "enabled": false,
-        "attempted": false,
-        "jvp_row_count": 0,
-        "jvp_rows_retained": false,
-        "hip_krylov_solver_used": false,
-        "accepted_state_tangent_refresh_hip_used": false,
+        "enabled": true,
+        "attempted": true,
+        "jvp_row_count": 3,
+        "jvp_rows_retained": true,
+        "hip_krylov_solver_used": true,
+        "accepted_state_tangent_refresh_hip_used": true,
         "accepted_state_tangent_refresh_cpu_used": false,
-        "accepted_state_tangent_refresh_deferred_satisfied": false,
-        "accepted_state_tangent_refresh_deferred_backend": "",
-        "promoted_to_final_state": false
+        "accepted_state_tangent_refresh_deferred_satisfied": true,
+        "accepted_state_tangent_refresh_deferred_backend": "global_deferred_hip_finite_difference_residual_jvp",
+        "promoted_to_final_state": true
       }
     },
     "current_tangent_residual_row_correction": {
@@ -200,13 +175,13 @@
         "residual_only_assembly": true
       },
       "proof": {
-        "enabled": false,
-        "attempted": false,
-        "require_hip_batch_replay": false,
+        "enabled": true,
+        "attempted": true,
+        "require_hip_batch_replay": true,
         "accepted_state_tangent_refresh_cpu_used": false,
-        "accepted_state_tangent_refresh_backend": "",
-        "accepted_state_tangent_refresh_hip_used": false,
-        "accepted_state_tangent_refresh_column_count": 0,
+        "accepted_state_tangent_refresh_backend": "global_deferred_hip_finite_difference_residual_jvp",
+        "accepted_state_tangent_refresh_hip_used": true,
+        "accepted_state_tangent_refresh_column_count": 2,
         "promoted_to_final_state": false
       }
     },
@@ -214,32 +189,139 @@
   },
   "component_only": false,
   "checkpoint": {
-    "path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_gate_candidate_step2_candidate.npz"
+    "path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_child_direct_step5_gmres3_signed_refined_candidate.npz"
   },
-  "load_scale": null,
+  "load_scale": 1.0,
   "shell_pressure_load_path_policy": "all_components",
   "hip_direct_probe": {
     "schema_version": "mgt-residual-jacobian-consistency-hip-direct-proof.v1",
-    "executed": false,
+    "executed": true,
     "execution_error": null,
-    "elapsed_seconds": 0.0,
-    "source_commit_sha": null,
-    "status": null,
-    "direct_residual_newton_ready": null,
-    "production_hip_residual_jacobian_path": false,
-    "hip_residual_engine_contract_passed": false,
-    "consistent_residual_jacobian_newton_gate_passed": false
+    "elapsed_seconds": 309.745885715005,
+    "source_commit_sha": "2061a8184c37d8934d2345f0c11784dae63d57fa",
+    "status": "partial",
+    "direct_residual_newton_ready": false,
+    "production_hip_residual_jacobian_path": true,
+    "hip_residual_engine_contract_passed": true,
+    "consistent_residual_jacobian_newton_gate_passed": false,
+    "hip_residual_engine_contract": {
+      "required": true,
+      "passed": true,
+      "required_lane_count": 2,
+      "passed_lane_count": 2,
+      "backends": [
+        "hip_full_residual",
+        "hip_full_residual_resident"
+      ],
+      "blockers": [],
+      "rows": [
+        {
+          "component": "matrix_free_global_krylov",
+          "active": true,
+          "attempted": true,
+          "promoted_to_final_state": true,
+          "require_hip": true,
+          "batch_replay_backend": "hip_full_residual_resident",
+          "backend_is_hip": true,
+          "require_hip_krylov_solver": true,
+          "hip_krylov_solver_used": true,
+          "passed": true,
+          "blockers": []
+        },
+        {
+          "component": "current_tangent_residual_row_correction",
+          "active": true,
+          "attempted": true,
+          "promoted_to_final_state": false,
+          "require_hip": true,
+          "batch_replay_backend": "hip_full_residual",
+          "backend_is_hip": true,
+          "require_hip_krylov_solver": false,
+          "hip_krylov_solver_used": false,
+          "passed": true,
+          "blockers": []
+        }
+      ]
+    },
+    "direct_residual_summary": {
+      "base_direct_residual_inf_n": 9.545433569596089,
+      "base_direct_relative_residual_inf": 0.0007217270653218927,
+      "final_direct_residual_inf_n": 9.495348728937525,
+      "final_direct_relative_residual_inf": 0.0007179401671362769,
+      "residual_tolerance_n": 0.0005,
+      "improvement_factor": 1.0052746710087568,
+      "output_final_checkpoint": {
+        "written": false,
+        "path": "",
+        "direct_residual_inf_n": null,
+        "load_scale": null
+      }
+    },
+    "gate_assessment": {
+      "direct_residual_gate_passed": false,
+      "relative_increment_gate_passed": true,
+      "full_load_closure_passed": true,
+      "consistent_residual_jacobian_newton_passed": false,
+      "consistent_residual_jacobian_newton_blockers": [
+        "consistent_residual_jacobian_newton_not_proven",
+        "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+      ],
+      "material_newton_breadth_passed": false,
+      "material_newton_breadth_blockers": [
+        "material_newton_breadth_not_proven",
+        "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+      ],
+      "fallback_zero_passed": true,
+      "fallback_zero_boundary_count": 0
+    },
+    "matrix_free_global_krylov": {
+      "enabled": true,
+      "attempted": true,
+      "batch_replay_backend": "hip_full_residual_resident",
+      "require_hip_batch_replay": true,
+      "require_hip_krylov_solver": true,
+      "hip_krylov_solver_used": true,
+      "promoted_to_final_state": true,
+      "accepted_state_refresh_cpu_used": false,
+      "accepted_state_tangent_refresh_backend": "current_tangent_residual_row_hip_finite_difference_residual_jvp",
+      "accepted_state_tangent_refresh_cpu_used": false,
+      "accepted_state_tangent_refresh_hip_used": true,
+      "accepted_state_tangent_refresh_deferred_to": "current_tangent_residual_row_correction",
+      "accepted_state_tangent_refresh_deferred_satisfied": true,
+      "accepted_state_tangent_refresh_deferred_backend": "global_deferred_hip_finite_difference_residual_jvp",
+      "accepted_state_tangent_refresh_closure_blocked": false,
+      "accepted_state_tangent_refresh_closure_blocker": "",
+      "jvp_row_count": 3,
+      "jvp_rows_retained": true
+    },
+    "current_tangent_residual_row_correction": {
+      "enabled": true,
+      "attempted": true,
+      "batch_replay_backend": "hip_full_residual",
+      "require_hip_batch_replay": true,
+      "accepted_state_refresh_cpu_used": false,
+      "accepted_state_tangent_refresh_cpu_used": false,
+      "accepted_state_tangent_refresh_backend": "global_deferred_hip_finite_difference_residual_jvp",
+      "accepted_state_tangent_refresh_hip_used": true,
+      "accepted_state_tangent_refresh_column_count": 2,
+      "promoted_to_final_state": false
+    }
   },
   "direction_rows": [],
   "state_scale_sweep": [],
   "runtime_metrics": {
     "setup_and_reference_seconds": 0.0,
     "base_assembly_seconds": 0.0,
-    "total_seconds": 1.0970381749793887
+    "total_seconds": 310.8031494669849
   },
-  "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested, but this receipt only records the ROCm/HIP runtime preflight. The HIP-required direct residual Newton proof was not executed, this module's CPU diagnostic assembler was not used, and this receipt does not close G1.",
+  "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested and routed to the HIP-required direct residual Newton proof path. The probe does not use this module's CPU diagnostic assembler. This receipt closes neither full G1 nor release readiness unless the child HIP residual engine contract and consistent residual/Jacobian Newton gate both pass without blockers.",
   "blockers": [
-    "hip_residual_jacobian_consistency_preflight_only",
-    "hip_residual_jacobian_consistency_not_executed"
+    "consistent_residual_jacobian::consistent_residual_jacobian_newton_not_proven",
+    "consistent_residual_jacobian::state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency",
+    "hip_direct_probe::consistent_jacobian_or_globalization_required",
+    "hip_direct_probe::direct_residual_gate_not_closed",
+    "hip_direct_probe::regularized_fixed_point_residual_must_not_be_used_as_physical_residual",
+    "hip_direct_probe_consistent_residual_jacobian_not_closed",
+    "production_rocm_hip_residual_jvp_worker::consistent_residual_jacobian_newton_gate_not_passed"
   ]
 }

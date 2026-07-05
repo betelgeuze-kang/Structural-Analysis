@@ -1,7 +1,7 @@
 # G1 Consistent Newton Full-Load Runner Contract
 
-- `summary_line`: `G1 consistent Newton full-load runner contract: BLOCKED_RUNNER_CONTRACT | contract_pass=False | observed_load=1/1 | closure_blockers=16`
-- `contract_pass`: `False`
+- `summary_line`: `G1 consistent Newton full-load runner contract: READY_FOR_RUNNER_IMPLEMENTATION | contract_pass=True | observed_load=1/1 | closure_blockers=13`
+- `contract_pass`: `True`
 - `evidence_closure_pass`: `False`
 - `runner_id`: `build_consistent_newton_full_load_checkpoint_candidate_runner`
 - `preferred_candidate_generator`: `consistent_residual_jacobian_newton_rocm_full_load_candidate`
@@ -60,7 +60,7 @@
 - `active_set_ls_tangent_fd_jvp_max_relative_inf_error`: `4.753647244794899e-14`
 - `active_set_minimax_final_residual_n`: `0.42740724991695345`
 - `active_set_minimax_steps_taken`: `0`
-- `worker_path_ready`: `False`
+- `worker_path_ready`: `True`
 - `worker_g1_closure_gate_ready`: `False`
 - `assembly_contract_seed_ready`: `True`
 - `cpu_seed_newton_parity`: `True`
@@ -506,42 +506,31 @@
 - `close_consistent_residual_jacobian_newton_gate`: owner=`solver_numerics_owner`, status=`required`
 - `prove_production_rocm_hip_residual_jvp_worker`: owner=`runtime_rocm_owner`, status=`required`
 
-## Contract Blockers
-
-- `production_rocm_hip_residual_jvp_worker_path_not_ready`
-
 ## Worker Path Repair Plan
 
-- `next_action_id`: `repair_production_rocm_hip_residual_jvp_worker_path`
-- `blocker_count`: `6`
-- `hip_required_direct_probe`: `1`
-- `production_hip_residual_jacobian_path`: `1`
-- `matrix_free_global_krylov`: `3`
-- `current_tangent_residual_row_replay`: `1`
+- `next_action_id`: `rerun_g1_full_load_hip_newton_lane`
+- `blocker_count`: `0`
 
 ## Worker Path Operator Sequence
 
 - `verify_rocm_runtime_device_interface`: owner=`runtime_rocm_owner`, status=`ready`
-- `run_hip_required_direct_probe`: owner=`runtime_rocm_owner`, status=`required`
-- `refresh_runner_contract_after_hip_probe`: owner=`g1_solver_owner`, status=`required`
+- `run_hip_required_direct_probe`: owner=`runtime_rocm_owner`, status=`ready`
+- `refresh_runner_contract_after_hip_probe`: owner=`g1_solver_owner`, status=`ready`
 - `rerun_g1_full_load_lane_with_full_load_checkpoint`: owner=`g1_solver_owner`, status=`required`
 
 ## Closure Blockers
 
-- `hip_consistency_proof_production_hip_path_not_proven`
 - `hip_consistency_proof_gate_not_passed`
-- `hip_consistency_proof_residual_jvp_worker_path_not_ready`
 - `hip_consistency_proof_worker_g1_closure_gate_not_ready`
 - `hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed`
-- `hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven`
-- `hip_consistency_proof_worker::direct_probe_not_executed_preflight_only`
-- `hip_consistency_proof_worker::global_krylov_accepted_state_tangent_refresh_hip_not_proven`
-- `hip_consistency_proof_worker::global_krylov_hip_solver_not_proven`
-- `hip_consistency_proof_worker::global_krylov_jvp_rows_not_retained`
-- `hip_consistency_proof_worker::production_hip_residual_jacobian_path_not_proven`
 - `hip_consistency_proof_has_blockers`
-- `hip_residual_jacobian_consistency_preflight_only`
-- `hip_residual_jacobian_consistency_not_executed`
+- `consistent_residual_jacobian::consistent_residual_jacobian_newton_not_proven`
+- `consistent_residual_jacobian::state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency`
+- `hip_direct_probe::consistent_jacobian_or_globalization_required`
+- `hip_direct_probe::direct_residual_gate_not_closed`
+- `hip_direct_probe::regularized_fixed_point_residual_must_not_be_used_as_physical_residual`
+- `hip_direct_probe_consistent_residual_jacobian_not_closed`
+- `production_rocm_hip_residual_jvp_worker::consistent_residual_jacobian_newton_gate_not_passed`
 - `consistent_residual_jacobian_newton_gate_not_passed`
 - `production_rocm_hip_worker_g1_closure_gate_not_ready`
 
