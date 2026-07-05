@@ -169,7 +169,7 @@
     "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
     "g1_full_load_lane::hip_consistency_proof_has_blockers"
   ],
-  "generated_at": "2026-07-05T12:28:37.600860+00:00",
+  "generated_at": "2026-07-05T12:37:52.142463+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -237,7 +237,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json": "sha256:51fcb241f9223f1055fb222f08cedf7e004abb7b3227116defd73232505d3089",
     "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:e18438d69a6f45a18cc8cd0afd15c2b30dd81228ec70b58b8e38204a942a62df",
-    "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:be030eb9abb2dbc748007acd1995ff53cdfd71a9912890c6e3dfc3e3cc93e28c",
+    "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:8a733e06ea9d00ef86ad53efa844ac48a3ecc9ac10d493092565686613a289bf",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:d234a41b8361426321f387573e8ef976ee53b6cfa801e170836cb58123b56d36",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:42f77c9c6856a124859510d049d0419cf5fa41a7d71e8f15f2f8c883f7301c73",
     "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:b39062c3bb3ad05d34a4fa67e2126f264d545dbe08ccbd1fe42f625f0bb6e13d",
@@ -418,7 +418,7 @@
     "solver_hip_strict_probe_pass": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "source_commit_sha": "8cb7add4d8a48fbbe67608612d679348d0cf029f",
+  "source_commit_sha": "88d2e54929f1daac1fd0ce21f7d2d2f93dd6431f",
   "status": "ready",
   "summary": {
     "dominant_near_null_rows": 64,

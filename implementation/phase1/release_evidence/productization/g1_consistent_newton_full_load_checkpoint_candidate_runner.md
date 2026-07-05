@@ -45,6 +45,8 @@
 - `active_frontier_structural_policy_active_set_state_updated_direct_replay_top_component`: `shell_bending_drilling`
 - `active_frontier_structural_policy_active_set_current_component_row_correction_final_residual_n`: `44.08014382294667`
 - `active_frontier_structural_policy_active_set_current_component_row_correction_improvement_n`: `0.0003377105458639562`
+- `active_frontier_structural_policy_active_set_current_component_row_correction_step2_final_residual_n`: `43.816671401648165`
+- `active_frontier_structural_policy_active_set_current_component_row_correction_step2_improvement_n`: `0.263472421298502`
 - `active_frontier_structural_policy_top_component`: `shell_bending_drilling`
 - `active_frontier_structural_policy_top_balance_driver`: `shell_bending_drilling_internal_force`
 - `active_frontier_shell_rotation_candidate_residual_n`: `0.04728610099315822`
@@ -249,6 +251,18 @@
 - `row_correction_accepted`: `True`
 - `accepted_state_refresh_cpu_used`: `True`
 - `output_checkpoint_path`: `implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz`
+- `top_row_dominant_component`: `shell_bending_drilling`
+
+## Active Frontier Structural Policy Current Component Row Correction Step 2
+
+- `present`: `True`
+- `status`: `partial`
+- `base_direct_residual_inf_n`: `44.08014382294667`
+- `final_direct_residual_inf_n`: `43.816671401648165`
+- `improvement_inf_n`: `0.263472421298502`
+- `row_correction_accepted`: `True`
+- `accepted_state_refresh_cpu_used`: `True`
+- `output_checkpoint_path`: `implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz`
 - `top_row_dominant_component`: `shell_bending_drilling`
 
 ## Active Frontier Structural Policy Residual Ownership
