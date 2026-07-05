@@ -235,6 +235,7 @@ def build_medium_model_scorecard_receipt(
     max_iterations: int = 0,
     matrix_backend: str = "numpy_linalg_solve_dense",
     reference: Path | None = None,
+    normalization_receipt: Path | None = None,
     memory_limit_gb: float = DEFAULT_MEMORY_LIMIT_GB,
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
     runner_command: str = "",
@@ -243,6 +244,7 @@ def build_medium_model_scorecard_receipt(
     started_perf = time.perf_counter()
     resolved_model = model_path.resolve()
     computed_sha = _sha256(resolved_model)
+    reference_output_sha256 = _sha256(reference) if reference is not None and reference.exists() else ""
     expected_sha = source_sha256 or computed_sha
     source_sha256_match = computed_sha == expected_sha
     scorecard_or_review_status = _scorecard_or_review_status(scorecard_or_review_path)
@@ -333,6 +335,9 @@ def build_medium_model_scorecard_receipt(
         "exception": exception,
         "scorecard_or_review_path": str(scorecard_or_review_path or ""),
         "scorecard_or_review_status": scorecard_or_review_status,
+        "reference_output_path": str(reference or ""),
+        "reference_output_sha256": reference_output_sha256,
+        "normalization_receipt": str(normalization_receipt or ""),
         "result_out": str(result_out or ""),
         "report_out": str(report_out or ""),
         "analysis_result_status": str((result_payload or {}).get("status", "")),
@@ -374,6 +379,7 @@ def build_parser() -> argparse.ArgumentParser:
         default="numpy_linalg_solve_dense",
     )
     parser.add_argument("--reference", type=Path)
+    parser.add_argument("--normalization-receipt", type=Path)
     parser.add_argument("--memory-limit-gb", type=float, default=DEFAULT_MEMORY_LIMIT_GB)
     parser.add_argument("--timeout-seconds", type=int, default=DEFAULT_TIMEOUT_SECONDS)
     parser.add_argument("--json", action="store_true")
@@ -401,6 +407,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         max_iterations=args.max_iterations,
         matrix_backend=args.matrix_backend,
         reference=args.reference,
+        normalization_receipt=args.normalization_receipt,
         memory_limit_gb=args.memory_limit_gb,
         timeout_seconds=args.timeout_seconds,
         runner_command=runner_command,

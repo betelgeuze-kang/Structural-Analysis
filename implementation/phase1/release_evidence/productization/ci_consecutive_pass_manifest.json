@@ -14,7 +14,7 @@
     "local_pr_report_count": 2,
     "release_streak_source_policy": "github_actions_required"
   },
-  "generated_at": "2026-07-04T09:02:15.543228+00:00",
+  "generated_at": "2026-07-05T08:09:05.852377+00:00",
   "lanes": {
     "nightly": {
       "blockers": [
@@ -24,7 +24,7 @@
       "claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
       "consecutive_pass_count": 0,
       "github_actions_consecutive_pass_count": 0,
-      "github_actions_filtered_run_count": 15,
+      "github_actions_filtered_run_count": 16,
       "github_actions_ignored_event_names": [],
       "github_actions_job_start_blocker_count": 1,
       "github_actions_job_start_blockers": [
@@ -32,15 +32,15 @@
           "event": "schedule",
           "head_branch": "main",
           "head_sha": "7dd6bc6cf09267eb2dc88b545620d72b58d222e2",
-          "message": "nightly workflow run has remained queued for 790.4 minutes on a self-hosted runner lane.",
-          "queued_minutes": 790.4,
+          "message": "nightly workflow run has remained queued for 749.1 minutes on a self-hosted runner lane.",
+          "queued_minutes": 749.1,
           "queued_threshold_minutes": 15,
           "reason_code": "github_actions_self_hosted_runner_queued_timeout",
-          "run_id": 28680698586,
-          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28680698586"
+          "run_id": 28717454485,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28717454485"
         }
       ],
-      "github_actions_queried_run_count": 15,
+      "github_actions_queried_run_count": 16,
       "github_actions_query_error": "",
       "github_actions_workflow_registered": true,
       "lane": "nightly",

@@ -93,6 +93,7 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
         "current_medium_model_scorecard_count": 0,
         "normalization_receipt_count": 0,
         "pass_or_approved_review_count": 0,
+        "reference_output_count": 0,
         "remaining_scorecard_case_count": 5,
         "remaining_pass_or_review_case_count": 5,
         "required_evidence_pass_count": 4,
@@ -121,6 +122,12 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert "medium_model_pass_or_review_missing" in payload["blockers"]
     assert payload["runner_command_ready"] is True
     assert "run_phase3_medium_model_scorecard_receipt.py" in payload["runner_command_template"]
+    assert "--reference OPERATOR_ATTACHED_REFERENCE_OUTPUTS.json" in payload[
+        "runner_command_template"
+    ]
+    assert "--normalization-receipt OPERATOR_ATTACHED_NORMALIZATION_RECEIPT.json" in payload[
+        "runner_command_template"
+    ]
     assert payload["resource_envelope"]["default_timeout_seconds"] == 3600
     assert payload["local_parser_boundary"]["topology_contract_pass"] is True
     assert "parser input evidence" in payload["local_parser_boundary"]["claim_boundary"]
@@ -312,6 +319,7 @@ def test_medium_model_scorecard_readiness_validates_normalization_receipts(tmp_p
                 "validation_contract_pass": True,
                 "crashed": False,
                 "oom": False,
+                "reference_output_sha256": f"sha256:{index:064x}",
                 "scorecard_or_review_path": f"approved-review-{index}.json",
                 "normalization_receipt": normalization_receipt.as_posix(),
                 "blockers": [],
@@ -325,7 +333,12 @@ def test_medium_model_scorecard_readiness_validates_normalization_receipts(tmp_p
 
     assert payload["scorecard_receipt_inventory"]["valid_normalization_case_count"] == 5
     assert payload["summary"]["normalization_receipt_count"] == 5
+    assert "reference_outputs_missing" not in payload["blockers"]
     assert "normalization_receipts_missing" not in payload["blockers"]
+    reference_outputs = {
+        row["id"]: row for row in payload["required_evidence"]
+    }["reference_outputs"]
+    assert reference_outputs["contract_pass"] is True
     canonical_normalization = {
         row["id"]: row for row in payload["required_evidence"]
     }["canonical_normalization"]
@@ -334,6 +347,61 @@ def test_medium_model_scorecard_readiness_validates_normalization_receipts(tmp_p
         row["normalization_receipt_contract_pass"] is True
         for row in payload["scorecard_receipt_inventory"]["receipts"]
     )
+
+
+def test_medium_model_scorecard_readiness_rejects_invalid_reference_output_sha(
+    tmp_path: Path,
+) -> None:
+    _write_minimal_medium_readiness_inputs(tmp_path)
+    _write_json(
+        tmp_path
+        / "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+        {
+            "rows": [
+                {
+                    "case_id": "SCBF16B",
+                    "family_id": "sac_scbf16b",
+                    "format": "tcl",
+                    "origin": "global_authority",
+                    "parser_contract_ready": True,
+                    "path": "operator-attached-medium.tcl",
+                    "sha256": "sha256:medium",
+                }
+            ]
+        },
+    )
+    receipt_dir = tmp_path / module.MEDIUM_RECEIPT_DIR
+    _write_review(tmp_path / "approved-review.json", index=0)
+    _write_json(
+        receipt_dir / "SCBF16B.scorecard_receipt.json",
+        {
+            "schema_version": "phase3-medium-model-scorecard-receipt.v1",
+            "case_id": "SCBF16B",
+            "contract_pass": True,
+            "validation_contract_pass": True,
+            "crashed": False,
+            "oom": False,
+            "reference_output_sha256": "sha256:not-a-real-digest",
+            "scorecard_or_review_path": "approved-review.json",
+            "blockers": [],
+        },
+    )
+
+    payload = module.build_phase3_medium_model_scorecard_readiness_receipt(
+        repo_root=tmp_path,
+        source_commit_sha="test-sha",
+    )
+
+    assert payload["reference_output_count"] == 0
+    assert payload["scorecard_receipt_inventory"]["valid_reference_output_case_count"] == 0
+    first_receipt = payload["scorecard_receipt_inventory"]["receipts"][0]
+    assert first_receipt["reference_output_sha256_valid"] is False
+    case_rows = {
+        row["case_id"]: row for row in payload["case_readiness_ledger"]["case_rows"]
+    }
+    assert case_rows["SCBF16B"]["reference_outputs_pass"] is False
+    assert "reference_outputs_missing" in case_rows["SCBF16B"]["blockers"]
+    assert "reference_outputs_missing" in payload["blockers"]
 
 
 def test_medium_model_scorecard_readiness_rejects_invalid_review_payloads(

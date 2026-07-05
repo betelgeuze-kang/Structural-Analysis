@@ -53,10 +53,47 @@ def test_medium_model_scorecard_receipt_runner_writes_pass_receipt_for_valid_att
 ) -> None:
     model = tmp_path / "attached-medium-model.json"
     review = tmp_path / "approved-review.json"
+    reference = tmp_path / "reference-output.json"
+    normalization = tmp_path / "normalization-receipt.json"
     result = tmp_path / "result.json"
     report = tmp_path / "report.json"
     out = tmp_path / "receipt.json"
     _write_model(model)
+    reference.write_text(
+        json.dumps(
+            {
+                "element_count": 1,
+                "load_count": 0,
+                "node_count": 2,
+                "support_count": 0,
+                "unit_force": "kN",
+                "unit_length": "m",
+                "up_axis": "Z",
+            },
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    normalization.write_text(
+        json.dumps(
+            {
+                "schema_version": "phase3-medium-normalization-receipt.v1",
+                "case_id": "operator_attached_medium_runner_smoke_case",
+                "contract_pass": True,
+                "units": {"force": "kN", "length": "m"},
+                "coordinate_transform": "identity",
+                "mapping_coverage": {"member": 1.0, "node": 1.0},
+            },
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     review.write_text(
         json.dumps(
             {
@@ -81,6 +118,8 @@ def test_medium_model_scorecard_receipt_runner_writes_pass_receipt_for_valid_att
         out_path=out,
         result_out=result,
         report_out=report,
+        reference=reference,
+        normalization_receipt=normalization,
         runner_command="python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model attached-medium-model.json",
     )
 
@@ -92,6 +131,9 @@ def test_medium_model_scorecard_receipt_runner_writes_pass_receipt_for_valid_att
     assert payload["blockers"] == []
     assert payload["scorecard_or_review_status"]["contract_pass"] is True
     assert payload["scorecard_or_review_status"]["decision"] == "APPROVED_REVIEW"
+    assert payload["reference_output_path"] == str(reference)
+    assert payload["reference_output_sha256"] == module._sha256(reference)
+    assert payload["normalization_receipt"] == str(normalization)
     assert payload["source_sha256_match"] is True
     assert payload["validation_contract_pass"] is True
     assert payload["crashed"] is False

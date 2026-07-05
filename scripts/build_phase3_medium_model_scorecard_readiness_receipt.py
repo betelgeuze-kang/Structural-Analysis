@@ -56,6 +56,8 @@ RUNNER_COMMAND_TEMPLATE = (
     "--case-id OPERATOR_ATTACHED_CASE_ID "
     "--source-sha256 OPERATOR_ATTACHED_SHA256 "
     "--scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json "
+    "--reference OPERATOR_ATTACHED_REFERENCE_OUTPUTS.json "
+    "--normalization-receipt OPERATOR_ATTACHED_NORMALIZATION_RECEIPT.json "
     "--out implementation/phase1/release_evidence/productization/"
     "medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json "
     "--result-out implementation/phase1/release_evidence/productization/"
@@ -185,6 +187,15 @@ def _as_float(value: Any, *, default: float = 0.0) -> float:
         return float(value)
     except (TypeError, ValueError):
         return default
+
+
+def _is_sha256_digest(value: str) -> bool:
+    prefix = "sha256:"
+    digest = str(value or "").strip()
+    if not digest.startswith(prefix):
+        return False
+    hex_part = digest[len(prefix) :]
+    return len(hex_part) == 64 and all(char in "0123456789abcdef" for char in hex_part)
 
 
 def _normalized_decision(value: Any) -> str:
@@ -401,6 +412,7 @@ def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
     receipt_rows: list[dict[str, Any]] = []
     valid_scorecard_case_ids: set[str] = set()
     pass_or_review_case_ids: set[str] = set()
+    valid_reference_case_ids: set[str] = set()
     valid_normalization_case_ids: set[str] = set()
     for path in _receipt_files(repo_root, MEDIUM_RECEIPT_DIR):
         payload = _try_load_json(path)
@@ -438,6 +450,9 @@ def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
             valid_scorecard_case_ids.add(case_id)
         if pass_or_review_pass:
             pass_or_review_case_ids.add(case_id)
+        reference_output_sha256_valid = _is_sha256_digest(reference_output_sha256)
+        if reference_output_sha256_valid:
+            valid_reference_case_ids.add(case_id)
         if normalization_status["contract_pass"]:
             valid_normalization_case_ids.add(case_id)
         receipt_rows.append(
@@ -453,6 +468,7 @@ def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
                 "scorecard_or_review_contract_pass": scorecard_or_review_status["contract_pass"],
                 "scorecard_or_review_status": scorecard_or_review_status,
                 "reference_output_sha256": reference_output_sha256,
+                "reference_output_sha256_valid": reference_output_sha256_valid,
                 "normalization_receipt": normalization_receipt,
                 "normalization_receipt_contract_pass": normalization_status["contract_pass"],
                 "normalization_receipt_status": normalization_status,
@@ -467,6 +483,7 @@ def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
         "receipt_file_count": len(receipt_rows),
         "valid_scorecard_case_count": len(valid_scorecard_case_ids),
         "pass_or_approved_review_count": len(pass_or_review_case_ids),
+        "valid_reference_output_case_count": len(valid_reference_case_ids),
         "valid_normalization_case_count": len(valid_normalization_case_ids),
         "receipts": receipt_rows,
         "claim_boundary": (
@@ -508,6 +525,28 @@ def _pass_review_evidence_row(row: dict[str, Any], *, current: int, required: in
     return enriched
 
 
+def _reference_output_evidence_row(
+    row: dict[str, Any], *, current: int, required: int
+) -> dict[str, Any]:
+    enriched = dict(row)
+    ready = current >= required
+    enriched.update(
+        {
+            "status": "ready" if ready else ("partial" if current else "missing"),
+            "contract_pass": ready,
+            "blocker": "" if ready else row["blocker"],
+            "current_reference_output_count": current,
+            "required_reference_output_count": required,
+            "claim_boundary": (
+                "Reference-output credit requires one operator-attached checksum "
+                "per selected medium case. This row does not create or approve "
+                "reference outputs."
+            ),
+        }
+    )
+    return enriched
+
+
 def _normalization_evidence_row(row: dict[str, Any], *, current: int, required: int) -> dict[str, Any]:
     enriched = dict(row)
     ready = current >= required
@@ -537,6 +576,7 @@ def _missing_evidence_breakdown(
     required_medium_model_count: int,
     current_scorecard_count: int,
     pass_or_approved_review_count: int,
+    reference_output_count: int,
     normalization_receipt_count: int,
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
@@ -564,8 +604,11 @@ def _missing_evidence_breakdown(
             item.update(
                 {
                     "required_case_count": required_medium_model_count,
-                    "current_case_count": 0,
-                    "remaining_case_count": required_medium_model_count,
+                    "current_case_count": reference_output_count,
+                    "remaining_case_count": max(
+                        required_medium_model_count - reference_output_count,
+                        0,
+                    ),
                     "required_artifacts": [
                         "reference displacement/reaction/member/modal outputs",
                         "reference output checksum per selected case",
@@ -951,7 +994,7 @@ def _case_readiness_ledger(
         pass_or_approved_review = bool(
             receipt.get("pass_or_approved_review") is True
         )
-        reference_outputs_pass = bool(receipt.get("reference_output_sha256"))
+        reference_outputs_pass = bool(receipt.get("reference_output_sha256_valid") is True)
         normalization_pass = bool(receipt.get("normalization_receipt_contract_pass") is True)
         blockers = []
         if authoritative_source_pass is not True:
@@ -1253,6 +1296,7 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
     )
     current_scorecard_count = int(receipt_inventory["valid_scorecard_case_count"])
     pass_or_approved_review_count = int(receipt_inventory["pass_or_approved_review_count"])
+    reference_output_count = int(receipt_inventory["valid_reference_output_case_count"])
     normalization_receipt_count = int(receipt_inventory["valid_normalization_case_count"])
     runner_script = repo_root / RUNNER_SCRIPT
     runner_command_ready = runner_script.exists()
@@ -1285,6 +1329,14 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
                 _pass_review_evidence_row(
                     row,
                     current=pass_or_approved_review_count,
+                    required=required_medium_model_count,
+                )
+            )
+        elif row["id"] == "reference_outputs":
+            evidence_rows.append(
+                _reference_output_evidence_row(
+                    row,
+                    current=reference_output_count,
                     required=required_medium_model_count,
                 )
             )
@@ -1332,6 +1384,7 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         required_medium_model_count=required_medium_model_count,
         current_scorecard_count=current_scorecard_count,
         pass_or_approved_review_count=pass_or_approved_review_count,
+        reference_output_count=reference_output_count,
         normalization_receipt_count=normalization_receipt_count,
     )
     operator_next_actions = _operator_next_actions(
@@ -1353,6 +1406,7 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         "missing_candidate_case_count": max(required_medium_model_count - len(canonical_rows), 0),
         "current_medium_model_scorecard_count": current_scorecard_count,
         "pass_or_approved_review_count": pass_or_approved_review_count,
+        "reference_output_count": reference_output_count,
         "normalization_receipt_count": normalization_receipt_count,
         "remaining_scorecard_case_count": max(
             required_medium_model_count - current_scorecard_count,
@@ -1385,6 +1439,7 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         "required_medium_model_count": required_medium_model_count,
         "current_medium_model_scorecard_count": current_scorecard_count,
         "pass_or_approved_review_count": pass_or_approved_review_count,
+        "reference_output_count": reference_output_count,
         "scorecard_receipt_inventory": receipt_inventory,
         "local_candidate_artifact_count": len(canonical_rows),
         "case_selection_summary": {
