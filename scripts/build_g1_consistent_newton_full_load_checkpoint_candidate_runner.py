@@ -226,6 +226,12 @@ DEFAULT_HIP_REQUIRED_SCALED_GLOBAL_KRYLOV_NO_DESCENT_PROBE = (
 DEFAULT_CURRENT_FRONTIER_OPERATOR_MISMATCH_AUDIT = (
     PRODUCTIZATION / "g1_current_frontier_operator_mismatch_audit.json"
 )
+DEFAULT_PHASE2_MATERIAL_NEWTON_BREADTH_SUMMARY = (
+    PRODUCTIZATION / "phase2_material_newton_breadth_summary.json"
+)
+DEFAULT_PHASE2_MATERIAL_NEWTON_BREADTH_STATE_UPDATED_SEEDS = (
+    PRODUCTIZATION / "phase2_material_newton_breadth_state_updated_seeds.json"
+)
 DEFAULT_OUT = PRODUCTIZATION / "g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_SOLVER_HIP_E2E = Path(
@@ -3061,6 +3067,12 @@ def build_runner_packet(
     current_frontier_operator_mismatch_audit_path: Path = (
         DEFAULT_CURRENT_FRONTIER_OPERATOR_MISMATCH_AUDIT
     ),
+    phase2_material_newton_breadth_summary_path: Path = (
+        DEFAULT_PHASE2_MATERIAL_NEWTON_BREADTH_SUMMARY
+    ),
+    phase2_material_newton_breadth_state_updated_seeds_path: Path = (
+        DEFAULT_PHASE2_MATERIAL_NEWTON_BREADTH_STATE_UPDATED_SEEDS
+    ),
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     g1_lane = _load_json(repo_root, g1_lane_path)
@@ -3077,6 +3089,14 @@ def build_runner_packet(
     current_frontier_operator_mismatch_audit = _load_json(
         repo_root,
         current_frontier_operator_mismatch_audit_path,
+    )
+    phase2_material_newton_breadth_summary = _load_json(
+        repo_root,
+        phase2_material_newton_breadth_summary_path,
+    )
+    phase2_material_newton_breadth_state_updated_seeds = _load_json(
+        repo_root,
+        phase2_material_newton_breadth_state_updated_seeds_path,
     )
     global_connectivity = _load_json(repo_root, global_connectivity_path)
     assembly_contract_seed = _load_json(repo_root, assembly_contract_seed_path)
@@ -3728,6 +3748,8 @@ def build_runner_packet(
                 hip_required_consistency_no_descent_probe_path,
                 hip_required_scaled_global_krylov_no_descent_probe_path,
                 current_frontier_operator_mismatch_audit_path,
+                phase2_material_newton_breadth_summary_path,
+                phase2_material_newton_breadth_state_updated_seeds_path,
             ],
             reused_evidence=True,
             reuse_policy=(
@@ -5228,6 +5250,37 @@ def build_runner_packet(
                 ).get("next_required_operator")
                 or ""
             ),
+            "phase2_material_newton_breadth_seed_coverage_ready": (
+                phase2_material_newton_breadth_summary.get(
+                    "state_updated_material_newton_breadth_seed_coverage_ready"
+                )
+                is True
+            ),
+            "phase2_state_updated_material_seed_case_count": int(
+                _as_float(
+                    phase2_material_newton_breadth_summary.get(
+                        "state_updated_material_newton_seed_case_count"
+                    )
+                )
+            ),
+            "phase2_state_updated_material_jvp_pass": (
+                phase2_material_newton_breadth_summary.get(
+                    "material_jvp_relative_error_pass"
+                )
+                is True
+            ),
+            "phase2_state_updated_material_replay_pass": (
+                phase2_material_newton_breadth_summary.get(
+                    "material_state_persistence_replay_seed_passed"
+                )
+                is True
+            ),
+            "phase2_state_updated_material_breadth_closed": (
+                phase2_material_newton_breadth_summary.get(
+                    "state_updated_material_newton_breadth_closed"
+                )
+                is True
+            ),
             "row_only_correction_loop_stopped": _row_only_loop_stopped(
                 cause_narrowing,
                 action,
@@ -5521,6 +5574,12 @@ def build_runner_packet(
         "current_frontier_operator_mismatch_audit": (
             current_frontier_operator_mismatch_audit
         ),
+        "phase2_material_newton_breadth_summary": (
+            phase2_material_newton_breadth_summary
+        ),
+        "phase2_material_newton_breadth_state_updated_seeds": (
+            phase2_material_newton_breadth_state_updated_seeds
+        ),
         "hip_worker_contract": {
             "worker_id": str(worker.get("worker_id") or ""),
             "residual_jvp_worker_path_ready": worker.get(
@@ -5730,6 +5789,12 @@ def build_runner_packet(
             "g1_current_frontier_operator_mismatch_audit": (
                 current_frontier_operator_mismatch_audit_path.as_posix()
             ),
+            "phase2_material_newton_breadth_summary": (
+                phase2_material_newton_breadth_summary_path.as_posix()
+            ),
+            "phase2_material_newton_breadth_state_updated_seeds": (
+                phase2_material_newton_breadth_state_updated_seeds_path.as_posix()
+            ),
         },
         "claim_boundary": (
             "This packet defines the next G1 runner contract for generating a "
@@ -5786,6 +5851,10 @@ def _markdown(payload: dict[str, Any]) -> str:
     ]
     current_frontier_operator_mismatch = _as_dict(
         payload.get("current_frontier_operator_mismatch_audit")
+    )
+    material_breadth = _as_dict(payload.get("phase2_material_newton_breadth_summary"))
+    material_seed_suite = _as_dict(
+        payload.get("phase2_material_newton_breadth_state_updated_seeds")
     )
     frame_eps_sweep = _as_dict(payload.get("frame_tangent_fd_epsilon_sweep"))
     mu_sweep = _as_dict(payload.get("true_newton_from_active_set_mu_sweep"))
@@ -5969,6 +6038,12 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `current_frontier_operator_mismatch_audit_complete`: `{current_frontier_operator_mismatch.get('audit_complete')}`",
         f"- `current_frontier_full_load_no_descent`: `{_as_dict(current_frontier_operator_mismatch.get('frontier_probe')).get('full_load_no_descent')}`",
         f"- `current_frontier_operator_family_no_descent`: `{_as_dict(current_frontier_operator_mismatch.get('current_frontier_no_descent')).get('global_and_row_operator_family_no_descent')}`",
+        "- `phase2_material_newton_breadth_seed_coverage_ready`: "
+        f"`{material_breadth.get('state_updated_material_newton_breadth_seed_coverage_ready')}`",
+        "- `phase2_state_updated_material_seed_case_count`: "
+        f"`{material_breadth.get('state_updated_material_newton_seed_case_count')}`",
+        "- `phase2_state_updated_material_breadth_closed`: "
+        f"`{material_breadth.get('state_updated_material_newton_breadth_closed')}`",
         f"- `worker_path_ready`: `{hip.get('residual_jvp_worker_path_ready')}`",
         f"- `worker_g1_closure_gate_ready`: `{hip.get('g1_closure_gate_ready')}`",
         f"- `assembly_contract_seed_ready`: `{assembly.get('contract_pass')}`",
@@ -7317,6 +7392,44 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.append(
             f"- `claim_boundary`: `{current_frontier_operator_mismatch.get('claim_boundary')}`"
         )
+    if material_breadth or material_seed_suite:
+        lines.extend(["", "## State-Updated Material Newton Breadth Seeds", ""])
+        lines.append(f"- `summary_status`: `{material_breadth.get('status')}`")
+        lines.append(
+            "- `seed_coverage_ready`: "
+            f"`{material_breadth.get('state_updated_material_newton_breadth_seed_coverage_ready')}`"
+        )
+        lines.append(
+            "- `seed_case_count`: "
+            f"`{material_breadth.get('state_updated_material_newton_seed_case_count')}`"
+        )
+        lines.append(
+            "- `frame_material_newton_seed_pass`: "
+            f"`{material_breadth.get('frame_material_newton_seed_pass')}`"
+        )
+        lines.append(
+            "- `shell_material_newton_seed_pass`: "
+            f"`{material_breadth.get('shell_material_newton_seed_pass')}`"
+        )
+        lines.append(
+            "- `material_state_persistence_replay_seed_passed`: "
+            f"`{material_breadth.get('material_state_persistence_replay_seed_passed')}`"
+        )
+        lines.append(
+            "- `material_jvp_relative_error_pass`: "
+            f"`{material_breadth.get('material_jvp_relative_error_pass')}`"
+        )
+        lines.append(
+            "- `state_updated_material_newton_breadth_closed`: "
+            f"`{material_breadth.get('state_updated_material_newton_breadth_closed')}`"
+        )
+        lines.append(
+            "- `state_updated_seed_suite_case_count`: "
+            f"`{material_seed_suite.get('state_updated_material_newton_seed_case_count')}`"
+        )
+        lines.append(
+            f"- `claim_boundary`: `{material_breadth.get('claim_boundary')}`"
+        )
     if payload.get("next_actions"):
         lines.extend(["", "## Next Actions", ""])
         for item in _as_list(payload.get("next_actions")):
@@ -7509,6 +7622,12 @@ def write_runner_packet(
     current_frontier_operator_mismatch_audit_path: Path = (
         DEFAULT_CURRENT_FRONTIER_OPERATOR_MISMATCH_AUDIT
     ),
+    phase2_material_newton_breadth_summary_path: Path = (
+        DEFAULT_PHASE2_MATERIAL_NEWTON_BREADTH_SUMMARY
+    ),
+    phase2_material_newton_breadth_state_updated_seeds_path: Path = (
+        DEFAULT_PHASE2_MATERIAL_NEWTON_BREADTH_STATE_UPDATED_SEEDS
+    ),
     out: Path = DEFAULT_OUT,
     out_md: Path = DEFAULT_OUT_MD,
 ) -> dict[str, Any]:
@@ -7661,6 +7780,12 @@ def write_runner_packet(
         ),
         current_frontier_operator_mismatch_audit_path=(
             current_frontier_operator_mismatch_audit_path
+        ),
+        phase2_material_newton_breadth_summary_path=(
+            phase2_material_newton_breadth_summary_path
+        ),
+        phase2_material_newton_breadth_state_updated_seeds_path=(
+            phase2_material_newton_breadth_state_updated_seeds_path
         ),
     )
     resolved_out = _resolve(repo_root, out)
@@ -7903,6 +8028,16 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_CURRENT_FRONTIER_OPERATOR_MISMATCH_AUDIT,
     )
+    parser.add_argument(
+        "--phase2-material-newton-breadth-summary",
+        type=Path,
+        default=DEFAULT_PHASE2_MATERIAL_NEWTON_BREADTH_SUMMARY,
+    )
+    parser.add_argument(
+        "--phase2-material-newton-breadth-state-updated-seeds",
+        type=Path,
+        default=DEFAULT_PHASE2_MATERIAL_NEWTON_BREADTH_STATE_UPDATED_SEEDS,
+    )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
     parser.add_argument("--json", action="store_true")
@@ -8037,6 +8172,12 @@ def main(argv: list[str] | None = None) -> int:
         ),
         current_frontier_operator_mismatch_audit_path=(
             args.current_frontier_operator_mismatch_audit
+        ),
+        phase2_material_newton_breadth_summary_path=(
+            args.phase2_material_newton_breadth_summary
+        ),
+        phase2_material_newton_breadth_state_updated_seeds_path=(
+            args.phase2_material_newton_breadth_state_updated_seeds
         ),
         out=args.out,
         out_md=args.out_md,

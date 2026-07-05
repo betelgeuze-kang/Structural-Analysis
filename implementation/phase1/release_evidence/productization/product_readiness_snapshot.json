@@ -141,7 +141,7 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 37,
+      "blocker_count": 38,
       "blockers": [
         "ci_streak::nightly::github_actions_job_start_blocked",
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -170,6 +170,7 @@
         "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
         "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
         "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
+        "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
@@ -190,7 +191,7 @@
       ]
     }
   },
-  "blocker_count": 67,
+  "blocker_count": 68,
   "blockers": [
     "ci_streak::nightly::github_actions_job_start_blocked",
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -249,6 +250,7 @@
     "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
     "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
     "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
+    "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
     "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
     "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
     "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
@@ -519,12 +521,12 @@
       "status": "blocked"
     },
     "developer_preview_readiness": {
-      "blocker_count": 33,
+      "blocker_count": 32,
       "category_counts": {
         "benchmark": 2,
         "future commercial": 35,
         "numerical": 6,
-        "software product": 25
+        "software product": 24
       },
       "claim_boundary": "Developer Preview is an open benchmark workstation preview, not a commercial structural solver beta. Customer shadow, commercial license/legal approval, license-server operation, commercial SLA, 30-run CI streak, and external approval receipts remain visible as future Commercial Release blockers. Remote GitHub sync/push approval is a release-publication handoff and does not block the local Developer Preview evidence bar. AI/GNN/surrogate truth claims stay frozen until the deterministic reference solver, residual/Jacobian/Newton closure, and benchmark truth are fixed.",
       "developer_preview_ready": false,
@@ -3081,22 +3083,22 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-05T14:32:06.360831+00:00",
+  "generated_at": "2026-07-05T14:39:08.969807+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
-    "README.md": "sha256:86d1df312925414aa9b7b16c42e546179395301dc7a2e135865c94f4050af07a",
-    "docs/commercialization-gap-current-state.md": "sha256:e54a8b3eafc925e0adc4829d84c56393ac72bbcadc68b815263319c632c6b0db",
+    "README.md": "sha256:ba9fa3c24568958ed973b2a399ef8c968e777fe2ff5e7a5240ae002cbc464572",
+    "docs/commercialization-gap-current-state.md": "sha256:09dd6efac1d70d2086171f0ba45d0680c686df666d9ffc68fc7960ee4a9adb05",
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:c4a21ef31b6606231a9622652c5e94e57de6f7e0572f7e42afdfa2addd6d314a",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:d2fdac0bedd30f70c70bf93c4485c5414a43eac50fd5c847b60cb4c274eb548d",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:f3276b89e0984fe83d84fa1e9eae05fed6d9a5eac56c8b21fd7ee54702ea3667",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:ed32dcfc42e783e07320ea30a9e3e6417cb295df174b5625d3eaff344e6d4865",
     "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:b4d7fb16bd51b75de337797bbf0651b1801e895f0f651062aeded0e4ad546531",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:304c5efc89c7879a054cddbf7f72ecf3324ef9583386ff614ca04c1c26540e80",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:5cb1817f5001d5bc2a428bfc9ca4748febb554aa5edff8ab95316bb26390024a",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:e0bf9bc6cd4c41ac051b3dabf23ba894d272f6472e912fce3aaba51c69cc4648",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:d26d45f45646b8a99ac764fa275cff946028ec54ae29775f1c7fd66157f9cba6",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:b83383261c90420ed89cd42c98383887404da18514324fe28d4d4a7c867da3b2",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:8cdd4232a99e080753e1b651c0f122466a6fd6109d3e1fd5602a982c58eb9bbb",
-    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:10f9562a12a617784795532db5efd7a59e9d9b6479e33c9fc0a622b213c66570",
+    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:1d686eef62750f779dbc9aee547afea26397cca9ff2ac089f8f45d2b8b0e4aad",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:019e1db2e3a6774821c5f8679ab26ad1b4caf889b5fe9ddba5bfa49e4581a1a1",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:a33733e0cdba8a4ca84fa88825e1339af11bda21d8b35ac66787f91669918002",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:40b1b46562249340f70f9c1aeb2364b5efbefd0a0b348b781b1417e444ec0e5e",
@@ -3107,8 +3109,8 @@
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:66d6027aa5089c91489ae966693e938254fe8fca247749d6303bfece8a3552a0",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:01911ef80b1cd08db6b03d5570ebb919d12287be47b550129ecf1a0b39b71b6a",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d7accd8c23f8c31bdb42003018772fd860316cecf75552af94bac60c4d3b2bcb",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:587b6b593368456ceb92cf366cc41fe5654439f8b434ca4cb9a428709d1f59e0",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:2d7fbbee579cddd7410232b06e48956999e20ef32c5c240b84e423b33124c94f",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:540d2a8425dd8440e4c6aa64a2f7b4f63167a4560db8df5136c0ebceb984ff18",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:71aa6dac4c27bce1193bb09417e16abe08ea80240bbe1b8eedff3ebdd7222dec",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:2dd335461534767886bc08ce07d463d36e2617cab30e8306d9da5e0e51e8aa3b",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:4f8ea099cd22b4eff4bda273b6425f22da1b9b908d99ebe70a2c352d0a5b23d2",
@@ -3402,7 +3404,7 @@
     },
     "release freshness/sync": {
       "blocked": true,
-      "blocker_count": 26,
+      "blocker_count": 27,
       "blockers": [
         "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
         "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
@@ -3423,6 +3425,7 @@
         "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
         "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
         "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
+        "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
@@ -3446,7 +3449,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "6a4085c424e821cd29b2620dfb4d604198d5936e",
+  "source_commit_sha": "cdbe88c95142b662af1a57644a1cd385b1e1947c",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3543,15 +3546,17 @@
     "metadata_rows": [
       {
         "artifact": "pm_release_gate_report",
-        "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-05T14:29:44.026153+00:00",
+        "changed_paths_since_source_commit": [
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
+        ],
+        "generated_at": "2026-07-05T14:32:24.430694+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "6a4085c424e821cd29b2620dfb4d604198d5936e",
-        "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "gap_closure_status",
@@ -3572,7 +3577,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T07:42:21.976217+00:00",
         "input_checksum_present": true,
@@ -3602,7 +3608,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T07:42:21.644037+00:00",
         "input_checksum_present": true,
@@ -3632,7 +3639,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T07:42:22.083023+00:00",
         "input_checksum_present": true,
@@ -3662,7 +3670,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T07:42:20.507990+00:00",
         "input_checksum_present": true,
@@ -3676,24 +3685,24 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-05T14:31:58.538417+00:00",
+        "generated_at": "2026-07-05T14:39:08.681682+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "6a4085c424e821cd29b2620dfb4d604198d5936e",
+        "source_commit_sha": "cdbe88c95142b662af1a57644a1cd385b1e1947c",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-05T14:32:02.476110+00:00",
+        "generated_at": "2026-07-05T14:39:08.743015+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "6a4085c424e821cd29b2620dfb4d604198d5936e",
+        "source_commit_sha": "cdbe88c95142b662af1a57644a1cd385b1e1947c",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -3716,7 +3725,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T07:42:18.984493+00:00",
         "input_checksum_present": true,
@@ -3746,7 +3756,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T07:42:19.109398+00:00",
         "input_checksum_present": true,
@@ -3761,7 +3772,8 @@
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [
           "docs/g1-global-operator-mismatch-audit.md",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T13:40:10.440430+00:00",
         "input_checksum_present": true,
@@ -3775,12 +3787,12 @@
       {
         "artifact": "g1_f2g_f2h_cause_narrowing_status",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-05T14:29:11.816260+00:00",
+        "generated_at": "2026-07-05T14:39:02.389887+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "6a4085c424e821cd29b2620dfb4d604198d5936e",
+        "source_commit_sha": "cdbe88c95142b662af1a57644a1cd385b1e1947c",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -3803,7 +3815,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T07:35:29.708651+00:00",
         "input_checksum_present": true,
@@ -3833,7 +3846,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T07:42:20.636281+00:00",
         "input_checksum_present": true,
@@ -3863,7 +3877,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T07:42:21.331842+00:00",
         "input_checksum_present": true,
@@ -3893,7 +3908,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T08:31:37.173121+00:00",
         "input_checksum_present": true,
@@ -3923,7 +3939,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T07:35:29.597225+00:00",
         "input_checksum_present": true,
@@ -3953,7 +3970,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T07:35:29.670294+00:00",
         "input_checksum_present": true,
@@ -3983,7 +4001,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T07:42:22.258098+00:00",
         "input_checksum_present": true,
@@ -4013,7 +4032,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T07:35:29.749021+00:00",
         "input_checksum_present": true,
@@ -4043,7 +4063,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T08:11:07.261112+00:00",
         "input_checksum_present": true,
@@ -4073,7 +4094,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T07:45:18.457129+00:00",
         "input_checksum_present": true,
@@ -4103,7 +4125,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T07:45:18.507287+00:00",
         "input_checksum_present": true,
@@ -4133,7 +4156,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T07:45:18.570774+00:00",
         "input_checksum_present": true,
@@ -4156,7 +4180,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T11:07:27.746010+00:00",
         "input_checksum_present": true,
@@ -4186,7 +4211,8 @@
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py"
         ],
         "generated_at": "2026-07-05T08:28:17.903872+00:00",
         "input_checksum_present": true,
@@ -4220,29 +4246,18 @@
     "worktree": {
       "dirty": true,
       "dirty_paths": [
-        "README.md",
-        "docs/commercialization-gap-current-state.md",
         "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
         "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
         "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
-        "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json",
         "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
+        "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.md",
         "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json",
-        "implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_summary.json",
-        "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
-        "scripts/build_phase2_material_newton_breadth_artifacts.py",
-        "tests/test_build_phase2_material_newton_breadth_artifacts.py",
-        "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_state_updated_seeds.json"
+        "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+        "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py"
       ],
       "non_receipt_dirty_paths": [
-        "scripts/build_phase2_material_newton_breadth_artifacts.py",
-        "tests/test_build_phase2_material_newton_breadth_artifacts.py"
+        "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+        "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py"
       ],
       "phase3_release_control_cleanup_plan": {
         "candidate_release_control_commit_set_count": 0,
@@ -4266,25 +4281,14 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M README.md",
-        " M docs/commercialization-gap-current-state.md",
         " M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
         " M implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
         " M implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
-        " M implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json",
         " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
+        " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.md",
         " M implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json",
-        " M implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_summary.json",
-        " M implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
-        " M scripts/build_phase2_material_newton_breadth_artifacts.py",
-        " M tests/test_build_phase2_material_newton_breadth_artifacts.py",
-        "?? implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_state_updated_seeds.json"
+        " M scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+        " M tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py"
       ]
     }
   },

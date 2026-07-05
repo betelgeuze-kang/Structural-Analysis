@@ -4,7 +4,7 @@
     "phase1_core_api_contract": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
     "product_readiness_snapshot": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
   },
-  "blocker_count": 33,
+  "blocker_count": 32,
   "blockers": [
     "g1::full_load_gate_not_closed",
     "g1::full_mesh_nonlinear_equilibrium_not_closed",
@@ -28,7 +28,6 @@
     "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
     "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
     "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
-    "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
     "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
     "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
     "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
@@ -104,7 +103,7 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 25,
+      "blocker_count": 24,
       "blockers": [
         "human_ux::observation_file_missing",
         "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
@@ -120,7 +119,6 @@
         "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
         "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
         "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
-        "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
@@ -255,7 +253,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-07-05T14:31:58.538417+00:00",
+  "generated_at": "2026-07-05T14:39:08.681682+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -274,7 +272,7 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:86ba2e2845df5b4c4f8f921f7c998bb6394d9dcf95c433335529c2d62310da0b",
+      "input_checksum": "sha256:063db734461ab603062272d667902f3d5377fc1a887bee8cc3159bc98e12c178",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
@@ -286,7 +284,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:01911ef80b1cd08db6b03d5570ebb919d12287be47b550129ecf1a0b39b71b6a",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:86ba2e2845df5b4c4f8f921f7c998bb6394d9dcf95c433335529c2d62310da0b"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:063db734461ab603062272d667902f3d5377fc1a887bee8cc3159bc98e12c178"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "stale_or_inconsistent",
@@ -1978,7 +1976,7 @@
       },
       "release freshness/sync": {
         "blocked": true,
-        "blocker_count": 27,
+        "blocker_count": 26,
         "blockers": [
           "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
           "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
@@ -1999,7 +1997,6 @@
           "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
           "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
           "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
-          "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
           "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
           "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
           "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
@@ -2212,6 +2209,6 @@
       }
     }
   },
-  "source_commit_sha": "6a4085c424e821cd29b2620dfb4d604198d5936e",
+  "source_commit_sha": "cdbe88c95142b662af1a57644a1cd385b1e1947c",
   "status": "blocked"
 }

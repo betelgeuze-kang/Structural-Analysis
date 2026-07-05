@@ -82,6 +82,9 @@
 - `current_frontier_operator_mismatch_audit_complete`: `True`
 - `current_frontier_full_load_no_descent`: `True`
 - `current_frontier_operator_family_no_descent`: `True`
+- `phase2_material_newton_breadth_seed_coverage_ready`: `True`
+- `phase2_state_updated_material_seed_case_count`: `9`
+- `phase2_state_updated_material_breadth_closed`: `False`
 - `worker_path_ready`: `True`
 - `worker_g1_closure_gate_ready`: `False`
 - `assembly_contract_seed_ready`: `True`
@@ -645,6 +648,19 @@
 - `mismatch_reasons`: `['frame_service_material_tangent_reduced_below_elastic', 'assembled_service_material_tangent_reduced_below_elastic', 'lambda_damping_available_to_corrector_but_excluded_from_physical_residual', 'state_dependent_shell_material_tangent_refresh_is_host_side_not_production_residency']`
 - `next_required_operator`: `physical_consistent_frame_shell_material_geometric_with_state_updated_material_tangent_and_full_residual_globalization`
 - `claim_boundary`: `This is a non-promoting current-frontier operator mismatch audit. It proves only that the current full-load HIP scaled global-Krylov and row-correction operator family produced no residual descent while preserving the physical residual contract. It does not close G1, material Newton breadth, direct residual, or production ROCm/HIP residency.`
+
+## State-Updated Material Newton Breadth Seeds
+
+- `summary_status`: `ready`
+- `seed_coverage_ready`: `True`
+- `seed_case_count`: `9`
+- `frame_material_newton_seed_pass`: `True`
+- `shell_material_newton_seed_pass`: `True`
+- `material_state_persistence_replay_seed_passed`: `True`
+- `material_jvp_relative_error_pass`: `True`
+- `state_updated_material_newton_breadth_closed`: `False`
+- `state_updated_seed_suite_case_count`: `9`
+- `claim_boundary`: `Deterministic material-Newton breadth seeds using the explicit F_internal_minus_F_external residual contract. This includes scalar analytic material laws plus a state-updated frame/shell/composite return-mapping seed suite with material-state checkpoint replay and finite-difference JVP checks. It does not close G1 full-mesh/full-load nonlinear equilibrium, sparse production matrix backends, or production GPU/HIP gates.`
 
 ## Next Actions
 

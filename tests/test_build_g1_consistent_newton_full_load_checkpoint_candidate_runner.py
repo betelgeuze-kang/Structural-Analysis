@@ -217,6 +217,91 @@ def _assembly_contract_seed_payload() -> dict:
     }
 
 
+def _phase2_material_newton_breadth_summary_payload() -> dict:
+    return {
+        "schema_version": "phase2-material-newton-breadth-artifacts.v1",
+        "status": "ready",
+        "contract_pass": True,
+        "g1_closure_claim": False,
+        "material_newton_closure_claim": False,
+        "residual_formula": "F_internal_minus_F_external",
+        "state_updated_material_newton_seed_passed": True,
+        "state_updated_material_newton_seed_case_count": 9,
+        "state_updated_material_newton_seed_case_kinds": [
+            "monotonic_tension_yield",
+            "monotonic_steel_tension_yield",
+            "elastic_only_replay",
+            "monotonic_compression_yield",
+            "monotonic_shell_bending_yield",
+            "elastic_drilling_stiffness_replay",
+            "plastic_reloading_from_committed_state",
+            "elastic_unloading_from_committed_state",
+            "reverse_compression_from_committed_state",
+        ],
+        "state_updated_material_newton_seed_material_families": [
+            "reinforced_concrete",
+            "shell_equivalent_plate",
+            "src_composite",
+            "steel",
+        ],
+        "state_updated_material_newton_seed_section_integrations": [
+            "composite_fiber",
+            "frame_fiber",
+            "layered_shell",
+        ],
+        "state_updated_material_newton_seed_strain_modes": [
+            "axial",
+            "axial_reverse",
+            "bending",
+            "drilling",
+            "membrane",
+        ],
+        "path_dependent_material_update_seed_case_count": 6,
+        "path_dependent_material_replay_seed_case_count": 9,
+        "material_state_persistence_replay_seed_passed": True,
+        "material_jvp_relative_error_pass": True,
+        "material_jvp_max_relative_error": 8.429443131654742e-09,
+        "frame_material_newton_seed_pass": True,
+        "shell_material_newton_seed_pass": True,
+        "state_updated_material_newton_breadth_seed_coverage_ready": True,
+        "state_updated_material_newton_breadth_closed": False,
+        "blockers_remaining": [
+            "full_mesh_full_load_nonlinear_equilibrium_not_closed",
+            "full_load_g1_material_newton_breadth_not_closed_by_seed_artifact",
+        ],
+        "claim_boundary": (
+            "Deterministic material-Newton breadth seed fixture; does not close "
+            "G1 full-mesh/full-load material Newton breadth."
+        ),
+    }
+
+
+def _phase2_material_newton_breadth_state_updated_seeds_payload() -> dict:
+    return {
+        "schema_version": "phase2-material-newton-breadth-state-updated-seeds.v1",
+        "status": "ready",
+        "contract_pass": True,
+        "state_updated_material_newton_seed_case_count": 9,
+        "state_updated_material_newton_breadth_seed_coverage_ready": True,
+        "state_updated_material_newton_breadth_closed": False,
+        "state_updated_seed_cases": [
+            {
+                "case_id": "g1_state_updated_shell_layer_bending_seed",
+                "case_contract_pass": True,
+                "material_family": "reinforced_concrete",
+                "section_integration": "layered_shell",
+                "strain_mode": "bending",
+                "jvp_finite_difference_pass": True,
+                "checkpoint_replay_pass": True,
+                "g1_closure_claim": False,
+            }
+        ],
+        "claim_boundary": (
+            "State-updated seed suite fixture; not a full-load/full-mesh closure."
+        ),
+    }
+
+
 def _true_newton_load_sweep_payload() -> dict:
     return {
         "schema_version": "g1-true-newton-load-sweep-status.v1",
@@ -2380,6 +2465,12 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
         "current_frontier_operator_mismatch_audit": (
             tmp_path / runner.DEFAULT_CURRENT_FRONTIER_OPERATOR_MISMATCH_AUDIT
         ),
+        "phase2_material_newton_breadth_summary": (
+            tmp_path / runner.DEFAULT_PHASE2_MATERIAL_NEWTON_BREADTH_SUMMARY
+        ),
+        "phase2_material_newton_breadth_state_updated_seeds": (
+            tmp_path / runner.DEFAULT_PHASE2_MATERIAL_NEWTON_BREADTH_STATE_UPDATED_SEEDS
+        ),
     }
     _write_json(paths["g1_lane"], _g1_lane_payload(action_id=action_id))
     _write_json(paths["cause"], _cause_narrowing_payload())
@@ -2552,6 +2643,14 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
     _write_json(
         paths["current_frontier_operator_mismatch_audit"],
         _current_frontier_operator_mismatch_audit_payload(),
+    )
+    _write_json(
+        paths["phase2_material_newton_breadth_summary"],
+        _phase2_material_newton_breadth_summary_payload(),
+    )
+    _write_json(
+        paths["phase2_material_newton_breadth_state_updated_seeds"],
+        _phase2_material_newton_breadth_state_updated_seeds_payload(),
     )
     return paths
 
@@ -3485,6 +3584,29 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
         "physical_consistent_frame_shell_material_geometric_with_state_"
         "updated_material_tangent_and_full_residual_globalization"
     )
+    assert (
+        payload["summary"]["phase2_material_newton_breadth_seed_coverage_ready"]
+        is True
+    )
+    assert payload["summary"]["phase2_state_updated_material_seed_case_count"] == 9
+    assert payload["summary"]["phase2_state_updated_material_jvp_pass"] is True
+    assert payload["summary"]["phase2_state_updated_material_replay_pass"] is True
+    assert payload["summary"]["phase2_state_updated_material_breadth_closed"] is False
+    assert payload["phase2_material_newton_breadth_summary"][
+        "state_updated_material_newton_breadth_seed_coverage_ready"
+    ] is True
+    assert payload["phase2_material_newton_breadth_summary"][
+        "state_updated_material_newton_breadth_closed"
+    ] is False
+    assert payload["phase2_material_newton_breadth_state_updated_seeds"][
+        "state_updated_material_newton_seed_case_count"
+    ] == 9
+    assert payload["artifacts"]["phase2_material_newton_breadth_summary"].endswith(
+        "phase2_material_newton_breadth_summary.json"
+    )
+    assert payload["artifacts"][
+        "phase2_material_newton_breadth_state_updated_seeds"
+    ].endswith("phase2_material_newton_breadth_state_updated_seeds.json")
     assert payload["hip_required_full_load_residual_jvp_frontier"]["load_scale"] == 1.0
     assert payload["hip_required_full_load_residual_jvp_frontier"][
         "final_direct_residual_inf_n"
