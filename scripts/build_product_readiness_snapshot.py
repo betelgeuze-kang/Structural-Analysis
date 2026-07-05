@@ -611,6 +611,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
             "scripts/report_pm_release_gate.py",
         },
         "non_snapshot_product_surfaces": {
+            "scripts/build_g1_assembly_contract_seed_report.py",
             "scripts/build_pm_release_blocker_action_register.py",
             "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
             "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
