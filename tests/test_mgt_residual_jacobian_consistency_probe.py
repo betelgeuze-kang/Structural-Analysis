@@ -921,8 +921,10 @@ def test_hip_required_preflight_only_skips_cpu_assembler_and_child_probe(
 
 def test_hip_required_probe_with_runtime_still_does_not_use_cpu_assembler(
     monkeypatch,
+    tmp_path: Path,
 ) -> None:
     calls = {"child": 0}
+    child_checkpoint = tmp_path / "child-candidate.npz"
 
     def build_direct_residual_assembler(**_kwargs):
         raise AssertionError(
@@ -940,6 +942,8 @@ def test_hip_required_probe_with_runtime_still_does_not_use_cpu_assembler(
         assert kwargs["matrix_free_global_krylov_linear_solver_backend"] == "torch_hip_gmres"
         assert kwargs["enable_current_tangent_residual_row_correction"] is True
         assert kwargs["current_tangent_residual_row_require_hip_batch_replay"] is True
+        assert kwargs["output_final_checkpoint_npz"] == child_checkpoint
+        assert kwargs["compact_output_final_checkpoint"] is True
         assert (
             kwargs["current_tangent_residual_row_batch_replay_backend"]
             == "hip_full_residual"
@@ -962,7 +966,7 @@ def test_hip_required_probe_with_runtime_still_does_not_use_cpu_assembler(
             },
             "output_final_checkpoint": {
                 "written": True,
-                "path": "candidate.npz",
+                "path": str(kwargs["output_final_checkpoint_npz"]),
                 "direct_residual_inf_n": 11.0,
                 "load_scale": 0.656,
             },
@@ -1037,6 +1041,7 @@ def test_hip_required_probe_with_runtime_still_does_not_use_cpu_assembler(
         output_json=None,
         component_only=False,
         require_hip_residual_engine=True,
+        hip_direct_output_checkpoint_npz=child_checkpoint,
     )
 
     assert payload["status"] == "partial"
@@ -1056,6 +1061,12 @@ def test_hip_required_probe_with_runtime_still_does_not_use_cpu_assembler(
     assert calls["child"] == 1
     assert payload["load_scale"] == 0.656
     assert payload["hip_direct_probe"]["executed"] is True
+    assert (
+        payload["hip_direct_probe"]["direct_residual_summary"][
+            "output_final_checkpoint"
+        ]["path"]
+        == str(child_checkpoint)
+    )
     assert payload["hip_direct_probe"]["production_hip_residual_jacobian_path"] is True
     assert (
         payload["hip_direct_probe"]["matrix_free_global_krylov"][

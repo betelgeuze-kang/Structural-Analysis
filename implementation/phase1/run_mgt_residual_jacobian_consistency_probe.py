@@ -168,8 +168,9 @@ def _hip_required_direct_probe_kwargs(
     mgt_path: Path,
     checkpoint_npz: Path,
     shell_pressure_load_path_policy: str,
+    output_final_checkpoint_npz: Path | None = None,
 ) -> dict[str, Any]:
-    return {
+    kwargs: dict[str, Any] = {
         "mgt_path": mgt_path,
         "checkpoint_npz": checkpoint_npz,
         "output_json": None,
@@ -224,6 +225,10 @@ def _hip_required_direct_probe_kwargs(
             0.03125,
         ),
     }
+    if output_final_checkpoint_npz is not None:
+        kwargs["output_final_checkpoint_npz"] = output_final_checkpoint_npz
+        kwargs["compact_output_final_checkpoint"] = True
+    return kwargs
 
 
 def _live_g1_assembly_contract_from_child_payload(
@@ -3128,6 +3133,7 @@ def run_mgt_residual_jacobian_consistency_probe(
     allow_state_dependent_shell_material_tangent_hip_replay: bool = False,
     require_hip_residual_engine: bool = False,
     hip_runtime_preflight_only: bool = False,
+    hip_direct_output_checkpoint_npz: Path | None = None,
 ) -> dict[str, Any]:
     started = time.perf_counter()
     generated_at = datetime.now(timezone.utc).isoformat()
@@ -3153,6 +3159,7 @@ def run_mgt_residual_jacobian_consistency_probe(
             mgt_path=mgt_path,
             checkpoint_npz=checkpoint_npz,
             shell_pressure_load_path_policy=shell_pressure_load_path_policy,
+            output_final_checkpoint_npz=hip_direct_output_checkpoint_npz,
         )
         worker_contract = _production_rocm_hip_residual_jvp_worker_contract(
             source_commit_sha=source_commit_sha,
@@ -3235,6 +3242,7 @@ def run_mgt_residual_jacobian_consistency_probe(
             mgt_path=mgt_path,
             checkpoint_npz=checkpoint_npz,
             shell_pressure_load_path_policy=shell_pressure_load_path_policy,
+            output_final_checkpoint_npz=hip_direct_output_checkpoint_npz,
         )
         worker_contract = _production_rocm_hip_residual_jvp_worker_contract(
             source_commit_sha=source_commit_sha,
@@ -3290,6 +3298,7 @@ def run_mgt_residual_jacobian_consistency_probe(
             mgt_path=mgt_path,
             checkpoint_npz=checkpoint_npz,
             shell_pressure_load_path_policy=shell_pressure_load_path_policy,
+            output_final_checkpoint_npz=hip_direct_output_checkpoint_npz,
         )
         try:
             child_payload = run_mgt_direct_residual_newton_probe(**child_kwargs)
@@ -3912,6 +3921,15 @@ def main(argv: list[str] | None = None) -> int:
             "preflight and emit a non-promoting receipt without running the child proof."
         ),
     )
+    parser.add_argument(
+        "--hip-direct-output-checkpoint-npz",
+        type=Path,
+        default=None,
+        help=(
+            "Optional compact checkpoint path forwarded to the HIP-required child "
+            "direct residual probe when it finds an improved accepted state."
+        ),
+    )
     args = parser.parse_args(argv)
     state_scale_values = tuple(
         float(value.strip())
@@ -3985,6 +4003,7 @@ def main(argv: list[str] | None = None) -> int:
         ),
         require_hip_residual_engine=bool(args.require_hip_residual_engine),
         hip_runtime_preflight_only=bool(args.hip_runtime_preflight_only),
+        hip_direct_output_checkpoint_npz=args.hip_direct_output_checkpoint_npz,
     )
     print(
         "mgt-residual-jacobian-consistency:",

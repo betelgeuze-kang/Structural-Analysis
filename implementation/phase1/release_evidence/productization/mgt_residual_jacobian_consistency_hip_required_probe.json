@@ -1,7 +1,7 @@
 {
   "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
-  "generated_at": "2026-07-05T09:36:20.004885+00:00",
-  "source_commit_sha": "33147d409657a5139d0c173aaf11d63fa9e0d036",
+  "generated_at": "2026-07-05T10:34:11.696354+00:00",
+  "source_commit_sha": "2ed0fa52cb62daadd38783504082d615f8c001fe",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "reused_evidence": false,
   "status": "partial",
@@ -13,7 +13,7 @@
   "cpu_diagnostic_assembler_used": false,
   "production_hip_residual_jacobian_path": true,
   "rocm_hip_runtime_preflight": {
-    "checked_at": "2026-07-05T09:36:20.006785+00:00",
+    "checked_at": "2026-07-05T10:34:11.698166+00:00",
     "hip_available": true,
     "torch_importable": true,
     "torch_rocm_build": true,
@@ -83,7 +83,7 @@
   "production_rocm_hip_residual_jvp_worker": {
     "schema_version": "production-rocm-hip-residual-jvp-worker-contract.v1",
     "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
-    "source_commit_sha": "33147d409657a5139d0c173aaf11d63fa9e0d036",
+    "source_commit_sha": "2ed0fa52cb62daadd38783504082d615f8c001fe",
     "ready": false,
     "status": "blocked",
     "blockers": [
@@ -232,7 +232,7 @@
     },
     "free_dof_count": 58998,
     "load_scale": 1.0,
-    "residual_inf_norm": 13.509397811599964,
+    "residual_inf_norm": 10.288724185371219,
     "tangent_inf_norm": 263305013223928.78,
     "physical_internal_force_model": "corotational_force_based_6dof_plus_force_consistent_shell_plus_springs_with_shell_material_tangent",
     "external_load_source": "reference_configuration",
@@ -243,16 +243,16 @@
   },
   "component_only": false,
   "checkpoint": {
-    "path": "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz"
+    "path": "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz"
   },
   "load_scale": 1.0,
-  "shell_pressure_load_path_policy": "all_components",
+  "shell_pressure_load_path_policy": "structural_components_only",
   "hip_direct_probe": {
     "schema_version": "mgt-residual-jacobian-consistency-hip-direct-proof.v1",
     "executed": true,
     "execution_error": null,
-    "elapsed_seconds": 307.7523214669782,
-    "source_commit_sha": "33147d409657a5139d0c173aaf11d63fa9e0d036",
+    "elapsed_seconds": 313.2764872669941,
+    "source_commit_sha": "2ed0fa52cb62daadd38783504082d615f8c001fe",
     "status": "partial",
     "direct_residual_newton_ready": false,
     "production_hip_residual_jacobian_path": true,
@@ -342,7 +342,7 @@
       },
       "free_dof_count": 58998,
       "load_scale": 1.0,
-      "residual_inf_norm": 13.509397811599964,
+      "residual_inf_norm": 10.288724185371219,
       "tangent_inf_norm": 263305013223928.78,
       "physical_internal_force_model": "corotational_force_based_6dof_plus_force_consistent_shell_plus_springs_with_shell_material_tangent",
       "external_load_source": "reference_configuration",
@@ -352,17 +352,17 @@
       "present": true
     },
     "direct_residual_summary": {
-      "base_direct_residual_inf_n": 13.509397811599964,
-      "base_direct_relative_residual_inf": 0.0010214410865408822,
-      "final_direct_residual_inf_n": 11.359973395366342,
-      "final_direct_relative_residual_inf": 0.0008589238195410181,
+      "base_direct_residual_inf_n": 10.288724185371219,
+      "base_direct_relative_residual_inf": 0.0007779270221801527,
+      "final_direct_residual_inf_n": 9.670005113590223,
+      "final_direct_relative_residual_inf": 0.0007311458784343606,
       "residual_tolerance_n": 0.0005,
-      "improvement_factor": 1.1892103389177264,
+      "improvement_factor": 1.0639833241568246,
       "output_final_checkpoint": {
-        "written": false,
-        "path": "",
-        "direct_residual_inf_n": null,
-        "load_scale": null
+        "written": true,
+        "path": "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+        "direct_residual_inf_n": 9.670005113590223,
+        "load_scale": 1.0
       }
     },
     "gate_assessment": {
@@ -420,7 +420,7 @@
   "runtime_metrics": {
     "setup_and_reference_seconds": 0.0,
     "base_assembly_seconds": 0.0,
-    "total_seconds": 308.82601396297105
+    "total_seconds": 314.3437364519923
   },
   "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested and routed to the HIP-required direct residual Newton proof path. The probe does not use this module's CPU diagnostic assembler. This receipt closes neither full G1 nor release readiness unless the child HIP residual engine contract and consistent residual/Jacobian Newton gate both pass without blockers.",
   "blockers": [

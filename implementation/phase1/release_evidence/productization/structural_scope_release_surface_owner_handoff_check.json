@@ -9,7 +9,7 @@
     "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
   ],
-  "generated_at": "2026-07-05T09:42:33.987261+00:00",
+  "generated_at": "2026-07-05T10:40:29.174181+00:00",
   "handoff_check_pass": true,
   "handoff_surfaces": {
     "application_plan_action_packet_ready": true,
@@ -21,7 +21,7 @@
     "template_json_row_count": 3
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:e4936f6824e6b5678a7f32c9fbfc116bfe9990cde072853b8753a9eb8293c908",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:8f5ed8608ecd4b6df9645945ac4abf1b61d1ce45a89878517fadeb296836c673",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:2dd335461534767886bc08ce07d463d36e2617cab30e8306d9da5e0e51e8aa3b",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.csv": "sha256:7e8d084885bd6f98fd62af4cd83d812dd4426c83e35d67152f39129cf7d106ba",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv": "sha256:7f99c21fcf9f754da96ae9a9c7534f6ac9e56ebfdb72161adf8195679b1e09d9",
@@ -67,7 +67,7 @@
   "reuse_policy": "non_mutating_release_surface_first_owner_handoff_consistency_check",
   "reused_evidence": true,
   "schema_version": "structural-scope-release-surface-owner-handoff-check.v1",
-  "source_commit_sha": "33147d409657a5139d0c173aaf11d63fa9e0d036",
+  "source_commit_sha": "2ed0fa52cb62daadd38783504082d615f8c001fe",
   "status": "ready_for_owner_review",
   "template_paths": {
     "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",

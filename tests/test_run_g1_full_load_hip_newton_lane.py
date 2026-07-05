@@ -463,6 +463,8 @@ def test_full_load_dry_run_builds_hip_required_direct_probe_command(tmp_path: Pa
     policy_index = command.index("--shell-pressure-load-path-policy")
     assert command[policy_index + 1] == "structural_components_only"
     assert "--matrix-free-global-krylov-require-hip-batch-replay" in command
+    assert "--matrix-free-global-krylov-preconditioner-mode" not in command
+    assert "--matrix-free-global-krylov-full-assembly-trial-replay" not in command
     assert "--current-tangent-residual-row-require-hip-batch-replay" in command
     assert "--allow-state-dependent-shell-material-tangent-hip-replay" in command
     assert "hip_full_residual_resident" in command
