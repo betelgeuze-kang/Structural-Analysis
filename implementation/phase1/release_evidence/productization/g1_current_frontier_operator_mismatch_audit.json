@@ -1,0 +1,133 @@
+{
+  "audit_complete": true,
+  "blockers_remaining": [
+    "direct_residual_gate_not_closed",
+    "consistent_residual_jacobian_newton_gate_not_closed",
+    "state_updated_material_newton_breadth_not_closed",
+    "state_dependent_shell_material_tangent_refresh_not_production_rocm_hip_residency"
+  ],
+  "claim_boundary": "This is a non-promoting current-frontier operator mismatch audit. It proves only that the current full-load HIP scaled global-Krylov and row-correction operator family produced no residual descent while preserving the physical residual contract. It does not close G1, material Newton breadth, direct residual, or production ROCm/HIP residency.",
+  "current_frontier_no_descent": {
+    "current_tangent_residual_row_correction": {
+      "all_trial_candidates_no_descent": true,
+      "attempted": true,
+      "best_alpha": 0.03125,
+      "best_alpha_source": "current_tangent_residual_row",
+      "best_candidate_no_descent": true,
+      "best_direct_residual_inf_n": 5.58261631268956,
+      "best_improvement_inf_n": -0.010783866339932224,
+      "promoted_to_final_state": false,
+      "residual_batch_backend": "hip_full_residual",
+      "trial_count": 24
+    },
+    "global_and_row_operator_family_no_descent": true,
+    "scaled_global_krylov": {
+      "all_trial_candidates_no_descent": true,
+      "attempted": true,
+      "best_alpha": -0.0625,
+      "best_alpha_source": "matrix_free_global_krylov_negative",
+      "best_candidate_no_descent": true,
+      "best_direct_residual_inf_n": 5.572699041492692,
+      "best_improvement_inf_n": -0.0008665950510797771,
+      "promoted_to_final_state": false,
+      "residual_batch_backend": "hip_full_residual_resident",
+      "trial_count": 16
+    }
+  },
+  "current_operator_mismatch": {
+    "direct_residual_uses_solver_regularization": false,
+    "frame_geometric_delta_stiffness_nnz": 44913,
+    "frame_tangent_ratio_min": 4.7619047619047615e-06,
+    "frame_tangent_reduction_element_count": 1763,
+    "linearized_tangent_description": "current service-material frame tangent plus frame geometric delta plus state shell material tangent plus finite springs",
+    "mismatch_reasons": [
+      "frame_service_material_tangent_reduced_below_elastic",
+      "assembled_service_material_tangent_reduced_below_elastic",
+      "lambda_damping_available_to_corrector_but_excluded_from_physical_residual",
+      "state_dependent_shell_material_tangent_refresh_is_host_side_not_production_residency"
+    ],
+    "normalization_lambda": 515.4003370345272,
+    "regularization_used_only_for_linear_correction_direction": true,
+    "service_material_scale_mean": 0.9360619275141128,
+    "service_material_scale_min": 0.02746524828006217,
+    "service_material_tangent_used_for_newton_direction_only": true
+  },
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "frontier_probe": {
+    "base_direct_residual_inf_n": 5.571832446349628,
+    "final_direct_residual_inf_n": 5.571832446349628,
+    "full_load_no_descent": true,
+    "load_scale": 1.0,
+    "output_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step16_scaled_global_krylov_candidate.npz",
+    "output_checkpoint_reason": "no_residual_descent",
+    "output_checkpoint_written": false,
+    "path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step16_scaled_global_krylov_direct_probe.json",
+    "source_commit_sha": "adfe7bd283e801825d1759b3ef88b5305650b84a",
+    "status": "partial"
+  },
+  "generated_at": "2026-07-05T14:14:17.110319+00:00",
+  "hip_residual_engine": {
+    "backends": [
+      "hip_full_residual",
+      "hip_full_residual_resident"
+    ],
+    "contract_passed": true,
+    "passed_lane_count": 2,
+    "required_lane_count": 2
+  },
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step16_scaled_global_krylov_direct_probe.json": "sha256:e7eb74f06319595eb5f99cc22decd68976819a0020317713335f9b659cd0a860",
+    "scripts/build_g1_current_frontier_operator_mismatch_audit.py": "sha256:194d2863fede9d4eb66f3b152c69999784340980f5cb6ba6686ab7b2f7db8c12"
+  },
+  "is_audit_only": true,
+  "live_g1_assembly_contract": {
+    "assembly_result_schema": "g1-assembly-result.v1",
+    "contract_pass": true,
+    "free_dof_count": 58998,
+    "present": true,
+    "residual_formula": "F_internal_minus_F_external",
+    "residual_inf_norm": 5.571832446349628,
+    "residual_source": "physical_direct_residual",
+    "tangent_definition": "dR_du_consistent"
+  },
+  "operator_mismatch_summary": {
+    "disfavored_retries": [
+      "repeat_scaled_global_krylov_with_residual_diagonal_displacement",
+      "repeat_largest_rows_current_tangent_residual_row_correction",
+      "promote_fixed_point_or_regularized_residual_as_physical_residual"
+    ],
+    "named_current_operator": "service-material reduced frame tangent + frame geometric delta + state shell material tangent + finite springs, evaluated through HIP residual replay but not a convergent physical-consistent Newton operator at the current full-load frontier",
+    "next_required_operator": "physical_consistent_frame_shell_material_geometric_with_state_updated_material_tangent_and_full_residual_globalization",
+    "stall_driver": "current_full_load_scaled_global_krylov_and_row_correction_operator_family_no_descent"
+  },
+  "promotes_g1_closure": false,
+  "reuse_policy": "Derived from the current full-load HIP step16 no-descent probe. It does not run the solver or promote G1.",
+  "reused_evidence": true,
+  "schema_version": "g1-current-frontier-operator-mismatch-audit.v1",
+  "shell_material_state": {
+    "shell_material_tangent_elastic_passive_at_checkpoint": true,
+    "shell_material_tangent_is_stall_driver": false,
+    "shell_max_abs_strain": 3.89556638705355e-06,
+    "shell_nonlinear_surface_element_count": 0,
+    "shell_state_tag_counts": {
+      "concrete_compression_hardening": 4252,
+      "concrete_tension_elastic": 2638,
+      "unknown_elastic_proxy": 262
+    },
+    "shell_tangent_ratio_mean": 0.9999869549431114,
+    "shell_tangent_ratio_min": 0.9988921983086817
+  },
+  "source_commit_sha": "e2229edc7318c62410188d8f5e955018780998a1",
+  "status": "ready",
+  "terminal_criteria": {
+    "current_operator_mismatch_named": true,
+    "current_row_correction_no_descent": true,
+    "current_scaled_global_krylov_no_descent": true,
+    "frontier_probe_present": true,
+    "full_load_checkpoint_input": true,
+    "hip_residual_engine_contract_passed": true,
+    "live_g1_assembly_contract_passed": true,
+    "physical_residual_contract_preserved": true,
+    "shell_material_tangent_elastic_passive_evidence_present": true
+  }
+}

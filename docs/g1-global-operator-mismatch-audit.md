@@ -9,12 +9,21 @@ physical-consistent operator) safe. It is **not** a fix and **not** a closure.
 - Tests: `tests/test_g1_operator_mismatch_audit.py` (hermetic, synthetic fixtures)
 - Output: `release_evidence/productization/g1_global_operator_mismatch_audit.local.json`
   (untracked `*.local.json`; never promoted, never committed)
+- Current frontier tracked audit:
+  `scripts/build_g1_current_frontier_operator_mismatch_audit.py` writes
+  `implementation/phase1/release_evidence/productization/g1_current_frontier_operator_mismatch_audit.json`
+  from the full-load HIP step16 no-descent receipt. This tracked audit is also
+  non-promoting; it records that the current scaled global-Krylov plus
+  current-tangent row-correction operator family produced no residual descent at
+  `load_scale=1.0`.
 
 ## Non-promoting guarantees
 
 - `is_audit_only: true`, `promotes_g1_closure: false` in every payload.
 - Derived only from already-emitted, non-promoting local probe/tangent reports;
   it does not run the solver, change the solver, or regenerate tracked evidence.
+- The current frontier tracked audit is likewise derived only from already
+  emitted productization receipts and does not run the solver.
 - Preserves all partial/proxy/external-blocked evidence boundaries.
 
 ## What the audit fixes in machine-readable form
@@ -44,3 +53,9 @@ tangent and **not** GPU/HIP residency. A future opt-in
 `physical_consistent_frame_shell_material_geometric` operator must be added
 behind a feature flag and validated against the physical residual before any G1
 gate is considered.
+
+The current full-load frontier audit keeps the same boundary but updates the
+frontier: `g1_current_frontier_operator_mismatch_audit.json` records
+`full_load_no_descent=true`, global Krylov best residual
+`5.572699041492692 N`, current-row best residual `5.58261631268956 N`, and
+`next_required_operator=physical_consistent_frame_shell_material_geometric_with_state_updated_material_tangent_and_full_residual_globalization`.

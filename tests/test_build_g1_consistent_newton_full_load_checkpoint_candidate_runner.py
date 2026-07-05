@@ -2115,6 +2115,96 @@ def _hip_required_scaled_global_krylov_no_descent_payload() -> dict:
     }
 
 
+def _current_frontier_operator_mismatch_audit_payload() -> dict:
+    return {
+        "schema_version": "g1-current-frontier-operator-mismatch-audit.v1",
+        "status": "ready",
+        "audit_complete": True,
+        "is_audit_only": True,
+        "promotes_g1_closure": False,
+        "frontier_probe": {
+            "path": (
+                "implementation/phase1/release_evidence/productization/"
+                "mgt_residual_jacobian_step16_scaled_global_krylov_direct_probe.json"
+            ),
+            "status": "partial",
+            "source_commit_sha": "fixture-step16-scaled-global-krylov",
+            "load_scale": 1.0,
+            "base_direct_residual_inf_n": 5.571832446349628,
+            "final_direct_residual_inf_n": 5.571832446349628,
+            "output_checkpoint_written": False,
+            "output_checkpoint_reason": "no_residual_descent",
+            "output_checkpoint_path": (
+                "implementation/phase1/release_evidence/productization/"
+                "mgt_residual_jacobian_step16_scaled_global_krylov_candidate.npz"
+            ),
+            "full_load_no_descent": True,
+        },
+        "current_operator_mismatch": {
+            "normalization_lambda": 515.4003370345272,
+            "frame_tangent_ratio_min": 4.7619047619047615e-06,
+            "service_material_scale_min": 0.02746524828006217,
+            "mismatch_reasons": [
+                "frame_service_material_tangent_reduced_below_elastic",
+                "assembled_service_material_tangent_reduced_below_elastic",
+                "lambda_damping_available_to_corrector_but_excluded_from_physical_residual",
+                "state_dependent_shell_material_tangent_refresh_is_host_side_not_production_residency",
+            ],
+        },
+        "shell_material_state": {
+            "shell_material_tangent_elastic_passive_at_checkpoint": True,
+            "shell_material_tangent_is_stall_driver": False,
+        },
+        "current_frontier_no_descent": {
+            "global_and_row_operator_family_no_descent": True,
+            "scaled_global_krylov": {
+                "attempted": True,
+                "promoted_to_final_state": False,
+                "best_direct_residual_inf_n": 5.572699041492692,
+                "best_improvement_inf_n": -0.0008665950510797771,
+                "trial_count": 16,
+                "all_trial_candidates_no_descent": True,
+            },
+            "current_tangent_residual_row_correction": {
+                "attempted": True,
+                "promoted_to_final_state": False,
+                "best_direct_residual_inf_n": 5.58261631268956,
+                "best_improvement_inf_n": -0.010783866339932224,
+                "trial_count": 24,
+                "all_trial_candidates_no_descent": True,
+            },
+        },
+        "operator_mismatch_summary": {
+            "stall_driver": (
+                "current_full_load_scaled_global_krylov_and_row_correction_"
+                "operator_family_no_descent"
+            ),
+            "next_required_operator": (
+                "physical_consistent_frame_shell_material_geometric_with_state_"
+                "updated_material_tangent_and_full_residual_globalization"
+            ),
+            "disfavored_retries": [
+                "repeat_scaled_global_krylov_with_residual_diagonal_displacement",
+                "repeat_largest_rows_current_tangent_residual_row_correction",
+            ],
+        },
+        "terminal_criteria": {
+            "frontier_probe_present": True,
+            "full_load_checkpoint_input": True,
+            "live_g1_assembly_contract_passed": True,
+            "physical_residual_contract_preserved": True,
+            "hip_residual_engine_contract_passed": True,
+            "current_scaled_global_krylov_no_descent": True,
+            "current_row_correction_no_descent": True,
+            "shell_material_tangent_elastic_passive_evidence_present": True,
+            "current_operator_mismatch_named": True,
+        },
+        "claim_boundary": (
+            "This is a non-promoting current-frontier operator mismatch audit."
+        ),
+    }
+
+
 def _global_connectivity_payload() -> dict:
     return {
         "schema_version": "g1-global-connectivity-load-path-audit.v1",
@@ -2287,6 +2377,9 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
         "hip_required_scaled_global_krylov_no_descent": (
             tmp_path / runner.DEFAULT_HIP_REQUIRED_SCALED_GLOBAL_KRYLOV_NO_DESCENT_PROBE
         ),
+        "current_frontier_operator_mismatch_audit": (
+            tmp_path / runner.DEFAULT_CURRENT_FRONTIER_OPERATOR_MISMATCH_AUDIT
+        ),
     }
     _write_json(paths["g1_lane"], _g1_lane_payload(action_id=action_id))
     _write_json(paths["cause"], _cause_narrowing_payload())
@@ -2455,6 +2548,10 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
     _write_json(
         paths["hip_required_scaled_global_krylov_no_descent"],
         _hip_required_scaled_global_krylov_no_descent_payload(),
+    )
+    _write_json(
+        paths["current_frontier_operator_mismatch_audit"],
+        _current_frontier_operator_mismatch_audit_payload(),
     )
     return paths
 
@@ -3372,6 +3469,22 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
         ]
         is False
     )
+    assert (
+        payload["summary"]["current_frontier_operator_mismatch_audit_complete"]
+        is True
+    )
+    assert payload["summary"]["current_frontier_full_load_no_descent"] is True
+    assert payload["summary"]["current_frontier_operator_family_no_descent"] is True
+    assert payload["summary"][
+        "current_frontier_scaled_global_krylov_best_residual_n"
+    ] == 5.572699041492692
+    assert payload["summary"][
+        "current_frontier_row_correction_best_residual_n"
+    ] == 5.58261631268956
+    assert payload["summary"]["current_frontier_next_required_operator"] == (
+        "physical_consistent_frame_shell_material_geometric_with_state_"
+        "updated_material_tangent_and_full_residual_globalization"
+    )
     assert payload["hip_required_full_load_residual_jvp_frontier"]["load_scale"] == 1.0
     assert payload["hip_required_full_load_residual_jvp_frontier"][
         "final_direct_residual_inf_n"
@@ -3425,6 +3538,15 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     assert payload["hip_required_frontier_no_descent_receipts"][1][
         "current_tangent_residual_row_best_residual_inf_n"
     ] == 5.58261631268956
+    assert payload["current_frontier_operator_mismatch_audit"][
+        "audit_complete"
+    ] is True
+    assert payload["current_frontier_operator_mismatch_audit"][
+        "frontier_probe"
+    ]["full_load_no_descent"] is True
+    assert payload["current_frontier_operator_mismatch_audit"][
+        "current_frontier_no_descent"
+    ]["global_and_row_operator_family_no_descent"] is True
     assert payload["true_newton_full_load_checkpoint_candidate"]["present"] is True
     assert payload["true_newton_full_load_checkpoint_candidate"][
         "checkpoint_written"
@@ -4178,4 +4300,9 @@ def test_runner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
     assert "5.572699041492692" in markdown
     assert "5.58261631268956" in markdown
     assert "mgt_residual_jacobian_step16_scaled_global_krylov_candidate.npz" in markdown
+    assert "## Current Frontier Operator Mismatch Audit" in markdown
+    assert "current_frontier_operator_mismatch_audit_complete" in markdown
+    assert "current_frontier_operator_family_no_descent" in markdown
+    assert "physical_consistent_frame_shell_material_geometric" in markdown
+    assert "frame_service_material_tangent_reduced_below_elastic" in markdown
     assert payload["status"] == "ready_for_runner_implementation"

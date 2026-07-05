@@ -223,6 +223,9 @@ DEFAULT_HIP_REQUIRED_SCALED_GLOBAL_KRYLOV_NO_DESCENT_PROBE = (
     PRODUCTIZATION
     / "mgt_residual_jacobian_step16_scaled_global_krylov_direct_probe.json"
 )
+DEFAULT_CURRENT_FRONTIER_OPERATOR_MISMATCH_AUDIT = (
+    PRODUCTIZATION / "g1_current_frontier_operator_mismatch_audit.json"
+)
 DEFAULT_OUT = PRODUCTIZATION / "g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_SOLVER_HIP_E2E = Path(
@@ -3055,6 +3058,9 @@ def build_runner_packet(
     hip_required_scaled_global_krylov_no_descent_probe_path: Path = (
         DEFAULT_HIP_REQUIRED_SCALED_GLOBAL_KRYLOV_NO_DESCENT_PROBE
     ),
+    current_frontier_operator_mismatch_audit_path: Path = (
+        DEFAULT_CURRENT_FRONTIER_OPERATOR_MISMATCH_AUDIT
+    ),
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     g1_lane = _load_json(repo_root, g1_lane_path)
@@ -3067,6 +3073,10 @@ def build_runner_packet(
     hip_required_scaled_global_krylov_no_descent_probe = _load_json(
         repo_root,
         hip_required_scaled_global_krylov_no_descent_probe_path,
+    )
+    current_frontier_operator_mismatch_audit = _load_json(
+        repo_root,
+        current_frontier_operator_mismatch_audit_path,
     )
     global_connectivity = _load_json(repo_root, global_connectivity_path)
     assembly_contract_seed = _load_json(repo_root, assembly_contract_seed_path)
@@ -3717,6 +3727,7 @@ def build_runner_packet(
                 hip_required_consistency_direct_checkpoint_path,
                 hip_required_consistency_no_descent_probe_path,
                 hip_required_scaled_global_krylov_no_descent_probe_path,
+                current_frontier_operator_mismatch_audit_path,
             ],
             reused_evidence=True,
             reuse_policy=(
@@ -5180,6 +5191,43 @@ def build_runner_packet(
                     "output_checkpoint_written"
                 ]
             ),
+            "current_frontier_operator_mismatch_audit_complete": (
+                current_frontier_operator_mismatch_audit.get("audit_complete") is True
+            ),
+            "current_frontier_full_load_no_descent": _as_dict(
+                current_frontier_operator_mismatch_audit.get("frontier_probe")
+            ).get("full_load_no_descent")
+            is True,
+            "current_frontier_operator_family_no_descent": _as_dict(
+                current_frontier_operator_mismatch_audit.get("current_frontier_no_descent")
+            ).get("global_and_row_operator_family_no_descent")
+            is True,
+            "current_frontier_scaled_global_krylov_best_residual_n": _as_float(
+                _as_dict(
+                    _as_dict(
+                        current_frontier_operator_mismatch_audit.get(
+                            "current_frontier_no_descent"
+                        )
+                    ).get("scaled_global_krylov")
+                ).get("best_direct_residual_inf_n")
+            ),
+            "current_frontier_row_correction_best_residual_n": _as_float(
+                _as_dict(
+                    _as_dict(
+                        current_frontier_operator_mismatch_audit.get(
+                            "current_frontier_no_descent"
+                        )
+                    ).get("current_tangent_residual_row_correction")
+                ).get("best_direct_residual_inf_n")
+            ),
+            "current_frontier_next_required_operator": str(
+                _as_dict(
+                    current_frontier_operator_mismatch_audit.get(
+                        "operator_mismatch_summary"
+                    )
+                ).get("next_required_operator")
+                or ""
+            ),
             "row_only_correction_loop_stopped": _row_only_loop_stopped(
                 cause_narrowing,
                 action,
@@ -5470,6 +5518,9 @@ def build_runner_packet(
         "hip_required_frontier_no_descent_receipts": (
             hip_required_frontier_no_descent_receipts
         ),
+        "current_frontier_operator_mismatch_audit": (
+            current_frontier_operator_mismatch_audit
+        ),
         "hip_worker_contract": {
             "worker_id": str(worker.get("worker_id") or ""),
             "residual_jvp_worker_path_ready": worker.get(
@@ -5676,6 +5727,9 @@ def build_runner_packet(
             "mgt_residual_jacobian_step16_scaled_global_krylov_direct_probe": (
                 hip_required_scaled_global_krylov_no_descent_probe_path.as_posix()
             ),
+            "g1_current_frontier_operator_mismatch_audit": (
+                current_frontier_operator_mismatch_audit_path.as_posix()
+            ),
         },
         "claim_boundary": (
             "This packet defines the next G1 runner contract for generating a "
@@ -5730,6 +5784,9 @@ def _markdown(payload: dict[str, Any]) -> str:
         for item in _as_list(payload.get("hip_required_frontier_no_descent_receipts"))
         if isinstance(item, dict)
     ]
+    current_frontier_operator_mismatch = _as_dict(
+        payload.get("current_frontier_operator_mismatch_audit")
+    )
     frame_eps_sweep = _as_dict(payload.get("frame_tangent_fd_epsilon_sweep"))
     mu_sweep = _as_dict(payload.get("true_newton_from_active_set_mu_sweep"))
     load_param = _as_dict(payload.get("active_set_load_parameter_probe"))
@@ -5909,6 +5966,9 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `hip_required_consistency_direct_probe_output_checkpoint_written`: `{hip_required_consistency_direct.get('output_checkpoint_written')}`",
         f"- `hip_required_frontier_no_descent_receipt_count`: `{sum(1 for receipt in hip_required_no_descent_receipts if receipt.get('present') is True)}`",
         f"- `hip_required_frontier_no_descent_all_no_descent`: `{all(receipt.get('no_descent') is True for receipt in hip_required_no_descent_receipts if receipt.get('present') is True) if hip_required_no_descent_receipts else False}`",
+        f"- `current_frontier_operator_mismatch_audit_complete`: `{current_frontier_operator_mismatch.get('audit_complete')}`",
+        f"- `current_frontier_full_load_no_descent`: `{_as_dict(current_frontier_operator_mismatch.get('frontier_probe')).get('full_load_no_descent')}`",
+        f"- `current_frontier_operator_family_no_descent`: `{_as_dict(current_frontier_operator_mismatch.get('current_frontier_no_descent')).get('global_and_row_operator_family_no_descent')}`",
         f"- `worker_path_ready`: `{hip.get('residual_jvp_worker_path_ready')}`",
         f"- `worker_g1_closure_gate_ready`: `{hip.get('g1_closure_gate_ready')}`",
         f"- `assembly_contract_seed_ready`: `{assembly.get('contract_pass')}`",
@@ -7209,6 +7269,54 @@ def _markdown(payload: dict[str, Any]) -> str:
                 f"- `{variant}.claim_boundary`: "
                 f"`{receipt.get('claim_boundary')}`"
             )
+    if current_frontier_operator_mismatch:
+        frontier = _as_dict(current_frontier_operator_mismatch.get("frontier_probe"))
+        no_descent = _as_dict(
+            current_frontier_operator_mismatch.get("current_frontier_no_descent")
+        )
+        scaled_global = _as_dict(no_descent.get("scaled_global_krylov"))
+        row_correction = _as_dict(
+            no_descent.get("current_tangent_residual_row_correction")
+        )
+        operator_summary = _as_dict(
+            current_frontier_operator_mismatch.get("operator_mismatch_summary")
+        )
+        mismatch = _as_dict(
+            current_frontier_operator_mismatch.get("current_operator_mismatch")
+        )
+        lines.extend(["", "## Current Frontier Operator Mismatch Audit", ""])
+        lines.append(f"- `status`: `{current_frontier_operator_mismatch.get('status')}`")
+        lines.append(
+            f"- `audit_complete`: `{current_frontier_operator_mismatch.get('audit_complete')}`"
+        )
+        lines.append(
+            f"- `full_load_no_descent`: `{frontier.get('full_load_no_descent')}`"
+        )
+        lines.append(
+            "- `base_direct_residual_inf_n`: "
+            f"`{frontier.get('base_direct_residual_inf_n')}`"
+        )
+        lines.append(
+            "- `scaled_global_krylov.best_direct_residual_inf_n`: "
+            f"`{scaled_global.get('best_direct_residual_inf_n')}`"
+        )
+        lines.append(
+            "- `current_tangent_residual_row_correction.best_direct_residual_inf_n`: "
+            f"`{row_correction.get('best_direct_residual_inf_n')}`"
+        )
+        lines.append(
+            "- `global_and_row_operator_family_no_descent`: "
+            f"`{no_descent.get('global_and_row_operator_family_no_descent')}`"
+        )
+        lines.append(
+            f"- `mismatch_reasons`: `{mismatch.get('mismatch_reasons')}`"
+        )
+        lines.append(
+            f"- `next_required_operator`: `{operator_summary.get('next_required_operator')}`"
+        )
+        lines.append(
+            f"- `claim_boundary`: `{current_frontier_operator_mismatch.get('claim_boundary')}`"
+        )
     if payload.get("next_actions"):
         lines.extend(["", "## Next Actions", ""])
         for item in _as_list(payload.get("next_actions")):
@@ -7398,6 +7506,9 @@ def write_runner_packet(
     hip_required_scaled_global_krylov_no_descent_probe_path: Path = (
         DEFAULT_HIP_REQUIRED_SCALED_GLOBAL_KRYLOV_NO_DESCENT_PROBE
     ),
+    current_frontier_operator_mismatch_audit_path: Path = (
+        DEFAULT_CURRENT_FRONTIER_OPERATOR_MISMATCH_AUDIT
+    ),
     out: Path = DEFAULT_OUT,
     out_md: Path = DEFAULT_OUT_MD,
 ) -> dict[str, Any]:
@@ -7547,6 +7658,9 @@ def write_runner_packet(
         ),
         hip_required_scaled_global_krylov_no_descent_probe_path=(
             hip_required_scaled_global_krylov_no_descent_probe_path
+        ),
+        current_frontier_operator_mismatch_audit_path=(
+            current_frontier_operator_mismatch_audit_path
         ),
     )
     resolved_out = _resolve(repo_root, out)
@@ -7784,6 +7898,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_HIP_REQUIRED_SCALED_GLOBAL_KRYLOV_NO_DESCENT_PROBE,
     )
+    parser.add_argument(
+        "--current-frontier-operator-mismatch-audit",
+        type=Path,
+        default=DEFAULT_CURRENT_FRONTIER_OPERATOR_MISMATCH_AUDIT,
+    )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
     parser.add_argument("--json", action="store_true")
@@ -7915,6 +8034,9 @@ def main(argv: list[str] | None = None) -> int:
         ),
         hip_required_scaled_global_krylov_no_descent_probe_path=(
             args.hip_required_scaled_global_krylov_no_descent_probe
+        ),
+        current_frontier_operator_mismatch_audit_path=(
+            args.current_frontier_operator_mismatch_audit
         ),
         out=args.out,
         out_md=args.out_md,

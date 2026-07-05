@@ -79,6 +79,9 @@
 - `hip_required_consistency_direct_probe_output_checkpoint_written`: `True`
 - `hip_required_frontier_no_descent_receipt_count`: `2`
 - `hip_required_frontier_no_descent_all_no_descent`: `True`
+- `current_frontier_operator_mismatch_audit_complete`: `True`
+- `current_frontier_full_load_no_descent`: `True`
+- `current_frontier_operator_family_no_descent`: `True`
 - `worker_path_ready`: `True`
 - `worker_g1_closure_gate_ready`: `False`
 - `assembly_contract_seed_ready`: `True`
@@ -629,6 +632,19 @@
 - `scaled_global_krylov_step16.matrix_free_global_krylov_best_residual_inf_n`: `5.572699041492692`
 - `scaled_global_krylov_step16.current_tangent_residual_row_best_residual_inf_n`: `5.58261631268956`
 - `scaled_global_krylov_step16.claim_boundary`: `Non-promoting HIP direct no-descent receipt. It records that this full-load residual/JVP operator variant did not improve the physical direct residual, so it must not be promoted as G1 closure.`
+
+## Current Frontier Operator Mismatch Audit
+
+- `status`: `ready`
+- `audit_complete`: `True`
+- `full_load_no_descent`: `True`
+- `base_direct_residual_inf_n`: `5.571832446349628`
+- `scaled_global_krylov.best_direct_residual_inf_n`: `5.572699041492692`
+- `current_tangent_residual_row_correction.best_direct_residual_inf_n`: `5.58261631268956`
+- `global_and_row_operator_family_no_descent`: `True`
+- `mismatch_reasons`: `['frame_service_material_tangent_reduced_below_elastic', 'assembled_service_material_tangent_reduced_below_elastic', 'lambda_damping_available_to_corrector_but_excluded_from_physical_residual', 'state_dependent_shell_material_tangent_refresh_is_host_side_not_production_residency']`
+- `next_required_operator`: `physical_consistent_frame_shell_material_geometric_with_state_updated_material_tangent_and_full_residual_globalization`
+- `claim_boundary`: `This is a non-promoting current-frontier operator mismatch audit. It proves only that the current full-load HIP scaled global-Krylov and row-correction operator family produced no residual descent while preserving the physical residual contract. It does not close G1, material Newton breadth, direct residual, or production ROCm/HIP residency.`
 
 ## Next Actions
 
