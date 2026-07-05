@@ -1,7 +1,7 @@
 # G1 Consistent Newton Full-Load Runner Contract
 
-- `summary_line`: `G1 consistent Newton full-load runner contract: READY_FOR_RUNNER_IMPLEMENTATION | contract_pass=True | observed_load=1/1 | closure_blockers=13`
-- `contract_pass`: `True`
+- `summary_line`: `G1 consistent Newton full-load runner contract: BLOCKED_RUNNER_CONTRACT | contract_pass=False | observed_load=1/1 | closure_blockers=16`
+- `contract_pass`: `False`
 - `evidence_closure_pass`: `False`
 - `runner_id`: `build_consistent_newton_full_load_checkpoint_candidate_runner`
 - `preferred_candidate_generator`: `consistent_residual_jacobian_newton_rocm_full_load_candidate`
@@ -60,7 +60,7 @@
 - `active_set_ls_tangent_fd_jvp_max_relative_inf_error`: `4.753647244794899e-14`
 - `active_set_minimax_final_residual_n`: `0.42740724991695345`
 - `active_set_minimax_steps_taken`: `0`
-- `worker_path_ready`: `True`
+- `worker_path_ready`: `False`
 - `worker_g1_closure_gate_ready`: `False`
 - `assembly_contract_seed_ready`: `True`
 - `cpu_seed_newton_parity`: `True`
@@ -289,6 +289,54 @@
 - `output_checkpoint_direct_residual_inf_n`: `0.047285916814733264`
 - `output_checkpoint_residual_gate_passed`: `False`
 
+## Sparse Direct Scaled-LSMR From Incomplete Preview
+
+- `present`: `True`
+- `status`: `ready`
+- `line_search_residual_after_n`: `0.0033227123724053342`
+- `line_search_residual_reduction_ratio`: `4.433084782619419e-05`
+- `output_checkpoint_path`: `implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_candidate.npz`
+- `output_checkpoint_direct_residual_inf_n`: `0.0033227123724053342`
+- `output_checkpoint_residual_gate_passed`: `False`
+
+## Sparse Direct Scaled-LSMR From Incomplete Preview Chain
+
+- `path`: `implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe.json`
+- `status`: `ready`
+- `step_count`: `10`
+- `final_residual_n`: `0.003321678662540961`
+- `final_residual_over_gate`: `6.643357325081922`
+- `estimated_steps_to_gate_at_last_reduction`: `27717`
+- `gate_convergence_assessment`: `stalled_for_gate`
+- `recommended_next_action`: `switch_operator_preconditioner_or_tangent_model_before_extending_scaled_lsmr_chain`
+- `latest_checkpoint_path`: `implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_step_10_candidate.npz`
+
+## Sparse Direct Shifted-SPLU From Incomplete Preview Chain
+
+- `path`: `implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_incomplete_preview_chain_probe.json`
+- `status`: `ready`
+- `shift_mu`: `0.0001`
+- `line_search_residual_before_n`: `0.003321678662540961`
+- `line_search_residual_after_n`: `3.694505585372099e-05`
+- `line_search_residual_reduction_ratio`: `0.9888775948527606`
+- `output_checkpoint_path`: `implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_incomplete_preview_chain_candidate.npz`
+- `output_checkpoint_direct_residual_inf_n`: `3.694505585372099e-05`
+- `output_checkpoint_residual_gate_passed`: `True`
+- `recommended_next_action`: `run_full_load_lane_material_mesh_hip_proofs_from_shifted_splu_gate_checkpoint`
+
+## Sparse Direct Shifted-SPLU From Gate Candidate Step 2
+
+- `path`: `implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_gate_candidate_step2_probe.json`
+- `status`: `ready`
+- `shift_mu`: `0.0001`
+- `line_search_residual_before_n`: `3.694505585372099e-05`
+- `line_search_residual_after_n`: `3.42023849952966e-05`
+- `line_search_residual_reduction_ratio`: `0.07423647887510655`
+- `output_checkpoint_path`: `implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_gate_candidate_step2_candidate.npz`
+- `output_checkpoint_direct_residual_inf_n`: `3.42023849952966e-05`
+- `output_checkpoint_residual_gate_passed`: `True`
+- `recommended_next_action`: `run_full_load_lane_material_mesh_hip_proofs_from_shifted_splu_gate_checkpoint`
+
 ## Sparse Direct Scaled-LSMR Accepted-Step Chain
 
 - `step_count`: `3`
@@ -319,6 +367,53 @@
 - `gate_convergence_assessment`: `stalled_for_gate`
 - `recommended_next_action`: `switch_operator_preconditioner_or_tangent_model_before_extending_scaled_lsmr_chain`
 - `latest_checkpoint_path`: `implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_long_chain_step_10_candidate.npz`
+
+## Sparse Direct Adaptive-JVP GMRES Receipts
+
+- `gmres_ilu.path`: `implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.json`
+- `gmres_ilu.status`: `blocked`
+- `gmres_ilu.reason_code`: `ERR_ILU_FACTOR_FAILED`
+- `gmres_ilu.jvp_eps`: `0.001`
+- `gmres_ilu.jvp_parity_max_absolute_error_n`: `0.001708984375`
+- `gmres_ilu.direction_status`: `blocked`
+- `gmres_ilu.direction_residual_after_n`: `0.0`
+- `gmres_ilu.line_search_status`: `blocked`
+- `gmres_ilu.line_search_residual_after_n`: `0.0`
+- `gmres_ilu.incomplete_direction_preview`: `False`
+- `gmres_ilu.recommended_next_action`: `replace_or_shift_preconditioner_family_before_more_gmres_iterations`
+- `gmres_matrix_free.path`: `implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe.json`
+- `gmres_matrix_free.status`: `blocked`
+- `gmres_matrix_free.reason_code`: `ERR_DIRECTION_SOLVE_BLOCKED`
+- `gmres_matrix_free.jvp_eps`: `0.001`
+- `gmres_matrix_free.jvp_parity_max_absolute_error_n`: `0.001708984375`
+- `gmres_matrix_free.direction_status`: `blocked`
+- `gmres_matrix_free.direction_residual_after_n`: `0.05179151634140644`
+- `gmres_matrix_free.line_search_status`: `blocked`
+- `gmres_matrix_free.line_search_residual_after_n`: `0.0`
+- `gmres_matrix_free.incomplete_direction_preview`: `False`
+- `gmres_matrix_free.recommended_next_action`: `avoid_matrix_free_only_retry_until_operator_preconditioner_changes`
+- `gmres_shifted_ilu.path`: `implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_mu_1e_4_probe.json`
+- `gmres_shifted_ilu.status`: `blocked`
+- `gmres_shifted_ilu.reason_code`: `ERR_ILU_GMRES_NOT_CONVERGED`
+- `gmres_shifted_ilu.jvp_eps`: `0.001`
+- `gmres_shifted_ilu.jvp_parity_max_absolute_error_n`: `0.001708984375`
+- `gmres_shifted_ilu.direction_status`: `blocked`
+- `gmres_shifted_ilu.direction_residual_after_n`: `0.0001237155747730867`
+- `gmres_shifted_ilu.line_search_status`: `blocked`
+- `gmres_shifted_ilu.line_search_residual_after_n`: `0.0`
+- `gmres_shifted_ilu.incomplete_direction_preview`: `False`
+- `gmres_shifted_ilu.recommended_next_action`: `tune_shift_or_multilevel_preconditioner_before_accepting_shifted_ilu_direction`
+- `gmres_shifted_ilu_incomplete_preview.path`: `implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_mu_1e_4_incomplete_preview_probe.json`
+- `gmres_shifted_ilu_incomplete_preview.status`: `review`
+- `gmres_shifted_ilu_incomplete_preview.reason_code`: `PREVIEW_INCOMPLETE_GMRES_DIRECTION`
+- `gmres_shifted_ilu_incomplete_preview.jvp_eps`: `0.001`
+- `gmres_shifted_ilu_incomplete_preview.jvp_parity_max_absolute_error_n`: `0.001708984375`
+- `gmres_shifted_ilu_incomplete_preview.direction_status`: `preview`
+- `gmres_shifted_ilu_incomplete_preview.direction_residual_after_n`: `0.0001237155747730867`
+- `gmres_shifted_ilu_incomplete_preview.line_search_status`: `ready`
+- `gmres_shifted_ilu_incomplete_preview.line_search_residual_after_n`: `0.0033228596775920494`
+- `gmres_shifted_ilu_incomplete_preview.incomplete_direction_preview`: `True`
+- `gmres_shifted_ilu_incomplete_preview.recommended_next_action`: `tune_shift_or_multilevel_preconditioner_before_accepting_shifted_ilu_direction`
 
 ## Adaptive All-Components Frontier
 
@@ -411,31 +506,42 @@
 - `close_consistent_residual_jacobian_newton_gate`: owner=`solver_numerics_owner`, status=`required`
 - `prove_production_rocm_hip_residual_jvp_worker`: owner=`runtime_rocm_owner`, status=`required`
 
+## Contract Blockers
+
+- `production_rocm_hip_residual_jvp_worker_path_not_ready`
+
 ## Worker Path Repair Plan
 
-- `next_action_id`: `rerun_g1_full_load_hip_newton_lane`
-- `blocker_count`: `0`
+- `next_action_id`: `repair_production_rocm_hip_residual_jvp_worker_path`
+- `blocker_count`: `6`
+- `hip_required_direct_probe`: `1`
+- `production_hip_residual_jacobian_path`: `1`
+- `matrix_free_global_krylov`: `3`
+- `current_tangent_residual_row_replay`: `1`
 
 ## Worker Path Operator Sequence
 
 - `verify_rocm_runtime_device_interface`: owner=`runtime_rocm_owner`, status=`ready`
-- `run_hip_required_direct_probe`: owner=`runtime_rocm_owner`, status=`ready`
-- `refresh_runner_contract_after_hip_probe`: owner=`g1_solver_owner`, status=`ready`
+- `run_hip_required_direct_probe`: owner=`runtime_rocm_owner`, status=`required`
+- `refresh_runner_contract_after_hip_probe`: owner=`g1_solver_owner`, status=`required`
 - `rerun_g1_full_load_lane_with_full_load_checkpoint`: owner=`g1_solver_owner`, status=`required`
 
 ## Closure Blockers
 
+- `hip_consistency_proof_production_hip_path_not_proven`
 - `hip_consistency_proof_gate_not_passed`
+- `hip_consistency_proof_residual_jvp_worker_path_not_ready`
 - `hip_consistency_proof_worker_g1_closure_gate_not_ready`
 - `hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed`
+- `hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven`
+- `hip_consistency_proof_worker::direct_probe_not_executed_preflight_only`
+- `hip_consistency_proof_worker::global_krylov_accepted_state_tangent_refresh_hip_not_proven`
+- `hip_consistency_proof_worker::global_krylov_hip_solver_not_proven`
+- `hip_consistency_proof_worker::global_krylov_jvp_rows_not_retained`
+- `hip_consistency_proof_worker::production_hip_residual_jacobian_path_not_proven`
 - `hip_consistency_proof_has_blockers`
-- `consistent_residual_jacobian::consistent_residual_jacobian_newton_not_proven`
-- `consistent_residual_jacobian::state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency`
-- `hip_direct_probe::consistent_jacobian_or_globalization_required`
-- `hip_direct_probe::direct_residual_gate_not_closed`
-- `hip_direct_probe::regularized_fixed_point_residual_must_not_be_used_as_physical_residual`
-- `hip_direct_probe_consistent_residual_jacobian_not_closed`
-- `production_rocm_hip_residual_jvp_worker::consistent_residual_jacobian_newton_gate_not_passed`
+- `hip_residual_jacobian_consistency_preflight_only`
+- `hip_residual_jacobian_consistency_not_executed`
 - `consistent_residual_jacobian_newton_gate_not_passed`
 - `production_rocm_hip_worker_g1_closure_gate_not_ready`
 

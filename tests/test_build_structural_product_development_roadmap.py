@@ -495,6 +495,97 @@ def _write_minimal_inputs(repo_root: Path) -> None:
                 ),
                 "promotes_g1_closure": False,
             },
+            "sparse_direct_scaled_lsmr_from_incomplete_preview_probe": {
+                "present": True,
+                "status": "ready",
+                "line_search_status": "ready",
+                "line_search_residual_after_n": 0.0033227123724053342,
+                "line_search_residual_reduction_ratio": 4.433084782619419e-05,
+                "output_checkpoint_written": True,
+                "output_checkpoint_path": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_candidate.npz"
+                ),
+                "output_checkpoint_direct_residual_inf_n": 0.0033227123724053342,
+                "output_checkpoint_residual_gate_passed": False,
+                "promotes_g1_closure": False,
+            },
+            "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe": {
+                "present": True,
+                "status": "ready",
+                "step_count": 10,
+                "monotonic_residual_descent": True,
+                "initial_residual_n": 0.0033227123724053342,
+                "final_residual_n": 0.003321678662540961,
+                "final_residual_over_gate": 6.643357325081922,
+                "estimated_steps_to_gate_at_last_reduction": 27717,
+                "gate_convergence_assessment": "stalled_for_gate",
+                "recommended_next_action": (
+                    "switch_operator_preconditioner_or_tangent_model_before_extending_scaled_lsmr_chain"
+                ),
+                "latest_checkpoint_path": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_step_10_candidate.npz"
+                ),
+                "promotes_g1_closure": False,
+            },
+            "sparse_direct_shifted_splu_from_gate_candidate_step2_probe": {
+                "present": True,
+                "status": "ready",
+                "line_search_status": "ready",
+                "line_search_residual_after_n": 3.42023849952966e-05,
+                "line_search_residual_reduction_ratio": 0.07423647887510655,
+                "output_checkpoint_written": True,
+                "output_checkpoint_path": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_gate_candidate_step2_candidate.npz"
+                ),
+                "output_checkpoint_direct_residual_inf_n": 3.42023849952966e-05,
+                "output_checkpoint_residual_gate_passed": True,
+                "recommended_next_action": (
+                    "run_full_load_lane_material_mesh_hip_proofs_from_shifted_splu_gate_checkpoint"
+                ),
+                "promotes_g1_closure": False,
+            },
+            "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe": {
+                "present": True,
+                "status": "blocked",
+                "reason_code": "ERR_ILU_FACTOR_FAILED",
+                "jvp_eps": 0.001,
+                "jvp_parity_max_absolute_error_n": 0.001708984375,
+                "direction_status": "blocked",
+                "recommended_next_action": (
+                    "replace_or_shift_preconditioner_family_before_more_gmres_iterations"
+                ),
+            },
+            "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe": {
+                "present": True,
+                "status": "blocked",
+                "reason_code": "ERR_DIRECTION_SOLVE_BLOCKED",
+                "jvp_eps": 0.001,
+                "direction_status": "blocked",
+                "direction_residual_after_n": 0.05179151634140644,
+            },
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe": {
+                "present": True,
+                "status": "blocked",
+                "reason_code": "ERR_ILU_GMRES_NOT_CONVERGED",
+                "jvp_eps": 0.001,
+                "direction_status": "blocked",
+                "preconditioner_shift_mu": 1.0e-4,
+                "direction_residual_after_n": 0.0001237155747730867,
+            },
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe": {
+                "present": True,
+                "status": "review",
+                "reason_code": "PREVIEW_INCOMPLETE_GMRES_DIRECTION",
+                "jvp_eps": 0.001,
+                "direction_status": "preview",
+                "line_search_status": "ready",
+                "line_search_residual_after_n": 0.0033228596775920494,
+                "line_search_residual_reduction_ratio": 0.9297278781195855,
+                "incomplete_direction_preview": True,
+            },
             "shell_hotspot_tangent_fd_jvp": {
                 "present": True,
                 "status": "ready",
@@ -1091,6 +1182,94 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
     assert (
         details[
             "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_line_search_residual_after_n"
+        ]
+        == 0.0033227123724053342
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_output_checkpoint_residual_gate_passed"
+        ]
+        is False
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_final_residual_n"
+        ]
+        == 0.003321678662540961
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_gate_convergence_assessment"
+        ]
+        == "stalled_for_gate"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_output_checkpoint_residual_gate_passed"
+        ]
+        is True
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_output_checkpoint_residual_n"
+        ]
+        == 3.42023849952966e-05
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_reason_code"
+        ]
+        == "ERR_ILU_FACTOR_FAILED"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe_direction_residual_after_n"
+        ]
+        == 0.05179151634140644
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_direction_residual_after_n"
+        ]
+        == 0.0001237155747730867
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_reason_code"
+        ]
+        == "PREVIEW_INCOMPLETE_GMRES_DIRECTION"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_line_search_residual_after_n"
+        ]
+        == 0.0033228596775920494
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
         ]["current_position"]["shell_hotspot_tangent_fd_jvp_fd_consistent"]
         is True
     )
@@ -1522,6 +1701,66 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
             "sparse_direct_scaled_lsmr_long_chain_probe_recommended_next_action"
         ]
         == "switch_operator_preconditioner_or_tangent_model_before_extending_scaled_lsmr_chain"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_reason_code"
+        ]
+        == "ERR_ILU_FACTOR_FAILED"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_output_checkpoint_residual_n"
+        ]
+        == 0.0033227123724053342
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_estimated_steps_to_gate_at_last_reduction"
+        ]
+        == 27717
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_output_checkpoint_residual_gate_passed"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe_reason_code"
+        ]
+        == "ERR_DIRECTION_SOLVE_BLOCKED"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_reason_code"
+        ]
+        == "ERR_ILU_GMRES_NOT_CONVERGED"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_preconditioner_shift_mu"
+        ]
+        == 1.0e-4
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_direction_status"
+        ]
+        == "preview"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_line_search_status"
+        ]
+        == "ready"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_incomplete_direction_preview"
+        ]
+        is True
     )
     assert (
         stages["g1_solver_closure"]["summary"][

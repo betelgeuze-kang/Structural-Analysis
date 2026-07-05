@@ -50,6 +50,8 @@ def test_default_direction_solver_is_matrix_free():
     assert "scaled_lsmr" in ats.DIRECTION_SOLVERS
     assert "sparse_direct_spsolve" in ats.DIRECTION_SOLVERS
     assert "gmres_ilu" in ats.DIRECTION_SOLVERS
+    assert "gmres_shifted_ilu" in ats.DIRECTION_SOLVERS
+    assert "shifted_sparse_direct_splu" in ats.DIRECTION_SOLVERS
 
 
 # ---------------------------------------------------------------------------
@@ -119,6 +121,55 @@ def test_ilu_factor_failure():
     assert meta["reason_code"] == ats.ERR_ILU_FACTOR_FAILED
 
 
+def test_shifted_ilu_can_factor_singular_preconditioner():
+    ats = _load("g1_assembled_tangent_solve")
+    n = 6
+    k = diags(np.zeros(n)).tocsr()
+
+    def residual_fn(x):
+        return np.asarray(x, dtype=np.float64) - 1.0
+
+    p, meta = ats.solve_direction_assembled(
+        k,
+        residual_fn,
+        np.zeros(n),
+        solver="gmres_shifted_ilu",
+        ilu_shift_mu=1.0e-3,
+        gmres_maxiter=8,
+    )
+
+    assert p is not None
+    assert meta["status"] == "ready"
+    assert meta["reason_code"] == ats.PASS
+    assert meta["preconditioner"]["mode"] == "shifted_ilu"
+    assert meta["preconditioner"]["shift_mode"] == "relative_diagonal_shift"
+    assert meta["preconditioner"]["effective_shift"] > 0.0
+
+
+def test_shifted_sparse_direct_splu_can_factor_singular_tangent():
+    ats = _load("g1_assembled_tangent_solve")
+    n = 6
+    k = diags(np.zeros(n)).tocsr()
+
+    def residual_fn(x):
+        return np.asarray(x, dtype=np.float64) - 1.0
+
+    p, meta = ats.solve_direction_assembled(
+        k,
+        residual_fn,
+        np.zeros(n),
+        solver="shifted_sparse_direct_splu",
+        ilu_shift_mu=1.0e-3,
+    )
+
+    assert p is not None
+    assert meta["status"] == "ready"
+    assert meta["reason_code"] == ats.PASS
+    assert meta["shifted_operator"]["mode"] == "shifted_ilu"
+    assert meta["shifted_operator"]["effective_shift"] > 0.0
+    assert meta["residual_norm_after_shifted_linear_solve"] == 0.0
+
+
 # ---------------------------------------------------------------------------
 # 7. ILU GMRES nonconvergence -> explicit reason code
 # ---------------------------------------------------------------------------
@@ -144,6 +195,46 @@ def test_ilu_gmres_nonconvergence():
     assert meta["reason_code"] == ats.ERR_ILU_GMRES_NOT_CONVERGED
 
 
+def test_incomplete_gmres_direction_preview_is_opt_in(monkeypatch):
+    ats = _load("g1_assembled_tangent_solve")
+    n = 5
+    k = csr_matrix(np.eye(n))
+    f = np.linspace(1.0, 2.0, n)
+
+    def residual_fn(x):
+        return np.asarray(x, dtype=np.float64) - f
+
+    def fake_gmres(operator, b, **_kwargs):
+        return 0.999 * np.asarray(b, dtype=np.float64), 1
+
+    monkeypatch.setattr(ats, "gmres", fake_gmres)
+    p, meta = ats.solve_direction_assembled(
+        k,
+        residual_fn,
+        np.zeros(n),
+        solver="gmres_matrix_free",
+        gmres_maxiter=1,
+        allow_incomplete_gmres_direction=True,
+        incomplete_gmres_relative_tolerance=2.0e-3,
+    )
+    assert p is not None
+    assert meta["status"] == "preview"
+    assert meta["preview_reason_code"] == ats.PREVIEW_INCOMPLETE_GMRES_DIRECTION
+    assert meta["incomplete_direction_preview"] is True
+    assert meta["residual_norm_after_ratio"] <= 2.0e-3
+
+    p_blocked, meta_blocked = ats.solve_direction_assembled(
+        k,
+        residual_fn,
+        np.zeros(n),
+        solver="gmres_matrix_free",
+        gmres_maxiter=1,
+    )
+    assert p_blocked is None
+    assert meta_blocked["status"] == "blocked"
+    assert meta_blocked["reason_code"] == ats.ERR_DIRECTION_SOLVE_BLOCKED
+
+
 # ---------------------------------------------------------------------------
 # 8. sparse-direct ready -> line-search attempted, non-promoting
 # ---------------------------------------------------------------------------
@@ -159,6 +250,26 @@ def test_sparse_direct_ready_line_search():
     ls = payload["line_search_preview"]
     assert ls["attempted"] is True
     assert ls["accepted_alpha"] is not None
+    assert payload["promotes_g1_closure"] is False
+
+
+def test_sparse_direct_smoke_threads_opt_in_jvp_eps():
+    smoke = _load("run_g1_mgt_sparse_direct_physical_line_search_smoke")
+    residual_fn, x0, a = _spd_linear(n=10, seed=12)
+    payload = smoke.run_sparse_direct_smoke_from_closure(
+        residual_fn,
+        x0,
+        a,
+        direction_solver="scaled_lsmr",
+        gmres_maxiter=32,
+        gmres_rtol=3.0e-3,
+        jvp_eps=1.0e-3,
+    )
+    assert payload["jvp_eps"] == 1.0e-3
+    assert payload["gmres_rtol"] == 3.0e-3
+    assert payload["jvp_parity"]["finite_difference_eps"] == 1.0e-3
+    assert payload["jvp_parity"]["reference_finite_difference_eps"] == 1.0e-2
+    assert payload["line_search_preview"]["attempted"] is True
     assert payload["promotes_g1_closure"] is False
 
 
@@ -201,6 +312,145 @@ def test_no_descent_after_solved_direction(monkeypatch):
     assert payload["reason_code"] == smoke.ERR_LINE_SEARCH_NO_DESCENT
     assert payload["status"] == "review"
     assert payload["promotes_g1_closure"] is False
+
+
+def test_incomplete_gmres_preview_runs_line_search_without_promotion(monkeypatch):
+    smoke = _load("run_g1_mgt_sparse_direct_physical_line_search_smoke")
+    residual_fn, x0, a = _spd_linear(n=8, seed=14)
+    p_preview = np.linalg.solve(a.toarray(), -residual_fn(x0))
+
+    def fake_solve(k, fn, x, **kwargs):
+        assert kwargs["allow_incomplete_gmres_direction"] is True
+        assert kwargs["incomplete_gmres_relative_tolerance"] == 3.0e-3
+        return p_preview, {
+            "solver": kwargs.get("solver", "gmres_shifted_ilu"),
+            "status": "preview",
+            "reason_code": "ERR_ILU_GMRES_NOT_CONVERGED",
+            "preview_reason_code": smoke.PREVIEW_INCOMPLETE_GMRES_DIRECTION,
+            "incomplete_direction_preview": True,
+            "incomplete_gmres_relative_tolerance": 3.0e-3,
+            "residual_norm_before": float(np.max(np.abs(fn(x)))),
+            "residual_norm_after": 1.0e-4,
+            "residual_norm_after_ratio": 1.0e-4,
+        }
+
+    monkeypatch.setattr(smoke, "solve_direction_assembled", fake_solve)
+    payload = smoke.run_sparse_direct_smoke_from_closure(
+        residual_fn,
+        x0,
+        a,
+        direction_solver="gmres_shifted_ilu",
+        allow_incomplete_gmres_direction=True,
+        incomplete_gmres_relative_tolerance=3.0e-3,
+    )
+
+    assert payload["status"] == "review"
+    assert payload["reason_code"] == smoke.PREVIEW_INCOMPLETE_GMRES_DIRECTION
+    assert payload["allow_incomplete_gmres_direction"] is True
+    assert payload["line_search_preview"]["status"] == "ready"
+    assert payload["line_search_preview"]["incomplete_gmres_direction_preview"] is True
+    assert payload["direction_solve_comparison"]["gmres_shifted_ilu"]["status"] == "preview"
+    assert (
+        payload["direction_solve_comparison"]["gmres_shifted_ilu"]["preview_reason_code"]
+        == smoke.PREVIEW_INCOMPLETE_GMRES_DIRECTION
+    )
+    assert payload["promotes_g1_closure"] is False
+
+
+def test_incomplete_gmres_preview_checkpoint_is_explicit_opt_in(tmp_path, monkeypatch):
+    smoke = _load("run_g1_mgt_sparse_direct_physical_line_search_smoke")
+    n = 6
+    k_free = csr_matrix(np.eye(n))
+    force = np.linspace(0.5, 1.0, n)
+
+    def residual_fn(x):
+        return np.asarray(x, dtype=np.float64) - force
+
+    x0 = np.zeros(n)
+    p_preview = -residual_fn(x0)
+
+    def fake_build_mgt_physical_residual_closure(**_kwargs):
+        return residual_fn, x0, {
+            "tangent_free_csr": k_free,
+            "tangent_free_nnz": int(k_free.nnz),
+            "frame_service_tangent_source": "real_per_element",
+            "frame_service_tangent_stats_mpa": {},
+            "checkpoint_kind": "mgt-direct-residual-newton-state.v1",
+            "dof_count": n,
+            "node_count": 1,
+            "element_count": 1,
+            "free_dof_count": n,
+            "checkpoint": {
+                "checkpoint_applied": True,
+                "checkpoint_direct_residual_inf_n": float(np.max(np.abs(residual_fn(x0)))),
+                "checkpoint_promotes_g1_closure": False,
+            },
+            "frame_inputs": {"u0": np.zeros(n)},
+            "free": np.arange(n, dtype=np.int64),
+            "external_load_inf_n": 1.0,
+            "frame_tangent_source": "force_based_residual_tangent",
+            "shell_pressure_load_path_policy": "structural_components_only",
+        }
+
+    def fake_solve(k, fn, x, **kwargs):
+        assert kwargs["allow_incomplete_gmres_direction"] is True
+        return p_preview, {
+            "solver": kwargs.get("solver", "gmres_shifted_ilu"),
+            "status": "preview",
+            "reason_code": "ERR_ILU_GMRES_NOT_CONVERGED",
+            "preview_reason_code": smoke.PREVIEW_INCOMPLETE_GMRES_DIRECTION,
+            "incomplete_direction_preview": True,
+            "incomplete_gmres_relative_tolerance": 3.0e-3,
+            "residual_norm_before": float(np.max(np.abs(fn(x)))),
+            "residual_norm_after": 1.0e-4,
+            "residual_norm_after_ratio": 1.0e-4,
+        }
+
+    monkeypatch.setattr(
+        smoke,
+        "build_mgt_physical_residual_closure",
+        fake_build_mgt_physical_residual_closure,
+    )
+    monkeypatch.setattr(smoke, "solve_direction_assembled", fake_solve)
+    fake_mgt = tmp_path / "fake.mgt"
+    fake_mgt.write_text("fake", encoding="utf-8")
+
+    without_opt_in = smoke.run_g1_mgt_sparse_direct_physical_line_search_smoke(
+        mgt_model=fake_mgt,
+        output_json=tmp_path / "without.json",
+        output_final_checkpoint_npz=tmp_path / "without.npz",
+        direction_solver="gmres_shifted_ilu",
+        allow_incomplete_gmres_direction=True,
+        incomplete_gmres_relative_tolerance=3.0e-3,
+    )
+    assert without_opt_in["status"] == "review"
+    assert without_opt_in["output_final_checkpoint"] is None
+
+    checkpoint_path = tmp_path / "preview.npz"
+    with_opt_in = smoke.run_g1_mgt_sparse_direct_physical_line_search_smoke(
+        mgt_model=fake_mgt,
+        output_json=tmp_path / "with.json",
+        output_final_checkpoint_npz=checkpoint_path,
+        direction_solver="gmres_shifted_ilu",
+        allow_incomplete_gmres_direction=True,
+        incomplete_gmres_relative_tolerance=3.0e-3,
+        write_incomplete_gmres_preview_checkpoint=True,
+    )
+    checkpoint = with_opt_in["output_final_checkpoint"]
+    assert with_opt_in["status"] == "review"
+    assert with_opt_in["reason_code"] == smoke.PREVIEW_INCOMPLETE_GMRES_DIRECTION
+    assert checkpoint["written"] is True
+    assert checkpoint["direction_status"] == "preview"
+    assert checkpoint["incomplete_gmres_direction_preview"] is True
+    assert checkpoint["preview_reason_code"] == smoke.PREVIEW_INCOMPLETE_GMRES_DIRECTION
+    assert checkpoint["promotes_g1_closure"] is False
+    with np.load(checkpoint_path) as data:
+        assert bool(data["incomplete_gmres_direction_preview"]) is True
+        assert str(data["direction_status"]) == "preview"
+        assert str(data["preview_reason_code"]) == smoke.PREVIEW_INCOMPLETE_GMRES_DIRECTION
+        assert str(data["checkpoint_claim_boundary"]) == (
+            "non_promoting_incomplete_gmres_preview_checkpoint_candidate"
+        )
 
 
 # ---------------------------------------------------------------------------

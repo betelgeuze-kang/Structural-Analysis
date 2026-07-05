@@ -7,6 +7,8 @@ assembled-tangent-based direction solves:
 
   - ``sparse_direct_spsolve`` / ``sparse_direct_splu`` : solve K_free p = -R(x0)
     directly (a modified/quasi-Newton step when K_free approximates dR/du);
+  - ``shifted_sparse_direct_splu`` : solve (K_free + shift I) p = -R(x0)
+    directly as a non-promoting regularized tangent-model probe;
   - ``gmres_ilu`` : matrix-free physical JVP operator preconditioned by an
     incomplete-LU factorization of the assembled free-space tangent.
 
@@ -20,7 +22,7 @@ from __future__ import annotations
 from typing import Any, Callable
 
 import numpy as np
-from scipy.sparse import csc_matrix, diags
+from scipy.sparse import csc_matrix, diags, eye as sparse_eye
 from scipy.sparse.linalg import LinearOperator, gmres, lsmr, spilu, splu, spsolve
 
 from g1_global_newton_operator import DEFAULT_JVP_EPS, physical_consistent_jvp
@@ -32,8 +34,10 @@ DIRECTION_SOLVERS = (
     "gmres_matrix_free",
     "scaled_lsmr",
     "gmres_ilu",
+    "gmres_shifted_ilu",
     "sparse_direct_spsolve",
     "sparse_direct_splu",
+    "shifted_sparse_direct_splu",
 )
 DEFAULT_DIRECTION_SOLVER = "gmres_matrix_free"
 
@@ -48,6 +52,11 @@ ERR_ILU_GMRES_NOT_CONVERGED = "ERR_ILU_GMRES_NOT_CONVERGED"
 ERR_LSMR_SOLVE_FAILED = "ERR_LSMR_SOLVE_FAILED"
 ERR_LSMR_ZERO_DIRECTION = "ERR_LSMR_ZERO_DIRECTION"
 ERR_DIRECTION_SOLVE_BLOCKED = "ERR_DIRECTION_SOLVE_BLOCKED"
+PREVIEW_INCOMPLETE_GMRES_DIRECTION = "PREVIEW_INCOMPLETE_GMRES_DIRECTION"
+
+ILU_SHIFT_MODES = ("scalar_shift", "relative_diagonal_shift")
+DEFAULT_ILU_SHIFT_MODE = "relative_diagonal_shift"
+DEFAULT_ILU_SHIFT_MU = 1.0e-6
 
 
 def _inf_norm(x: np.ndarray) -> float:
@@ -57,6 +66,37 @@ def _inf_norm(x: np.ndarray) -> float:
 
 def _is_finite(x: np.ndarray) -> bool:
     return bool(np.all(np.isfinite(np.asarray(x, dtype=np.float64))))
+
+
+def _shifted_preconditioner_matrix(
+    k_free: Any,
+    *,
+    mode: str = DEFAULT_ILU_SHIFT_MODE,
+    mu: float = DEFAULT_ILU_SHIFT_MU,
+) -> tuple[Any, dict[str, Any]]:
+    if mode not in ILU_SHIFT_MODES:
+        raise ValueError(f"unknown ilu_shift_mode {mode!r}; expected {ILU_SHIFT_MODES}")
+    n = int(k_free.shape[0])
+    mu_float = float(mu)
+    if mode == "scalar_shift":
+        shift = mu_float
+        scale_source = "absolute"
+    else:
+        diag = np.abs(np.asarray(k_free.diagonal(), dtype=np.float64))
+        nz = diag[diag > 0.0]
+        scale = float(np.median(nz)) if nz.size else 1.0
+        shift = mu_float * scale
+        scale_source = f"relative_median_diag={scale:.6e}"
+    return (
+        k_free + shift * sparse_eye(n, format="csr"),
+        {
+            "mode": "shifted_ilu",
+            "shift_mode": mode,
+            "shift_mu": mu_float,
+            "effective_shift": float(shift),
+            "scale_source": scale_source,
+        },
+    )
 
 
 def assembled_tangent_parity(
@@ -112,6 +152,10 @@ def solve_direction_assembled(
     gmres_maxiter: int = 400,
     gmres_rtol: float = 1.0e-6,
     gmres_atol: float = 1.0e-10,
+    ilu_shift_mode: str = DEFAULT_ILU_SHIFT_MODE,
+    ilu_shift_mu: float = DEFAULT_ILU_SHIFT_MU,
+    allow_incomplete_gmres_direction: bool = False,
+    incomplete_gmres_relative_tolerance: float = 0.0,
 ) -> tuple[np.ndarray | None, dict[str, Any]]:
     """Solve for a Newton-ish direction using the assembled free-space tangent."""
     if solver not in DIRECTION_SOLVERS:
@@ -169,6 +213,53 @@ def solve_direction_assembled(
         return p, {"solver": solver, "status": "ready", "reason_code": PASS,
                    "residual_norm_before": _inf_norm(r0),
                    "residual_norm_after_linear_solve": _linear_residual_after(p)}
+
+    if solver == "shifted_sparse_direct_splu":
+        try:
+            shifted_k, shifted_meta = _shifted_preconditioner_matrix(
+                k_free,
+                mode=ilu_shift_mode,
+                mu=ilu_shift_mu,
+            )
+            lu = splu(csc_matrix(shifted_k))
+        except Exception as exc:  # noqa: BLE001
+            return None, {
+                "solver": solver,
+                "status": "blocked",
+                "reason_code": ERR_SPARSE_DIRECT_FACTOR_FAILED,
+                "shifted_operator": shifted_meta if "shifted_meta" in locals() else None,
+                "detail": str(exc)[:200],
+            }
+        try:
+            p = np.asarray(lu.solve(b), dtype=np.float64)
+        except Exception as exc:  # noqa: BLE001
+            return None, {
+                "solver": solver,
+                "status": "blocked",
+                "reason_code": ERR_SPARSE_DIRECT_SOLVE_FAILED,
+                "shifted_operator": shifted_meta,
+                "detail": str(exc)[:200],
+            }
+        if not _is_finite(p):
+            return None, {
+                "solver": solver,
+                "status": "blocked",
+                "reason_code": ERR_SPARSE_DIRECT_SOLVE_FAILED,
+                "shifted_operator": shifted_meta,
+                "detail": "non_finite_solution",
+            }
+        return p, {
+            "solver": solver,
+            "status": "ready",
+            "reason_code": PASS,
+            "preconditioned": True,
+            "shifted_operator": shifted_meta,
+            "residual_norm_before": _inf_norm(r0),
+            "residual_norm_after_linear_solve": _linear_residual_after(p),
+            "residual_norm_after_shifted_linear_solve": _inf_norm(
+                np.asarray(shifted_k @ p, dtype=np.float64) - b
+            ),
+        }
 
     if solver == "scaled_lsmr":
         try:
@@ -252,12 +343,26 @@ def solve_direction_assembled(
     if solver == "gmres_matrix_free":
         operator = LinearOperator((n, n), matvec=lambda v: physical_consistent_jvp(residual_fn, x0, v, eps=eps), dtype=np.float64)
         precond = None
-    else:  # gmres_ilu
+    else:  # gmres_ilu / gmres_shifted_ilu
+        preconditioner_meta = {"mode": "ilu"}
+        preconditioner_matrix = k_free
+        if solver == "gmres_shifted_ilu":
+            preconditioner_matrix, preconditioner_meta = _shifted_preconditioner_matrix(
+                k_free,
+                mode=ilu_shift_mode,
+                mu=ilu_shift_mu,
+            )
         try:
-            ilu = spilu(csc_matrix(k_free), drop_tol=ilu_drop_tol, fill_factor=ilu_fill_factor)
+            ilu = spilu(
+                csc_matrix(preconditioner_matrix),
+                drop_tol=ilu_drop_tol,
+                fill_factor=ilu_fill_factor,
+            )
         except Exception as exc:  # noqa: BLE001
             return None, {"solver": solver, "status": "blocked",
-                          "reason_code": ERR_ILU_FACTOR_FAILED, "detail": str(exc)[:200]}
+                          "reason_code": ERR_ILU_FACTOR_FAILED,
+                          "preconditioner": preconditioner_meta,
+                          "detail": str(exc)[:200]}
         operator = LinearOperator((n, n), matvec=lambda v: physical_consistent_jvp(residual_fn, x0, v, eps=eps), dtype=np.float64)
         precond = LinearOperator((n, n), matvec=ilu.solve, dtype=np.float64)
 
@@ -275,14 +380,52 @@ def solve_direction_assembled(
     residual_after = _inf_norm(np.asarray(operator @ p, dtype=np.float64) - b) if _is_finite(p) else None
     if not converged:
         reason = (
-            ERR_ILU_GMRES_NOT_CONVERGED if solver == "gmres_ilu"
+            ERR_ILU_GMRES_NOT_CONVERGED if solver in {"gmres_ilu", "gmres_shifted_ilu"}
             else ERR_DIRECTION_SOLVE_BLOCKED
         )
+        residual_before = _inf_norm(r0)
+        residual_ratio = (
+            residual_after / max(residual_before, 1.0e-30)
+            if residual_after is not None
+            else None
+        )
+        common = {"solver": solver, "reason_code": reason,
+                  "gmres_info": int(info), "iterations": int(iters["n"]),
+                  "preconditioned": bool(precond is not None),
+                  "preconditioner": (
+                      preconditioner_meta if precond is not None else None
+                  ),
+                  "residual_norm_before": residual_before,
+                  "residual_norm_after": residual_after,
+                  "residual_norm_after_ratio": residual_ratio}
+        if (
+            allow_incomplete_gmres_direction
+            and _is_finite(p)
+            and residual_ratio is not None
+            and residual_ratio <= float(incomplete_gmres_relative_tolerance)
+        ):
+            return p, {
+                **common,
+                "status": "preview",
+                "preview_reason_code": PREVIEW_INCOMPLETE_GMRES_DIRECTION,
+                "incomplete_direction_preview": True,
+                "incomplete_gmres_relative_tolerance": float(
+                    incomplete_gmres_relative_tolerance
+                ),
+            }
         return None, {"solver": solver, "status": "blocked", "reason_code": reason,
                       "gmres_info": int(info), "iterations": int(iters["n"]),
                       "preconditioned": bool(precond is not None),
-                      "residual_norm_before": _inf_norm(r0), "residual_norm_after": residual_after}
+                      "preconditioner": (
+                          preconditioner_meta if precond is not None else None
+                      ),
+                      "residual_norm_before": residual_before,
+                      "residual_norm_after": residual_after,
+                      "residual_norm_after_ratio": residual_ratio}
     return p, {"solver": solver, "status": "ready", "reason_code": PASS,
                "gmres_info": int(info), "iterations": int(iters["n"]),
                "preconditioned": bool(precond is not None),
+               "preconditioner": (
+                   preconditioner_meta if precond is not None else None
+               ),
                "residual_norm_before": _inf_norm(r0), "residual_norm_after": residual_after}

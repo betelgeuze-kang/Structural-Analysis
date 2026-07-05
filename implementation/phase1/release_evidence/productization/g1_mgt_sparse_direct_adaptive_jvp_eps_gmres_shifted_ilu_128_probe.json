@@ -1,0 +1,115 @@
+{
+  "schema_version": "g1-mgt-sparse-direct-physical-line-search-smoke.v1",
+  "generated_at": "2026-07-05T01:52:54.871437+00:00",
+  "is_smoke_only": true,
+  "promotes_g1_closure": false,
+  "uses_real_mgt_model": true,
+  "mgt_source": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "load_scale": 1.0,
+  "checkpoint_kind": "mgt-direct-residual-newton-state.v1",
+  "global_newton_operator": "physical_consistent_frame_shell_material_geometric",
+  "baseline_operator": "current_normalized_frame_geometric",
+  "default_global_newton_operator": "current_normalized_frame_geometric",
+  "default_direction_solver": "gmres_matrix_free",
+  "jvp_eps": 0.001,
+  "physical_residual_formula": "R(u,lambda)=F_int(u)-lambda*F_ext",
+  "uses_solver_normalization_lambda": false,
+  "normalization_lambda_excluded": true,
+  "status": "blocked",
+  "reason_code": "ERR_ILU_GMRES_NOT_CONVERGED",
+  "free_space": {
+    "free_dof_count": 58998,
+    "residual_shape": [
+      58998
+    ],
+    "tangent_shape": [
+      58998,
+      58998
+    ]
+  },
+  "assembled_tangent": {
+    "format": "csr",
+    "nnz": 1195482,
+    "build_seconds": 11.824412802990992,
+    "diag_min_abs": 1.0,
+    "diag_max_abs": 263305013223928.78,
+    "frame_service_tangent_source": "real_per_element",
+    "frame_service_tangent_stats_mpa": {
+      "min": 1e-09,
+      "max": 28000000000.0,
+      "mean": 30318042.015985984
+    }
+  },
+  "assembled_tangent_parity": {
+    "attempted": true,
+    "pass": true,
+    "max_relative_error": 2.683381287585585e-15,
+    "max_absolute_error": 0.006011962890625,
+    "relative_tolerance": 0.001,
+    "probes": 3
+  },
+  "jvp_parity": {
+    "finite_difference_eps": 0.001,
+    "reference_finite_difference_eps": 0.01,
+    "jvp_inf_n": 1285283167731.8245,
+    "reference_jvp_inf_n": 1285283167731.8245,
+    "max_relative_error": 1.3296559216720257e-15,
+    "max_absolute_error_n": 0.001708984375,
+    "relative_tolerance": 0.0001,
+    "absolute_tolerance_n": 0.01,
+    "pass_condition": "relative_or_absolute",
+    "pass": true,
+    "attempted": true
+  },
+  "direction_solve_comparison": {
+    "gmres_matrix_free_none": {
+      "status": "blocked",
+      "reason_code": "gmres_not_converged_maxiter",
+      "iterations": 128,
+      "residual_norm_before": 0.04728560329011722,
+      "residual_norm_after": 0.04810147280545318
+    },
+    "gmres_shifted_ilu": {
+      "status": "blocked",
+      "reason_code": "ERR_ILU_GMRES_NOT_CONVERGED",
+      "iterations": 128,
+      "residual_norm_before": 0.04728560329011722,
+      "residual_norm_after": 0.007633794433594687,
+      "preconditioned": true,
+      "preconditioner": {
+        "mode": "shifted_ilu",
+        "shift_mode": "relative_diagonal_shift",
+        "shift_mu": 1e-06,
+        "effective_shift": 2921.6811536893133,
+        "scale_source": "relative_median_diag=2.921681e+09"
+      }
+    }
+  },
+  "line_search_preview": {
+    "attempted": true,
+    "status": "blocked",
+    "reason_code": "ERR_ILU_GMRES_NOT_CONVERGED",
+    "accepted_alpha": null
+  },
+  "output_final_checkpoint": null,
+  "resource_usage": {
+    "dof_count": 78282,
+    "node_count": 13047,
+    "element_count": 12728,
+    "free_dof_count": 58998,
+    "peak_memory_mb": null,
+    "checkpoint": {
+      "checkpoint_applied": true,
+      "checkpoint_npz": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_long_chain_step_10_candidate.npz",
+      "checkpoint_schema": "mgt-direct-residual-newton-state.v1",
+      "checkpoint_load_scale": 1.0,
+      "requested_load_scale": 1.0,
+      "checkpoint_load_scale_matches_requested": true,
+      "checkpoint_direct_residual_inf_n": 0.04728560329011722,
+      "checkpoint_residual_gate_passed": false,
+      "checkpoint_promotes_g1_closure": false
+    }
+  },
+  "f2b_ii_b_scope_note": "0.656 continuation checkpoint regeneration/application is F2b-ii-b; not done here",
+  "claim_boundary": "non_promoting_sparse_direct_real_mgt_smoke_only"
+}

@@ -1295,6 +1295,299 @@ def _sparse_direct_scaled_lsmr_long_chain_payload() -> dict:
     return payload
 
 
+def _sparse_direct_scaled_lsmr_from_incomplete_preview_payload() -> dict:
+    payload = _sparse_direct_scaled_lsmr_frontier_payload()
+    payload["status"] = "ready"
+    payload["jvp_eps"] = 0.001
+    payload["direction_solve_comparison"]["scaled_lsmr"].update(
+        {
+            "iterations": 512,
+            "residual_norm_before": 0.0033228596775920494,
+            "residual_norm_after_linear_solve": 0.003322712022860205,
+            "condition_estimate": 321056.7105073829,
+        }
+    )
+    payload["line_search_preview"].update(
+        {
+            "residual_before_n": 0.0033228596775920494,
+            "residual_after_n": 0.0033227123724053342,
+            "residual_reduction_ratio": 4.433084782619419e-05,
+            "beats_d_residual_reduction_baseline": False,
+        }
+    )
+    payload["output_final_checkpoint"].update(
+        {
+            "path": (
+                "implementation/phase1/release_evidence/productization/"
+                "g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_candidate.npz"
+            ),
+            "direct_residual_inf_n": 0.0033227123724053342,
+            "residual_before_n": 0.0033228596775920494,
+            "direction_solver": "scaled_lsmr",
+            "direction_status": "ready",
+            "incomplete_gmres_direction_preview": False,
+            "residual_gate_passed": False,
+        }
+    )
+    payload["resource_usage"]["checkpoint"] = {
+        "checkpoint_applied": True,
+        "checkpoint_npz": (
+            "implementation/phase1/release_evidence/productization/"
+            "g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_mu_1e_4_incomplete_preview_candidate.npz"
+        ),
+        "checkpoint_direct_residual_inf_n": 0.0033228596775920494,
+        "checkpoint_promotes_g1_closure": False,
+    }
+    payload["claim_boundary"] = (
+        "non_promoting_scaled_lsmr_from_incomplete_preview_fixture"
+    )
+    return payload
+
+
+def _sparse_direct_scaled_lsmr_from_incomplete_preview_chain_payload() -> dict:
+    return {
+        "schema_version": "g1-mgt-sparse-direct-scaled-lsmr-chain-probe.v1",
+        "status": "ready",
+        "reason_code": "PASS",
+        "promotes_g1_closure": False,
+        "is_smoke_only": True,
+        "initial_checkpoint_npz": (
+            "implementation/phase1/release_evidence/productization/"
+            "g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_candidate.npz"
+        ),
+        "max_steps": 10,
+        "jvp_eps": 0.001,
+        "step_count": 10,
+        "ready_step_count": 10,
+        "checkpoint_written_step_count": 10,
+        "monotonic_residual_descent": True,
+        "initial_residual_n": 0.0033227123724053342,
+        "final_residual_n": 0.003321678662540961,
+        "residual_gate_n": 5.0e-4,
+        "final_residual_gate_passed": False,
+        "final_residual_gate_gap_n": 0.002821678662540961,
+        "final_residual_over_gate": 6.643357325081922,
+        "gate_convergence_assessment": "stalled_for_gate",
+        "recommended_next_action": (
+            "switch_operator_preconditioner_or_tangent_model_before_extending_scaled_lsmr_chain"
+        ),
+        "total_reduction_n": 1.0337098643731224e-06,
+        "total_reduction_ratio": 0.00031110422706399134,
+        "last_step_reduction_n": 1.018051989376545e-07,
+        "estimated_steps_to_gate_at_last_reduction": 27717,
+        "latest_checkpoint_path": (
+            "implementation/phase1/release_evidence/productization/"
+            "g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_step_10_candidate.npz"
+        ),
+        "latest_checkpoint_residual_gate_passed": False,
+        "claim_boundary": "non-promoting chain fixture",
+    }
+
+
+def _sparse_direct_shifted_splu_payload(
+    *,
+    from_gate_step2: bool = False,
+) -> dict:
+    before = 3.694505585372099e-05 if from_gate_step2 else 0.003321678662540961
+    after = 3.42023849952966e-05 if from_gate_step2 else 3.694505585372099e-05
+    input_checkpoint = (
+        "g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_incomplete_preview_chain_candidate.npz"
+        if from_gate_step2
+        else "g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_step_10_candidate.npz"
+    )
+    output_checkpoint = (
+        "g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_gate_candidate_step2_candidate.npz"
+        if from_gate_step2
+        else "g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_incomplete_preview_chain_candidate.npz"
+    )
+    return {
+        "schema_version": "g1-mgt-sparse-direct-physical-line-search-smoke.v1",
+        "status": "ready",
+        "reason_code": "PASS",
+        "promotes_g1_closure": False,
+        "load_scale": 1.0,
+        "jvp_eps": 0.001,
+        "jvp_parity": {"pass": True},
+        "assembled_tangent_parity": {"pass": True},
+        "direction_solve_comparison": {
+            "shifted_sparse_direct_splu": {
+                "status": "ready",
+                "reason_code": "PASS",
+                "residual_norm_before": before,
+                "residual_norm_after_linear_solve": after,
+                "residual_norm_after_shifted_linear_solve": 8.0e-16,
+                "shifted_operator": {
+                    "mode": "shifted_ilu",
+                    "shift_mode": "relative_diagonal_shift",
+                    "shift_mu": 1.0e-4,
+                    "effective_shift": 292168.1153689314,
+                },
+                "preconditioned": True,
+            }
+        },
+        "line_search_preview": {
+            "attempted": True,
+            "status": "ready",
+            "accepted_alpha": 1.0,
+            "residual_before_n": before,
+            "residual_after_n": after,
+            "residual_reduction_ratio": (before - after) / before,
+        },
+        "output_final_checkpoint": {
+            "written": True,
+            "path": (
+                "implementation/phase1/release_evidence/productization/"
+                f"{output_checkpoint}"
+            ),
+            "direct_residual_inf_n": after,
+            "direct_relative_residual_inf": 2.6e-09,
+            "residual_gate_passed": True,
+            "direction_solver": "shifted_sparse_direct_splu",
+            "direction_status": "ready",
+            "promotes_g1_closure": False,
+        },
+        "resource_usage": {
+            "checkpoint": {
+                "checkpoint_applied": True,
+                "checkpoint_npz": (
+                    "implementation/phase1/release_evidence/productization/"
+                    f"{input_checkpoint}"
+                ),
+                "checkpoint_direct_residual_inf_n": before,
+                "checkpoint_residual_gate_passed": from_gate_step2,
+                "checkpoint_promotes_g1_closure": False,
+            }
+        },
+        "claim_boundary": "non-promoting shifted SPLU fixture",
+    }
+
+
+def _sparse_direct_adaptive_jvp_eps_probe_payload(
+    *,
+    solver: str,
+    incomplete_preview: bool = False,
+) -> dict:
+    reason = (
+        "ERR_ILU_FACTOR_FAILED"
+        if solver == "gmres_ilu"
+        else "ERR_ILU_GMRES_NOT_CONVERGED"
+        if solver == "gmres_shifted_ilu"
+        else "ERR_DIRECTION_SOLVE_BLOCKED"
+    )
+    direction = {
+        "status": "blocked",
+        "reason_code": reason,
+    }
+    if solver in {"gmres_matrix_free", "gmres_shifted_ilu"}:
+        direction.update(
+            {
+                "iterations": 32,
+                "residual_norm_before": 0.04728560329011722,
+                "residual_norm_after": (
+                    0.0001237155747730867
+                    if solver == "gmres_shifted_ilu"
+                    else 0.05179151634140644
+                ),
+                "preconditioned": solver == "gmres_shifted_ilu",
+            }
+        )
+    if solver == "gmres_shifted_ilu":
+        direction["preconditioner"] = {
+            "mode": "shifted_ilu",
+            "shift_mode": "relative_diagonal_shift",
+            "shift_mu": 1.0e-4,
+            "effective_shift": 292168.1153689314,
+        }
+    status = "blocked"
+    line_search = {
+        "attempted": True,
+        "status": "blocked",
+        "reason_code": reason,
+        "accepted_alpha": None,
+    }
+    if incomplete_preview:
+        status = "review"
+        direction.update(
+            {
+                "status": "preview",
+                "preview_reason_code": "PREVIEW_INCOMPLETE_GMRES_DIRECTION",
+                "incomplete_direction_preview": True,
+                "incomplete_gmres_relative_tolerance": 3.0e-3,
+                "residual_norm_after_ratio": 0.002616347601912557,
+            }
+        )
+        line_search = {
+            "attempted": True,
+            "status": "ready",
+            "reason_code": "ok",
+            "accepted_alpha": 1.0,
+            "residual_before_n": 0.04728560329011722,
+            "residual_after_n": 0.0033228596775920494,
+            "residual_reduction_ratio": 0.9297278781195855,
+            "incomplete_gmres_direction_preview": True,
+        }
+    output_checkpoint = None
+    if incomplete_preview:
+        output_checkpoint = {
+            "written": True,
+            "path": (
+                "implementation/phase1/release_evidence/productization/"
+                "g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_mu_1e_4_incomplete_preview_candidate.npz"
+            ),
+            "direct_residual_inf_n": 0.0033228596775920494,
+            "residual_gate_passed": False,
+            "direction_solver": "gmres_shifted_ilu",
+            "direction_status": "preview",
+            "incomplete_gmres_direction_preview": True,
+            "preview_reason_code": "PREVIEW_INCOMPLETE_GMRES_DIRECTION",
+            "promotes_g1_closure": False,
+        }
+    return {
+        "schema_version": "g1-mgt-sparse-direct-physical-line-search-smoke.v1",
+        "status": status,
+        "reason_code": (
+            "PREVIEW_INCOMPLETE_GMRES_DIRECTION" if incomplete_preview else reason
+        ),
+        "promotes_g1_closure": False,
+        "load_scale": 1.0,
+        "jvp_eps": 0.001,
+        "jvp_parity": {
+            "pass": True,
+            "finite_difference_eps": 0.001,
+            "reference_finite_difference_eps": 0.01,
+            "max_absolute_error_n": 0.001708984375,
+            "max_relative_error": 1.3296559216720257e-15,
+        },
+        "assembled_tangent_parity": {
+            "pass": True,
+            "max_absolute_error": 0.006011962890625,
+            "max_relative_error": 2.683381287585585e-15,
+        },
+        "direction_solve_comparison": {
+            "gmres_matrix_free_none": {
+                "status": "blocked",
+                "reason_code": "gmres_not_converged_maxiter",
+                "iterations": 32,
+                "residual_norm_after": 0.05179151634140644,
+            },
+            solver: direction,
+        },
+        "line_search_preview": line_search,
+        "output_final_checkpoint": output_checkpoint,
+        "resource_usage": {
+            "checkpoint": {
+                "checkpoint_applied": True,
+                "checkpoint_npz": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "g1_mgt_sparse_direct_scaled_lsmr_long_chain_step_10_candidate.npz"
+                ),
+                "checkpoint_direct_residual_inf_n": 0.04728560329011722,
+            }
+        },
+        "claim_boundary": "non-promoting adaptive JVP fixture",
+    }
+
+
 def _active_set_ls_trust_schedule_candidate_payload() -> dict:
     payload = _active_set_ls_trust_candidate_payload()
     payload["summary"] = {
@@ -1488,6 +1781,38 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
         "sparse_direct_scaled_lsmr_long_chain": (
             tmp_path / runner.DEFAULT_SPARSE_DIRECT_SCALED_LSMR_LONG_CHAIN_PROBE
         ),
+        "sparse_direct_scaled_lsmr_from_incomplete_preview": (
+            tmp_path
+            / runner.DEFAULT_SPARSE_DIRECT_SCALED_LSMR_FROM_INCOMPLETE_PREVIEW_PROBE
+        ),
+        "sparse_direct_scaled_lsmr_from_incomplete_preview_chain": (
+            tmp_path
+            / runner.DEFAULT_SPARSE_DIRECT_SCALED_LSMR_FROM_INCOMPLETE_PREVIEW_CHAIN_PROBE
+        ),
+        "sparse_direct_shifted_splu_from_incomplete_preview_chain": (
+            tmp_path
+            / runner.DEFAULT_SPARSE_DIRECT_SHIFTED_SPLU_FROM_INCOMPLETE_PREVIEW_CHAIN_PROBE
+        ),
+        "sparse_direct_shifted_splu_from_gate_candidate_step2": (
+            tmp_path
+            / runner.DEFAULT_SPARSE_DIRECT_SHIFTED_SPLU_FROM_GATE_CANDIDATE_STEP2_PROBE
+        ),
+        "sparse_direct_adaptive_jvp_eps_gmres_ilu": (
+            tmp_path
+            / runner.DEFAULT_SPARSE_DIRECT_ADAPTIVE_JVP_EPS_GMRES_ILU_PROBE
+        ),
+        "sparse_direct_adaptive_jvp_eps_gmres_matrix_free": (
+            tmp_path
+            / runner.DEFAULT_SPARSE_DIRECT_ADAPTIVE_JVP_EPS_GMRES_MATRIX_FREE_PROBE
+        ),
+        "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu": (
+            tmp_path
+            / runner.DEFAULT_SPARSE_DIRECT_ADAPTIVE_JVP_EPS_GMRES_SHIFTED_ILU_PROBE
+        ),
+        "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview": (
+            tmp_path
+            / runner.DEFAULT_SPARSE_DIRECT_ADAPTIVE_JVP_EPS_GMRES_SHIFTED_ILU_INCOMPLETE_PREVIEW_PROBE
+        ),
     }
     _write_json(paths["g1_lane"], _g1_lane_payload(action_id=action_id))
     _write_json(paths["cause"], _cause_narrowing_payload())
@@ -1593,6 +1918,41 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
     _write_json(
         paths["sparse_direct_scaled_lsmr_long_chain"],
         _sparse_direct_scaled_lsmr_long_chain_payload(),
+    )
+    _write_json(
+        paths["sparse_direct_scaled_lsmr_from_incomplete_preview"],
+        _sparse_direct_scaled_lsmr_from_incomplete_preview_payload(),
+    )
+    _write_json(
+        paths["sparse_direct_scaled_lsmr_from_incomplete_preview_chain"],
+        _sparse_direct_scaled_lsmr_from_incomplete_preview_chain_payload(),
+    )
+    _write_json(
+        paths["sparse_direct_shifted_splu_from_incomplete_preview_chain"],
+        _sparse_direct_shifted_splu_payload(),
+    )
+    _write_json(
+        paths["sparse_direct_shifted_splu_from_gate_candidate_step2"],
+        _sparse_direct_shifted_splu_payload(from_gate_step2=True),
+    )
+    _write_json(
+        paths["sparse_direct_adaptive_jvp_eps_gmres_ilu"],
+        _sparse_direct_adaptive_jvp_eps_probe_payload(solver="gmres_ilu"),
+    )
+    _write_json(
+        paths["sparse_direct_adaptive_jvp_eps_gmres_matrix_free"],
+        _sparse_direct_adaptive_jvp_eps_probe_payload(solver="gmres_matrix_free"),
+    )
+    _write_json(
+        paths["sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu"],
+        _sparse_direct_adaptive_jvp_eps_probe_payload(solver="gmres_shifted_ilu"),
+    )
+    _write_json(
+        paths["sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview"],
+        _sparse_direct_adaptive_jvp_eps_probe_payload(
+            solver="gmres_shifted_ilu",
+            incomplete_preview=True,
+        ),
     )
     return paths
 
@@ -2078,6 +2438,162 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
         ]
         == "switch_operator_preconditioner_or_tangent_model_before_extending_scaled_lsmr_chain"
     )
+    assert (
+        payload["summary"][
+            "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_status"
+        ]
+        == "ready"
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_line_search_residual_after_n"
+        ]
+        == 0.0033227123724053342
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_output_checkpoint_residual_n"
+        ]
+        == 0.0033227123724053342
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_output_checkpoint_residual_gate_passed"
+        ]
+        is False
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_step_count"
+        ]
+        == 10
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_final_residual_n"
+        ]
+        == 0.003321678662540961
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_estimated_steps_to_gate_at_last_reduction"
+        ]
+        == 27717
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_gate_convergence_assessment"
+        ]
+        == "stalled_for_gate"
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_shifted_splu_from_incomplete_preview_chain_probe_output_checkpoint_residual_gate_passed"
+        ]
+        is True
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_shifted_splu_from_incomplete_preview_chain_probe_output_checkpoint_residual_n"
+        ]
+        == 3.694505585372099e-05
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_output_checkpoint_residual_n"
+        ]
+        == 3.42023849952966e-05
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_output_checkpoint_residual_gate_passed"
+        ]
+        is True
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_status"
+        ]
+        == "blocked"
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_reason_code"
+        ]
+        == "ERR_ILU_FACTOR_FAILED"
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_jvp_parity_max_absolute_error_n"
+        ]
+        == 0.001708984375
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe_reason_code"
+        ]
+        == "ERR_DIRECTION_SOLVE_BLOCKED"
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe_direction_residual_after_n"
+        ]
+        == 0.05179151634140644
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_reason_code"
+        ]
+        == "ERR_ILU_GMRES_NOT_CONVERGED"
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_preconditioner_shift_mu"
+        ]
+        == 1.0e-4
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_direction_residual_after_n"
+        ]
+        == 0.0001237155747730867
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_status"
+        ]
+        == "review"
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_reason_code"
+        ]
+        == "PREVIEW_INCOMPLETE_GMRES_DIRECTION"
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_direction_status"
+        ]
+        == "preview"
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_line_search_status"
+        ]
+        == "ready"
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_line_search_residual_after_n"
+        ]
+        == 0.0033228596775920494
+    )
+    assert (
+        payload["summary"][
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_incomplete_direction_preview"
+        ]
+        is True
+    )
     assert payload["summary"]["adaptive_all_components_frontier_present"] is True
     assert payload["summary"][
         "adaptive_all_components_frontier_final_residual_n"
@@ -2330,6 +2846,79 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
             "recommended_next_action"
         ]
         == "switch_operator_preconditioner_or_tangent_model_before_extending_scaled_lsmr_chain"
+    )
+    assert (
+        payload["sparse_direct_scaled_lsmr_from_incomplete_preview_probe"][
+            "output_checkpoint_direct_residual_inf_n"
+        ]
+        == 0.0033227123724053342
+    )
+    assert payload["sparse_direct_scaled_lsmr_from_incomplete_preview_probe"][
+        "output_checkpoint_path"
+    ].endswith("g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_candidate.npz")
+    assert (
+        payload["sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe"][
+            "latest_checkpoint_path"
+        ].endswith(
+            "g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_step_10_candidate.npz"
+        )
+    )
+    assert (
+        payload["sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe"][
+            "recommended_next_action"
+        ]
+        == "switch_operator_preconditioner_or_tangent_model_before_extending_scaled_lsmr_chain"
+    )
+    assert payload["sparse_direct_shifted_splu_from_gate_candidate_step2_probe"][
+        "output_checkpoint_path"
+    ].endswith("g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_gate_candidate_step2_candidate.npz")
+    assert (
+        payload["sparse_direct_shifted_splu_from_gate_candidate_step2_probe"][
+            "recommended_next_action"
+        ]
+        == "run_full_load_lane_material_mesh_hip_proofs_from_shifted_splu_gate_checkpoint"
+    )
+    assert (
+        payload["sparse_direct_adaptive_jvp_eps_gmres_ilu_probe"][
+            "recommended_next_action"
+        ]
+        == "replace_or_shift_preconditioner_family_before_more_gmres_iterations"
+    )
+    assert (
+        payload["sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe"][
+            "recommended_next_action"
+        ]
+        == "avoid_matrix_free_only_retry_until_operator_preconditioner_changes"
+    )
+    assert (
+        payload["sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe"][
+            "preconditioner_mode"
+        ]
+        == "shifted_ilu"
+    )
+    assert (
+        payload["sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe"][
+            "recommended_next_action"
+        ]
+        == "tune_shift_or_multilevel_preconditioner_before_accepting_shifted_ilu_direction"
+    )
+    assert (
+        payload[
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe"
+        ]["line_search_residual_after_n"]
+        == 0.0033228596775920494
+    )
+    assert (
+        payload[
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe"
+        ]["output_checkpoint_direct_residual_inf_n"]
+        == 0.0033228596775920494
+    )
+    assert (
+        payload[
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe"
+        ]["incomplete_direction_preview"]
+        is True
     )
     assert payload["adaptive_all_components_frontier"] == {
         "path": runner.DEFAULT_ADAPTIVE_ALL_COMPONENTS_FRONTIER.as_posix(),
@@ -2695,4 +3284,8 @@ def test_runner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
     assert "g1_mgt_sparse_direct_scaled_lsmr_chain_probe.json" in markdown
     assert "## Sparse Direct Scaled-LSMR Long-Chain Receipt" in markdown
     assert "g1_mgt_sparse_direct_scaled_lsmr_long_chain_step_10_candidate.npz" in markdown
+    assert "## Sparse Direct Adaptive-JVP GMRES Receipts" in markdown
+    assert "ERR_ILU_FACTOR_FAILED" in markdown
+    assert "gmres_shifted_ilu" in markdown
+    assert "0.0001237155747730867" in markdown
     assert payload["status"] == "ready_for_runner_implementation"

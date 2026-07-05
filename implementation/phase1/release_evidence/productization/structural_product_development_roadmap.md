@@ -34,7 +34,7 @@ Structural product roadmap: BLOCKED | evidence_progress=50.9% | stage_average=40
   - first blocker: `selected_medium_models_pass_or_approved_review::medium_structural_models_current_below_required:3/5`
   - next action: `close_medium_model_pass_or_approved_review_gate`
 - `g1_solver_closure`: partial (1/2, 50.0%)
-  - first blocker: `hip_consistency_proof_gate_not_passed`
+  - first blocker: `hip_consistency_proof_production_hip_path_not_proven`
   - next action: `promote_g1_assembly_contract_to_live_runner`
 - `paid_pilot_readiness`: blocked (0/4, 0.0%)
   - first blocker: `customer_shadow_below_required:0/3`

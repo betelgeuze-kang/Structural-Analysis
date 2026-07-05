@@ -116,3 +116,38 @@ def test_summarize_chain_marks_gate_stall_when_step_count_is_huge():
     assert payload["recommended_next_action"] == (
         "switch_operator_preconditioner_or_tangent_model_before_extending_scaled_lsmr_chain"
     )
+
+
+def test_run_chain_probe_threads_opt_in_jvp_eps(tmp_path, monkeypatch):
+    chain = _load("run_g1_mgt_sparse_direct_scaled_lsmr_chain_probe")
+    seen: list[float] = []
+
+    def fake_smoke(**kwargs):
+        seen.append(kwargs["jvp_eps"])
+        step = len(seen)
+        return _step(
+            before=1.0 - 0.1 * (step - 1),
+            after=0.9 - 0.1 * (step - 1),
+            path=str(tmp_path / f"step{step}.npz"),
+        )
+
+    monkeypatch.setattr(
+        chain,
+        "run_g1_mgt_sparse_direct_physical_line_search_smoke",
+        fake_smoke,
+    )
+
+    payload = chain.run_chain_probe(
+        mgt_model=tmp_path / "fake.mgt",
+        initial_checkpoint_npz=tmp_path / "initial.npz",
+        max_steps=2,
+        gmres_maxiter=8,
+        jvp_eps=1.0e-3,
+        output_json=tmp_path / "chain.json",
+        step_prefix=tmp_path / "chain_step",
+    )
+
+    assert seen == [1.0e-3, 1.0e-3]
+    assert payload["jvp_eps"] == 1.0e-3
+    assert payload["step_count"] == 2
+    assert payload["promotes_g1_closure"] is False

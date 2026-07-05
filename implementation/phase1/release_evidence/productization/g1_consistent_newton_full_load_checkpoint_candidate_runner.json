@@ -554,7 +554,9 @@
     "residual_formula": "F_internal_minus_F_external",
     "status": "ready"
   },
-  "blockers": [],
+  "blockers": [
+    "production_rocm_hip_residual_jvp_worker_path_not_ready"
+  ],
   "checkpoint_gap": {
     "checkpoint_resolution_passed": true,
     "full_load_candidate_count": 1,
@@ -566,21 +568,24 @@
   },
   "claim_boundary": "This packet defines the next G1 runner contract for generating a consistent residual/Jacobian Newton full-load checkpoint candidate. It does not create the checkpoint, close the consistent Newton gate, prove full-load 1.0 equilibrium, promote G1 closure, or allow an exhausted row-only support/link retuning loop to count as progress.",
   "closure_blockers": [
+    "hip_consistency_proof_production_hip_path_not_proven",
     "hip_consistency_proof_gate_not_passed",
+    "hip_consistency_proof_residual_jvp_worker_path_not_ready",
     "hip_consistency_proof_worker_g1_closure_gate_not_ready",
     "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
+    "hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven",
+    "hip_consistency_proof_worker::direct_probe_not_executed_preflight_only",
+    "hip_consistency_proof_worker::global_krylov_accepted_state_tangent_refresh_hip_not_proven",
+    "hip_consistency_proof_worker::global_krylov_hip_solver_not_proven",
+    "hip_consistency_proof_worker::global_krylov_jvp_rows_not_retained",
+    "hip_consistency_proof_worker::production_hip_residual_jacobian_path_not_proven",
     "hip_consistency_proof_has_blockers",
-    "consistent_residual_jacobian::consistent_residual_jacobian_newton_not_proven",
-    "consistent_residual_jacobian::state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency",
-    "hip_direct_probe::consistent_jacobian_or_globalization_required",
-    "hip_direct_probe::direct_residual_gate_not_closed",
-    "hip_direct_probe::regularized_fixed_point_residual_must_not_be_used_as_physical_residual",
-    "hip_direct_probe_consistent_residual_jacobian_not_closed",
-    "production_rocm_hip_residual_jvp_worker::consistent_residual_jacobian_newton_gate_not_passed",
+    "hip_residual_jacobian_consistency_preflight_only",
+    "hip_residual_jacobian_consistency_not_executed",
     "consistent_residual_jacobian_newton_gate_not_passed",
     "production_rocm_hip_worker_g1_closure_gate_not_ready"
   ],
-  "contract_pass": true,
+  "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
   "frame_tangent_fd_epsilon_sweep": {
@@ -604,7 +609,7 @@
     "residual_inf_n": 0.42740724991695345,
     "status": "ready"
   },
-  "generated_at": "2026-07-05T01:38:28.896686+00:00",
+  "generated_at": "2026-07-05T02:48:46.806370+00:00",
   "global_tangent_scaled_sweep": {
     "base_residual_inf_n": 0.4278304040181992,
     "best_alpha": 0.00390625,
@@ -632,22 +637,22 @@
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
     "g1_closure_gate_ready": false,
-    "production_hip_residual_jacobian_path": true,
-    "residual_jvp_worker_path_ready": true,
+    "production_hip_residual_jacobian_path": false,
+    "residual_jvp_worker_path_ready": false,
     "terminal_gate_partition": {
       "checkpoint_gate": {
-        "full_load_candidate": true,
-        "full_load_closure_passed": true,
+        "full_load_candidate": false,
+        "full_load_closure_passed": false,
         "full_load_required": true,
-        "gap_to_full_load": 0.0,
-        "load_scale": 1.0
+        "gap_to_full_load": null,
+        "load_scale": null
       },
       "claim_boundary": "Partition only: this separates the HIP residual/JVP worker path from the remaining full-load and consistent Newton G1 closure gates. It does not promote G1 readiness.",
       "direct_residual_gate": {
-        "fallback_zero_passed": true,
+        "fallback_zero_passed": false,
         "material_newton_breadth_passed": false,
         "passed": false,
-        "relative_increment_gate_passed": true
+        "relative_increment_gate_passed": false
       },
       "g1_closure_gate": {
         "blockers": [
@@ -658,40 +663,138 @@
       },
       "next_action": {
         "blockers": [
-          "direct_residual_gate_not_passed"
+          "current_tangent_residual_row_hip_replay_not_proven",
+          "direct_probe_not_executed_preflight_only",
+          "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
+          "global_krylov_hip_solver_not_proven",
+          "global_krylov_jvp_rows_not_retained",
+          "production_hip_residual_jacobian_path_not_proven"
         ],
         "disallowed_retry_action_ids": [],
-        "id": "close_direct_residual_gate_on_full_load_checkpoint",
+        "id": "repair_production_rocm_hip_residual_jvp_worker_path",
         "preferred_candidate_generator": null,
         "rerun_command": ""
       },
       "schema_version": "production-rocm-hip-worker-terminal-gate-partition.v1",
       "worker_path": {
-        "blockers": [],
-        "ready": true
+        "blockers": [
+          "current_tangent_residual_row_hip_replay_not_proven",
+          "direct_probe_not_executed_preflight_only",
+          "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
+          "global_krylov_hip_solver_not_proven",
+          "global_krylov_jvp_rows_not_retained",
+          "production_hip_residual_jacobian_path_not_proven"
+        ],
+        "ready": false
       }
     },
     "worker_blockers": [
-      "consistent_residual_jacobian_newton_gate_not_passed"
+      "consistent_residual_jacobian_newton_gate_not_passed",
+      "current_tangent_residual_row_hip_replay_not_proven",
+      "direct_probe_not_executed_preflight_only",
+      "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
+      "global_krylov_hip_solver_not_proven",
+      "global_krylov_jvp_rows_not_retained",
+      "production_hip_residual_jacobian_path_not_proven"
     ],
     "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
-    "worker_path_blockers": [],
+    "worker_path_blockers": [
+      "current_tangent_residual_row_hip_replay_not_proven",
+      "direct_probe_not_executed_preflight_only",
+      "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
+      "global_krylov_hip_solver_not_proven",
+      "global_krylov_jvp_rows_not_retained",
+      "production_hip_residual_jacobian_path_not_proven"
+    ],
     "worker_path_repair_plan": {
-      "blocker_count": 0,
-      "blockers": [],
-      "categories": {},
-      "category_count": 0,
-      "category_counts": {},
-      "category_order": [],
+      "blocker_count": 6,
+      "blockers": [
+        "current_tangent_residual_row_hip_replay_not_proven",
+        "direct_probe_not_executed_preflight_only",
+        "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
+        "global_krylov_hip_solver_not_proven",
+        "global_krylov_jvp_rows_not_retained",
+        "production_hip_residual_jacobian_path_not_proven"
+      ],
+      "categories": {
+        "current_tangent_residual_row_replay": {
+          "acceptance": [
+            "current tangent residual row correction attempted with HIP batch replay",
+            "accepted-state tangent refresh CPU fallback remains false"
+          ],
+          "blocker_count": 1,
+          "blockers": [
+            "current_tangent_residual_row_hip_replay_not_proven"
+          ],
+          "required_receipts": [
+            "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
+          ]
+        },
+        "hip_required_direct_probe": {
+          "acceptance": [
+            "HIP-required direct probe executed, not preflight-only",
+            "cpu_diagnostic_assembler_used == false"
+          ],
+          "blocker_count": 1,
+          "blockers": [
+            "direct_probe_not_executed_preflight_only"
+          ],
+          "required_receipts": [
+            "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
+          ]
+        },
+        "matrix_free_global_krylov": {
+          "acceptance": [
+            "matrix_free_global_krylov.proof.hip_krylov_solver_used == true",
+            "matrix_free_global_krylov.proof.jvp_rows_retained == true",
+            "accepted-state tangent refresh uses HIP, not CPU"
+          ],
+          "blocker_count": 3,
+          "blockers": [
+            "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
+            "global_krylov_hip_solver_not_proven",
+            "global_krylov_jvp_rows_not_retained"
+          ],
+          "required_receipts": [
+            "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
+          ]
+        },
+        "production_hip_residual_jacobian_path": {
+          "acceptance": [
+            "production_hip_residual_jacobian_path == true",
+            "no CPU fallback path is counted as production HIP"
+          ],
+          "blocker_count": 1,
+          "blockers": [
+            "production_hip_residual_jacobian_path_not_proven"
+          ],
+          "required_receipts": [
+            "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
+          ]
+        }
+      },
+      "category_count": 4,
+      "category_counts": {
+        "current_tangent_residual_row_replay": 1,
+        "hip_required_direct_probe": 1,
+        "matrix_free_global_krylov": 3,
+        "production_hip_residual_jacobian_path": 1
+      },
+      "category_order": [
+        "hip_required_direct_probe",
+        "production_hip_residual_jacobian_path",
+        "matrix_free_global_krylov",
+        "current_tangent_residual_row_replay"
+      ],
       "claim_boundary": "This repair plan classifies the missing production ROCm/HIP residual/JVP worker path. It does not execute HIP, prove device residency, create a full-load checkpoint, or promote G1 closure.",
-      "next_action_id": "rerun_g1_full_load_hip_newton_lane",
+      "next_action_id": "repair_production_rocm_hip_residual_jvp_worker_path",
       "required_receipts": [
         "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
         "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json"
       ],
       "runtime_blockers": [],
       "schema_version": "g1-production-rocm-hip-worker-path-repair-plan.v1",
-      "status": "ready"
+      "status": "blocked"
     }
   },
   "input_checksums": {
@@ -719,9 +822,16 @@
     "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json": "sha256:78554ec85bd6751670a6529578abc411dab5b7bb7f7f30140c099ad18de23407",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:92ca6c7d4e23dd89132e0fe834fbe16ca753e17ae860786ff5ad7bed97a27aad",
     "implementation/phase1/release_evidence/productization/g1_frame_tangent_fd_epsilon_sweep_probe.json": "sha256:81c2ad32a078db886d09c6637cd7d1369719d2ed6c8f5fac88ae5ac410c4291d",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:bb41cd81c27566ea856a57da95c48f798ad75b551ca7ab16a6e88468fa96522f",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:f8d9f6819b7d89a5430d11decd1d833fa93ed68c676dee4f9c08dc651b3cd6c1",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:461c82706d56e914cd27e1781e2bbfc9bbeb6b58e266952918766d2e00963858",
+    "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.json": "sha256:e6582053c0d7dc2c99c3737f0c7ffa94579855a5520cdb416efc2abd01aa3ee9",
+    "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe.json": "sha256:83a0e92b346a14a6f8833bb39b572437f405fdafe62e631d55da9d7c7c3fa4da",
+    "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_mu_1e_4_incomplete_preview_probe.json": "sha256:9ff8990a1854ee65df00f875522c5e51085e4808c6d0bdd49b276f885e464734",
+    "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_mu_1e_4_probe.json": "sha256:bb4cfcc02394d5e861e2dfe5eac9aad41b36323b4209950037e97a351001ad12",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_chain_probe.json": "sha256:f3babed6cee7698ed9717c18ece8f6776c59a336c6618c1c444d229d5d4f02a2",
+    "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_candidate.npz": "sha256:9eb7bdd5b93eed8de9fb1f9a0fc04e7c98b076c70031874a446d354569649648",
+    "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe.json": "sha256:de1936fba8af18f2bbf0109d29d00ca4fcfd323285b97c92f76a94ac4127820a",
+    "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_probe.json": "sha256:e16828a6297df927a8b620eb5986f97be6f6ea139804b206a9d635fd35626faf",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_shell_rotation_frontier_candidate.npz": "sha256:d8d8322abbff74de9f654faf0e5ee7b4d2a7df2b18baebc9dcc485acf64c79da",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_shell_rotation_frontier_probe.json": "sha256:6064a8d6f7846b06e649f651582c0c1012b09aa1422b4f52242982c901d08b3c",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_sparse_frontier_second_candidate.npz": "sha256:575f3afbc047b17a99999475d014d9282e65f45ae4ed3bbef8d17d7fc1624363",
@@ -729,13 +839,15 @@
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_sparse_frontier_third_candidate.npz": "sha256:bed702b5095b8b61b6efd63788f86bda1c350394c180213eaaea45a8e078ba4e",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_sparse_frontier_third_probe.json": "sha256:1263e9b2216e534330033619daabab5b71e183eb9a3161774cd781e1482fdd0b",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_long_chain_probe.json": "sha256:915d911f36ad2ad457abdbeea2eb6980a7c97053d347bf48cc07d442dcd875a7",
+    "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_gate_candidate_step2_probe.json": "sha256:c18ebba4154ca787e19c4e99b2e2b2ab8e6aa62b7f3255925b4e75d51248a068",
+    "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_incomplete_preview_chain_probe.json": "sha256:d847e122c0c70b915341d1b4887a7ea6563bba5947a2ceff491cb5674d7b5ae2",
     "implementation/phase1/release_evidence/productization/g1_true_newton_from_active_set_ls_trust_mu_0p03_candidate.json": "sha256:a2fed692736a3bea5c3f16eea175651db99d8ad4712974f7f4d88518a2ab4b48",
     "implementation/phase1/release_evidence/productization/g1_true_newton_from_active_set_ls_trust_service_tangent_mu_0p03_candidate.json": "sha256:eceb8b94cbba35d1d3f67c83ea9b8d7cb419e909bba5a58e86c3dfbbf09b07e4",
     "implementation/phase1/release_evidence/productization/g1_true_newton_from_active_set_mu_sweep_probe.json": "sha256:37c65291c66cb545b17330ba59c0b7b51ea251382f4165406b5b57898f1c6ed7",
     "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:a5b58790d91923c379c57834bcc71bcc6440af1800aebe525391e05442188318",
     "implementation/phase1/release_evidence/productization/g1_true_newton_load_sweep_status.json": "sha256:c1a862c28a6f31163f15f8cbe03334e0060a6cbb81138b9e3819d53fad497aca",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:1fc336abe3927dbcc2fdb8d0f3e89f70a5aced81efa5e65c381d3ecc00607ca5",
-    "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:43ac79a0cdc948e5ed44f735e1ca4bab0410dcf1911b17adb2a50d9a5950281e"
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:19bd610a874fcb520b2b3785f85ce0672294e56a0793babbb891c36b84440c41",
+    "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:d79842b09bed586a3667f0b6f086546c7a58f344a3cf5504a08da36b15c5849e"
   },
   "next_actions": [
     {
@@ -939,7 +1051,187 @@
     "row_count": 8,
     "status": "ready"
   },
-  "source_commit_sha": "f779666af7356914e11290547c4a001151062cb6",
+  "source_commit_sha": "4760f23489f3b5e98cfec61f1ab36eddaf901933",
+  "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe": {
+    "assembled_tangent_parity_max_absolute_error": 0.006011962890625,
+    "assembled_tangent_parity_max_relative_error": 2.683381287585585e-15,
+    "assembled_tangent_parity_pass": true,
+    "baseline_direction_iterations": 32,
+    "baseline_direction_reason_code": "gmres_not_converged_maxiter",
+    "baseline_direction_residual_after_n": 0.05179151634140644,
+    "baseline_direction_status": "blocked",
+    "checkpoint_direct_residual_inf_n": 0.04728560329011722,
+    "checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_long_chain_step_10_candidate.npz",
+    "claim_boundary": "non_promoting_sparse_direct_real_mgt_smoke_only",
+    "direction_iterations": 0,
+    "direction_reason_code": "ERR_ILU_FACTOR_FAILED",
+    "direction_residual_after_n": 0.0,
+    "direction_residual_reduction_ratio": 0.0,
+    "direction_solver": "gmres_ilu",
+    "direction_status": "blocked",
+    "incomplete_direction_preview": false,
+    "incomplete_gmres_relative_tolerance": 0.0,
+    "jvp_eps": 0.001,
+    "jvp_parity_max_absolute_error_n": 0.001708984375,
+    "jvp_parity_max_relative_error": 1.3296559216720257e-15,
+    "jvp_parity_pass": true,
+    "line_search_accepted_alpha": 0.0,
+    "line_search_reason_code": "ERR_ILU_FACTOR_FAILED",
+    "line_search_residual_after_n": 0.0,
+    "line_search_residual_reduction_ratio": 0.0,
+    "line_search_status": "blocked",
+    "output_checkpoint_direct_residual_inf_n": 0.0,
+    "output_checkpoint_incomplete_gmres_direction_preview": false,
+    "output_checkpoint_path": "",
+    "output_checkpoint_residual_gate_passed": false,
+    "output_checkpoint_written": false,
+    "path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.json",
+    "preconditioner_effective_shift": 0.0,
+    "preconditioner_mode": "",
+    "preconditioner_shift_mode": "",
+    "preconditioner_shift_mu": 0.0,
+    "present": true,
+    "preview_reason_code": "",
+    "promotes_g1_closure": false,
+    "reason_code": "ERR_ILU_FACTOR_FAILED",
+    "recommended_next_action": "replace_or_shift_preconditioner_family_before_more_gmres_iterations",
+    "status": "blocked"
+  },
+  "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe": {
+    "assembled_tangent_parity_max_absolute_error": 0.006011962890625,
+    "assembled_tangent_parity_max_relative_error": 2.683381287585585e-15,
+    "assembled_tangent_parity_pass": true,
+    "baseline_direction_iterations": 32,
+    "baseline_direction_reason_code": "gmres_not_converged_maxiter",
+    "baseline_direction_residual_after_n": 0.05179151634140644,
+    "baseline_direction_status": "blocked",
+    "checkpoint_direct_residual_inf_n": 0.04728560329011722,
+    "checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_long_chain_step_10_candidate.npz",
+    "claim_boundary": "non_promoting_sparse_direct_real_mgt_smoke_only",
+    "direction_iterations": 32,
+    "direction_reason_code": "ERR_DIRECTION_SOLVE_BLOCKED",
+    "direction_residual_after_n": 0.05179151634140644,
+    "direction_residual_reduction_ratio": -0.09529143624632505,
+    "direction_solver": "gmres_matrix_free",
+    "direction_status": "blocked",
+    "incomplete_direction_preview": false,
+    "incomplete_gmres_relative_tolerance": 0.0,
+    "jvp_eps": 0.001,
+    "jvp_parity_max_absolute_error_n": 0.001708984375,
+    "jvp_parity_max_relative_error": 1.3296559216720257e-15,
+    "jvp_parity_pass": true,
+    "line_search_accepted_alpha": 0.0,
+    "line_search_reason_code": "ERR_DIRECTION_SOLVE_BLOCKED",
+    "line_search_residual_after_n": 0.0,
+    "line_search_residual_reduction_ratio": 0.0,
+    "line_search_status": "blocked",
+    "output_checkpoint_direct_residual_inf_n": 0.0,
+    "output_checkpoint_incomplete_gmres_direction_preview": false,
+    "output_checkpoint_path": "",
+    "output_checkpoint_residual_gate_passed": false,
+    "output_checkpoint_written": false,
+    "path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe.json",
+    "preconditioner_effective_shift": 0.0,
+    "preconditioner_mode": "",
+    "preconditioner_shift_mode": "",
+    "preconditioner_shift_mu": 0.0,
+    "present": true,
+    "preview_reason_code": "",
+    "promotes_g1_closure": false,
+    "reason_code": "ERR_DIRECTION_SOLVE_BLOCKED",
+    "recommended_next_action": "avoid_matrix_free_only_retry_until_operator_preconditioner_changes",
+    "status": "blocked"
+  },
+  "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe": {
+    "assembled_tangent_parity_max_absolute_error": 0.006011962890625,
+    "assembled_tangent_parity_max_relative_error": 2.683381287585585e-15,
+    "assembled_tangent_parity_pass": true,
+    "baseline_direction_iterations": 32,
+    "baseline_direction_reason_code": "gmres_not_converged_maxiter",
+    "baseline_direction_residual_after_n": 0.05179151634140644,
+    "baseline_direction_status": "blocked",
+    "checkpoint_direct_residual_inf_n": 0.04728560329011722,
+    "checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_long_chain_step_10_candidate.npz",
+    "claim_boundary": "non_promoting_sparse_direct_real_mgt_smoke_only",
+    "direction_iterations": 32,
+    "direction_reason_code": "ERR_ILU_GMRES_NOT_CONVERGED",
+    "direction_residual_after_n": 0.0001237155747730867,
+    "direction_residual_reduction_ratio": 0.9973836523980875,
+    "direction_solver": "gmres_shifted_ilu",
+    "direction_status": "preview",
+    "incomplete_direction_preview": true,
+    "incomplete_gmres_relative_tolerance": 0.003,
+    "jvp_eps": 0.001,
+    "jvp_parity_max_absolute_error_n": 0.001708984375,
+    "jvp_parity_max_relative_error": 1.3296559216720257e-15,
+    "jvp_parity_pass": true,
+    "line_search_accepted_alpha": 1.0,
+    "line_search_reason_code": "ok",
+    "line_search_residual_after_n": 0.0033228596775920494,
+    "line_search_residual_reduction_ratio": 0.9297278781195855,
+    "line_search_status": "ready",
+    "output_checkpoint_direct_residual_inf_n": 0.0033228596775920494,
+    "output_checkpoint_incomplete_gmres_direction_preview": true,
+    "output_checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_mu_1e_4_incomplete_preview_candidate.npz",
+    "output_checkpoint_residual_gate_passed": false,
+    "output_checkpoint_written": true,
+    "path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_mu_1e_4_incomplete_preview_probe.json",
+    "preconditioner_effective_shift": 292168.1153689314,
+    "preconditioner_mode": "shifted_ilu",
+    "preconditioner_shift_mode": "relative_diagonal_shift",
+    "preconditioner_shift_mu": 0.0001,
+    "present": true,
+    "preview_reason_code": "PREVIEW_INCOMPLETE_GMRES_DIRECTION",
+    "promotes_g1_closure": false,
+    "reason_code": "PREVIEW_INCOMPLETE_GMRES_DIRECTION",
+    "recommended_next_action": "tune_shift_or_multilevel_preconditioner_before_accepting_shifted_ilu_direction",
+    "status": "review"
+  },
+  "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe": {
+    "assembled_tangent_parity_max_absolute_error": 0.006011962890625,
+    "assembled_tangent_parity_max_relative_error": 2.683381287585585e-15,
+    "assembled_tangent_parity_pass": true,
+    "baseline_direction_iterations": 32,
+    "baseline_direction_reason_code": "gmres_not_converged_maxiter",
+    "baseline_direction_residual_after_n": 0.05179151634140644,
+    "baseline_direction_status": "blocked",
+    "checkpoint_direct_residual_inf_n": 0.04728560329011722,
+    "checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_long_chain_step_10_candidate.npz",
+    "claim_boundary": "non_promoting_sparse_direct_real_mgt_smoke_only",
+    "direction_iterations": 32,
+    "direction_reason_code": "ERR_ILU_GMRES_NOT_CONVERGED",
+    "direction_residual_after_n": 0.0001237155747730867,
+    "direction_residual_reduction_ratio": 0.9973836523980875,
+    "direction_solver": "gmres_shifted_ilu",
+    "direction_status": "blocked",
+    "incomplete_direction_preview": false,
+    "incomplete_gmres_relative_tolerance": 0.0,
+    "jvp_eps": 0.001,
+    "jvp_parity_max_absolute_error_n": 0.001708984375,
+    "jvp_parity_max_relative_error": 1.3296559216720257e-15,
+    "jvp_parity_pass": true,
+    "line_search_accepted_alpha": 0.0,
+    "line_search_reason_code": "ERR_ILU_GMRES_NOT_CONVERGED",
+    "line_search_residual_after_n": 0.0,
+    "line_search_residual_reduction_ratio": 0.0,
+    "line_search_status": "blocked",
+    "output_checkpoint_direct_residual_inf_n": 0.0,
+    "output_checkpoint_incomplete_gmres_direction_preview": false,
+    "output_checkpoint_path": "",
+    "output_checkpoint_residual_gate_passed": false,
+    "output_checkpoint_written": false,
+    "path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_mu_1e_4_probe.json",
+    "preconditioner_effective_shift": 292168.1153689314,
+    "preconditioner_mode": "shifted_ilu",
+    "preconditioner_shift_mode": "relative_diagonal_shift",
+    "preconditioner_shift_mu": 0.0001,
+    "present": true,
+    "preview_reason_code": "",
+    "promotes_g1_closure": false,
+    "reason_code": "ERR_ILU_GMRES_NOT_CONVERGED",
+    "recommended_next_action": "tune_shift_or_multilevel_preconditioner_before_accepting_shifted_ilu_direction",
+    "status": "blocked"
+  },
   "sparse_direct_scaled_lsmr_chain": {
     "all_output_checkpoints_written": true,
     "all_steps_ready": true,
@@ -967,6 +1259,7 @@
     "final_residual_over_gate": 94.57172737101892,
     "gate_convergence_assessment": "stalled_for_gate",
     "initial_residual_n": 0.04728610099315822,
+    "jvp_eps": 0.0,
     "last_step_reduction_n": 5.31292237981873e-08,
     "latest_checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_chain_step_03_candidate.npz",
     "latest_checkpoint_residual_gate_passed": false,
@@ -982,6 +1275,66 @@
     "step_count": 3,
     "total_reduction_n": 2.3730764875384835e-07,
     "total_reduction_ratio": 5.018549716928113e-06
+  },
+  "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe": {
+    "checkpoint_written_step_count": 10,
+    "claim_boundary": "Non-promoting repeated scaled-LSMR accepted-step chain only. It does not close G1 without residual gate, full-mesh nonlinear equilibrium, material Newton breadth, and production ROCm/HIP proof.",
+    "estimated_steps_to_gate_at_last_reduction": 27717,
+    "final_residual_gate_gap_n": 0.002821678662540961,
+    "final_residual_gate_passed": false,
+    "final_residual_n": 0.003321678662540961,
+    "final_residual_over_gate": 6.643357325081922,
+    "gate_convergence_assessment": "stalled_for_gate",
+    "initial_residual_n": 0.0033227123724053342,
+    "jvp_eps": 0.001,
+    "last_step_reduction_n": 1.018051989376545e-07,
+    "latest_checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_step_10_candidate.npz",
+    "latest_checkpoint_residual_gate_passed": false,
+    "monotonic_residual_descent": true,
+    "path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe.json",
+    "present": true,
+    "promotes_g1_closure": false,
+    "ready_step_count": 10,
+    "reason_code": "PASS",
+    "recommended_next_action": "switch_operator_preconditioner_or_tangent_model_before_extending_scaled_lsmr_chain",
+    "residual_gate_n": 0.0005,
+    "status": "ready",
+    "step_count": 10,
+    "total_reduction_n": 1.0337098643731224e-06,
+    "total_reduction_ratio": 0.00031110422706399134
+  },
+  "sparse_direct_scaled_lsmr_from_incomplete_preview_probe": {
+    "assembled_tangent_parity_max_relative_error": 2.7658732107947367e-15,
+    "assembled_tangent_parity_pass": true,
+    "checkpoint_applied": true,
+    "checkpoint_direct_residual_inf_n": 0.0033228596775920494,
+    "checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_mu_1e_4_incomplete_preview_candidate.npz",
+    "claim_boundary": "non_promoting_sparse_direct_real_mgt_smoke_only",
+    "direction_condition_estimate": 321056.7105073829,
+    "direction_iterations": 512,
+    "direction_reason_code": "PASS",
+    "direction_residual_after_linear_solve_n": 0.003322712022860205,
+    "direction_residual_before_n": 0.0033228596775920494,
+    "direction_status": "ready",
+    "jvp_parity_pass": true,
+    "line_search_accepted_alpha": 1.0,
+    "line_search_residual_after_n": 0.0033227123724053342,
+    "line_search_residual_before_n": 0.0033228596775920494,
+    "line_search_residual_reduction_ratio": 4.433084782619419e-05,
+    "line_search_status": "ready",
+    "load_scale": 1.0,
+    "output_checkpoint_accepted_alpha": 1.0,
+    "output_checkpoint_direct_relative_residual_inf": 2.5122918010588806e-07,
+    "output_checkpoint_direct_residual_inf_n": 0.0033227123724053342,
+    "output_checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_candidate.npz",
+    "output_checkpoint_promotes_g1_closure": false,
+    "output_checkpoint_residual_gate_passed": false,
+    "output_checkpoint_written": true,
+    "path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_probe.json",
+    "present": true,
+    "promotes_g1_closure": false,
+    "reason_code": "PASS",
+    "status": "ready"
   },
   "sparse_direct_scaled_lsmr_frontier_probe": {
     "assembled_tangent_parity_max_relative_error": 7.863775071614314e-12,
@@ -1026,6 +1379,7 @@
     "final_residual_over_gate": 94.57120658023443,
     "gate_convergence_assessment": "stalled_for_gate",
     "initial_residual_n": 0.04728610099315822,
+    "jvp_eps": 0.0,
     "last_step_reduction_n": 2.3295130602285496e-08,
     "latest_checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_long_chain_step_10_candidate.npz",
     "latest_checkpoint_residual_gate_passed": false,
@@ -1108,7 +1462,75 @@
     "reason_code": "PASS",
     "status": "ready"
   },
-  "status": "ready_for_runner_implementation",
+  "sparse_direct_shifted_splu_from_gate_candidate_step2_probe": {
+    "assembled_tangent_parity_pass": true,
+    "checkpoint_direct_residual_inf_n": 3.694505585372099e-05,
+    "checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_incomplete_preview_chain_candidate.npz",
+    "checkpoint_residual_gate_passed": true,
+    "claim_boundary": "non_promoting_sparse_direct_real_mgt_smoke_only",
+    "direction_residual_after_linear_solve_n": 3.426127969196778e-05,
+    "direction_residual_after_shifted_linear_solve_n": 2.259477327459791e-16,
+    "direction_residual_before_n": 3.694505585372099e-05,
+    "direction_solver": "shifted_sparse_direct_splu",
+    "direction_status": "ready",
+    "jvp_eps": 0.001,
+    "jvp_parity_pass": true,
+    "line_search_accepted_alpha": 1.0,
+    "line_search_residual_after_n": 3.42023849952966e-05,
+    "line_search_residual_before_n": 3.694505585372099e-05,
+    "line_search_residual_reduction_ratio": 0.07423647887510655,
+    "line_search_status": "ready",
+    "output_checkpoint_direct_relative_residual_inf": 2.5860309822165022e-09,
+    "output_checkpoint_direct_residual_inf_n": 3.42023849952966e-05,
+    "output_checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_gate_candidate_step2_candidate.npz",
+    "output_checkpoint_residual_gate_passed": true,
+    "output_checkpoint_written": true,
+    "path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_gate_candidate_step2_probe.json",
+    "present": true,
+    "promotes_g1_closure": false,
+    "reason_code": "PASS",
+    "recommended_next_action": "run_full_load_lane_material_mesh_hip_proofs_from_shifted_splu_gate_checkpoint",
+    "shifted_operator_effective_shift": 292168.1153689314,
+    "shifted_operator_mode": "shifted_ilu",
+    "shifted_operator_shift_mode": "relative_diagonal_shift",
+    "shifted_operator_shift_mu": 0.0001,
+    "status": "ready"
+  },
+  "sparse_direct_shifted_splu_from_incomplete_preview_chain_probe": {
+    "assembled_tangent_parity_pass": true,
+    "checkpoint_direct_residual_inf_n": 0.003321678662540961,
+    "checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_step_10_candidate.npz",
+    "checkpoint_residual_gate_passed": false,
+    "claim_boundary": "non_promoting_sparse_direct_real_mgt_smoke_only",
+    "direction_residual_after_linear_solve_n": 3.6889994581359564e-05,
+    "direction_residual_after_shifted_linear_solve_n": 8.881784197001252e-16,
+    "direction_residual_before_n": 0.003321678662540961,
+    "direction_solver": "shifted_sparse_direct_splu",
+    "direction_status": "ready",
+    "jvp_eps": 0.001,
+    "jvp_parity_pass": true,
+    "line_search_accepted_alpha": 1.0,
+    "line_search_residual_after_n": 3.694505585372099e-05,
+    "line_search_residual_before_n": 0.003321678662540961,
+    "line_search_residual_reduction_ratio": 0.9888775948527606,
+    "line_search_status": "ready",
+    "output_checkpoint_direct_relative_residual_inf": 2.7934034158898605e-09,
+    "output_checkpoint_direct_residual_inf_n": 3.694505585372099e-05,
+    "output_checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_incomplete_preview_chain_candidate.npz",
+    "output_checkpoint_residual_gate_passed": true,
+    "output_checkpoint_written": true,
+    "path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_incomplete_preview_chain_probe.json",
+    "present": true,
+    "promotes_g1_closure": false,
+    "reason_code": "PASS",
+    "recommended_next_action": "run_full_load_lane_material_mesh_hip_proofs_from_shifted_splu_gate_checkpoint",
+    "shifted_operator_effective_shift": 292168.1153689314,
+    "shifted_operator_mode": "shifted_ilu",
+    "shifted_operator_shift_mode": "relative_diagonal_shift",
+    "shifted_operator_shift_mu": 0.0001,
+    "status": "ready"
+  },
+  "status": "blocked_runner_contract",
   "summary": {
     "active_frontier_residual_ownership_present": true,
     "active_frontier_residual_ownership_top_residual_inf_n": 0.42740724991695345,
@@ -1231,11 +1653,11 @@
     "adaptive_all_components_frontier_residual_gate_passed": false,
     "assembly_contract_cpu_seed_newton_gate_passed": true,
     "assembly_contract_seed_ready": true,
-    "closure_blocker_count": 13,
+    "closure_blocker_count": 16,
     "consistent_residual_jacobian_newton_gate_passed": false,
-    "contract_blocker_count": 0,
-    "contract_pass": true,
-    "contract_status": "ready_for_runner_implementation",
+    "contract_blocker_count": 1,
+    "contract_pass": false,
+    "contract_status": "blocked_runner_contract",
     "evidence_closure_pass": false,
     "frame_tangent_fd_epsilon_sweep_best_eps": 0.001,
     "frame_tangent_fd_epsilon_sweep_best_gap_relative_inf": 0.003379869645939948,
@@ -1265,7 +1687,7 @@
     "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
     "promotes_g1_closure": false,
     "required_load_scale": 1.0,
-    "residual_jvp_worker_path_ready": true,
+    "residual_jvp_worker_path_ready": false,
     "residual_norm_gradient_tiny_sweep_best_l2_improvement_n": 0.16379561248899166,
     "residual_norm_gradient_tiny_sweep_best_l2_residual_n": 1.2159739821333575,
     "residual_norm_gradient_tiny_sweep_inf_descent_observed": false,
@@ -1280,6 +1702,39 @@
     "shell_hotspot_tangent_fd_jvp_fd_consistent": true,
     "shell_hotspot_tangent_fd_jvp_max_relative_inf_error": 8.335535780253022e-14,
     "shell_hotspot_tangent_fd_jvp_present": true,
+    "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_direction_status": "blocked",
+    "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_jvp_eps": 0.001,
+    "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_jvp_parity_max_absolute_error_n": 0.001708984375,
+    "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_present": true,
+    "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_reason_code": "ERR_ILU_FACTOR_FAILED",
+    "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_recommended_next_action": "replace_or_shift_preconditioner_family_before_more_gmres_iterations",
+    "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_status": "blocked",
+    "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe_direction_residual_after_n": 0.05179151634140644,
+    "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe_direction_status": "blocked",
+    "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe_jvp_eps": 0.001,
+    "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe_jvp_parity_max_absolute_error_n": 0.001708984375,
+    "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe_present": true,
+    "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe_reason_code": "ERR_DIRECTION_SOLVE_BLOCKED",
+    "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe_status": "blocked",
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_direction_residual_after_n": 0.0001237155747730867,
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_direction_status": "preview",
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_incomplete_direction_preview": true,
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_line_search_residual_after_n": 0.0033228596775920494,
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_line_search_residual_reduction_ratio": 0.9297278781195855,
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_line_search_status": "ready",
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_output_checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_mu_1e_4_incomplete_preview_candidate.npz",
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_output_checkpoint_residual_n": 0.0033228596775920494,
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_output_checkpoint_written": true,
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_present": true,
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_reason_code": "PREVIEW_INCOMPLETE_GMRES_DIRECTION",
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_status": "review",
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_direction_residual_after_n": 0.0001237155747730867,
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_direction_residual_reduction_ratio": 0.9973836523980875,
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_jvp_eps": 0.001,
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_preconditioner_shift_mu": 0.0001,
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_present": true,
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_reason_code": "ERR_ILU_GMRES_NOT_CONVERGED",
+    "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_status": "blocked",
     "sparse_direct_scaled_lsmr_chain_final_residual_n": 0.047285863685509466,
     "sparse_direct_scaled_lsmr_chain_initial_residual_n": 0.04728610099315822,
     "sparse_direct_scaled_lsmr_chain_latest_checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_sparse_frontier_third_candidate.npz",
@@ -1295,6 +1750,23 @@
     "sparse_direct_scaled_lsmr_chain_step_count": 3,
     "sparse_direct_scaled_lsmr_chain_total_reduction_n": 2.3730764875384835e-07,
     "sparse_direct_scaled_lsmr_chain_total_reduction_ratio": 5.018549716928113e-06,
+    "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_estimated_steps_to_gate_at_last_reduction": 27717,
+    "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_final_residual_n": 0.003321678662540961,
+    "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_final_residual_over_gate": 6.643357325081922,
+    "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_gate_convergence_assessment": "stalled_for_gate",
+    "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_latest_checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_step_10_candidate.npz",
+    "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_present": true,
+    "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_recommended_next_action": "switch_operator_preconditioner_or_tangent_model_before_extending_scaled_lsmr_chain",
+    "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_status": "ready",
+    "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_step_count": 10,
+    "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_total_reduction_ratio": 0.00031110422706399134,
+    "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_line_search_reduction_ratio": 4.433084782619419e-05,
+    "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_line_search_residual_after_n": 0.0033227123724053342,
+    "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_output_checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_incomplete_preview_candidate.npz",
+    "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_output_checkpoint_residual_gate_passed": false,
+    "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_output_checkpoint_residual_n": 0.0033227123724053342,
+    "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_present": true,
+    "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_status": "ready",
     "sparse_direct_scaled_lsmr_frontier_direction_iterations": 27,
     "sparse_direct_scaled_lsmr_frontier_direction_status": "ready",
     "sparse_direct_scaled_lsmr_frontier_jvp_parity_pass": true,
@@ -1328,6 +1800,19 @@
     "sparse_direct_scaled_lsmr_second_output_checkpoint_written": true,
     "sparse_direct_scaled_lsmr_second_present": true,
     "sparse_direct_scaled_lsmr_second_status": "ready",
+    "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_line_search_residual_after_n": 3.42023849952966e-05,
+    "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_output_checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_shifted_splu_mu_1e_4_from_gate_candidate_step2_candidate.npz",
+    "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_output_checkpoint_residual_gate_passed": true,
+    "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_output_checkpoint_residual_n": 3.42023849952966e-05,
+    "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_present": true,
+    "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_recommended_next_action": "run_full_load_lane_material_mesh_hip_proofs_from_shifted_splu_gate_checkpoint",
+    "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_status": "ready",
+    "sparse_direct_shifted_splu_from_incomplete_preview_chain_probe_line_search_residual_after_n": 3.694505585372099e-05,
+    "sparse_direct_shifted_splu_from_incomplete_preview_chain_probe_output_checkpoint_residual_gate_passed": true,
+    "sparse_direct_shifted_splu_from_incomplete_preview_chain_probe_output_checkpoint_residual_n": 3.694505585372099e-05,
+    "sparse_direct_shifted_splu_from_incomplete_preview_chain_probe_present": true,
+    "sparse_direct_shifted_splu_from_incomplete_preview_chain_probe_shift_mu": 0.0001,
+    "sparse_direct_shifted_splu_from_incomplete_preview_chain_probe_status": "ready",
     "support_or_link_row_gap_disfavored": true,
     "true_newton_frame_tangent_source_comparison_both_dominant_gap_component_frame": true,
     "true_newton_frame_tangent_source_comparison_both_line_search_no_descent": true,
@@ -1358,11 +1843,11 @@
     "true_newton_full_load_checkpoint_candidate_written": true,
     "true_newton_load_sweep_present": true,
     "worker_path_operator_sequence_count": 4,
-    "worker_path_repair_blocker_count": 0,
-    "worker_path_repair_category_count": 0,
-    "worker_path_repair_next_action_id": "rerun_g1_full_load_hip_newton_lane"
+    "worker_path_repair_blocker_count": 6,
+    "worker_path_repair_category_count": 4,
+    "worker_path_repair_next_action_id": "repair_production_rocm_hip_residual_jvp_worker_path"
   },
-  "summary_line": "G1 consistent Newton full-load runner contract: READY_FOR_RUNNER_IMPLEMENTATION | contract_pass=True | observed_load=1/1 | closure_blockers=13",
+  "summary_line": "G1 consistent Newton full-load runner contract: BLOCKED_RUNNER_CONTRACT | contract_pass=False | observed_load=1/1 | closure_blockers=16",
   "true_newton_frame_tangent_source_comparison": {
     "both_dominant_gap_component_frame": true,
     "both_line_search_no_descent": true,
@@ -1564,7 +2049,7 @@
       "required_receipts": [
         "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
       ],
-      "status": "ready",
+      "status": "required",
       "step_id": "run_hip_required_direct_probe"
     },
     {
@@ -1579,7 +2064,7 @@
         "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
         "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
       ],
-      "status": "ready",
+      "status": "required",
       "step_id": "refresh_runner_contract_after_hip_probe"
     },
     {
@@ -1600,20 +2085,93 @@
     }
   ],
   "worker_path_repair_plan": {
-    "blocker_count": 0,
-    "blockers": [],
-    "categories": {},
-    "category_count": 0,
-    "category_counts": {},
-    "category_order": [],
+    "blocker_count": 6,
+    "blockers": [
+      "current_tangent_residual_row_hip_replay_not_proven",
+      "direct_probe_not_executed_preflight_only",
+      "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
+      "global_krylov_hip_solver_not_proven",
+      "global_krylov_jvp_rows_not_retained",
+      "production_hip_residual_jacobian_path_not_proven"
+    ],
+    "categories": {
+      "current_tangent_residual_row_replay": {
+        "acceptance": [
+          "current tangent residual row correction attempted with HIP batch replay",
+          "accepted-state tangent refresh CPU fallback remains false"
+        ],
+        "blocker_count": 1,
+        "blockers": [
+          "current_tangent_residual_row_hip_replay_not_proven"
+        ],
+        "required_receipts": [
+          "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
+        ]
+      },
+      "hip_required_direct_probe": {
+        "acceptance": [
+          "HIP-required direct probe executed, not preflight-only",
+          "cpu_diagnostic_assembler_used == false"
+        ],
+        "blocker_count": 1,
+        "blockers": [
+          "direct_probe_not_executed_preflight_only"
+        ],
+        "required_receipts": [
+          "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
+        ]
+      },
+      "matrix_free_global_krylov": {
+        "acceptance": [
+          "matrix_free_global_krylov.proof.hip_krylov_solver_used == true",
+          "matrix_free_global_krylov.proof.jvp_rows_retained == true",
+          "accepted-state tangent refresh uses HIP, not CPU"
+        ],
+        "blocker_count": 3,
+        "blockers": [
+          "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
+          "global_krylov_hip_solver_not_proven",
+          "global_krylov_jvp_rows_not_retained"
+        ],
+        "required_receipts": [
+          "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
+        ]
+      },
+      "production_hip_residual_jacobian_path": {
+        "acceptance": [
+          "production_hip_residual_jacobian_path == true",
+          "no CPU fallback path is counted as production HIP"
+        ],
+        "blocker_count": 1,
+        "blockers": [
+          "production_hip_residual_jacobian_path_not_proven"
+        ],
+        "required_receipts": [
+          "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json"
+        ]
+      }
+    },
+    "category_count": 4,
+    "category_counts": {
+      "current_tangent_residual_row_replay": 1,
+      "hip_required_direct_probe": 1,
+      "matrix_free_global_krylov": 3,
+      "production_hip_residual_jacobian_path": 1
+    },
+    "category_order": [
+      "hip_required_direct_probe",
+      "production_hip_residual_jacobian_path",
+      "matrix_free_global_krylov",
+      "current_tangent_residual_row_replay"
+    ],
     "claim_boundary": "This repair plan classifies the missing production ROCm/HIP residual/JVP worker path. It does not execute HIP, prove device residency, create a full-load checkpoint, or promote G1 closure.",
-    "next_action_id": "rerun_g1_full_load_hip_newton_lane",
+    "next_action_id": "repair_production_rocm_hip_residual_jvp_worker_path",
     "required_receipts": [
       "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
       "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json"
     ],
     "runtime_blockers": [],
     "schema_version": "g1-production-rocm-hip-worker-path-repair-plan.v1",
-    "status": "ready"
+    "status": "blocked"
   }
 }

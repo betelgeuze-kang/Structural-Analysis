@@ -72,6 +72,7 @@ def summarize_chain(
     step_payloads: list[dict[str, Any]],
     initial_checkpoint: Path,
     max_steps: int,
+    jvp_eps: float | None = None,
     residual_gate_n: float = 5.0e-4,
 ) -> dict[str, Any]:
     steps = [
@@ -175,6 +176,7 @@ def summarize_chain(
         "is_smoke_only": True,
         "initial_checkpoint_npz": Path(initial_checkpoint).as_posix(),
         "max_steps": int(max_steps),
+        "jvp_eps": _as_float(jvp_eps),
         "step_count": len(steps),
         "ready_step_count": len(ready_steps),
         "checkpoint_written_step_count": len(written_steps),
@@ -235,6 +237,7 @@ def run_chain_probe(
     shell_pressure_load_path_policy: str = "structural_components_only",
     direction_solver: str = "scaled_lsmr",
     gmres_maxiter: int = 32,
+    jvp_eps: float | None = None,
     residual_gate_n: float = 5.0e-4,
     output_json: Path = DEFAULT_OUT,
     step_prefix: Path = DEFAULT_STEP_PREFIX,
@@ -252,6 +255,7 @@ def run_chain_probe(
             frame_tangent_source=frame_tangent_source,
             shell_pressure_load_path_policy=shell_pressure_load_path_policy,
             gmres_maxiter=gmres_maxiter,
+            jvp_eps=float(jvp_eps) if jvp_eps is not None else 1.0e-6,
             output_json=step_json,
             output_final_checkpoint_npz=step_npz,
         )
@@ -268,6 +272,7 @@ def run_chain_probe(
         step_payloads=step_payloads,
         initial_checkpoint=initial_checkpoint_npz,
         max_steps=max_steps,
+        jvp_eps=jvp_eps,
         residual_gate_n=residual_gate_n,
     )
     output_json.parent.mkdir(parents=True, exist_ok=True)
@@ -304,6 +309,12 @@ def main() -> int:
         default="scaled_lsmr",
     )
     parser.add_argument("--gmres-maxiter", type=int, default=32)
+    parser.add_argument(
+        "--jvp-eps",
+        type=float,
+        default=None,
+        help="Optional central-difference epsilon forwarded to each sparse-direct smoke step.",
+    )
     parser.add_argument("--residual-gate-n", type=float, default=5.0e-4)
     parser.add_argument("--out", "--output-json", dest="output_json", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--step-prefix", type=Path, default=DEFAULT_STEP_PREFIX)
@@ -317,6 +328,7 @@ def main() -> int:
         shell_pressure_load_path_policy=args.shell_pressure_load_path_policy,
         direction_solver=args.direction_solver,
         gmres_maxiter=args.gmres_maxiter,
+        jvp_eps=args.jvp_eps,
         residual_gate_n=args.residual_gate_n,
         output_json=args.output_json,
         step_prefix=args.step_prefix,

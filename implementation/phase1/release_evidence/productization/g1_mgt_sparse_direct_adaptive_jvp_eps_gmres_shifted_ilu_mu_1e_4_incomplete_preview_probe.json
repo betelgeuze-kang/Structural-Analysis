@@ -1,0 +1,153 @@
+{
+  "schema_version": "g1-mgt-sparse-direct-physical-line-search-smoke.v1",
+  "generated_at": "2026-07-05T02:17:49.132538+00:00",
+  "is_smoke_only": true,
+  "promotes_g1_closure": false,
+  "uses_real_mgt_model": true,
+  "mgt_source": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "load_scale": 1.0,
+  "checkpoint_kind": "mgt-direct-residual-newton-state.v1",
+  "global_newton_operator": "physical_consistent_frame_shell_material_geometric",
+  "baseline_operator": "current_normalized_frame_geometric",
+  "default_global_newton_operator": "current_normalized_frame_geometric",
+  "default_direction_solver": "gmres_matrix_free",
+  "jvp_eps": 0.001,
+  "gmres_rtol": 1e-06,
+  "allow_incomplete_gmres_direction": true,
+  "incomplete_gmres_relative_tolerance": 0.003,
+  "physical_residual_formula": "R(u,lambda)=F_int(u)-lambda*F_ext",
+  "uses_solver_normalization_lambda": false,
+  "normalization_lambda_excluded": true,
+  "status": "review",
+  "reason_code": "PREVIEW_INCOMPLETE_GMRES_DIRECTION",
+  "free_space": {
+    "free_dof_count": 58998,
+    "residual_shape": [
+      58998
+    ],
+    "tangent_shape": [
+      58998,
+      58998
+    ]
+  },
+  "assembled_tangent": {
+    "format": "csr",
+    "nnz": 1195482,
+    "build_seconds": 11.873395430040546,
+    "diag_min_abs": 1.0,
+    "diag_max_abs": 263305013223928.78,
+    "frame_service_tangent_source": "real_per_element",
+    "frame_service_tangent_stats_mpa": {
+      "min": 1e-09,
+      "max": 28000000000.0,
+      "mean": 30318042.015985984
+    }
+  },
+  "assembled_tangent_parity": {
+    "attempted": true,
+    "pass": true,
+    "max_relative_error": 2.683381287585585e-15,
+    "max_absolute_error": 0.006011962890625,
+    "relative_tolerance": 0.001,
+    "probes": 3
+  },
+  "jvp_parity": {
+    "finite_difference_eps": 0.001,
+    "reference_finite_difference_eps": 0.01,
+    "jvp_inf_n": 1285283167731.8245,
+    "reference_jvp_inf_n": 1285283167731.8245,
+    "max_relative_error": 1.3296559216720257e-15,
+    "max_absolute_error_n": 0.001708984375,
+    "relative_tolerance": 0.0001,
+    "absolute_tolerance_n": 0.01,
+    "pass_condition": "relative_or_absolute",
+    "pass": true,
+    "attempted": true
+  },
+  "direction_solve_comparison": {
+    "gmres_matrix_free_none": {
+      "status": "blocked",
+      "reason_code": "gmres_not_converged_maxiter",
+      "iterations": 32,
+      "residual_norm_before": 0.04728560329011722,
+      "residual_norm_after": 0.05179151634140644
+    },
+    "gmres_shifted_ilu": {
+      "status": "preview",
+      "reason_code": "ERR_ILU_GMRES_NOT_CONVERGED",
+      "iterations": 32,
+      "residual_norm_before": 0.04728560329011722,
+      "residual_norm_after": 0.0001237155747730867,
+      "residual_norm_after_ratio": 0.002616347601912557,
+      "preview_reason_code": "PREVIEW_INCOMPLETE_GMRES_DIRECTION",
+      "incomplete_direction_preview": true,
+      "incomplete_gmres_relative_tolerance": 0.003,
+      "preconditioned": true,
+      "preconditioner": {
+        "mode": "shifted_ilu",
+        "shift_mode": "relative_diagonal_shift",
+        "shift_mu": 0.0001,
+        "effective_shift": 292168.1153689314,
+        "scale_source": "relative_median_diag=2.921681e+09"
+      }
+    }
+  },
+  "line_search_preview": {
+    "attempted": true,
+    "status": "ready",
+    "accepted_alpha": 1.0,
+    "residual_before_n": 0.04728560329011722,
+    "residual_after_n": 0.0033228596775920494,
+    "residual_reduction_ratio": 0.9297278781195855,
+    "beats_d_tiny_alpha_threshold": true,
+    "beats_d_residual_reduction_baseline": true,
+    "reason_code": "ok",
+    "incomplete_gmres_direction_preview": true
+  },
+  "output_final_checkpoint": {
+    "written": true,
+    "path": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_mu_1e_4_incomplete_preview_candidate.npz",
+    "schema": "mgt-direct-residual-newton-state.v1",
+    "load_scale": 1.0,
+    "dof_count": 78282,
+    "direct_residual_inf_n": 0.0033228596775920494,
+    "direct_relative_residual_inf": 2.512403178021843e-07,
+    "external_load_inf_n": 13225.821821354024,
+    "max_translation_m": 0.0536017880259559,
+    "accepted_iteration_count": 1,
+    "accepted_history_count": 1,
+    "residual_before_n": 0.04728560329011722,
+    "accepted_alpha": 1.0,
+    "residual_gate_n": 0.0005,
+    "residual_gate_passed": false,
+    "direction_solver": "gmres_shifted_ilu",
+    "direction_status": "preview",
+    "incomplete_gmres_direction_preview": true,
+    "preview_reason_code": "PREVIEW_INCOMPLETE_GMRES_DIRECTION",
+    "frame_tangent_source": "force_based_residual_tangent",
+    "shell_pressure_load_path_policy": "structural_components_only",
+    "promotes_g1_closure": false,
+    "claim_boundary": "Loadable sparse-direct line-search checkpoint candidate only. It does not close G1 without direct residual, material Newton, full-mesh, and production ROCm/HIP gates."
+  },
+  "resource_usage": {
+    "dof_count": 78282,
+    "node_count": 13047,
+    "element_count": 12728,
+    "free_dof_count": 58998,
+    "peak_memory_mb": null,
+    "checkpoint": {
+      "checkpoint_applied": true,
+      "checkpoint_npz": "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_long_chain_step_10_candidate.npz",
+      "checkpoint_schema": "mgt-direct-residual-newton-state.v1",
+      "checkpoint_load_scale": 1.0,
+      "requested_load_scale": 1.0,
+      "checkpoint_load_scale_matches_requested": true,
+      "checkpoint_direct_residual_inf_n": 0.04728560329011722,
+      "checkpoint_residual_gate_passed": false,
+      "checkpoint_promotes_g1_closure": false
+    }
+  },
+  "f2b_ii_b_scope_note": "0.656 continuation checkpoint regeneration/application is F2b-ii-b; not done here",
+  "claim_boundary": "non_promoting_sparse_direct_real_mgt_smoke_only",
+  "write_incomplete_gmres_preview_checkpoint": true
+}

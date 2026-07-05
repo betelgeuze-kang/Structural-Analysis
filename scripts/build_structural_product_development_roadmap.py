@@ -551,6 +551,41 @@ def build_structural_product_development_roadmap(
             "sparse_direct_scaled_lsmr_long_chain_probe"
         )
     )
+    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_probe = _as_dict(
+        g1_consistent_newton_runner.get(
+            "sparse_direct_scaled_lsmr_from_incomplete_preview_probe"
+        )
+    )
+    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe = _as_dict(
+        g1_consistent_newton_runner.get(
+            "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe"
+        )
+    )
+    g1_sparse_direct_shifted_splu_from_gate_candidate_step2_probe = _as_dict(
+        g1_consistent_newton_runner.get(
+            "sparse_direct_shifted_splu_from_gate_candidate_step2_probe"
+        )
+    )
+    g1_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe = _as_dict(
+        g1_consistent_newton_runner.get(
+            "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe"
+        )
+    )
+    g1_sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe = _as_dict(
+        g1_consistent_newton_runner.get(
+            "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe"
+        )
+    )
+    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe = _as_dict(
+        g1_consistent_newton_runner.get(
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe"
+        )
+    )
+    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe = _as_dict(
+        g1_consistent_newton_runner.get(
+            "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe"
+        )
+    )
     g1_adaptive_all_components_frontier = _as_dict(
         g1_consistent_newton_runner.get("adaptive_all_components_frontier")
     )
@@ -1363,6 +1398,203 @@ def build_structural_product_development_roadmap(
                         "recommended_next_action"
                     )
                     or ""
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_status": str(
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_probe.get(
+                        "status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_line_search_residual_after_n": (
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_probe.get(
+                        "line_search_residual_after_n"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_line_search_reduction_ratio": (
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_probe.get(
+                        "line_search_residual_reduction_ratio"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_output_checkpoint_path": str(
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_probe.get(
+                        "output_checkpoint_path"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_output_checkpoint_residual_n": (
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_probe.get(
+                        "output_checkpoint_direct_residual_inf_n"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_output_checkpoint_residual_gate_passed": _as_bool(
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_probe.get(
+                        "output_checkpoint_residual_gate_passed"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_status": str(
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe.get(
+                        "status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_step_count": (
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe.get(
+                        "step_count"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_final_residual_n": (
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe.get(
+                        "final_residual_n"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_final_residual_over_gate": (
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe.get(
+                        "final_residual_over_gate"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_estimated_steps_to_gate_at_last_reduction": (
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe.get(
+                        "estimated_steps_to_gate_at_last_reduction"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_gate_convergence_assessment": str(
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe.get(
+                        "gate_convergence_assessment"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_recommended_next_action": str(
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe.get(
+                        "recommended_next_action"
+                    )
+                    or ""
+                ),
+                "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_status": str(
+                    g1_sparse_direct_shifted_splu_from_gate_candidate_step2_probe.get(
+                        "status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_line_search_residual_after_n": (
+                    g1_sparse_direct_shifted_splu_from_gate_candidate_step2_probe.get(
+                        "line_search_residual_after_n"
+                    )
+                ),
+                "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_output_checkpoint_path": str(
+                    g1_sparse_direct_shifted_splu_from_gate_candidate_step2_probe.get(
+                        "output_checkpoint_path"
+                    )
+                    or ""
+                ),
+                "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_output_checkpoint_residual_n": (
+                    g1_sparse_direct_shifted_splu_from_gate_candidate_step2_probe.get(
+                        "output_checkpoint_direct_residual_inf_n"
+                    )
+                ),
+                "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_output_checkpoint_residual_gate_passed": _as_bool(
+                    g1_sparse_direct_shifted_splu_from_gate_candidate_step2_probe.get(
+                        "output_checkpoint_residual_gate_passed"
+                    )
+                ),
+                "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_recommended_next_action": str(
+                    g1_sparse_direct_shifted_splu_from_gate_candidate_step2_probe.get(
+                        "recommended_next_action"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_status": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.get("status")
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_reason_code": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.get(
+                        "reason_code"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_jvp_parity_max_absolute_error_n": (
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.get(
+                        "jvp_parity_max_absolute_error_n"
+                    )
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_recommended_next_action": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.get(
+                        "recommended_next_action"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe_status": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe.get(
+                        "status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe_reason_code": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe.get(
+                        "reason_code"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe_direction_residual_after_n": (
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe.get(
+                        "direction_residual_after_n"
+                    )
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_status": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe.get(
+                        "status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_reason_code": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe.get(
+                        "reason_code"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_preconditioner_shift_mu": (
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe.get(
+                        "preconditioner_shift_mu"
+                    )
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_direction_residual_after_n": (
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe.get(
+                        "direction_residual_after_n"
+                    )
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_status": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe.get(
+                        "status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_reason_code": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe.get(
+                        "reason_code"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_direction_status": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe.get(
+                        "direction_status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_line_search_status": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe.get(
+                        "line_search_status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_line_search_residual_after_n": (
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe.get(
+                        "line_search_residual_after_n"
+                    )
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_incomplete_direction_preview": _as_bool(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe.get(
+                        "incomplete_direction_preview"
+                    )
                 ),
                 "adaptive_all_components_frontier_present": _as_bool(
                     g1_adaptive_all_components_frontier.get("present")
@@ -2313,6 +2545,203 @@ def build_structural_product_development_roadmap(
                         "recommended_next_action"
                     )
                     or ""
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_status": str(
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_probe.get(
+                        "status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_line_search_residual_after_n": (
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_probe.get(
+                        "line_search_residual_after_n"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_line_search_reduction_ratio": (
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_probe.get(
+                        "line_search_residual_reduction_ratio"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_output_checkpoint_path": str(
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_probe.get(
+                        "output_checkpoint_path"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_output_checkpoint_residual_n": (
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_probe.get(
+                        "output_checkpoint_direct_residual_inf_n"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_probe_output_checkpoint_residual_gate_passed": _as_bool(
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_probe.get(
+                        "output_checkpoint_residual_gate_passed"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_status": str(
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe.get(
+                        "status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_step_count": (
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe.get(
+                        "step_count"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_final_residual_n": (
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe.get(
+                        "final_residual_n"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_final_residual_over_gate": (
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe.get(
+                        "final_residual_over_gate"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_estimated_steps_to_gate_at_last_reduction": (
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe.get(
+                        "estimated_steps_to_gate_at_last_reduction"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_gate_convergence_assessment": str(
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe.get(
+                        "gate_convergence_assessment"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe_recommended_next_action": str(
+                    g1_sparse_direct_scaled_lsmr_from_incomplete_preview_chain_probe.get(
+                        "recommended_next_action"
+                    )
+                    or ""
+                ),
+                "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_status": str(
+                    g1_sparse_direct_shifted_splu_from_gate_candidate_step2_probe.get(
+                        "status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_line_search_residual_after_n": (
+                    g1_sparse_direct_shifted_splu_from_gate_candidate_step2_probe.get(
+                        "line_search_residual_after_n"
+                    )
+                ),
+                "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_output_checkpoint_path": str(
+                    g1_sparse_direct_shifted_splu_from_gate_candidate_step2_probe.get(
+                        "output_checkpoint_path"
+                    )
+                    or ""
+                ),
+                "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_output_checkpoint_residual_n": (
+                    g1_sparse_direct_shifted_splu_from_gate_candidate_step2_probe.get(
+                        "output_checkpoint_direct_residual_inf_n"
+                    )
+                ),
+                "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_output_checkpoint_residual_gate_passed": _as_bool(
+                    g1_sparse_direct_shifted_splu_from_gate_candidate_step2_probe.get(
+                        "output_checkpoint_residual_gate_passed"
+                    )
+                ),
+                "sparse_direct_shifted_splu_from_gate_candidate_step2_probe_recommended_next_action": str(
+                    g1_sparse_direct_shifted_splu_from_gate_candidate_step2_probe.get(
+                        "recommended_next_action"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_status": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.get("status")
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_reason_code": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.get(
+                        "reason_code"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_jvp_parity_max_absolute_error_n": (
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.get(
+                        "jvp_parity_max_absolute_error_n"
+                    )
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe_recommended_next_action": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.get(
+                        "recommended_next_action"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe_status": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe.get(
+                        "status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe_reason_code": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe.get(
+                        "reason_code"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe_direction_residual_after_n": (
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe.get(
+                        "direction_residual_after_n"
+                    )
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_status": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe.get(
+                        "status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_reason_code": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe.get(
+                        "reason_code"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_preconditioner_shift_mu": (
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe.get(
+                        "preconditioner_shift_mu"
+                    )
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_direction_residual_after_n": (
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe.get(
+                        "direction_residual_after_n"
+                    )
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_status": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe.get(
+                        "status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_reason_code": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe.get(
+                        "reason_code"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_direction_status": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe.get(
+                        "direction_status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_line_search_status": str(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe.get(
+                        "line_search_status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_line_search_residual_after_n": (
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe.get(
+                        "line_search_residual_after_n"
+                    )
+                ),
+                "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_incomplete_direction_preview": _as_bool(
+                    g1_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe.get(
+                        "incomplete_direction_preview"
+                    )
                 ),
                 "adaptive_all_components_frontier_present": _as_bool(
                     g1_adaptive_all_components_frontier.get("present")
