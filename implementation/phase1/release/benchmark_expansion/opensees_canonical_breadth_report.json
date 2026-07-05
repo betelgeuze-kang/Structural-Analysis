@@ -1,25 +1,25 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-08T11:22:32.087086+00:00",
+  "generated_at": "2026-07-05T17:58:36.990256+00:00",
   "contract_pass": true,
   "reason_code": "PASS",
   "reason": "committed OpenSees canonical asset breadth is sufficient for P1 breadth surfacing",
   "summary": {
-    "canonical_case_count": 7,
+    "canonical_case_count": 8,
     "canonical_family_count": 6,
-    "standalone_parser_ready_case_count": 3,
+    "standalone_parser_ready_case_count": 5,
     "origin_counts": {
       "designsafe_publication": 1,
       "github_public": 2,
       "global_authority": 2,
-      "public_lab_download": 2
+      "public_lab_download": 3
     },
     "format_counts": {
-      "tcl": 6,
+      "tcl": 7,
       "zip": 1
     }
   },
-  "summary_line": "OpenSees canonical breadth: PASS | families=6 | cases=7 | parser_ready=3 | origins=designsafe_publication=1,github_public=2,global_authority=2,public_lab_download=2",
+  "summary_line": "OpenSees canonical breadth: PASS | families=6 | cases=8 | parser_ready=5 | origins=designsafe_publication=1,github_public=2,global_authority=2,public_lab_download=3",
   "rows": [
     {
       "case_id": "SCBF16B",
@@ -29,7 +29,39 @@
       "origin": "global_authority",
       "size_bytes": 118066,
       "sha256": "309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80",
-      "parser_contract_ready": true
+      "parser_contract_ready": true,
+      "parser_contract": {
+        "contract_pass": true,
+        "reason_code": "PASS",
+        "parse_counters": {
+          "source_include_missing": 17,
+          "ignored": 1103,
+          "node": 452,
+          "element": 214,
+          "constraint": 40
+        },
+        "metrics": {
+          "node_count": 420,
+          "edge_count_undirected": 254,
+          "edge_node_ratio": 0.6047619047619047,
+          "degree_entropy": 0.370354136784691,
+          "largest_component_ratio": 0.02619047619047619,
+          "element_type_count": 5,
+          "shell_element_count": 0,
+          "beam_element_count": 166
+        },
+        "checks": {
+          "source_is_opensees_text": true,
+          "synthetic_source_detected": false,
+          "min_nodes_pass": true,
+          "edge_node_ratio_pass": true,
+          "degree_entropy_pass": true,
+          "element_type_count_pass": true,
+          "largest_component_pass": true,
+          "shell_beam_mix_pass": false,
+          "real_topology_pass": true
+        }
+      }
     },
     {
       "case_id": "SCBF16B_shell_beam_mix",
@@ -39,7 +71,39 @@
       "origin": "global_authority",
       "size_bytes": 118474,
       "sha256": "ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
-      "parser_contract_ready": true
+      "parser_contract_ready": true,
+      "parser_contract": {
+        "contract_pass": true,
+        "reason_code": "PASS",
+        "parse_counters": {
+          "source_include_missing": 17,
+          "ignored": 1103,
+          "node": 452,
+          "element": 219,
+          "constraint": 40
+        },
+        "metrics": {
+          "node_count": 426,
+          "edge_count_undirected": 270,
+          "edge_node_ratio": 0.6338028169014085,
+          "degree_entropy": 0.33759993123790566,
+          "largest_component_ratio": 0.03990610328638498,
+          "element_type_count": 6,
+          "shell_element_count": 5,
+          "beam_element_count": 166
+        },
+        "checks": {
+          "source_is_opensees_text": true,
+          "synthetic_source_detected": false,
+          "min_nodes_pass": true,
+          "edge_node_ratio_pass": true,
+          "degree_entropy_pass": true,
+          "element_type_count_pass": true,
+          "largest_component_pass": true,
+          "shell_beam_mix_pass": true,
+          "real_topology_pass": true
+        }
+      }
     },
     {
       "case_id": "luxinzheng_megatall_model1",
@@ -49,7 +113,77 @@
       "origin": "public_lab_download",
       "size_bytes": 2850355,
       "sha256": "862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
-      "parser_contract_ready": true
+      "parser_contract_ready": true,
+      "parser_contract": {
+        "contract_pass": true,
+        "reason_code": "PASS",
+        "parse_counters": {
+          "node": 27220,
+          "ignored": 10465,
+          "element": 1240
+        },
+        "metrics": {
+          "node_count": 1252,
+          "edge_count_undirected": 1240,
+          "edge_node_ratio": 0.9904153354632588,
+          "degree_entropy": 0.13675081967072697,
+          "largest_component_ratio": 0.09664536741214058,
+          "element_type_count": 1,
+          "shell_element_count": 0,
+          "beam_element_count": 1240
+        },
+        "checks": {
+          "source_is_opensees_text": true,
+          "synthetic_source_detected": false,
+          "min_nodes_pass": true,
+          "edge_node_ratio_pass": true,
+          "degree_entropy_pass": true,
+          "element_type_count_pass": true,
+          "largest_component_pass": true,
+          "shell_beam_mix_pass": false,
+          "real_topology_pass": true
+        }
+      }
+    },
+    {
+      "case_id": "luxinzheng_megatall_model2",
+      "family_id": "luxinzheng_megatall",
+      "path": "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model2/opensees.tcl",
+      "format": "tcl",
+      "origin": "public_lab_download",
+      "size_bytes": 6926755,
+      "sha256": "66b73f329080e06a083f6f1ac3bbdc8ce45ca1fb8c2184c676efb978b32bb30f",
+      "parser_contract_ready": true,
+      "parser_contract": {
+        "contract_pass": true,
+        "reason_code": "PASS",
+        "parse_counters": {
+          "node": 81572,
+          "ignored": 10465,
+          "element": 1240
+        },
+        "metrics": {
+          "node_count": 1252,
+          "edge_count_undirected": 1240,
+          "edge_node_ratio": 0.9904153354632588,
+          "degree_entropy": 0.13675081967072697,
+          "largest_component_ratio": 0.09664536741214058,
+          "element_type_count": 1,
+          "shell_element_count": 0,
+          "beam_element_count": 1240
+        },
+        "checks": {
+          "source_is_opensees_text": true,
+          "synthetic_source_detected": false,
+          "min_nodes_pass": true,
+          "edge_node_ratio_pass": true,
+          "degree_entropy_pass": true,
+          "element_type_count_pass": true,
+          "largest_component_pass": true,
+          "shell_beam_mix_pass": false,
+          "real_topology_pass": true
+        }
+      }
     },
     {
       "case_id": "nheri_soft_story_podium",
@@ -59,7 +193,39 @@
       "origin": "designsafe_publication",
       "size_bytes": 2701,
       "sha256": "8e80be8849fa4529ad0138767ee066a8ce56a98839e3bc3ceb8bb43625edc728",
-      "parser_contract_ready": false
+      "parser_contract_ready": true,
+      "parser_contract": {
+        "contract_pass": true,
+        "reason_code": "PASS",
+        "parse_counters": {
+          "source_include": 7,
+          "ignored": 3407,
+          "node": 1687,
+          "element": 1781,
+          "constraint": 1094
+        },
+        "metrics": {
+          "node_count": 1687,
+          "edge_count_undirected": 2682,
+          "edge_node_ratio": 1.5898043864848843,
+          "degree_entropy": 0.38463121975001363,
+          "largest_component_ratio": 1.0,
+          "element_type_count": 6,
+          "shell_element_count": 0,
+          "beam_element_count": 496
+        },
+        "checks": {
+          "source_is_opensees_text": true,
+          "synthetic_source_detected": false,
+          "min_nodes_pass": true,
+          "edge_node_ratio_pass": true,
+          "degree_entropy_pass": true,
+          "element_type_count_pass": true,
+          "largest_component_pass": true,
+          "shell_beam_mix_pass": false,
+          "real_topology_pass": true
+        }
+      }
     },
     {
       "case_id": "amaelkady_constructbrace",
@@ -69,7 +235,35 @@
       "origin": "github_public",
       "size_bytes": 3062,
       "sha256": "a0d8554dbf0c6f7b3e79ab4581c71b07cdfdd8a936bddfaa12dc6c54ce76d416",
-      "parser_contract_ready": false
+      "parser_contract_ready": false,
+      "parser_contract": {
+        "contract_pass": false,
+        "reason_code": "ERR_PARSE_FAIL",
+        "parse_counters": {
+          "ignored": 37
+        },
+        "metrics": {
+          "node_count": 0,
+          "edge_count_undirected": 0,
+          "edge_node_ratio": 0.0,
+          "degree_entropy": 0.0,
+          "largest_component_ratio": 0.0,
+          "element_type_count": 0,
+          "shell_element_count": 0,
+          "beam_element_count": 0
+        },
+        "checks": {
+          "source_is_opensees_text": true,
+          "synthetic_source_detected": false,
+          "min_nodes_pass": false,
+          "edge_node_ratio_pass": false,
+          "degree_entropy_pass": false,
+          "element_type_count_pass": false,
+          "largest_component_pass": false,
+          "shell_beam_mix_pass": false,
+          "real_topology_pass": false
+        }
+      }
     },
     {
       "case_id": "amaelkady_scbf16cg",
@@ -79,7 +273,35 @@
       "origin": "github_public",
       "size_bytes": 3062,
       "sha256": "a0d8554dbf0c6f7b3e79ab4581c71b07cdfdd8a936bddfaa12dc6c54ce76d416",
-      "parser_contract_ready": false
+      "parser_contract_ready": false,
+      "parser_contract": {
+        "contract_pass": false,
+        "reason_code": "ERR_PARSE_FAIL",
+        "parse_counters": {
+          "ignored": 37
+        },
+        "metrics": {
+          "node_count": 0,
+          "edge_count_undirected": 0,
+          "edge_node_ratio": 0.0,
+          "degree_entropy": 0.0,
+          "largest_component_ratio": 0.0,
+          "element_type_count": 0,
+          "shell_element_count": 0,
+          "beam_element_count": 0
+        },
+        "checks": {
+          "source_is_opensees_text": true,
+          "synthetic_source_detected": false,
+          "min_nodes_pass": false,
+          "edge_node_ratio_pass": false,
+          "degree_entropy_pass": false,
+          "element_type_count_pass": false,
+          "largest_component_pass": false,
+          "shell_beam_mix_pass": false,
+          "real_topology_pass": false
+        }
+      }
     },
     {
       "case_id": "luxinzheng_megatall_bundle",
@@ -89,7 +311,15 @@
       "origin": "public_lab_download",
       "size_bytes": 5615432,
       "sha256": "3d7980f46fd8cec54df5e6b83c7959e746cfdae7a15b1e5726a3e8c129991e98",
-      "parser_contract_ready": false
+      "parser_contract_ready": false,
+      "parser_contract": {
+        "contract_pass": false,
+        "reason_code": "ERR_UNSUPPORTED_CANONICAL_FORMAT",
+        "metrics": {},
+        "checks": {
+          "source_is_opensees_text": false
+        }
+      }
     }
   ]
 }

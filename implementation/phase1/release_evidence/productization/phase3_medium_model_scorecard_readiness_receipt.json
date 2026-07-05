@@ -149,27 +149,79 @@
         "scorecard_receipt_path": null,
         "source_path": "implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/opensees.tcl",
         "source_sha256": "862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c"
+      },
+      {
+        "authoritative_source_case_ids": [
+          "SCBF16B"
+        ],
+        "authoritative_source_pass": false,
+        "blockers": [
+          "source_url_verification_pending",
+          "license_review_pending",
+          "reference_outputs_missing",
+          "normalization_receipts_missing",
+          "opensees_medium_scorecard_execution_missing",
+          "medium_model_pass_or_review_missing"
+        ],
+        "case_id": "luxinzheng_megatall_model2",
+        "family_id": "luxinzheng_megatall",
+        "license_approval_pass": false,
+        "normalization_pass": false,
+        "normalization_receipt_status": null,
+        "parser_contract_pass": true,
+        "pass_or_approved_review": false,
+        "ready_for_medium_scorecard_credit": false,
+        "reference_outputs_pass": false,
+        "scorecard_execution_pass": false,
+        "scorecard_receipt_path": null,
+        "source_path": "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model2/opensees.tcl",
+        "source_sha256": "66b73f329080e06a083f6f1ac3bbdc8ce45ca1fb8c2184c676efb978b32bb30f"
+      },
+      {
+        "authoritative_source_case_ids": [
+          "SCBF16B"
+        ],
+        "authoritative_source_pass": false,
+        "blockers": [
+          "source_url_verification_pending",
+          "license_review_pending",
+          "reference_outputs_missing",
+          "normalization_receipts_missing",
+          "opensees_medium_scorecard_execution_missing",
+          "medium_model_pass_or_review_missing"
+        ],
+        "case_id": "nheri_soft_story_podium",
+        "family_id": "nheri_soft_story_podium",
+        "license_approval_pass": false,
+        "normalization_pass": false,
+        "normalization_receipt_status": null,
+        "parser_contract_pass": true,
+        "pass_or_approved_review": false,
+        "ready_for_medium_scorecard_credit": false,
+        "reference_outputs_pass": false,
+        "scorecard_execution_pass": false,
+        "scorecard_receipt_path": null,
+        "source_path": "implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/main.tcl",
+        "source_sha256": "8e80be8849fa4529ad0138767ee066a8ce56a98839e3bc3ceb8bb43625edc728"
       }
     ],
     "claim_boundary": "This ledger is case-level readiness accounting. It does not create new source files, license approvals, reference outputs, normalization receipts, scorecard executions, or PASS/REVIEW decisions.",
-    "local_candidate_case_count": 3,
-    "missing_candidate_case_count": 2,
+    "local_candidate_case_count": 5,
+    "missing_candidate_case_count": 0,
     "required_case_count": 5,
     "schema_version": "phase3-medium-model-case-readiness-ledger.v1",
     "selection_gate": {
-      "blockers": [
-        "medium_structural_models_current_below_required:3/5"
-      ],
-      "contract_pass": false,
-      "current_candidate_case_count": 3,
+      "blockers": [],
+      "contract_pass": true,
+      "current_candidate_case_count": 5,
       "required_candidate_case_count": 5
     }
   },
   "case_selection_summary": {
     "claim_boundary": "Candidate selection counts parser/topology-ready local source rows only. Scorecard credit remains zero until reference outputs, normalization receipts, scorecard execution, and PASS/REVIEW decisions pass.",
     "current_scorecard_credit_count": 0,
-    "local_candidate_case_count": 3,
-    "missing_candidate_case_count": 2,
+    "local_candidate_case_count": 5,
+    "missing_candidate_case_count": 0,
     "required_candidate_case_count": 5
   },
   "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only, reads the source license receipt for upstream source identity, and implements the operator scorecard runner command plus normalization receipt validation, but it does not prove product license approval, reference outputs, attached normalization receipts, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
@@ -179,29 +231,6 @@
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
   "gate_unblock_plan": [
-    {
-      "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
-      "clears_blockers": [
-        "medium_structural_models_current_below_required:3/5"
-      ],
-      "evidence_artifacts": [
-        "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
-        "operator-attached source/license/reference/normalization rows for each added case"
-      ],
-      "minimum_evidence": [
-        "five authoritative medium structural model cases selected",
-        "each selected case has stable source id and checksum",
-        "case selection remains parser-only until reference, normalization, scorecard, and review evidence pass"
-      ],
-      "owner": "benchmark_operator",
-      "remaining_case_count": 2,
-      "slot_id": "select_additional_medium_model_cases",
-      "validation_commands": [
-        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
-        "python3 scripts/build_phase6_benchmark_scale_status.py --check",
-        "python3 scripts/build_developer_preview_rc_status.py --check"
-      ]
-    },
     {
       "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
       "clears_blockers": [
@@ -321,11 +350,11 @@
       ]
     }
   ],
-  "gate_unblock_plan_count": 7,
-  "generated_at": "2026-07-05T08:06:11.567730+00:00",
+  "gate_unblock_plan_count": 6,
+  "generated_at": "2026-07-05T17:58:41.594983+00:00",
   "input_checksums": {
     "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
-    "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
+    "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:203a42dc7d4f2effb2fd5f94d04796fad12884e1cb046ce4839de10a300a316a",
     "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts": "missing",
     "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json": "sha256:b335844f0f419f5015f148451d14aaa35b59c5ac897c35c783db49481786e0eb",
     "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:4d8966f765271bb3691c588bead008b3e17d2eedb1d5ea9bf4f07c5660e76239",
@@ -337,13 +366,15 @@
     "opensees-medium"
   ],
   "license_review_status": "identified_gpl_3_0_product_legal_review_required",
-  "local_candidate_artifact_count": 3,
+  "local_candidate_artifact_count": 5,
   "local_parser_boundary": {
     "beam_element_count": 166,
     "canonical_candidate_case_ids": [
       "SCBF16B",
       "SCBF16B_shell_beam_mix",
-      "luxinzheng_megatall_model1"
+      "luxinzheng_megatall_model1",
+      "luxinzheng_megatall_model2",
+      "nheri_soft_story_podium"
     ],
     "claim_boundary": "Local checksum and topology/parser evidence is retained only as parser input evidence. It is not reference-output ingest, normalization, medium scorecard execution, or PASS/REVIEW benchmark evidence.",
     "node_count": 426,
@@ -358,7 +389,7 @@
   "medium_model_case_execution_queue": {
     "case_ready_count": 0,
     "claim_boundary": "This queue translates the medium-model RC gate into five execution slots. It is non-promoting and does not replace actual source, license, reference-output, normalization, scorecard, or PASS/REVIEW receipts.",
-    "missing_case_count": 2,
+    "missing_case_count": 0,
     "next_case_slot": {
       "blockers": [
         "license_review_pending",
@@ -462,50 +493,60 @@
       },
       {
         "blockers": [
-          "medium_structural_models_current_below_required:3/5"
+          "source_url_verification_pending",
+          "license_review_pending",
+          "reference_outputs_missing",
+          "normalization_receipts_missing",
+          "opensees_medium_scorecard_execution_missing",
+          "medium_model_pass_or_review_missing"
         ],
-        "case_id": "OPERATOR_ATTACHED_MEDIUM_CASE_4",
-        "claim_boundary": "This placeholder reserves an RC medium-model slot. It cannot receive scorecard credit until an operator-attached case and all per-case evidence are present.",
+        "case_id": "luxinzheng_megatall_model2",
+        "claim_boundary": "This slot is execution scheduling only. It does not create source, license, reference, normalization, scorecard, or PASS/REVIEW evidence.",
         "next_required_inputs": [
-          "authoritative medium structural model case",
-          "stable source id",
-          "source/model checksum",
-          "reference output or approved REVIEW baseline",
-          "normalization receipt",
-          "scorecard/review decision"
+          "verified authoritative source URL/checksum",
+          "approved OpenSees medium product/legal license receipt",
+          "reference output checksum or approved REVIEW baseline",
+          "passing phase3-medium-normalization-receipt.v1 normalization receipt",
+          "medium scorecard receipt, result artifact, and validation report",
+          "PASS or APPROVED_REVIEW decision with non-generated evidence_ref"
         ],
         "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --reference OPERATOR_ATTACHED_REFERENCE_OUTPUTS.json --normalization-receipt OPERATOR_ATTACHED_NORMALIZATION_RECEIPT.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
-        "scorecard_receipt_path": "",
+        "scorecard_receipt_path": null,
         "slot": 4,
-        "slot_status": "operator_selection_required",
-        "source_path": "OPERATOR_ATTACHED_MODEL.json",
-        "source_sha256": "OPERATOR_ATTACHED_SHA256"
+        "slot_status": "selected_blocked",
+        "source_path": "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model2/opensees.tcl",
+        "source_sha256": "66b73f329080e06a083f6f1ac3bbdc8ce45ca1fb8c2184c676efb978b32bb30f"
       },
       {
         "blockers": [
-          "medium_structural_models_current_below_required:3/5"
+          "source_url_verification_pending",
+          "license_review_pending",
+          "reference_outputs_missing",
+          "normalization_receipts_missing",
+          "opensees_medium_scorecard_execution_missing",
+          "medium_model_pass_or_review_missing"
         ],
-        "case_id": "OPERATOR_ATTACHED_MEDIUM_CASE_5",
-        "claim_boundary": "This placeholder reserves an RC medium-model slot. It cannot receive scorecard credit until an operator-attached case and all per-case evidence are present.",
+        "case_id": "nheri_soft_story_podium",
+        "claim_boundary": "This slot is execution scheduling only. It does not create source, license, reference, normalization, scorecard, or PASS/REVIEW evidence.",
         "next_required_inputs": [
-          "authoritative medium structural model case",
-          "stable source id",
-          "source/model checksum",
-          "reference output or approved REVIEW baseline",
-          "normalization receipt",
-          "scorecard/review decision"
+          "verified authoritative source URL/checksum",
+          "approved OpenSees medium product/legal license receipt",
+          "reference output checksum or approved REVIEW baseline",
+          "passing phase3-medium-normalization-receipt.v1 normalization receipt",
+          "medium scorecard receipt, result artifact, and validation report",
+          "PASS or APPROVED_REVIEW decision with non-generated evidence_ref"
         ],
         "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --reference OPERATOR_ATTACHED_REFERENCE_OUTPUTS.json --normalization-receipt OPERATOR_ATTACHED_NORMALIZATION_RECEIPT.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
-        "scorecard_receipt_path": "",
+        "scorecard_receipt_path": null,
         "slot": 5,
-        "slot_status": "operator_selection_required",
-        "source_path": "OPERATOR_ATTACHED_MODEL.json",
-        "source_sha256": "OPERATOR_ATTACHED_SHA256"
+        "slot_status": "selected_blocked",
+        "source_path": "implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/main.tcl",
+        "source_sha256": "8e80be8849fa4529ad0138767ee066a8ce56a98839e3bc3ceb8bb43625edc728"
       }
     ],
     "required_case_count": 5,
     "schema_version": "phase3-medium-model-case-execution-queue.v1",
-    "selected_case_count": 3
+    "selected_case_count": 5
   },
   "missing_evidence_breakdown": [
     {
@@ -578,7 +619,6 @@
     }
   ],
   "next_actions": [
-    "select_additional_medium_model_cases",
     "complete_product_legal_license_review",
     "attach_medium_reference_outputs",
     "record_medium_canonical_normalization",
@@ -601,26 +641,6 @@
     }
   },
   "operator_next_actions": [
-    {
-      "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
-      "clears_blockers": [
-        "medium_structural_models_current_below_required:3/5"
-      ],
-      "current_candidate_case_count": 3,
-      "evidence_artifacts": [
-        "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
-        "operator-attached source/license/reference/normalization rows for each added case"
-      ],
-      "id": "select_additional_medium_model_cases",
-      "owner": "benchmark_operator",
-      "remaining_case_count": 2,
-      "required_candidate_case_count": 5,
-      "validation_commands": [
-        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
-        "python3 scripts/build_phase6_benchmark_scale_status.py --check",
-        "python3 scripts/build_developer_preview_rc_status.py --check"
-      ]
-    },
     {
       "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
       "clears_blockers": [
@@ -707,26 +727,6 @@
   "pass_or_approved_review_count": 0,
   "phase3_closure_claim": false,
   "recommended_next_actions": [
-    {
-      "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
-      "clears_blockers": [
-        "medium_structural_models_current_below_required:3/5"
-      ],
-      "current_candidate_case_count": 3,
-      "evidence_artifacts": [
-        "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
-        "operator-attached source/license/reference/normalization rows for each added case"
-      ],
-      "id": "select_additional_medium_model_cases",
-      "owner": "benchmark_operator",
-      "remaining_case_count": 2,
-      "required_candidate_case_count": 5,
-      "validation_commands": [
-        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
-        "python3 scripts/build_phase6_benchmark_scale_status.py --check",
-        "python3 scripts/build_developer_preview_rc_status.py --check"
-      ]
-    },
     {
       "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
       "clears_blockers": [
@@ -950,7 +950,7 @@
     "source_id": "opensees_scbf16b_medium_candidate",
     "source_sha256": "OPERATOR_ATTACHED_SHA256"
   },
-  "source_commit_sha": "dc2bc847ca779729087be5333e4cdbd0508b25fc",
+  "source_commit_sha": "70a999321fa7371f72f750c0429f18b51a5b084e",
   "source_id": "opensees_scbf16b_medium_candidate",
   "source_license_receipt_path": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
   "source_url_verified": true,
@@ -958,8 +958,8 @@
   "summary": {
     "current_medium_model_scorecard_count": 0,
     "license_review_status": "identified_gpl_3_0_product_legal_review_required",
-    "local_candidate_case_count": 3,
-    "missing_candidate_case_count": 2,
+    "local_candidate_case_count": 5,
+    "missing_candidate_case_count": 0,
     "normalization_receipt_count": 0,
     "pass_or_approved_review_count": 0,
     "reference_output_count": 0,

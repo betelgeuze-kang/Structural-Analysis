@@ -54,6 +54,7 @@ INPUT_SCHEMA = {
 _INT_RE = re.compile(r"^[+-]?\d+$")
 _SPLIT_SEMICOLON = re.compile(r";+")
 _COMMENT_RE = re.compile(r"#.*$")
+_SOURCE_PATH_WRAPPER_RE = re.compile(r"^[\"{](.*)[\"}]$")
 
 
 def _sha256(path: Path) -> str:
@@ -101,13 +102,95 @@ def _iter_statements(text: str):
                 yield s
 
 
+def _source_path_token(tok: str) -> str:
+    text = tok.strip()
+    match = _SOURCE_PATH_WRAPPER_RE.match(text)
+    if match is not None:
+        text = match.group(1).strip()
+    return text
+
+
+def _read_text_with_sources(
+    path: Path,
+    *,
+    seen: set[Path] | None = None,
+    depth: int = 0,
+    max_depth: int = 16,
+) -> tuple[str, dict[str, int]]:
+    resolved = path.resolve()
+    counters: dict[str, int] = {
+        "source_include": 0,
+        "source_include_cycle": 0,
+        "source_include_missing": 0,
+        "source_include_unresolved": 0,
+        "source_include_depth_limit": 0,
+    }
+    if seen is None:
+        seen = set()
+    if resolved in seen:
+        counters["source_include_cycle"] += 1
+        return "", counters
+    if depth > max_depth:
+        counters["source_include_depth_limit"] += 1
+        return "", counters
+
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    seen.add(resolved)
+    expanded_lines: list[str] = []
+    for raw in text.splitlines():
+        line = _clean_line(raw)
+        included = False
+        if line:
+            for stmt in _SPLIT_SEMICOLON.split(line):
+                toks = _tokenize(stmt.strip())
+                if not toks or toks[0].lower() != "source":
+                    continue
+                if len(toks) < 2:
+                    counters["source_include_unresolved"] += 1
+                    continue
+                source_token = _source_path_token(toks[1])
+                if (
+                    not source_token
+                    or "$" in source_token
+                    or "[" in source_token
+                    or "]" in source_token
+                ):
+                    counters["source_include_unresolved"] += 1
+                    continue
+                source_path = Path(source_token)
+                if not source_path.is_absolute():
+                    source_path = path.parent / source_path
+                if not source_path.exists():
+                    counters["source_include_missing"] += 1
+                    continue
+                child_text, child_counters = _read_text_with_sources(
+                    source_path,
+                    seen=seen,
+                    depth=depth + 1,
+                    max_depth=max_depth,
+                )
+                counters["source_include"] += 1
+                for key, value in child_counters.items():
+                    counters[key] = counters.get(key, 0) + int(value)
+                expanded_lines.append(child_text)
+                included = True
+        if not included:
+            expanded_lines.append(raw)
+
+    seen.remove(resolved)
+    return "\n".join(expanded_lines), counters
+
+
 def _parse_model(path: Path) -> tuple[dict[int, tuple[float, float, float] | None], list[tuple[str, int, list[int]]], dict[str, int]]:
     nodes: dict[int, tuple[float, float, float] | None] = {}
     elements: list[tuple[str, int, list[int]]] = []
     parse_counters = defaultdict(int)
     next_constraint_id = 10_000_000_000
 
-    txt = path.read_text(encoding="utf-8", errors="ignore")
+    txt, source_counters = _read_text_with_sources(path)
+    for key, value in source_counters.items():
+        if value:
+            parse_counters[key] += int(value)
     for stmt in _iter_statements(txt):
         toks = _tokenize(stmt)
         if not toks:

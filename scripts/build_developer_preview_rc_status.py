@@ -841,7 +841,16 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
             else list(
                 dict.fromkeys(
                     [
-                        f"medium_structural_models_current_below_required:{medium_current}/{medium_required}",
+                        *(
+                            [
+                                (
+                                    "medium_structural_models_current_below_required:"
+                                    f"{medium_current}/{medium_required}"
+                                )
+                            ]
+                            if medium_current < medium_required
+                            else []
+                        ),
                         *medium_acquisition_blockers,
                         *medium_scorecard_blockers,
                         *benchmark_medium_blockers,

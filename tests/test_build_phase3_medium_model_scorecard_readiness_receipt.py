@@ -57,8 +57,8 @@ def _write_minimal_medium_readiness_inputs(repo_root: Path) -> None:
         / "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
         {
             "rows": [
-                {"case_id": "SCBF16B"},
-                {"case_id": "SCBF16B_shell_beam_mix"},
+                {"case_id": f"medium-{index}", "parser_contract_ready": True}
+                for index in range(5)
             ]
         },
     )
@@ -80,7 +80,7 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert payload["current_medium_model_scorecard_count"] == 0
     assert payload["pass_or_approved_review_count"] == 0
     assert payload["scorecard_receipt_inventory"]["receipt_file_count"] == 0
-    assert payload["local_candidate_artifact_count"] == 3
+    assert payload["local_candidate_artifact_count"] == 5
     assert payload["local_topology_contract_pass"] is True
     assert payload["source_url_verified"] is True
     assert payload["license_review_status"] == "identified_gpl_3_0_product_legal_review_required"
@@ -88,8 +88,8 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert payload["required_evidence_count"] == len(payload["required_evidence"])
     assert payload["summary"] == {
         "required_medium_model_count": 5,
-        "local_candidate_case_count": 3,
-        "missing_candidate_case_count": 2,
+        "local_candidate_case_count": 5,
+        "missing_candidate_case_count": 0,
         "current_medium_model_scorecard_count": 0,
         "normalization_receipt_count": 0,
         "pass_or_approved_review_count": 0,
@@ -109,8 +109,8 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
             "receipts, scorecard execution, and PASS/REVIEW decisions pass."
         ),
         "current_scorecard_credit_count": 0,
-        "local_candidate_case_count": 3,
-        "missing_candidate_case_count": 2,
+        "local_candidate_case_count": 5,
+        "missing_candidate_case_count": 0,
         "required_candidate_case_count": 5,
     }
     assert "source_url_verification_pending" not in payload["blockers"]
@@ -148,7 +148,6 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert scorecard_gap["remaining_case_count"] == 5
     assert scorecard_gap["receipt_directory"].endswith("medium_model_scorecard_receipts")
     assert [row["id"] for row in payload["operator_next_actions"]] == [
-        "select_additional_medium_model_cases",
         "complete_product_legal_license_review",
         "attach_medium_reference_outputs",
         "record_medium_canonical_normalization",
@@ -156,9 +155,9 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
         "attach_medium_pass_or_approved_review_decisions",
     ]
     assert payload["recommended_next_actions"] == payload["operator_next_actions"]
-    assert payload["gate_unblock_plan_count"] == 7
+    assert payload["gate_unblock_plan_count"] == 6
     gate_plan = {row["slot_id"]: row for row in payload["gate_unblock_plan"]}
-    assert "select_additional_medium_model_cases" in gate_plan
+    assert "select_additional_medium_model_cases" not in gate_plan
     assert "rerun_medium_model_and_dp_rc_checks" in gate_plan
     assert gate_plan["run_medium_scorecard_receipts"]["remaining_case_count"] == 5
     assert any(
@@ -172,7 +171,6 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
         "python3 scripts/build_product_readiness_snapshot.py --check",
     ]
     assert payload["next_actions"] == [
-        "select_additional_medium_model_cases",
         "complete_product_legal_license_review",
         "attach_medium_reference_outputs",
         "record_medium_canonical_normalization",
@@ -182,13 +180,13 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     case_ledger = payload["case_readiness_ledger"]
     assert case_ledger["schema_version"] == "phase3-medium-model-case-readiness-ledger.v1"
     assert case_ledger["required_case_count"] == 5
-    assert case_ledger["local_candidate_case_count"] == 3
-    assert case_ledger["missing_candidate_case_count"] == 2
+    assert case_ledger["local_candidate_case_count"] == 5
+    assert case_ledger["missing_candidate_case_count"] == 0
     assert case_ledger["case_ready_count"] == 0
     assert case_ledger["selection_gate"] == {
-        "blockers": ["medium_structural_models_current_below_required:3/5"],
-        "contract_pass": False,
-        "current_candidate_case_count": 3,
+        "blockers": [],
+        "contract_pass": True,
+        "current_candidate_case_count": 5,
         "required_candidate_case_count": 5,
     }
     case_rows = {row["case_id"]: row for row in case_ledger["case_rows"]}
@@ -196,6 +194,8 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
         "SCBF16B",
         "SCBF16B_shell_beam_mix",
         "luxinzheng_megatall_model1",
+        "luxinzheng_megatall_model2",
+        "nheri_soft_story_podium",
     }
     assert case_rows["SCBF16B"]["parser_contract_pass"] is True
     assert case_rows["SCBF16B"]["authoritative_source_pass"] is True
@@ -204,26 +204,29 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert "source_url_verification_pending" in (
         case_rows["luxinzheng_megatall_model1"]["blockers"]
     )
+    assert "source_url_verification_pending" in (
+        case_rows["luxinzheng_megatall_model2"]["blockers"]
+    )
+    assert "source_url_verification_pending" in (
+        case_rows["nheri_soft_story_podium"]["blockers"]
+    )
     assert "reference_outputs_missing" in case_rows["SCBF16B"]["blockers"]
     queue = payload["medium_model_case_execution_queue"]
     assert queue["schema_version"] == "phase3-medium-model-case-execution-queue.v1"
     assert queue["required_case_count"] == 5
-    assert queue["selected_case_count"] == 3
-    assert queue["missing_case_count"] == 2
+    assert queue["selected_case_count"] == 5
+    assert queue["missing_case_count"] == 0
     assert queue["case_ready_count"] == 0
     assert len(queue["queue_rows"]) == 5
     assert queue["next_case_slot"]["slot"] == 1
     assert queue["next_case_slot"]["case_id"] == "SCBF16B"
-    selected_slots = queue["queue_rows"][:3]
-    missing_slots = queue["queue_rows"][3:]
+    selected_slots = queue["queue_rows"]
     assert [row["slot_status"] for row in selected_slots] == [
         "selected_blocked",
         "selected_blocked",
         "selected_blocked",
-    ]
-    assert [row["slot_status"] for row in missing_slots] == [
-        "operator_selection_required",
-        "operator_selection_required",
+        "selected_blocked",
+        "selected_blocked",
     ]
     assert "PASS or APPROVED_REVIEW decision with non-generated evidence_ref" in (
         selected_slots[0]["next_required_inputs"]
@@ -231,9 +234,8 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert "verified authoritative source URL/checksum" in (
         selected_slots[2]["next_required_inputs"]
     )
-    assert missing_slots[0]["case_id"] == "OPERATOR_ATTACHED_MEDIUM_CASE_4"
     assert "run_phase3_medium_model_scorecard_receipt.py" in (
-        missing_slots[0]["runner_command_template"]
+        selected_slots[3]["runner_command_template"]
     )
     assert payload["case_input_requirements"]["remaining_case_count"] == 5
     assert "case_id" in {

@@ -195,3 +195,71 @@ def test_parse_opensees_synthetic_marker_checks_filename_only(tmp_path: Path) ->
 
     report = json.loads(report_out.read_text(encoding="utf-8"))
     assert report["checks"]["synthetic_source_detected"] is False
+
+
+def test_parse_opensees_to_csr_follows_relative_source_files(tmp_path: Path) -> None:
+    model = tmp_path / "main.tcl"
+    model.write_text(
+        "\n".join(
+            [
+                "model basic -ndm 3 -ndf 6",
+                "source nodes.tcl",
+                "source elements.tcl",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / "nodes.tcl").write_text(
+        "\n".join(f"node {idx} {idx}.0 0.0 0.0" for idx in range(1, 9)),
+        encoding="utf-8",
+    )
+    (tmp_path / "elements.tcl").write_text(
+        "\n".join(
+            [
+                "element elasticBeamColumn 11 1 2 1.0 2.0e11 1.0e-4 1",
+                "element elasticBeamColumn 12 2 3 1.0 2.0e11 1.0e-4 1",
+                "element elasticBeamColumn 13 3 4 1.0 2.0e11 1.0e-4 1",
+                "element elasticBeamColumn 14 4 5 1.0 2.0e11 1.0e-4 1",
+                "element elasticBeamColumn 15 5 6 1.0 2.0e11 1.0e-4 1",
+                "element truss 16 6 7 1.0 1",
+                "element truss 17 7 8 1.0 1",
+                "element truss 18 8 1 1.0 1",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    report_out = tmp_path / "report.json"
+    edges_out = tmp_path / "edges.json"
+    csr_out = tmp_path / "csr.npz"
+    cmd = [
+        sys.executable,
+        str(SCRIPT),
+        "--model",
+        str(model),
+        "--edges-out",
+        str(edges_out),
+        "--csr-out",
+        str(csr_out),
+        "--report-out",
+        str(report_out),
+        "--require-real-topology",
+        "--forbid-synthetic-source",
+        "--no-require-shell-beam-mix",
+        "--min-nodes",
+        "8",
+        "--min-edge-node-ratio",
+        "0.5",
+        "--min-degree-entropy",
+        "0.0",
+        "--min-largest-component-ratio",
+        "0.4",
+    ]
+    proc = subprocess.run(cmd, check=False, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stderr
+
+    report = json.loads(report_out.read_text(encoding="utf-8"))
+    assert report["contract_pass"] is True
+    assert report["parse_counters"]["source_include"] == 2
+    assert report["parse_counters"]["node"] == 8
+    assert report["parse_counters"]["element"] == 8
