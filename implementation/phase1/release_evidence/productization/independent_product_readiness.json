@@ -128,13 +128,13 @@
       "status": "ready"
     }
   ],
-  "generated_at": "2026-07-02T15:34:12.475930+00:00",
+  "generated_at": "2026-07-05T16:24:36.257932+00:00",
   "independent_commercial_product_ready": false,
   "input_checksums": {
-    "README.md": "sha256:f56c2ddeb5b9f430fb5449888040e7f1050f0ce4b65274d6ad25960625ca1d4e",
+    "README.md": "sha256:2704f4bfca7f7edb4b502dbaa32c6f69ce80dde7555021e2ab859869676ca76a",
     "docs/architecture-definition-document.md": "sha256:69aadd156758df4429bcc0d223f68f115818c6bff8239550043cd0e840748222",
-    "docs/commercialization-gap-current-state.md": "sha256:92002f2c563ff25f6dfd726645480e76d4d2035fec38fea74d72403d49c8512b",
-    "docs/commercialization-improvement-priority-assessment.md": "sha256:c4ae5576d72aac533864aad1e6ca926ae325e981c566ea08901e50f91e70298a",
+    "docs/commercialization-gap-current-state.md": "sha256:d3554f8f1fedd9c96d3c7fb05ee0eb72985613371153c7900e67581aa338d960",
+    "docs/commercialization-improvement-priority-assessment.md": "sha256:eeee3d2f6476d9f0ee237de43d3713c92afde2b3eb37196f9141cab8e4852488",
     "docs/independent-commercial-productization-plan.md": "sha256:739f2c5ff437dc3e2cb8131177a9d6f22d632fa788decab829be197219b11537",
     "docs/production-ops-security.md": "sha256:f83f3482d42d11a62c615659f5050e7e8f2dd5b603ff29208331129b2354a21f",
     "docs/release-publication-runbook.md": "sha256:e531952925d22c141e57757c58b428c23330cef11dee71017c162d312fe8ddfb",
@@ -144,14 +144,14 @@
     "implementation/phase1/production_runtime_packaging_manifest.json": "sha256:fe38311c0b3ff7cf0044748690b070e21a3168c67ec5f38dc9ef0d69e9612cfe",
     "implementation/phase1/project_ops_api_service.py": "sha256:a8b316fa8a7f7c28ab51752137d11891cf3b3c69978febddc3d1a50d7a8ea80b",
     "implementation/phase1/project_ops_deployment_drill_manifest.json": "sha256:9de92a86a0a414b222d4b6724a9ce54da33e31ea9fd5859f66194e289d0fa1c5",
-    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:b85c948fb870c71d7b81d930c2a284aa5979ff251ccef213fc8edce973c496a2",
-    "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:1a7f8b5466ad9604fdd2878dc9507da2d0800210b22084f592e791d3ea327873",
+    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:376572ac7f4d841aaa7a9c04fefb5f6edd639df7da7e69a816e5e1669e6b36af",
+    "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:e31435d18a94ddecb9e343afb6702feaad3d455f6c0b5b77df08024a79e37efa",
     "implementation/phase1/source_boundary_allowlist.json": "sha256:3fe8d06bc0118b4ceb92498b3250657d964cc60ce00f420569938f860e18a507",
     "implementation/phase1/structure_viewer_browser_performance_probe.json": "sha256:bf7c000487aee9b46112110b3b8a3f65e43806babd3e96b44bc4e3ffafba64d4",
     "implementation/phase1/structure_viewer_performance_budget_manifest.json": "sha256:812cb97ff4be17e3fefe7c6c5aec9ada413974a91f3bd3df5e4c61351f939996",
     "implementation/phase1/structure_viewer_visual_regression_baseline.json": "sha256:70908d83636063c26f0fb0136f928365e0fca2dc826dcefa44efffe8dc1b6503",
-    "implementation/phase1/support_bundle_manifest.json": "sha256:218a5ee7db7a07b3db806d9010fe9216e54e821afa640a4303f39aa824b911b2",
-    "implementation/phase1/workstation_delivery_readiness.json": "sha256:bcaa6ffdad0256ee94f15bee9157f796c0bbff9cb52fc1272ccf0056d5a1d07a",
+    "implementation/phase1/support_bundle_manifest.json": "sha256:0ea06a12cb5060fa049ff7403497d0221edacf0a2c4ba13ed60a2e0cd2b01234",
+    "implementation/phase1/workstation_delivery_readiness.json": "sha256:67cdede7ec025a1d4b34392b92537d7f5ea240db793c0cb208ca30ffc2368cbe",
     "implementation/phase1/zero_copy_real_probe_report_strict.json": "sha256:c0f432962f820b7b6d122fd12a6bc050c1f61a0e2c72699d7b639c67b2f60f6b"
   },
   "next_actions": [
@@ -162,7 +162,7 @@
   "recommended_claim": "Commercial engineer-in-loop acceleration for 95-99% repeated workflows; not a full autonomous commercial replacement.",
   "reused_evidence": false,
   "schema_version": "independent-commercial-product-readiness.v1",
-  "source_commit_sha": "ab0aee6bfb8a3aa94b9e04e51e1deed8237bfbe2",
+  "source_commit_sha": "cc9d0e344185a5dfbe21d14b9d7ffae97b6c5044",
   "status": "blocked",
   "summary_line": "Independent commercial product readiness: BLOCKED | score=80.0/100 | full_autonomous_replacement_ready=False",
   "workstation_delivery_service": {
