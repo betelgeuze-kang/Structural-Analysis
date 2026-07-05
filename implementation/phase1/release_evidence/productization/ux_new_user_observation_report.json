@@ -125,7 +125,7 @@
     }
   ],
   "gate_unblock_plan_count": 5,
-  "generated_at": "2026-07-05T07:35:29.597225+00:00",
+  "generated_at": "2026-07-05T16:06:59.185495+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ux_new_user_observation.json": "missing"
   },
@@ -177,7 +177,7 @@
   ],
   "reused_evidence": false,
   "schema_version": "ux-new-user-observation-report.v1",
-  "source_commit_sha": "42eccb4207eaba2b209cf59d2773554f1ca52477",
+  "source_commit_sha": "b2f9a0f73d86b6f7a78bece06827b6c16c7fe253",
   "status": "blocked",
   "summary": {
     "approval_decision": "",
