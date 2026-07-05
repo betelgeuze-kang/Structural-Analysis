@@ -102,9 +102,55 @@ def _hip_probe_payload() -> dict:
     return {
         "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
         "status": "partial",
+        "source_commit_sha": "fixture-hip-proof",
+        "rocm_hip_required": True,
+        "execution_mode": "hip_required_direct_probe_no_cpu_fallback",
         "consistent_residual_jacobian_newton_gate_passed": False,
         "cpu_diagnostic_assembler_used": False,
         "production_hip_residual_jacobian_path": True,
+        "load_scale": 1.0,
+        "hip_direct_probe": {
+            "executed": True,
+            "status": "partial",
+            "direct_residual_newton_ready": False,
+            "direct_residual_summary": {
+                "base_direct_residual_inf_n": 5.584111205195331,
+                "base_direct_relative_residual_inf": 0.0004222127955919827,
+                "final_direct_residual_inf_n": 5.571832446441612,
+                "final_direct_relative_residual_inf": 0.0004212844027163208,
+                "output_final_checkpoint": {
+                    "written": True,
+                    "path": (
+                        "implementation/phase1/release_evidence/productization/"
+                        "mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz"
+                    ),
+                    "load_scale": 1.0,
+                    "direct_residual_inf_n": 5.571832446441612,
+                },
+            },
+            "gate_assessment": {
+                "direct_residual_gate_passed": False,
+                "relative_increment_gate_passed": True,
+                "full_load_closure_passed": True,
+                "consistent_residual_jacobian_newton_passed": False,
+                "material_newton_breadth_passed": False,
+                "fallback_zero_passed": True,
+            },
+            "matrix_free_global_krylov": {
+                "hip_krylov_solver_used": True,
+                "jvp_rows_retained": True,
+                "jvp_row_count": 3,
+                "accepted_state_refresh_cpu_used": False,
+                "accepted_state_tangent_refresh_hip_used": True,
+            },
+            "current_tangent_residual_row_correction": {
+                "attempted": True,
+                "promoted_to_final_state": False,
+                "batch_replay_backend": "hip_full_residual",
+                "accepted_state_refresh_cpu_used": False,
+                "accepted_state_tangent_refresh_hip_used": True,
+            },
+        },
         "live_g1_assembly_contract": {
             "uses_assembly_result_contract": True,
             "assembly_result_schema": "g1-assembly-result.v1",
@@ -1888,6 +1934,85 @@ def _active_set_minimax_trust_candidate_payload() -> dict:
     }
 
 
+def _hip_required_full_load_residual_jvp_frontier_payload() -> dict:
+    return {
+        "schema_version": "mgt-direct-residual-newton-probe.v1",
+        "status": "partial",
+        "source_commit_sha": "fixture-step14",
+        "base_direct_residual": {
+            "load_scale": 1.0,
+            "direct_residual_inf_n": 5.602810437066918,
+        },
+        "final_direct_residual": {
+            "direct_residual_inf_n": 5.584111205301272,
+            "direct_relative_residual_inf": 0.0004222127955999929,
+            "residual_gate_passed": False,
+        },
+        "gate_assessment": {
+            "direct_residual_gate_passed": False,
+            "relative_increment_gate_passed": True,
+            "full_load_closure_passed": True,
+            "material_newton_breadth_passed": False,
+            "consistent_residual_jacobian_newton_passed": False,
+            "hip_residual_engine_gate_passed": True,
+        },
+        "residual_contract": {
+            "consistent_residual_jacobian_newton_gate_passed": False,
+            "hip_residual_engine_contract_passed": True,
+            "hip_residual_engine_required_lane_count": 2,
+            "hip_residual_engine_passed_lane_count": 2,
+            "hip_residual_engine_backends": [
+                "hip_full_residual",
+                "hip_full_residual_resident",
+            ],
+            "hip_residual_engine_rows": [
+                {"component": "matrix_free_global_krylov", "passed": True},
+                {
+                    "component": "current_tangent_residual_row_correction",
+                    "passed": True,
+                },
+            ],
+        },
+        "matrix_free_global_krylov": {
+            "enabled": True,
+            "attempted": True,
+            "promoted_to_final_state": True,
+            "hip_krylov_solver_used": True,
+            "accepted_state_refresh_backend": "hip_full_residual_resident",
+            "accepted_state_refresh_hip_used": True,
+            "accepted_state_refresh_cpu_used": False,
+            "best_gate_eligible_candidate": {
+                "direct_residual_inf_n": 5.601030296954047,
+                "improvement_inf_n": 0.0017801401659198746,
+                "residual_batch_backend": "hip_full_residual_resident",
+            },
+        },
+        "current_tangent_residual_row_correction": {
+            "enabled": True,
+            "attempted": True,
+            "promoted_to_final_state": True,
+            "accepted_state_refresh_backend": "hip_full_residual",
+            "accepted_state_refresh_hip_used": True,
+            "accepted_state_refresh_cpu_used": False,
+            "best_gate_eligible_candidate": {
+                "direct_residual_inf_n": 5.584111205301272,
+                "improvement_inf_n": 0.01691909165277483,
+                "residual_batch_backend": "hip_full_residual",
+            },
+        },
+        "output_final_checkpoint": {
+            "written": True,
+            "path": (
+                "implementation/phase1/release_evidence/productization/"
+                "mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz"
+            ),
+            "schema": "mgt-direct-residual-newton-state.v1",
+            "load_scale": 1.0,
+            "direct_residual_inf_n": 5.584111205301272,
+        },
+    }
+
+
 def _global_connectivity_payload() -> dict:
     return {
         "schema_version": "g1-global-connectivity-load-path-audit.v1",
@@ -2051,6 +2176,9 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
             tmp_path
             / runner.DEFAULT_SPARSE_DIRECT_ADAPTIVE_JVP_EPS_GMRES_SHIFTED_ILU_INCOMPLETE_PREVIEW_PROBE
         ),
+        "hip_required_full_load_residual_jvp_frontier": (
+            tmp_path / runner.DEFAULT_HIP_REQUIRED_FULL_LOAD_RESIDUAL_JVP_FRONTIER_PROBE
+        ),
     }
     _write_json(paths["g1_lane"], _g1_lane_payload(action_id=action_id))
     _write_json(paths["cause"], _cause_narrowing_payload())
@@ -2207,6 +2335,10 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
             solver="gmres_shifted_ilu",
             incomplete_preview=True,
         ),
+    )
+    _write_json(
+        paths["hip_required_full_load_residual_jvp_frontier"],
+        _hip_required_full_load_residual_jvp_frontier_payload(),
     )
     return paths
 
@@ -3060,6 +3192,88 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     assert payload["summary"][
         "active_set_minimax_trust_candidate_steps_taken"
     ] == 0
+    assert (
+        payload["summary"]["hip_required_full_load_residual_jvp_frontier_present"]
+        is True
+    )
+    assert payload["summary"][
+        "hip_required_full_load_residual_jvp_frontier_final_residual_n"
+    ] == 5.584111205301272
+    assert (
+        payload["summary"]["hip_required_full_load_residual_jvp_frontier_residual_gate"]
+        is False
+    )
+    assert (
+        payload["summary"][
+            "hip_required_full_load_residual_jvp_frontier_global_krylov_hip_solver"
+        ]
+        is True
+    )
+    assert (
+        payload["summary"][
+            "hip_required_full_load_residual_jvp_frontier_hip_components_passed"
+        ]
+        is True
+    )
+    assert payload["summary"][
+        "hip_required_consistency_direct_probe_final_residual_n"
+    ] == 5.571832446441612
+    assert (
+        payload["summary"]["hip_required_consistency_direct_probe_residual_gate"]
+        is False
+    )
+    assert (
+        payload["summary"][
+            "hip_required_consistency_direct_probe_worker_path_ready"
+        ]
+        is True
+    )
+    assert (
+        payload["summary"][
+            "hip_required_consistency_direct_probe_jvp_rows_retained"
+        ]
+        is True
+    )
+    assert (
+        payload["summary"][
+            "hip_required_consistency_direct_probe_output_checkpoint_written"
+        ]
+        is True
+    )
+    assert payload["hip_required_full_load_residual_jvp_frontier"]["load_scale"] == 1.0
+    assert payload["hip_required_full_load_residual_jvp_frontier"][
+        "final_direct_residual_inf_n"
+    ] == 5.584111205301272
+    assert payload["hip_required_full_load_residual_jvp_frontier"][
+        "matrix_free_global_krylov_hip_solver_used"
+    ] is True
+    assert payload["hip_required_full_load_residual_jvp_frontier"][
+        "current_tangent_residual_row_correction_residual_batch_backend"
+    ] == "hip_full_residual"
+    assert payload["hip_required_full_load_residual_jvp_frontier"][
+        "direct_residual_gate_passed"
+    ] is False
+    assert payload["hip_required_full_load_residual_jvp_frontier"][
+        "consistent_residual_jacobian_newton_passed"
+    ] is False
+    assert payload["hip_required_full_load_residual_jvp_frontier"][
+        "material_newton_breadth_passed"
+    ] is False
+    assert payload["hip_required_consistency_direct_probe"][
+        "final_direct_residual_inf_n"
+    ] == 5.571832446441612
+    assert payload["hip_required_consistency_direct_probe"][
+        "residual_jvp_worker_path_ready"
+    ] is True
+    assert payload["hip_required_consistency_direct_probe"][
+        "matrix_free_global_krylov_jvp_rows_retained"
+    ] is True
+    assert payload["hip_required_consistency_direct_probe"][
+        "output_checkpoint_path"
+    ].endswith("mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz")
+    assert payload["hip_required_consistency_direct_probe"][
+        "direct_residual_gate_passed"
+    ] is False
     assert payload["true_newton_full_load_checkpoint_candidate"]["present"] is True
     assert payload["true_newton_full_load_checkpoint_candidate"][
         "checkpoint_written"
@@ -3796,4 +4010,14 @@ def test_runner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
     assert "ERR_ILU_FACTOR_FAILED" in markdown
     assert "gmres_shifted_ilu" in markdown
     assert "0.0001237155747730867" in markdown
+    assert "## HIP-Required Full-Load Residual/JVP Frontier" in markdown
+    assert "hip_required_full_load_residual_jvp_frontier_final_residual_n" in markdown
+    assert "5.584111205301272" in markdown
+    assert "matrix_free_global_krylov_hip_solver_used" in markdown
+    assert "does not close G1" in markdown
+    assert "## HIP-Required Consistency Direct Probe" in markdown
+    assert "hip_required_consistency_direct_probe_final_residual_n" in markdown
+    assert "5.571832446441612" in markdown
+    assert "matrix_free_global_krylov_jvp_rows_retained" in markdown
+    assert "mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz" in markdown
     assert payload["status"] == "ready_for_runner_implementation"

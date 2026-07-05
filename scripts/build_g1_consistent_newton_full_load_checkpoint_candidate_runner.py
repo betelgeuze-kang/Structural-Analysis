@@ -203,6 +203,18 @@ DEFAULT_SPARSE_DIRECT_ADAPTIVE_JVP_EPS_GMRES_SHIFTED_ILU_INCOMPLETE_PREVIEW_PROB
     PRODUCTIZATION
     / "g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_mu_1e_4_incomplete_preview_probe.json"
 )
+DEFAULT_HIP_REQUIRED_FULL_LOAD_RESIDUAL_JVP_FRONTIER_PROBE = (
+    PRODUCTIZATION
+    / "mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_saved_probe.json"
+)
+DEFAULT_HIP_REQUIRED_FULL_LOAD_RESIDUAL_JVP_FRONTIER_CANDIDATE = (
+    PRODUCTIZATION
+    / "mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz"
+)
+DEFAULT_HIP_REQUIRED_CONSISTENCY_DIRECT_FRONTIER_CANDIDATE = (
+    PRODUCTIZATION
+    / "mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz"
+)
 DEFAULT_OUT = PRODUCTIZATION / "g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_SOLVER_HIP_E2E = Path(
@@ -2342,6 +2354,220 @@ def _active_frontier_current_component_row_correction_chain_summary(
     }
 
 
+def _hip_required_full_load_residual_jvp_frontier_summary(
+    *,
+    payload: dict[str, Any],
+    path: Path,
+    candidate_path: Path,
+) -> dict[str, Any]:
+    base = _as_dict(payload.get("base_direct_residual"))
+    final = _as_dict(payload.get("final_direct_residual"))
+    gate = _as_dict(payload.get("gate_assessment"))
+    residual_contract = _as_dict(payload.get("residual_contract"))
+    output = _as_dict(payload.get("output_final_checkpoint"))
+    global_krylov = _as_dict(payload.get("matrix_free_global_krylov"))
+    global_best = _as_dict(global_krylov.get("best_gate_eligible_candidate"))
+    if not global_best:
+        global_best = _as_dict(global_krylov.get("best_candidate"))
+    row_correction = _as_dict(payload.get("current_tangent_residual_row_correction"))
+    row_best = _as_dict(row_correction.get("best_gate_eligible_candidate"))
+    if not row_best:
+        row_best = _as_dict(row_correction.get("best_candidate"))
+    hip_rows = [
+        row
+        for row in _as_list(residual_contract.get("hip_residual_engine_rows"))
+        if isinstance(row, dict)
+    ]
+    hip_required_count = _as_int(residual_contract.get("hip_residual_engine_required_lane_count"))
+    hip_passed_count = _as_int(residual_contract.get("hip_residual_engine_passed_lane_count"))
+    return {
+        "path": path.as_posix(),
+        "present": bool(payload),
+        "status": str(payload.get("status") or "missing"),
+        "source_commit_sha": str(payload.get("source_commit_sha") or ""),
+        "load_scale": _as_float(base.get("load_scale") or output.get("load_scale")),
+        "base_direct_residual_inf_n": _as_float(base.get("direct_residual_inf_n")),
+        "final_direct_residual_inf_n": _as_float(final.get("direct_residual_inf_n")),
+        "improvement_inf_n": (
+            _as_float(base.get("direct_residual_inf_n"))
+            - _as_float(final.get("direct_residual_inf_n"))
+        ),
+        "direct_relative_residual_inf": _as_float(final.get("direct_relative_residual_inf")),
+        "direct_residual_gate_passed": (
+            final.get("residual_gate_passed") is True
+            or gate.get("direct_residual_gate_passed") is True
+        ),
+        "relative_increment_gate_passed": (
+            gate.get("relative_increment_gate_passed") is True
+        ),
+        "full_load_closure_passed": gate.get("full_load_closure_passed") is True,
+        "material_newton_breadth_passed": (
+            gate.get("material_newton_breadth_passed") is True
+        ),
+        "consistent_residual_jacobian_newton_passed": (
+            gate.get("consistent_residual_jacobian_newton_passed") is True
+        ),
+        "hip_residual_engine_gate_passed": (
+            gate.get("hip_residual_engine_gate_passed") is True
+            or residual_contract.get("hip_residual_engine_contract_passed") is True
+        ),
+        "hip_residual_engine_required_lane_count": hip_required_count,
+        "hip_residual_engine_passed_lane_count": hip_passed_count,
+        "hip_required_components_passed": bool(
+            hip_required_count > 0 and hip_required_count == hip_passed_count
+        ),
+        "hip_residual_engine_backends": _strings(
+            residual_contract.get("hip_residual_engine_backends")
+        ),
+        "hip_residual_engine_row_count": len(hip_rows),
+        "matrix_free_global_krylov_accepted": (
+            global_krylov.get("promoted_to_final_state") is True
+        ),
+        "matrix_free_global_krylov_best_residual_inf_n": _as_float(
+            global_best.get("direct_residual_inf_n")
+        ),
+        "matrix_free_global_krylov_improvement_inf_n": _as_float(
+            global_best.get("improvement_inf_n")
+        ),
+        "matrix_free_global_krylov_hip_solver_used": (
+            global_krylov.get("hip_krylov_solver_used") is True
+        ),
+        "matrix_free_global_krylov_accepted_state_refresh_hip_used": (
+            global_krylov.get("accepted_state_refresh_hip_used") is True
+        ),
+        "matrix_free_global_krylov_accepted_state_refresh_cpu_used": (
+            global_krylov.get("accepted_state_refresh_cpu_used") is True
+        ),
+        "current_tangent_residual_row_correction_accepted": (
+            row_correction.get("promoted_to_final_state") is True
+        ),
+        "current_tangent_residual_row_correction_best_residual_inf_n": _as_float(
+            row_best.get("direct_residual_inf_n")
+        ),
+        "current_tangent_residual_row_correction_improvement_inf_n": _as_float(
+            row_best.get("improvement_inf_n")
+        ),
+        "current_tangent_residual_row_correction_residual_batch_backend": str(
+            row_best.get("residual_batch_backend") or ""
+        ),
+        "current_tangent_residual_row_correction_accepted_state_refresh_hip_used": (
+            row_correction.get("accepted_state_refresh_hip_used") is True
+        ),
+        "current_tangent_residual_row_correction_accepted_state_refresh_cpu_used": (
+            row_correction.get("accepted_state_refresh_cpu_used") is True
+        ),
+        "output_checkpoint_written": output.get("written") is True,
+        "output_checkpoint_path": str(output.get("path") or candidate_path.as_posix()),
+        "output_checkpoint_direct_residual_inf_n": _as_float(
+            output.get("direct_residual_inf_n")
+        ),
+        "claim_boundary": (
+            "Full-load HIP-required residual/JVP frontier evidence. It records "
+            "HIP resident residual/JVP descent at load_scale 1.0, but it does not "
+            "close G1 while the direct residual gate, consistent residual/Jacobian "
+            "Newton gate, material Newton breadth, and full production residency "
+            "remain open."
+        ),
+    }
+
+
+def _hip_required_consistency_direct_probe_summary(
+    *,
+    payload: dict[str, Any],
+) -> dict[str, Any]:
+    hip_direct = _as_dict(payload.get("hip_direct_probe"))
+    direct_summary = _as_dict(hip_direct.get("direct_residual_summary"))
+    output_checkpoint = _as_dict(direct_summary.get("output_final_checkpoint"))
+    gate = _as_dict(hip_direct.get("gate_assessment"))
+    global_krylov = _as_dict(hip_direct.get("matrix_free_global_krylov"))
+    row_correction = _as_dict(
+        hip_direct.get("current_tangent_residual_row_correction")
+    )
+    worker = _as_dict(payload.get("production_rocm_hip_residual_jvp_worker"))
+    base_residual = _as_float(direct_summary.get("base_direct_residual_inf_n"))
+    final_residual = _as_float(direct_summary.get("final_direct_residual_inf_n"))
+    return {
+        "present": bool(hip_direct),
+        "executed": hip_direct.get("executed") is True,
+        "status": str(hip_direct.get("status") or payload.get("status") or "missing"),
+        "source_commit_sha": str(payload.get("source_commit_sha") or ""),
+        "load_scale": _as_float(
+            payload.get("load_scale") or output_checkpoint.get("load_scale")
+        ),
+        "base_direct_residual_inf_n": base_residual,
+        "final_direct_residual_inf_n": final_residual,
+        "improvement_inf_n": base_residual - final_residual,
+        "direct_relative_residual_inf": _as_float(
+            direct_summary.get("final_direct_relative_residual_inf")
+        ),
+        "direct_residual_gate_passed": (
+            gate.get("direct_residual_gate_passed") is True
+        ),
+        "relative_increment_gate_passed": (
+            gate.get("relative_increment_gate_passed") is True
+        ),
+        "full_load_closure_passed": gate.get("full_load_closure_passed") is True,
+        "consistent_residual_jacobian_newton_passed": (
+            payload.get("consistent_residual_jacobian_newton_gate_passed") is True
+            or gate.get("consistent_residual_jacobian_newton_passed") is True
+        ),
+        "material_newton_breadth_passed": (
+            gate.get("material_newton_breadth_passed") is True
+        ),
+        "fallback_zero_passed": gate.get("fallback_zero_passed") is True,
+        "production_hip_residual_jacobian_path": (
+            payload.get("production_hip_residual_jacobian_path") is True
+        ),
+        "residual_jvp_worker_path_ready": (
+            worker.get("residual_jvp_worker_path_ready") is True
+        ),
+        "g1_closure_gate_ready": worker.get("g1_closure_gate_ready") is True,
+        "matrix_free_global_krylov_hip_solver_used": (
+            global_krylov.get("hip_krylov_solver_used") is True
+        ),
+        "matrix_free_global_krylov_jvp_rows_retained": (
+            global_krylov.get("jvp_rows_retained") is True
+        ),
+        "matrix_free_global_krylov_jvp_row_count": _as_int(
+            global_krylov.get("jvp_row_count")
+        ),
+        "matrix_free_global_krylov_accepted_state_refresh_cpu_used": (
+            global_krylov.get("accepted_state_refresh_cpu_used") is True
+        ),
+        "matrix_free_global_krylov_accepted_state_tangent_refresh_hip_used": (
+            global_krylov.get("accepted_state_tangent_refresh_hip_used") is True
+        ),
+        "current_tangent_residual_row_correction_attempted": (
+            row_correction.get("attempted") is True
+        ),
+        "current_tangent_residual_row_correction_promoted": (
+            row_correction.get("promoted_to_final_state") is True
+        ),
+        "current_tangent_residual_row_correction_batch_replay_backend": str(
+            row_correction.get("batch_replay_backend") or ""
+        ),
+        "current_tangent_residual_row_correction_accepted_state_refresh_cpu_used": (
+            row_correction.get("accepted_state_refresh_cpu_used") is True
+        ),
+        "current_tangent_residual_row_correction_accepted_state_tangent_refresh_hip_used": (
+            row_correction.get("accepted_state_tangent_refresh_hip_used") is True
+        ),
+        "output_checkpoint_written": output_checkpoint.get("written") is True,
+        "output_checkpoint_path": str(output_checkpoint.get("path") or ""),
+        "output_checkpoint_direct_residual_inf_n": _as_float(
+            output_checkpoint.get("direct_residual_inf_n")
+        ),
+        "blocker_count": len(_strings(payload.get("blockers"))),
+        "blockers": _strings(payload.get("blockers")),
+        "claim_boundary": (
+            "HIP-required consistency proof child summary. It proves the production "
+            "HIP residual/JVP worker path progressed on a full-load checkpoint, but "
+            "it does not close G1 while direct residual, material breadth, and "
+            "consistent residual/Jacobian Newton gates remain open."
+        ),
+    }
+
+
 def _directional_tangent_fd_jvp_summary(
     *,
     payload: dict[str, Any],
@@ -2689,6 +2915,12 @@ def build_runner_packet(
     sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_path: Path = (
         DEFAULT_SPARSE_DIRECT_ADAPTIVE_JVP_EPS_GMRES_SHIFTED_ILU_INCOMPLETE_PREVIEW_PROBE
     ),
+    hip_required_full_load_residual_jvp_frontier_probe_path: Path = (
+        DEFAULT_HIP_REQUIRED_FULL_LOAD_RESIDUAL_JVP_FRONTIER_PROBE
+    ),
+    hip_required_full_load_residual_jvp_frontier_candidate_path: Path = (
+        DEFAULT_HIP_REQUIRED_FULL_LOAD_RESIDUAL_JVP_FRONTIER_CANDIDATE
+    ),
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     g1_lane = _load_json(repo_root, g1_lane_path)
@@ -2870,6 +3102,10 @@ def build_runner_packet(
             repo_root,
             sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_path,
         )
+    )
+    hip_required_full_load_residual_jvp_frontier_probe = _load_json(
+        repo_root,
+        hip_required_full_load_residual_jvp_frontier_probe_path,
     )
     action = _find_runner_action(g1_lane)
     checkpoint_gate = _as_dict(g1_lane.get("checkpoint_resolution_gate"))
@@ -3254,6 +3490,16 @@ def build_runner_packet(
             direction_solver="gmres_shifted_ilu",
         )
     )
+    hip_required_full_load_residual_jvp_frontier_summary = (
+        _hip_required_full_load_residual_jvp_frontier_summary(
+            payload=hip_required_full_load_residual_jvp_frontier_probe,
+            path=hip_required_full_load_residual_jvp_frontier_probe_path,
+            candidate_path=hip_required_full_load_residual_jvp_frontier_candidate_path,
+        )
+    )
+    hip_required_consistency_direct_probe_summary = (
+        _hip_required_consistency_direct_probe_summary(payload=hip_probe)
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -3308,6 +3554,9 @@ def build_runner_packet(
                 sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe_path,
                 sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_probe_path,
                 sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_path,
+                hip_required_full_load_residual_jvp_frontier_probe_path,
+                hip_required_full_load_residual_jvp_frontier_candidate_path,
+                DEFAULT_HIP_REQUIRED_CONSISTENCY_DIRECT_FRONTIER_CANDIDATE,
             ],
             reused_evidence=True,
             reuse_policy=(
@@ -4698,6 +4947,54 @@ def build_runner_packet(
                 "consistent_residual_jacobian_newton_gate_passed"
             )
             is True,
+            "hip_required_full_load_residual_jvp_frontier_present": bool(
+                hip_required_full_load_residual_jvp_frontier_probe
+            ),
+            "hip_required_full_load_residual_jvp_frontier_final_residual_n": (
+                hip_required_full_load_residual_jvp_frontier_summary[
+                    "final_direct_residual_inf_n"
+                ]
+            ),
+            "hip_required_full_load_residual_jvp_frontier_residual_gate": (
+                hip_required_full_load_residual_jvp_frontier_summary[
+                    "direct_residual_gate_passed"
+                ]
+            ),
+            "hip_required_full_load_residual_jvp_frontier_global_krylov_hip_solver": (
+                hip_required_full_load_residual_jvp_frontier_summary[
+                    "matrix_free_global_krylov_hip_solver_used"
+                ]
+            ),
+            "hip_required_full_load_residual_jvp_frontier_hip_components_passed": (
+                hip_required_full_load_residual_jvp_frontier_summary[
+                    "hip_required_components_passed"
+                ]
+            ),
+            "hip_required_consistency_direct_probe_final_residual_n": (
+                hip_required_consistency_direct_probe_summary[
+                    "final_direct_residual_inf_n"
+                ]
+            ),
+            "hip_required_consistency_direct_probe_residual_gate": (
+                hip_required_consistency_direct_probe_summary[
+                    "direct_residual_gate_passed"
+                ]
+            ),
+            "hip_required_consistency_direct_probe_worker_path_ready": (
+                hip_required_consistency_direct_probe_summary[
+                    "residual_jvp_worker_path_ready"
+                ]
+            ),
+            "hip_required_consistency_direct_probe_jvp_rows_retained": (
+                hip_required_consistency_direct_probe_summary[
+                    "matrix_free_global_krylov_jvp_rows_retained"
+                ]
+            ),
+            "hip_required_consistency_direct_probe_output_checkpoint_written": (
+                hip_required_consistency_direct_probe_summary[
+                    "output_checkpoint_written"
+                ]
+            ),
             "row_only_correction_loop_stopped": _row_only_loop_stopped(
                 cause_narrowing,
                 action,
@@ -4979,6 +5276,12 @@ def build_runner_packet(
         "sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe": (
             sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_summary
         ),
+        "hip_required_full_load_residual_jvp_frontier": (
+            hip_required_full_load_residual_jvp_frontier_summary
+        ),
+        "hip_required_consistency_direct_probe": (
+            hip_required_consistency_direct_probe_summary
+        ),
         "hip_worker_contract": {
             "worker_id": str(worker.get("worker_id") or ""),
             "residual_jvp_worker_path_ready": worker.get(
@@ -5170,6 +5473,16 @@ def build_runner_packet(
             "g1_mgt_sparse_direct_scaled_lsmr_long_chain_probe": (
                 sparse_direct_scaled_lsmr_long_chain_probe_path.as_posix()
             ),
+            "mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_saved_probe": (
+                hip_required_full_load_residual_jvp_frontier_probe_path.as_posix()
+            ),
+            "mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate": (
+                hip_required_full_load_residual_jvp_frontier_candidate_path.as_posix()
+            ),
+            "mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate": (
+                hip_required_consistency_direct_probe_summary["output_checkpoint_path"]
+                or DEFAULT_HIP_REQUIRED_CONSISTENCY_DIRECT_FRONTIER_CANDIDATE.as_posix()
+            ),
         },
         "claim_boundary": (
             "This packet defines the next G1 runner contract for generating a "
@@ -5212,6 +5525,12 @@ def _markdown(payload: dict[str, Any]) -> str:
     )
     active_set_minimax = _as_dict(
         payload.get("active_set_minimax_trust_candidate")
+    )
+    hip_required_frontier = _as_dict(
+        payload.get("hip_required_full_load_residual_jvp_frontier")
+    )
+    hip_required_consistency_direct = _as_dict(
+        payload.get("hip_required_consistency_direct_probe")
     )
     frame_eps_sweep = _as_dict(payload.get("frame_tangent_fd_epsilon_sweep"))
     mu_sweep = _as_dict(payload.get("true_newton_from_active_set_mu_sweep"))
@@ -5382,6 +5701,14 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `active_set_ls_tangent_fd_jvp_max_relative_inf_error`: `{active_set_tangent_jvp.get('max_relative_inf_error')}`",
         f"- `active_set_minimax_final_residual_n`: `{active_set_minimax.get('final_residual_n')}`",
         f"- `active_set_minimax_steps_taken`: `{active_set_minimax.get('steps_taken')}`",
+        f"- `hip_required_full_load_residual_jvp_frontier_final_residual_n`: `{hip_required_frontier.get('final_direct_residual_inf_n')}`",
+        f"- `hip_required_full_load_residual_jvp_frontier_residual_gate`: `{hip_required_frontier.get('direct_residual_gate_passed')}`",
+        f"- `hip_required_full_load_residual_jvp_frontier_global_krylov_hip_solver`: `{hip_required_frontier.get('matrix_free_global_krylov_hip_solver_used')}`",
+        f"- `hip_required_full_load_residual_jvp_frontier_hip_components_passed`: `{hip_required_frontier.get('hip_required_components_passed')}`",
+        f"- `hip_required_consistency_direct_probe_final_residual_n`: `{hip_required_consistency_direct.get('final_direct_residual_inf_n')}`",
+        f"- `hip_required_consistency_direct_probe_worker_path_ready`: `{hip_required_consistency_direct.get('residual_jvp_worker_path_ready')}`",
+        f"- `hip_required_consistency_direct_probe_jvp_rows_retained`: `{hip_required_consistency_direct.get('matrix_free_global_krylov_jvp_rows_retained')}`",
+        f"- `hip_required_consistency_direct_probe_output_checkpoint_written`: `{hip_required_consistency_direct.get('output_checkpoint_written')}`",
         f"- `worker_path_ready`: `{hip.get('residual_jvp_worker_path_ready')}`",
         f"- `worker_g1_closure_gate_ready`: `{hip.get('g1_closure_gate_ready')}`",
         f"- `assembly_contract_seed_ready`: `{assembly.get('contract_pass')}`",
@@ -6560,6 +6887,83 @@ def _markdown(payload: dict[str, Any]) -> str:
             "- `best_linear_active_inf_improvement_n`: "
             f"`{active_set_minimax.get('best_linear_active_inf_improvement_n')}`"
         )
+    if hip_required_frontier:
+        lines.extend(["", "## HIP-Required Full-Load Residual/JVP Frontier", ""])
+        lines.append(f"- `present`: `{hip_required_frontier.get('present')}`")
+        lines.append(f"- `status`: `{hip_required_frontier.get('status')}`")
+        lines.append(
+            "- `load_scale`: "
+            f"`{hip_required_frontier.get('load_scale')}`"
+        )
+        lines.append(
+            "- `base_direct_residual_inf_n`: "
+            f"`{hip_required_frontier.get('base_direct_residual_inf_n')}`"
+        )
+        lines.append(
+            "- `final_direct_residual_inf_n`: "
+            f"`{hip_required_frontier.get('final_direct_residual_inf_n')}`"
+        )
+        lines.append(
+            "- `direct_residual_gate_passed`: "
+            f"`{hip_required_frontier.get('direct_residual_gate_passed')}`"
+        )
+        lines.append(
+            "- `matrix_free_global_krylov_hip_solver_used`: "
+            f"`{hip_required_frontier.get('matrix_free_global_krylov_hip_solver_used')}`"
+        )
+        lines.append(
+            "- `hip_required_components_passed`: "
+            f"`{hip_required_frontier.get('hip_required_components_passed')}`"
+        )
+        lines.append(
+            "- `output_checkpoint_path`: "
+            f"`{hip_required_frontier.get('output_checkpoint_path')}`"
+        )
+        lines.append(
+            "- `claim_boundary`: "
+            f"`{hip_required_frontier.get('claim_boundary')}`"
+        )
+    if hip_required_consistency_direct:
+        lines.extend(["", "## HIP-Required Consistency Direct Probe", ""])
+        lines.append(f"- `present`: `{hip_required_consistency_direct.get('present')}`")
+        lines.append(f"- `executed`: `{hip_required_consistency_direct.get('executed')}`")
+        lines.append(f"- `status`: `{hip_required_consistency_direct.get('status')}`")
+        lines.append(
+            "- `load_scale`: "
+            f"`{hip_required_consistency_direct.get('load_scale')}`"
+        )
+        lines.append(
+            "- `base_direct_residual_inf_n`: "
+            f"`{hip_required_consistency_direct.get('base_direct_residual_inf_n')}`"
+        )
+        lines.append(
+            "- `final_direct_residual_inf_n`: "
+            f"`{hip_required_consistency_direct.get('final_direct_residual_inf_n')}`"
+        )
+        lines.append(
+            "- `direct_residual_gate_passed`: "
+            f"`{hip_required_consistency_direct.get('direct_residual_gate_passed')}`"
+        )
+        lines.append(
+            "- `residual_jvp_worker_path_ready`: "
+            f"`{hip_required_consistency_direct.get('residual_jvp_worker_path_ready')}`"
+        )
+        lines.append(
+            "- `matrix_free_global_krylov_jvp_rows_retained`: "
+            f"`{hip_required_consistency_direct.get('matrix_free_global_krylov_jvp_rows_retained')}`"
+        )
+        lines.append(
+            "- `output_checkpoint_path`: "
+            f"`{hip_required_consistency_direct.get('output_checkpoint_path')}`"
+        )
+        lines.append(
+            "- `blocker_count`: "
+            f"`{hip_required_consistency_direct.get('blocker_count')}`"
+        )
+        lines.append(
+            "- `claim_boundary`: "
+            f"`{hip_required_consistency_direct.get('claim_boundary')}`"
+        )
     if payload.get("next_actions"):
         lines.extend(["", "## Next Actions", ""])
         for item in _as_list(payload.get("next_actions")):
@@ -6737,6 +7141,12 @@ def write_runner_packet(
     sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_path: Path = (
         DEFAULT_SPARSE_DIRECT_ADAPTIVE_JVP_EPS_GMRES_SHIFTED_ILU_INCOMPLETE_PREVIEW_PROBE
     ),
+    hip_required_full_load_residual_jvp_frontier_probe_path: Path = (
+        DEFAULT_HIP_REQUIRED_FULL_LOAD_RESIDUAL_JVP_FRONTIER_PROBE
+    ),
+    hip_required_full_load_residual_jvp_frontier_candidate_path: Path = (
+        DEFAULT_HIP_REQUIRED_FULL_LOAD_RESIDUAL_JVP_FRONTIER_CANDIDATE
+    ),
     out: Path = DEFAULT_OUT,
     out_md: Path = DEFAULT_OUT_MD,
 ) -> dict[str, Any]:
@@ -6874,6 +7284,12 @@ def write_runner_packet(
         ),
         sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_path=(
             sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_path
+        ),
+        hip_required_full_load_residual_jvp_frontier_probe_path=(
+            hip_required_full_load_residual_jvp_frontier_probe_path
+        ),
+        hip_required_full_load_residual_jvp_frontier_candidate_path=(
+            hip_required_full_load_residual_jvp_frontier_candidate_path
         ),
     )
     resolved_out = _resolve(repo_root, out)
@@ -7091,6 +7507,16 @@ def build_parser() -> argparse.ArgumentParser:
             DEFAULT_SPARSE_DIRECT_ADAPTIVE_JVP_EPS_GMRES_SHIFTED_ILU_INCOMPLETE_PREVIEW_PROBE
         ),
     )
+    parser.add_argument(
+        "--hip-required-full-load-residual-jvp-frontier-probe",
+        type=Path,
+        default=DEFAULT_HIP_REQUIRED_FULL_LOAD_RESIDUAL_JVP_FRONTIER_PROBE,
+    )
+    parser.add_argument(
+        "--hip-required-full-load-residual-jvp-frontier-candidate",
+        type=Path,
+        default=DEFAULT_HIP_REQUIRED_FULL_LOAD_RESIDUAL_JVP_FRONTIER_CANDIDATE,
+    )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
     parser.add_argument("--json", action="store_true")
@@ -7210,6 +7636,12 @@ def main(argv: list[str] | None = None) -> int:
         ),
         sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_path=(
             args.sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe
+        ),
+        hip_required_full_load_residual_jvp_frontier_probe_path=(
+            args.hip_required_full_load_residual_jvp_frontier_probe
+        ),
+        hip_required_full_load_residual_jvp_frontier_candidate_path=(
+            args.hip_required_full_load_residual_jvp_frontier_candidate
         ),
         out=args.out,
         out_md=args.out_md,

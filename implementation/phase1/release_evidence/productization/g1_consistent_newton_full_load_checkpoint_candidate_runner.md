@@ -69,6 +69,14 @@
 - `active_set_ls_tangent_fd_jvp_max_relative_inf_error`: `4.753647244794899e-14`
 - `active_set_minimax_final_residual_n`: `0.42740724991695345`
 - `active_set_minimax_steps_taken`: `0`
+- `hip_required_full_load_residual_jvp_frontier_final_residual_n`: `5.584111205301272`
+- `hip_required_full_load_residual_jvp_frontier_residual_gate`: `False`
+- `hip_required_full_load_residual_jvp_frontier_global_krylov_hip_solver`: `True`
+- `hip_required_full_load_residual_jvp_frontier_hip_components_passed`: `True`
+- `hip_required_consistency_direct_probe_final_residual_n`: `5.571832446441612`
+- `hip_required_consistency_direct_probe_worker_path_ready`: `True`
+- `hip_required_consistency_direct_probe_jvp_rows_retained`: `True`
+- `hip_required_consistency_direct_probe_output_checkpoint_written`: `True`
 - `worker_path_ready`: `True`
 - `worker_g1_closure_gate_ready`: `False`
 - `assembly_contract_seed_ready`: `True`
@@ -563,6 +571,34 @@
 - `total_reduction_n`: `0.0`
 - `steps_taken`: `0`
 - `best_linear_active_inf_improvement_n`: `1.1784706543949142e-10`
+
+## HIP-Required Full-Load Residual/JVP Frontier
+
+- `present`: `True`
+- `status`: `partial`
+- `load_scale`: `1.0`
+- `base_direct_residual_inf_n`: `5.602810437066918`
+- `final_direct_residual_inf_n`: `5.584111205301272`
+- `direct_residual_gate_passed`: `False`
+- `matrix_free_global_krylov_hip_solver_used`: `True`
+- `hip_required_components_passed`: `True`
+- `output_checkpoint_path`: `implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz`
+- `claim_boundary`: `Full-load HIP-required residual/JVP frontier evidence. It records HIP resident residual/JVP descent at load_scale 1.0, but it does not close G1 while the direct residual gate, consistent residual/Jacobian Newton gate, material Newton breadth, and full production residency remain open.`
+
+## HIP-Required Consistency Direct Probe
+
+- `present`: `True`
+- `executed`: `True`
+- `status`: `partial`
+- `load_scale`: `1.0`
+- `base_direct_residual_inf_n`: `5.584111205195331`
+- `final_direct_residual_inf_n`: `5.571832446441612`
+- `direct_residual_gate_passed`: `False`
+- `residual_jvp_worker_path_ready`: `True`
+- `matrix_free_global_krylov_jvp_rows_retained`: `True`
+- `output_checkpoint_path`: `implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz`
+- `blocker_count`: `7`
+- `claim_boundary`: `HIP-required consistency proof child summary. It proves the production HIP residual/JVP worker path progressed on a full-load checkpoint, but it does not close G1 while direct residual, material breadth, and consistent residual/Jacobian Newton gates remain open.`
 
 ## Next Actions
 

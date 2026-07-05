@@ -109,13 +109,13 @@
     "frontier_load_scale": null,
     "load_path_provenance_present": false,
     "load_scale": 1.0,
-    "path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+    "path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
     "schema": "mgt-direct-residual-newton-state.v1",
-    "shell_pressure_load_path_policy": ""
+    "shell_pressure_load_path_policy": "all_components"
   },
   "checkpoint_resolution": {
     "mode": "explicit",
-    "requested_path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+    "requested_path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
     "selection": null
   },
   "checkpoint_resolution_gate": {
@@ -206,7 +206,7 @@
     "/usr/bin/python3",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
     "--checkpoint-npz",
-    "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
     "--output-json",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_direct_probe.json",
     "--shell-pressure-load-path-policy",
@@ -247,7 +247,7 @@
     ],
     "row_only_correction_loop_stopped": true,
     "schema_version": "g1-full-load-cause-narrowing-context.v1",
-    "source_commit_sha": "80185ce7be693ca37417617fdebf485cee1c17ee",
+    "source_commit_sha": "e23636036abea57313836810b6cd971652912c10",
     "status": "ready",
     "summary_line": "G1 F2g/F2h cause narrowing: READY | support_or_link_row_gap_disfavored=True | f2h_0p4_ready=True | next=consistent_residual_jacobian_newton_rocm_worker",
     "support_or_link_row_gap_disfavored": true
@@ -1391,13 +1391,9 @@
   },
   "full_load_input_pass": true,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-07-05T11:41:47.314541+00:00",
+  "generated_at": "2026-07-05T13:17:12.068811+00:00",
   "hip_consistency_proof": {
-    "changed_paths_since_source_commit": [
-      "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
-      "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
-      "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz"
-    ],
+    "changed_paths_since_source_commit": [],
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
     "execution_mode": "hip_required_direct_probe_no_cpu_fallback",
@@ -1468,17 +1464,17 @@
     "reused_evidence": false,
     "rocm_hip_required": true,
     "runtime_blockers": [],
-    "source_commit_sha": "b870aba742b105f0afa0408ab3e37e02f2530433",
+    "source_commit_sha": "a8086418c37e8eaaa41747e5cc221a233b98d2a4",
     "source_state_fresh": true,
-    "source_state_kind": "non_g1_hip_paths_changed",
+    "source_state_kind": "exact",
     "status": "partial"
   },
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json": "sha256:b35be5bd18a33d52ec5afab1ee79b4953d6f9a8c933336e8a3680ddea36c4b24",
-    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:3cee02e591d160cc07c24c79ad9886d6bfaf0c1c910afed6e2371540ef7bf6ab",
-    "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz": "sha256:59e4ec6720751f42864c0c8bb2647b120d22ae666f6c90e62a80672f8d24c955",
+    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:2f7a9e33d7d9124d99d1b49b96074f2c578ae2d81d902f06d8b24c7bf7014e7a",
     "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:826ccc4f116c02d8d75c8b0d78d77b63a70371ef3cb8e7e516126a75ed008dc3",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:55a28ce5255823f78b29d4c1ca8f15894632c4f208c92e23da3795ff756446d8",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:8c49ce32c05c834e42d2471f91e5a7887df370cd7fc7e4cd61b3477040f10ab9",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz": "sha256:865e2daee190803fb8349aff5f08d170b6b88794ac6cfb3ca4f43f912b30239a",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:715b40736e3f4b5420a2edc5e3f7b533d72d9f7d3da8887ee4d1d3334167c17d"
   },
   "lane_next_actions": [
@@ -1533,7 +1529,7 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "80185ce7be693ca37417617fdebf485cee1c17ee",
+  "source_commit_sha": "a8086418c37e8eaaa41747e5cc221a233b98d2a4",
   "status": "blocked",
   "terminal_requirement_breakdown": {
     "active_terminal_requirement_id": "hip_consistent_residual_jacobian_newton_proof",
@@ -1593,7 +1589,7 @@
           "receipt_blocker_count": 7,
           "runtime_blocker_count": 0,
           "source_state_fresh": true,
-          "source_state_kind": "non_g1_hip_paths_changed"
+          "source_state_kind": "exact"
         },
         "ready": false,
         "rerun_command": "python3 implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py --require-hip-residual-engine --checkpoint-npz <full-load-checkpoint.npz> --output-json implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
@@ -1683,7 +1679,7 @@
             "/usr/bin/python3",
             "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
             "--checkpoint-npz",
-            "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+            "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
             "--output-json",
             "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_direct_probe.json",
             "--shell-pressure-load-path-policy",
@@ -1735,7 +1731,28 @@
         "blockers": [],
         "dof_count": 78282,
         "load_scale": 1.0,
+        "path": "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
+        "schema": "mgt-direct-residual-newton-state.v1"
+      },
+      {
+        "blockers": [],
+        "dof_count": 78282,
+        "load_scale": 1.0,
+        "path": "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
+        "schema": "mgt-direct-residual-newton-state.v1"
+      },
+      {
+        "blockers": [],
+        "dof_count": 78282,
+        "load_scale": 1.0,
         "path": "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_one_step_candidate.npz",
+        "schema": "mgt-direct-residual-newton-state.v1"
+      },
+      {
+        "blockers": [],
+        "dof_count": 78282,
+        "load_scale": 1.0,
+        "path": "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
         "schema": "mgt-direct-residual-newton-state.v1"
       },
       {
@@ -1792,27 +1809,6 @@
         "dof_count": 78282,
         "load_scale": 1.0,
         "path": "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_active_set_ls_trust_candidate.npz",
-        "schema": "mgt-direct-residual-newton-state.v1"
-      },
-      {
-        "blockers": [],
-        "dof_count": 78282,
-        "load_scale": 1.0,
-        "path": "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_active_set_ls_trust_schedule_candidate.npz",
-        "schema": "mgt-direct-residual-newton-state.v1"
-      },
-      {
-        "blockers": [],
-        "dof_count": 78282,
-        "load_scale": 1.0,
-        "path": "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_active_set_ls_trust_schedule_from_frontier_candidate.npz",
-        "schema": "mgt-direct-residual-newton-state.v1"
-      },
-      {
-        "blockers": [],
-        "dof_count": 78282,
-        "load_scale": 1.0,
-        "path": "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_active_set_minimax_trust_candidate.npz",
         "schema": "mgt-direct-residual-newton-state.v1"
       }
     ]
