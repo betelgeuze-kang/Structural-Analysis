@@ -77,6 +77,8 @@
 - `hip_required_consistency_direct_probe_worker_path_ready`: `True`
 - `hip_required_consistency_direct_probe_jvp_rows_retained`: `True`
 - `hip_required_consistency_direct_probe_output_checkpoint_written`: `True`
+- `hip_required_frontier_no_descent_receipt_count`: `2`
+- `hip_required_frontier_no_descent_all_no_descent`: `True`
 - `worker_path_ready`: `True`
 - `worker_g1_closure_gate_ready`: `False`
 - `assembly_contract_seed_ready`: `True`
@@ -599,6 +601,34 @@
 - `output_checkpoint_path`: `implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz`
 - `blocker_count`: `7`
 - `claim_boundary`: `HIP-required consistency proof child summary. It proves the production HIP residual/JVP worker path progressed on a full-load checkpoint, but it does not close G1 while direct residual, material breadth, and consistent residual/Jacobian Newton gates remain open.`
+
+## HIP-Required Frontier No-Descent Receipts
+
+- `unscaled_consistency_wrapper_step16.path`: `implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step16_material_active_set_ls_rows32_child_direct_no_descent_probe.json`
+- `unscaled_consistency_wrapper_step16.receipt_kind`: `hip_required_consistency_wrapper`
+- `unscaled_consistency_wrapper_step16.status`: `partial`
+- `unscaled_consistency_wrapper_step16.no_descent`: `True`
+- `unscaled_consistency_wrapper_step16.base_direct_residual_inf_n`: `5.571832446349628`
+- `unscaled_consistency_wrapper_step16.final_direct_residual_inf_n`: `5.571832446349628`
+- `unscaled_consistency_wrapper_step16.output_checkpoint_written`: `False`
+- `unscaled_consistency_wrapper_step16.output_checkpoint_path`: `implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step16_material_active_set_ls_rows32_child_direct_candidate.npz`
+- `unscaled_consistency_wrapper_step16.matrix_free_global_krylov_scaling_mode`: `None`
+- `unscaled_consistency_wrapper_step16.matrix_free_global_krylov_best_residual_inf_n`: `None`
+- `unscaled_consistency_wrapper_step16.current_tangent_residual_row_best_residual_inf_n`: `None`
+- `unscaled_consistency_wrapper_step16.claim_boundary`: `HIP-required consistency proof child summary. It proves the production HIP residual/JVP worker path progressed on a full-load checkpoint, but it does not close G1 while direct residual, material breadth, and consistent residual/Jacobian Newton gates remain open.`
+- `scaled_global_krylov_step16.path`: `implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step16_scaled_global_krylov_direct_probe.json`
+- `scaled_global_krylov_step16.receipt_kind`: `direct_residual_probe`
+- `scaled_global_krylov_step16.status`: `partial`
+- `scaled_global_krylov_step16.no_descent`: `True`
+- `scaled_global_krylov_step16.base_direct_residual_inf_n`: `5.571832446349628`
+- `scaled_global_krylov_step16.final_direct_residual_inf_n`: `5.571832446349628`
+- `scaled_global_krylov_step16.output_checkpoint_written`: `False`
+- `scaled_global_krylov_step16.output_checkpoint_path`: `implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step16_scaled_global_krylov_candidate.npz`
+- `scaled_global_krylov_step16.output_checkpoint_reason`: `no_residual_descent`
+- `scaled_global_krylov_step16.matrix_free_global_krylov_scaling_mode`: `residual_diagonal_displacement`
+- `scaled_global_krylov_step16.matrix_free_global_krylov_best_residual_inf_n`: `5.572699041492692`
+- `scaled_global_krylov_step16.current_tangent_residual_row_best_residual_inf_n`: `5.58261631268956`
+- `scaled_global_krylov_step16.claim_boundary`: `Non-promoting HIP direct no-descent receipt. It records that this full-load residual/JVP operator variant did not improve the physical direct residual, so it must not be promoted as G1 closure.`
 
 ## Next Actions
 

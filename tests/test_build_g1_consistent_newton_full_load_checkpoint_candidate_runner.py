@@ -2013,6 +2013,108 @@ def _hip_required_full_load_residual_jvp_frontier_payload() -> dict:
     }
 
 
+def _hip_required_consistency_no_descent_payload() -> dict:
+    payload = deepcopy(_hip_probe_payload())
+    payload["source_commit_sha"] = "fixture-step16-consistency-no-descent"
+    payload["blockers"] = [
+        "consistent_residual_jacobian::consistent_residual_jacobian_newton_not_proven",
+        "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
+    ]
+    direct_summary = payload["hip_direct_probe"]["direct_residual_summary"]
+    direct_summary["base_direct_residual_inf_n"] = 5.571832446349628
+    direct_summary["final_direct_residual_inf_n"] = 5.571832446349628
+    direct_summary["output_final_checkpoint"] = {
+        "written": False,
+        "reason": "no_residual_descent",
+        "path": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_residual_jacobian_step16_material_active_set_ls_rows32_child_direct_candidate.npz"
+        ),
+        "load_scale": 1.0,
+    }
+    payload["production_rocm_hip_residual_jvp_worker"][
+        "residual_jvp_worker_path_ready"
+    ] = True
+    return payload
+
+
+def _hip_required_scaled_global_krylov_no_descent_payload() -> dict:
+    return {
+        "schema_version": "mgt-direct-residual-newton-probe.v1",
+        "status": "partial",
+        "source_commit_sha": "fixture-step16-scaled-global-krylov",
+        "base_direct_residual": {
+            "load_scale": 1.0,
+            "direct_residual_inf_n": 5.571832446349628,
+        },
+        "final_direct_residual": {
+            "direct_residual_inf_n": 5.571832446349628,
+            "direct_relative_residual_inf": 0.00042128440270930455,
+            "residual_gate_passed": False,
+        },
+        "gate_assessment": {
+            "direct_residual_gate_passed": False,
+            "relative_increment_gate_passed": True,
+            "full_load_closure_passed": True,
+            "material_newton_breadth_passed": False,
+            "consistent_residual_jacobian_newton_passed": False,
+            "fallback_zero_passed": True,
+            "hip_residual_engine_gate_passed": True,
+        },
+        "matrix_free_global_krylov": {
+            "enabled": True,
+            "attempted": True,
+            "promoted_to_final_state": False,
+            "scaling_mode": "residual_diagonal_displacement",
+            "hip_krylov_solver_used": True,
+            "jvp_rows": [
+                {"row": 101, "backend": "hip_full_residual_resident"},
+                {"row": 102, "backend": "hip_full_residual_resident"},
+                {"row": 103, "backend": "hip_full_residual_resident"},
+                {"row": 104, "backend": "hip_full_residual_resident"},
+            ],
+            "trial_rows": [
+                {"alpha": 1.0, "direct_residual_inf_n": 5.572699041492692},
+                {"alpha": 0.5, "direct_residual_inf_n": 5.5732},
+            ],
+            "best_candidate": {
+                "alpha": 1.0,
+                "direct_residual_inf_n": 5.572699041492692,
+                "improvement_inf_n": -0.0008665950510797771,
+                "residual_batch_backend": "hip_full_residual_resident",
+            },
+        },
+        "current_tangent_residual_row_correction": {
+            "enabled": True,
+            "attempted": True,
+            "promoted_to_final_state": False,
+            "target_row_counts": [16, 32],
+            "support_column_counts": [2],
+            "trial_rows": [
+                {
+                    "target_row_count": 16,
+                    "support_column_count": 2,
+                    "direct_residual_inf_n": 5.58261631268956,
+                }
+            ],
+            "best_candidate": {
+                "direct_residual_inf_n": 5.58261631268956,
+                "improvement_inf_n": -0.010783866339932224,
+                "residual_batch_backend": "hip_full_residual",
+            },
+        },
+        "output_final_checkpoint": {
+            "written": False,
+            "reason": "no_residual_descent",
+            "path": (
+                "implementation/phase1/release_evidence/productization/"
+                "mgt_residual_jacobian_step16_scaled_global_krylov_candidate.npz"
+            ),
+            "load_scale": 1.0,
+        },
+    }
+
+
 def _global_connectivity_payload() -> dict:
     return {
         "schema_version": "g1-global-connectivity-load-path-audit.v1",
@@ -2179,6 +2281,12 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
         "hip_required_full_load_residual_jvp_frontier": (
             tmp_path / runner.DEFAULT_HIP_REQUIRED_FULL_LOAD_RESIDUAL_JVP_FRONTIER_PROBE
         ),
+        "hip_required_consistency_no_descent": (
+            tmp_path / runner.DEFAULT_HIP_REQUIRED_CONSISTENCY_NO_DESCENT_PROBE
+        ),
+        "hip_required_scaled_global_krylov_no_descent": (
+            tmp_path / runner.DEFAULT_HIP_REQUIRED_SCALED_GLOBAL_KRYLOV_NO_DESCENT_PROBE
+        ),
     }
     _write_json(paths["g1_lane"], _g1_lane_payload(action_id=action_id))
     _write_json(paths["cause"], _cause_narrowing_payload())
@@ -2339,6 +2447,14 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
     _write_json(
         paths["hip_required_full_load_residual_jvp_frontier"],
         _hip_required_full_load_residual_jvp_frontier_payload(),
+    )
+    _write_json(
+        paths["hip_required_consistency_no_descent"],
+        _hip_required_consistency_no_descent_payload(),
+    )
+    _write_json(
+        paths["hip_required_scaled_global_krylov_no_descent"],
+        _hip_required_scaled_global_krylov_no_descent_payload(),
     )
     return paths
 
@@ -3240,6 +3356,22 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
         ]
         is True
     )
+    assert payload["summary"]["hip_required_frontier_no_descent_receipt_count"] == 2
+    assert (
+        payload["summary"]["hip_required_frontier_no_descent_all_no_descent"] is True
+    )
+    assert payload["summary"][
+        "hip_required_scaled_global_krylov_no_descent_final_residual_n"
+    ] == 5.571832446349628
+    assert payload["summary"][
+        "hip_required_scaled_global_krylov_no_descent_best_residual_n"
+    ] == 5.572699041492692
+    assert (
+        payload["summary"][
+            "hip_required_scaled_global_krylov_no_descent_output_written"
+        ]
+        is False
+    )
     assert payload["hip_required_full_load_residual_jvp_frontier"]["load_scale"] == 1.0
     assert payload["hip_required_full_load_residual_jvp_frontier"][
         "final_direct_residual_inf_n"
@@ -3274,6 +3406,25 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     assert payload["hip_required_consistency_direct_probe"][
         "direct_residual_gate_passed"
     ] is False
+    assert len(payload["hip_required_frontier_no_descent_receipts"]) == 2
+    assert payload["hip_required_frontier_no_descent_receipts"][0][
+        "variant"
+    ] == "unscaled_consistency_wrapper_step16"
+    assert payload["hip_required_frontier_no_descent_receipts"][0][
+        "no_descent"
+    ] is True
+    assert payload["hip_required_frontier_no_descent_receipts"][1][
+        "variant"
+    ] == "scaled_global_krylov_step16"
+    assert payload["hip_required_frontier_no_descent_receipts"][1][
+        "no_descent"
+    ] is True
+    assert payload["hip_required_frontier_no_descent_receipts"][1][
+        "matrix_free_global_krylov_scaling_mode"
+    ] == "residual_diagonal_displacement"
+    assert payload["hip_required_frontier_no_descent_receipts"][1][
+        "current_tangent_residual_row_best_residual_inf_n"
+    ] == 5.58261631268956
     assert payload["true_newton_full_load_checkpoint_candidate"]["present"] is True
     assert payload["true_newton_full_load_checkpoint_candidate"][
         "checkpoint_written"
@@ -4020,4 +4171,11 @@ def test_runner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
     assert "5.571832446441612" in markdown
     assert "matrix_free_global_krylov_jvp_rows_retained" in markdown
     assert "mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz" in markdown
+    assert "## HIP-Required Frontier No-Descent Receipts" in markdown
+    assert "unscaled_consistency_wrapper_step16.no_descent" in markdown
+    assert "scaled_global_krylov_step16.no_descent" in markdown
+    assert "residual_diagonal_displacement" in markdown
+    assert "5.572699041492692" in markdown
+    assert "5.58261631268956" in markdown
+    assert "mgt_residual_jacobian_step16_scaled_global_krylov_candidate.npz" in markdown
     assert payload["status"] == "ready_for_runner_implementation"

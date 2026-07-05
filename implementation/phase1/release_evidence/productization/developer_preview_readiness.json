@@ -251,7 +251,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-07-05T13:40:33.378114+00:00",
+  "generated_at": "2026-07-05T14:03:53.323492+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -270,11 +270,11 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:d37662a3c13a4a82d981d85d224f631e4f8e5edb5e287ee6ba5a56330fb0710b",
+      "input_checksum": "sha256:e60707eb01bf4f8fd1d0e2f80bcc6d57a809a15de1d024d8419be3099143f2c7",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "a8086418c37e8eaaa41747e5cc221a233b98d2a4",
+      "source_commit_sha": "adfe7bd283e801825d1759b3ef88b5305650b84a",
       "status": "stale_or_inconsistent"
     }
   },
@@ -282,7 +282,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:01911ef80b1cd08db6b03d5570ebb919d12287be47b550129ecf1a0b39b71b6a",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:d37662a3c13a4a82d981d85d224f631e4f8e5edb5e287ee6ba5a56330fb0710b"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:e60707eb01bf4f8fd1d0e2f80bcc6d57a809a15de1d024d8419be3099143f2c7"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "stale_or_inconsistent",
@@ -1829,7 +1829,7 @@
         "reused_evidence": false,
         "rocm_hip_required": true,
         "runtime_blockers": [],
-        "source_commit_sha": "a8086418c37e8eaaa41747e5cc221a233b98d2a4",
+        "source_commit_sha": "54123a5200d97300eb2a8dd4f7ed75c805159527",
         "source_state_fresh": true,
         "source_state_kind": "exact",
         "status": "partial"
@@ -2206,6 +2206,6 @@
       }
     }
   },
-  "source_commit_sha": "54123a5200d97300eb2a8dd4f7ed75c805159527",
+  "source_commit_sha": "adfe7bd283e801825d1759b3ef88b5305650b84a",
   "status": "blocked"
 }

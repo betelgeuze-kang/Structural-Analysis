@@ -480,11 +480,11 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-05T13:40:33.261094+00:00",
+  "generated_at": "2026-07-05T14:03:57.083963+00:00",
   "input_checksums": {
     ".github/workflows/dp-windows-parity.yml": "sha256:1a25e658ec3fabfa5fee9fcdaee8c708b145989df373759424eea78914c4e5cd",
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:48c29eaad0978715cbc1a173bc1bbdfa46b659d11869e61fac2d83c2970acf7a",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:6197d43becc9aa66acb8383cfb4b6e0b00efc605634dca8469a9db4729c247c2",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:c9387081dd42e14fa175f0a18626999509188c47a04ee448df257e4239d5d5a4",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:40b1b46562249340f70f9c1aeb2364b5efbefd0a0b348b781b1417e444ec0e5e",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:01911ef80b1cd08db6b03d5570ebb919d12287be47b550129ecf1a0b39b71b6a",
@@ -3245,6 +3245,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "54123a5200d97300eb2a8dd4f7ed75c805159527",
+  "source_commit_sha": "adfe7bd283e801825d1759b3ef88b5305650b84a",
   "status": "blocked"
 }

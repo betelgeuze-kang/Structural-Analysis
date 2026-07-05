@@ -215,6 +215,14 @@ DEFAULT_HIP_REQUIRED_CONSISTENCY_DIRECT_FRONTIER_CANDIDATE = (
     PRODUCTIZATION
     / "mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz"
 )
+DEFAULT_HIP_REQUIRED_CONSISTENCY_NO_DESCENT_PROBE = (
+    PRODUCTIZATION
+    / "mgt_residual_jacobian_step16_material_active_set_ls_rows32_child_direct_no_descent_probe.json"
+)
+DEFAULT_HIP_REQUIRED_SCALED_GLOBAL_KRYLOV_NO_DESCENT_PROBE = (
+    PRODUCTIZATION
+    / "mgt_residual_jacobian_step16_scaled_global_krylov_direct_probe.json"
+)
 DEFAULT_OUT = PRODUCTIZATION / "g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_SOLVER_HIP_E2E = Path(
@@ -2568,6 +2576,126 @@ def _hip_required_consistency_direct_probe_summary(
     }
 
 
+def _hip_required_consistency_no_descent_summary(
+    *,
+    payload: dict[str, Any],
+    path: Path,
+    variant: str,
+) -> dict[str, Any]:
+    summary = _hip_required_consistency_direct_probe_summary(payload=payload)
+    return {
+        **summary,
+        "path": path.as_posix(),
+        "variant": variant,
+        "no_descent": (
+            summary["output_checkpoint_written"] is False
+            and summary["final_direct_residual_inf_n"]
+            >= summary["base_direct_residual_inf_n"]
+        ),
+        "receipt_kind": "hip_required_consistency_wrapper",
+    }
+
+
+def _hip_required_direct_no_descent_summary(
+    *,
+    payload: dict[str, Any],
+    path: Path,
+    variant: str,
+) -> dict[str, Any]:
+    base = _as_dict(payload.get("base_direct_residual"))
+    final = _as_dict(payload.get("final_direct_residual"))
+    output = _as_dict(payload.get("output_final_checkpoint"))
+    gate = _as_dict(payload.get("gate_assessment"))
+    global_krylov = _as_dict(payload.get("matrix_free_global_krylov"))
+    global_best = _as_dict(global_krylov.get("best_gate_eligible_candidate"))
+    if not global_best:
+        global_best = _as_dict(global_krylov.get("best_candidate"))
+    row_correction = _as_dict(payload.get("current_tangent_residual_row_correction"))
+    row_best = _as_dict(row_correction.get("best_gate_eligible_candidate"))
+    if not row_best:
+        row_best = _as_dict(row_correction.get("best_candidate"))
+    base_residual = _as_float(base.get("direct_residual_inf_n"))
+    final_residual = _as_float(final.get("direct_residual_inf_n"))
+    return {
+        "path": path.as_posix(),
+        "variant": variant,
+        "receipt_kind": "direct_residual_probe",
+        "present": bool(payload),
+        "status": str(payload.get("status") or "missing"),
+        "source_commit_sha": str(payload.get("source_commit_sha") or ""),
+        "load_scale": _as_float(base.get("load_scale") or output.get("load_scale")),
+        "base_direct_residual_inf_n": base_residual,
+        "final_direct_residual_inf_n": final_residual,
+        "improvement_inf_n": base_residual - final_residual,
+        "direct_residual_gate_passed": (
+            final.get("residual_gate_passed") is True
+            or gate.get("direct_residual_gate_passed") is True
+        ),
+        "relative_increment_gate_passed": (
+            gate.get("relative_increment_gate_passed") is True
+        ),
+        "full_load_closure_passed": gate.get("full_load_closure_passed") is True,
+        "material_newton_breadth_passed": (
+            gate.get("material_newton_breadth_passed") is True
+        ),
+        "consistent_residual_jacobian_newton_passed": (
+            gate.get("consistent_residual_jacobian_newton_passed") is True
+        ),
+        "output_checkpoint_written": output.get("written") is True,
+        "output_checkpoint_reason": str(output.get("reason") or ""),
+        "output_checkpoint_path": str(output.get("path") or ""),
+        "no_descent": (
+            output.get("written") is not True
+            and (
+                str(output.get("reason") or "") == "no_residual_descent"
+                or final_residual >= base_residual
+            )
+        ),
+        "matrix_free_global_krylov_attempted": global_krylov.get("attempted") is True,
+        "matrix_free_global_krylov_promoted": (
+            global_krylov.get("promoted_to_final_state") is True
+        ),
+        "matrix_free_global_krylov_scaling_mode": str(
+            global_krylov.get("scaling_mode") or ""
+        ),
+        "matrix_free_global_krylov_best_residual_inf_n": _as_float(
+            global_best.get("direct_residual_inf_n")
+        ),
+        "matrix_free_global_krylov_best_improvement_inf_n": _as_float(
+            global_best.get("improvement_inf_n")
+        ),
+        "matrix_free_global_krylov_trial_count": len(
+            _as_list(global_krylov.get("trial_rows"))
+        ),
+        "matrix_free_global_krylov_hip_solver_used": (
+            global_krylov.get("hip_krylov_solver_used") is True
+        ),
+        "matrix_free_global_krylov_jvp_row_count": len(
+            _as_list(global_krylov.get("jvp_rows"))
+        ),
+        "current_tangent_residual_row_attempted": (
+            row_correction.get("attempted") is True
+        ),
+        "current_tangent_residual_row_promoted": (
+            row_correction.get("promoted_to_final_state") is True
+        ),
+        "current_tangent_residual_row_best_residual_inf_n": _as_float(
+            row_best.get("direct_residual_inf_n")
+        ),
+        "current_tangent_residual_row_best_improvement_inf_n": _as_float(
+            row_best.get("improvement_inf_n")
+        ),
+        "current_tangent_residual_row_trial_count": len(
+            _as_list(row_correction.get("trial_rows"))
+        ),
+        "claim_boundary": (
+            "Non-promoting HIP direct no-descent receipt. It records that this "
+            "full-load residual/JVP operator variant did not improve the physical "
+            "direct residual, so it must not be promoted as G1 closure."
+        ),
+    }
+
+
 def _directional_tangent_fd_jvp_summary(
     *,
     payload: dict[str, Any],
@@ -2921,11 +3049,25 @@ def build_runner_packet(
     hip_required_full_load_residual_jvp_frontier_candidate_path: Path = (
         DEFAULT_HIP_REQUIRED_FULL_LOAD_RESIDUAL_JVP_FRONTIER_CANDIDATE
     ),
+    hip_required_consistency_no_descent_probe_path: Path = (
+        DEFAULT_HIP_REQUIRED_CONSISTENCY_NO_DESCENT_PROBE
+    ),
+    hip_required_scaled_global_krylov_no_descent_probe_path: Path = (
+        DEFAULT_HIP_REQUIRED_SCALED_GLOBAL_KRYLOV_NO_DESCENT_PROBE
+    ),
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     g1_lane = _load_json(repo_root, g1_lane_path)
     cause_narrowing = _load_json(repo_root, cause_narrowing_path)
     hip_probe = _load_json(repo_root, hip_probe_path)
+    hip_required_consistency_no_descent_probe = _load_json(
+        repo_root,
+        hip_required_consistency_no_descent_probe_path,
+    )
+    hip_required_scaled_global_krylov_no_descent_probe = _load_json(
+        repo_root,
+        hip_required_scaled_global_krylov_no_descent_probe_path,
+    )
     global_connectivity = _load_json(repo_root, global_connectivity_path)
     assembly_contract_seed = _load_json(repo_root, assembly_contract_seed_path)
     true_newton_load_sweep = _load_json(repo_root, true_newton_load_sweep_path)
@@ -3500,6 +3642,18 @@ def build_runner_packet(
     hip_required_consistency_direct_probe_summary = (
         _hip_required_consistency_direct_probe_summary(payload=hip_probe)
     )
+    hip_required_frontier_no_descent_receipts = [
+        _hip_required_consistency_no_descent_summary(
+            payload=hip_required_consistency_no_descent_probe,
+            path=hip_required_consistency_no_descent_probe_path,
+            variant="unscaled_consistency_wrapper_step16",
+        ),
+        _hip_required_direct_no_descent_summary(
+            payload=hip_required_scaled_global_krylov_no_descent_probe,
+            path=hip_required_scaled_global_krylov_no_descent_probe_path,
+            variant="scaled_global_krylov_step16",
+        ),
+    ]
     hip_required_consistency_direct_checkpoint_path = Path(
         hip_required_consistency_direct_probe_summary["output_checkpoint_path"]
         or DEFAULT_HIP_REQUIRED_CONSISTENCY_DIRECT_FRONTIER_CANDIDATE.as_posix()
@@ -3561,6 +3715,8 @@ def build_runner_packet(
                 hip_required_full_load_residual_jvp_frontier_probe_path,
                 hip_required_full_load_residual_jvp_frontier_candidate_path,
                 hip_required_consistency_direct_checkpoint_path,
+                hip_required_consistency_no_descent_probe_path,
+                hip_required_scaled_global_krylov_no_descent_probe_path,
             ],
             reused_evidence=True,
             reuse_policy=(
@@ -4999,6 +5155,31 @@ def build_runner_packet(
                     "output_checkpoint_written"
                 ]
             ),
+            "hip_required_frontier_no_descent_receipt_count": sum(
+                1
+                for receipt in hip_required_frontier_no_descent_receipts
+                if receipt.get("present") is True
+            ),
+            "hip_required_frontier_no_descent_all_no_descent": all(
+                receipt.get("no_descent") is True
+                for receipt in hip_required_frontier_no_descent_receipts
+                if receipt.get("present") is True
+            ),
+            "hip_required_scaled_global_krylov_no_descent_final_residual_n": (
+                hip_required_frontier_no_descent_receipts[1][
+                    "final_direct_residual_inf_n"
+                ]
+            ),
+            "hip_required_scaled_global_krylov_no_descent_best_residual_n": (
+                hip_required_frontier_no_descent_receipts[1][
+                    "matrix_free_global_krylov_best_residual_inf_n"
+                ]
+            ),
+            "hip_required_scaled_global_krylov_no_descent_output_written": (
+                hip_required_frontier_no_descent_receipts[1][
+                    "output_checkpoint_written"
+                ]
+            ),
             "row_only_correction_loop_stopped": _row_only_loop_stopped(
                 cause_narrowing,
                 action,
@@ -5286,6 +5467,9 @@ def build_runner_packet(
         "hip_required_consistency_direct_probe": (
             hip_required_consistency_direct_probe_summary
         ),
+        "hip_required_frontier_no_descent_receipts": (
+            hip_required_frontier_no_descent_receipts
+        ),
         "hip_worker_contract": {
             "worker_id": str(worker.get("worker_id") or ""),
             "residual_jvp_worker_path_ready": worker.get(
@@ -5486,6 +5670,12 @@ def build_runner_packet(
             "mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate": (
                 hip_required_consistency_direct_checkpoint_path.as_posix()
             ),
+            "mgt_residual_jacobian_step16_material_active_set_ls_rows32_child_direct_no_descent_probe": (
+                hip_required_consistency_no_descent_probe_path.as_posix()
+            ),
+            "mgt_residual_jacobian_step16_scaled_global_krylov_direct_probe": (
+                hip_required_scaled_global_krylov_no_descent_probe_path.as_posix()
+            ),
         },
         "claim_boundary": (
             "This packet defines the next G1 runner contract for generating a "
@@ -5535,6 +5725,11 @@ def _markdown(payload: dict[str, Any]) -> str:
     hip_required_consistency_direct = _as_dict(
         payload.get("hip_required_consistency_direct_probe")
     )
+    hip_required_no_descent_receipts = [
+        _as_dict(item)
+        for item in _as_list(payload.get("hip_required_frontier_no_descent_receipts"))
+        if isinstance(item, dict)
+    ]
     frame_eps_sweep = _as_dict(payload.get("frame_tangent_fd_epsilon_sweep"))
     mu_sweep = _as_dict(payload.get("true_newton_from_active_set_mu_sweep"))
     load_param = _as_dict(payload.get("active_set_load_parameter_probe"))
@@ -5712,6 +5907,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `hip_required_consistency_direct_probe_worker_path_ready`: `{hip_required_consistency_direct.get('residual_jvp_worker_path_ready')}`",
         f"- `hip_required_consistency_direct_probe_jvp_rows_retained`: `{hip_required_consistency_direct.get('matrix_free_global_krylov_jvp_rows_retained')}`",
         f"- `hip_required_consistency_direct_probe_output_checkpoint_written`: `{hip_required_consistency_direct.get('output_checkpoint_written')}`",
+        f"- `hip_required_frontier_no_descent_receipt_count`: `{sum(1 for receipt in hip_required_no_descent_receipts if receipt.get('present') is True)}`",
+        f"- `hip_required_frontier_no_descent_all_no_descent`: `{all(receipt.get('no_descent') is True for receipt in hip_required_no_descent_receipts if receipt.get('present') is True) if hip_required_no_descent_receipts else False}`",
         f"- `worker_path_ready`: `{hip.get('residual_jvp_worker_path_ready')}`",
         f"- `worker_g1_closure_gate_ready`: `{hip.get('g1_closure_gate_ready')}`",
         f"- `assembly_contract_seed_ready`: `{assembly.get('contract_pass')}`",
@@ -6967,6 +7164,51 @@ def _markdown(payload: dict[str, Any]) -> str:
             "- `claim_boundary`: "
             f"`{hip_required_consistency_direct.get('claim_boundary')}`"
         )
+    if hip_required_no_descent_receipts:
+        lines.extend(["", "## HIP-Required Frontier No-Descent Receipts", ""])
+        for receipt in hip_required_no_descent_receipts:
+            variant = receipt.get("variant")
+            lines.append(f"- `{variant}.path`: `{receipt.get('path')}`")
+            lines.append(f"- `{variant}.receipt_kind`: `{receipt.get('receipt_kind')}`")
+            lines.append(f"- `{variant}.status`: `{receipt.get('status')}`")
+            lines.append(f"- `{variant}.no_descent`: `{receipt.get('no_descent')}`")
+            lines.append(
+                f"- `{variant}.base_direct_residual_inf_n`: "
+                f"`{receipt.get('base_direct_residual_inf_n')}`"
+            )
+            lines.append(
+                f"- `{variant}.final_direct_residual_inf_n`: "
+                f"`{receipt.get('final_direct_residual_inf_n')}`"
+            )
+            lines.append(
+                f"- `{variant}.output_checkpoint_written`: "
+                f"`{receipt.get('output_checkpoint_written')}`"
+            )
+            lines.append(
+                f"- `{variant}.output_checkpoint_path`: "
+                f"`{receipt.get('output_checkpoint_path')}`"
+            )
+            if receipt.get("output_checkpoint_reason"):
+                lines.append(
+                    f"- `{variant}.output_checkpoint_reason`: "
+                    f"`{receipt.get('output_checkpoint_reason')}`"
+                )
+            lines.append(
+                f"- `{variant}.matrix_free_global_krylov_scaling_mode`: "
+                f"`{receipt.get('matrix_free_global_krylov_scaling_mode')}`"
+            )
+            lines.append(
+                f"- `{variant}.matrix_free_global_krylov_best_residual_inf_n`: "
+                f"`{receipt.get('matrix_free_global_krylov_best_residual_inf_n')}`"
+            )
+            lines.append(
+                f"- `{variant}.current_tangent_residual_row_best_residual_inf_n`: "
+                f"`{receipt.get('current_tangent_residual_row_best_residual_inf_n')}`"
+            )
+            lines.append(
+                f"- `{variant}.claim_boundary`: "
+                f"`{receipt.get('claim_boundary')}`"
+            )
     if payload.get("next_actions"):
         lines.extend(["", "## Next Actions", ""])
         for item in _as_list(payload.get("next_actions")):
@@ -7150,6 +7392,12 @@ def write_runner_packet(
     hip_required_full_load_residual_jvp_frontier_candidate_path: Path = (
         DEFAULT_HIP_REQUIRED_FULL_LOAD_RESIDUAL_JVP_FRONTIER_CANDIDATE
     ),
+    hip_required_consistency_no_descent_probe_path: Path = (
+        DEFAULT_HIP_REQUIRED_CONSISTENCY_NO_DESCENT_PROBE
+    ),
+    hip_required_scaled_global_krylov_no_descent_probe_path: Path = (
+        DEFAULT_HIP_REQUIRED_SCALED_GLOBAL_KRYLOV_NO_DESCENT_PROBE
+    ),
     out: Path = DEFAULT_OUT,
     out_md: Path = DEFAULT_OUT_MD,
 ) -> dict[str, Any]:
@@ -7293,6 +7541,12 @@ def write_runner_packet(
         ),
         hip_required_full_load_residual_jvp_frontier_candidate_path=(
             hip_required_full_load_residual_jvp_frontier_candidate_path
+        ),
+        hip_required_consistency_no_descent_probe_path=(
+            hip_required_consistency_no_descent_probe_path
+        ),
+        hip_required_scaled_global_krylov_no_descent_probe_path=(
+            hip_required_scaled_global_krylov_no_descent_probe_path
         ),
     )
     resolved_out = _resolve(repo_root, out)
@@ -7520,6 +7774,16 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_HIP_REQUIRED_FULL_LOAD_RESIDUAL_JVP_FRONTIER_CANDIDATE,
     )
+    parser.add_argument(
+        "--hip-required-consistency-no-descent-probe",
+        type=Path,
+        default=DEFAULT_HIP_REQUIRED_CONSISTENCY_NO_DESCENT_PROBE,
+    )
+    parser.add_argument(
+        "--hip-required-scaled-global-krylov-no-descent-probe",
+        type=Path,
+        default=DEFAULT_HIP_REQUIRED_SCALED_GLOBAL_KRYLOV_NO_DESCENT_PROBE,
+    )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
     parser.add_argument("--json", action="store_true")
@@ -7645,6 +7909,12 @@ def main(argv: list[str] | None = None) -> int:
         ),
         hip_required_full_load_residual_jvp_frontier_candidate_path=(
             args.hip_required_full_load_residual_jvp_frontier_candidate
+        ),
+        hip_required_consistency_no_descent_probe_path=(
+            args.hip_required_consistency_no_descent_probe
+        ),
+        hip_required_scaled_global_krylov_no_descent_probe_path=(
+            args.hip_required_scaled_global_krylov_no_descent_probe
         ),
         out=args.out,
         out_md=args.out_md,
