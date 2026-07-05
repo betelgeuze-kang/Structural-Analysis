@@ -12,6 +12,7 @@ from pathlib import Path
 import sys
 
 import numpy as np
+import pytest
 
 
 PHASE1 = Path(__file__).resolve().parents[1] / "implementation" / "phase1"
@@ -88,6 +89,7 @@ def test_no_descent_maps_to_review(monkeypatch):
     payload = smoke.run_smoke_from_closure(residual_fn, x0)
     assert payload["reason_code"] == smoke.ERR_LINE_SEARCH_NO_DESCENT
     assert payload["status"] == "review"
+    assert payload["line_search_preview"]["direction_solve"]["mode"] == "fake"
     assert payload["promotes_g1_closure"] is False
 
 
@@ -159,4 +161,113 @@ def test_memory_budget_guard():
         free_dof_budget=10,
     )
     assert payload["reason_code"] == smoke.ERR_MEMORY_BUDGET_EXCEEDED
+    assert payload["promotes_g1_closure"] is False
+
+
+# ---------------------------------------------------------------------------
+# 9. checkpoint loader accepts direct-residual checkpoint displacement
+# ---------------------------------------------------------------------------
+def test_checkpoint_loader_accepts_direct_residual_checkpoint(tmp_path):
+    smoke = _load("run_g1_mgt_physical_line_search_smoke")
+    checkpoint = tmp_path / "candidate.npz"
+    np.savez(
+        checkpoint,
+        checkpoint_schema="mgt-direct-residual-newton-state.v1",
+        load_scale=np.array(1.0),
+        displacement_u=np.array([0.0, 1.5, -2.0], dtype=np.float64),
+        direct_residual_inf_n=np.array(0.047),
+        residual_gate_passed=np.array(False),
+        promotes_g1_closure=np.array(False),
+    )
+
+    displacement, meta = smoke._load_checkpoint_displacement(
+        checkpoint,
+        expected_dof_count=3,
+        requested_load_scale=1.0,
+    )
+
+    assert displacement.tolist() == [0.0, 1.5, -2.0]
+    assert meta["checkpoint_applied"] is True
+    assert meta["checkpoint_schema"] == "mgt-direct-residual-newton-state.v1"
+    assert meta["checkpoint_load_scale_matches_requested"] is True
+    assert meta["checkpoint_direct_residual_inf_n"] == 0.047
+    assert meta["checkpoint_residual_gate_passed"] is False
+    assert meta["checkpoint_promotes_g1_closure"] is False
+
+
+# ---------------------------------------------------------------------------
+# 10. checkpoint shape mismatch fails closed before live residual work
+# ---------------------------------------------------------------------------
+def test_checkpoint_loader_rejects_shape_mismatch(tmp_path):
+    smoke = _load("run_g1_mgt_physical_line_search_smoke")
+    checkpoint = tmp_path / "bad_candidate.npz"
+    np.savez(
+        checkpoint,
+        checkpoint_schema="mgt-direct-residual-newton-state.v1",
+        load_scale=np.array(1.0),
+        displacement_u=np.array([0.0, 1.0], dtype=np.float64),
+    )
+
+    with pytest.raises(ValueError, match="expected DOF count"):
+        smoke._load_checkpoint_displacement(
+            checkpoint,
+            expected_dof_count=3,
+            requested_load_scale=1.0,
+        )
+
+
+# ---------------------------------------------------------------------------
+# 11. checkpoint provenance is carried by smoke payload resource usage
+# ---------------------------------------------------------------------------
+def test_smoke_payload_carries_checkpoint_resource_metadata():
+    smoke = _load("run_g1_mgt_physical_line_search_smoke")
+    residual_fn, x0, _a, _f = _spd_linear_closure(n=6, seed=4)
+    payload = smoke.run_smoke_from_closure(
+        residual_fn,
+        x0,
+        checkpoint_kind="mgt-direct-residual-newton-state.v1",
+        resource_usage={
+            "dof_count": 6,
+            "node_count": 1,
+            "element_count": 1,
+            "free_dof_count": 6,
+            "peak_memory_mb": None,
+            "checkpoint": {
+                "checkpoint_applied": True,
+                "checkpoint_npz": "candidate.npz",
+                "checkpoint_load_scale_matches_requested": True,
+            },
+        },
+    )
+
+    assert payload["checkpoint_kind"] == "mgt-direct-residual-newton-state.v1"
+    assert payload["resource_usage"]["checkpoint"]["checkpoint_applied"] is True
+    assert payload["resource_usage"]["checkpoint"]["checkpoint_npz"] == "candidate.npz"
+    assert payload["promotes_g1_closure"] is False
+
+
+# ---------------------------------------------------------------------------
+# 12. blocked direction solve preserves solver metadata
+# ---------------------------------------------------------------------------
+def test_blocked_direction_solve_preserves_solver_metadata(monkeypatch):
+    smoke = _load("run_g1_mgt_physical_line_search_smoke")
+    residual_fn, x0, _a, _f = _spd_linear_closure(n=6, seed=6)
+
+    def fake_solve(fn, x, **kwargs):
+        return None, {
+            "mode": "matrix_free_gmres",
+            "converged": False,
+            "reason_code": "gmres_not_converged_maxiter",
+            "gmres_info": 8,
+            "iterations": 8,
+        }
+
+    monkeypatch.setattr(smoke, "solve_physical_newton_direction", fake_solve)
+    payload = smoke.run_smoke_from_closure(residual_fn, x0)
+
+    assert payload["reason_code"] == smoke.ERR_DIRECTION_SOLVE_BLOCKED
+    solve = payload["line_search_preview"]["direction_solve"]
+    assert solve["reason_code"] == "gmres_not_converged_maxiter"
+    assert solve["gmres_info"] == 8
+    assert solve["iterations"] == 8
     assert payload["promotes_g1_closure"] is False

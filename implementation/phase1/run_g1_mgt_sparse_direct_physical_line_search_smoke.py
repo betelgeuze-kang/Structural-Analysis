@@ -10,7 +10,8 @@ a physical-residual line-search preview.
 
 It does not change the default solver path (default solver remains
 ``gmres_matrix_free``), does not promote G1, does not regenerate the 0.656
-continuation checkpoint (F2b-ii-b), and writes only an untracked ``*.local.json``.
+continuation checkpoint (F2b-ii-b), and writes only an untracked ``*.local.json``
+unless an explicit non-promoting output checkpoint path is supplied.
 """
 
 from __future__ import annotations
@@ -54,7 +55,15 @@ from run_g1_mgt_physical_line_search_smoke import (
     ERR_MGT_STATE_BUILD_FAILED,
     ERR_NAN_RESIDUAL,
     ERR_OPERATOR_SHAPE_MISMATCH,
+    FRAME_TANGENT_SOURCE_CHOICES,
+    FRAME_TANGENT_SOURCE_SERVICE,
+    SHELL_PRESSURE_LOAD_PATH_POLICIES,
     build_mgt_physical_residual_closure,
+)
+from run_g1_true_newton_reference_candidate import (
+    CHECKPOINT_SCHEMA,
+    _max_abs,
+    _translation_metrics,
 )
 
 
@@ -62,6 +71,10 @@ SCHEMA_VERSION = "g1-mgt-sparse-direct-physical-line-search-smoke.v1"
 HERE = Path(__file__).resolve().parent
 PRODUCTIZATION = HERE / "release_evidence" / "productization"
 DEFAULT_OUTPUT_JSON = PRODUCTIZATION / "g1_mgt_sparse_direct_physical_line_search_smoke.local.json"
+DEFAULT_SCALED_LSMR_FRONTIER_CHECKPOINT = (
+    PRODUCTIZATION
+    / "g1_mgt_sparse_direct_scaled_lsmr_from_shell_rotation_frontier_candidate.npz"
+)
 
 ReducedResidualFn = Callable[[np.ndarray], np.ndarray]
 
@@ -92,6 +105,7 @@ def _report(**kw: Any) -> dict[str, Any]:
         "jvp_parity": kw.get("jvp_parity", {"attempted": False, "pass": False}),
         "direction_solve_comparison": kw.get("direction_solve_comparison", {}),
         "line_search_preview": kw.get("line_search_preview", {"attempted": False, "status": "not_attempted"}),
+        "output_final_checkpoint": kw.get("output_final_checkpoint"),
         "resource_usage": kw.get("resource_usage", {}),
         "f2b_ii_b_scope_note": "0.656 continuation checkpoint regeneration/application is F2b-ii-b; not done here",
         "claim_boundary": "non_promoting_sparse_direct_real_mgt_smoke_only",
@@ -100,8 +114,96 @@ def _report(**kw: Any) -> dict[str, Any]:
 
 def _solve_summary(meta: dict[str, Any]) -> dict[str, Any]:
     keys = ("status", "reason_code", "iterations", "residual_norm_before",
-            "residual_norm_after", "residual_norm_after_linear_solve", "preconditioned")
+            "residual_norm_after", "residual_norm_after_linear_solve",
+            "preconditioned", "scaling", "condition_estimate", "istop")
     return {k: meta.get(k) for k in keys if k in meta}
+
+
+def _write_checkpoint(
+    *,
+    path: Path,
+    load_scale: float,
+    displacement_u: np.ndarray,
+    final_residual: np.ndarray,
+    residual_before_n: float | None,
+    external_load_inf_n: float | None,
+    accepted_alpha: float,
+    direction_solver: str,
+    frame_tangent_source: str,
+    shell_pressure_load_path_policy: str,
+    residual_gate_n: float = 5.0e-4,
+) -> dict[str, Any]:
+    residual_inf = _max_abs(final_residual)
+    relative_residual = residual_inf / max(
+        float(external_load_inf_n) if external_load_inf_n is not None else 1.0,
+        1.0,
+    )
+    translation = _translation_metrics(displacement_u)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(
+        path,
+        checkpoint_schema=np.asarray(CHECKPOINT_SCHEMA),
+        source_schema_version=np.asarray(SCHEMA_VERSION),
+        load_scale=np.asarray(float(load_scale), dtype=np.float64),
+        displacement_u=np.asarray(displacement_u, dtype=np.float64),
+        residual_inf_n=np.asarray(residual_inf, dtype=np.float64),
+        direct_residual_inf_n=np.asarray(residual_inf, dtype=np.float64),
+        direct_relative_residual_inf=np.asarray(
+            relative_residual,
+            dtype=np.float64,
+        ),
+        max_translation_m=np.asarray(
+            translation["max_translation_m"],
+            dtype=np.float64,
+        ),
+        accepted_iteration_count=np.asarray(1, dtype=np.int64),
+        accepted_history_count=np.asarray(1, dtype=np.int64),
+        residual_before_n=np.asarray(
+            float(residual_before_n) if residual_before_n is not None else np.nan,
+            dtype=np.float64,
+        ),
+        accepted_alpha=np.asarray(float(accepted_alpha), dtype=np.float64),
+        residual_gate_n=np.asarray(float(residual_gate_n), dtype=np.float64),
+        residual_gate_passed=np.asarray(bool(residual_inf <= float(residual_gate_n))),
+        direction_solver=np.asarray(direction_solver),
+        frame_tangent_source=np.asarray(frame_tangent_source),
+        shell_pressure_load_path_policy=np.asarray(shell_pressure_load_path_policy),
+        sparse_direct_line_search_candidate_only=np.asarray(True),
+        promotes_g1_closure=np.asarray(False),
+        checkpoint_claim_boundary=np.asarray(
+            "non_promoting_sparse_direct_scaled_lsmr_checkpoint_candidate"
+        ),
+    )
+    return {
+        "written": True,
+        "path": str(path),
+        "schema": CHECKPOINT_SCHEMA,
+        "load_scale": float(load_scale),
+        "dof_count": int(np.asarray(displacement_u).size),
+        "direct_residual_inf_n": residual_inf,
+        "direct_relative_residual_inf": relative_residual,
+        "external_load_inf_n": (
+            float(external_load_inf_n) if external_load_inf_n is not None else None
+        ),
+        "max_translation_m": translation["max_translation_m"],
+        "accepted_iteration_count": 1,
+        "accepted_history_count": 1,
+        "residual_before_n": (
+            float(residual_before_n) if residual_before_n is not None else None
+        ),
+        "accepted_alpha": float(accepted_alpha),
+        "residual_gate_n": float(residual_gate_n),
+        "residual_gate_passed": bool(residual_inf <= float(residual_gate_n)),
+        "direction_solver": str(direction_solver),
+        "frame_tangent_source": str(frame_tangent_source),
+        "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
+        "promotes_g1_closure": False,
+        "claim_boundary": (
+            "Loadable sparse-direct line-search checkpoint candidate only. It "
+            "does not close G1 without direct residual, material Newton, "
+            "full-mesh, and production ROCm/HIP gates."
+        ),
+    }
 
 
 def run_sparse_direct_smoke_from_closure(
@@ -114,6 +216,7 @@ def run_sparse_direct_smoke_from_closure(
     uses_real_mgt_model: bool = False,
     mgt_source: str | None = None,
     load_scale: float | None = None,
+    checkpoint_kind: str = "reference_or_lightweight_state",
     parity_relative_tolerance: float = 1.0e-3,
     ilu_drop_tol: float = 1.0e-4,
     ilu_fill_factor: float = 10.0,
@@ -127,6 +230,7 @@ def run_sparse_direct_smoke_from_closure(
     n = int(x0.size)
     common = dict(operator=operator, uses_real_mgt_model=uses_real_mgt_model,
                   mgt_source=mgt_source, load_scale=load_scale,
+                  checkpoint_kind=checkpoint_kind,
                   resource_usage=resource_usage or {},
                   assembled_tangent=assembled_tangent_meta or {},
                   free_space={"free_dof_count": n, "residual_shape": [n],
@@ -216,14 +320,18 @@ def run_g1_mgt_sparse_direct_physical_line_search_smoke(
     *,
     mgt_model: Path = DEFAULT_MGT_MODEL,
     roundtrip_npz: Path | None = None,
+    checkpoint_npz: Path | None = None,
     direction_solver: str = "sparse_direct_spsolve",
     global_newton_operator: str = GLOBAL_NEWTON_OPERATOR_PHYSICAL,
     load_scale: float = 0.1,
+    frame_tangent_source: str = FRAME_TANGENT_SOURCE_SERVICE,
+    shell_pressure_load_path_policy: str = "all_components",
     ilu_drop_tol: float = 1.0e-4,
     ilu_fill_factor: float = 10.0,
     gmres_maxiter: int = 400,
     frame_service_tangent_source: str = "real_per_element",
     output_json: Path | None = DEFAULT_OUTPUT_JSON,
+    output_final_checkpoint_npz: Path | None = None,
 ) -> dict[str, Any]:
     operator = normalize_global_newton_operator(global_newton_operator)
     mgt_model = Path(mgt_model)
@@ -234,7 +342,10 @@ def run_g1_mgt_sparse_direct_physical_line_search_smoke(
         try:
             t0 = time.perf_counter()
             residual_fn, x0, meta = build_mgt_physical_residual_closure(
-                mgt_path=mgt_model, roundtrip_npz=roundtrip_npz, load_scale=load_scale,
+                mgt_path=mgt_model, roundtrip_npz=roundtrip_npz,
+                checkpoint_npz=checkpoint_npz, load_scale=load_scale,
+                frame_tangent_source=frame_tangent_source,
+                shell_pressure_load_path_policy=shell_pressure_load_path_policy,
                 frame_service_tangent_source=frame_service_tangent_source,
             )
             build_seconds = time.perf_counter() - t0
@@ -258,14 +369,63 @@ def run_g1_mgt_sparse_direct_physical_line_search_smoke(
             payload = run_sparse_direct_smoke_from_closure(
                 residual_fn, x0, k_free, direction_solver=direction_solver, operator=operator,
                 uses_real_mgt_model=True, mgt_source=str(mgt_model), load_scale=load_scale,
+                checkpoint_kind=str(meta.get("checkpoint_kind") or "reference_or_lightweight_state"),
                 ilu_drop_tol=ilu_drop_tol, ilu_fill_factor=ilu_fill_factor, gmres_maxiter=gmres_maxiter,
                 assembled_tangent_meta=assembled_tangent_meta,
                 resource_usage={
                     "dof_count": meta["dof_count"], "node_count": meta["node_count"],
                     "element_count": meta["element_count"], "free_dof_count": meta["free_dof_count"],
                     "peak_memory_mb": None,
+                    "checkpoint": meta.get("checkpoint", {}),
                 },
             )
+            if (
+                output_final_checkpoint_npz is not None
+                and payload.get("status") == "ready"
+                and payload.get("line_search_preview", {}).get("status") == "ready"
+            ):
+                line_search = payload["line_search_preview"]
+                accepted_alpha = float(line_search["accepted_alpha"])
+                direction_meta = payload["direction_solve_comparison"][direction_solver]
+                p, recomputed_meta = solve_direction_assembled(
+                    k_free,
+                    residual_fn,
+                    x0,
+                    solver=direction_solver,
+                    ilu_drop_tol=ilu_drop_tol,
+                    ilu_fill_factor=ilu_fill_factor,
+                    gmres_maxiter=gmres_maxiter,
+                )
+                if p is None or recomputed_meta.get("status") != "ready":
+                    payload["output_final_checkpoint"] = {
+                        "written": False,
+                        "reason_code": recomputed_meta.get(
+                            "reason_code",
+                            "ERR_DIRECTION_SOLVE_BLOCKED",
+                        ),
+                    }
+                else:
+                    final_x = np.asarray(x0, dtype=np.float64) + accepted_alpha * np.asarray(
+                        p,
+                        dtype=np.float64,
+                    )
+                    final_residual = np.asarray(residual_fn(final_x), dtype=np.float64)
+                    full_u = np.asarray(meta["frame_inputs"]["u0"], dtype=np.float64).copy()
+                    full_u[np.asarray(meta["free"], dtype=np.int64)] = final_x
+                    payload["output_final_checkpoint"] = _write_checkpoint(
+                        path=Path(output_final_checkpoint_npz),
+                        load_scale=float(load_scale),
+                        displacement_u=full_u,
+                        final_residual=final_residual,
+                        residual_before_n=line_search.get("residual_before_n"),
+                        external_load_inf_n=meta.get("external_load_inf_n"),
+                        accepted_alpha=accepted_alpha,
+                        direction_solver=str(direction_meta.get("solver") or direction_solver),
+                        frame_tangent_source=str(meta.get("frame_tangent_source") or ""),
+                        shell_pressure_load_path_policy=str(
+                            meta.get("shell_pressure_load_path_policy") or ""
+                        ),
+                    )
 
     if output_json is not None:
         output_json.parent.mkdir(parents=True, exist_ok=True)
@@ -279,6 +439,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mgt-model", type=Path, default=DEFAULT_MGT_MODEL)
     parser.add_argument("--roundtrip-npz", type=Path, default=None)
+    parser.add_argument("--checkpoint-npz", type=Path, default=None)
     parser.add_argument("--direction-solver", choices=list(DIRECTION_SOLVERS), default="sparse_direct_spsolve")
     parser.add_argument(
         "--global-newton-operator",
@@ -286,6 +447,16 @@ def main() -> int:
         default=GLOBAL_NEWTON_OPERATOR_PHYSICAL,
     )
     parser.add_argument("--load-scale", type=float, default=0.1)
+    parser.add_argument(
+        "--frame-tangent-source",
+        choices=FRAME_TANGENT_SOURCE_CHOICES,
+        default=FRAME_TANGENT_SOURCE_SERVICE,
+    )
+    parser.add_argument(
+        "--shell-pressure-load-path-policy",
+        choices=SHELL_PRESSURE_LOAD_PATH_POLICIES,
+        default="all_components",
+    )
     parser.add_argument("--ilu-drop-tol", type=float, default=1.0e-4)
     parser.add_argument("--ilu-fill-factor", type=float, default=10.0)
     parser.add_argument("--gmres-maxiter", type=int, default=400)
@@ -294,14 +465,24 @@ def main() -> int:
         choices=["real_per_element", "placeholder_1mpa"], default="real_per_element",
     )
     parser.add_argument("--out", "--output-json", dest="output_json", type=Path, default=DEFAULT_OUTPUT_JSON)
+    parser.add_argument(
+        "--output-final-checkpoint-npz",
+        type=Path,
+        default=None,
+        help="Optional non-promoting loadable checkpoint for an accepted line-search step.",
+    )
     args = parser.parse_args()
     payload = run_g1_mgt_sparse_direct_physical_line_search_smoke(
         mgt_model=args.mgt_model, roundtrip_npz=args.roundtrip_npz,
+        checkpoint_npz=args.checkpoint_npz,
         direction_solver=args.direction_solver, global_newton_operator=args.global_newton_operator,
-        load_scale=args.load_scale, ilu_drop_tol=args.ilu_drop_tol,
+        load_scale=args.load_scale, frame_tangent_source=args.frame_tangent_source,
+        shell_pressure_load_path_policy=args.shell_pressure_load_path_policy,
+        ilu_drop_tol=args.ilu_drop_tol,
         ilu_fill_factor=args.ilu_fill_factor, gmres_maxiter=args.gmres_maxiter,
         frame_service_tangent_source=args.frame_service_tangent_source,
         output_json=args.output_json,
+        output_final_checkpoint_npz=args.output_final_checkpoint_npz,
     )
     tp = payload.get("assembled_tangent_parity", {})
     ls = payload["line_search_preview"]

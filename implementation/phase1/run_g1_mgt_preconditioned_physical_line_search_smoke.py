@@ -51,7 +51,10 @@ from run_g1_mgt_physical_line_search_smoke import (
     ERR_MGT_STATE_BUILD_FAILED,
     ERR_NAN_RESIDUAL,
     ERR_OPERATOR_SHAPE_MISMATCH,
+    FRAME_TANGENT_SOURCE_CHOICES,
+    FRAME_TANGENT_SOURCE_SERVICE,
     PASS,
+    SHELL_PRESSURE_LOAD_PATH_POLICIES,
     build_mgt_physical_residual_closure,
 )
 
@@ -117,6 +120,7 @@ def run_preconditioned_smoke_from_closure(
     uses_real_mgt_model: bool = False,
     mgt_source: str | None = None,
     load_scale: float | None = None,
+    checkpoint_kind: str = "reference_or_lightweight_state",
     gmres_maxiter: int = 200,
     gmres_rtol: float = 1.0e-6,
     gmres_atol: float = 1.0e-10,
@@ -128,7 +132,9 @@ def run_preconditioned_smoke_from_closure(
     diag_free = np.asarray(diag_free, dtype=np.float64)
     common = dict(
         operator=operator, uses_real_mgt_model=uses_real_mgt_model,
-        mgt_source=mgt_source, load_scale=load_scale, resource_usage=resource_usage or {},
+        mgt_source=mgt_source, load_scale=load_scale,
+        checkpoint_kind=checkpoint_kind,
+        resource_usage=resource_usage or {},
     )
 
     # base residual contract
@@ -234,9 +240,12 @@ def run_g1_mgt_preconditioned_physical_line_search_smoke(
     *,
     mgt_model: Path = DEFAULT_MGT_MODEL,
     roundtrip_npz: Path | None = None,
+    checkpoint_npz: Path | None = None,
     preconditioner: str = "damped_jacobi_diag",
     global_newton_operator: str = GLOBAL_NEWTON_OPERATOR_PHYSICAL,
     load_scale: float = 0.1,
+    frame_tangent_source: str = FRAME_TANGENT_SOURCE_SERVICE,
+    shell_pressure_load_path_policy: str = "all_components",
     gmres_maxiter: int = 200,
     gmres_rtol: float = 1.0e-6,
     gmres_atol: float = 1.0e-10,
@@ -250,7 +259,10 @@ def run_g1_mgt_preconditioned_physical_line_search_smoke(
     else:
         try:
             residual_fn, x0, meta = build_mgt_physical_residual_closure(
-                mgt_path=mgt_model, roundtrip_npz=roundtrip_npz, load_scale=load_scale,
+                mgt_path=mgt_model, roundtrip_npz=roundtrip_npz,
+                checkpoint_npz=checkpoint_npz, load_scale=load_scale,
+                frame_tangent_source=frame_tangent_source,
+                shell_pressure_load_path_policy=shell_pressure_load_path_policy,
             )
         except Exception as exc:  # noqa: BLE001
             payload = _report(status="blocked", reason_code=ERR_MGT_STATE_BUILD_FAILED,
@@ -261,12 +273,15 @@ def run_g1_mgt_preconditioned_physical_line_search_smoke(
             payload = run_preconditioned_smoke_from_closure(
                 residual_fn, x0, meta["diag_free"], preconditioner_mode=preconditioner,
                 operator=operator, uses_real_mgt_model=True, mgt_source=str(mgt_model),
-                load_scale=load_scale, gmres_maxiter=gmres_maxiter,
+                load_scale=load_scale,
+                checkpoint_kind=str(meta.get("checkpoint_kind") or "reference_or_lightweight_state"),
+                gmres_maxiter=gmres_maxiter,
                 gmres_rtol=gmres_rtol, gmres_atol=gmres_atol,
                 resource_usage={
                     "dof_count": meta["dof_count"], "node_count": meta["node_count"],
                     "element_count": meta["element_count"], "free_dof_count": meta["free_dof_count"],
                     "peak_memory_mb": None,
+                    "checkpoint": meta.get("checkpoint", {}),
                 },
             )
 
@@ -282,6 +297,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mgt-model", type=Path, default=DEFAULT_MGT_MODEL)
     parser.add_argument("--roundtrip-npz", type=Path, default=None)
+    parser.add_argument("--checkpoint-npz", type=Path, default=None)
     parser.add_argument("--preconditioner", choices=list(PRECONDITIONER_MODES), default="damped_jacobi_diag")
     parser.add_argument(
         "--global-newton-operator",
@@ -289,6 +305,16 @@ def main() -> int:
         default=GLOBAL_NEWTON_OPERATOR_PHYSICAL,
     )
     parser.add_argument("--load-scale", type=float, default=0.1)
+    parser.add_argument(
+        "--frame-tangent-source",
+        choices=FRAME_TANGENT_SOURCE_CHOICES,
+        default=FRAME_TANGENT_SOURCE_SERVICE,
+    )
+    parser.add_argument(
+        "--shell-pressure-load-path-policy",
+        choices=SHELL_PRESSURE_LOAD_PATH_POLICIES,
+        default="all_components",
+    )
     parser.add_argument("--gmres-maxiter", type=int, default=200)
     parser.add_argument("--gmres-rtol", type=float, default=1.0e-6)
     parser.add_argument("--gmres-atol", type=float, default=1.0e-10)
@@ -296,8 +322,11 @@ def main() -> int:
     args = parser.parse_args()
     payload = run_g1_mgt_preconditioned_physical_line_search_smoke(
         mgt_model=args.mgt_model, roundtrip_npz=args.roundtrip_npz,
+        checkpoint_npz=args.checkpoint_npz,
         preconditioner=args.preconditioner, global_newton_operator=args.global_newton_operator,
-        load_scale=args.load_scale, gmres_maxiter=args.gmres_maxiter,
+        load_scale=args.load_scale, frame_tangent_source=args.frame_tangent_source,
+        shell_pressure_load_path_policy=args.shell_pressure_load_path_policy,
+        gmres_maxiter=args.gmres_maxiter,
         gmres_rtol=args.gmres_rtol, gmres_atol=args.gmres_atol, output_json=args.output_json,
     )
     cmp = payload.get("direction_solve_comparison", {})

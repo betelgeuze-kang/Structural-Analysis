@@ -194,3 +194,32 @@ def test_report_always_non_promoting(tmp_path):
     assert payload["promotes_g1_closure"] is False
     assert payload["claim_boundary"] == "non_promoting_preconditioned_real_mgt_smoke_only"
     assert str(smoke.DEFAULT_OUTPUT_JSON).endswith(".local.json")
+
+
+# ---------------------------------------------------------------------------
+# 10. checkpoint provenance can be carried by core smoke payloads
+# ---------------------------------------------------------------------------
+def test_checkpoint_provenance_carried_by_core_payload():
+    smoke = _load("run_g1_mgt_preconditioned_physical_line_search_smoke")
+    residual_fn, x0, diag = _diag_closure([1.0, 2.0, 3.0, 4.0])
+
+    payload = smoke.run_preconditioned_smoke_from_closure(
+        residual_fn,
+        x0,
+        diag,
+        preconditioner_mode="absolute_jacobi_diag",
+        checkpoint_kind="mgt-direct-residual-newton-state.v1",
+        resource_usage={
+            "dof_count": 4,
+            "free_dof_count": 4,
+            "checkpoint": {
+                "checkpoint_applied": True,
+                "checkpoint_npz": "frontier.npz",
+            },
+        },
+    )
+
+    assert payload["checkpoint_kind"] == "mgt-direct-residual-newton-state.v1"
+    assert payload["resource_usage"]["checkpoint"]["checkpoint_applied"] is True
+    assert payload["resource_usage"]["checkpoint"]["checkpoint_npz"] == "frontier.npz"
+    assert payload["promotes_g1_closure"] is False

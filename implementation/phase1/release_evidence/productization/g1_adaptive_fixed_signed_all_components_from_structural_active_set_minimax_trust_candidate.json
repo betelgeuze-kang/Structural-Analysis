@@ -1,0 +1,363 @@
+{
+  "schema_version": "g1-active-set-minimax-trust-candidate.v1",
+  "generated_at": "2026-07-04T22:12:22.228799+00:00",
+  "source_commit_sha": "f779666af7356914e11290547c4a001151062cb6",
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "status": "review",
+  "promotes_g1_closure": false,
+  "load_scale": 1.0,
+  "checkpoint_npz": "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_active_set_ls_trust_candidate.npz",
+  "shell_pressure_load_path_policy": "all_components",
+  "strategy": {
+    "mode": "iterative_active_set_global_minimax_trust",
+    "active_row_count": 8,
+    "active_row_count_schedule": [
+      8,
+      16,
+      32
+    ],
+    "support_strongest_per_row": 32,
+    "trust_radius_m": 1e-08,
+    "alpha_values": [
+      1.0,
+      0.5,
+      0.25,
+      0.125,
+      0.0625
+    ],
+    "selection_metric": "direct_residual_inf_descent"
+  },
+  "summary": {
+    "initial_residual_n": 0.42740724991695345,
+    "final_residual_n": 0.42740724991695345,
+    "initial_relative_residual_inf": 3.231612036590983e-05,
+    "final_relative_residual_inf": 3.231612036590983e-05,
+    "total_reduction_n": 0.0,
+    "total_reduction_ratio": 0.0,
+    "residual_gate_n": 0.0005,
+    "residual_gate_passed": false,
+    "steps_taken": 0,
+    "stop_reason": "no_candidate_descent",
+    "active_row_count_schedule": [
+      8,
+      16,
+      32
+    ],
+    "support_strongest_per_row": 32
+  },
+  "history": [
+    {
+      "iteration": 0,
+      "residual_before_n": 0.42740724991695345,
+      "direction_attempts": [
+        {
+          "active_row_count": 8,
+          "active_rows": [
+            11024,
+            33812,
+            11072,
+            33860,
+            33806,
+            11018,
+            33848,
+            11066
+          ],
+          "direction_status": "ready",
+          "direction": {
+            "active_row_count": 8,
+            "support_column_count": 24,
+            "support_strongest_per_row": 32,
+            "trust_radius_m": 1e-08,
+            "direction_inf_m": 1e-08,
+            "active_linear_residual_inf_n": 0.4274072497991064,
+            "active_linear_objective_t_n": 0.4274072497990948,
+            "active_linear_improvement_inf_n": 1.1784706543949142e-10,
+            "solver": "scipy_linprog_highs_active_set_minimax_cpu_diagnostic",
+            "solver_stats": {
+              "status": 0,
+              "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+              "nit": 15,
+              "objective": 0.4274072497990948
+            }
+          },
+          "candidate_rows": [
+            {
+              "alpha": 1.0,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.4274072502274002,
+              "active_residual_inf_n": 0.4274072502274002,
+              "direct_relative_residual_inf": 3.231612038938261e-05,
+              "improvement_inf_n": -3.1044677939462417e-10,
+              "active_improvement_inf_n": -3.1044677939462417e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.5,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.4274072501534268,
+              "active_residual_inf_n": 0.4274072501534268,
+              "direct_relative_residual_inf": 3.2316120383789505e-05,
+              "improvement_inf_n": -2.36473340908816e-10,
+              "active_improvement_inf_n": -2.36473340908816e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.25,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.42740725034651383,
+              "active_residual_inf_n": 0.42740725034651383,
+              "direct_relative_residual_inf": 3.231612039838875e-05,
+              "improvement_inf_n": -4.2956038726060797e-10,
+              "active_improvement_inf_n": -4.2956038726060797e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.125,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.4274072506563205,
+              "active_residual_inf_n": 0.4274072506563205,
+              "direct_relative_residual_inf": 3.231612042181313e-05,
+              "improvement_inf_n": -7.393670675703845e-10,
+              "active_improvement_inf_n": -7.393670675703845e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.0625,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.42740725050727707,
+              "active_residual_inf_n": 0.42740725050727707,
+              "direct_relative_residual_inf": 3.2316120410544e-05,
+              "improvement_inf_n": -5.903236233173459e-10,
+              "active_improvement_inf_n": -5.903236233173459e-10,
+              "residual_gate_passed": false
+            }
+          ],
+          "best_candidate": {}
+        },
+        {
+          "active_row_count": 16,
+          "active_rows": [
+            11024,
+            33812,
+            11072,
+            33860,
+            33806,
+            11018,
+            33848,
+            11066,
+            54224,
+            1778,
+            7358,
+            56540,
+            1790,
+            1784,
+            422,
+            5876
+          ],
+          "direction_status": "ready",
+          "direction": {
+            "active_row_count": 16,
+            "support_column_count": 143,
+            "support_strongest_per_row": 32,
+            "trust_radius_m": 1e-08,
+            "direction_inf_m": 1e-08,
+            "active_linear_residual_inf_n": 0.427407249909983,
+            "active_linear_objective_t_n": 0.42740724979909533,
+            "active_linear_improvement_inf_n": 6.970424237806583e-12,
+            "solver": "scipy_linprog_highs_active_set_minimax_cpu_diagnostic",
+            "solver_stats": {
+              "status": 0,
+              "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+              "nit": 25,
+              "objective": 0.42740724979909533
+            }
+          },
+          "candidate_rows": [
+            {
+              "alpha": 1.0,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 34969.37364137261,
+              "active_residual_inf_n": 0.42741071093750094,
+              "direct_relative_residual_inf": 2.644022739283549,
+              "improvement_inf_n": -34968.94623412269,
+              "active_improvement_inf_n": -3.4610205474905342e-06,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.5,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 17484.690185621155,
+              "active_residual_inf_n": 0.42740725053839884,
+              "direct_relative_residual_inf": 1.3220116240633824,
+              "improvement_inf_n": -17484.262778371238,
+              "active_improvement_inf_n": -6.214453951436383e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.25,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 8742.348457747989,
+              "active_residual_inf_n": 0.42740725032167326,
+              "direct_relative_residual_inf": 0.6610060664534925,
+              "improvement_inf_n": -8741.921050498071,
+              "active_improvement_inf_n": -4.0471981321843487e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.125,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 4371.177593577467,
+              "active_residual_inf_n": 0.42740725051969736,
+              "direct_relative_residual_inf": 0.33050328763085945,
+              "improvement_inf_n": -4370.75018632755,
+              "active_improvement_inf_n": -6.027439103384324e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.0625,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 2185.5921616073456,
+              "active_residual_inf_n": 0.427407250904641,
+              "direct_relative_residual_inf": 0.16525189822824868,
+              "improvement_inf_n": -2185.1647543574286,
+              "active_improvement_inf_n": -9.876875428638243e-10,
+              "residual_gate_passed": false
+            }
+          ],
+          "best_candidate": {}
+        },
+        {
+          "active_row_count": 32,
+          "active_rows": [
+            33812,
+            11024,
+            33860,
+            11072,
+            33806,
+            11018,
+            33848,
+            11066,
+            54224,
+            1778,
+            7358,
+            56540,
+            1790,
+            1784,
+            422,
+            5876,
+            7371,
+            7370,
+            7364,
+            7994,
+            5870,
+            430,
+            428,
+            424,
+            1786,
+            11613,
+            5858,
+            8006,
+            5990,
+            6202,
+            8084,
+            566
+          ],
+          "direction_status": "ready",
+          "direction": {
+            "active_row_count": 32,
+            "support_column_count": 323,
+            "support_strongest_per_row": 32,
+            "trust_radius_m": 1e-08,
+            "direction_inf_m": 1e-08,
+            "active_linear_residual_inf_n": 0.4274072498062398,
+            "active_linear_objective_t_n": 0.42740724979909667,
+            "active_linear_improvement_inf_n": 1.1071366046166986e-10,
+            "solver": "scipy_linprog_highs_active_set_minimax_cpu_diagnostic",
+            "solver_stats": {
+              "status": 0,
+              "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+              "nit": 56,
+              "objective": 0.42740724979909667
+            }
+          },
+          "candidate_rows": [
+            {
+              "alpha": 1.0,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 15500.68512211148,
+              "active_residual_inf_n": 0.4274114175992345,
+              "direct_relative_residual_inf": 1.1720016594420264,
+              "improvement_inf_n": -15500.257714861562,
+              "active_improvement_inf_n": -4.167682281064344e-06,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.5,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 7750.34258475882,
+              "active_residual_inf_n": 0.42740725053839884,
+              "direct_relative_residual_inf": 0.5860008315131952,
+              "improvement_inf_n": -7749.915177508903,
+              "active_improvement_inf_n": -6.214453951436383e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.25,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 3875.171316081384,
+              "active_residual_inf_n": 0.42740725032167326,
+              "direct_relative_residual_inf": 0.293000417548696,
+              "improvement_inf_n": -3874.743908831467,
+              "active_improvement_inf_n": -4.0471981321843487e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.125,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 1937.5856817436274,
+              "active_residual_inf_n": 0.42740725051969736,
+              "direct_relative_residual_inf": 0.14650021056651907,
+              "improvement_inf_n": -1937.1582744937105,
+              "active_improvement_inf_n": -6.027439103384324e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.0625,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 968.7928645748916,
+              "active_residual_inf_n": 0.427407250904641,
+              "direct_relative_residual_inf": 0.0732501070754414,
+              "improvement_inf_n": -968.3654573249746,
+              "active_improvement_inf_n": -9.876875428638243e-10,
+              "residual_gate_passed": false
+            }
+          ],
+          "best_candidate": {}
+        }
+      ],
+      "accepted": false
+    }
+  ],
+  "output_final_checkpoint": {
+    "written": true,
+    "path": "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_active_set_minimax_trust_candidate.npz",
+    "schema": "mgt-direct-residual-newton-state.v1",
+    "load_scale": 1.0,
+    "dof_count": 78282,
+    "direct_residual_inf_n": 0.42740724991695345,
+    "direct_relative_residual_inf": 3.231612036590983e-05,
+    "max_translation_m": 0.05360178515313762,
+    "accepted_iteration_count": 0,
+    "accepted_history_count": 0,
+    "residual_gate_n": 0.0005,
+    "residual_gate_passed": false,
+    "frame_tangent_source": "force_based_residual_tangent",
+    "shell_pressure_load_path_policy": "all_components",
+    "promotes_g1_closure": false,
+    "claim_boundary": "Loadable active-set minimax trust checkpoint candidate only. It does not close G1 without direct residual, material Newton, full-mesh, and production ROCm/HIP gates."
+  },
+  "runtime_metrics": {
+    "total_seconds": 142.61326199799078
+  },
+  "claim_boundary": "Non-promoting active-set minimax trust candidate. It targets the linearized infinity norm of selected residual rows and replays the physical direct residual before accepting a step. It does not close G1, material Newton breadth, full-mesh equilibrium, or production ROCm/HIP residency."
+}

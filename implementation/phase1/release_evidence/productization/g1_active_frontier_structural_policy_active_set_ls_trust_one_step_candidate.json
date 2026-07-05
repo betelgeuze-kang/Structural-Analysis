@@ -1,0 +1,171 @@
+{
+  "schema_version": "g1-active-set-ls-trust-candidate.v1",
+  "generated_at": "2026-07-04T23:50:24.039872+00:00",
+  "source_commit_sha": "f779666af7356914e11290547c4a001151062cb6",
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "status": "candidate_created",
+  "promotes_g1_closure": false,
+  "load_scale": 1.0,
+  "checkpoint_npz": "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_active_set_ls_trust_candidate.npz",
+  "shell_pressure_load_path_policy": "structural_components_only",
+  "strategy": {
+    "mode": "iterative_active_set_global_least_squares_trust",
+    "active_row_count": 8,
+    "active_row_count_schedule": [
+      8
+    ],
+    "trust_radius_m": 1e-08,
+    "max_lsmr_iterations": 128,
+    "alpha_values": [
+      1.0
+    ],
+    "selection_metric": "direct_residual_inf_descent"
+  },
+  "summary": {
+    "initial_residual_n": 0.3818403374023447,
+    "final_residual_n": 0.12093228075045737,
+    "initial_relative_residual_inf": 2.8870821228351682e-05,
+    "final_relative_residual_inf": 9.143649626006882e-06,
+    "total_reduction_n": 0.2609080566518873,
+    "total_reduction_ratio": 0.6832909755602087,
+    "residual_gate_n": 0.0005,
+    "residual_gate_passed": false,
+    "steps_taken": 1,
+    "stop_reason": "max_steps",
+    "active_row_count_schedule": [
+      8
+    ]
+  },
+  "history": [
+    {
+      "iteration": 0,
+      "residual_before_n": 0.3818403374023447,
+      "residual_after_n": 0.12093228075045737,
+      "residual_reduction_n": 0.2609080566518873,
+      "residual_reduction_ratio": 0.6832909755602087,
+      "selected_active_row_count": 8,
+      "active_rows": [
+        54224,
+        1778,
+        7358,
+        56540,
+        11072,
+        33860,
+        33848,
+        11066
+      ],
+      "direction": {
+        "active_row_count": 8,
+        "raw_direction_inf_m": 3.569746351570336e-11,
+        "trust_radius_m": 1e-08,
+        "trust_scale": 1.0,
+        "direction_inf_m": 3.569746351570336e-11,
+        "active_linear_residual_inf_n": 7.245315458703772e-13,
+        "solver": "scipy_lsmr_active_set_cpu_diagnostic",
+        "solver_stats": {
+          "istop": 1,
+          "iteration_count": 10,
+          "normr": 8.066771902453451e-17,
+          "normar": 3.092075006883198e-07,
+          "norma": 756815715587224.5,
+          "condition_estimate": 133075.64460482544,
+          "normx": 7.498324400548137e-11,
+          "max_iterations": 128
+        }
+      },
+      "candidate_rows": [
+        {
+          "alpha": 1.0,
+          "free_dof_set_stable": true,
+          "direct_residual_inf_n": 0.12093228075045737,
+          "active_residual_inf_n": 4.400511894431247e-06,
+          "direct_relative_residual_inf": 9.143649626006882e-06,
+          "improvement_inf_n": 0.2609080566518873,
+          "active_improvement_inf_n": 0.38183593689045026,
+          "residual_gate_passed": false
+        }
+      ],
+      "direction_attempts": [
+        {
+          "active_row_count": 8,
+          "active_rows": [
+            54224,
+            1778,
+            7358,
+            56540,
+            11072,
+            33860,
+            33848,
+            11066
+          ],
+          "direction_status": "ready",
+          "direction": {
+            "active_row_count": 8,
+            "raw_direction_inf_m": 3.569746351570336e-11,
+            "trust_radius_m": 1e-08,
+            "trust_scale": 1.0,
+            "direction_inf_m": 3.569746351570336e-11,
+            "active_linear_residual_inf_n": 7.245315458703772e-13,
+            "solver": "scipy_lsmr_active_set_cpu_diagnostic",
+            "solver_stats": {
+              "istop": 1,
+              "iteration_count": 10,
+              "normr": 8.066771902453451e-17,
+              "normar": 3.092075006883198e-07,
+              "norma": 756815715587224.5,
+              "condition_estimate": 133075.64460482544,
+              "normx": 7.498324400548137e-11,
+              "max_iterations": 128
+            }
+          },
+          "candidate_rows": [
+            {
+              "alpha": 1.0,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.12093228075045737,
+              "active_residual_inf_n": 4.400511894431247e-06,
+              "direct_relative_residual_inf": 9.143649626006882e-06,
+              "improvement_inf_n": 0.2609080566518873,
+              "active_improvement_inf_n": 0.38183593689045026,
+              "residual_gate_passed": false
+            }
+          ],
+          "best_candidate": {
+            "alpha": 1.0,
+            "free_dof_set_stable": true,
+            "direct_residual_inf_n": 0.12093228075045737,
+            "active_residual_inf_n": 4.400511894431247e-06,
+            "direct_relative_residual_inf": 9.143649626006882e-06,
+            "improvement_inf_n": 0.2609080566518873,
+            "active_improvement_inf_n": 0.38183593689045026,
+            "residual_gate_passed": false
+          }
+        }
+      ],
+      "accepted": true,
+      "accepted_alpha": 1.0
+    }
+  ],
+  "output_final_checkpoint": {
+    "written": true,
+    "path": "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_one_step_candidate.npz",
+    "schema": "mgt-direct-residual-newton-state.v1",
+    "load_scale": 1.0,
+    "dof_count": 78282,
+    "direct_residual_inf_n": 0.12093228075045737,
+    "direct_relative_residual_inf": 9.143649626006882e-06,
+    "max_translation_m": 0.05360178515313762,
+    "accepted_iteration_count": 1,
+    "accepted_history_count": 1,
+    "residual_gate_n": 0.0005,
+    "residual_gate_passed": false,
+    "frame_tangent_source": "force_based_residual_tangent",
+    "shell_pressure_load_path_policy": "structural_components_only",
+    "promotes_g1_closure": false,
+    "claim_boundary": "Loadable active-set LS trust checkpoint candidate only. It does not close G1 without direct residual, material Newton, full-mesh, and production ROCm/HIP gates."
+  },
+  "runtime_metrics": {
+    "total_seconds": 44.323834536015056
+  },
+  "claim_boundary": "Non-promoting active-set LS trust candidate. It may lower the current full-load residual frontier but does not close G1, material Newton breadth, full-mesh equilibrium, or production ROCm/HIP residency."
+}

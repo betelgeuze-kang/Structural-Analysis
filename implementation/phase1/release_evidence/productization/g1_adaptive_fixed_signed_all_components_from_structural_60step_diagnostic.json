@@ -1,0 +1,2674 @@
+{
+  "schema_version": "g1-adaptive-regularization-reference-newton.v1",
+  "generated_at": "2026-07-04T20:30:03.675172+00:00",
+  "is_candidate_only": true,
+  "promotes_g1_closure": false,
+  "load_scale": 1.0,
+  "frame_service_tangent_source": "real_per_element",
+  "frame_tangent_source": "force_based_residual_tangent",
+  "shell_pressure_load_path_policy": "all_components",
+  "initial_checkpoint_npz": "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_structural_policy_from_0p428_60step_diagnostic.npz",
+  "output_final_checkpoint_npz": "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_60step_diagnostic.npz",
+  "adaptive_strategy": {
+    "mode": "greedy_per_step_mu_selection",
+    "tangent_update_mode": "fixed_reference",
+    "allow_signed_direction_globalization": true,
+    "regularization_mode": "relative_diagonal_shift",
+    "mu_candidates": [
+      0.003,
+      0.0003,
+      3e-05,
+      3e-06,
+      3e-07
+    ],
+    "selection_metric": "min_residual_after_line_search"
+  },
+  "production_lambda": 515.4025311317521,
+  "material_tangent_update": {
+    "claim_boundary": "not_material_newton_breadth"
+  },
+  "claim_boundary": "non_promoting_adaptive_regularization_reference_candidate_only",
+  "status": "review",
+  "reason_code": "no_candidate_descent",
+  "uses_real_mgt_model": true,
+  "mgt_source": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "initial_state": {
+    "source": "checkpoint",
+    "checkpoint": {
+      "path": "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_structural_policy_from_0p428_60step_diagnostic.npz",
+      "content_sha256": "sha256:f49589f1167f5a82f2ed663d0db863b6491d44540802a2b29872a49980d98837",
+      "schema": "mgt-direct-residual-newton-state.v1",
+      "load_scale": 1.0,
+      "dof_count": 78282,
+      "free_dof_count": 58998,
+      "accepted_iteration_count": 32,
+      "direct_residual_inf_n": 0.00047091187565051484
+    }
+  },
+  "baseline_fixed_mu": {
+    "mu": 3e-06,
+    "final_residual_n": 0.427836171536726,
+    "total_reduction_ratio": 0.24924734271083707,
+    "residual_gate_passed": false,
+    "stop_reason": "max_steps"
+  },
+  "history": [
+    {
+      "iteration": 0,
+      "residual_before_n": 0.5698763332807477,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4308839348087996,
+          "residual_reduction_ratio": 0.24389922927975666
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4286360563887397,
+          "residual_reduction_ratio": 0.24784373142659788
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4279788321027864,
+          "residual_reduction_ratio": 0.24899700670330513
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42789085460492204,
+          "residual_reduction_ratio": 0.2491513866849371
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278817290994281,
+          "residual_reduction_ratio": 0.2491673998178942
+        }
+      ],
+      "selected_mu": 3e-07,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.4278817290994281,
+      "residual_reduction_ratio": 0.2491673998178942
+    },
+    {
+      "iteration": 1,
+      "residual_before_n": 0.4278817290994281,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278814289095374,
+          "residual_reduction_ratio": 7.015721174977645e-07
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278809738769498,
+          "residual_reduction_ratio": 1.765026237325014e-06
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788074837389445,
+          "residual_reduction_ratio": 2.292048168863413e-06
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278807151504198,
+          "residual_reduction_ratio": 2.3696945659367444e-06
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788071160375907,
+          "residual_reduction_ratio": 2.377983446956121e-06
+        }
+      ],
+      "selected_mu": 3e-07,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.42788071160375907,
+      "residual_reduction_ratio": 2.377983446956121e-06
+    },
+    {
+      "iteration": 2,
+      "residual_before_n": 0.42788071160375907,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278807113992684,
+          "residual_reduction_ratio": 4.779150849581824e-10
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.5,
+          "residual_after_n": 0.4278807113632581,
+          "residual_reduction_ratio": 5.620747698230364e-10
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278807113464982,
+          "residual_reduction_ratio": 6.012443942656123e-10
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788071113506376,
+          "residual_reduction_ratio": 1.095387784676474e-09
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278807113626186,
+          "residual_reduction_ratio": 5.635693182914336e-10
+        }
+      ],
+      "selected_mu": 3e-06,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.42788071113506376,
+      "residual_reduction_ratio": 1.095387784676474e-09
+    },
+    {
+      "iteration": 3,
+      "residual_before_n": 0.42788071113506376,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0625,
+          "residual_after_n": 0.42788071083564816,
+          "residual_reduction_ratio": 6.997641997641624e-10
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0625,
+          "residual_after_n": 0.42788071075746004,
+          "residual_reduction_ratio": 8.824976593670206e-10
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.125,
+          "residual_after_n": 0.42788071094558866,
+          "residual_reduction_ratio": 4.428222571005742e-10
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0625,
+          "residual_after_n": 0.427880710797659,
+          "residual_reduction_ratio": 7.885486819312545e-10
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.5,
+          "residual_after_n": 0.427880710905832,
+          "residual_reduction_ratio": 5.357375051778999e-10
+        }
+      ],
+      "selected_mu": 0.0003,
+      "selected_alpha": 0.0625,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.42788071075746004,
+      "residual_reduction_ratio": 8.824976593670206e-10
+    },
+    {
+      "iteration": 4,
+      "residual_before_n": 0.42788071075746004,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.03125,
+          "residual_after_n": 0.42788071062458144,
+          "residual_reduction_ratio": 3.105505662530725e-10
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.4278807107379379,
+          "residual_reduction_ratio": 4.5625243611588506e-11
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.015625,
+          "residual_after_n": 0.4278807107055851,
+          "residual_reduction_ratio": 1.2123694169146672e-10
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.000244140625,
+          "residual_after_n": 0.4278807107502871,
+          "residual_reduction_ratio": 1.676385202034526e-11
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.015625,
+          "residual_after_n": 0.4278807105028317,
+          "residual_reduction_ratio": 5.950918375810674e-10
+        }
+      ],
+      "selected_mu": 3e-07,
+      "selected_alpha": 0.015625,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.4278807105028317,
+      "residual_reduction_ratio": 5.950918375810674e-10
+    },
+    {
+      "iteration": 5,
+      "residual_before_n": 0.4278807105028317,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "no_descent_found",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "no_descent_found",
+          "accepted_direction_sign": null,
+          "accepted_alpha": null,
+          "residual_after_n": null,
+          "residual_reduction_ratio": 0.0
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.000244140625,
+          "residual_after_n": 0.4278807103790694,
+          "residual_reduction_ratio": 2.8924494766135336e-10
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278807102104043,
+          "residual_reduction_ratio": 6.83432107215342e-10
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "no_descent_found",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "no_descent_found",
+          "accepted_direction_sign": null,
+          "accepted_alpha": null,
+          "residual_after_n": null,
+          "residual_reduction_ratio": 0.0
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "no_descent_found",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "no_descent_found",
+          "accepted_direction_sign": null,
+          "accepted_alpha": null,
+          "residual_after_n": null,
+          "residual_reduction_ratio": 0.0
+        }
+      ],
+      "selected_mu": 3e-05,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.4278807102104043,
+      "residual_reduction_ratio": 6.83432107215342e-10
+    },
+    {
+      "iteration": 6,
+      "residual_before_n": 0.4278807102104043,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.03125,
+          "residual_after_n": 0.42788071017672813,
+          "residual_reduction_ratio": 7.870458321149875e-11
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.125,
+          "residual_after_n": 0.42788070986814297,
+          "residual_reduction_ratio": 7.998989489850582e-10
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0625,
+          "residual_after_n": 0.4278807102032438,
+          "residual_reduction_ratio": 1.673479137702033e-11
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.03125,
+          "residual_after_n": 0.42788071017401563,
+          "residual_reduction_ratio": 8.504395965226036e-11
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0625,
+          "residual_after_n": 0.42788070974841297,
+          "residual_reduction_ratio": 1.0797199384154537e-09
+        }
+      ],
+      "selected_mu": 3e-07,
+      "selected_alpha": 0.0625,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.42788070974841297,
+      "residual_reduction_ratio": 1.0797199384154537e-09
+    },
+    {
+      "iteration": 7,
+      "residual_before_n": 0.42788070974841297,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788070857090155,
+          "residual_reduction_ratio": 2.7519619250748556e-09
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.427880709382487,
+          "residual_reduction_ratio": 8.552055464662836e-10
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0078125,
+          "residual_after_n": 0.4278807094760744,
+          "residual_reduction_ratio": 6.364825286914695e-10
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.03125,
+          "residual_after_n": 0.4278807097470647,
+          "residual_reduction_ratio": 3.1510063678672085e-12
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278807090889831,
+          "residual_reduction_ratio": 1.5411534781526646e-09
+        }
+      ],
+      "selected_mu": 0.003,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.42788070857090155,
+      "residual_reduction_ratio": 2.7519619250748556e-09
+    },
+    {
+      "iteration": 8,
+      "residual_before_n": 0.42788070857090155,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788070671928047,
+          "residual_reduction_ratio": 4.3274236056819514e-09
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788070659165633,
+          "residual_reduction_ratio": 4.625693966852962e-09
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788070650899357,
+          "residual_reduction_ratio": 4.818885115380269e-09
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.03125,
+          "residual_after_n": 0.42788070854407856,
+          "residual_reduction_ratio": 6.268800564655302e-11
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278807067628705,
+          "residual_reduction_ratio": 4.225549369220974e-09
+        }
+      ],
+      "selected_mu": 3e-05,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.42788070650899357,
+      "residual_reduction_ratio": 4.818885115380269e-09
+    },
+    {
+      "iteration": 9,
+      "residual_before_n": 0.42788070650899357,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0625,
+          "residual_after_n": 0.42788070585507043,
+          "residual_reduction_ratio": 1.5282837667449534e-09
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.015625,
+          "residual_after_n": 0.4278807059089065,
+          "residual_reduction_ratio": 1.4024635418253897e-09
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0625,
+          "residual_after_n": 0.427880706445082,
+          "residual_reduction_ratio": 1.4936766662424463e-10
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0625,
+          "residual_after_n": 0.4278807062997956,
+          "residual_reduction_ratio": 4.889166281165136e-10
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.125,
+          "residual_after_n": 0.42788070638823505,
+          "residual_reduction_ratio": 2.822247239996324e-10
+        }
+      ],
+      "selected_mu": 0.003,
+      "selected_alpha": 0.0625,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.42788070585507043,
+      "residual_reduction_ratio": 1.5282837667449534e-09
+    },
+    {
+      "iteration": 10,
+      "residual_before_n": 0.42788070585507043,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788070124220035,
+          "residual_reduction_ratio": 1.0780738703066478e-08
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278807012708157,
+          "residual_reduction_ratio": 1.071386180973072e-08
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278807012060266,
+          "residual_reduction_ratio": 1.0865280329231317e-08
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00390625,
+          "residual_after_n": 0.4278807057709173,
+          "residual_reduction_ratio": 1.9667427803639125e-10
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278807015595758,
+          "residual_reduction_ratio": 1.0039000515520802e-08
+        }
+      ],
+      "selected_mu": 3e-05,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.4278807012060266,
+      "residual_reduction_ratio": 1.0865280329231317e-08
+    },
+    {
+      "iteration": 11,
+      "residual_before_n": 0.4278807012060266,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00048828125,
+          "residual_after_n": 0.42788070074837137,
+          "residual_reduction_ratio": 1.069586091970526e-09
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278806910929873,
+          "residual_reduction_ratio": 2.3635184448315344e-08
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.4278807010508956,
+          "residual_reduction_ratio": 3.625567096258612e-10
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00048828125,
+          "residual_after_n": 0.4278807010264245,
+          "residual_reduction_ratio": 4.1974809907297464e-10
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.015625,
+          "residual_after_n": 0.42788070117643606,
+          "residual_reduction_ratio": 6.915608053208593e-11
+        }
+      ],
+      "selected_mu": 0.0003,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.4278806910929873,
+      "residual_reduction_ratio": 2.3635184448315344e-08
+    },
+    {
+      "iteration": 12,
+      "residual_before_n": 0.4278806910929873,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00048828125,
+          "residual_after_n": 0.4278806909882764,
+          "residual_reduction_ratio": 2.4471986886029106e-10
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.4278806908485677,
+          "residual_reduction_ratio": 5.712330580979627e-10
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.42788069081692015,
+          "residual_reduction_ratio": 6.451966047350256e-10
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.015625,
+          "residual_after_n": 0.4278806910254396,
+          "residual_reduction_ratio": 1.5786584106538802e-10
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00048828125,
+          "residual_after_n": 0.42788069097574777,
+          "residual_reduction_ratio": 2.7400056567389703e-10
+        }
+      ],
+      "selected_mu": 3e-05,
+      "selected_alpha": 0.001953125,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.42788069081692015,
+      "residual_reduction_ratio": 6.451966047350256e-10
+    },
+    {
+      "iteration": 13,
+      "residual_before_n": 0.42788069081692015,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788067079491654,
+          "residual_reduction_ratio": 4.67934263927492e-08
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278806707513496,
+          "residual_reduction_ratio": 4.6895246663628804e-08
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788067062694957,
+          "residual_reduction_ratio": 4.7185982021615e-08
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788067069564306,
+          "residual_reduction_ratio": 4.702543844764513e-08
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278806710647105,
+          "residual_reduction_ratio": 4.616289089363277e-08
+        }
+      ],
+      "selected_mu": 3e-05,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.42788067062694957,
+      "residual_reduction_ratio": 4.7185982021615e-08
+    },
+    {
+      "iteration": 14,
+      "residual_before_n": 0.42788067062694957,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0001220703125,
+          "residual_after_n": 0.42788067054580026,
+          "residual_reduction_ratio": 1.8965406727865997e-10
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00048828125,
+          "residual_after_n": 0.4278806705741065,
+          "residual_reduction_ratio": 1.2349953359905384e-10
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.000244140625,
+          "residual_after_n": 0.4278806704682925,
+          "residual_reduction_ratio": 3.7079751051946666e-10
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.4278806704054645,
+          "residual_reduction_ratio": 5.176327600779222e-10
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.4278806704308522,
+          "residual_reduction_ratio": 4.582991802003614e-10
+        }
+      ],
+      "selected_mu": 3e-06,
+      "selected_alpha": 0.0009765625,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.4278806704054645,
+      "residual_reduction_ratio": 5.176327600779222e-10
+    },
+    {
+      "iteration": 15,
+      "residual_before_n": 0.4278806704054645,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00390625,
+          "residual_after_n": 0.4278806703614677,
+          "residual_reduction_ratio": 1.0282494452617721e-10
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278806295703159,
+          "residual_reduction_ratio": 9.543583391411168e-08
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.000244140625,
+          "residual_after_n": 0.42788067022215515,
+          "residual_reduction_ratio": 4.284123597155334e-10
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.000244140625,
+          "residual_after_n": 0.42788067028440224,
+          "residual_reduction_ratio": 2.8293465840390946e-10
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00048828125,
+          "residual_after_n": 0.42788067033794697,
+          "residual_reduction_ratio": 1.5779527279132225e-10
+        }
+      ],
+      "selected_mu": 0.0003,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.4278806295703159,
+      "residual_reduction_ratio": 9.543583391411168e-08
+    },
+    {
+      "iteration": 16,
+      "residual_before_n": 0.4278806295703159,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.4278806293866886,
+          "residual_reduction_ratio": 4.2915552345457517e-10
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00048828125,
+          "residual_after_n": 0.42788062929967197,
+          "residual_reduction_ratio": 6.325220937577087e-10
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.42788062955892237,
+          "residual_reduction_ratio": 2.6627876983715717e-11
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.4278806294977109,
+          "residual_reduction_ratio": 1.6968525350099978e-10
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00390625,
+          "residual_after_n": 0.4278806294039281,
+          "residual_reduction_ratio": 3.8886497993618394e-10
+        }
+      ],
+      "selected_mu": 0.0003,
+      "selected_alpha": 0.00048828125,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.42788062929967197,
+      "residual_reduction_ratio": 6.325220937577087e-10
+    },
+    {
+      "iteration": 17,
+      "residual_before_n": 0.42788062929967197,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.4278806291553927,
+          "residual_reduction_ratio": 3.3719510847199213e-10
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.4278806292484738,
+          "residual_reduction_ratio": 1.1965523400531578e-10
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0001220703125,
+          "residual_after_n": 0.4278806292265518,
+          "residual_reduction_ratio": 1.7088919566167555e-10
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00048828125,
+          "residual_after_n": 0.42788062907252744,
+          "residual_reduction_ratio": 5.308595665635186e-10
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0001220703125,
+          "residual_after_n": 0.4278806291347692,
+          "residual_reduction_ratio": 3.8539430584905535e-10
+        }
+      ],
+      "selected_mu": 3e-06,
+      "selected_alpha": 0.00048828125,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.42788062907252744,
+      "residual_reduction_ratio": 5.308595665635186e-10
+    },
+    {
+      "iteration": 18,
+      "residual_before_n": 0.42788062907252744,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.000244140625,
+          "residual_after_n": 0.42788062903648694,
+          "residual_reduction_ratio": 8.42302770114014e-11
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.000244140625,
+          "residual_after_n": 0.4278806290089161,
+          "residual_reduction_ratio": 1.4866608604555593e-10
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00048828125,
+          "residual_after_n": 0.4278806289211534,
+          "residual_reduction_ratio": 3.537762968013989e-10
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.4278806288929431,
+          "residual_reduction_ratio": 4.1970665459222475e-10
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.42788062904258517,
+          "residual_reduction_ratio": 6.99780940068107e-11
+        }
+      ],
+      "selected_mu": 3e-06,
+      "selected_alpha": 0.0009765625,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.4278806288929431,
+      "residual_reduction_ratio": 4.1970665459222475e-10
+    },
+    {
+      "iteration": 19,
+      "residual_before_n": 0.4278806288929431,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0001220703125,
+          "residual_after_n": 0.42788062869990995,
+          "residual_reduction_ratio": 4.511378454392331e-10
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.42788062860552145,
+          "residual_reduction_ratio": 6.717332420165059e-10
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788054604518244,
+          "residual_reduction_ratio": 1.9362353670033764e-07
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.42788062856611475,
+          "residual_reduction_ratio": 7.638306576607062e-10
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.4278806287698398,
+          "residual_reduction_ratio": 2.877047873043057e-10
+        }
+      ],
+      "selected_mu": 3e-05,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.42788054604518244,
+      "residual_reduction_ratio": 1.9362353670033764e-07
+    },
+    {
+      "iteration": 20,
+      "residual_before_n": 0.42788054604518244,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.000244140625,
+          "residual_after_n": 0.42788054602948833,
+          "residual_reduction_ratio": 3.6678724520567426e-11
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0001220703125,
+          "residual_after_n": 0.42788054591503233,
+          "residual_reduction_ratio": 3.0417394320010575e-10
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788038135136297,
+          "residual_reduction_ratio": 3.8490607014802e-07
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.000244140625,
+          "residual_after_n": 0.4278805459184465,
+          "residual_reduction_ratio": 2.961947119008946e-10
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788038146444674,
+          "residual_reduction_ratio": 3.846417819825032e-07
+        }
+      ],
+      "selected_mu": 3e-05,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.42788038135136297,
+      "residual_reduction_ratio": 3.8490607014802e-07
+    },
+    {
+      "iteration": 21,
+      "residual_before_n": 0.42788038135136297,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788004942823754,
+          "residual_reduction_ratio": 7.757381265792278e-07
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278800508283638,
+          "residual_reduction_ratio": 7.724658890609986e-07
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278800514968921,
+          "residual_reduction_ratio": 7.70903470280116e-07
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278800518544532,
+          "residual_reduction_ratio": 7.700678136166421e-07
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42788005110324345,
+          "residual_reduction_ratio": 7.718234672848246e-07
+        }
+      ],
+      "selected_mu": 0.003,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.42788004942823754,
+      "residual_reduction_ratio": 7.757381265792278e-07
+    },
+    {
+      "iteration": 22,
+      "residual_before_n": 0.42788004942823754,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.000244140625,
+          "residual_after_n": 0.42788004938435265,
+          "residual_reduction_ratio": 1.0256354736806535e-10
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42787938681442306,
+          "residual_reduction_ratio": 1.5485971252206723e-06
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42787938742562837,
+          "residual_reduction_ratio": 1.5471686750991865e-06
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278793874897069,
+          "residual_reduction_ratio": 1.5470189169593681e-06
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278793875172173,
+          "residual_reduction_ratio": 1.5469546222150618e-06
+        }
+      ],
+      "selected_mu": 0.0003,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.42787938681442306,
+      "residual_reduction_ratio": 1.5485971252206723e-06
+    },
+    {
+      "iteration": 23,
+      "residual_before_n": 0.42787938681442306,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.000244140625,
+          "residual_after_n": 0.4278793865370272,
+          "residual_reduction_ratio": 6.483039206584947e-10
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0001220703125,
+          "residual_after_n": 0.4278793867641948,
+          "residual_reduction_ratio": 1.1738884260079147e-10
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0001220703125,
+          "residual_after_n": 0.427879386410007,
+          "residual_reduction_ratio": 9.451636808442422e-10
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.427878061909448,
+          "residual_reduction_ratio": 3.0964449699904086e-06
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.000244140625,
+          "residual_after_n": 0.4278793867242552,
+          "residual_reduction_ratio": 2.1073198650502815e-10
+        }
+      ],
+      "selected_mu": 3e-06,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.427878061909448,
+      "residual_reduction_ratio": 3.0964449699904086e-06
+    },
+    {
+      "iteration": 24,
+      "residual_before_n": 0.427878061909448,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42787540500765964,
+          "residual_reduction_ratio": 6.209483553560318e-06
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.427875409532362,
+          "residual_reduction_ratio": 6.198908806235465e-06
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.427875411855565,
+          "residual_reduction_ratio": 6.193479215026765e-06
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0001220703125,
+          "residual_after_n": 0.4278780618821969,
+          "residual_reduction_ratio": 6.368891677135436e-11
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278754126396125,
+          "residual_reduction_ratio": 6.191646806302426e-06
+        }
+      ],
+      "selected_mu": 0.003,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.42787540500765964,
+      "residual_reduction_ratio": 6.209483553560318e-06
+    },
+    {
+      "iteration": 25,
+      "residual_before_n": 0.42787540500765964,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42787009119070163,
+          "residual_reduction_ratio": 1.241907549678605e-05
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.427870095080074,
+          "residual_reduction_ratio": 1.2409985531964054e-05
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278700977442149,
+          "residual_reduction_ratio": 1.2403759091096683e-05
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42787009825698696,
+          "residual_reduction_ratio": 1.2402560676696032e-05
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278700989138331,
+          "residual_reduction_ratio": 1.2401025542576724e-05
+        }
+      ],
+      "selected_mu": 0.003,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.42787009119070163,
+      "residual_reduction_ratio": 1.241907549678605e-05
+    },
+    {
+      "iteration": 26,
+      "residual_before_n": 0.42787009119070163,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278594678999088,
+          "residual_reduction_ratio": 2.4828308899223458e-05
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278594670836693,
+          "residual_reduction_ratio": 2.4830216579935953e-05
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278594709342709,
+          "residual_reduction_ratio": 2.4821217115625126e-05
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42785947058578166,
+          "residual_reduction_ratio": 2.482203159002902e-05
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278594707637673,
+          "residual_reduction_ratio": 2.4821615609501514e-05
+        }
+      ],
+      "selected_mu": 0.0003,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.4278594670836693,
+      "residual_reduction_ratio": 2.4830216579935953e-05
+    },
+    {
+      "iteration": 27,
+      "residual_before_n": 0.4278594670836693,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42783822115502623,
+          "residual_reduction_ratio": 4.965632474575981e-05
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278382163681016,
+          "residual_reduction_ratio": 4.966751282269331e-05
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278382221671002,
+          "residual_reduction_ratio": 4.965395931024175e-05
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.4278382229343993,
+          "residual_reduction_ratio": 4.965216596646379e-05
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 1.0,
+          "residual_after_n": 0.42783822314537545,
+          "residual_reduction_ratio": 4.965167286968392e-05
+        }
+      ],
+      "selected_mu": 0.0003,
+      "selected_alpha": 1.0,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.4278382163681016,
+      "residual_reduction_ratio": 4.966751282269331e-05
+    },
+    {
+      "iteration": 28,
+      "residual_before_n": 0.4278382163681016,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.25,
+          "residual_after_n": 0.42783262900123437,
+          "residual_reduction_ratio": 1.305953197604289e-05
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.25,
+          "residual_after_n": 0.4278325953298647,
+          "residual_reduction_ratio": 1.3138233149533868e-05
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.25,
+          "residual_after_n": 0.4278325882331912,
+          "residual_reduction_ratio": 1.315482043229542e-05
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.25,
+          "residual_after_n": 0.4278325871871586,
+          "residual_reduction_ratio": 1.3157265357862744e-05
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.25,
+          "residual_after_n": 0.4278325875692885,
+          "residual_reduction_ratio": 1.3156372193417233e-05
+        }
+      ],
+      "selected_mu": 3e-06,
+      "selected_alpha": 0.25,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.4278325871871586,
+      "residual_reduction_ratio": 1.3157265357862744e-05
+    },
+    {
+      "iteration": 29,
+      "residual_before_n": 0.4278325871871586,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0625,
+          "residual_after_n": 0.42783091209486557,
+          "residual_reduction_ratio": 3.915298514435219e-06
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0625,
+          "residual_after_n": 0.42783091370985993,
+          "residual_reduction_ratio": 3.911523686596405e-06
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0625,
+          "residual_after_n": 0.4278309128383615,
+          "residual_reduction_ratio": 3.913560694657684e-06
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0625,
+          "residual_after_n": 0.4278309126365851,
+          "residual_reduction_ratio": 3.914032319259059e-06
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0625,
+          "residual_after_n": 0.42783091238024973,
+          "residual_reduction_ratio": 3.914631468096781e-06
+        }
+      ],
+      "selected_mu": 0.003,
+      "selected_alpha": 0.0625,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.42783091209486557,
+      "residual_reduction_ratio": 3.915298514435219e-06
+    },
+    {
+      "iteration": 30,
+      "residual_before_n": 0.42783091209486557,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.015625,
+          "residual_after_n": 0.42783061354633806,
+          "residual_reduction_ratio": 6.978189725680199e-07
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.015625,
+          "residual_after_n": 0.42783061094106206,
+          "residual_reduction_ratio": 7.039084717633475e-07
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.015625,
+          "residual_after_n": 0.42783060982968796,
+          "residual_reduction_ratio": 7.065061664890868e-07
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.015625,
+          "residual_after_n": 0.42783061048230725,
+          "residual_reduction_ratio": 7.049807524213062e-07
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.015625,
+          "residual_after_n": 0.42783061025763364,
+          "residual_reduction_ratio": 7.055058982363836e-07
+        }
+      ],
+      "selected_mu": 3e-05,
+      "selected_alpha": 0.015625,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.42783060982968796,
+      "residual_reduction_ratio": 7.065061664890868e-07
+    },
+    {
+      "iteration": 31,
+      "residual_before_n": 0.42783060982968796,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0078125,
+          "residual_after_n": 0.42783052931252463,
+          "residual_reduction_ratio": 1.8819869704421093e-07
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0078125,
+          "residual_after_n": 0.4278305298773706,
+          "residual_reduction_ratio": 1.868784410017147e-07
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0078125,
+          "residual_after_n": 0.42783052997792836,
+          "residual_reduction_ratio": 1.866433998849474e-07
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0078125,
+          "residual_after_n": 0.42783052972250246,
+          "residual_reduction_ratio": 1.8724042566286618e-07
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.0078125,
+          "residual_after_n": 0.4278305288484354,
+          "residual_reduction_ratio": 1.8928344694485413e-07
+        }
+      ],
+      "selected_mu": 3e-07,
+      "selected_alpha": 0.0078125,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.4278305288484354,
+      "residual_reduction_ratio": 1.8928344694485413e-07
+    },
+    {
+      "iteration": 32,
+      "residual_before_n": 0.4278305288484354,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.00390625,
+          "residual_after_n": 0.4278304570140576,
+          "residual_reduction_ratio": 1.679038146911359e-07
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.00390625,
+          "residual_after_n": 0.427830457253681,
+          "residual_reduction_ratio": 1.6734372508543918e-07
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.00390625,
+          "residual_after_n": 0.4278304563826409,
+          "residual_reduction_ratio": 1.6937967172827956e-07
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.00390625,
+          "residual_after_n": 0.427830456667938,
+          "residual_reduction_ratio": 1.6871282562912362e-07
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.00390625,
+          "residual_after_n": 0.42783045658815827,
+          "residual_reduction_ratio": 1.6889930072379694e-07
+        }
+      ],
+      "selected_mu": 3e-05,
+      "selected_alpha": 0.00390625,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.4278304563826409,
+      "residual_reduction_ratio": 1.6937967172827956e-07
+    },
+    {
+      "iteration": 33,
+      "residual_before_n": 0.4278304563826409,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.42783043153620604,
+          "residual_reduction_ratio": 5.807542329755719e-08
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.42783043183166924,
+          "residual_reduction_ratio": 5.7384815125449806e-08
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.42783043157403533,
+          "residual_reduction_ratio": 5.798700206740046e-08
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.4278304313146446,
+          "residual_reduction_ratio": 5.8593295348411265e-08
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.001953125,
+          "residual_after_n": 0.42783043128614473,
+          "residual_reduction_ratio": 5.8659910215834e-08
+        }
+      ],
+      "selected_mu": 3e-07,
+      "selected_alpha": 0.001953125,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.42783043128614473,
+      "residual_reduction_ratio": 5.8659910215834e-08
+    },
+    {
+      "iteration": 34,
+      "residual_before_n": 0.42783043128614473,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.42783041864551724,
+          "residual_reduction_ratio": 2.954588211778123e-08
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.4278304183258583,
+          "residual_reduction_ratio": 3.0293044878043035e-08
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.42783041858856014,
+          "residual_reduction_ratio": 2.9679012212167702e-08
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.42783041830056295,
+          "residual_reduction_ratio": 3.035216952075958e-08
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.0009765625,
+          "residual_after_n": 0.4278304182745855,
+          "residual_reduction_ratio": 3.0412888535863985e-08
+        }
+      ],
+      "selected_mu": 3e-07,
+      "selected_alpha": 0.0009765625,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.4278304182745855,
+      "residual_reduction_ratio": 3.0412888535863985e-08
+    },
+    {
+      "iteration": 35,
+      "residual_before_n": 0.4278304182745855,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00048828125,
+          "residual_after_n": 0.4278304073955823,
+          "residual_reduction_ratio": 2.5428306949675357e-08
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00048828125,
+          "residual_after_n": 0.4278304069758345,
+          "residual_reduction_ratio": 2.6409414823614238e-08
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00048828125,
+          "residual_after_n": 0.42783040731805677,
+          "residual_reduction_ratio": 2.560951318988287e-08
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00048828125,
+          "residual_after_n": 0.4278304070685781,
+          "residual_reduction_ratio": 2.6192638300432186e-08
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready",
+          "forward_line_search_status": "ready",
+          "reverse_line_search_status": null,
+          "accepted_direction_sign": 1,
+          "accepted_alpha": 0.00048828125,
+          "residual_after_n": 0.4278304070807746,
+          "residual_reduction_ratio": 2.6164130589109298e-08
+        }
+      ],
+      "selected_mu": 0.0003,
+      "selected_alpha": 0.00048828125,
+      "accepted_direction_sign": 1,
+      "line_search_status": "ready",
+      "residual_after_n": 0.4278304069758345,
+      "residual_reduction_ratio": 2.6409414823614238e-08
+    },
+    {
+      "iteration": 36,
+      "residual_before_n": 0.4278304069758345,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.0001220703125,
+          "residual_after_n": 0.4278304040181992,
+          "residual_reduction_ratio": 6.9131021430710305e-09
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.0001220703125,
+          "residual_after_n": 0.42783040442318016,
+          "residual_reduction_ratio": 5.966509916173278e-09
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.0001220703125,
+          "residual_after_n": 0.4278304042383538,
+          "residual_reduction_ratio": 6.398518425648757e-09
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.0001220703125,
+          "residual_after_n": 0.42783040437986547,
+          "residual_reduction_ratio": 6.0677525685553526e-09
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "ready_reverse_direction",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "ready",
+          "accepted_direction_sign": -1,
+          "accepted_alpha": 0.0001220703125,
+          "residual_after_n": 0.4278304044384142,
+          "residual_reduction_ratio": 5.930902264154387e-09
+        }
+      ],
+      "selected_mu": 0.003,
+      "selected_alpha": 0.0001220703125,
+      "accepted_direction_sign": -1,
+      "line_search_status": "ready_reverse_direction",
+      "residual_after_n": 0.4278304040181992,
+      "residual_reduction_ratio": 6.9131021430710305e-09
+    },
+    {
+      "iteration": 37,
+      "residual_before_n": 0.4278304040181992,
+      "candidate_results": [
+        {
+          "mu": 0.003,
+          "direction_solve_status": "ready",
+          "line_search_status": "no_descent_found",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "no_descent_found",
+          "accepted_direction_sign": null,
+          "accepted_alpha": null,
+          "residual_after_n": null,
+          "residual_reduction_ratio": 0.0
+        },
+        {
+          "mu": 0.0003,
+          "direction_solve_status": "ready",
+          "line_search_status": "no_descent_found",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "no_descent_found",
+          "accepted_direction_sign": null,
+          "accepted_alpha": null,
+          "residual_after_n": null,
+          "residual_reduction_ratio": 0.0
+        },
+        {
+          "mu": 3e-05,
+          "direction_solve_status": "ready",
+          "line_search_status": "no_descent_found",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "no_descent_found",
+          "accepted_direction_sign": null,
+          "accepted_alpha": null,
+          "residual_after_n": null,
+          "residual_reduction_ratio": 0.0
+        },
+        {
+          "mu": 3e-06,
+          "direction_solve_status": "ready",
+          "line_search_status": "no_descent_found",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "no_descent_found",
+          "accepted_direction_sign": null,
+          "accepted_alpha": null,
+          "residual_after_n": null,
+          "residual_reduction_ratio": 0.0
+        },
+        {
+          "mu": 3e-07,
+          "direction_solve_status": "ready",
+          "line_search_status": "no_descent_found",
+          "forward_line_search_status": "no_descent_found",
+          "reverse_line_search_status": "no_descent_found",
+          "accepted_direction_sign": null,
+          "accepted_alpha": null,
+          "residual_after_n": null,
+          "residual_reduction_ratio": 0.0
+        }
+      ],
+      "selected_mu": null
+    }
+  ],
+  "summary": {
+    "initial_residual_n": 0.5698763332807477,
+    "final_residual_n": 0.4278304040181992,
+    "total_reduction_ratio": 0.24925746336016033,
+    "monotonic_residual_decrease": true,
+    "residual_gate_n": 0.0005,
+    "residual_gate_passed": false,
+    "stop_reason": "no_candidate_descent",
+    "steps_taken": 38,
+    "selected_mu_schedule": [
+      3e-07,
+      3e-07,
+      3e-06,
+      0.0003,
+      3e-07,
+      3e-05,
+      3e-07,
+      0.003,
+      3e-05,
+      0.003,
+      3e-05,
+      0.0003,
+      3e-05,
+      3e-05,
+      3e-06,
+      0.0003,
+      0.0003,
+      3e-06,
+      3e-06,
+      3e-05,
+      3e-05,
+      0.003,
+      0.0003,
+      3e-06,
+      0.003,
+      0.003,
+      0.0003,
+      0.0003,
+      3e-06,
+      0.003,
+      3e-05,
+      3e-07,
+      3e-05,
+      3e-07,
+      3e-07,
+      0.0003,
+      0.003,
+      null
+    ],
+    "beats_fixed_mu_baseline": true
+  },
+  "output_final_checkpoint": {
+    "written": true,
+    "path": "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_60step_diagnostic.npz",
+    "schema": "mgt-direct-residual-newton-state.v1",
+    "load_scale": 1.0,
+    "dof_count": 78282,
+    "free_dof_count": 58998,
+    "direct_residual_inf_n": 0.4278304040181992,
+    "direct_relative_residual_inf": 3.2348114907115774e-05,
+    "max_translation_m": 0.05360178515313762,
+    "accepted_iteration_count": 38,
+    "accepted_history_count": 0,
+    "residual_gate_n": 0.0005,
+    "residual_gate_passed": false,
+    "frame_tangent_source": "force_based_residual_tangent",
+    "shell_pressure_load_path_policy": "all_components",
+    "promotes_g1_closure": false,
+    "claim_boundary": "This is a loadable adaptive-regularization checkpoint candidate only. It does not close G1 unless direct residual, increment, full-mesh, material breadth, and production ROCm/HIP gates also pass."
+  },
+  "resource_usage": {
+    "dof_count": 78282,
+    "free_dof_count": 58998,
+    "element_count": 12728,
+    "factorable_mu_count": 5
+  }
+}

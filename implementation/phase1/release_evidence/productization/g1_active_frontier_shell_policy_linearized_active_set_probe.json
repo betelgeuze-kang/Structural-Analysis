@@ -1,0 +1,635 @@
+{
+  "schema_version": "g1-active-frontier-shell-policy-linearized-active-set-probe.v1",
+  "generated_at": "2026-07-04T23:45:48.677402+00:00",
+  "source_commit_sha": "f779666af7356914e11290547c4a001151062cb6",
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "status": "ready",
+  "promotes_g1_closure": false,
+  "load_scale": 1.0,
+  "checkpoint_npz": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_active_set_ls_trust_candidate.npz",
+  "mgt_model": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "frame_tangent_source": "force_based_residual_tangent",
+  "shell_pressure_load_path_policy": "structural_components_only",
+  "summary": {
+    "base_residual_inf_n": 0.3818403374023447,
+    "base_relative_residual_inf": 2.8870821228351682e-05,
+    "residual_gate_n": 0.0005,
+    "base_residual_gate_passed": false,
+    "evaluated_active_row_count_schedule": [
+      8,
+      16,
+      32
+    ],
+    "best_active_row_count": 8,
+    "best_linear_active_residual_before_inf_n": 0.3818403374023447,
+    "best_linear_active_residual_after_inf_n": 7.245315458703772e-13,
+    "best_linear_active_improvement_inf_n": 0.38184033740162016,
+    "best_linear_active_reduction_ratio": 0.9999999999981025,
+    "linearized_active_descent_observed": true,
+    "direct_replay_attempted": false,
+    "direct_replay_required_for_candidate": true
+  },
+  "attempts": [
+    {
+      "active_row_count": 8,
+      "active_rows": [
+        54224,
+        1778,
+        7358,
+        56540,
+        11072,
+        33860,
+        33848,
+        11066
+      ],
+      "active_row_descriptors": [
+        {
+          "reduced_row": 54224,
+          "global_dof": 68648,
+          "node_index": 11441,
+          "node_id": 11442,
+          "dof_label": "UZ",
+          "residual_n": 0.3818403374023447
+        },
+        {
+          "reduced_row": 1778,
+          "global_dof": 1922,
+          "node_index": 320,
+          "node_id": 321,
+          "dof_label": "UZ",
+          "residual_n": -0.3817036904618334
+        },
+        {
+          "reduced_row": 7358,
+          "global_dof": 8516,
+          "node_index": 1419,
+          "node_id": 1420,
+          "dof_label": "UZ",
+          "residual_n": -0.2736842054046029
+        },
+        {
+          "reduced_row": 56540,
+          "global_dof": 74216,
+          "node_index": 12369,
+          "node_id": 12370,
+          "dof_label": "UZ",
+          "residual_n": 0.2735639702148447
+        },
+        {
+          "reduced_row": 11072,
+          "global_dof": 13712,
+          "node_index": 2285,
+          "node_id": 2286,
+          "dof_label": "UZ",
+          "residual_n": -0.14388958322598455
+        },
+        {
+          "reduced_row": 33860,
+          "global_dof": 46766,
+          "node_index": 7794,
+          "node_id": 7795,
+          "dof_label": "UZ",
+          "residual_n": -0.14388958322598455
+        },
+        {
+          "reduced_row": 33848,
+          "global_dof": 46754,
+          "node_index": 7792,
+          "node_id": 7793,
+          "dof_label": "UZ",
+          "residual_n": 0.14246908371015365
+        },
+        {
+          "reduced_row": 11066,
+          "global_dof": 13706,
+          "node_index": 2284,
+          "node_id": 2285,
+          "dof_label": "UZ",
+          "residual_n": 0.14246908371015365
+        }
+      ],
+      "direction": {
+        "active_row_count": 8,
+        "raw_direction_inf_m": 3.569746351570336e-11,
+        "trust_radius_m": 1e-08,
+        "trust_scale": 1.0,
+        "direction_inf_m": 3.569746351570336e-11,
+        "active_linear_residual_inf_n": 7.245315458703772e-13,
+        "solver": "scipy_lsmr_active_set_cpu_diagnostic",
+        "solver_stats": {
+          "istop": 1,
+          "iteration_count": 10,
+          "normr": 8.066771902453451e-17,
+          "normar": 3.092075006883198e-07,
+          "norma": 756815715587224.5,
+          "condition_estimate": 133075.64460482544,
+          "normx": 7.498324400548137e-11,
+          "max_iterations": 128
+        }
+      },
+      "linear_active_residual_before_inf_n": 0.3818403374023447,
+      "linear_active_residual_after_inf_n": 7.245315458703772e-13,
+      "linear_active_improvement_inf_n": 0.38184033740162016,
+      "linear_active_reduction_ratio": 0.9999999999981025,
+      "linearized_active_descent_observed": true
+    },
+    {
+      "active_row_count": 16,
+      "active_rows": [
+        54224,
+        1778,
+        7358,
+        56540,
+        11072,
+        33860,
+        11066,
+        33848,
+        33812,
+        11024,
+        11018,
+        33806,
+        1790,
+        1784,
+        422,
+        5876
+      ],
+      "active_row_descriptors": [
+        {
+          "reduced_row": 54224,
+          "global_dof": 68648,
+          "node_index": 11441,
+          "node_id": 11442,
+          "dof_label": "UZ",
+          "residual_n": 0.3818403374023447
+        },
+        {
+          "reduced_row": 1778,
+          "global_dof": 1922,
+          "node_index": 320,
+          "node_id": 321,
+          "dof_label": "UZ",
+          "residual_n": -0.3817036904618334
+        },
+        {
+          "reduced_row": 7358,
+          "global_dof": 8516,
+          "node_index": 1419,
+          "node_id": 1420,
+          "dof_label": "UZ",
+          "residual_n": -0.2736842054046029
+        },
+        {
+          "reduced_row": 56540,
+          "global_dof": 74216,
+          "node_index": 12369,
+          "node_id": 12370,
+          "dof_label": "UZ",
+          "residual_n": 0.2735639702148447
+        },
+        {
+          "reduced_row": 11072,
+          "global_dof": 13712,
+          "node_index": 2285,
+          "node_id": 2286,
+          "dof_label": "UZ",
+          "residual_n": -0.14388958322598455
+        },
+        {
+          "reduced_row": 33860,
+          "global_dof": 46766,
+          "node_index": 7794,
+          "node_id": 7795,
+          "dof_label": "UZ",
+          "residual_n": -0.14388958322598455
+        },
+        {
+          "reduced_row": 11066,
+          "global_dof": 13706,
+          "node_index": 2284,
+          "node_id": 2285,
+          "dof_label": "UZ",
+          "residual_n": 0.14246908371015365
+        },
+        {
+          "reduced_row": 33848,
+          "global_dof": 46754,
+          "node_index": 7792,
+          "node_id": 7793,
+          "dof_label": "UZ",
+          "residual_n": 0.14246908371015365
+        },
+        {
+          "reduced_row": 33812,
+          "global_dof": 46706,
+          "node_index": 7784,
+          "node_id": 7785,
+          "dof_label": "UZ",
+          "residual_n": 0.14246908341638154
+        },
+        {
+          "reduced_row": 11024,
+          "global_dof": 13652,
+          "node_index": 2275,
+          "node_id": 2276,
+          "dof_label": "UZ",
+          "residual_n": 0.14246908341638154
+        },
+        {
+          "reduced_row": 11018,
+          "global_dof": 13640,
+          "node_index": 2273,
+          "node_id": 2274,
+          "dof_label": "UZ",
+          "residual_n": -0.14104858309693213
+        },
+        {
+          "reduced_row": 33806,
+          "global_dof": 46694,
+          "node_index": 7782,
+          "node_id": 7783,
+          "dof_label": "UZ",
+          "residual_n": -0.14104858309693213
+        },
+        {
+          "reduced_row": 1790,
+          "global_dof": 1934,
+          "node_index": 322,
+          "node_id": 323,
+          "dof_label": "UZ",
+          "residual_n": 0.011794193795190644
+        },
+        {
+          "reduced_row": 1784,
+          "global_dof": 1928,
+          "node_index": 321,
+          "node_id": 322,
+          "dof_label": "UZ",
+          "residual_n": -0.011771767537564592
+        },
+        {
+          "reduced_row": 422,
+          "global_dof": 518,
+          "node_index": 86,
+          "node_id": 87,
+          "dof_label": "UZ",
+          "residual_n": -0.011601722753766808
+        },
+        {
+          "reduced_row": 5876,
+          "global_dof": 6932,
+          "node_index": 1155,
+          "node_id": 1156,
+          "dof_label": "UZ",
+          "residual_n": -0.008658271586682531
+        }
+      ],
+      "direction": {
+        "active_row_count": 16,
+        "raw_direction_inf_m": 3.4960783720980394e-11,
+        "trust_radius_m": 1e-08,
+        "trust_scale": 1.0,
+        "direction_inf_m": 3.4960783720980394e-11,
+        "active_linear_residual_inf_n": 2.0092352781553302e-10,
+        "solver": "scipy_lsmr_active_set_cpu_diagnostic",
+        "solver_stats": {
+          "istop": 1,
+          "iteration_count": 27,
+          "normr": 5.682606440630305e-10,
+          "normar": 7.649998452680954,
+          "norma": 1024851850706031.4,
+          "condition_estimate": 128093.28083168947,
+          "normx": 9.914941755664749e-11,
+          "max_iterations": 128
+        }
+      },
+      "linear_active_residual_before_inf_n": 0.3818403374023447,
+      "linear_active_residual_after_inf_n": 2.0092352781553302e-10,
+      "linear_active_improvement_inf_n": 0.3818403372014212,
+      "linear_active_reduction_ratio": 0.9999999994738024,
+      "linearized_active_descent_observed": true
+    },
+    {
+      "active_row_count": 32,
+      "active_rows": [
+        54224,
+        1778,
+        7358,
+        56540,
+        33860,
+        11072,
+        33848,
+        11066,
+        33812,
+        11024,
+        33806,
+        11018,
+        1790,
+        1784,
+        422,
+        5876,
+        7371,
+        7370,
+        7364,
+        7994,
+        5870,
+        430,
+        428,
+        424,
+        1786,
+        11613,
+        5858,
+        8006,
+        5990,
+        6202,
+        8084,
+        566
+      ],
+      "active_row_descriptors": [
+        {
+          "reduced_row": 54224,
+          "global_dof": 68648,
+          "node_index": 11441,
+          "node_id": 11442,
+          "dof_label": "UZ",
+          "residual_n": 0.3818403374023447
+        },
+        {
+          "reduced_row": 1778,
+          "global_dof": 1922,
+          "node_index": 320,
+          "node_id": 321,
+          "dof_label": "UZ",
+          "residual_n": -0.3817036904618334
+        },
+        {
+          "reduced_row": 7358,
+          "global_dof": 8516,
+          "node_index": 1419,
+          "node_id": 1420,
+          "dof_label": "UZ",
+          "residual_n": -0.2736842054046029
+        },
+        {
+          "reduced_row": 56540,
+          "global_dof": 74216,
+          "node_index": 12369,
+          "node_id": 12370,
+          "dof_label": "UZ",
+          "residual_n": 0.2735639702148447
+        },
+        {
+          "reduced_row": 33860,
+          "global_dof": 46766,
+          "node_index": 7794,
+          "node_id": 7795,
+          "dof_label": "UZ",
+          "residual_n": -0.14388958322598455
+        },
+        {
+          "reduced_row": 11072,
+          "global_dof": 13712,
+          "node_index": 2285,
+          "node_id": 2286,
+          "dof_label": "UZ",
+          "residual_n": -0.14388958322598455
+        },
+        {
+          "reduced_row": 33848,
+          "global_dof": 46754,
+          "node_index": 7792,
+          "node_id": 7793,
+          "dof_label": "UZ",
+          "residual_n": 0.14246908371015365
+        },
+        {
+          "reduced_row": 11066,
+          "global_dof": 13706,
+          "node_index": 2284,
+          "node_id": 2285,
+          "dof_label": "UZ",
+          "residual_n": 0.14246908371015365
+        },
+        {
+          "reduced_row": 33812,
+          "global_dof": 46706,
+          "node_index": 7784,
+          "node_id": 7785,
+          "dof_label": "UZ",
+          "residual_n": 0.14246908341638154
+        },
+        {
+          "reduced_row": 11024,
+          "global_dof": 13652,
+          "node_index": 2275,
+          "node_id": 2276,
+          "dof_label": "UZ",
+          "residual_n": 0.14246908341638154
+        },
+        {
+          "reduced_row": 33806,
+          "global_dof": 46694,
+          "node_index": 7782,
+          "node_id": 7783,
+          "dof_label": "UZ",
+          "residual_n": -0.14104858309693213
+        },
+        {
+          "reduced_row": 11018,
+          "global_dof": 13640,
+          "node_index": 2273,
+          "node_id": 2274,
+          "dof_label": "UZ",
+          "residual_n": -0.14104858309693213
+        },
+        {
+          "reduced_row": 1790,
+          "global_dof": 1934,
+          "node_index": 322,
+          "node_id": 323,
+          "dof_label": "UZ",
+          "residual_n": 0.011794193795190644
+        },
+        {
+          "reduced_row": 1784,
+          "global_dof": 1928,
+          "node_index": 321,
+          "node_id": 322,
+          "dof_label": "UZ",
+          "residual_n": -0.011771767537564592
+        },
+        {
+          "reduced_row": 422,
+          "global_dof": 518,
+          "node_index": 86,
+          "node_id": 87,
+          "dof_label": "UZ",
+          "residual_n": -0.011601722753766808
+        },
+        {
+          "reduced_row": 5876,
+          "global_dof": 6932,
+          "node_index": 1155,
+          "node_id": 1156,
+          "dof_label": "UZ",
+          "residual_n": -0.008658271586682531
+        },
+        {
+          "reduced_row": 7371,
+          "global_dof": 8529,
+          "node_index": 1421,
+          "node_id": 1422,
+          "dof_label": "RX",
+          "residual_n": -0.007058864264081421
+        },
+        {
+          "reduced_row": 7370,
+          "global_dof": 8528,
+          "node_index": 1421,
+          "node_id": 1422,
+          "dof_label": "UZ",
+          "residual_n": -0.006742486404396786
+        },
+        {
+          "reduced_row": 7364,
+          "global_dof": 8522,
+          "node_index": 1420,
+          "node_id": 1421,
+          "dof_label": "UZ",
+          "residual_n": 0.0067296376892205245
+        },
+        {
+          "reduced_row": 7994,
+          "global_dof": 9152,
+          "node_index": 1525,
+          "node_id": 1526,
+          "dof_label": "UZ",
+          "residual_n": 0.006643242903464852
+        },
+        {
+          "reduced_row": 5870,
+          "global_dof": 6926,
+          "node_index": 1154,
+          "node_id": 1155,
+          "dof_label": "UZ",
+          "residual_n": 0.006531800465381821
+        },
+        {
+          "reduced_row": 430,
+          "global_dof": 526,
+          "node_index": 87,
+          "node_id": 88,
+          "dof_label": "RY",
+          "residual_n": -0.005686124750582167
+        },
+        {
+          "reduced_row": 428,
+          "global_dof": 524,
+          "node_index": 87,
+          "node_id": 88,
+          "dof_label": "UZ",
+          "residual_n": -0.005420373699962511
+        },
+        {
+          "reduced_row": 424,
+          "global_dof": 520,
+          "node_index": 86,
+          "node_id": 87,
+          "dof_label": "RY",
+          "residual_n": 0.0045914976127505724
+        },
+        {
+          "reduced_row": 1786,
+          "global_dof": 1930,
+          "node_index": 321,
+          "node_id": 322,
+          "dof_label": "RY",
+          "residual_n": 0.004536399553899173
+        },
+        {
+          "reduced_row": 11613,
+          "global_dof": 14265,
+          "node_index": 2377,
+          "node_id": 2378,
+          "dof_label": "RX",
+          "residual_n": -0.004125591943193285
+        },
+        {
+          "reduced_row": 5858,
+          "global_dof": 6914,
+          "node_index": 1152,
+          "node_id": 1153,
+          "dof_label": "UZ",
+          "residual_n": -0.003930727682018187
+        },
+        {
+          "reduced_row": 8006,
+          "global_dof": 9164,
+          "node_index": 1527,
+          "node_id": 1528,
+          "dof_label": "UZ",
+          "residual_n": 0.003619620558083625
+        },
+        {
+          "reduced_row": 5990,
+          "global_dof": 7076,
+          "node_index": 1179,
+          "node_id": 1180,
+          "dof_label": "UZ",
+          "residual_n": 0.0034790914717177657
+        },
+        {
+          "reduced_row": 6202,
+          "global_dof": 7354,
+          "node_index": 1225,
+          "node_id": 1226,
+          "dof_label": "RY",
+          "residual_n": -0.0032694758328943863
+        },
+        {
+          "reduced_row": 8084,
+          "global_dof": 9242,
+          "node_index": 1540,
+          "node_id": 1541,
+          "dof_label": "UZ",
+          "residual_n": -0.002985261379194526
+        },
+        {
+          "reduced_row": 566,
+          "global_dof": 662,
+          "node_index": 110,
+          "node_id": 111,
+          "dof_label": "UZ",
+          "residual_n": 0.0028195195975513343
+        }
+      ],
+      "direction": {
+        "active_row_count": 32,
+        "raw_direction_inf_m": 3.496078358032542e-11,
+        "trust_radius_m": 1e-08,
+        "trust_scale": 1.0,
+        "direction_inf_m": 3.496078358032542e-11,
+        "active_linear_residual_inf_n": 8.117416494535235e-08,
+        "solver": "scipy_lsmr_active_set_cpu_diagnostic",
+        "solver_stats": {
+          "istop": 1,
+          "iteration_count": 116,
+          "normr": 1.5656423015594113e-07,
+          "normar": 897.9753771289253,
+          "norma": 1929835348404814.2,
+          "condition_estimate": 5534.228777527585,
+          "normx": 9.91497261499784e-11,
+          "max_iterations": 128
+        }
+      },
+      "linear_active_residual_before_inf_n": 0.3818403374023447,
+      "linear_active_residual_after_inf_n": 8.117416494535235e-08,
+      "linear_active_improvement_inf_n": 0.38184025622817974,
+      "linear_active_reduction_ratio": 0.9999997874133323,
+      "linearized_active_descent_observed": true
+    }
+  ],
+  "runtime_metrics": {
+    "total_seconds": 23.029447456006892
+  },
+  "claim_boundary": "Linearized active-set evidence only. It checks whether the current structural shell pressure policy tangent can reduce active residual rows. It does not replay the nonlinear direct residual, write a checkpoint, or close G1 full-load equilibrium."
+}

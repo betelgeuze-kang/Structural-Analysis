@@ -72,6 +72,7 @@ ERR_MEMORY_BUDGET_EXCEEDED = "ERR_MEMORY_BUDGET_EXCEEDED"
 ERR_NAN_RESIDUAL = "ERR_NAN_RESIDUAL"
 ERR_OPERATOR_SHAPE_MISMATCH = "ERR_OPERATOR_SHAPE_MISMATCH"
 ERR_DIRECTION_SOLVE_BLOCKED = "ERR_DIRECTION_SOLVE_BLOCKED"
+ERR_CHECKPOINT_LOAD_FAILED = "ERR_CHECKPOINT_LOAD_FAILED"
 
 # Lightweight smoke budget: refuse to build dense operators beyond this size.
 DEFAULT_FREE_DOF_BUDGET = 250_000
@@ -133,6 +134,64 @@ def _report(
             "0.656 continuation checkpoint regeneration/application is F2b; not done here"
         ),
         "claim_boundary": "non_promoting_real_mgt_smoke_only",
+    }
+
+
+def _load_checkpoint_displacement(
+    checkpoint_npz: Path,
+    *,
+    expected_dof_count: int,
+    requested_load_scale: float,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Load a non-promoting MGT direct-residual checkpoint displacement vector."""
+    checkpoint_npz = Path(checkpoint_npz)
+    if not checkpoint_npz.is_file():
+        raise FileNotFoundError(checkpoint_npz)
+    with np.load(checkpoint_npz, allow_pickle=False) as ar:
+        if "displacement_u" not in ar.files:
+            raise ValueError("checkpoint missing displacement_u")
+        displacement = np.asarray(ar["displacement_u"], dtype=np.float64)
+        if displacement.ndim != 1:
+            raise ValueError("checkpoint displacement_u must be 1D")
+        if int(displacement.size) != int(expected_dof_count):
+            raise ValueError(
+                "checkpoint displacement_u size "
+                f"{int(displacement.size)} != expected DOF count "
+                f"{int(expected_dof_count)}"
+            )
+        schema = str(ar["checkpoint_schema"]) if "checkpoint_schema" in ar.files else ""
+        checkpoint_load_scale = (
+            float(ar["load_scale"]) if "load_scale" in ar.files else None
+        )
+        direct_residual_inf_n = (
+            float(ar["direct_residual_inf_n"])
+            if "direct_residual_inf_n" in ar.files
+            else None
+        )
+        residual_gate_passed = (
+            bool(ar["residual_gate_passed"])
+            if "residual_gate_passed" in ar.files
+            else None
+        )
+        promotes_g1_closure = (
+            bool(ar["promotes_g1_closure"])
+            if "promotes_g1_closure" in ar.files
+            else None
+        )
+    return displacement.copy(), {
+        "checkpoint_applied": True,
+        "checkpoint_npz": checkpoint_npz.as_posix(),
+        "checkpoint_schema": schema,
+        "checkpoint_load_scale": checkpoint_load_scale,
+        "requested_load_scale": float(requested_load_scale),
+        "checkpoint_load_scale_matches_requested": (
+            checkpoint_load_scale is not None
+            and abs(float(checkpoint_load_scale) - float(requested_load_scale))
+            <= 1.0e-12
+        ),
+        "checkpoint_direct_residual_inf_n": direct_residual_inf_n,
+        "checkpoint_residual_gate_passed": residual_gate_passed,
+        "checkpoint_promotes_g1_closure": promotes_g1_closure,
     }
 
 
@@ -227,6 +286,7 @@ def run_smoke_from_closure(
     if p is None or not solve_meta.get("converged", False):
         ls = _empty_line_search(solve_meta.get("reason_code", "direction_solve_failed"))
         ls["status"] = "blocked"
+        ls["direction_solve"] = solve_meta
         return _report(
             status="blocked", reason_code=ERR_DIRECTION_SOLVE_BLOCKED,
             uses_real_mgt_model=uses_real_mgt_model, mgt_source=mgt_source,
@@ -252,6 +312,7 @@ def run_smoke_from_closure(
             "accepted_predicted_over_actual_mismatch_ratio"
         ),
         "reason_code": ls_raw.get("reason_code"),
+        "direction_solve": solve_meta,
     }
     if ls_raw.get("status") != "ready":
         return _report(
@@ -272,6 +333,7 @@ def build_mgt_physical_residual_closure(
     *,
     mgt_path: Path,
     roundtrip_npz: Path | None = None,
+    checkpoint_npz: Path | None = None,
     load_scale: float = 0.1,
     frame_gravity_load_scale: float = 0.01,
     stiffness_scale_to_si: float = 1000.0,
@@ -386,6 +448,17 @@ def build_mgt_physical_residual_closure(
     force_based_frame_stiffness = frame_force_cache.stiffness_matrix().tocsr()
     ndof = int(node_xyz.shape[0]) * DOF_PER_NODE
     u0 = np.zeros(ndof, dtype=np.float64)
+    checkpoint_meta: dict[str, Any] = {
+        "checkpoint_applied": False,
+        "checkpoint_npz": None,
+        "requested_load_scale": float(load_scale),
+    }
+    if checkpoint_npz is not None:
+        u0, checkpoint_meta = _load_checkpoint_displacement(
+            checkpoint_npz,
+            expected_dof_count=ndof,
+            requested_load_scale=load_scale,
+        )
 
     frame_tangent_source = str(frame_tangent_source)
     if frame_tangent_source not in FRAME_TANGENT_SOURCE_CHOICES:
@@ -564,6 +637,23 @@ def build_mgt_physical_residual_closure(
             "free": free,
             "u0": u0,
         },
+        "shell_inputs": {
+            "node_xyz": node_xyz,
+            "node_id": node_id,
+            "elem_id": elem_id,
+            "elem_type_code": elem_type_code,
+            "elem_section_id": elem_section_id,
+            "elem_material_id": elem_material_id,
+            "conn_ptr": conn_ptr,
+            "conn_idx": conn_idx,
+            "material_props": material_props,
+            "plate_thickness_props": plate_thickness_props,
+            "frame_elements": frame_elements,
+            "restrained_dofs": np.asarray(sorted(restrained), dtype=np.int64),
+            "load_scale": float(load_scale),
+            "free": free,
+            "u0": u0,
+        },
         "frame_service_tangent_source": service_tangent_source,
         "frame_tangent_source": frame_tangent_source,
         "shell_pressure_load_path_policy": pressure_load_path_meta.get(
@@ -574,6 +664,12 @@ def build_mgt_physical_residual_closure(
         "roundtrip_npz": str(roundtrip_npz),
         "parser_source": parser_source,
         "parser_report_path": parser_report_path,
+        "checkpoint": checkpoint_meta,
+        "checkpoint_kind": (
+            "mgt-direct-residual-newton-state.v1"
+            if checkpoint_meta.get("checkpoint_applied")
+            else "none_or_lightweight_state"
+        ),
         "node_id": node_id,
         "free": free,
         "dof_per_node": int(DOF_PER_NODE),
@@ -590,6 +686,7 @@ def run_g1_mgt_physical_line_search_smoke(
     *,
     mgt_model: Path = DEFAULT_MGT_MODEL,
     roundtrip_npz: Path | None = None,
+    checkpoint_npz: Path | None = None,
     global_newton_operator: str = GLOBAL_NEWTON_OPERATOR_PHYSICAL,
     load_scale: float = 0.1,
     frame_tangent_source: str = FRAME_TANGENT_SOURCE_SERVICE,
@@ -608,7 +705,8 @@ def run_g1_mgt_physical_line_search_smoke(
     else:
         try:
             residual_fn, x0, meta = build_mgt_physical_residual_closure(
-                mgt_path=mgt_model, roundtrip_npz=roundtrip_npz, load_scale=load_scale,
+                mgt_path=mgt_model, roundtrip_npz=roundtrip_npz,
+                checkpoint_npz=checkpoint_npz, load_scale=load_scale,
                 frame_tangent_source=frame_tangent_source,
                 shell_pressure_load_path_policy=shell_pressure_load_path_policy,
             )
@@ -628,11 +726,13 @@ def run_g1_mgt_physical_line_search_smoke(
             payload = run_smoke_from_closure(
                 residual_fn, x0, operator=operator, uses_real_mgt_model=True,
                 mgt_source=str(mgt_model), load_scale=load_scale,
+                checkpoint_kind=str(meta.get("checkpoint_kind") or "none_or_lightweight_state"),
                 gmres_maxiter=gmres_maxiter,
                 resource_usage={
                     "dof_count": meta["dof_count"], "node_count": meta["node_count"],
                     "element_count": meta["element_count"], "peak_memory_mb": None,
                     "free_dof_count": meta["free_dof_count"],
+                    "checkpoint": meta.get("checkpoint", {}),
                 },
             )
 
@@ -648,6 +748,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mgt-model", type=Path, default=DEFAULT_MGT_MODEL)
     parser.add_argument("--roundtrip-npz", type=Path, default=None)
+    parser.add_argument("--checkpoint-npz", type=Path, default=None)
     parser.add_argument(
         "--global-newton-operator",
         choices=[GLOBAL_NEWTON_OPERATOR_CURRENT, GLOBAL_NEWTON_OPERATOR_PHYSICAL],
@@ -669,6 +770,7 @@ def main() -> int:
     args = parser.parse_args()
     payload = run_g1_mgt_physical_line_search_smoke(
         mgt_model=args.mgt_model, roundtrip_npz=args.roundtrip_npz,
+        checkpoint_npz=args.checkpoint_npz,
         global_newton_operator=args.global_newton_operator,
         load_scale=args.load_scale, frame_tangent_source=args.frame_tangent_source,
         shell_pressure_load_path_policy=args.shell_pressure_load_path_policy,

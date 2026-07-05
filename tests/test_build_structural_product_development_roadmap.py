@@ -249,6 +249,325 @@ def _write_minimal_inputs(repo_root: Path) -> None:
                 "checkpoint_direct_residual_inf_n": 464.56223807569995,
                 "true_newton_residual_gate_passed": False,
             },
+            "true_newton_from_active_set_ls_trust_candidate": {
+                "present": True,
+                "status": "review",
+                "true_final_residual_n": 0.42740724991695345,
+                "true_residual_gate_passed": False,
+                "true_stop_reason": "line_search_no_descent",
+                "max_jvp_minus_unregularized_tangent_action_relative_inf": (
+                    4.088178091005261
+                ),
+                "dominant_jvp_gap_component": "frame",
+            },
+            "true_newton_from_active_set_service_tangent_ls_trust_candidate": {
+                "present": True,
+                "status": "review",
+                "true_final_residual_n": 0.42740724991695345,
+                "true_residual_gate_passed": False,
+                "true_stop_reason": "line_search_no_descent",
+                "max_jvp_minus_unregularized_tangent_action_relative_inf": (
+                    4.088231545444302
+                ),
+                "dominant_jvp_gap_component": "frame",
+            },
+            "true_newton_frame_tangent_source_comparison": {
+                "present": True,
+                "both_line_search_no_descent": True,
+                "both_dominant_gap_component_frame": True,
+                "service_minus_force_max_jvp_gap_relative_inf": (
+                    5.3454439040478974e-05
+                ),
+            },
+            "frame_tangent_fd_epsilon_sweep": {
+                "present": True,
+                "status": "ready",
+                "default_eps_gap_relative_inf": 4.088178091005261,
+                "best_eps": 0.001,
+                "best_eps_gap_relative_inf": 0.003379869645939948,
+                "default_eps_artifact_likely": True,
+            },
+            "true_newton_from_active_set_mu_sweep": {
+                "present": True,
+                "status": "ready",
+                "evaluated_mu_count": 11,
+                "factorable_mu_count": 11,
+                "descent_observed": False,
+                "best_mu": 0.03,
+                "best_improvement_inf_n": -2.9530156098189764e-10,
+            },
+            "active_set_load_parameter_probe": {
+                "present": True,
+                "status": "ready",
+                "actual_replay_descent_observed": False,
+                "best_actual_replay_load_scale": 0.995,
+                "best_actual_replay_residual_inf_n": 66.12257730630517,
+                "best_actual_replay_improvement_inf_n": -65.69517005638822,
+                "restored_full_load_descent_observed": False,
+                "best_restored_full_load_residual_inf_n": 0.42811959570077285,
+            },
+            "active_set_load_parameter_tiny_trust_probe": {
+                "present": True,
+                "status": "ready",
+                "actual_replay_descent_observed": True,
+                "best_actual_replay_load_scale": 0.99999,
+                "best_actual_replay_residual_inf_n": 0.4274029760383601,
+                "best_actual_replay_improvement_inf_n": (
+                    4.273878593363811e-06
+                ),
+                "restored_full_load_descent_observed": False,
+                "best_restored_full_load_residual_inf_n": (
+                    0.42740796265036174
+                ),
+            },
+            "active_frontier_residual_ownership_probe": {
+                "present": True,
+                "status": "ready",
+                "top_residual_inf_n": 0.42740724991695345,
+                "top_row_node_id": 2276,
+                "top_row_dof_label": "UZ",
+                "top_row_dominant_internal_component": "shell_bending_drilling",
+                "top_row_balance_driver": "external_load_balance",
+                "top_row_inferred_external_load_n": 0.569876333333335,
+            },
+            "active_frontier_shell_load_neighborhood_probe": {
+                "present": True,
+                "status": "ready",
+                "top_row_required_reference_shell_load_scale_for_zero_row_residual": (
+                    0.25000000014572954
+                ),
+                "top_row_surface_component_free_pressure_resultant": True,
+                "top_incident_element_id": 25880,
+            },
+            "active_frontier_shell_policy_replay_probe": {
+                "present": True,
+                "status": "ready",
+                "best_policy": "attached_components_only",
+                "best_residual_inf_n": 0.3818403374023447,
+                "best_improvement_inf_n": 0.04556691251460876,
+                "structural_or_attached_policy_descent_observed": True,
+                "best_residual_gate_passed": False,
+            },
+            "active_frontier_shell_policy_linearized_active_set_probe": {
+                "present": True,
+                "status": "ready",
+                "shell_pressure_load_path_policy": "structural_components_only",
+                "best_linear_active_residual_after_inf_n": 7.245315458703772e-13,
+                "linearized_active_descent_observed": True,
+                "direct_replay_required_for_candidate": True,
+            },
+            "active_frontier_structural_policy_active_set_ls_trust_candidate": {
+                "present": True,
+                "status": "candidate_created",
+                "final_residual_n": 0.07205501101467937,
+                "total_reduction_n": 0.048877269735777995,
+                "residual_gate_passed": False,
+                "checkpoint_path": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "g1_active_frontier_structural_policy_active_set_ls_trust_two_step_candidate.npz"
+                ),
+            },
+            "active_frontier_structural_policy_active_set_ls_trust_alpha_sweep": {
+                "present": True,
+                "status": "review",
+                "final_residual_n": 0.07205501101467937,
+                "stop_reason": "no_candidate_descent",
+            },
+            "active_frontier_structural_policy_residual_ownership_probe": {
+                "present": True,
+                "status": "ready",
+                "top_row_dof_label": "RX",
+                "top_row_dominant_internal_component": "shell_bending_drilling",
+                "top_row_balance_driver": "shell_bending_drilling_internal_force",
+                "top_row_load_derivative_n_per_load": 0.0,
+            },
+            "active_frontier_structural_policy_linearized_active_set_after_two_step_probe": {
+                "present": True,
+                "status": "ready",
+                "best_linear_active_residual_after_inf_n": 3.396605913197348e-13,
+                "linearized_active_descent_observed": True,
+            },
+            "active_frontier_structural_policy_shell_rotation_row_candidate": {
+                "present": True,
+                "status": "ready",
+                "fd_consistent": True,
+                "selected_rotation_row_count": 4,
+                "best_direct_residual_inf_n": 0.04728610099315822,
+                "best_improvement_inf_n": 0.006755157257430255,
+                "checkpoint_path": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "g1_active_frontier_structural_policy_shell_rotation_row_second_candidate.npz"
+                ),
+                "checkpoint_best_alpha": 0.125,
+            },
+            "active_frontier_structural_policy_shell_rotation_row_no_descent_probe": {
+                "present": True,
+                "status": "ready",
+                "base_residual_inf_n": 0.04728610099315822,
+                "best_improvement_inf_n": -0.0016700968262350901,
+                "direct_descent_observed": False,
+            },
+            "active_frontier_structural_policy_shell_rotation_candidate_residual_ownership_probe": {
+                "present": True,
+                "status": "ready",
+                "top_residual_inf_n": 0.04728610099315822,
+                "top_row_dof_label": "RX",
+                "top_row_dominant_internal_component": "shell_bending_drilling",
+                "top_row_balance_driver": "shell_bending_drilling_internal_force",
+            },
+            "sparse_direct_scaled_lsmr_frontier_probe": {
+                "present": True,
+                "status": "ready",
+                "jvp_parity_pass": True,
+                "assembled_tangent_parity_pass": True,
+                "direction_status": "ready",
+                "line_search_status": "ready",
+                "line_search_residual_after_n": 0.04728606850215522,
+                "line_search_residual_reduction_ratio": 6.871152900485691e-07,
+                "output_checkpoint_written": True,
+                "output_checkpoint_path": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "g1_mgt_sparse_direct_scaled_lsmr_from_shell_rotation_frontier_candidate.npz"
+                ),
+                "output_checkpoint_direct_residual_inf_n": 0.04728606850215522,
+                "output_checkpoint_residual_gate_passed": False,
+            },
+            "sparse_direct_scaled_lsmr_second_probe": {
+                "present": True,
+                "status": "ready",
+                "line_search_status": "ready",
+                "line_search_residual_after_n": 0.047285916814733264,
+                "line_search_residual_reduction_ratio": 3.2078670687026466e-06,
+                "output_checkpoint_written": True,
+                "output_checkpoint_path": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "g1_mgt_sparse_direct_scaled_lsmr_from_sparse_frontier_second_candidate.npz"
+                ),
+                "output_checkpoint_direct_residual_inf_n": 0.047285916814733264,
+                "output_checkpoint_residual_gate_passed": False,
+            },
+            "sparse_direct_scaled_lsmr_chain": {
+                "present": True,
+                "step_count": 3,
+                "ready_step_count": 3,
+                "checkpoint_written_step_count": 3,
+                "all_steps_ready": True,
+                "all_output_checkpoints_written": True,
+                "monotonic_residual_descent": True,
+                "initial_residual_n": 0.04728610099315822,
+                "final_residual_n": 0.047285863685509466,
+                "total_reduction_n": 2.3730764875384835e-07,
+                "total_reduction_ratio": 5.018549716928113e-06,
+                "latest_checkpoint_path": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "g1_mgt_sparse_direct_scaled_lsmr_from_sparse_frontier_third_candidate.npz"
+                ),
+                "latest_checkpoint_residual_gate_passed": False,
+                "promotes_g1_closure": False,
+            },
+            "sparse_direct_scaled_lsmr_chain_probe": {
+                "present": True,
+                "status": "ready",
+                "step_count": 3,
+                "monotonic_residual_descent": True,
+                "final_residual_n": 0.047285863685509466,
+                "latest_checkpoint_path": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "g1_mgt_sparse_direct_scaled_lsmr_chain_step_03_candidate.npz"
+                ),
+                "promotes_g1_closure": False,
+            },
+            "sparse_direct_scaled_lsmr_long_chain_probe": {
+                "present": True,
+                "status": "ready",
+                "step_count": 10,
+                "monotonic_residual_descent": True,
+                "final_residual_n": 0.04728560329011722,
+                "final_residual_over_gate": 94.57120658023443,
+                "estimated_steps_to_gate_at_last_reduction": 2008386,
+                "gate_convergence_assessment": "stalled_for_gate",
+                "recommended_next_action": (
+                    "switch_operator_preconditioner_or_tangent_model_before_extending_scaled_lsmr_chain"
+                ),
+                "latest_checkpoint_path": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "g1_mgt_sparse_direct_scaled_lsmr_long_chain_step_10_candidate.npz"
+                ),
+                "promotes_g1_closure": False,
+            },
+            "shell_hotspot_tangent_fd_jvp": {
+                "present": True,
+                "status": "ready",
+                "fd_consistent": True,
+                "max_relative_inf_error": 7.82988821999408e-14,
+                "evaluated_row_count": 8,
+            },
+            "shell_hotspot_diagonal_sweep": {
+                "present": True,
+                "status": "ready",
+                "descent_observed": False,
+                "best_direct_residual_inf_n": 0.4278508811240626,
+                "best_improvement_inf_n": -2.0477105863392353e-05,
+            },
+            "global_tangent_scaled_sweep": {
+                "present": True,
+                "status": "ready",
+                "descent_observed": False,
+                "best_direct_residual_inf_n": 0.42783040426657654,
+                "best_improvement_inf_n": -2.483773187123006e-10,
+                "linear_relative_residual_inf": 0.4278305011820284,
+            },
+            "residual_norm_gradient_tiny_sweep": {
+                "present": True,
+                "status": "ready",
+                "inf_descent_observed": False,
+                "l2_descent_observed": True,
+                "best_l2_direct_residual_l2_n": 1.2159739821333575,
+                "best_l2_improvement_l2_n": 0.16379561248899166,
+            },
+            "active_set_ls_sweep": {
+                "present": True,
+                "status": "ready",
+                "full_inf_descent_observed": True,
+                "active_inf_descent_observed": True,
+                "best_full_direct_residual_inf_n": 0.4274072503950392,
+                "best_full_improvement_inf_n": 0.000423153623160033,
+            },
+            "active_set_ls_trust_candidate": {
+                "present": True,
+                "status": "candidate_created",
+                "checkpoint_written": True,
+                "final_residual_n": 0.42740724991695345,
+                "residual_gate_passed": False,
+                "checkpoint_path": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "g1_adaptive_fixed_signed_all_components_from_structural_active_set_ls_trust_candidate.npz"
+                ),
+            },
+            "active_set_ls_trust_schedule_candidate": {
+                "present": True,
+                "status": "candidate_created",
+                "final_residual_n": 0.4274072499174437,
+                "residual_gate_passed": False,
+                "active_row_count_schedule": [8, 16, 32],
+            },
+            "active_set_ls_trust_tangent_fd_jvp": {
+                "present": True,
+                "status": "ready",
+                "base_residual_inf_n": 0.42740724991695345,
+                "fd_consistent": True,
+                "max_relative_inf_error": 5.0e-14,
+                "evaluated_row_count": 2,
+                "consistent_residual_jacobian_newton_gate_passed": False,
+            },
+            "active_set_minimax_trust_candidate": {
+                "present": True,
+                "status": "review",
+                "final_residual_n": 0.42740724991695345,
+                "residual_gate_passed": False,
+                "steps_taken": 0,
+                "best_linear_active_inf_improvement_n": 1.1784706543949142e-10,
+            },
             "worker_path_repair_plan": {
                 "schema_version": "g1-production-rocm-hip-worker-path-repair-plan.v1",
                 "status": "blocked",
@@ -381,6 +700,464 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
         ]["current_position"]["rocm_worker_path_repair_next_action"]
         == "repair_production_rocm_hip_residual_jvp_worker_path"
     )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_residual_ownership_top_row_balance_driver"
+        ]
+        == "external_load_balance"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_shell_load_neighborhood_top_free_pressure_resultant"
+        ]
+        is True
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_shell_load_neighborhood_top_required_shell_load_scale"
+        ]
+        == 0.25000000014572954
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["active_frontier_shell_policy_replay_best_policy"]
+        == "attached_components_only"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_shell_policy_replay_best_residual_inf_n"
+        ]
+        == 0.3818403374023447
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_shell_policy_replay_descent_observed"
+        ]
+        is True
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_shell_policy_replay_best_residual_gate_passed"
+        ]
+        is False
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_shell_policy_linearized_active_set_policy"
+        ]
+        == "structural_components_only"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_shell_policy_linearized_active_set_best_after_inf_n"
+        ]
+        == 7.245315458703772e-13
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_shell_policy_linearized_active_set_direct_replay_required"
+        ]
+        is True
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_structural_policy_active_set_ls_trust_final_residual_n"
+        ]
+        == 0.07205501101467937
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_structural_policy_active_set_ls_trust_total_reduction_n"
+        ]
+        == 0.048877269735777995
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_structural_policy_active_set_ls_trust_residual_gate_passed"
+        ]
+        is False
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_structural_policy_active_set_ls_trust_alpha_sweep_stop_reason"
+        ]
+        == "no_candidate_descent"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_structural_policy_residual_ownership_top_row_dof_label"
+        ]
+        == "RX"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_structural_policy_residual_ownership_top_row_balance_driver"
+        ]
+        == "shell_bending_drilling_internal_force"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_structural_policy_linearized_after_two_step_best_after_inf_n"
+        ]
+        == 3.396605913197348e-13
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_structural_policy_shell_rotation_candidate_best_residual_inf_n"
+        ]
+        == 0.04728610099315822
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_structural_policy_shell_rotation_candidate_best_improvement_inf_n"
+        ]
+        == 0.006755157257430255
+    )
+    assert details[
+        "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+    ]["current_position"][
+        "active_frontier_structural_policy_shell_rotation_candidate_checkpoint_path"
+    ].endswith(
+        "g1_active_frontier_structural_policy_shell_rotation_row_second_candidate.npz"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_structural_policy_shell_rotation_no_descent_best_improvement_inf_n"
+        ]
+        == -0.0016700968262350901
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_structural_policy_shell_rotation_no_descent_observed"
+        ]
+        is False
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_structural_policy_shell_rotation_candidate_ownership_top_row_dof_label"
+        ]
+        == "RX"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_frontier_structural_policy_shell_rotation_candidate_ownership_top_row_balance_driver"
+        ]
+        == "shell_bending_drilling_internal_force"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["sparse_direct_scaled_lsmr_frontier_status"]
+        == "ready"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["sparse_direct_scaled_lsmr_frontier_jvp_parity_pass"]
+        is True
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["sparse_direct_scaled_lsmr_frontier_tangent_parity_pass"]
+        is True
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["sparse_direct_scaled_lsmr_frontier_direction_status"]
+        == "ready"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["sparse_direct_scaled_lsmr_frontier_line_search_status"]
+        == "ready"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_scaled_lsmr_frontier_line_search_residual_after_n"
+        ]
+        == 0.04728606850215522
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_scaled_lsmr_frontier_line_search_reduction_ratio"
+        ]
+        == 6.871152900485691e-07
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_scaled_lsmr_frontier_output_checkpoint_written"
+        ]
+        is True
+    )
+    assert details[
+        "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+    ]["current_position"][
+        "sparse_direct_scaled_lsmr_frontier_output_checkpoint_path"
+    ].endswith(
+        "g1_mgt_sparse_direct_scaled_lsmr_from_shell_rotation_frontier_candidate.npz"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_scaled_lsmr_frontier_output_checkpoint_residual_n"
+        ]
+        == 0.04728606850215522
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_scaled_lsmr_frontier_output_checkpoint_residual_gate_passed"
+        ]
+        is False
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["sparse_direct_scaled_lsmr_second_status"]
+        == "ready"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["sparse_direct_scaled_lsmr_second_line_search_status"]
+        == "ready"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_scaled_lsmr_second_line_search_residual_after_n"
+        ]
+        == 0.047285916814733264
+    )
+    assert details[
+        "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+    ]["current_position"][
+        "sparse_direct_scaled_lsmr_second_output_checkpoint_path"
+    ].endswith(
+        "g1_mgt_sparse_direct_scaled_lsmr_from_sparse_frontier_second_candidate.npz"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_scaled_lsmr_second_output_checkpoint_residual_n"
+        ]
+        == 0.047285916814733264
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["sparse_direct_scaled_lsmr_chain_step_count"]
+        == 3
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_scaled_lsmr_chain_monotonic_residual_descent"
+        ]
+        is True
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["sparse_direct_scaled_lsmr_chain_final_residual_n"]
+        == 0.047285863685509466
+    )
+    assert details[
+        "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+    ]["current_position"][
+        "sparse_direct_scaled_lsmr_chain_latest_checkpoint_path"
+    ].endswith(
+        "g1_mgt_sparse_direct_scaled_lsmr_from_sparse_frontier_third_candidate.npz"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["sparse_direct_scaled_lsmr_chain_probe_status"]
+        == "ready"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_scaled_lsmr_chain_probe_final_residual_n"
+        ]
+        == 0.047285863685509466
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["sparse_direct_scaled_lsmr_long_chain_probe_status"]
+        == "ready"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_scaled_lsmr_long_chain_probe_step_count"
+        ]
+        == 10
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_scaled_lsmr_long_chain_probe_final_residual_over_gate"
+        ]
+        == 94.57120658023443
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_scaled_lsmr_long_chain_probe_estimated_steps_to_gate_at_last_reduction"
+        ]
+        == 2008386
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_scaled_lsmr_long_chain_probe_gate_convergence_assessment"
+        ]
+        == "stalled_for_gate"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "sparse_direct_scaled_lsmr_long_chain_probe_recommended_next_action"
+        ]
+        == "switch_operator_preconditioner_or_tangent_model_before_extending_scaled_lsmr_chain"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["shell_hotspot_tangent_fd_jvp_fd_consistent"]
+        is True
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["shell_hotspot_diagonal_sweep_descent_observed"]
+        is False
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["global_tangent_scaled_sweep_descent_observed"]
+        is False
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["residual_norm_gradient_tiny_sweep_l2_descent_observed"]
+        is True
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["active_set_ls_sweep_full_inf_descent_observed"]
+        is True
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["active_set_ls_trust_candidate_checkpoint_written"]
+        is True
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["active_set_ls_trust_schedule_candidate_final_residual_n"]
+        == 0.4274072499174437
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_set_ls_trust_schedule_candidate_active_row_count_schedule"
+        ]
+        == [8, 16, 32]
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["active_set_ls_trust_tangent_fd_jvp_fd_consistent"]
+        is True
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"][
+            "active_set_ls_trust_tangent_fd_jvp_evaluated_row_count"
+        ]
+        == 2
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["active_set_minimax_trust_candidate_steps_taken"]
+        == 0
+    )
     assert details[
         "collect_customer_shadow_and_external_benchmark_terminal_receipts"
     ]["current_position"]["completed_shadow_case_count"] == 1
@@ -469,6 +1246,405 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
             "true_newton_full_load_checkpoint_candidate_residual_n"
         ]
         == 464.56223807569995
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "true_newton_from_active_set_stop_reason"
+        ]
+        == "line_search_no_descent"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "true_newton_from_active_set_max_jvp_gap_relative_inf"
+        ]
+        == 4.088178091005261
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "true_newton_from_active_set_dominant_gap_component"
+        ]
+        == "frame"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "true_newton_from_active_set_service_tangent_max_jvp_gap_relative_inf"
+        ]
+        == 4.088231545444302
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "true_newton_frame_tangent_source_comparison_both_line_search_no_descent"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "true_newton_frame_tangent_source_comparison_both_dominant_gap_component_frame"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "frame_tangent_fd_epsilon_sweep_default_eps_artifact_likely"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "frame_tangent_fd_epsilon_sweep_best_gap_relative_inf"
+        ]
+        == 0.003379869645939948
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "true_newton_from_active_set_mu_sweep_evaluated_mu_count"
+        ]
+        == 11
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "true_newton_from_active_set_mu_sweep_descent_observed"
+        ]
+        is False
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_set_load_parameter_probe_descent_observed"
+        ]
+        is False
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_set_load_parameter_tiny_trust_descent_observed"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_set_load_parameter_tiny_trust_best_load_scale"
+        ]
+        == 0.99999
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_set_load_parameter_tiny_trust_restored_full_load_descent_observed"
+        ]
+        is False
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_frontier_residual_ownership_present"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_frontier_residual_ownership_top_row_balance_driver"
+        ]
+        == "external_load_balance"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_frontier_residual_ownership_top_row_dominant_internal_component"
+        ]
+        == "shell_bending_drilling"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_frontier_residual_ownership_top_row_inferred_external_load_n"
+        ]
+        == 0.569876333333335
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_frontier_shell_load_neighborhood_top_free_pressure_resultant"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_frontier_shell_load_neighborhood_top_incident_element_id"
+        ]
+        == 25880
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_frontier_shell_policy_replay_best_policy"
+        ]
+        == "attached_components_only"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_frontier_shell_policy_replay_best_residual_inf_n"
+        ]
+        == 0.3818403374023447
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_frontier_shell_policy_replay_descent_observed"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_frontier_shell_policy_linearized_active_set_policy"
+        ]
+        == "structural_components_only"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_frontier_shell_policy_linearized_active_set_best_after_inf_n"
+        ]
+        == 7.245315458703772e-13
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_frontier_shell_policy_linearized_active_set_descent_observed"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_frontier_structural_policy_active_set_ls_trust_final_residual_n"
+        ]
+        == 0.07205501101467937
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_frontier_structural_policy_active_set_ls_trust_alpha_sweep_stop_reason"
+        ]
+        == "no_candidate_descent"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_frontier_structural_policy_residual_ownership_top_row_dof_label"
+        ]
+        == "RX"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_frontier_structural_policy_residual_ownership_top_row_component"
+        ]
+        == "shell_bending_drilling"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_frontier_structural_policy_linearized_after_two_step_descent_observed"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_scaled_lsmr_frontier_status"
+        ]
+        == "ready"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_scaled_lsmr_frontier_line_search_residual_after_n"
+        ]
+        == 0.04728606850215522
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_scaled_lsmr_frontier_line_search_reduction_ratio"
+        ]
+        == 6.871152900485691e-07
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_scaled_lsmr_frontier_output_checkpoint_written"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_scaled_lsmr_frontier_output_checkpoint_residual_n"
+        ]
+        == 0.04728606850215522
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_scaled_lsmr_second_line_search_residual_after_n"
+        ]
+        == 0.047285916814733264
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_scaled_lsmr_second_output_checkpoint_written"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_scaled_lsmr_second_output_checkpoint_residual_n"
+        ]
+        == 0.047285916814733264
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_scaled_lsmr_chain_step_count"
+        ]
+        == 3
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_scaled_lsmr_chain_monotonic_residual_descent"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_scaled_lsmr_chain_final_residual_n"
+        ]
+        == 0.047285863685509466
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_scaled_lsmr_chain_probe_status"
+        ]
+        == "ready"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_scaled_lsmr_long_chain_probe_final_residual_n"
+        ]
+        == 0.04728560329011722
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_scaled_lsmr_long_chain_probe_gate_convergence_assessment"
+        ]
+        == "stalled_for_gate"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "sparse_direct_scaled_lsmr_long_chain_probe_recommended_next_action"
+        ]
+        == "switch_operator_preconditioner_or_tangent_model_before_extending_scaled_lsmr_chain"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "shell_hotspot_tangent_fd_jvp_fd_consistent"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "shell_hotspot_tangent_fd_jvp_max_relative_inf_error"
+        ]
+        == 7.82988821999408e-14
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "shell_hotspot_diagonal_sweep_descent_observed"
+        ]
+        is False
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "shell_hotspot_diagonal_sweep_best_improvement_n"
+        ]
+        == -2.0477105863392353e-05
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "global_tangent_scaled_sweep_descent_observed"
+        ]
+        is False
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "global_tangent_scaled_sweep_best_improvement_n"
+        ]
+        == -2.483773187123006e-10
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "global_tangent_scaled_sweep_linear_relative_residual"
+        ]
+        == 0.4278305011820284
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "residual_norm_gradient_tiny_sweep_inf_descent_observed"
+        ]
+        is False
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "residual_norm_gradient_tiny_sweep_l2_descent_observed"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "residual_norm_gradient_tiny_sweep_best_l2_improvement_n"
+        ]
+        == 0.16379561248899166
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_set_ls_sweep_full_inf_descent_observed"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_set_ls_sweep_best_full_residual_n"
+        ]
+        == 0.4274072503950392
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_set_ls_sweep_best_full_improvement_n"
+        ]
+        == 0.000423153623160033
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_set_ls_trust_candidate_final_residual_n"
+        ]
+        == 0.42740724991695345
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_set_ls_trust_candidate_residual_gate_passed"
+        ]
+        is False
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_set_ls_trust_schedule_candidate_final_residual_n"
+        ]
+        == 0.4274072499174437
+    )
+    assert stages["g1_solver_closure"]["summary"][
+        "active_set_ls_trust_schedule_candidate_active_row_count_schedule"
+    ] == [8, 16, 32]
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_set_ls_trust_tangent_fd_jvp_fd_consistent"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_set_ls_trust_tangent_fd_jvp_max_relative_inf_error"
+        ]
+        == 5.0e-14
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_set_minimax_trust_candidate_final_residual_n"
+        ]
+        == 0.42740724991695345
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "active_set_minimax_trust_candidate_best_linear_active_inf_improvement_n"
+        ]
+        == 1.1784706543949142e-10
     )
     assert (
         stages["g1_solver_closure"]["summary"]["rocm_worker_path_repair_status"]

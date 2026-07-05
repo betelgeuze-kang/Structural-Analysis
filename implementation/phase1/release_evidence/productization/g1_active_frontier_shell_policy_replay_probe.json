@@ -1,0 +1,216 @@
+{
+  "checkpoint": {
+    "direct_residual_inf_n": 0.42740724991695345,
+    "load_scale": 1.0,
+    "schema": "mgt-direct-residual-newton-state.v1"
+  },
+  "checkpoint_npz": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_active_set_ls_trust_candidate.npz",
+  "claim_boundary": "Shell pressure policy replay evidence only. A lower residual under a filtered policy is routing evidence for load-path policy repair; it does not by itself close G1 full-load nonlinear equilibrium.",
+  "frame_tangent_source": "force_based_residual_tangent",
+  "generated_at": "2026-07-04T23:29:23.100278+00:00",
+  "is_candidate_only": true,
+  "load_scale": 1.0,
+  "mgt_model": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "policies": [
+    "all_components",
+    "attached_components_only",
+    "structural_components_only"
+  ],
+  "promotes_g1_closure": false,
+  "rows": [
+    {
+      "anchor_all_components_top_row": {
+        "component_values_n": {
+          "frame": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.14246908341638154,
+          "shell_membrane": 0.0,
+          "spring": 0.0
+        },
+        "dominant_internal_component": "shell_bending_drilling",
+        "found": true,
+        "global_dof": 13652,
+        "inferred_external_load_n": 0.569876333333335,
+        "internal_sum_n": 0.14246908341638154,
+        "reduced_index": 11024,
+        "residual_abs_n": 0.42740724991695345,
+        "residual_n": -0.42740724991695345
+      },
+      "canonical_policy": "all_components",
+      "claim_boundary": "Policy replay only: re-evaluates the same active-frontier checkpoint under a shell pressure load-path policy. It does not create or promote a full-load G1 closure checkpoint.",
+      "policy": "all_components",
+      "pressure_load_allowed_surface_element_count": null,
+      "pressure_load_filter_enabled": false,
+      "pressure_load_path_meta": {
+        "pressure_load_filter_enabled": false,
+        "shell_pressure_load_path_policy": "all_components"
+      },
+      "pressure_load_suppressed_surface_element_count": null,
+      "residual_gate_passed": false,
+      "residual_inf_n": 0.42740724991695345,
+      "status": "ready",
+      "top_row": {
+        "balance_driver": "external_load_balance",
+        "component_values_n": {
+          "frame": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.14246908341638154,
+          "shell_membrane": 0.0,
+          "spring": 0.0
+        },
+        "dof_label": "UZ",
+        "dominant_internal_component": "shell_bending_drilling",
+        "global_dof": 13652,
+        "inferred_external_load_n": 0.569876333333335,
+        "internal_sum_n": 0.14246908341638154,
+        "local_dof_index": 2,
+        "max_component_abs_n": 0.14246908341638154,
+        "node_id": 2276,
+        "node_index": 2275,
+        "reduced_index": 11024,
+        "residual_abs_n": 0.42740724991695345,
+        "residual_n": -0.42740724991695345,
+        "residual_reconstruction_error_n": 0.0
+      }
+    },
+    {
+      "anchor_all_components_top_row": {
+        "component_values_n": {
+          "frame": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.14246908341638154,
+          "shell_membrane": 0.0,
+          "spring": 0.0
+        },
+        "dominant_internal_component": "shell_bending_drilling",
+        "found": true,
+        "global_dof": 13652,
+        "inferred_external_load_n": 0.0,
+        "internal_sum_n": 0.14246908341638154,
+        "reduced_index": 11024,
+        "residual_abs_n": 0.14246908341638154,
+        "residual_n": 0.14246908341638154
+      },
+      "canonical_policy": "attached_components_only",
+      "claim_boundary": "Policy replay only: re-evaluates the same active-frontier checkpoint under a shell pressure load-path policy. It does not create or promote a full-load G1 closure checkpoint.",
+      "policy": "attached_components_only",
+      "pressure_load_allowed_surface_element_count": 7150,
+      "pressure_load_filter_enabled": true,
+      "pressure_load_path_meta": {
+        "attached_surface_component_count": 1,
+        "claim_boundary": "Diagnostic load-path policy: shell pressure is applied only to surface components with a frame-connected node or an authored translational restraint.",
+        "free_pressure_surface_component_count": 2,
+        "pressure_load_allowed_surface_element_count": 7150,
+        "pressure_load_filter_enabled": true,
+        "pressure_load_suppressed_surface_element_count": 2,
+        "shell_pressure_load_path_policy": "attached_components_only",
+        "surface_component_count": 3
+      },
+      "pressure_load_suppressed_surface_element_count": 2,
+      "residual_gate_passed": false,
+      "residual_inf_n": 0.3818403374023447,
+      "status": "ready",
+      "top_row": {
+        "balance_driver": "component_external_cancellation",
+        "component_values_n": {
+          "frame": -27.524208068847656,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0,
+          "spring": 0.0
+        },
+        "dof_label": "UZ",
+        "dominant_internal_component": "frame",
+        "global_dof": 68648,
+        "inferred_external_load_n": -27.90604840625,
+        "internal_sum_n": -27.524208068847656,
+        "local_dof_index": 2,
+        "max_component_abs_n": 27.524208068847656,
+        "node_id": 11457,
+        "node_index": 11441,
+        "reduced_index": 54224,
+        "residual_abs_n": 0.3818403374023447,
+        "residual_n": 0.3818403374023447,
+        "residual_reconstruction_error_n": 0.0
+      }
+    },
+    {
+      "anchor_all_components_top_row": {
+        "component_values_n": {
+          "frame": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.14246908341638154,
+          "shell_membrane": 0.0,
+          "spring": 0.0
+        },
+        "dominant_internal_component": "shell_bending_drilling",
+        "found": true,
+        "global_dof": 13652,
+        "inferred_external_load_n": 0.0,
+        "internal_sum_n": 0.14246908341638154,
+        "reduced_index": 11024,
+        "residual_abs_n": 0.14246908341638154,
+        "residual_n": 0.14246908341638154
+      },
+      "canonical_policy": "structural_components_only",
+      "claim_boundary": "Policy replay only: re-evaluates the same active-frontier checkpoint under a shell pressure load-path policy. It does not create or promote a full-load G1 closure checkpoint.",
+      "policy": "structural_components_only",
+      "pressure_load_allowed_surface_element_count": 7150,
+      "pressure_load_filter_enabled": true,
+      "pressure_load_path_meta": {
+        "attached_surface_component_count": 1,
+        "claim_boundary": "Production load-path policy: shell pressure is applied only to surface components with a structural load path, defined as a frame-connected node or an authored translational restraint; unattached pressure-only shell components are classified as non-structural external loads.",
+        "free_pressure_surface_component_count": 2,
+        "pressure_load_allowed_surface_element_count": 7150,
+        "pressure_load_filter_enabled": true,
+        "pressure_load_suppressed_surface_element_count": 2,
+        "shell_pressure_load_path_policy": "structural_components_only",
+        "surface_component_count": 3
+      },
+      "pressure_load_suppressed_surface_element_count": 2,
+      "residual_gate_passed": false,
+      "residual_inf_n": 0.3818403374023447,
+      "status": "ready",
+      "top_row": {
+        "balance_driver": "component_external_cancellation",
+        "component_values_n": {
+          "frame": -27.524208068847656,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0,
+          "spring": 0.0
+        },
+        "dof_label": "UZ",
+        "dominant_internal_component": "frame",
+        "global_dof": 68648,
+        "inferred_external_load_n": -27.90604840625,
+        "internal_sum_n": -27.524208068847656,
+        "local_dof_index": 2,
+        "max_component_abs_n": 27.524208068847656,
+        "node_id": 11457,
+        "node_index": 11441,
+        "reduced_index": 54224,
+        "residual_abs_n": 0.3818403374023447,
+        "residual_n": 0.3818403374023447,
+        "residual_reconstruction_error_n": 0.0
+      }
+    }
+  ],
+  "schema_version": "g1-active-frontier-shell-policy-replay-probe.v1",
+  "status": "ready",
+  "summary": {
+    "anchor_global_dof": 13652,
+    "anchor_reduced_index": 11024,
+    "baseline_policy": "all_components",
+    "baseline_residual_inf_n": 0.42740724991695345,
+    "best_improvement_inf_n": 0.04556691251460876,
+    "best_policy": "attached_components_only",
+    "best_policy_pressure_filter_enabled": true,
+    "best_policy_pressure_suppressed_surface_element_count": 2,
+    "best_reduction_ratio": 0.10661239958719126,
+    "best_residual_gate_passed": false,
+    "best_residual_inf_n": 0.3818403374023447,
+    "ready_policy_count": 3,
+    "structural_or_attached_policy_descent_observed": true
+  }
+}

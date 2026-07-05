@@ -14,11 +14,14 @@ sys.path.insert(0, str(REPO_ROOT / "implementation" / "phase1"))
 import run_mgt_residual_jacobian_consistency_probe as probe_module  # noqa: E402
 from run_mgt_residual_jacobian_consistency_probe import (  # noqa: E402
     _component_breakdown,
+    _active_set_least_squares_sweep,
     _frame_hotspot_diagnostics,
+    _global_tangent_newton_sweep,
     _hotspot_diagonal_newton_sweep,
     _hotspot_signed_displacement_sweep,
     _hotspot_tangent_fd_jvp_rows,
     _local_row_projection_diagnostics,
+    _residual_norm_gradient_sweep,
     _scalar_load_balance_diagnostics,
     _shell_internal_element_hotspot_diagnostics,
     _shell_membrane_hotspot_diagnostics,
@@ -439,6 +442,180 @@ def test_hotspot_diagonal_newton_sweep_reduces_linear_hotspot_residual() -> None
     assert row["best_candidate"]["alpha"] == 1.0
     assert row["best_candidate"]["direct_residual_inf_n"] <= 1.0e-12
     assert abs(row["candidate_rows"][1]["direct_residual_inf_n"] - 0.5) <= 1.0e-12
+
+
+def test_hotspot_diagonal_newton_sweep_filters_shell_bending_rows() -> None:
+    stiffness = coo_matrix(([5.0, 3.0], ([0, 1], [0, 1])), shape=(2, 2)).tocsc()
+    free = np.asarray([0, 1], dtype=np.int64)
+
+    def assemble_residual(u: np.ndarray):
+        residual = np.asarray(
+            [5.0 * float(u[0]) - 1.0, 3.0 * float(u[1]) - 6.0],
+            dtype=np.float64,
+        )
+        return stiffness, np.asarray([1.0, 6.0], dtype=np.float64), free, residual, np.asarray([1.0, 6.0]), {}
+
+    row = _hotspot_diagonal_newton_sweep(
+        u=np.asarray([0.2, 3.0], dtype=np.float64),
+        stiffness=stiffness,
+        free=free,
+        top_rows=[
+            {
+                "free_row": 0,
+                "global_dof": 0,
+                "node_index": 0,
+                "dof": "ux",
+                "dominant_component": "frame",
+                "residual_n": 0.0,
+            },
+            {
+                "free_row": 1,
+                "global_dof": 1,
+                "node_index": 0,
+                "dof": "uz",
+                "dominant_component": "shell_bending_drilling",
+                "residual_n": 3.0,
+            },
+        ],
+        assemble_residual=assemble_residual,
+        alpha_values=(1.0, 0.5),
+        component_filter="shell_bending_drilling",
+    )
+
+    assert row["evaluated"] is True
+    assert row["component_filter"] == "shell_bending_drilling"
+    assert row["direction"] == "diagonal_newton_on_shell_bending_drilling_translation_hotspots"
+    assert row["selected_hotspot_row_count"] == 1
+    assert row["selected_corrections"][0]["global_dof"] == 1
+    assert row["selected_corrections"][0]["unit_alpha_correction_m"] == -1.0
+    assert row["best_candidate"]["alpha"] == 1.0
+    assert row["best_candidate"]["direct_residual_inf_n"] <= 1.0e-12
+
+
+def test_global_tangent_newton_sweep_reduces_linear_residual() -> None:
+    stiffness = coo_matrix(([2.0, 4.0], ([0, 1], [0, 1])), shape=(2, 2)).tocsc()
+    free = np.asarray([0, 1], dtype=np.int64)
+
+    def assemble_residual(u: np.ndarray):
+        residual = np.asarray(
+            [2.0 * float(u[0]) - 3.0, 4.0 * float(u[1]) - 6.0],
+            dtype=np.float64,
+        )
+        return stiffness, np.asarray([3.0, 6.0], dtype=np.float64), free, residual, np.asarray([3.0, 6.0]), {}
+
+    u0 = np.asarray([1.0, 1.0], dtype=np.float64)
+    residual = np.asarray([-1.0, -2.0], dtype=np.float64)
+    row = _global_tangent_newton_sweep(
+        u=u0,
+        stiffness=stiffness,
+        free=free,
+        residual=residual,
+        rhs=np.asarray([3.0, 6.0], dtype=np.float64),
+        assemble_residual=assemble_residual,
+        alpha_values=(1.0, 0.5),
+        max_iterations=8,
+        relative_increment_tolerance=1.0,
+    )
+
+    assert row["evaluated"] is True
+    assert row["solver"] == "scipy_lsmr_limited_cpu_diagnostic"
+    assert row["scaling"]["mode"] == "none"
+    assert row["descent_observed"] is True
+    assert row["linear_residual_inf_n"] <= 1.0e-10
+    assert row["best_candidate"]["alpha"] == 1.0
+    assert row["best_candidate"]["direct_residual_inf_n"] <= 1.0e-10
+    assert row["best_gate_eligible_candidate"]["alpha"] == 1.0
+
+    scaled = _global_tangent_newton_sweep(
+        u=u0,
+        stiffness=stiffness,
+        free=free,
+        residual=residual,
+        rhs=np.asarray([3.0, 6.0], dtype=np.float64),
+        assemble_residual=assemble_residual,
+        alpha_values=(1.0,),
+        max_iterations=8,
+        relative_increment_tolerance=1.0,
+        scaling="row_col_inf",
+    )
+    assert scaled["evaluated"] is True
+    assert scaled["scaling"]["mode"] == "row_col_inf"
+    assert scaled["best_candidate"]["direct_residual_inf_n"] <= 1.0e-10
+
+
+def test_residual_norm_gradient_sweep_reduces_linear_residual() -> None:
+    stiffness = coo_matrix(([2.0, 4.0], ([0, 1], [0, 1])), shape=(2, 2)).tocsc()
+    free = np.asarray([0, 1], dtype=np.int64)
+
+    def assemble_residual(u: np.ndarray):
+        residual = np.asarray(
+            [2.0 * float(u[0]) - 3.0, 4.0 * float(u[1]) - 6.0],
+            dtype=np.float64,
+        )
+        return stiffness, np.asarray([3.0, 6.0], dtype=np.float64), free, residual, np.asarray([3.0, 6.0]), {}
+
+    row = _residual_norm_gradient_sweep(
+        u=np.asarray([1.0, 1.0], dtype=np.float64),
+        stiffness=stiffness,
+        free=free,
+        residual=np.asarray([-1.0, -2.0], dtype=np.float64),
+        rhs=np.asarray([3.0, 6.0], dtype=np.float64),
+        assemble_residual=assemble_residual,
+        alpha_values=(1.0, 0.5),
+        trust_radius_m=0.25,
+        relative_increment_tolerance=1.0,
+    )
+
+    assert row["evaluated"] is True
+    assert row["direction"] == "negative_residual_norm_gradient"
+    assert row["inf_descent_observed"] is True
+    assert row["l2_descent_observed"] is True
+    assert row["best_inf_candidate"]["alpha"] == 1.0
+    assert row["best_inf_candidate"]["direct_residual_inf_n"] < 2.0
+    assert row["best_l2_candidate"]["direct_residual_l2_n"] < np.linalg.norm([-1.0, -2.0])
+
+
+def test_active_set_least_squares_sweep_reduces_active_and_full_residual() -> None:
+    stiffness = coo_matrix(([2.0, 4.0], ([0, 1], [0, 1])), shape=(2, 2)).tocsc()
+    free = np.asarray([0, 1], dtype=np.int64)
+
+    def assemble_residual(u: np.ndarray):
+        residual = np.asarray(
+            [2.0 * float(u[0]) - 3.0, 4.0 * float(u[1]) - 6.0],
+            dtype=np.float64,
+        )
+        return stiffness, np.asarray([3.0, 6.0], dtype=np.float64), free, residual, np.asarray([3.0, 6.0]), {}
+
+    row = _active_set_least_squares_sweep(
+        u=np.asarray([1.0, 1.0], dtype=np.float64),
+        stiffness=stiffness,
+        free=free,
+        residual=np.asarray([-1.0, -2.0], dtype=np.float64),
+        rhs=np.asarray([3.0, 6.0], dtype=np.float64),
+        top_rows=[
+            {
+                "free_row": 1,
+                "global_dof": 1,
+                "node_index": 0,
+                "dof": "uy",
+                "dominant_component": "frame",
+            }
+        ],
+        assemble_residual=assemble_residual,
+        alpha_values=(1.0, 0.5),
+        max_rows=1,
+        max_iterations=8,
+        trust_radius_m=1.0,
+        relative_increment_tolerance=1.0,
+    )
+
+    assert row["evaluated"] is True
+    assert row["direction"] == "active_set_global_least_squares"
+    assert row["selected_hotspot_row_count"] == 1
+    assert row["active_inf_descent_observed"] is True
+    assert row["full_inf_descent_observed"] is True
+    assert row["best_active_inf_candidate"]["active_residual_inf_n"] <= 1.0e-10
+    assert row["best_full_inf_candidate"]["direct_residual_inf_n"] == 1.0
 
 
 def test_component_only_probe_skips_jvp_and_state_scale(monkeypatch) -> None:

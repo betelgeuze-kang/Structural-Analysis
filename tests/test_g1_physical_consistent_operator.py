@@ -123,6 +123,24 @@ def test_jvp_matches_linear_system_exactly():
     assert parity["max_relative_error"] < 1.0e-8
 
 
+def test_jvp_parity_accepts_large_global_action_by_relative_tolerance():
+    op = _load("g1_global_newton_operator")
+    jvp = np.array([1.2852831677318245e12, -2.0e9])
+    reference = jvp + np.array([10.681396484375, -0.02])
+
+    parity = op.jvp_parity_against_reference(
+        jvp,
+        reference,
+        relative_tolerance=1.0e-4,
+        absolute_tolerance_n=1.0e-2,
+    )
+
+    assert parity["max_absolute_error_n"] > parity["absolute_tolerance_n"]
+    assert parity["max_relative_error"] < parity["relative_tolerance"]
+    assert parity["pass_condition"] == "relative_or_absolute"
+    assert parity["pass"] is True
+
+
 def test_jvp_matches_nonlinear_system_within_tolerance():
     op = _load("g1_global_newton_operator")
     rng = np.random.default_rng(11)

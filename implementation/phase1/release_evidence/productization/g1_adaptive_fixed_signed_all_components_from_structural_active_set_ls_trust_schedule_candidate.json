@@ -1,0 +1,368 @@
+{
+  "schema_version": "g1-active-set-ls-trust-candidate.v1",
+  "generated_at": "2026-07-04T21:45:57.705909+00:00",
+  "source_commit_sha": "f779666af7356914e11290547c4a001151062cb6",
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "status": "review",
+  "promotes_g1_closure": false,
+  "load_scale": 1.0,
+  "checkpoint_npz": "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_active_set_ls_trust_candidate.npz",
+  "shell_pressure_load_path_policy": "all_components",
+  "strategy": {
+    "mode": "iterative_active_set_global_least_squares_trust",
+    "active_row_count": 8,
+    "active_row_count_schedule": [
+      8,
+      16,
+      32
+    ],
+    "trust_radius_m": 1e-08,
+    "max_lsmr_iterations": 128,
+    "alpha_values": [
+      1.0,
+      0.5,
+      0.25,
+      0.125,
+      0.0625
+    ],
+    "selection_metric": "direct_residual_inf_descent"
+  },
+  "summary": {
+    "initial_residual_n": 0.42740724991695345,
+    "final_residual_n": 0.42740724991695345,
+    "initial_relative_residual_inf": 3.231612036590983e-05,
+    "final_relative_residual_inf": 3.231612036590983e-05,
+    "total_reduction_n": 0.0,
+    "total_reduction_ratio": 0.0,
+    "residual_gate_n": 0.0005,
+    "residual_gate_passed": false,
+    "steps_taken": 0,
+    "stop_reason": "no_candidate_descent",
+    "active_row_count_schedule": [
+      8,
+      16,
+      32
+    ]
+  },
+  "history": [
+    {
+      "iteration": 0,
+      "residual_before_n": 0.42740724991695345,
+      "direction_attempts": [
+        {
+          "active_row_count": 8,
+          "active_rows": [
+            11024,
+            33812,
+            11072,
+            33860,
+            33806,
+            11018,
+            33848,
+            11066
+          ],
+          "direction_status": "ready",
+          "direction": {
+            "active_row_count": 8,
+            "raw_direction_inf_m": 5.938909372969706e-20,
+            "trust_radius_m": 1e-08,
+            "trust_scale": 1.0,
+            "direction_inf_m": 5.938909372969706e-20,
+            "active_linear_residual_inf_n": 0.4274072497990966,
+            "solver": "scipy_lsmr_active_set_cpu_diagnostic",
+            "solver_stats": {
+              "istop": 2,
+              "iteration_count": 3,
+              "normr": 1.2088902586449355,
+              "normar": 1.9635517884039427e-07,
+              "norma": 5492060615.504721,
+              "condition_estimate": 3.1445049772113474,
+              "normx": 1.3303802289386373e-19,
+              "max_iterations": 128
+            }
+          },
+          "candidate_rows": [
+            {
+              "alpha": 1.0,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.42740725035698307,
+              "active_residual_inf_n": 0.42740725035698307,
+              "direct_relative_residual_inf": 3.2316120399180324e-05,
+              "improvement_inf_n": -4.400296238493695e-10,
+              "active_improvement_inf_n": -4.400296238493695e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.5,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.42740725035763677,
+              "active_residual_inf_n": 0.42740725035763677,
+              "direct_relative_residual_inf": 3.231612039922975e-05,
+              "improvement_inf_n": -4.406833231662688e-10,
+              "active_improvement_inf_n": -4.406833231662688e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.25,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.4274072503579494,
+              "active_residual_inf_n": 0.4274072503579494,
+              "direct_relative_residual_inf": 3.231612039925339e-05,
+              "improvement_inf_n": -4.4099596197000324e-10,
+              "active_improvement_inf_n": -4.4099596197000324e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.125,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.42740725035814836,
+              "active_residual_inf_n": 0.42740725035814836,
+              "direct_relative_residual_inf": 3.2316120399268436e-05,
+              "improvement_inf_n": -4.4119491393601606e-10,
+              "active_improvement_inf_n": -4.4119491393601606e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.0625,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.4274072503582052,
+              "active_residual_inf_n": 0.4274072503582052,
+              "direct_relative_residual_inf": 3.231612039927273e-05,
+              "improvement_inf_n": -4.4125175735487687e-10,
+              "active_improvement_inf_n": -4.4125175735487687e-10,
+              "residual_gate_passed": false
+            }
+          ],
+          "best_candidate": {}
+        },
+        {
+          "active_row_count": 16,
+          "active_rows": [
+            11024,
+            33812,
+            11072,
+            33860,
+            33806,
+            11018,
+            33848,
+            11066,
+            54224,
+            1778,
+            7358,
+            56540,
+            1790,
+            1784,
+            422,
+            5876
+          ],
+          "direction_status": "ready",
+          "direction": {
+            "active_row_count": 16,
+            "raw_direction_inf_m": 1.80129035715447e-14,
+            "trust_radius_m": 1e-08,
+            "trust_scale": 1.0,
+            "direction_inf_m": 1.80129035715447e-14,
+            "active_linear_residual_inf_n": 0.4274072498315474,
+            "solver": "scipy_lsmr_active_set_cpu_diagnostic",
+            "solver_stats": {
+              "istop": 2,
+              "iteration_count": 17,
+              "normr": 1.2088902586449357,
+              "normar": 0.18807949923630893,
+              "norma": 817565331813129.9,
+              "condition_estimate": 65093.9885357026,
+              "normx": 3.6609635317149483e-14,
+              "max_iterations": 128
+            }
+          },
+          "candidate_rows": [
+            {
+              "alpha": 1.0,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.4274072503538567,
+              "active_residual_inf_n": 0.4274072503538567,
+              "direct_relative_residual_inf": 3.231612039894394e-05,
+              "improvement_inf_n": -4.3690323581202506e-10,
+              "active_improvement_inf_n": -4.3690323581202506e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.5,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.427407250356102,
+              "active_residual_inf_n": 0.427407250356102,
+              "direct_relative_residual_inf": 3.231612039911371e-05,
+              "improvement_inf_n": -4.39148550857027e-10,
+              "active_improvement_inf_n": -4.39148550857027e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.25,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.42740725035721044,
+              "active_residual_inf_n": 0.42740725035721044,
+              "direct_relative_residual_inf": 3.2316120399197516e-05,
+              "improvement_inf_n": -4.4025699752481273e-10,
+              "active_improvement_inf_n": -4.4025699752481273e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.125,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.4274072503577789,
+              "active_residual_inf_n": 0.4274072503577789,
+              "direct_relative_residual_inf": 3.23161203992405e-05,
+              "improvement_inf_n": -4.408254317134208e-10,
+              "active_improvement_inf_n": -4.408254317134208e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.0625,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.42740725035800625,
+              "active_residual_inf_n": 0.42740725035800625,
+              "direct_relative_residual_inf": 3.231612039925769e-05,
+              "improvement_inf_n": -4.4105280538886404e-10,
+              "active_improvement_inf_n": -4.4105280538886404e-10,
+              "residual_gate_passed": false
+            }
+          ],
+          "best_candidate": {}
+        },
+        {
+          "active_row_count": 32,
+          "active_rows": [
+            33812,
+            11024,
+            33860,
+            11072,
+            33806,
+            11018,
+            33848,
+            11066,
+            54224,
+            1778,
+            7358,
+            56540,
+            1790,
+            1784,
+            422,
+            5876,
+            7371,
+            7370,
+            7364,
+            7994,
+            5870,
+            430,
+            428,
+            424,
+            1786,
+            11613,
+            5858,
+            8006,
+            5990,
+            6202,
+            8084,
+            566
+          ],
+          "direction_status": "ready",
+          "direction": {
+            "active_row_count": 32,
+            "raw_direction_inf_m": 1.5830619362943028e-13,
+            "trust_radius_m": 1e-08,
+            "trust_scale": 1.0,
+            "direction_inf_m": 1.5830619362943028e-13,
+            "active_linear_residual_inf_n": 0.42740724983009265,
+            "solver": "scipy_lsmr_active_set_cpu_diagnostic",
+            "solver_stats": {
+              "istop": 2,
+              "iteration_count": 90,
+              "normr": 1.2088902586449388,
+              "normar": 1109.5025980232228,
+              "norma": 1692572591853417.5,
+              "condition_estimate": 6548.345424757538,
+              "normx": 2.5007046811397635e-13,
+              "max_iterations": 128
+            }
+          },
+          "candidate_rows": [
+            {
+              "alpha": 1.0,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.42740725035408406,
+              "active_residual_inf_n": 0.42740725035408406,
+              "direct_relative_residual_inf": 3.231612039896113e-05,
+              "improvement_inf_n": -4.371306094874683e-10,
+              "active_improvement_inf_n": -4.371306094874683e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.5,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.42740725035615884,
+              "active_residual_inf_n": 0.42740725035615884,
+              "direct_relative_residual_inf": 3.2316120399118e-05,
+              "improvement_inf_n": -4.392053942758878e-10,
+              "active_improvement_inf_n": -4.392053942758878e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.25,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.4274072503572673,
+              "active_residual_inf_n": 0.4274072503572673,
+              "direct_relative_residual_inf": 3.231612039920182e-05,
+              "improvement_inf_n": -4.4031384094367354e-10,
+              "active_improvement_inf_n": -4.4031384094367354e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.125,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.4274072503577789,
+              "active_residual_inf_n": 0.4274072503577789,
+              "direct_relative_residual_inf": 3.23161203992405e-05,
+              "improvement_inf_n": -4.408254317134208e-10,
+              "active_improvement_inf_n": -4.408254317134208e-10,
+              "residual_gate_passed": false
+            },
+            {
+              "alpha": 0.0625,
+              "free_dof_set_stable": true,
+              "direct_residual_inf_n": 0.4274072503580631,
+              "active_residual_inf_n": 0.4274072503580631,
+              "direct_relative_residual_inf": 3.2316120399261985e-05,
+              "improvement_inf_n": -4.4110964880772485e-10,
+              "active_improvement_inf_n": -4.4110964880772485e-10,
+              "residual_gate_passed": false
+            }
+          ],
+          "best_candidate": {}
+        }
+      ],
+      "accepted": false
+    }
+  ],
+  "output_final_checkpoint": {
+    "written": true,
+    "path": "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_active_set_ls_trust_schedule_candidate.npz",
+    "schema": "mgt-direct-residual-newton-state.v1",
+    "load_scale": 1.0,
+    "dof_count": 78282,
+    "direct_residual_inf_n": 0.42740724991695345,
+    "direct_relative_residual_inf": 3.231612036590983e-05,
+    "max_translation_m": 0.05360178515313762,
+    "accepted_iteration_count": 0,
+    "accepted_history_count": 0,
+    "residual_gate_n": 0.0005,
+    "residual_gate_passed": false,
+    "frame_tangent_source": "force_based_residual_tangent",
+    "shell_pressure_load_path_policy": "all_components",
+    "promotes_g1_closure": false,
+    "claim_boundary": "Loadable active-set LS trust checkpoint candidate only. It does not close G1 without direct residual, material Newton, full-mesh, and production ROCm/HIP gates."
+  },
+  "runtime_metrics": {
+    "total_seconds": 143.09812533296645
+  },
+  "claim_boundary": "Non-promoting active-set LS trust candidate. It may lower the current full-load residual frontier but does not close G1, material Newton breadth, full-mesh equilibrium, or production ROCm/HIP residency."
+}

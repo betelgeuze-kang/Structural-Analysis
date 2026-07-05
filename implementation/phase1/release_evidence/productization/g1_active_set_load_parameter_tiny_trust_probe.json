@@ -1,0 +1,727 @@
+{
+  "actual_replay_rows": [
+    {
+      "alpha": 1.0,
+      "delta_load_scale": -1e-05,
+      "direct_residual_inf_n": 0.4274029760383601,
+      "free_dof_set_stable": true,
+      "improvement_inf_n": 4.273878593363811e-06,
+      "load_scale": 0.99999,
+      "residual_gate_passed": false,
+      "status": "ready"
+    },
+    {
+      "alpha": 0.5,
+      "delta_load_scale": -5e-06,
+      "direct_residual_inf_n": 0.427405113268695,
+      "free_dof_set_stable": true,
+      "improvement_inf_n": 2.1366482584328494e-06,
+      "load_scale": 0.999995,
+      "residual_gate_passed": false,
+      "status": "ready"
+    }
+  ],
+  "attempts": [
+    {
+      "active_row_count": 8,
+      "active_rows": [
+        {
+          "abs": 0.42740724991695345,
+          "dof_label": "UZ",
+          "global_dof": 13652,
+          "local_dof_index": 2,
+          "node_id": 2276,
+          "node_index": 2275,
+          "reduced_index": 11024,
+          "value": -0.42740724991695345
+        },
+        {
+          "abs": 0.42740724991695345,
+          "dof_label": "UZ",
+          "global_dof": 46706,
+          "local_dof_index": 2,
+          "node_id": 7785,
+          "node_index": 7784,
+          "reduced_index": 33812,
+          "value": -0.42740724991695345
+        },
+        {
+          "abs": 0.4274072498926576,
+          "dof_label": "UZ",
+          "global_dof": 13712,
+          "local_dof_index": 2,
+          "node_id": 2286,
+          "node_index": 2285,
+          "reduced_index": 11072,
+          "value": -0.4274072498926576
+        },
+        {
+          "abs": 0.4274072498926576,
+          "dof_label": "UZ",
+          "global_dof": 46766,
+          "local_dof_index": 2,
+          "node_id": 7795,
+          "node_index": 7794,
+          "reduced_index": 33860,
+          "value": -0.4274072498926576
+        },
+        {
+          "abs": 0.42740724976359407,
+          "dof_label": "UZ",
+          "global_dof": 46694,
+          "local_dof_index": 2,
+          "node_id": 7783,
+          "node_index": 7782,
+          "reduced_index": 33806,
+          "value": -0.42740724976359407
+        },
+        {
+          "abs": 0.42740724976359407,
+          "dof_label": "UZ",
+          "global_dof": 13640,
+          "local_dof_index": 2,
+          "node_id": 2274,
+          "node_index": 2273,
+          "reduced_index": 11018,
+          "value": -0.42740724976359407
+        },
+        {
+          "abs": 0.42740724962318133,
+          "dof_label": "UZ",
+          "global_dof": 46754,
+          "local_dof_index": 2,
+          "node_id": 7793,
+          "node_index": 7792,
+          "reduced_index": 33848,
+          "value": -0.42740724962318133
+        },
+        {
+          "abs": 0.42740724962318133,
+          "dof_label": "UZ",
+          "global_dof": 13706,
+          "local_dof_index": 2,
+          "node_id": 2285,
+          "node_index": 2284,
+          "reduced_index": 11066,
+          "value": -0.42740724962318133
+        }
+      ],
+      "direction": {
+        "active_linear_improvement_inf_n": 4.274190345765483e-06,
+        "active_linear_residual_inf_n": 0.4274029757266077,
+        "active_load_derivative_inf_n_per_load": 0.5698763333333301,
+        "active_row_count": 8,
+        "delta_load_scale": -1e-05,
+        "direction_inf_m": 1e-08,
+        "displacement_trust_radius_m": 1e-08,
+        "load_trust_radius": 1e-05,
+        "solver": "scipy_linprog_highs_active_set_displacement_plus_load_parameter",
+        "solver_stats": {
+          "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+          "nit": 17,
+          "objective": 0.42740297572659386,
+          "status": 0
+        },
+        "support_column_count": 24,
+        "support_strongest_per_row": 32
+      },
+      "status": "ready"
+    },
+    {
+      "active_row_count": 16,
+      "active_rows": [
+        {
+          "abs": 0.42740724991695345,
+          "dof_label": "UZ",
+          "global_dof": 13652,
+          "local_dof_index": 2,
+          "node_id": 2276,
+          "node_index": 2275,
+          "reduced_index": 11024,
+          "value": -0.42740724991695345
+        },
+        {
+          "abs": 0.42740724991695345,
+          "dof_label": "UZ",
+          "global_dof": 46706,
+          "local_dof_index": 2,
+          "node_id": 7785,
+          "node_index": 7784,
+          "reduced_index": 33812,
+          "value": -0.42740724991695345
+        },
+        {
+          "abs": 0.4274072498926576,
+          "dof_label": "UZ",
+          "global_dof": 13712,
+          "local_dof_index": 2,
+          "node_id": 2286,
+          "node_index": 2285,
+          "reduced_index": 11072,
+          "value": -0.4274072498926576
+        },
+        {
+          "abs": 0.4274072498926576,
+          "dof_label": "UZ",
+          "global_dof": 46766,
+          "local_dof_index": 2,
+          "node_id": 7795,
+          "node_index": 7794,
+          "reduced_index": 33860,
+          "value": -0.4274072498926576
+        },
+        {
+          "abs": 0.42740724976359407,
+          "dof_label": "UZ",
+          "global_dof": 46694,
+          "local_dof_index": 2,
+          "node_id": 7783,
+          "node_index": 7782,
+          "reduced_index": 33806,
+          "value": -0.42740724976359407
+        },
+        {
+          "abs": 0.42740724976359407,
+          "dof_label": "UZ",
+          "global_dof": 13640,
+          "local_dof_index": 2,
+          "node_id": 2274,
+          "node_index": 2273,
+          "reduced_index": 11018,
+          "value": -0.42740724976359407
+        },
+        {
+          "abs": 0.42740724962318133,
+          "dof_label": "UZ",
+          "global_dof": 46754,
+          "local_dof_index": 2,
+          "node_id": 7793,
+          "node_index": 7792,
+          "reduced_index": 33848,
+          "value": -0.42740724962318133
+        },
+        {
+          "abs": 0.42740724962318133,
+          "dof_label": "UZ",
+          "global_dof": 13706,
+          "local_dof_index": 2,
+          "node_id": 2285,
+          "node_index": 2284,
+          "reduced_index": 11066,
+          "value": -0.42740724962318133
+        },
+        {
+          "abs": 0.3818403374023447,
+          "dof_label": "UZ",
+          "global_dof": 68648,
+          "local_dof_index": 2,
+          "node_id": 11457,
+          "node_index": 11441,
+          "reduced_index": 54224,
+          "value": 0.3818403374023447
+        },
+        {
+          "abs": 0.3817036904618334,
+          "dof_label": "UZ",
+          "global_dof": 1922,
+          "local_dof_index": 2,
+          "node_id": 321,
+          "node_index": 320,
+          "reduced_index": 1778,
+          "value": -0.3817036904618334
+        },
+        {
+          "abs": 0.2736842054046029,
+          "dof_label": "UZ",
+          "global_dof": 8516,
+          "local_dof_index": 2,
+          "node_id": 1420,
+          "node_index": 1419,
+          "reduced_index": 7358,
+          "value": -0.2736842054046029
+        },
+        {
+          "abs": 0.2735639702148447,
+          "dof_label": "UZ",
+          "global_dof": 74216,
+          "local_dof_index": 2,
+          "node_id": 12385,
+          "node_index": 12369,
+          "reduced_index": 56540,
+          "value": 0.2735639702148447
+        },
+        {
+          "abs": 0.011794193795190644,
+          "dof_label": "UZ",
+          "global_dof": 1934,
+          "local_dof_index": 2,
+          "node_id": 323,
+          "node_index": 322,
+          "reduced_index": 1790,
+          "value": 0.011794193795190644
+        },
+        {
+          "abs": 0.011771767537564592,
+          "dof_label": "UZ",
+          "global_dof": 1928,
+          "local_dof_index": 2,
+          "node_id": 322,
+          "node_index": 321,
+          "reduced_index": 1784,
+          "value": -0.011771767537564592
+        },
+        {
+          "abs": 0.011601722753766808,
+          "dof_label": "UZ",
+          "global_dof": 518,
+          "local_dof_index": 2,
+          "node_id": 87,
+          "node_index": 86,
+          "reduced_index": 422,
+          "value": -0.011601722753766808
+        },
+        {
+          "abs": 0.008658271586682531,
+          "dof_label": "UZ",
+          "global_dof": 6932,
+          "local_dof_index": 2,
+          "node_id": 1156,
+          "node_index": 1155,
+          "reduced_index": 5876,
+          "value": -0.008658271586682531
+        }
+      ],
+      "direction": {
+        "active_linear_improvement_inf_n": 4.273998223225384e-06,
+        "active_linear_residual_inf_n": 0.4274029759187302,
+        "active_load_derivative_inf_n_per_load": 12362.497501079815,
+        "active_row_count": 16,
+        "delta_load_scale": -1e-05,
+        "direction_inf_m": 2.406891396232877e-08,
+        "displacement_trust_radius_m": 1e-08,
+        "load_trust_radius": 1e-05,
+        "solver": "scipy_linprog_highs_active_set_displacement_plus_load_parameter",
+        "solver_stats": {
+          "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+          "nit": 26,
+          "objective": 0.4274029757266007,
+          "status": 0
+        },
+        "support_column_count": 143,
+        "support_strongest_per_row": 32
+      },
+      "status": "ready"
+    },
+    {
+      "active_row_count": 32,
+      "active_rows": [
+        {
+          "abs": 0.42740724991695345,
+          "dof_label": "UZ",
+          "global_dof": 46706,
+          "local_dof_index": 2,
+          "node_id": 7785,
+          "node_index": 7784,
+          "reduced_index": 33812,
+          "value": -0.42740724991695345
+        },
+        {
+          "abs": 0.42740724991695345,
+          "dof_label": "UZ",
+          "global_dof": 13652,
+          "local_dof_index": 2,
+          "node_id": 2276,
+          "node_index": 2275,
+          "reduced_index": 11024,
+          "value": -0.42740724991695345
+        },
+        {
+          "abs": 0.4274072498926576,
+          "dof_label": "UZ",
+          "global_dof": 46766,
+          "local_dof_index": 2,
+          "node_id": 7795,
+          "node_index": 7794,
+          "reduced_index": 33860,
+          "value": -0.4274072498926576
+        },
+        {
+          "abs": 0.4274072498926576,
+          "dof_label": "UZ",
+          "global_dof": 13712,
+          "local_dof_index": 2,
+          "node_id": 2286,
+          "node_index": 2285,
+          "reduced_index": 11072,
+          "value": -0.4274072498926576
+        },
+        {
+          "abs": 0.42740724976359407,
+          "dof_label": "UZ",
+          "global_dof": 46694,
+          "local_dof_index": 2,
+          "node_id": 7783,
+          "node_index": 7782,
+          "reduced_index": 33806,
+          "value": -0.42740724976359407
+        },
+        {
+          "abs": 0.42740724976359407,
+          "dof_label": "UZ",
+          "global_dof": 13640,
+          "local_dof_index": 2,
+          "node_id": 2274,
+          "node_index": 2273,
+          "reduced_index": 11018,
+          "value": -0.42740724976359407
+        },
+        {
+          "abs": 0.42740724962318133,
+          "dof_label": "UZ",
+          "global_dof": 46754,
+          "local_dof_index": 2,
+          "node_id": 7793,
+          "node_index": 7792,
+          "reduced_index": 33848,
+          "value": -0.42740724962318133
+        },
+        {
+          "abs": 0.42740724962318133,
+          "dof_label": "UZ",
+          "global_dof": 13706,
+          "local_dof_index": 2,
+          "node_id": 2285,
+          "node_index": 2284,
+          "reduced_index": 11066,
+          "value": -0.42740724962318133
+        },
+        {
+          "abs": 0.3818403374023447,
+          "dof_label": "UZ",
+          "global_dof": 68648,
+          "local_dof_index": 2,
+          "node_id": 11457,
+          "node_index": 11441,
+          "reduced_index": 54224,
+          "value": 0.3818403374023447
+        },
+        {
+          "abs": 0.3817036904618334,
+          "dof_label": "UZ",
+          "global_dof": 1922,
+          "local_dof_index": 2,
+          "node_id": 321,
+          "node_index": 320,
+          "reduced_index": 1778,
+          "value": -0.3817036904618334
+        },
+        {
+          "abs": 0.2736842054046029,
+          "dof_label": "UZ",
+          "global_dof": 8516,
+          "local_dof_index": 2,
+          "node_id": 1420,
+          "node_index": 1419,
+          "reduced_index": 7358,
+          "value": -0.2736842054046029
+        },
+        {
+          "abs": 0.2735639702148447,
+          "dof_label": "UZ",
+          "global_dof": 74216,
+          "local_dof_index": 2,
+          "node_id": 12385,
+          "node_index": 12369,
+          "reduced_index": 56540,
+          "value": 0.2735639702148447
+        },
+        {
+          "abs": 0.011794193795190644,
+          "dof_label": "UZ",
+          "global_dof": 1934,
+          "local_dof_index": 2,
+          "node_id": 323,
+          "node_index": 322,
+          "reduced_index": 1790,
+          "value": 0.011794193795190644
+        },
+        {
+          "abs": 0.011771767537564592,
+          "dof_label": "UZ",
+          "global_dof": 1928,
+          "local_dof_index": 2,
+          "node_id": 322,
+          "node_index": 321,
+          "reduced_index": 1784,
+          "value": -0.011771767537564592
+        },
+        {
+          "abs": 0.011601722753766808,
+          "dof_label": "UZ",
+          "global_dof": 518,
+          "local_dof_index": 2,
+          "node_id": 87,
+          "node_index": 86,
+          "reduced_index": 422,
+          "value": -0.011601722753766808
+        },
+        {
+          "abs": 0.008658271586682531,
+          "dof_label": "UZ",
+          "global_dof": 6932,
+          "local_dof_index": 2,
+          "node_id": 1156,
+          "node_index": 1155,
+          "reduced_index": 5876,
+          "value": -0.008658271586682531
+        },
+        {
+          "abs": 0.007058864264081421,
+          "dof_label": "RX",
+          "global_dof": 8529,
+          "local_dof_index": 3,
+          "node_id": 1422,
+          "node_index": 1421,
+          "reduced_index": 7371,
+          "value": -0.007058864264081421
+        },
+        {
+          "abs": 0.006742486404396786,
+          "dof_label": "UZ",
+          "global_dof": 8528,
+          "local_dof_index": 2,
+          "node_id": 1422,
+          "node_index": 1421,
+          "reduced_index": 7370,
+          "value": -0.006742486404396786
+        },
+        {
+          "abs": 0.0067296376892205245,
+          "dof_label": "UZ",
+          "global_dof": 8522,
+          "local_dof_index": 2,
+          "node_id": 1421,
+          "node_index": 1420,
+          "reduced_index": 7364,
+          "value": 0.0067296376892205245
+        },
+        {
+          "abs": 0.006643242903464852,
+          "dof_label": "UZ",
+          "global_dof": 9152,
+          "local_dof_index": 2,
+          "node_id": 1526,
+          "node_index": 1525,
+          "reduced_index": 7994,
+          "value": 0.006643242903464852
+        },
+        {
+          "abs": 0.006531800465381821,
+          "dof_label": "UZ",
+          "global_dof": 6926,
+          "local_dof_index": 2,
+          "node_id": 1155,
+          "node_index": 1154,
+          "reduced_index": 5870,
+          "value": 0.006531800465381821
+        },
+        {
+          "abs": 0.005686124750582167,
+          "dof_label": "RY",
+          "global_dof": 526,
+          "local_dof_index": 4,
+          "node_id": 88,
+          "node_index": 87,
+          "reduced_index": 430,
+          "value": -0.005686124750582167
+        },
+        {
+          "abs": 0.005420373699962511,
+          "dof_label": "UZ",
+          "global_dof": 524,
+          "local_dof_index": 2,
+          "node_id": 88,
+          "node_index": 87,
+          "reduced_index": 428,
+          "value": -0.005420373699962511
+        },
+        {
+          "abs": 0.0045914976127505724,
+          "dof_label": "RY",
+          "global_dof": 520,
+          "local_dof_index": 4,
+          "node_id": 87,
+          "node_index": 86,
+          "reduced_index": 424,
+          "value": 0.0045914976127505724
+        },
+        {
+          "abs": 0.004536399553899173,
+          "dof_label": "RY",
+          "global_dof": 1930,
+          "local_dof_index": 4,
+          "node_id": 322,
+          "node_index": 321,
+          "reduced_index": 1786,
+          "value": 0.004536399553899173
+        },
+        {
+          "abs": 0.004125591943193285,
+          "dof_label": "RX",
+          "global_dof": 14265,
+          "local_dof_index": 3,
+          "node_id": 2378,
+          "node_index": 2377,
+          "reduced_index": 11613,
+          "value": -0.004125591943193285
+        },
+        {
+          "abs": 0.003930727682018187,
+          "dof_label": "UZ",
+          "global_dof": 6914,
+          "local_dof_index": 2,
+          "node_id": 1153,
+          "node_index": 1152,
+          "reduced_index": 5858,
+          "value": -0.003930727682018187
+        },
+        {
+          "abs": 0.003619620558083625,
+          "dof_label": "UZ",
+          "global_dof": 9164,
+          "local_dof_index": 2,
+          "node_id": 1528,
+          "node_index": 1527,
+          "reduced_index": 8006,
+          "value": 0.003619620558083625
+        },
+        {
+          "abs": 0.0034790914717177657,
+          "dof_label": "UZ",
+          "global_dof": 7076,
+          "local_dof_index": 2,
+          "node_id": 1180,
+          "node_index": 1179,
+          "reduced_index": 5990,
+          "value": 0.0034790914717177657
+        },
+        {
+          "abs": 0.0032694758328943863,
+          "dof_label": "RY",
+          "global_dof": 7354,
+          "local_dof_index": 4,
+          "node_id": 1226,
+          "node_index": 1225,
+          "reduced_index": 6202,
+          "value": -0.0032694758328943863
+        },
+        {
+          "abs": 0.002985261379194526,
+          "dof_label": "UZ",
+          "global_dof": 9242,
+          "local_dof_index": 2,
+          "node_id": 1541,
+          "node_index": 1540,
+          "reduced_index": 8084,
+          "value": -0.002985261379194526
+        },
+        {
+          "abs": 0.0028195195975513343,
+          "dof_label": "UZ",
+          "global_dof": 662,
+          "local_dof_index": 2,
+          "node_id": 111,
+          "node_index": 110,
+          "reduced_index": 566,
+          "value": 0.0028195195975513343
+        }
+      ],
+      "direction": {
+        "active_linear_improvement_inf_n": 4.274114638547211e-06,
+        "active_linear_residual_inf_n": 0.4274029758023149,
+        "active_load_derivative_inf_n_per_load": 13225.821821352838,
+        "active_row_count": 32,
+        "delta_load_scale": -1e-05,
+        "direction_inf_m": 1e-08,
+        "displacement_trust_radius_m": 1e-08,
+        "load_trust_radius": 1e-05,
+        "solver": "scipy_linprog_highs_active_set_displacement_plus_load_parameter",
+        "solver_stats": {
+          "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+          "nit": 51,
+          "objective": 0.4274029757265948,
+          "status": 0
+        },
+        "support_column_count": 323,
+        "support_strongest_per_row": 32
+      },
+      "status": "ready"
+    }
+  ],
+  "checkpoint": {
+    "direct_residual_inf_n": 0.42740724991695345,
+    "load_scale": 1.0,
+    "schema": "mgt-direct-residual-newton-state.v1"
+  },
+  "checkpoint_npz": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_active_set_ls_trust_candidate.npz",
+  "claim_boundary": "Active-set load-parameter continuation probe only. Any residual descent at load_scale != 1.0 is routing evidence for arc-length/continuation design and does not close G1 full-load equilibrium.",
+  "displacement_trust_radius_m": 1e-08,
+  "frame_tangent_source": "force_based_residual_tangent",
+  "generated_at": "2026-07-04T23:00:07.612310+00:00",
+  "is_candidate_only": true,
+  "load_derivative_eps": 0.001,
+  "load_scale": 1.0,
+  "load_trust_radius": 1e-05,
+  "mgt_model": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "promotes_g1_closure": false,
+  "restored_full_load_replay_rows": [
+    {
+      "alpha": 1.0,
+      "claim_boundary": "Restores the continuation displacement to the original full-load residual; this is the relevant full-load check.",
+      "delta_load_scale": 0.0,
+      "direct_residual_inf_n": 0.4274086748016934,
+      "improvement_inf_n": -1.424884739975596e-06,
+      "load_scale": 1.0,
+      "residual_gate_passed": false,
+      "status": "ready"
+    },
+    {
+      "alpha": 0.5,
+      "claim_boundary": "Restores the continuation displacement to the original full-load residual; this is the relevant full-load check.",
+      "delta_load_scale": 0.0,
+      "direct_residual_inf_n": 0.42740796265036174,
+      "improvement_inf_n": -7.127334082923653e-07,
+      "load_scale": 1.0,
+      "residual_gate_passed": false,
+      "status": "ready"
+    }
+  ],
+  "schema_version": "g1-active-set-load-parameter-probe.v1",
+  "status": "ready",
+  "summary": {
+    "active_row_count_schedule": [
+      8,
+      16,
+      32
+    ],
+    "actual_replay_attempted": true,
+    "actual_replay_descent_observed": true,
+    "best_actual_replay_improvement_inf_n": 4.273878593363811e-06,
+    "best_actual_replay_load_scale": 0.99999,
+    "best_actual_replay_residual_gate_passed": false,
+    "best_actual_replay_residual_inf_n": 0.4274029760383601,
+    "best_linear_active_improvement_inf_n": 4.274190345765483e-06,
+    "best_linear_active_residual_inf_n": 0.4274029757266077,
+    "best_linear_active_row_count": 8,
+    "best_linear_delta_load_scale": -1e-05,
+    "best_linear_direction_inf_m": 1e-08,
+    "best_restored_full_load_improvement_inf_n": -7.127334082923653e-07,
+    "best_restored_full_load_residual_gate_passed": false,
+    "best_restored_full_load_residual_inf_n": 0.42740796265036174,
+    "initial_residual_inf_n": 0.42740724991695345,
+    "load_derivative_inf_n_per_load": 13225.821821352838,
+    "ready_attempt_count": 3,
+    "restored_full_load_descent_observed": false,
+    "restored_full_load_replay_attempted": true
+  }
+}

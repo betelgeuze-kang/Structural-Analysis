@@ -448,6 +448,139 @@ def build_structural_product_development_roadmap(
             "true_newton_full_load_checkpoint_candidate"
         )
     )
+    g1_true_newton_from_active_set = _as_dict(
+        g1_consistent_newton_runner.get(
+            "true_newton_from_active_set_ls_trust_candidate"
+        )
+    )
+    g1_true_newton_from_active_set_service_tangent = _as_dict(
+        g1_consistent_newton_runner.get(
+            "true_newton_from_active_set_service_tangent_ls_trust_candidate"
+        )
+    )
+    g1_true_newton_frame_tangent_source_comparison = _as_dict(
+        g1_consistent_newton_runner.get(
+            "true_newton_frame_tangent_source_comparison"
+        )
+    )
+    g1_frame_tangent_fd_epsilon_sweep = _as_dict(
+        g1_consistent_newton_runner.get("frame_tangent_fd_epsilon_sweep")
+    )
+    g1_true_newton_from_active_set_mu_sweep = _as_dict(
+        g1_consistent_newton_runner.get("true_newton_from_active_set_mu_sweep")
+    )
+    g1_active_set_load_parameter_probe = _as_dict(
+        g1_consistent_newton_runner.get("active_set_load_parameter_probe")
+    )
+    g1_active_set_load_parameter_tiny_trust_probe = _as_dict(
+        g1_consistent_newton_runner.get(
+            "active_set_load_parameter_tiny_trust_probe"
+        )
+    )
+    g1_active_frontier_residual_ownership_probe = _as_dict(
+        g1_consistent_newton_runner.get(
+            "active_frontier_residual_ownership_probe"
+        )
+    )
+    g1_active_frontier_shell_load_neighborhood_probe = _as_dict(
+        g1_consistent_newton_runner.get(
+            "active_frontier_shell_load_neighborhood_probe"
+        )
+    )
+    g1_active_frontier_shell_policy_replay_probe = _as_dict(
+        g1_consistent_newton_runner.get(
+            "active_frontier_shell_policy_replay_probe"
+        )
+    )
+    g1_active_frontier_shell_policy_linearized_active_set_probe = _as_dict(
+        g1_consistent_newton_runner.get(
+            "active_frontier_shell_policy_linearized_active_set_probe"
+        )
+    )
+    g1_active_frontier_structural_policy_active_set_ls_trust_candidate = _as_dict(
+        g1_consistent_newton_runner.get(
+            "active_frontier_structural_policy_active_set_ls_trust_candidate"
+        )
+    )
+    g1_active_frontier_structural_policy_active_set_ls_trust_alpha_sweep = _as_dict(
+        g1_consistent_newton_runner.get(
+            "active_frontier_structural_policy_active_set_ls_trust_alpha_sweep"
+        )
+    )
+    g1_active_frontier_structural_policy_residual_ownership_probe = _as_dict(
+        g1_consistent_newton_runner.get(
+            "active_frontier_structural_policy_residual_ownership_probe"
+        )
+    )
+    g1_active_frontier_structural_policy_linearized_after_two_step_probe = _as_dict(
+        g1_consistent_newton_runner.get(
+            "active_frontier_structural_policy_linearized_active_set_after_two_step_probe"
+        )
+    )
+    g1_active_frontier_structural_policy_shell_rotation_candidate = _as_dict(
+        g1_consistent_newton_runner.get(
+            "active_frontier_structural_policy_shell_rotation_row_candidate"
+        )
+    )
+    g1_active_frontier_structural_policy_shell_rotation_no_descent_probe = _as_dict(
+        g1_consistent_newton_runner.get(
+            "active_frontier_structural_policy_shell_rotation_row_no_descent_probe"
+        )
+    )
+    g1_active_frontier_structural_policy_shell_rotation_candidate_ownership = _as_dict(
+        g1_consistent_newton_runner.get(
+            "active_frontier_structural_policy_shell_rotation_candidate_residual_ownership_probe"
+        )
+    )
+    g1_sparse_direct_scaled_lsmr_frontier_probe = _as_dict(
+        g1_consistent_newton_runner.get(
+            "sparse_direct_scaled_lsmr_frontier_probe"
+        )
+    )
+    g1_sparse_direct_scaled_lsmr_second_probe = _as_dict(
+        g1_consistent_newton_runner.get("sparse_direct_scaled_lsmr_second_probe")
+    )
+    g1_sparse_direct_scaled_lsmr_chain = _as_dict(
+        g1_consistent_newton_runner.get("sparse_direct_scaled_lsmr_chain")
+    )
+    g1_sparse_direct_scaled_lsmr_chain_probe = _as_dict(
+        g1_consistent_newton_runner.get("sparse_direct_scaled_lsmr_chain_probe")
+    )
+    g1_sparse_direct_scaled_lsmr_long_chain_probe = _as_dict(
+        g1_consistent_newton_runner.get(
+            "sparse_direct_scaled_lsmr_long_chain_probe"
+        )
+    )
+    g1_adaptive_all_components_frontier = _as_dict(
+        g1_consistent_newton_runner.get("adaptive_all_components_frontier")
+    )
+    g1_shell_hotspot_tangent_fd_jvp = _as_dict(
+        g1_consistent_newton_runner.get("shell_hotspot_tangent_fd_jvp")
+    )
+    g1_shell_hotspot_diagonal_sweep = _as_dict(
+        g1_consistent_newton_runner.get("shell_hotspot_diagonal_sweep")
+    )
+    g1_global_tangent_scaled_sweep = _as_dict(
+        g1_consistent_newton_runner.get("global_tangent_scaled_sweep")
+    )
+    g1_residual_norm_gradient_tiny_sweep = _as_dict(
+        g1_consistent_newton_runner.get("residual_norm_gradient_tiny_sweep")
+    )
+    g1_active_set_ls_sweep = _as_dict(
+        g1_consistent_newton_runner.get("active_set_ls_sweep")
+    )
+    g1_active_set_ls_trust_candidate = _as_dict(
+        g1_consistent_newton_runner.get("active_set_ls_trust_candidate")
+    )
+    g1_active_set_ls_trust_schedule_candidate = _as_dict(
+        g1_consistent_newton_runner.get("active_set_ls_trust_schedule_candidate")
+    )
+    g1_active_set_ls_trust_tangent_fd_jvp = _as_dict(
+        g1_consistent_newton_runner.get("active_set_ls_trust_tangent_fd_jvp")
+    )
+    g1_active_set_minimax_trust_candidate = _as_dict(
+        g1_consistent_newton_runner.get("active_set_minimax_trust_candidate")
+    )
     g1_global_summary = _as_dict(g1_global_connectivity.get("summary"))
     g1_global_decision = _as_dict(g1_global_connectivity.get("decision_record"))
     g1_cause_signals = _as_dict(g1_cause_narrowing.get("evidence_signals"))
@@ -704,6 +837,684 @@ def build_structural_product_development_roadmap(
                 "true_newton_full_load_checkpoint_candidate_residual_n": (
                     g1_true_newton_checkpoint_candidate.get(
                         "checkpoint_direct_residual_inf_n"
+                    )
+                ),
+                "true_newton_from_active_set_final_residual_n": (
+                    g1_true_newton_from_active_set.get("true_final_residual_n")
+                ),
+                "true_newton_from_active_set_stop_reason": str(
+                    g1_true_newton_from_active_set.get("true_stop_reason") or ""
+                ),
+                "true_newton_from_active_set_max_jvp_gap_relative_inf": (
+                    g1_true_newton_from_active_set.get(
+                        "max_jvp_minus_unregularized_tangent_action_relative_inf"
+                    )
+                ),
+                "true_newton_from_active_set_dominant_gap_component": str(
+                    g1_true_newton_from_active_set.get(
+                        "dominant_jvp_gap_component"
+                    )
+                    or ""
+                ),
+                "true_newton_from_active_set_service_tangent_final_residual_n": (
+                    g1_true_newton_from_active_set_service_tangent.get(
+                        "true_final_residual_n"
+                    )
+                ),
+                "true_newton_from_active_set_service_tangent_stop_reason": str(
+                    g1_true_newton_from_active_set_service_tangent.get(
+                        "true_stop_reason"
+                    )
+                    or ""
+                ),
+                "true_newton_from_active_set_service_tangent_max_jvp_gap_relative_inf": (
+                    g1_true_newton_from_active_set_service_tangent.get(
+                        "max_jvp_minus_unregularized_tangent_action_relative_inf"
+                    )
+                ),
+                "true_newton_from_active_set_service_tangent_dominant_gap_component": str(
+                    g1_true_newton_from_active_set_service_tangent.get(
+                        "dominant_jvp_gap_component"
+                    )
+                    or ""
+                ),
+                "true_newton_frame_tangent_source_comparison_both_line_search_no_descent": _as_bool(
+                    g1_true_newton_frame_tangent_source_comparison.get(
+                        "both_line_search_no_descent"
+                    )
+                ),
+                "true_newton_frame_tangent_source_comparison_both_dominant_gap_component_frame": _as_bool(
+                    g1_true_newton_frame_tangent_source_comparison.get(
+                        "both_dominant_gap_component_frame"
+                    )
+                ),
+                "true_newton_frame_tangent_source_comparison_service_minus_force_jvp_gap": (
+                    g1_true_newton_frame_tangent_source_comparison.get(
+                        "service_minus_force_max_jvp_gap_relative_inf"
+                    )
+                ),
+                "frame_tangent_fd_epsilon_sweep_default_gap_relative_inf": (
+                    g1_frame_tangent_fd_epsilon_sweep.get(
+                        "default_eps_gap_relative_inf"
+                    )
+                ),
+                "frame_tangent_fd_epsilon_sweep_best_eps": (
+                    g1_frame_tangent_fd_epsilon_sweep.get("best_eps")
+                ),
+                "frame_tangent_fd_epsilon_sweep_best_gap_relative_inf": (
+                    g1_frame_tangent_fd_epsilon_sweep.get(
+                        "best_eps_gap_relative_inf"
+                    )
+                ),
+                "frame_tangent_fd_epsilon_sweep_default_eps_artifact_likely": _as_bool(
+                    g1_frame_tangent_fd_epsilon_sweep.get(
+                        "default_eps_artifact_likely"
+                    )
+                ),
+                "true_newton_from_active_set_mu_sweep_evaluated_mu_count": (
+                    g1_true_newton_from_active_set_mu_sweep.get(
+                        "evaluated_mu_count"
+                    )
+                ),
+                "true_newton_from_active_set_mu_sweep_factorable_mu_count": (
+                    g1_true_newton_from_active_set_mu_sweep.get(
+                        "factorable_mu_count"
+                    )
+                ),
+                "true_newton_from_active_set_mu_sweep_descent_observed": _as_bool(
+                    g1_true_newton_from_active_set_mu_sweep.get(
+                        "descent_observed"
+                    )
+                ),
+                "true_newton_from_active_set_mu_sweep_best_mu": (
+                    g1_true_newton_from_active_set_mu_sweep.get("best_mu")
+                ),
+                "true_newton_from_active_set_mu_sweep_best_improvement_inf_n": (
+                    g1_true_newton_from_active_set_mu_sweep.get(
+                        "best_improvement_inf_n"
+                    )
+                ),
+                "active_set_load_parameter_probe_descent_observed": _as_bool(
+                    g1_active_set_load_parameter_probe.get(
+                        "actual_replay_descent_observed"
+                    )
+                ),
+                "active_set_load_parameter_probe_best_load_scale": (
+                    g1_active_set_load_parameter_probe.get(
+                        "best_actual_replay_load_scale"
+                    )
+                ),
+                "active_set_load_parameter_probe_best_residual_inf_n": (
+                    g1_active_set_load_parameter_probe.get(
+                        "best_actual_replay_residual_inf_n"
+                    )
+                ),
+                "active_set_load_parameter_probe_restored_full_load_descent_observed": _as_bool(
+                    g1_active_set_load_parameter_probe.get(
+                        "restored_full_load_descent_observed"
+                    )
+                ),
+                "active_set_load_parameter_probe_best_restored_full_load_residual_inf_n": (
+                    g1_active_set_load_parameter_probe.get(
+                        "best_restored_full_load_residual_inf_n"
+                    )
+                ),
+                "active_set_load_parameter_tiny_trust_descent_observed": _as_bool(
+                    g1_active_set_load_parameter_tiny_trust_probe.get(
+                        "actual_replay_descent_observed"
+                    )
+                ),
+                "active_set_load_parameter_tiny_trust_best_load_scale": (
+                    g1_active_set_load_parameter_tiny_trust_probe.get(
+                        "best_actual_replay_load_scale"
+                    )
+                ),
+                "active_set_load_parameter_tiny_trust_best_residual_inf_n": (
+                    g1_active_set_load_parameter_tiny_trust_probe.get(
+                        "best_actual_replay_residual_inf_n"
+                    )
+                ),
+                "active_set_load_parameter_tiny_trust_best_improvement_inf_n": (
+                    g1_active_set_load_parameter_tiny_trust_probe.get(
+                        "best_actual_replay_improvement_inf_n"
+                    )
+                ),
+                "active_set_load_parameter_tiny_trust_restored_full_load_descent_observed": _as_bool(
+                    g1_active_set_load_parameter_tiny_trust_probe.get(
+                        "restored_full_load_descent_observed"
+                    )
+                ),
+                "active_set_load_parameter_tiny_trust_best_restored_full_load_residual_inf_n": (
+                    g1_active_set_load_parameter_tiny_trust_probe.get(
+                        "best_restored_full_load_residual_inf_n"
+                    )
+                ),
+                "active_frontier_residual_ownership_present": _as_bool(
+                    g1_active_frontier_residual_ownership_probe.get("present")
+                ),
+                "active_frontier_residual_ownership_top_residual_inf_n": (
+                    g1_active_frontier_residual_ownership_probe.get(
+                        "top_residual_inf_n"
+                    )
+                ),
+                "active_frontier_residual_ownership_top_row_node_id": (
+                    g1_active_frontier_residual_ownership_probe.get(
+                        "top_row_node_id"
+                    )
+                ),
+                "active_frontier_residual_ownership_top_row_dof_label": str(
+                    g1_active_frontier_residual_ownership_probe.get(
+                        "top_row_dof_label"
+                    )
+                    or ""
+                ),
+                "active_frontier_residual_ownership_top_row_dominant_internal_component": str(
+                    g1_active_frontier_residual_ownership_probe.get(
+                        "top_row_dominant_internal_component"
+                    )
+                    or ""
+                ),
+                "active_frontier_residual_ownership_top_row_balance_driver": str(
+                    g1_active_frontier_residual_ownership_probe.get(
+                        "top_row_balance_driver"
+                    )
+                    or ""
+                ),
+                "active_frontier_residual_ownership_top_row_inferred_external_load_n": (
+                    g1_active_frontier_residual_ownership_probe.get(
+                        "top_row_inferred_external_load_n"
+                    )
+                ),
+                "active_frontier_shell_load_neighborhood_present": _as_bool(
+                    g1_active_frontier_shell_load_neighborhood_probe.get("present")
+                ),
+                "active_frontier_shell_load_neighborhood_top_required_shell_load_scale": (
+                    g1_active_frontier_shell_load_neighborhood_probe.get(
+                        "top_row_required_reference_shell_load_scale_for_zero_row_residual"
+                    )
+                ),
+                "active_frontier_shell_load_neighborhood_top_free_pressure_resultant": _as_bool(
+                    g1_active_frontier_shell_load_neighborhood_probe.get(
+                        "top_row_surface_component_free_pressure_resultant"
+                    )
+                ),
+                "active_frontier_shell_load_neighborhood_top_incident_element_id": (
+                    g1_active_frontier_shell_load_neighborhood_probe.get(
+                        "top_incident_element_id"
+                    )
+                ),
+                "active_frontier_shell_policy_replay_present": _as_bool(
+                    g1_active_frontier_shell_policy_replay_probe.get("present")
+                ),
+                "active_frontier_shell_policy_replay_best_policy": str(
+                    g1_active_frontier_shell_policy_replay_probe.get(
+                        "best_policy"
+                    )
+                    or ""
+                ),
+                "active_frontier_shell_policy_replay_best_residual_inf_n": (
+                    g1_active_frontier_shell_policy_replay_probe.get(
+                        "best_residual_inf_n"
+                    )
+                ),
+                "active_frontier_shell_policy_replay_best_improvement_inf_n": (
+                    g1_active_frontier_shell_policy_replay_probe.get(
+                        "best_improvement_inf_n"
+                    )
+                ),
+                "active_frontier_shell_policy_replay_descent_observed": _as_bool(
+                    g1_active_frontier_shell_policy_replay_probe.get(
+                        "structural_or_attached_policy_descent_observed"
+                    )
+                ),
+                "active_frontier_shell_policy_replay_best_residual_gate_passed": _as_bool(
+                    g1_active_frontier_shell_policy_replay_probe.get(
+                        "best_residual_gate_passed"
+                    )
+                ),
+                "active_frontier_shell_policy_linearized_active_set_policy": str(
+                    g1_active_frontier_shell_policy_linearized_active_set_probe.get(
+                        "shell_pressure_load_path_policy"
+                    )
+                    or ""
+                ),
+                "active_frontier_shell_policy_linearized_active_set_best_after_inf_n": (
+                    g1_active_frontier_shell_policy_linearized_active_set_probe.get(
+                        "best_linear_active_residual_after_inf_n"
+                    )
+                ),
+                "active_frontier_shell_policy_linearized_active_set_descent_observed": _as_bool(
+                    g1_active_frontier_shell_policy_linearized_active_set_probe.get(
+                        "linearized_active_descent_observed"
+                    )
+                ),
+                "active_frontier_shell_policy_linearized_active_set_direct_replay_required": _as_bool(
+                    g1_active_frontier_shell_policy_linearized_active_set_probe.get(
+                        "direct_replay_required_for_candidate"
+                    )
+                ),
+                "active_frontier_structural_policy_active_set_ls_trust_final_residual_n": (
+                    g1_active_frontier_structural_policy_active_set_ls_trust_candidate.get(
+                        "final_residual_n"
+                    )
+                ),
+                "active_frontier_structural_policy_active_set_ls_trust_total_reduction_n": (
+                    g1_active_frontier_structural_policy_active_set_ls_trust_candidate.get(
+                        "total_reduction_n"
+                    )
+                ),
+                "active_frontier_structural_policy_active_set_ls_trust_residual_gate_passed": _as_bool(
+                    g1_active_frontier_structural_policy_active_set_ls_trust_candidate.get(
+                        "residual_gate_passed"
+                    )
+                ),
+                "active_frontier_structural_policy_active_set_ls_trust_checkpoint_path": str(
+                    g1_active_frontier_structural_policy_active_set_ls_trust_candidate.get(
+                        "checkpoint_path"
+                    )
+                    or ""
+                ),
+                "active_frontier_structural_policy_active_set_ls_trust_alpha_sweep_stop_reason": str(
+                    g1_active_frontier_structural_policy_active_set_ls_trust_alpha_sweep.get(
+                        "stop_reason"
+                    )
+                    or ""
+                ),
+                "active_frontier_structural_policy_residual_ownership_top_row_dof_label": str(
+                    g1_active_frontier_structural_policy_residual_ownership_probe.get(
+                        "top_row_dof_label"
+                    )
+                    or ""
+                ),
+                "active_frontier_structural_policy_residual_ownership_top_row_component": str(
+                    g1_active_frontier_structural_policy_residual_ownership_probe.get(
+                        "top_row_dominant_internal_component"
+                    )
+                    or ""
+                ),
+                "active_frontier_structural_policy_residual_ownership_top_row_balance_driver": str(
+                    g1_active_frontier_structural_policy_residual_ownership_probe.get(
+                        "top_row_balance_driver"
+                    )
+                    or ""
+                ),
+                "active_frontier_structural_policy_residual_ownership_top_row_load_derivative_n_per_load": (
+                    g1_active_frontier_structural_policy_residual_ownership_probe.get(
+                        "top_row_load_derivative_n_per_load"
+                    )
+                ),
+                "active_frontier_structural_policy_linearized_after_two_step_best_after_inf_n": (
+                    g1_active_frontier_structural_policy_linearized_after_two_step_probe.get(
+                        "best_linear_active_residual_after_inf_n"
+                    )
+                ),
+                "active_frontier_structural_policy_linearized_after_two_step_descent_observed": _as_bool(
+                    g1_active_frontier_structural_policy_linearized_after_two_step_probe.get(
+                        "linearized_active_descent_observed"
+                    )
+                ),
+                "active_frontier_structural_policy_shell_rotation_candidate_best_residual_inf_n": (
+                    g1_active_frontier_structural_policy_shell_rotation_candidate.get(
+                        "best_direct_residual_inf_n"
+                    )
+                ),
+                "active_frontier_structural_policy_shell_rotation_candidate_best_improvement_inf_n": (
+                    g1_active_frontier_structural_policy_shell_rotation_candidate.get(
+                        "best_improvement_inf_n"
+                    )
+                ),
+                "active_frontier_structural_policy_shell_rotation_candidate_checkpoint_path": str(
+                    g1_active_frontier_structural_policy_shell_rotation_candidate.get(
+                        "checkpoint_path"
+                    )
+                    or ""
+                ),
+                "active_frontier_structural_policy_shell_rotation_no_descent_best_improvement_inf_n": (
+                    g1_active_frontier_structural_policy_shell_rotation_no_descent_probe.get(
+                        "best_improvement_inf_n"
+                    )
+                ),
+                "active_frontier_structural_policy_shell_rotation_no_descent_observed": _as_bool(
+                    g1_active_frontier_structural_policy_shell_rotation_no_descent_probe.get(
+                        "direct_descent_observed"
+                    )
+                ),
+                "active_frontier_structural_policy_shell_rotation_candidate_ownership_top_row_dof_label": str(
+                    g1_active_frontier_structural_policy_shell_rotation_candidate_ownership.get(
+                        "top_row_dof_label"
+                    )
+                    or ""
+                ),
+                "active_frontier_structural_policy_shell_rotation_candidate_ownership_top_row_balance_driver": str(
+                    g1_active_frontier_structural_policy_shell_rotation_candidate_ownership.get(
+                        "top_row_balance_driver"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_frontier_status": str(
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get("status")
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_frontier_jvp_parity_pass": _as_bool(
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "jvp_parity_pass"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_frontier_tangent_parity_pass": _as_bool(
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "assembled_tangent_parity_pass"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_frontier_direction_status": str(
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "direction_status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_frontier_line_search_status": str(
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "line_search_status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_frontier_line_search_residual_after_n": (
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "line_search_residual_after_n"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_frontier_line_search_reduction_ratio": (
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "line_search_residual_reduction_ratio"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_frontier_output_checkpoint_written": _as_bool(
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "output_checkpoint_written"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_frontier_output_checkpoint_path": str(
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "output_checkpoint_path"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_frontier_output_checkpoint_residual_n": (
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "output_checkpoint_direct_residual_inf_n"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_frontier_output_checkpoint_residual_gate_passed": _as_bool(
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "output_checkpoint_residual_gate_passed"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_second_status": str(
+                    g1_sparse_direct_scaled_lsmr_second_probe.get("status") or ""
+                ),
+                "sparse_direct_scaled_lsmr_second_line_search_status": str(
+                    g1_sparse_direct_scaled_lsmr_second_probe.get(
+                        "line_search_status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_second_line_search_residual_after_n": (
+                    g1_sparse_direct_scaled_lsmr_second_probe.get(
+                        "line_search_residual_after_n"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_second_line_search_reduction_ratio": (
+                    g1_sparse_direct_scaled_lsmr_second_probe.get(
+                        "line_search_residual_reduction_ratio"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_second_output_checkpoint_written": _as_bool(
+                    g1_sparse_direct_scaled_lsmr_second_probe.get(
+                        "output_checkpoint_written"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_second_output_checkpoint_path": str(
+                    g1_sparse_direct_scaled_lsmr_second_probe.get(
+                        "output_checkpoint_path"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_second_output_checkpoint_residual_n": (
+                    g1_sparse_direct_scaled_lsmr_second_probe.get(
+                        "output_checkpoint_direct_residual_inf_n"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_second_output_checkpoint_residual_gate_passed": _as_bool(
+                    g1_sparse_direct_scaled_lsmr_second_probe.get(
+                        "output_checkpoint_residual_gate_passed"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_chain_step_count": (
+                    g1_sparse_direct_scaled_lsmr_chain.get("step_count")
+                ),
+                "sparse_direct_scaled_lsmr_chain_monotonic_residual_descent": _as_bool(
+                    g1_sparse_direct_scaled_lsmr_chain.get(
+                        "monotonic_residual_descent"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_chain_initial_residual_n": (
+                    g1_sparse_direct_scaled_lsmr_chain.get("initial_residual_n")
+                ),
+                "sparse_direct_scaled_lsmr_chain_final_residual_n": (
+                    g1_sparse_direct_scaled_lsmr_chain.get("final_residual_n")
+                ),
+                "sparse_direct_scaled_lsmr_chain_total_reduction_n": (
+                    g1_sparse_direct_scaled_lsmr_chain.get("total_reduction_n")
+                ),
+                "sparse_direct_scaled_lsmr_chain_latest_checkpoint_path": str(
+                    g1_sparse_direct_scaled_lsmr_chain.get(
+                        "latest_checkpoint_path"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_chain_latest_checkpoint_residual_gate_passed": _as_bool(
+                    g1_sparse_direct_scaled_lsmr_chain.get(
+                        "latest_checkpoint_residual_gate_passed"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_chain_probe_status": str(
+                    g1_sparse_direct_scaled_lsmr_chain_probe.get("status") or ""
+                ),
+                "sparse_direct_scaled_lsmr_chain_probe_final_residual_n": (
+                    g1_sparse_direct_scaled_lsmr_chain_probe.get(
+                        "final_residual_n"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_chain_probe_latest_checkpoint_path": str(
+                    g1_sparse_direct_scaled_lsmr_chain_probe.get(
+                        "latest_checkpoint_path"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_long_chain_probe_status": str(
+                    g1_sparse_direct_scaled_lsmr_long_chain_probe.get("status")
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_long_chain_probe_step_count": (
+                    g1_sparse_direct_scaled_lsmr_long_chain_probe.get("step_count")
+                ),
+                "sparse_direct_scaled_lsmr_long_chain_probe_final_residual_n": (
+                    g1_sparse_direct_scaled_lsmr_long_chain_probe.get(
+                        "final_residual_n"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_long_chain_probe_final_residual_over_gate": (
+                    g1_sparse_direct_scaled_lsmr_long_chain_probe.get(
+                        "final_residual_over_gate"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_long_chain_probe_estimated_steps_to_gate_at_last_reduction": (
+                    g1_sparse_direct_scaled_lsmr_long_chain_probe.get(
+                        "estimated_steps_to_gate_at_last_reduction"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_long_chain_probe_gate_convergence_assessment": str(
+                    g1_sparse_direct_scaled_lsmr_long_chain_probe.get(
+                        "gate_convergence_assessment"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_long_chain_probe_recommended_next_action": str(
+                    g1_sparse_direct_scaled_lsmr_long_chain_probe.get(
+                        "recommended_next_action"
+                    )
+                    or ""
+                ),
+                "adaptive_all_components_frontier_present": _as_bool(
+                    g1_adaptive_all_components_frontier.get("present")
+                ),
+                "adaptive_all_components_frontier_final_residual_n": (
+                    g1_adaptive_all_components_frontier.get("final_residual_n")
+                ),
+                "adaptive_all_components_frontier_residual_gate_passed": _as_bool(
+                    g1_adaptive_all_components_frontier.get("residual_gate_passed")
+                ),
+                "adaptive_all_components_frontier_checkpoint_path": str(
+                    g1_adaptive_all_components_frontier.get("checkpoint_path") or ""
+                ),
+                "shell_hotspot_tangent_fd_jvp_present": _as_bool(
+                    g1_shell_hotspot_tangent_fd_jvp.get("present")
+                ),
+                "shell_hotspot_tangent_fd_jvp_fd_consistent": _as_bool(
+                    g1_shell_hotspot_tangent_fd_jvp.get("fd_consistent")
+                ),
+                "shell_hotspot_tangent_fd_jvp_max_relative_inf_error": (
+                    g1_shell_hotspot_tangent_fd_jvp.get("max_relative_inf_error")
+                ),
+                "shell_hotspot_diagonal_sweep_present": _as_bool(
+                    g1_shell_hotspot_diagonal_sweep.get("present")
+                ),
+                "shell_hotspot_diagonal_sweep_descent_observed": _as_bool(
+                    g1_shell_hotspot_diagonal_sweep.get("descent_observed")
+                ),
+                "shell_hotspot_diagonal_sweep_best_residual_n": (
+                    g1_shell_hotspot_diagonal_sweep.get(
+                        "best_direct_residual_inf_n"
+                    )
+                ),
+                "shell_hotspot_diagonal_sweep_best_improvement_n": (
+                    g1_shell_hotspot_diagonal_sweep.get("best_improvement_inf_n")
+                ),
+                "global_tangent_scaled_sweep_present": _as_bool(
+                    g1_global_tangent_scaled_sweep.get("present")
+                ),
+                "global_tangent_scaled_sweep_descent_observed": _as_bool(
+                    g1_global_tangent_scaled_sweep.get("descent_observed")
+                ),
+                "global_tangent_scaled_sweep_best_residual_n": (
+                    g1_global_tangent_scaled_sweep.get(
+                        "best_direct_residual_inf_n"
+                    )
+                ),
+                "global_tangent_scaled_sweep_best_improvement_n": (
+                    g1_global_tangent_scaled_sweep.get("best_improvement_inf_n")
+                ),
+                "global_tangent_scaled_sweep_linear_relative_residual": (
+                    g1_global_tangent_scaled_sweep.get(
+                        "linear_relative_residual_inf"
+                    )
+                ),
+                "residual_norm_gradient_tiny_sweep_present": _as_bool(
+                    g1_residual_norm_gradient_tiny_sweep.get("present")
+                ),
+                "residual_norm_gradient_tiny_sweep_inf_descent_observed": _as_bool(
+                    g1_residual_norm_gradient_tiny_sweep.get(
+                        "inf_descent_observed"
+                    )
+                ),
+                "residual_norm_gradient_tiny_sweep_l2_descent_observed": _as_bool(
+                    g1_residual_norm_gradient_tiny_sweep.get(
+                        "l2_descent_observed"
+                    )
+                ),
+                "residual_norm_gradient_tiny_sweep_best_l2_residual_n": (
+                    g1_residual_norm_gradient_tiny_sweep.get(
+                        "best_l2_direct_residual_l2_n"
+                    )
+                ),
+                "residual_norm_gradient_tiny_sweep_best_l2_improvement_n": (
+                    g1_residual_norm_gradient_tiny_sweep.get(
+                        "best_l2_improvement_l2_n"
+                    )
+                ),
+                "active_set_ls_sweep_present": _as_bool(
+                    g1_active_set_ls_sweep.get("present")
+                ),
+                "active_set_ls_sweep_full_inf_descent_observed": _as_bool(
+                    g1_active_set_ls_sweep.get("full_inf_descent_observed")
+                ),
+                "active_set_ls_sweep_active_inf_descent_observed": _as_bool(
+                    g1_active_set_ls_sweep.get("active_inf_descent_observed")
+                ),
+                "active_set_ls_sweep_best_full_residual_n": (
+                    g1_active_set_ls_sweep.get("best_full_direct_residual_inf_n")
+                ),
+                "active_set_ls_sweep_best_full_improvement_n": (
+                    g1_active_set_ls_sweep.get("best_full_improvement_inf_n")
+                ),
+                "active_set_ls_trust_candidate_present": _as_bool(
+                    g1_active_set_ls_trust_candidate.get("present")
+                ),
+                "active_set_ls_trust_candidate_checkpoint_written": _as_bool(
+                    g1_active_set_ls_trust_candidate.get("checkpoint_written")
+                ),
+                "active_set_ls_trust_candidate_final_residual_n": (
+                    g1_active_set_ls_trust_candidate.get("final_residual_n")
+                ),
+                "active_set_ls_trust_candidate_residual_gate_passed": _as_bool(
+                    g1_active_set_ls_trust_candidate.get("residual_gate_passed")
+                ),
+                "active_set_ls_trust_candidate_checkpoint_path": str(
+                    g1_active_set_ls_trust_candidate.get("checkpoint_path") or ""
+                ),
+                "active_set_ls_trust_schedule_candidate_present": _as_bool(
+                    g1_active_set_ls_trust_schedule_candidate.get("present")
+                ),
+                "active_set_ls_trust_schedule_candidate_final_residual_n": (
+                    g1_active_set_ls_trust_schedule_candidate.get("final_residual_n")
+                ),
+                "active_set_ls_trust_schedule_candidate_residual_gate_passed": _as_bool(
+                    g1_active_set_ls_trust_schedule_candidate.get(
+                        "residual_gate_passed"
+                    )
+                ),
+                "active_set_ls_trust_schedule_candidate_active_row_count_schedule": (
+                    g1_active_set_ls_trust_schedule_candidate.get(
+                        "active_row_count_schedule"
+                    )
+                ),
+                "active_set_ls_trust_tangent_fd_jvp_present": _as_bool(
+                    g1_active_set_ls_trust_tangent_fd_jvp.get("present")
+                ),
+                "active_set_ls_trust_tangent_fd_jvp_fd_consistent": _as_bool(
+                    g1_active_set_ls_trust_tangent_fd_jvp.get("fd_consistent")
+                ),
+                "active_set_ls_trust_tangent_fd_jvp_max_relative_inf_error": (
+                    g1_active_set_ls_trust_tangent_fd_jvp.get(
+                        "max_relative_inf_error"
+                    )
+                ),
+                "active_set_ls_trust_tangent_fd_jvp_evaluated_row_count": (
+                    g1_active_set_ls_trust_tangent_fd_jvp.get(
+                        "evaluated_row_count"
+                    )
+                ),
+                "active_set_minimax_trust_candidate_present": _as_bool(
+                    g1_active_set_minimax_trust_candidate.get("present")
+                ),
+                "active_set_minimax_trust_candidate_final_residual_n": (
+                    g1_active_set_minimax_trust_candidate.get("final_residual_n")
+                ),
+                "active_set_minimax_trust_candidate_steps_taken": (
+                    g1_active_set_minimax_trust_candidate.get("steps_taken")
+                ),
+                "active_set_minimax_trust_candidate_best_linear_active_inf_improvement_n": (
+                    g1_active_set_minimax_trust_candidate.get(
+                        "best_linear_active_inf_improvement_n"
                     )
                 ),
                 "rocm_worker_path_repair_status": str(
@@ -976,6 +1787,684 @@ def build_structural_product_development_roadmap(
                 "true_newton_full_load_checkpoint_candidate_residual_n": (
                     g1_true_newton_checkpoint_candidate.get(
                         "checkpoint_direct_residual_inf_n"
+                    )
+                ),
+                "true_newton_from_active_set_final_residual_n": (
+                    g1_true_newton_from_active_set.get("true_final_residual_n")
+                ),
+                "true_newton_from_active_set_stop_reason": str(
+                    g1_true_newton_from_active_set.get("true_stop_reason") or ""
+                ),
+                "true_newton_from_active_set_max_jvp_gap_relative_inf": (
+                    g1_true_newton_from_active_set.get(
+                        "max_jvp_minus_unregularized_tangent_action_relative_inf"
+                    )
+                ),
+                "true_newton_from_active_set_dominant_gap_component": str(
+                    g1_true_newton_from_active_set.get(
+                        "dominant_jvp_gap_component"
+                    )
+                    or ""
+                ),
+                "true_newton_from_active_set_service_tangent_final_residual_n": (
+                    g1_true_newton_from_active_set_service_tangent.get(
+                        "true_final_residual_n"
+                    )
+                ),
+                "true_newton_from_active_set_service_tangent_stop_reason": str(
+                    g1_true_newton_from_active_set_service_tangent.get(
+                        "true_stop_reason"
+                    )
+                    or ""
+                ),
+                "true_newton_from_active_set_service_tangent_max_jvp_gap_relative_inf": (
+                    g1_true_newton_from_active_set_service_tangent.get(
+                        "max_jvp_minus_unregularized_tangent_action_relative_inf"
+                    )
+                ),
+                "true_newton_from_active_set_service_tangent_dominant_gap_component": str(
+                    g1_true_newton_from_active_set_service_tangent.get(
+                        "dominant_jvp_gap_component"
+                    )
+                    or ""
+                ),
+                "true_newton_frame_tangent_source_comparison_both_line_search_no_descent": _as_bool(
+                    g1_true_newton_frame_tangent_source_comparison.get(
+                        "both_line_search_no_descent"
+                    )
+                ),
+                "true_newton_frame_tangent_source_comparison_both_dominant_gap_component_frame": _as_bool(
+                    g1_true_newton_frame_tangent_source_comparison.get(
+                        "both_dominant_gap_component_frame"
+                    )
+                ),
+                "true_newton_frame_tangent_source_comparison_service_minus_force_jvp_gap": (
+                    g1_true_newton_frame_tangent_source_comparison.get(
+                        "service_minus_force_max_jvp_gap_relative_inf"
+                    )
+                ),
+                "frame_tangent_fd_epsilon_sweep_default_gap_relative_inf": (
+                    g1_frame_tangent_fd_epsilon_sweep.get(
+                        "default_eps_gap_relative_inf"
+                    )
+                ),
+                "frame_tangent_fd_epsilon_sweep_best_eps": (
+                    g1_frame_tangent_fd_epsilon_sweep.get("best_eps")
+                ),
+                "frame_tangent_fd_epsilon_sweep_best_gap_relative_inf": (
+                    g1_frame_tangent_fd_epsilon_sweep.get(
+                        "best_eps_gap_relative_inf"
+                    )
+                ),
+                "frame_tangent_fd_epsilon_sweep_default_eps_artifact_likely": _as_bool(
+                    g1_frame_tangent_fd_epsilon_sweep.get(
+                        "default_eps_artifact_likely"
+                    )
+                ),
+                "true_newton_from_active_set_mu_sweep_evaluated_mu_count": (
+                    g1_true_newton_from_active_set_mu_sweep.get(
+                        "evaluated_mu_count"
+                    )
+                ),
+                "true_newton_from_active_set_mu_sweep_factorable_mu_count": (
+                    g1_true_newton_from_active_set_mu_sweep.get(
+                        "factorable_mu_count"
+                    )
+                ),
+                "true_newton_from_active_set_mu_sweep_descent_observed": _as_bool(
+                    g1_true_newton_from_active_set_mu_sweep.get(
+                        "descent_observed"
+                    )
+                ),
+                "true_newton_from_active_set_mu_sweep_best_mu": (
+                    g1_true_newton_from_active_set_mu_sweep.get("best_mu")
+                ),
+                "true_newton_from_active_set_mu_sweep_best_improvement_inf_n": (
+                    g1_true_newton_from_active_set_mu_sweep.get(
+                        "best_improvement_inf_n"
+                    )
+                ),
+                "active_set_load_parameter_probe_descent_observed": _as_bool(
+                    g1_active_set_load_parameter_probe.get(
+                        "actual_replay_descent_observed"
+                    )
+                ),
+                "active_set_load_parameter_probe_best_load_scale": (
+                    g1_active_set_load_parameter_probe.get(
+                        "best_actual_replay_load_scale"
+                    )
+                ),
+                "active_set_load_parameter_probe_best_residual_inf_n": (
+                    g1_active_set_load_parameter_probe.get(
+                        "best_actual_replay_residual_inf_n"
+                    )
+                ),
+                "active_set_load_parameter_probe_restored_full_load_descent_observed": _as_bool(
+                    g1_active_set_load_parameter_probe.get(
+                        "restored_full_load_descent_observed"
+                    )
+                ),
+                "active_set_load_parameter_probe_best_restored_full_load_residual_inf_n": (
+                    g1_active_set_load_parameter_probe.get(
+                        "best_restored_full_load_residual_inf_n"
+                    )
+                ),
+                "active_set_load_parameter_tiny_trust_descent_observed": _as_bool(
+                    g1_active_set_load_parameter_tiny_trust_probe.get(
+                        "actual_replay_descent_observed"
+                    )
+                ),
+                "active_set_load_parameter_tiny_trust_best_load_scale": (
+                    g1_active_set_load_parameter_tiny_trust_probe.get(
+                        "best_actual_replay_load_scale"
+                    )
+                ),
+                "active_set_load_parameter_tiny_trust_best_residual_inf_n": (
+                    g1_active_set_load_parameter_tiny_trust_probe.get(
+                        "best_actual_replay_residual_inf_n"
+                    )
+                ),
+                "active_set_load_parameter_tiny_trust_best_improvement_inf_n": (
+                    g1_active_set_load_parameter_tiny_trust_probe.get(
+                        "best_actual_replay_improvement_inf_n"
+                    )
+                ),
+                "active_set_load_parameter_tiny_trust_restored_full_load_descent_observed": _as_bool(
+                    g1_active_set_load_parameter_tiny_trust_probe.get(
+                        "restored_full_load_descent_observed"
+                    )
+                ),
+                "active_set_load_parameter_tiny_trust_best_restored_full_load_residual_inf_n": (
+                    g1_active_set_load_parameter_tiny_trust_probe.get(
+                        "best_restored_full_load_residual_inf_n"
+                    )
+                ),
+                "active_frontier_residual_ownership_present": _as_bool(
+                    g1_active_frontier_residual_ownership_probe.get("present")
+                ),
+                "active_frontier_residual_ownership_top_residual_inf_n": (
+                    g1_active_frontier_residual_ownership_probe.get(
+                        "top_residual_inf_n"
+                    )
+                ),
+                "active_frontier_residual_ownership_top_row_node_id": (
+                    g1_active_frontier_residual_ownership_probe.get(
+                        "top_row_node_id"
+                    )
+                ),
+                "active_frontier_residual_ownership_top_row_dof_label": str(
+                    g1_active_frontier_residual_ownership_probe.get(
+                        "top_row_dof_label"
+                    )
+                    or ""
+                ),
+                "active_frontier_residual_ownership_top_row_dominant_internal_component": str(
+                    g1_active_frontier_residual_ownership_probe.get(
+                        "top_row_dominant_internal_component"
+                    )
+                    or ""
+                ),
+                "active_frontier_residual_ownership_top_row_balance_driver": str(
+                    g1_active_frontier_residual_ownership_probe.get(
+                        "top_row_balance_driver"
+                    )
+                    or ""
+                ),
+                "active_frontier_residual_ownership_top_row_inferred_external_load_n": (
+                    g1_active_frontier_residual_ownership_probe.get(
+                        "top_row_inferred_external_load_n"
+                    )
+                ),
+                "active_frontier_shell_load_neighborhood_present": _as_bool(
+                    g1_active_frontier_shell_load_neighborhood_probe.get("present")
+                ),
+                "active_frontier_shell_load_neighborhood_top_required_shell_load_scale": (
+                    g1_active_frontier_shell_load_neighborhood_probe.get(
+                        "top_row_required_reference_shell_load_scale_for_zero_row_residual"
+                    )
+                ),
+                "active_frontier_shell_load_neighborhood_top_free_pressure_resultant": _as_bool(
+                    g1_active_frontier_shell_load_neighborhood_probe.get(
+                        "top_row_surface_component_free_pressure_resultant"
+                    )
+                ),
+                "active_frontier_shell_load_neighborhood_top_incident_element_id": (
+                    g1_active_frontier_shell_load_neighborhood_probe.get(
+                        "top_incident_element_id"
+                    )
+                ),
+                "active_frontier_shell_policy_replay_present": _as_bool(
+                    g1_active_frontier_shell_policy_replay_probe.get("present")
+                ),
+                "active_frontier_shell_policy_replay_best_policy": str(
+                    g1_active_frontier_shell_policy_replay_probe.get(
+                        "best_policy"
+                    )
+                    or ""
+                ),
+                "active_frontier_shell_policy_replay_best_residual_inf_n": (
+                    g1_active_frontier_shell_policy_replay_probe.get(
+                        "best_residual_inf_n"
+                    )
+                ),
+                "active_frontier_shell_policy_replay_best_improvement_inf_n": (
+                    g1_active_frontier_shell_policy_replay_probe.get(
+                        "best_improvement_inf_n"
+                    )
+                ),
+                "active_frontier_shell_policy_replay_descent_observed": _as_bool(
+                    g1_active_frontier_shell_policy_replay_probe.get(
+                        "structural_or_attached_policy_descent_observed"
+                    )
+                ),
+                "active_frontier_shell_policy_replay_best_residual_gate_passed": _as_bool(
+                    g1_active_frontier_shell_policy_replay_probe.get(
+                        "best_residual_gate_passed"
+                    )
+                ),
+                "active_frontier_shell_policy_linearized_active_set_policy": str(
+                    g1_active_frontier_shell_policy_linearized_active_set_probe.get(
+                        "shell_pressure_load_path_policy"
+                    )
+                    or ""
+                ),
+                "active_frontier_shell_policy_linearized_active_set_best_after_inf_n": (
+                    g1_active_frontier_shell_policy_linearized_active_set_probe.get(
+                        "best_linear_active_residual_after_inf_n"
+                    )
+                ),
+                "active_frontier_shell_policy_linearized_active_set_descent_observed": _as_bool(
+                    g1_active_frontier_shell_policy_linearized_active_set_probe.get(
+                        "linearized_active_descent_observed"
+                    )
+                ),
+                "active_frontier_shell_policy_linearized_active_set_direct_replay_required": _as_bool(
+                    g1_active_frontier_shell_policy_linearized_active_set_probe.get(
+                        "direct_replay_required_for_candidate"
+                    )
+                ),
+                "active_frontier_structural_policy_active_set_ls_trust_final_residual_n": (
+                    g1_active_frontier_structural_policy_active_set_ls_trust_candidate.get(
+                        "final_residual_n"
+                    )
+                ),
+                "active_frontier_structural_policy_active_set_ls_trust_total_reduction_n": (
+                    g1_active_frontier_structural_policy_active_set_ls_trust_candidate.get(
+                        "total_reduction_n"
+                    )
+                ),
+                "active_frontier_structural_policy_active_set_ls_trust_residual_gate_passed": _as_bool(
+                    g1_active_frontier_structural_policy_active_set_ls_trust_candidate.get(
+                        "residual_gate_passed"
+                    )
+                ),
+                "active_frontier_structural_policy_active_set_ls_trust_checkpoint_path": str(
+                    g1_active_frontier_structural_policy_active_set_ls_trust_candidate.get(
+                        "checkpoint_path"
+                    )
+                    or ""
+                ),
+                "active_frontier_structural_policy_active_set_ls_trust_alpha_sweep_stop_reason": str(
+                    g1_active_frontier_structural_policy_active_set_ls_trust_alpha_sweep.get(
+                        "stop_reason"
+                    )
+                    or ""
+                ),
+                "active_frontier_structural_policy_residual_ownership_top_row_dof_label": str(
+                    g1_active_frontier_structural_policy_residual_ownership_probe.get(
+                        "top_row_dof_label"
+                    )
+                    or ""
+                ),
+                "active_frontier_structural_policy_residual_ownership_top_row_component": str(
+                    g1_active_frontier_structural_policy_residual_ownership_probe.get(
+                        "top_row_dominant_internal_component"
+                    )
+                    or ""
+                ),
+                "active_frontier_structural_policy_residual_ownership_top_row_balance_driver": str(
+                    g1_active_frontier_structural_policy_residual_ownership_probe.get(
+                        "top_row_balance_driver"
+                    )
+                    or ""
+                ),
+                "active_frontier_structural_policy_residual_ownership_top_row_load_derivative_n_per_load": (
+                    g1_active_frontier_structural_policy_residual_ownership_probe.get(
+                        "top_row_load_derivative_n_per_load"
+                    )
+                ),
+                "active_frontier_structural_policy_linearized_after_two_step_best_after_inf_n": (
+                    g1_active_frontier_structural_policy_linearized_after_two_step_probe.get(
+                        "best_linear_active_residual_after_inf_n"
+                    )
+                ),
+                "active_frontier_structural_policy_linearized_after_two_step_descent_observed": _as_bool(
+                    g1_active_frontier_structural_policy_linearized_after_two_step_probe.get(
+                        "linearized_active_descent_observed"
+                    )
+                ),
+                "active_frontier_structural_policy_shell_rotation_candidate_best_residual_inf_n": (
+                    g1_active_frontier_structural_policy_shell_rotation_candidate.get(
+                        "best_direct_residual_inf_n"
+                    )
+                ),
+                "active_frontier_structural_policy_shell_rotation_candidate_best_improvement_inf_n": (
+                    g1_active_frontier_structural_policy_shell_rotation_candidate.get(
+                        "best_improvement_inf_n"
+                    )
+                ),
+                "active_frontier_structural_policy_shell_rotation_candidate_checkpoint_path": str(
+                    g1_active_frontier_structural_policy_shell_rotation_candidate.get(
+                        "checkpoint_path"
+                    )
+                    or ""
+                ),
+                "active_frontier_structural_policy_shell_rotation_no_descent_best_improvement_inf_n": (
+                    g1_active_frontier_structural_policy_shell_rotation_no_descent_probe.get(
+                        "best_improvement_inf_n"
+                    )
+                ),
+                "active_frontier_structural_policy_shell_rotation_no_descent_observed": _as_bool(
+                    g1_active_frontier_structural_policy_shell_rotation_no_descent_probe.get(
+                        "direct_descent_observed"
+                    )
+                ),
+                "active_frontier_structural_policy_shell_rotation_candidate_ownership_top_row_dof_label": str(
+                    g1_active_frontier_structural_policy_shell_rotation_candidate_ownership.get(
+                        "top_row_dof_label"
+                    )
+                    or ""
+                ),
+                "active_frontier_structural_policy_shell_rotation_candidate_ownership_top_row_balance_driver": str(
+                    g1_active_frontier_structural_policy_shell_rotation_candidate_ownership.get(
+                        "top_row_balance_driver"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_frontier_status": str(
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get("status")
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_frontier_jvp_parity_pass": _as_bool(
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "jvp_parity_pass"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_frontier_tangent_parity_pass": _as_bool(
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "assembled_tangent_parity_pass"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_frontier_direction_status": str(
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "direction_status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_frontier_line_search_status": str(
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "line_search_status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_frontier_line_search_residual_after_n": (
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "line_search_residual_after_n"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_frontier_line_search_reduction_ratio": (
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "line_search_residual_reduction_ratio"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_frontier_output_checkpoint_written": _as_bool(
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "output_checkpoint_written"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_frontier_output_checkpoint_path": str(
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "output_checkpoint_path"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_frontier_output_checkpoint_residual_n": (
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "output_checkpoint_direct_residual_inf_n"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_frontier_output_checkpoint_residual_gate_passed": _as_bool(
+                    g1_sparse_direct_scaled_lsmr_frontier_probe.get(
+                        "output_checkpoint_residual_gate_passed"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_second_status": str(
+                    g1_sparse_direct_scaled_lsmr_second_probe.get("status") or ""
+                ),
+                "sparse_direct_scaled_lsmr_second_line_search_status": str(
+                    g1_sparse_direct_scaled_lsmr_second_probe.get(
+                        "line_search_status"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_second_line_search_residual_after_n": (
+                    g1_sparse_direct_scaled_lsmr_second_probe.get(
+                        "line_search_residual_after_n"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_second_line_search_reduction_ratio": (
+                    g1_sparse_direct_scaled_lsmr_second_probe.get(
+                        "line_search_residual_reduction_ratio"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_second_output_checkpoint_written": _as_bool(
+                    g1_sparse_direct_scaled_lsmr_second_probe.get(
+                        "output_checkpoint_written"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_second_output_checkpoint_path": str(
+                    g1_sparse_direct_scaled_lsmr_second_probe.get(
+                        "output_checkpoint_path"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_second_output_checkpoint_residual_n": (
+                    g1_sparse_direct_scaled_lsmr_second_probe.get(
+                        "output_checkpoint_direct_residual_inf_n"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_second_output_checkpoint_residual_gate_passed": _as_bool(
+                    g1_sparse_direct_scaled_lsmr_second_probe.get(
+                        "output_checkpoint_residual_gate_passed"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_chain_step_count": (
+                    g1_sparse_direct_scaled_lsmr_chain.get("step_count")
+                ),
+                "sparse_direct_scaled_lsmr_chain_monotonic_residual_descent": _as_bool(
+                    g1_sparse_direct_scaled_lsmr_chain.get(
+                        "monotonic_residual_descent"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_chain_initial_residual_n": (
+                    g1_sparse_direct_scaled_lsmr_chain.get("initial_residual_n")
+                ),
+                "sparse_direct_scaled_lsmr_chain_final_residual_n": (
+                    g1_sparse_direct_scaled_lsmr_chain.get("final_residual_n")
+                ),
+                "sparse_direct_scaled_lsmr_chain_total_reduction_n": (
+                    g1_sparse_direct_scaled_lsmr_chain.get("total_reduction_n")
+                ),
+                "sparse_direct_scaled_lsmr_chain_latest_checkpoint_path": str(
+                    g1_sparse_direct_scaled_lsmr_chain.get(
+                        "latest_checkpoint_path"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_chain_latest_checkpoint_residual_gate_passed": _as_bool(
+                    g1_sparse_direct_scaled_lsmr_chain.get(
+                        "latest_checkpoint_residual_gate_passed"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_chain_probe_status": str(
+                    g1_sparse_direct_scaled_lsmr_chain_probe.get("status") or ""
+                ),
+                "sparse_direct_scaled_lsmr_chain_probe_final_residual_n": (
+                    g1_sparse_direct_scaled_lsmr_chain_probe.get(
+                        "final_residual_n"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_chain_probe_latest_checkpoint_path": str(
+                    g1_sparse_direct_scaled_lsmr_chain_probe.get(
+                        "latest_checkpoint_path"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_long_chain_probe_status": str(
+                    g1_sparse_direct_scaled_lsmr_long_chain_probe.get("status")
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_long_chain_probe_step_count": (
+                    g1_sparse_direct_scaled_lsmr_long_chain_probe.get("step_count")
+                ),
+                "sparse_direct_scaled_lsmr_long_chain_probe_final_residual_n": (
+                    g1_sparse_direct_scaled_lsmr_long_chain_probe.get(
+                        "final_residual_n"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_long_chain_probe_final_residual_over_gate": (
+                    g1_sparse_direct_scaled_lsmr_long_chain_probe.get(
+                        "final_residual_over_gate"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_long_chain_probe_estimated_steps_to_gate_at_last_reduction": (
+                    g1_sparse_direct_scaled_lsmr_long_chain_probe.get(
+                        "estimated_steps_to_gate_at_last_reduction"
+                    )
+                ),
+                "sparse_direct_scaled_lsmr_long_chain_probe_gate_convergence_assessment": str(
+                    g1_sparse_direct_scaled_lsmr_long_chain_probe.get(
+                        "gate_convergence_assessment"
+                    )
+                    or ""
+                ),
+                "sparse_direct_scaled_lsmr_long_chain_probe_recommended_next_action": str(
+                    g1_sparse_direct_scaled_lsmr_long_chain_probe.get(
+                        "recommended_next_action"
+                    )
+                    or ""
+                ),
+                "adaptive_all_components_frontier_present": _as_bool(
+                    g1_adaptive_all_components_frontier.get("present")
+                ),
+                "adaptive_all_components_frontier_final_residual_n": (
+                    g1_adaptive_all_components_frontier.get("final_residual_n")
+                ),
+                "adaptive_all_components_frontier_residual_gate_passed": _as_bool(
+                    g1_adaptive_all_components_frontier.get("residual_gate_passed")
+                ),
+                "adaptive_all_components_frontier_checkpoint_path": str(
+                    g1_adaptive_all_components_frontier.get("checkpoint_path") or ""
+                ),
+                "shell_hotspot_tangent_fd_jvp_present": _as_bool(
+                    g1_shell_hotspot_tangent_fd_jvp.get("present")
+                ),
+                "shell_hotspot_tangent_fd_jvp_fd_consistent": _as_bool(
+                    g1_shell_hotspot_tangent_fd_jvp.get("fd_consistent")
+                ),
+                "shell_hotspot_tangent_fd_jvp_max_relative_inf_error": (
+                    g1_shell_hotspot_tangent_fd_jvp.get("max_relative_inf_error")
+                ),
+                "shell_hotspot_diagonal_sweep_present": _as_bool(
+                    g1_shell_hotspot_diagonal_sweep.get("present")
+                ),
+                "shell_hotspot_diagonal_sweep_descent_observed": _as_bool(
+                    g1_shell_hotspot_diagonal_sweep.get("descent_observed")
+                ),
+                "shell_hotspot_diagonal_sweep_best_residual_n": (
+                    g1_shell_hotspot_diagonal_sweep.get(
+                        "best_direct_residual_inf_n"
+                    )
+                ),
+                "shell_hotspot_diagonal_sweep_best_improvement_n": (
+                    g1_shell_hotspot_diagonal_sweep.get("best_improvement_inf_n")
+                ),
+                "global_tangent_scaled_sweep_present": _as_bool(
+                    g1_global_tangent_scaled_sweep.get("present")
+                ),
+                "global_tangent_scaled_sweep_descent_observed": _as_bool(
+                    g1_global_tangent_scaled_sweep.get("descent_observed")
+                ),
+                "global_tangent_scaled_sweep_best_residual_n": (
+                    g1_global_tangent_scaled_sweep.get(
+                        "best_direct_residual_inf_n"
+                    )
+                ),
+                "global_tangent_scaled_sweep_best_improvement_n": (
+                    g1_global_tangent_scaled_sweep.get("best_improvement_inf_n")
+                ),
+                "global_tangent_scaled_sweep_linear_relative_residual": (
+                    g1_global_tangent_scaled_sweep.get(
+                        "linear_relative_residual_inf"
+                    )
+                ),
+                "residual_norm_gradient_tiny_sweep_present": _as_bool(
+                    g1_residual_norm_gradient_tiny_sweep.get("present")
+                ),
+                "residual_norm_gradient_tiny_sweep_inf_descent_observed": _as_bool(
+                    g1_residual_norm_gradient_tiny_sweep.get(
+                        "inf_descent_observed"
+                    )
+                ),
+                "residual_norm_gradient_tiny_sweep_l2_descent_observed": _as_bool(
+                    g1_residual_norm_gradient_tiny_sweep.get(
+                        "l2_descent_observed"
+                    )
+                ),
+                "residual_norm_gradient_tiny_sweep_best_l2_residual_n": (
+                    g1_residual_norm_gradient_tiny_sweep.get(
+                        "best_l2_direct_residual_l2_n"
+                    )
+                ),
+                "residual_norm_gradient_tiny_sweep_best_l2_improvement_n": (
+                    g1_residual_norm_gradient_tiny_sweep.get(
+                        "best_l2_improvement_l2_n"
+                    )
+                ),
+                "active_set_ls_sweep_present": _as_bool(
+                    g1_active_set_ls_sweep.get("present")
+                ),
+                "active_set_ls_sweep_full_inf_descent_observed": _as_bool(
+                    g1_active_set_ls_sweep.get("full_inf_descent_observed")
+                ),
+                "active_set_ls_sweep_active_inf_descent_observed": _as_bool(
+                    g1_active_set_ls_sweep.get("active_inf_descent_observed")
+                ),
+                "active_set_ls_sweep_best_full_residual_n": (
+                    g1_active_set_ls_sweep.get("best_full_direct_residual_inf_n")
+                ),
+                "active_set_ls_sweep_best_full_improvement_n": (
+                    g1_active_set_ls_sweep.get("best_full_improvement_inf_n")
+                ),
+                "active_set_ls_trust_candidate_present": _as_bool(
+                    g1_active_set_ls_trust_candidate.get("present")
+                ),
+                "active_set_ls_trust_candidate_checkpoint_written": _as_bool(
+                    g1_active_set_ls_trust_candidate.get("checkpoint_written")
+                ),
+                "active_set_ls_trust_candidate_final_residual_n": (
+                    g1_active_set_ls_trust_candidate.get("final_residual_n")
+                ),
+                "active_set_ls_trust_candidate_residual_gate_passed": _as_bool(
+                    g1_active_set_ls_trust_candidate.get("residual_gate_passed")
+                ),
+                "active_set_ls_trust_candidate_checkpoint_path": str(
+                    g1_active_set_ls_trust_candidate.get("checkpoint_path") or ""
+                ),
+                "active_set_ls_trust_schedule_candidate_present": _as_bool(
+                    g1_active_set_ls_trust_schedule_candidate.get("present")
+                ),
+                "active_set_ls_trust_schedule_candidate_final_residual_n": (
+                    g1_active_set_ls_trust_schedule_candidate.get("final_residual_n")
+                ),
+                "active_set_ls_trust_schedule_candidate_residual_gate_passed": _as_bool(
+                    g1_active_set_ls_trust_schedule_candidate.get(
+                        "residual_gate_passed"
+                    )
+                ),
+                "active_set_ls_trust_schedule_candidate_active_row_count_schedule": (
+                    g1_active_set_ls_trust_schedule_candidate.get(
+                        "active_row_count_schedule"
+                    )
+                ),
+                "active_set_ls_trust_tangent_fd_jvp_present": _as_bool(
+                    g1_active_set_ls_trust_tangent_fd_jvp.get("present")
+                ),
+                "active_set_ls_trust_tangent_fd_jvp_fd_consistent": _as_bool(
+                    g1_active_set_ls_trust_tangent_fd_jvp.get("fd_consistent")
+                ),
+                "active_set_ls_trust_tangent_fd_jvp_max_relative_inf_error": (
+                    g1_active_set_ls_trust_tangent_fd_jvp.get(
+                        "max_relative_inf_error"
+                    )
+                ),
+                "active_set_ls_trust_tangent_fd_jvp_evaluated_row_count": (
+                    g1_active_set_ls_trust_tangent_fd_jvp.get(
+                        "evaluated_row_count"
+                    )
+                ),
+                "active_set_minimax_trust_candidate_present": _as_bool(
+                    g1_active_set_minimax_trust_candidate.get("present")
+                ),
+                "active_set_minimax_trust_candidate_final_residual_n": (
+                    g1_active_set_minimax_trust_candidate.get("final_residual_n")
+                ),
+                "active_set_minimax_trust_candidate_steps_taken": (
+                    g1_active_set_minimax_trust_candidate.get("steps_taken")
+                ),
+                "active_set_minimax_trust_candidate_best_linear_active_inf_improvement_n": (
+                    g1_active_set_minimax_trust_candidate.get(
+                        "best_linear_active_inf_improvement_n"
                     )
                 ),
                 "rocm_worker_path_repair_status": str(

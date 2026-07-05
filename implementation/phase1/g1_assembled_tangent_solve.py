@@ -20,8 +20,8 @@ from __future__ import annotations
 from typing import Any, Callable
 
 import numpy as np
-from scipy.sparse import csc_matrix
-from scipy.sparse.linalg import LinearOperator, gmres, spilu, splu, spsolve
+from scipy.sparse import csc_matrix, diags
+from scipy.sparse.linalg import LinearOperator, gmres, lsmr, spilu, splu, spsolve
 
 from g1_global_newton_operator import DEFAULT_JVP_EPS, physical_consistent_jvp
 
@@ -30,6 +30,7 @@ ResidualFn = Callable[[np.ndarray], np.ndarray]
 
 DIRECTION_SOLVERS = (
     "gmres_matrix_free",
+    "scaled_lsmr",
     "gmres_ilu",
     "sparse_direct_spsolve",
     "sparse_direct_splu",
@@ -44,6 +45,8 @@ ERR_SPARSE_DIRECT_FACTOR_FAILED = "ERR_SPARSE_DIRECT_FACTOR_FAILED"
 ERR_SPARSE_DIRECT_SOLVE_FAILED = "ERR_SPARSE_DIRECT_SOLVE_FAILED"
 ERR_ILU_FACTOR_FAILED = "ERR_ILU_FACTOR_FAILED"
 ERR_ILU_GMRES_NOT_CONVERGED = "ERR_ILU_GMRES_NOT_CONVERGED"
+ERR_LSMR_SOLVE_FAILED = "ERR_LSMR_SOLVE_FAILED"
+ERR_LSMR_ZERO_DIRECTION = "ERR_LSMR_ZERO_DIRECTION"
 ERR_DIRECTION_SOLVE_BLOCKED = "ERR_DIRECTION_SOLVE_BLOCKED"
 
 
@@ -166,6 +169,85 @@ def solve_direction_assembled(
         return p, {"solver": solver, "status": "ready", "reason_code": PASS,
                    "residual_norm_before": _inf_norm(r0),
                    "residual_norm_after_linear_solve": _linear_residual_after(p)}
+
+    if solver == "scaled_lsmr":
+        try:
+            abs_k = abs(k_free)
+            row_max_raw = abs_k.max(axis=1)
+            col_max_raw = abs_k.max(axis=0)
+            if hasattr(row_max_raw, "toarray"):
+                row_max_raw = row_max_raw.toarray()
+            if hasattr(col_max_raw, "toarray"):
+                col_max_raw = col_max_raw.toarray()
+            row_max = np.asarray(row_max_raw, dtype=np.float64).reshape(-1)
+            col_max = np.asarray(col_max_raw, dtype=np.float64).reshape(-1)
+            row_scale = np.divide(
+                1.0,
+                row_max,
+                out=np.ones_like(row_max, dtype=np.float64),
+                where=row_max > 0.0,
+            )
+            col_scale = np.divide(
+                1.0,
+                col_max,
+                out=np.ones_like(col_max, dtype=np.float64),
+                where=col_max > 0.0,
+            )
+            scaled_k = diags(row_scale) @ k_free @ diags(col_scale)
+            scaled_b = row_scale * b
+            result = lsmr(
+                scaled_k,
+                scaled_b,
+                atol=gmres_atol,
+                btol=gmres_rtol,
+                maxiter=max(int(gmres_maxiter), 1),
+            )
+        except Exception as exc:  # noqa: BLE001
+            return None, {
+                "solver": solver,
+                "status": "blocked",
+                "reason_code": ERR_LSMR_SOLVE_FAILED,
+                "detail": str(exc)[:200],
+            }
+        y = np.asarray(result[0], dtype=np.float64)
+        p = col_scale * y
+        if not _is_finite(p):
+            return None, {
+                "solver": solver,
+                "status": "blocked",
+                "reason_code": ERR_LSMR_SOLVE_FAILED,
+                "detail": "non_finite_solution",
+            }
+        if _inf_norm(p) <= 0.0:
+            return None, {
+                "solver": solver,
+                "status": "blocked",
+                "reason_code": ERR_LSMR_ZERO_DIRECTION,
+                "istop": int(result[1]),
+                "iterations": int(result[2]),
+            }
+        return p, {
+            "solver": solver,
+            "status": "ready",
+            "reason_code": PASS,
+            "istop": int(result[1]),
+            "iterations": int(result[2]),
+            "preconditioned": True,
+            "scaling": {
+                "mode": "row_col_inf",
+                "row_scale_min": float(np.min(row_scale)) if row_scale.size else 1.0,
+                "row_scale_max": float(np.max(row_scale)) if row_scale.size else 1.0,
+                "col_scale_min": float(np.min(col_scale)) if col_scale.size else 1.0,
+                "col_scale_max": float(np.max(col_scale)) if col_scale.size else 1.0,
+            },
+            "residual_norm_before": _inf_norm(r0),
+            "residual_norm_after_linear_solve": _linear_residual_after(p),
+            "lsmr_normr": float(result[3]),
+            "lsmr_normar": float(result[4]),
+            "lsmr_norma": float(result[5]),
+            "condition_estimate": float(result[6]),
+            "normx": float(result[7]),
+        }
 
     if solver == "gmres_matrix_free":
         operator = LinearOperator((n, n), matvec=lambda v: physical_consistent_jvp(residual_fn, x0, v, eps=eps), dtype=np.float64)

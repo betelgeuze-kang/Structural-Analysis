@@ -12,6 +12,8 @@ import sys
 from typing import Any, Callable
 
 import numpy as np
+from scipy.sparse import diags
+from scipy.sparse.linalg import lsmr
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PHASE1 = REPO_ROOT / "implementation" / "phase1"
@@ -2066,7 +2068,14 @@ def _hotspot_diagonal_newton_sweep(
     relative_increment_tolerance: float = 1.0e-4,
     residual_tolerance_n: float = 1.0e-3,
     max_rows: int = 8,
+    component_filter: str = "frame",
 ) -> dict[str, Any]:
+    component_filter = str(component_filter or "frame")
+    if component_filter not in {"frame", "shell_bending_drilling", "shell_membrane", "translation", "all"}:
+        raise ValueError(
+            "hotspot_diagonal_newton_component_filter must be one of frame, "
+            "shell_bending_drilling, shell_membrane, translation, or all"
+        )
     free_idx = np.asarray(free, dtype=np.int64)
     base_u = np.asarray(u, dtype=np.float64)
     _base_k, _base_f, base_free, base_residual, base_rhs, _base_meta = assemble_residual(
@@ -2083,7 +2092,8 @@ def _hotspot_diagonal_newton_sweep(
     selected_rows: list[dict[str, Any]] = []
     seen: set[int] = set()
     for row in top_rows:
-        if str(row.get("dominant_component") or "") != "frame":
+        dominant = str(row.get("dominant_component") or "")
+        if component_filter not in {"translation", "all"} and dominant != component_filter:
             continue
         if str(row.get("dof") or "") not in {"ux", "uy", "uz"}:
             continue
@@ -2119,7 +2129,8 @@ def _hotspot_diagonal_newton_sweep(
         return {
             "enabled": True,
             "evaluated": False,
-            "reason": "no_nonzero_frame_hotspot_diagonal_correction",
+            "component_filter": component_filter,
+            "reason": "no_nonzero_hotspot_diagonal_correction",
             "selected_corrections": selected_corrections,
             "candidate_rows": [],
             "best_candidate": {},
@@ -2180,7 +2191,8 @@ def _hotspot_diagonal_newton_sweep(
     return {
         "enabled": True,
         "evaluated": bool(free_stable),
-        "direction": "diagonal_newton_on_frame_translation_hotspots",
+        "component_filter": component_filter,
+        "direction": f"diagonal_newton_on_{component_filter}_translation_hotspots",
         "selected_hotspot_row_count": int(len(selected_corrections)),
         "base_direct_residual_inf_n": base_residual_inf,
         "base_relative_residual_inf": base_residual_inf / max(base_rhs_inf, 1.0),
@@ -2191,6 +2203,590 @@ def _hotspot_diagonal_newton_sweep(
         "candidate_rows": candidate_rows,
         "best_candidate": best_candidate,
         "best_gate_eligible_candidate": best_gate_eligible_candidate,
+    }
+
+
+def _global_tangent_newton_sweep(
+    *,
+    u: np.ndarray,
+    stiffness: Any,
+    free: np.ndarray,
+    residual: np.ndarray,
+    rhs: np.ndarray,
+    assemble_residual: Callable[..., tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]],
+    alpha_values: tuple[float, ...],
+    max_iterations: int = 64,
+    relative_increment_tolerance: float = 1.0e-4,
+    residual_tolerance_n: float = 5.0e-4,
+    scaling: str = "none",
+) -> dict[str, Any]:
+    scaling = str(scaling or "none")
+    if scaling not in {"none", "row_col_inf"}:
+        raise ValueError("global_tangent_newton_scaling must be one of none or row_col_inf")
+    free_idx = np.asarray(free, dtype=np.int64)
+    base_u = np.asarray(u, dtype=np.float64)
+    base_residual = np.asarray(residual, dtype=np.float64)
+    base_rhs = np.asarray(rhs, dtype=np.float64)
+    if not free_idx.size or not base_residual.size:
+        return {
+            "enabled": True,
+            "evaluated": False,
+            "reason": "empty_free_residual_system",
+            "solver": "scipy_lsmr_limited_cpu_diagnostic",
+            "candidate_rows": [],
+            "best_candidate": {},
+            "best_gate_eligible_candidate": {},
+        }
+    k_ff = stiffness[free_idx, :][:, free_idx]
+    solver_matrix = k_ff
+    solver_rhs = -base_residual
+    row_scale = np.ones_like(base_residual)
+    col_scale = np.ones_like(base_residual)
+    scaling_stats: dict[str, Any] = {
+        "mode": scaling,
+        "row_scale_min": 1.0,
+        "row_scale_max": 1.0,
+        "col_scale_min": 1.0,
+        "col_scale_max": 1.0,
+    }
+    if scaling == "row_col_inf":
+        abs_k = abs(k_ff)
+        row_max_raw = abs_k.max(axis=1)
+        col_max_raw = abs_k.max(axis=0)
+        if hasattr(row_max_raw, "toarray"):
+            row_max_raw = row_max_raw.toarray()
+        if hasattr(col_max_raw, "toarray"):
+            col_max_raw = col_max_raw.toarray()
+        row_max = np.asarray(row_max_raw).reshape(-1).astype(np.float64)
+        col_max = np.asarray(col_max_raw).reshape(-1).astype(np.float64)
+        row_scale = np.divide(
+            1.0,
+            row_max,
+            out=np.ones_like(row_max, dtype=np.float64),
+            where=row_max > 0.0,
+        )
+        col_scale = np.divide(
+            1.0,
+            col_max,
+            out=np.ones_like(col_max, dtype=np.float64),
+            where=col_max > 0.0,
+        )
+        solver_matrix = diags(row_scale) @ k_ff @ diags(col_scale)
+        solver_rhs = row_scale * (-base_residual)
+        scaling_stats = {
+            "mode": scaling,
+            "row_scale_min": float(np.min(row_scale)) if row_scale.size else 1.0,
+            "row_scale_max": float(np.max(row_scale)) if row_scale.size else 1.0,
+            "col_scale_min": float(np.min(col_scale)) if col_scale.size else 1.0,
+            "col_scale_max": float(np.max(col_scale)) if col_scale.size else 1.0,
+        }
+    try:
+        solve_result = lsmr(
+            solver_matrix,
+            solver_rhs,
+            atol=1.0e-10,
+            btol=1.0e-10,
+            maxiter=max(int(max_iterations), 1),
+        )
+    except Exception as exc:  # noqa: BLE001
+        return {
+            "enabled": True,
+            "evaluated": False,
+            "reason": "lsmr_solve_error",
+            "solver": "scipy_lsmr_limited_cpu_diagnostic",
+            "scaling": scaling_stats,
+            "error": f"{exc.__class__.__name__}: {exc}",
+            "candidate_rows": [],
+            "best_candidate": {},
+            "best_gate_eligible_candidate": {},
+        }
+    direction_free = col_scale * np.asarray(solve_result[0], dtype=np.float64)
+    direction = np.zeros_like(base_u)
+    direction[free_idx] = direction_free
+    direction_inf = _max_abs(direction)
+    base_residual_inf = _max_abs(base_residual)
+    base_rhs_inf = _max_abs(base_rhs)
+    linear_residual = np.asarray(k_ff @ direction_free, dtype=np.float64) + base_residual
+    linear_residual_inf = _max_abs(linear_residual)
+    solver_stats = {
+        "istop": int(solve_result[1]),
+        "iteration_count": int(solve_result[2]),
+        "normr": float(solve_result[3]),
+        "normar": float(solve_result[4]),
+        "norma": float(solve_result[5]),
+        "condition_estimate": float(solve_result[6]),
+        "normx": float(solve_result[7]),
+        "max_iterations": int(max_iterations),
+    }
+    if direction_inf <= 0.0:
+        return {
+            "enabled": True,
+            "evaluated": False,
+            "reason": "zero_global_tangent_direction",
+            "solver": "scipy_lsmr_limited_cpu_diagnostic",
+            "scaling": scaling_stats,
+            "solver_stats": solver_stats,
+            "linear_residual_inf_n": linear_residual_inf,
+            "linear_relative_residual_inf": linear_residual_inf / max(base_residual_inf, 1.0),
+            "candidate_rows": [],
+            "best_candidate": {},
+            "best_gate_eligible_candidate": {},
+        }
+    base_free_idx = np.asarray(free_idx, dtype=np.int64)
+    max_abs_u = max(_max_abs(base_u), 1.0e-12)
+    candidate_rows: list[dict[str, Any]] = []
+    for alpha in alpha_values:
+        alpha_float = float(alpha)
+        trial_u = base_u + alpha_float * direction
+        _trial_k, _trial_f, trial_free, trial_residual, trial_rhs, _trial_meta = assemble_residual(
+            trial_u
+        )
+        trial_free_idx = np.asarray(trial_free, dtype=np.int64)
+        trial_free_stable = bool(
+            trial_free_idx.shape == base_free_idx.shape
+            and np.array_equal(trial_free_idx, base_free_idx)
+        )
+        residual_inf = _max_abs(trial_residual)
+        rhs_inf = _max_abs(trial_rhs)
+        relative_increment = abs(alpha_float) * direction_inf / max_abs_u
+        candidate_rows.append(
+            {
+                "alpha": alpha_float,
+                "free_dof_set_stable": trial_free_stable,
+                "direct_residual_inf_n": residual_inf,
+                "direct_relative_residual_inf": residual_inf / max(rhs_inf, 1.0),
+                "improvement_inf_n": base_residual_inf - residual_inf,
+                "relative_improvement": (base_residual_inf - residual_inf)
+                / max(base_residual_inf, 1.0),
+                "relative_increment": relative_increment,
+                "residual_gate_passed": residual_inf <= float(residual_tolerance_n),
+                "relative_increment_gate_passed": relative_increment
+                <= float(relative_increment_tolerance),
+            }
+        )
+    best_candidate = min(
+        (
+            row
+            for row in candidate_rows
+            if bool(row.get("free_dof_set_stable"))
+        ),
+        key=lambda row: float(row["direct_residual_inf_n"]),
+        default={},
+    )
+    best_gate_eligible_candidate = min(
+        (
+            row
+            for row in candidate_rows
+            if bool(row.get("free_dof_set_stable"))
+            and bool(row.get("relative_increment_gate_passed"))
+        ),
+        key=lambda row: float(row["direct_residual_inf_n"]),
+        default={},
+    )
+    best_improvement = float(best_candidate.get("improvement_inf_n") or 0.0)
+    return {
+        "enabled": True,
+        "evaluated": True,
+        "solver": "scipy_lsmr_limited_cpu_diagnostic",
+        "scaling": scaling_stats,
+        "direction": "global_free_dof_lsmr_tangent_newton_direction",
+        "base_direct_residual_inf_n": base_residual_inf,
+        "base_relative_residual_inf": base_residual_inf / max(base_rhs_inf, 1.0),
+        "direction_inf_m": direction_inf,
+        "linear_residual_inf_n": linear_residual_inf,
+        "linear_relative_residual_inf": linear_residual_inf
+        / max(base_residual_inf, 1.0),
+        "solver_stats": solver_stats,
+        "relative_increment_tolerance": float(relative_increment_tolerance),
+        "residual_tolerance_n": float(residual_tolerance_n),
+        "descent_observed": bool(best_candidate and best_improvement > 0.0),
+        "candidate_rows": candidate_rows,
+        "best_candidate": best_candidate,
+        "best_gate_eligible_candidate": best_gate_eligible_candidate,
+        "claim_boundary": (
+            "CPU diagnostic global tangent sweep only. This does not prove "
+            "production ROCm/HIP residency, accepted-state material Newton breadth, "
+            "or G1 closure."
+        ),
+    }
+
+
+def _residual_norm_gradient_sweep(
+    *,
+    u: np.ndarray,
+    stiffness: Any,
+    free: np.ndarray,
+    residual: np.ndarray,
+    rhs: np.ndarray,
+    assemble_residual: Callable[..., tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]],
+    alpha_values: tuple[float, ...],
+    trust_radius_m: float = 1.0e-6,
+    relative_increment_tolerance: float = 1.0e-4,
+    residual_tolerance_n: float = 5.0e-4,
+) -> dict[str, Any]:
+    free_idx = np.asarray(free, dtype=np.int64)
+    base_u = np.asarray(u, dtype=np.float64)
+    base_residual = np.asarray(residual, dtype=np.float64)
+    base_rhs = np.asarray(rhs, dtype=np.float64)
+    if not free_idx.size or not base_residual.size:
+        return {
+            "enabled": True,
+            "evaluated": False,
+            "reason": "empty_free_residual_system",
+            "direction": "negative_residual_norm_gradient",
+            "candidate_rows": [],
+            "best_inf_candidate": {},
+            "best_l2_candidate": {},
+            "best_gate_eligible_inf_candidate": {},
+        }
+    k_ff = stiffness[free_idx, :][:, free_idx]
+    gradient_free = np.asarray(k_ff.T @ base_residual, dtype=np.float64)
+    gradient_inf = _max_abs(gradient_free)
+    gradient_l2 = float(np.linalg.norm(gradient_free)) if gradient_free.size else 0.0
+    if gradient_inf <= 0.0 or not np.isfinite(gradient_inf):
+        return {
+            "enabled": True,
+            "evaluated": False,
+            "reason": "zero_or_nonfinite_residual_norm_gradient",
+            "direction": "negative_residual_norm_gradient",
+            "gradient_inf": gradient_inf,
+            "gradient_l2": gradient_l2,
+            "candidate_rows": [],
+            "best_inf_candidate": {},
+            "best_l2_candidate": {},
+            "best_gate_eligible_inf_candidate": {},
+        }
+    direction_free = -gradient_free / gradient_inf * float(trust_radius_m)
+    direction = np.zeros_like(base_u)
+    direction[free_idx] = direction_free
+    direction_inf = _max_abs(direction)
+    base_residual_inf = _max_abs(base_residual)
+    base_residual_l2 = float(np.linalg.norm(base_residual)) if base_residual.size else 0.0
+    base_rhs_inf = _max_abs(base_rhs)
+    base_free_idx = np.asarray(free_idx, dtype=np.int64)
+    max_abs_u = max(_max_abs(base_u), 1.0e-12)
+    candidate_rows: list[dict[str, Any]] = []
+    for alpha in alpha_values:
+        alpha_float = float(alpha)
+        trial_u = base_u + alpha_float * direction
+        _trial_k, _trial_f, trial_free, trial_residual, trial_rhs, _trial_meta = assemble_residual(
+            trial_u
+        )
+        trial_free_idx = np.asarray(trial_free, dtype=np.int64)
+        trial_free_stable = bool(
+            trial_free_idx.shape == base_free_idx.shape
+            and np.array_equal(trial_free_idx, base_free_idx)
+        )
+        trial_residual = np.asarray(trial_residual, dtype=np.float64)
+        residual_inf = _max_abs(trial_residual)
+        residual_l2 = float(np.linalg.norm(trial_residual)) if trial_residual.size else 0.0
+        rhs_inf = _max_abs(trial_rhs)
+        relative_increment = abs(alpha_float) * direction_inf / max_abs_u
+        candidate_rows.append(
+            {
+                "alpha": alpha_float,
+                "free_dof_set_stable": trial_free_stable,
+                "direct_residual_inf_n": residual_inf,
+                "direct_residual_l2_n": residual_l2,
+                "direct_relative_residual_inf": residual_inf / max(rhs_inf, 1.0),
+                "improvement_inf_n": base_residual_inf - residual_inf,
+                "improvement_l2_n": base_residual_l2 - residual_l2,
+                "relative_improvement_inf": (base_residual_inf - residual_inf)
+                / max(base_residual_inf, 1.0),
+                "relative_improvement_l2": (base_residual_l2 - residual_l2)
+                / max(base_residual_l2, 1.0),
+                "relative_increment": relative_increment,
+                "residual_gate_passed": residual_inf <= float(residual_tolerance_n),
+                "relative_increment_gate_passed": relative_increment
+                <= float(relative_increment_tolerance),
+            }
+        )
+    stable_rows = [
+        row for row in candidate_rows if bool(row.get("free_dof_set_stable"))
+    ]
+    best_inf_candidate = min(
+        stable_rows,
+        key=lambda row: float(row["direct_residual_inf_n"]),
+        default={},
+    )
+    best_l2_candidate = min(
+        stable_rows,
+        key=lambda row: float(row["direct_residual_l2_n"]),
+        default={},
+    )
+    best_gate_eligible_inf_candidate = min(
+        (
+            row
+            for row in stable_rows
+            if bool(row.get("relative_increment_gate_passed"))
+        ),
+        key=lambda row: float(row["direct_residual_inf_n"]),
+        default={},
+    )
+    best_inf_improvement = float(best_inf_candidate.get("improvement_inf_n") or 0.0)
+    best_l2_improvement = float(best_l2_candidate.get("improvement_l2_n") or 0.0)
+    return {
+        "enabled": True,
+        "evaluated": True,
+        "direction": "negative_residual_norm_gradient",
+        "base_direct_residual_inf_n": base_residual_inf,
+        "base_direct_residual_l2_n": base_residual_l2,
+        "base_relative_residual_inf": base_residual_inf / max(base_rhs_inf, 1.0),
+        "gradient_inf": gradient_inf,
+        "gradient_l2": gradient_l2,
+        "trust_radius_m": float(trust_radius_m),
+        "direction_inf_m": direction_inf,
+        "relative_increment_tolerance": float(relative_increment_tolerance),
+        "residual_tolerance_n": float(residual_tolerance_n),
+        "inf_descent_observed": bool(best_inf_candidate and best_inf_improvement > 0.0),
+        "l2_descent_observed": bool(best_l2_candidate and best_l2_improvement > 0.0),
+        "candidate_rows": candidate_rows,
+        "best_inf_candidate": best_inf_candidate,
+        "best_l2_candidate": best_l2_candidate,
+        "best_gate_eligible_inf_candidate": best_gate_eligible_inf_candidate,
+        "claim_boundary": (
+            "CPU diagnostic residual-norm gradient sweep only. This can inform "
+            "trust-region/globalization design but does not close G1."
+        ),
+    }
+
+
+def _active_set_least_squares_sweep(
+    *,
+    u: np.ndarray,
+    stiffness: Any,
+    free: np.ndarray,
+    residual: np.ndarray,
+    rhs: np.ndarray,
+    top_rows: list[dict[str, Any]],
+    assemble_residual: Callable[..., tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]],
+    alpha_values: tuple[float, ...],
+    max_rows: int = 8,
+    max_iterations: int = 128,
+    trust_radius_m: float = 1.0e-8,
+    relative_increment_tolerance: float = 1.0e-4,
+    residual_tolerance_n: float = 5.0e-4,
+) -> dict[str, Any]:
+    free_idx = np.asarray(free, dtype=np.int64)
+    base_u = np.asarray(u, dtype=np.float64)
+    base_residual = np.asarray(residual, dtype=np.float64)
+    base_rhs = np.asarray(rhs, dtype=np.float64)
+    selected_rows: list[dict[str, Any]] = []
+    seen_free_rows: set[int] = set()
+    for row in top_rows:
+        try:
+            free_row = int(row.get("free_row", -1))
+        except Exception:
+            continue
+        if free_row < 0 or free_row >= int(base_residual.size) or free_row in seen_free_rows:
+            continue
+        selected_rows.append(row)
+        seen_free_rows.add(free_row)
+        if len(selected_rows) >= max(int(max_rows), 0):
+            break
+    if not selected_rows:
+        return {
+            "enabled": True,
+            "evaluated": False,
+            "reason": "no_active_top_rows_selected",
+            "direction": "active_set_global_least_squares",
+            "candidate_rows": [],
+            "best_full_inf_candidate": {},
+            "best_active_inf_candidate": {},
+            "best_gate_eligible_full_inf_candidate": {},
+        }
+    selected_free_rows = np.asarray(
+        [int(row["free_row"]) for row in selected_rows],
+        dtype=np.int64,
+    )
+    k_ff = stiffness[free_idx, :][:, free_idx]
+    active_matrix = k_ff[selected_free_rows, :]
+    active_residual = base_residual[selected_free_rows]
+    try:
+        solve_result = lsmr(
+            active_matrix,
+            -active_residual,
+            atol=1.0e-12,
+            btol=1.0e-12,
+            maxiter=max(int(max_iterations), 1),
+        )
+    except Exception as exc:  # noqa: BLE001
+        return {
+            "enabled": True,
+            "evaluated": False,
+            "reason": "active_set_lsmr_solve_error",
+            "direction": "active_set_global_least_squares",
+            "error": f"{exc.__class__.__name__}: {exc}",
+            "selected_hotspot_row_count": int(len(selected_rows)),
+            "candidate_rows": [],
+            "best_full_inf_candidate": {},
+            "best_active_inf_candidate": {},
+            "best_gate_eligible_full_inf_candidate": {},
+        }
+    raw_direction_free = np.asarray(solve_result[0], dtype=np.float64)
+    raw_direction_inf = _max_abs(raw_direction_free)
+    trust_radius = float(trust_radius_m)
+    trust_scale = 1.0
+    if raw_direction_inf > trust_radius > 0.0:
+        trust_scale = trust_radius / raw_direction_inf
+    direction_free = raw_direction_free * trust_scale
+    direction = np.zeros_like(base_u)
+    direction[free_idx] = direction_free
+    direction_inf = _max_abs(direction)
+    active_linear_residual = np.asarray(
+        active_matrix @ direction_free,
+        dtype=np.float64,
+    ) + active_residual
+    active_linear_residual_inf = _max_abs(active_linear_residual)
+    base_residual_inf = _max_abs(base_residual)
+    base_residual_l2 = float(np.linalg.norm(base_residual)) if base_residual.size else 0.0
+    base_rhs_inf = _max_abs(base_rhs)
+    base_active_residual_inf = _max_abs(active_residual)
+    base_active_residual_l2 = (
+        float(np.linalg.norm(active_residual)) if active_residual.size else 0.0
+    )
+    solver_stats = {
+        "istop": int(solve_result[1]),
+        "iteration_count": int(solve_result[2]),
+        "normr": float(solve_result[3]),
+        "normar": float(solve_result[4]),
+        "norma": float(solve_result[5]),
+        "condition_estimate": float(solve_result[6]),
+        "normx": float(solve_result[7]),
+        "max_iterations": int(max_iterations),
+    }
+    if direction_inf <= 0.0:
+        return {
+            "enabled": True,
+            "evaluated": False,
+            "reason": "zero_active_set_direction",
+            "direction": "active_set_global_least_squares",
+            "selected_hotspot_row_count": int(len(selected_rows)),
+            "solver_stats": solver_stats,
+            "candidate_rows": [],
+            "best_full_inf_candidate": {},
+            "best_active_inf_candidate": {},
+            "best_gate_eligible_full_inf_candidate": {},
+        }
+    base_free_idx = np.asarray(free_idx, dtype=np.int64)
+    max_abs_u = max(_max_abs(base_u), 1.0e-12)
+    selected_row_metadata = [
+        {
+            "free_row": int(row.get("free_row", -1)),
+            "global_dof": int(row.get("global_dof", -1)),
+            "node_index": row.get("node_index"),
+            "dof": row.get("dof"),
+            "dominant_component": row.get("dominant_component"),
+            "base_residual_n": float(base_residual[int(row["free_row"])]),
+        }
+        for row in selected_rows
+    ]
+    candidate_rows: list[dict[str, Any]] = []
+    for alpha in alpha_values:
+        alpha_float = float(alpha)
+        trial_u = base_u + alpha_float * direction
+        _trial_k, _trial_f, trial_free, trial_residual, trial_rhs, _trial_meta = assemble_residual(
+            trial_u
+        )
+        trial_free_idx = np.asarray(trial_free, dtype=np.int64)
+        trial_free_stable = bool(
+            trial_free_idx.shape == base_free_idx.shape
+            and np.array_equal(trial_free_idx, base_free_idx)
+        )
+        trial_residual = np.asarray(trial_residual, dtype=np.float64)
+        active_trial_residual = trial_residual[selected_free_rows]
+        residual_inf = _max_abs(trial_residual)
+        residual_l2 = float(np.linalg.norm(trial_residual)) if trial_residual.size else 0.0
+        active_residual_inf = _max_abs(active_trial_residual)
+        active_residual_l2 = (
+            float(np.linalg.norm(active_trial_residual))
+            if active_trial_residual.size
+            else 0.0
+        )
+        rhs_inf = _max_abs(trial_rhs)
+        relative_increment = abs(alpha_float) * direction_inf / max_abs_u
+        candidate_rows.append(
+            {
+                "alpha": alpha_float,
+                "free_dof_set_stable": trial_free_stable,
+                "direct_residual_inf_n": residual_inf,
+                "direct_residual_l2_n": residual_l2,
+                "active_residual_inf_n": active_residual_inf,
+                "active_residual_l2_n": active_residual_l2,
+                "direct_relative_residual_inf": residual_inf / max(rhs_inf, 1.0),
+                "improvement_inf_n": base_residual_inf - residual_inf,
+                "improvement_l2_n": base_residual_l2 - residual_l2,
+                "active_improvement_inf_n": base_active_residual_inf
+                - active_residual_inf,
+                "active_improvement_l2_n": base_active_residual_l2
+                - active_residual_l2,
+                "relative_increment": relative_increment,
+                "residual_gate_passed": residual_inf <= float(residual_tolerance_n),
+                "relative_increment_gate_passed": relative_increment
+                <= float(relative_increment_tolerance),
+            }
+        )
+    stable_rows = [
+        row for row in candidate_rows if bool(row.get("free_dof_set_stable"))
+    ]
+    best_full_inf_candidate = min(
+        stable_rows,
+        key=lambda row: float(row["direct_residual_inf_n"]),
+        default={},
+    )
+    best_active_inf_candidate = min(
+        stable_rows,
+        key=lambda row: float(row["active_residual_inf_n"]),
+        default={},
+    )
+    best_gate_eligible_full_inf_candidate = min(
+        (
+            row
+            for row in stable_rows
+            if bool(row.get("relative_increment_gate_passed"))
+        ),
+        key=lambda row: float(row["direct_residual_inf_n"]),
+        default={},
+    )
+    full_improvement = float(best_full_inf_candidate.get("improvement_inf_n") or 0.0)
+    active_improvement = float(
+        best_active_inf_candidate.get("active_improvement_inf_n") or 0.0
+    )
+    return {
+        "enabled": True,
+        "evaluated": True,
+        "direction": "active_set_global_least_squares",
+        "selected_hotspot_row_count": int(len(selected_rows)),
+        "selected_rows": selected_row_metadata,
+        "base_direct_residual_inf_n": base_residual_inf,
+        "base_direct_residual_l2_n": base_residual_l2,
+        "base_active_residual_inf_n": base_active_residual_inf,
+        "base_active_residual_l2_n": base_active_residual_l2,
+        "base_relative_residual_inf": base_residual_inf / max(base_rhs_inf, 1.0),
+        "raw_direction_inf_m": raw_direction_inf,
+        "trust_radius_m": trust_radius,
+        "trust_scale": trust_scale,
+        "direction_inf_m": direction_inf,
+        "active_linear_residual_inf_n": active_linear_residual_inf,
+        "active_linear_relative_residual_inf": active_linear_residual_inf
+        / max(base_active_residual_inf, 1.0),
+        "solver_stats": solver_stats,
+        "relative_increment_tolerance": float(relative_increment_tolerance),
+        "residual_tolerance_n": float(residual_tolerance_n),
+        "full_inf_descent_observed": bool(
+            best_full_inf_candidate and full_improvement > 0.0
+        ),
+        "active_inf_descent_observed": bool(
+            best_active_inf_candidate and active_improvement > 0.0
+        ),
+        "candidate_rows": candidate_rows,
+        "best_full_inf_candidate": best_full_inf_candidate,
+        "best_active_inf_candidate": best_active_inf_candidate,
+        "best_gate_eligible_full_inf_candidate": best_gate_eligible_full_inf_candidate,
+        "claim_boundary": (
+            "CPU diagnostic active-set least-squares sweep only. It targets top "
+            "residual rows over the global free-DOF space and does not close G1."
+        ),
     }
 
 
@@ -2279,6 +2875,7 @@ def run_mgt_residual_jacobian_consistency_probe(
     hotspot_jvp_max_rows: int = 6,
     hotspot_jvp_component_filter: str = "frame",
     hotspot_diagonal_newton_sweep: bool = False,
+    hotspot_diagonal_newton_component_filter: str = "frame",
     hotspot_diagonal_newton_alpha_values: tuple[float, ...] = (
         1.0,
         0.5,
@@ -2287,6 +2884,39 @@ def run_mgt_residual_jacobian_consistency_probe(
         0.01,
         0.001,
     ),
+    global_tangent_newton_sweep: bool = False,
+    global_tangent_newton_alpha_values: tuple[float, ...] = (
+        1.0,
+        0.5,
+        0.25,
+        0.125,
+        0.0625,
+        0.03125,
+    ),
+    global_tangent_newton_max_iterations: int = 64,
+    global_tangent_newton_scaling: str = "none",
+    residual_norm_gradient_sweep: bool = False,
+    residual_norm_gradient_alpha_values: tuple[float, ...] = (
+        1.0,
+        0.5,
+        0.25,
+        0.125,
+        0.0625,
+        0.03125,
+    ),
+    residual_norm_gradient_trust_radius_m: float = 1.0e-6,
+    active_set_ls_sweep: bool = False,
+    active_set_ls_max_rows: int = 8,
+    active_set_ls_alpha_values: tuple[float, ...] = (
+        1.0,
+        0.5,
+        0.25,
+        0.125,
+        0.0625,
+        0.03125,
+    ),
+    active_set_ls_trust_radius_m: float = 1.0e-8,
+    active_set_ls_max_iterations: int = 128,
     shell_pressure_load_path_policy: str = "all_components",
     require_hip_residual_engine: bool = False,
     hip_runtime_preflight_only: bool = False,
@@ -2668,8 +3298,55 @@ def run_mgt_residual_jacobian_consistency_probe(
             top_rows=residual_component_breakdown.get("top_rows", []),
             assemble_residual=assemble_residual,
             alpha_values=hotspot_diagonal_newton_alpha_values,
+            component_filter=str(hotspot_diagonal_newton_component_filter),
         )
         if hotspot_diagonal_newton_sweep
+        else {"enabled": False}
+    )
+    global_tangent_sweep = (
+        _global_tangent_newton_sweep(
+            u=u0,
+            stiffness=stiffness,
+            free=np.asarray(free, dtype=np.int64),
+            residual=np.asarray(residual, dtype=np.float64),
+            rhs=np.asarray(rhs, dtype=np.float64),
+            assemble_residual=assemble_residual,
+            alpha_values=global_tangent_newton_alpha_values,
+            max_iterations=int(global_tangent_newton_max_iterations),
+            scaling=str(global_tangent_newton_scaling),
+        )
+        if global_tangent_newton_sweep
+        else {"enabled": False}
+    )
+    residual_gradient_sweep = (
+        _residual_norm_gradient_sweep(
+            u=u0,
+            stiffness=stiffness,
+            free=np.asarray(free, dtype=np.int64),
+            residual=np.asarray(residual, dtype=np.float64),
+            rhs=np.asarray(rhs, dtype=np.float64),
+            assemble_residual=assemble_residual,
+            alpha_values=residual_norm_gradient_alpha_values,
+            trust_radius_m=float(residual_norm_gradient_trust_radius_m),
+        )
+        if residual_norm_gradient_sweep
+        else {"enabled": False}
+    )
+    active_set_sweep = (
+        _active_set_least_squares_sweep(
+            u=u0,
+            stiffness=stiffness,
+            free=np.asarray(free, dtype=np.int64),
+            residual=np.asarray(residual, dtype=np.float64),
+            rhs=np.asarray(rhs, dtype=np.float64),
+            top_rows=residual_component_breakdown.get("top_rows", []),
+            assemble_residual=assemble_residual,
+            alpha_values=active_set_ls_alpha_values,
+            max_rows=int(active_set_ls_max_rows),
+            max_iterations=int(active_set_ls_max_iterations),
+            trust_radius_m=float(active_set_ls_trust_radius_m),
+        )
+        if active_set_ls_sweep
         else {"enabled": False}
     )
     base_residual_inf = _max_abs(residual)
@@ -2764,6 +3441,9 @@ def run_mgt_residual_jacobian_consistency_probe(
             hotspot_jvp_component_filter
         ),
         "residual_hotspot_diagonal_newton_sweep": hotspot_diagonal_sweep,
+        "residual_global_tangent_newton_sweep": global_tangent_sweep,
+        "residual_norm_gradient_sweep": residual_gradient_sweep,
+        "residual_active_set_least_squares_sweep": active_set_sweep,
         "fd_step": float(fd_step),
         "relative_error_threshold": float(relative_error_threshold),
         "cosine_threshold": float(cosine_threshold),
@@ -2848,12 +3528,93 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--hotspot-diagonal-newton-sweep",
         action="store_true",
-        help="Evaluate diagonal Newton correction candidates on frame-dominant hotspot DOFs.",
+        help="Evaluate diagonal Newton correction candidates on selected hotspot DOFs.",
+    )
+    parser.add_argument(
+        "--hotspot-diagonal-newton-component-filter",
+        choices=("frame", "shell_bending_drilling", "shell_membrane", "translation", "all"),
+        default="frame",
+        help="Dominant component filter for --hotspot-diagonal-newton-sweep rows.",
     )
     parser.add_argument(
         "--hotspot-diagonal-newton-alpha-values",
         default="1,0.5,0.25,0.1,0.01,0.001",
         help="Comma-separated alpha values for --hotspot-diagonal-newton-sweep.",
+    )
+    parser.add_argument(
+        "--global-tangent-newton-sweep",
+        action="store_true",
+        help=(
+            "Evaluate a CPU diagnostic global tangent Newton direction with physical "
+            "residual alpha replay."
+        ),
+    )
+    parser.add_argument(
+        "--global-tangent-newton-alpha-values",
+        default="1,0.5,0.25,0.125,0.0625,0.03125",
+        help="Comma-separated alpha values for --global-tangent-newton-sweep.",
+    )
+    parser.add_argument(
+        "--global-tangent-newton-max-iterations",
+        type=int,
+        default=64,
+        help="Maximum LSMR iterations for --global-tangent-newton-sweep.",
+    )
+    parser.add_argument(
+        "--global-tangent-newton-scaling",
+        choices=("none", "row_col_inf"),
+        default="none",
+        help="Optional matrix scaling for --global-tangent-newton-sweep.",
+    )
+    parser.add_argument(
+        "--residual-norm-gradient-sweep",
+        action="store_true",
+        help=(
+            "Evaluate a CPU diagnostic -J^T R residual-norm gradient direction "
+            "with physical residual alpha replay."
+        ),
+    )
+    parser.add_argument(
+        "--residual-norm-gradient-alpha-values",
+        default="1,0.5,0.25,0.125,0.0625,0.03125",
+        help="Comma-separated alpha values for --residual-norm-gradient-sweep.",
+    )
+    parser.add_argument(
+        "--residual-norm-gradient-trust-radius-m",
+        type=float,
+        default=1.0e-6,
+        help="Inf-norm trust radius in meters for --residual-norm-gradient-sweep.",
+    )
+    parser.add_argument(
+        "--active-set-ls-sweep",
+        action="store_true",
+        help=(
+            "Evaluate a CPU diagnostic active-set least-squares direction over "
+            "the global free-DOF space."
+        ),
+    )
+    parser.add_argument(
+        "--active-set-ls-max-rows",
+        type=int,
+        default=8,
+        help="Maximum top residual rows used by --active-set-ls-sweep.",
+    )
+    parser.add_argument(
+        "--active-set-ls-alpha-values",
+        default="1,0.5,0.25,0.125,0.0625,0.03125",
+        help="Comma-separated alpha values for --active-set-ls-sweep.",
+    )
+    parser.add_argument(
+        "--active-set-ls-trust-radius-m",
+        type=float,
+        default=1.0e-8,
+        help="Inf-norm trust radius in meters for --active-set-ls-sweep.",
+    )
+    parser.add_argument(
+        "--active-set-ls-max-iterations",
+        type=int,
+        default=128,
+        help="Maximum LSMR iterations for --active-set-ls-sweep.",
     )
     parser.add_argument(
         "--shell-pressure-load-path-policy",
@@ -2903,11 +3664,42 @@ def main(argv: list[str] | None = None) -> int:
         hotspot_jvp_max_rows=int(args.hotspot_jvp_max_rows),
         hotspot_jvp_component_filter=str(args.hotspot_jvp_component_filter),
         hotspot_diagonal_newton_sweep=bool(args.hotspot_diagonal_newton_sweep),
+        hotspot_diagonal_newton_component_filter=str(
+            args.hotspot_diagonal_newton_component_filter
+        ),
         hotspot_diagonal_newton_alpha_values=tuple(
             float(value.strip())
             for value in str(args.hotspot_diagonal_newton_alpha_values).split(",")
             if value.strip()
         ),
+        global_tangent_newton_sweep=bool(args.global_tangent_newton_sweep),
+        global_tangent_newton_alpha_values=tuple(
+            float(value.strip())
+            for value in str(args.global_tangent_newton_alpha_values).split(",")
+            if value.strip()
+        ),
+        global_tangent_newton_max_iterations=int(
+            args.global_tangent_newton_max_iterations
+        ),
+        global_tangent_newton_scaling=str(args.global_tangent_newton_scaling),
+        residual_norm_gradient_sweep=bool(args.residual_norm_gradient_sweep),
+        residual_norm_gradient_alpha_values=tuple(
+            float(value.strip())
+            for value in str(args.residual_norm_gradient_alpha_values).split(",")
+            if value.strip()
+        ),
+        residual_norm_gradient_trust_radius_m=float(
+            args.residual_norm_gradient_trust_radius_m
+        ),
+        active_set_ls_sweep=bool(args.active_set_ls_sweep),
+        active_set_ls_max_rows=int(args.active_set_ls_max_rows),
+        active_set_ls_alpha_values=tuple(
+            float(value.strip())
+            for value in str(args.active_set_ls_alpha_values).split(",")
+            if value.strip()
+        ),
+        active_set_ls_trust_radius_m=float(args.active_set_ls_trust_radius_m),
+        active_set_ls_max_iterations=int(args.active_set_ls_max_iterations),
         shell_pressure_load_path_policy=str(args.shell_pressure_load_path_policy),
         require_hip_residual_engine=bool(args.require_hip_residual_engine),
         hip_runtime_preflight_only=bool(args.hip_runtime_preflight_only),

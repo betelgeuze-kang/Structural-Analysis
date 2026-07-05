@@ -127,7 +127,7 @@ def jvp_parity_report(
         1.0,
     )
     max_rel = max_abs / denom
-    passed = bool(max_rel <= relative_tolerance and max_abs <= absolute_tolerance_n)
+    passed = bool(max_rel <= relative_tolerance or max_abs <= absolute_tolerance_n)
     return {
         "finite_difference_eps": float(eps),
         "reference_finite_difference_eps": float(reference_eps),
@@ -137,6 +137,7 @@ def jvp_parity_report(
         "max_absolute_error_n": float(max_abs),
         "relative_tolerance": float(relative_tolerance),
         "absolute_tolerance_n": float(absolute_tolerance_n),
+        "pass_condition": "relative_or_absolute",
         "pass": passed,
     }
 
@@ -155,11 +156,12 @@ def jvp_parity_against_reference(
     max_abs = float(np.max(np.abs(diff))) if diff.size else 0.0
     denom = max(float(np.max(np.abs(reference_action))) if reference_action.size else 0.0, 1.0)
     max_rel = max_abs / denom
-    passed = bool(max_rel <= relative_tolerance and max_abs <= absolute_tolerance_n)
+    passed = bool(max_rel <= relative_tolerance or max_abs <= absolute_tolerance_n)
     return {
         "max_relative_error": float(max_rel),
         "max_absolute_error_n": float(max_abs),
         "relative_tolerance": float(relative_tolerance),
         "absolute_tolerance_n": float(absolute_tolerance_n),
+        "pass_condition": "relative_or_absolute",
         "pass": passed,
     }

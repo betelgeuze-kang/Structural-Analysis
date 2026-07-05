@@ -47,6 +47,7 @@ def _spd_linear(n=10, seed=1):
 def test_default_direction_solver_is_matrix_free():
     ats = _load("g1_assembled_tangent_solve")
     assert ats.DEFAULT_DIRECTION_SOLVER == "gmres_matrix_free"
+    assert "scaled_lsmr" in ats.DIRECTION_SOLVERS
     assert "sparse_direct_spsolve" in ats.DIRECTION_SOLVERS
     assert "gmres_ilu" in ats.DIRECTION_SOLVERS
 
@@ -162,7 +163,25 @@ def test_sparse_direct_ready_line_search():
 
 
 # ---------------------------------------------------------------------------
-# 9. no descent after solved direction -> review, no promotion
+# 9. scaled LSMR ready -> line-search attempted, non-promoting
+# ---------------------------------------------------------------------------
+def test_scaled_lsmr_ready_line_search():
+    smoke = _load("run_g1_mgt_sparse_direct_physical_line_search_smoke")
+    residual_fn, x0, a = _spd_linear(n=12, seed=8)
+    payload = smoke.run_sparse_direct_smoke_from_closure(
+        residual_fn, x0, a, direction_solver="scaled_lsmr", gmres_maxiter=32,
+    )
+    assert payload["assembled_tangent_parity"]["pass"] is True
+    assert payload["direction_solve_comparison"]["scaled_lsmr"]["status"] == "ready"
+    assert payload["direction_solve_comparison"]["scaled_lsmr"]["scaling"]["mode"] == (
+        "row_col_inf"
+    )
+    assert payload["line_search_preview"]["attempted"] is True
+    assert payload["promotes_g1_closure"] is False
+
+
+# ---------------------------------------------------------------------------
+# 10. no descent after solved direction -> review, no promotion
 # ---------------------------------------------------------------------------
 def test_no_descent_after_solved_direction(monkeypatch):
     smoke = _load("run_g1_mgt_sparse_direct_physical_line_search_smoke")
@@ -185,7 +204,7 @@ def test_no_descent_after_solved_direction(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# 10. report always non-promoting; missing input fail-closed
+# 11. report always non-promoting; missing input fail-closed
 # ---------------------------------------------------------------------------
 def test_report_always_non_promoting(tmp_path):
     smoke = _load("run_g1_mgt_sparse_direct_physical_line_search_smoke")
@@ -196,3 +215,66 @@ def test_report_always_non_promoting(tmp_path):
     assert payload["promotes_g1_closure"] is False
     assert payload["claim_boundary"] == "non_promoting_sparse_direct_real_mgt_smoke_only"
     assert str(smoke.DEFAULT_OUTPUT_JSON).endswith(".local.json")
+
+
+# ---------------------------------------------------------------------------
+# 12. checkpoint provenance can be carried by core smoke payloads
+# ---------------------------------------------------------------------------
+def test_checkpoint_provenance_carried_by_core_payload():
+    smoke = _load("run_g1_mgt_sparse_direct_physical_line_search_smoke")
+    residual_fn, x0, k_free = _spd_linear(n=6, seed=7)
+
+    payload = smoke.run_sparse_direct_smoke_from_closure(
+        residual_fn,
+        x0,
+        k_free,
+        direction_solver="sparse_direct_spsolve",
+        checkpoint_kind="mgt-direct-residual-newton-state.v1",
+        resource_usage={
+            "dof_count": 6,
+            "free_dof_count": 6,
+            "checkpoint": {
+                "checkpoint_applied": True,
+                "checkpoint_npz": "frontier.npz",
+            },
+        },
+    )
+
+    assert payload["checkpoint_kind"] == "mgt-direct-residual-newton-state.v1"
+    assert payload["resource_usage"]["checkpoint"]["checkpoint_applied"] is True
+    assert payload["resource_usage"]["checkpoint"]["checkpoint_npz"] == "frontier.npz"
+    assert payload["promotes_g1_closure"] is False
+
+
+def test_sparse_direct_checkpoint_writer_is_non_promoting(tmp_path):
+    smoke = _load("run_g1_mgt_sparse_direct_physical_line_search_smoke")
+    path = tmp_path / "candidate.npz"
+    result = smoke._write_checkpoint(
+        path=path,
+        load_scale=1.0,
+        displacement_u=np.asarray([0.0, 0.2, -0.1], dtype=np.float64),
+        final_residual=np.asarray([0.0, 0.25, -0.5], dtype=np.float64),
+        residual_before_n=0.75,
+        external_load_inf_n=10.0,
+        accepted_alpha=0.5,
+        direction_solver="scaled_lsmr",
+        frame_tangent_source="force_based_residual_tangent",
+        shell_pressure_load_path_policy="structural_components_only",
+    )
+
+    assert result["written"] is True
+    assert result["schema"] == smoke.CHECKPOINT_SCHEMA
+    assert result["direct_residual_inf_n"] == 0.5
+    assert result["direct_relative_residual_inf"] == 0.05
+    assert result["residual_gate_passed"] is False
+    assert result["promotes_g1_closure"] is False
+    with np.load(path, allow_pickle=False) as archive:
+        assert str(np.asarray(archive["checkpoint_schema"]).item()) == (
+            smoke.CHECKPOINT_SCHEMA
+        )
+        assert bool(np.asarray(archive["promotes_g1_closure"]).item()) is False
+        assert bool(
+            np.asarray(archive["sparse_direct_line_search_candidate_only"]).item()
+        ) is True
+        assert str(np.asarray(archive["direction_solver"]).item()) == "scaled_lsmr"
+        assert float(np.asarray(archive["accepted_alpha"]).item()) == 0.5
