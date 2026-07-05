@@ -1,7 +1,7 @@
 {
   "schema_version": "g1-active-set-ls-trust-candidate.v1",
-  "generated_at": "2026-07-04T23:51:34.711554+00:00",
-  "source_commit_sha": "f779666af7356914e11290547c4a001151062cb6",
+  "generated_at": "2026-07-05T11:49:40.627007+00:00",
+  "source_commit_sha": "1de8f1a9a0c80698b9db5f7808bf767fdcb683d6",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "status": "candidate_created",
   "promotes_g1_closure": false,
@@ -165,7 +165,7 @@
     "claim_boundary": "Loadable active-set LS trust checkpoint candidate only. It does not close G1 without direct residual, material Newton, full-mesh, and production ROCm/HIP gates."
   },
   "runtime_metrics": {
-    "total_seconds": 44.50150927598588
+    "total_seconds": 43.81597445497755
   },
   "claim_boundary": "Non-promoting active-set LS trust candidate. It may lower the current full-load residual frontier but does not close G1, material Newton breadth, full-mesh equilibrium, or production ROCm/HIP residency."
 }

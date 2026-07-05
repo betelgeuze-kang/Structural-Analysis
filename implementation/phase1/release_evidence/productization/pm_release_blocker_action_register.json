@@ -32,11 +32,11 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-05T11:42:02.382063+00:00",
+  "generated_at": "2026-07-05T12:05:06.711010+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:2cc4b6349f681fa058d246ca588abd32fd6a04bf201830efc545e01971f5c494",
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:4e292e214108da681bd4e02425a91626cfdf1f55ff04a08e989d14e87a9f7812",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:e4cd8fff323b11cf77bbac2fca086d2b297d255b554dfb47adb5470b555311e7",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:eecb0bc54b9cf84dc0ab4af3e1bc5d456fc04860c368230ec3d6487a748de7a3",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:69285c5dcf0a4bdc30c7a71d48b86dabde7af6e458925f250a4e3f9b9616e109",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:2dd335461534767886bc08ce07d463d36e2617cab30e8306d9da5e0e51e8aa3b",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:c1af83f1b410aca8536d5ab832c0ba6a86153436844e42152860f84ec0002328",
@@ -1191,7 +1191,7 @@
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
-        "current_head_sha": "40a003a581cf8b8db8f69bf365acd02188c16756",
+        "current_head_sha": "80185ce7be693ca37417617fdebf485cee1c17ee",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 230,
@@ -1229,7 +1229,7 @@
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
-        "current_head_sha": "40a003a581cf8b8db8f69bf365acd02188c16756",
+        "current_head_sha": "80185ce7be693ca37417617fdebf485cee1c17ee",
         "feature_ahead_count": 0,
         "feature_fast_forward_possible": true,
         "feature_synced_to_head": true,
@@ -1332,7 +1332,7 @@
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
-        "current_head_sha": "40a003a581cf8b8db8f69bf365acd02188c16756",
+        "current_head_sha": "80185ce7be693ca37417617fdebf485cee1c17ee",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 230,
@@ -1370,7 +1370,7 @@
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
-        "current_head_sha": "40a003a581cf8b8db8f69bf365acd02188c16756",
+        "current_head_sha": "80185ce7be693ca37417617fdebf485cee1c17ee",
         "feature_ahead_count": 0,
         "feature_fast_forward_possible": true,
         "feature_synced_to_head": true,
@@ -1473,7 +1473,7 @@
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
-        "current_head_sha": "40a003a581cf8b8db8f69bf365acd02188c16756",
+        "current_head_sha": "80185ce7be693ca37417617fdebf485cee1c17ee",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 230,
@@ -1511,7 +1511,7 @@
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
-        "current_head_sha": "40a003a581cf8b8db8f69bf365acd02188c16756",
+        "current_head_sha": "80185ce7be693ca37417617fdebf485cee1c17ee",
         "feature_ahead_count": 0,
         "feature_fast_forward_possible": true,
         "feature_synced_to_head": true,
@@ -1614,7 +1614,7 @@
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
-        "current_head_sha": "40a003a581cf8b8db8f69bf365acd02188c16756",
+        "current_head_sha": "80185ce7be693ca37417617fdebf485cee1c17ee",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 230,
@@ -1652,7 +1652,7 @@
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
-        "current_head_sha": "40a003a581cf8b8db8f69bf365acd02188c16756",
+        "current_head_sha": "80185ce7be693ca37417617fdebf485cee1c17ee",
         "feature_ahead_count": 0,
         "feature_fast_forward_possible": true,
         "feature_synced_to_head": true,
@@ -2234,7 +2234,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "80185ce7be693ca37417617fdebf485cee1c17ee",
+  "source_commit_sha": "1de8f1a9a0c80698b9db5f7808bf767fdcb683d6",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 14,

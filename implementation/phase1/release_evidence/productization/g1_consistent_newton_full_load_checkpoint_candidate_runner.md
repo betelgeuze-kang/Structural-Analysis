@@ -40,6 +40,8 @@
 - `active_frontier_shell_policy_linearized_direct_replay_required`: `True`
 - `active_frontier_structural_policy_active_set_final_residual_n`: `0.07205501101467937`
 - `active_frontier_structural_policy_active_set_alpha_sweep_stop`: `no_candidate_descent`
+- `active_frontier_structural_policy_active_set_state_updated_direct_replay_residual_n`: `44.08048153349253`
+- `active_frontier_structural_policy_active_set_state_updated_direct_replay_gate`: `False`
 - `active_frontier_structural_policy_top_component`: `shell_bending_drilling`
 - `active_frontier_structural_policy_top_balance_driver`: `shell_bending_drilling_internal_force`
 - `active_frontier_shell_rotation_candidate_residual_n`: `0.04728610099315822`
@@ -219,6 +221,15 @@
 - `present`: `True`
 - `stop_reason`: `no_candidate_descent`
 - `final_residual_n`: `0.07205501101467937`
+
+## Active Frontier Structural Policy State-Updated Direct Replay
+
+- `present`: `True`
+- `status`: `partial`
+- `state_updated_material_direct_residual_inf_n`: `44.08048153349253`
+- `direct_residual_gate_passed`: `False`
+- `live_g1_assembly_contract_passed`: `True`
+- `consistent_residual_jacobian_newton_passed`: `False`
 
 ## Active Frontier Structural Policy Residual Ownership
 

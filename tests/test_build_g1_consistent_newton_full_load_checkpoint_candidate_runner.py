@@ -949,6 +949,45 @@ def _active_frontier_structural_policy_alpha_sweep_payload() -> dict:
     return payload
 
 
+def _active_frontier_structural_policy_direct_material_replay_payload() -> dict:
+    return {
+        "schema_version": "mgt-direct-residual-newton-probe.v1",
+        "status": "partial",
+        "promotes_g1_closure": False,
+        "source_commit_sha": "fixture",
+        "base_direct_residual": {
+            "load_scale": 1.0,
+            "direct_residual_inf_n": 44.08048153349253,
+            "fixed_point_receipt_residual_inf_n": 0.07205064005823536,
+        },
+        "final_direct_residual": {
+            "direct_residual_inf_n": 44.08048153349253,
+            "residual_gate_passed": False,
+        },
+        "live_g1_assembly_contract": {
+            "contract_pass": True,
+            "load_scale": 1.0,
+            "residual_inf_norm": 44.08048153349253,
+        },
+        "gate_assessment": {
+            "direct_residual_gate_passed": False,
+            "consistent_residual_jacobian_newton_passed": False,
+            "consistent_residual_jacobian_newton_blockers": [
+                "consistent_residual_jacobian_newton_not_proven",
+                "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency",
+            ],
+            "material_newton_breadth_blockers": [
+                "material_newton_breadth_not_proven",
+                "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency",
+            ],
+        },
+        "residual_contract": {
+            "consistent_residual_jacobian_newton_gate_passed": False,
+        },
+        "claim_boundary": "state-updated material direct replay fixture",
+    }
+
+
 def _active_frontier_structural_policy_residual_ownership_payload() -> dict:
     payload = _active_frontier_residual_ownership_payload()
     payload["checkpoint_npz"] = (
@@ -1764,6 +1803,10 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
             tmp_path
             / runner.DEFAULT_ACTIVE_FRONTIER_STRUCTURAL_POLICY_ACTIVE_SET_LS_TRUST_ALPHA_SWEEP
         ),
+        "structural_policy_direct_replay": (
+            tmp_path
+            / runner.DEFAULT_ACTIVE_FRONTIER_STRUCTURAL_POLICY_ACTIVE_SET_DIRECT_MATERIAL_REPLAY_PROBE
+        ),
         "structural_policy_ownership": (
             tmp_path
             / runner.DEFAULT_ACTIVE_FRONTIER_STRUCTURAL_POLICY_RESIDUAL_OWNERSHIP_PROBE
@@ -1896,6 +1939,10 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
     _write_json(
         paths["structural_policy_alpha_sweep"],
         _active_frontier_structural_policy_alpha_sweep_payload(),
+    )
+    _write_json(
+        paths["structural_policy_direct_replay"],
+        _active_frontier_structural_policy_direct_material_replay_payload(),
     )
     _write_json(
         paths["structural_policy_ownership"],
@@ -2235,6 +2282,24 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     assert payload["summary"][
         "active_frontier_structural_policy_active_set_ls_trust_alpha_sweep_stop_reason"
     ] == "no_candidate_descent"
+    assert (
+        payload["summary"][
+            "active_frontier_structural_policy_active_set_state_updated_direct_replay_present"
+        ]
+        is True
+    )
+    assert payload["summary"][
+        "active_frontier_structural_policy_active_set_state_updated_direct_replay_residual_n"
+    ] == 44.08048153349253
+    assert (
+        payload["summary"][
+            "active_frontier_structural_policy_active_set_state_updated_direct_replay_gate"
+        ]
+        is False
+    )
+    assert payload["summary"][
+        "active_frontier_structural_policy_active_set_state_updated_direct_replay_gap_n"
+    ] == 44.08048153349253 - 0.07205501101467937
     assert (
         payload["summary"][
             "active_frontier_structural_policy_residual_ownership_present"
@@ -2790,6 +2855,15 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
         "active_frontier_structural_policy_active_set_ls_trust_alpha_sweep"
     ]["stop_reason"] == "no_candidate_descent"
     assert payload[
+        "active_frontier_structural_policy_active_set_state_updated_direct_replay_probe"
+    ]["state_updated_material_direct_residual_inf_n"] == 44.08048153349253
+    assert payload[
+        "active_frontier_structural_policy_active_set_state_updated_direct_replay_probe"
+    ]["direct_residual_gate_passed"] is False
+    assert payload[
+        "active_frontier_structural_policy_active_set_state_updated_direct_replay_probe"
+    ]["consistent_residual_jacobian_newton_passed"] is False
+    assert payload[
         "active_frontier_structural_policy_residual_ownership_probe"
     ]["top_row_balance_driver"] == "shell_bending_drilling_internal_force"
     assert payload[
@@ -3324,6 +3398,14 @@ def test_runner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
     assert "## Active Frontier Structural Policy Active-Set LS Trust" in markdown
     assert "active_frontier_structural_policy_active_set_final_residual_n" in markdown
     assert "## Active Frontier Structural Policy Alpha Sweep" in markdown
+    assert (
+        "## Active Frontier Structural Policy State-Updated Direct Replay"
+        in markdown
+    )
+    assert (
+        "active_frontier_structural_policy_active_set_state_updated_direct_replay_residual_n"
+        in markdown
+    )
     assert "## Active Frontier Structural Policy Residual Ownership" in markdown
     assert "shell_bending_drilling_internal_force" in markdown
     assert "## Active Frontier Structural Policy Linearized After Two-Step" in markdown

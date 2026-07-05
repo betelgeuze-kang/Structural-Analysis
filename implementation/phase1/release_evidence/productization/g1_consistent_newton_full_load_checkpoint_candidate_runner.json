@@ -151,13 +151,36 @@
     "present": true,
     "promotes_g1_closure": false,
     "residual_gate_passed": false,
-    "runtime_total_seconds": 44.50150927598588,
+    "runtime_total_seconds": 43.81597445497755,
     "shell_pressure_load_path_policy": "structural_components_only",
     "status": "candidate_created",
     "steps_taken": 1,
     "stop_reason": "max_steps",
     "total_reduction_n": 0.048877269735777995,
     "total_reduction_ratio": 0.4041705773881482
+  },
+  "active_frontier_structural_policy_active_set_state_updated_direct_replay_probe": {
+    "claim_boundary": "This is the direct residual/Jacobian bridge required before G1 closure. It evaluates the physical residual without solver regularization and iterates regularized Newton correction directions with trust-region line-search plus a directional finite-difference residual-Jacobian alpha probe, accepted-history secant subspace, an opt-in ridge/windowed secant-family subspace, and matrix-free finite-difference consistent-Jacobian subspace, an opt-in global matrix-free residual-JVP Krylov direction, plus a current-tangent residual-row least-squares correction. It is not full closure unless both direct residual and increment gates pass at full load scale 1.0. State-dependent shell-material tangent HIP replay computes the shell material tangent from each candidate state and evaluates through a candidate-specific HIP backend. Shell CSR/operator refresh happens on host; this is state-dependent material tangent HIP residual replay but not full production ROCm/HIP residency closure.",
+    "consistent_residual_jacobian_newton_blockers": [
+      "consistent_residual_jacobian_newton_not_proven",
+      "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+    ],
+    "consistent_residual_jacobian_newton_passed": false,
+    "direct_residual_gate_passed": false,
+    "final_direct_residual_inf_n": 44.08048153349253,
+    "live_g1_assembly_contract_passed": true,
+    "live_g1_assembly_contract_residual_inf_n": 44.08048153349253,
+    "load_scale": 1.0,
+    "material_newton_breadth_blockers": [
+      "material_newton_breadth_not_proven",
+      "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+    ],
+    "path": "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_direct_probe.json",
+    "present": true,
+    "promotes_g1_closure": false,
+    "source_commit_sha": "1de8f1a9a0c80698b9db5f7808bf767fdcb683d6",
+    "state_updated_material_direct_residual_inf_n": 44.08048153349253,
+    "status": "partial"
   },
   "active_frontier_structural_policy_linearized_active_set_after_two_step_probe": {
     "base_relative_residual_inf": 5.4480554772287545e-06,
@@ -509,6 +532,7 @@
     "g1_active_frontier_shell_policy_replay_probe": "implementation/phase1/release_evidence/productization/g1_active_frontier_shell_policy_replay_probe.json",
     "g1_active_frontier_structural_policy_active_set_ls_trust_alpha_sweep": "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_two_step_alpha_sweep_candidate.json",
     "g1_active_frontier_structural_policy_active_set_ls_trust_candidate": "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_two_step_candidate.json",
+    "g1_active_frontier_structural_policy_active_set_state_updated_direct_replay_probe": "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_direct_probe.json",
     "g1_active_frontier_structural_policy_linearized_active_set_after_two_step_probe": "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_linearized_active_set_after_two_step_probe.json",
     "g1_active_frontier_structural_policy_residual_ownership_probe": "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_residual_ownership_probe.json",
     "g1_active_frontier_structural_policy_shell_rotation_candidate_residual_ownership_probe": "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_shell_rotation_second_candidate_residual_ownership_probe.json",
@@ -604,7 +628,7 @@
     "residual_inf_n": 0.42740724991695345,
     "status": "ready"
   },
-  "generated_at": "2026-07-05T11:41:47.290717+00:00",
+  "generated_at": "2026-07-05T12:04:43.797095+00:00",
   "global_tangent_scaled_sweep": {
     "base_residual_inf_n": 0.4278304040181992,
     "best_alpha": 0.00390625,
@@ -700,7 +724,7 @@
     "implementation/phase1/release_evidence/productization/g1_active_frontier_shell_policy_linearized_active_set_probe.json": "sha256:e985b0d51c7b741e478e7daec8e9e2a31946d9fe0f6dd980bc1269998840ff1b",
     "implementation/phase1/release_evidence/productization/g1_active_frontier_shell_policy_replay_probe.json": "sha256:c2fca3c6fe03a9a3a59ac7c504e3d28f161052887761a1cb485407e081852fa3",
     "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_two_step_alpha_sweep_candidate.json": "sha256:73fc3d7eaeee9917e206fde40a55ba70020f737d21f5312bcad9e650794d8e94",
-    "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_two_step_candidate.json": "sha256:c37cd050c4e136782b4b0f00dd66c7e9ca99c641177bd76d025cc9eb2aded10a",
+    "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_two_step_candidate.json": "sha256:668b8d51674fc8e515d43b5a71b2cd100970f2ac39c0fd4250bf08b0ef5443de",
     "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_linearized_active_set_after_two_step_probe.json": "sha256:ae587fbbf47b376883c151071a18f438ac7e4d138fd3c14109050fc257fa0825",
     "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_residual_ownership_probe.json": "sha256:6fae50f47ea86c11c9d7dc6f0742084701ed9adb604713eae87497df5cfe530c",
     "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_shell_rotation_row_second_probe.json": "sha256:0c487932073bef1b97bd42f9144d4f94c2e1b4c6842eca604f5b463ebc46228a",
@@ -717,9 +741,9 @@
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_shell_diag_sweep_probe.json": "sha256:3fb896191af710575f7c4a7198de670b974250b26c3e6a93682ec033677f5ac6",
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_shell_jvp_probe.json": "sha256:1f50ad798a79bccf5a36b3f3fe4306ea17ab4305eca998703f41ae849b88da5e",
     "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json": "sha256:d22636072d5e435c501577f2e98c0d296292ff1971b76e7066e0e8584a0214eb",
-    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:d8fa32f927c5a4c2e7126453beeecda10a17c4bc3e366e3e7f9b61afcbfbd9f4",
+    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:6f20c9cd3b95729a9564eb6916a12faf13b1e6cfeca522a66156cbcc53777eec",
     "implementation/phase1/release_evidence/productization/g1_frame_tangent_fd_epsilon_sweep_probe.json": "sha256:81c2ad32a078db886d09c6637cd7d1369719d2ed6c8f5fac88ae5ac410c4291d",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:f931be82e586bf9cc3461410f9eb128df6df109c3912b3052459c1b2f1c9a93c",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:d234a41b8361426321f387573e8ef976ee53b6cfa801e170836cb58123b56d36",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:42f77c9c6856a124859510d049d0419cf5fa41a7d71e8f15f2f8c883f7301c73",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.json": "sha256:e6582053c0d7dc2c99c3737f0c7ffa94579855a5520cdb416efc2abd01aa3ee9",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe.json": "sha256:83a0e92b346a14a6f8833bb39b572437f405fdafe62e631d55da9d7c7c3fa4da",
@@ -744,7 +768,7 @@
     "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:ae97e161c5fdc4d9fb8764972b900f4d69afe55381c9015e2bcc778e67732345",
     "implementation/phase1/release_evidence/productization/g1_true_newton_load_sweep_status.json": "sha256:c1a862c28a6f31163f15f8cbe03334e0060a6cbb81138b9e3819d53fad497aca",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:55a28ce5255823f78b29d4c1ca8f15894632c4f208c92e23da3795ff756446d8",
-    "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:d763431c00478f0769039f419c8fc472cff9fb3d328f09d7c736f8c7a46de93d"
+    "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:b9f08f5d6fb2d0a08e121e13120baea18d9548ec28b65f73018e64a22fe5ce3e"
   },
   "live_g1_assembly_contract": {
     "assembly_result_schema": "g1-assembly-result.v1",
@@ -925,6 +949,7 @@
       "implementation/phase1/release_evidence/productization/g1_active_frontier_shell_policy_linearized_active_set_probe.json",
       "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_two_step_candidate.json",
       "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_two_step_alpha_sweep_candidate.json",
+      "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_direct_probe.json",
       "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_residual_ownership_probe.json",
       "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_linearized_active_set_after_two_step_probe.json",
       "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_shell_rotation_row_second_probe.json",
@@ -970,7 +995,7 @@
     "row_count": 8,
     "status": "ready"
   },
-  "source_commit_sha": "80185ce7be693ca37417617fdebf485cee1c17ee",
+  "source_commit_sha": "1de8f1a9a0c80698b9db5f7808bf767fdcb683d6",
   "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe": {
     "assembled_tangent_parity_max_absolute_error": 0.006011962890625,
     "assembled_tangent_parity_max_relative_error": 2.683381287585585e-15,
@@ -1496,6 +1521,10 @@
     "active_frontier_structural_policy_active_set_ls_trust_residual_gate_passed": false,
     "active_frontier_structural_policy_active_set_ls_trust_total_reduction_n": 0.048877269735777995,
     "active_frontier_structural_policy_active_set_ls_trust_total_reduction_ratio": 0.4041705773881482,
+    "active_frontier_structural_policy_active_set_state_updated_direct_replay_gap_n": 44.008426522477855,
+    "active_frontier_structural_policy_active_set_state_updated_direct_replay_gate": false,
+    "active_frontier_structural_policy_active_set_state_updated_direct_replay_present": true,
+    "active_frontier_structural_policy_active_set_state_updated_direct_replay_residual_n": 44.08048153349253,
     "active_frontier_structural_policy_linearized_after_two_step_best_after_inf_n": 3.396605913197348e-13,
     "active_frontier_structural_policy_linearized_after_two_step_descent_observed": true,
     "active_frontier_structural_policy_linearized_after_two_step_direct_replay_required": true,
