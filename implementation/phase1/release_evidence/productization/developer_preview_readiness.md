@@ -3,9 +3,9 @@
 - `status`: `blocked`
 - `developer_preview_ready`: `False`
 - `commercial_release_ready`: `False`
-- `blocker_count`: `11`
-- `future_commercial_blocker_count`: `34`
-- `source_commit_sha`: `2ed0fa52cb62daadd38783504082d615f8c001fe`
+- `blocker_count`: `32`
+- `future_commercial_blocker_count`: `35`
+- `source_commit_sha`: `8b91624603f9aa4f38a6676e73fbedc842b7c708`
 - `reuse_policy`: `derived_readiness_judgment_from_product_snapshot_and_dataset_license_manifest; does_not_create_authoritative_closure_evidence`
 - `input_checksum_policy`: `product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata`
 
@@ -13,10 +13,10 @@
 
 | Category | Count | Developer Preview Blocking |
 |---|---:|---|
-| numerical | 4 | yes |
+| numerical | 5 | yes |
 | benchmark | 2 | yes |
-| software product | 5 | yes |
-| future commercial | 34 | no, future commercial only |
+| software product | 25 | yes |
+| future commercial | 35 | no, future commercial only |
 
 ## Gap Ledger Closure Requirement Visibility
 

@@ -141,7 +141,7 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 37,
+      "blocker_count": 36,
       "blockers": [
         "ci_streak::nightly::github_actions_job_start_blocked",
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -155,7 +155,6 @@
         "pm_release::github_sync::github_sync_preflight_not_synced",
         "pm_release::github_sync::github_sync_remote_sync_pending",
         "self_hosted_runner::self_hosted_runner_matching_labels_not_online",
-        "stale_or_inconsistent:open_blocker_count_conflict",
         "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
         "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
         "stale_or_inconsistent:source_commit_mismatch:developer_preview_final_gate_owner_packet",
@@ -190,7 +189,7 @@
       ]
     }
   },
-  "blocker_count": 67,
+  "blocker_count": 66,
   "blockers": [
     "ci_streak::nightly::github_actions_job_start_blocked",
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -234,7 +233,6 @@
     "pm_release::github_sync::github_sync_remote_sync_pending",
     "pm_release::security::license_status_not_configured",
     "self_hosted_runner::self_hosted_runner_matching_labels_not_online",
-    "stale_or_inconsistent:open_blocker_count_conflict",
     "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
     "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
     "stale_or_inconsistent:source_commit_mismatch:developer_preview_final_gate_owner_packet",
@@ -519,12 +517,12 @@
       "status": "blocked"
     },
     "developer_preview_readiness": {
-      "blocker_count": 11,
+      "blocker_count": 32,
       "category_counts": {
         "benchmark": 2,
-        "future commercial": 34,
-        "numerical": 4,
-        "software product": 5
+        "future commercial": 35,
+        "numerical": 5,
+        "software product": 25
       },
       "claim_boundary": "Developer Preview is an open benchmark workstation preview, not a commercial structural solver beta. Customer shadow, commercial license/legal approval, license-server operation, commercial SLA, 30-run CI streak, and external approval receipts remain visible as future Commercial Release blockers. Remote GitHub sync/push approval is a release-publication handoff and does not block the local Developer Preview evidence bar. AI/GNN/surrogate truth claims stay frozen until the deterministic reference solver, residual/Jacobian/Newton closure, and benchmark truth are fixed.",
       "developer_preview_ready": false,
@@ -533,7 +531,7 @@
         "gpu_hip": "performance_track_after_cpu_reference_parity",
         "new_feature_development": "frozen_until_developer_preview_baseline_is_clean"
       },
-      "future_commercial_blocker_count": 34,
+      "future_commercial_blocker_count": 35,
       "gap_ledger_closure_requirement_visibility": {
         "ai_engine_guardrail_rows_ready": true,
         "autonomous_ai_engine_claim_blockers": [
@@ -2136,7 +2134,7 @@
         "reused_evidence": false,
         "rocm_hip_required": true,
         "runtime_blockers": [],
-        "source_commit_sha": "2ed0fa52cb62daadd38783504082d615f8c001fe",
+        "source_commit_sha": "8b91624603f9aa4f38a6676e73fbedc842b7c708",
         "source_state_fresh": true,
         "source_state_kind": "exact",
         "status": "partial"
@@ -2481,7 +2479,7 @@
       "release_area_green_count": 12,
       "release_area_total_count": 16,
       "release_decision": {
-        "approval_token_count": 7,
+        "approval_token_count": 8,
         "blocked_release_count": 9,
         "claim_boundary": "Evidence surface counts include only structural-analysis evidence surfaces. Non-structural product domains are outside this structural solver release gate and must not influence release readiness.",
         "evidence_surface_count": 8,
@@ -2655,7 +2653,7 @@
         "locked_evidence_surface_count": 0,
         "missing_evidence_surface_count": 0,
         "non_structural_evidence_surface_excluded_count": 3,
-        "operator_action_count": 15,
+        "operator_action_count": 16,
         "operator_actions": [],
         "public_benchmark_ready": true,
         "release_allowed": false,
@@ -2707,14 +2705,14 @@
       "cleanup_plan_status": "ready",
       "cleanup_plan_track_or_add_required_path_count": 0,
       "codex_commit_or_push_performed": false,
-      "dirty_path_count": 8,
+      "dirty_path_count": 1,
       "human_git_action_required": false,
       "human_handoff_next_action": "rerun_git_clean_clone_reproduction",
       "human_handoff_push_or_release_command_included": false,
       "human_handoff_status": "ready",
       "human_handoff_suggested_command_count": 3,
       "local_worktree_dirty": true,
-      "non_receipt_dirty_path_count": 8,
+      "non_receipt_dirty_path_count": 1,
       "remote_github_sync_blocker_count": 4,
       "remote_github_sync_blockers": [
         "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
@@ -3081,23 +3079,23 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-05T10:40:29.426830+00:00",
+  "generated_at": "2026-07-05T10:51:41.805215+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
-    "README.md": "sha256:6787544e1e6deccff89e20e1ae6412c10b7eaca4b53981401914883fa07a3ca3",
-    "docs/commercialization-gap-current-state.md": "sha256:6a2b11c0b0406cebd87a0210950bddef739900b03f4cd24ec9e78553d1976c13",
+    "README.md": "sha256:360dc38fe7750b5c7faca77ecc2b82d86031f4cd44244b6157bcb63528b8b135",
+    "docs/commercialization-gap-current-state.md": "sha256:d558814b4d62c1189dde716fec554c74b6bc73ac9d4138fa57d0b73f9c41cc8a",
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:c4a21ef31b6606231a9622652c5e94e57de6f7e0572f7e42afdfa2addd6d314a",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:d2fdac0bedd30f70c70bf93c4485c5414a43eac50fd5c847b60cb4c274eb548d",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:f3276b89e0984fe83d84fa1e9eae05fed6d9a5eac56c8b21fd7ee54702ea3667",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:ed32dcfc42e783e07320ea30a9e3e6417cb295df174b5625d3eaff344e6d4865",
     "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:b4d7fb16bd51b75de337797bbf0651b1801e895f0f651062aeded0e4ad546531",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:e747c5a378a02bf4ceb1ce13e09428e67a2a293ef1165affa7ca284b0d83f6c6",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:143782b76abe1bbbd218a2e7d7d96aa96196503ac246a8dc481c8ba67f798c3b",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:bbc5714ee502f7344dfee3973a14257cfcdea9cf74c1de7909aeac65a03b5a9c",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:54dbf8e19b7b1e38ac1b15c314b8f79cc88293e9050f2537fd179b5ac7fa03a9",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:b83383261c90420ed89cd42c98383887404da18514324fe28d4d4a7c867da3b2",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:8cdd4232a99e080753e1b651c0f122466a6fd6109d3e1fd5602a982c58eb9bbb",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:77f3f517e096efb64215d42472053a94e4f9dd8836f1ca2cfe9090c158dc3c5d",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:87e7a45139dc61af7b52562132f532a69666d07b5bfc1af4ea5b8ae712963530",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:f82b5f9257ed13dbdd8560f5510411f95da7125161d938f3e1abcaceebfbb675",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:a33733e0cdba8a4ca84fa88825e1339af11bda21d8b35ac66787f91669918002",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:40b1b46562249340f70f9c1aeb2364b5efbefd0a0b348b781b1417e444ec0e5e",
     "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:499e7fdb4a0633071dbbab0245198daec1756f1fe29f04a1c1dedcabbe4393a5",
@@ -3107,12 +3105,12 @@
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:66d6027aa5089c91489ae966693e938254fe8fca247749d6303bfece8a3552a0",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:01911ef80b1cd08db6b03d5570ebb919d12287be47b550129ecf1a0b39b71b6a",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:8f5ed8608ecd4b6df9645945ac4abf1b61d1ce45a89878517fadeb296836c673",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:8701a5fac3d6bf56f942eb0a5db7d1ea91a2f6dfea380a11fceecf7e1cb7b670",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:8ecf7505028e726985af68a4f18b1af98b7528e32bd58f56e2547f899bc449a2",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:e4ecd0e53d900f0c0409de09fc6e01d6e950596aa18968be944dc96603da008a",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:71aa6dac4c27bce1193bb09417e16abe08ea80240bbe1b8eedff3ebdd7222dec",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:2dd335461534767886bc08ce07d463d36e2617cab30e8306d9da5e0e51e8aa3b",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:4f8ea099cd22b4eff4bda273b6425f22da1b9b908d99ebe70a2c352d0a5b23d2",
-    "implementation/phase1/release_evidence/productization/structural_scope_release_surface_owner_handoff_check.json": "sha256:f2804d676a1daf32b3d67f7410aaf5a16aac1d24963794a4b13df03f2d2b3c18",
+    "implementation/phase1/release_evidence/productization/structural_scope_release_surface_owner_handoff_check.json": "sha256:8eec977f2ef0b12dc93e6f089e4d08743733ac55262b97ce3746eb77082c8346",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:0fc6612932cd04df8a6e431bdf9139be30d22ef1631fd233c376e6804c6845bc",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:4ed2ac8c01630e36a06ab577b13428ba8e3cda73eb1a9e68ef65b33ec4c830d7",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
@@ -3123,7 +3121,7 @@
   "paid_pilot_ready": false,
   "reason_code": "STALE_OR_INCONSISTENT",
   "release_decision": {
-    "approval_token_count": 7,
+    "approval_token_count": 8,
     "blocked_release_count": 9,
     "claim_boundary": "Evidence surface counts include only structural-analysis evidence surfaces. Non-structural product domains are outside this structural solver release gate and must not influence release readiness.",
     "evidence_surface_count": 8,
@@ -3297,7 +3295,7 @@
     "locked_evidence_surface_count": 0,
     "missing_evidence_surface_count": 0,
     "non_structural_evidence_surface_excluded_count": 3,
-    "operator_action_count": 15,
+    "operator_action_count": 16,
     "operator_actions": [],
     "public_benchmark_ready": true,
     "release_allowed": false,
@@ -3402,13 +3400,12 @@
     },
     "release freshness/sync": {
       "blocked": true,
-      "blocker_count": 26,
+      "blocker_count": 25,
       "blockers": [
         "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
         "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
         "pm_release::github_sync::github_sync_preflight_not_synced",
         "pm_release::github_sync::github_sync_remote_sync_pending",
-        "stale_or_inconsistent:open_blocker_count_conflict",
         "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
         "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
         "stale_or_inconsistent:source_commit_mismatch:developer_preview_final_gate_owner_packet",
@@ -3446,7 +3443,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "2ed0fa52cb62daadd38783504082d615f8c001fe",
+  "source_commit_sha": "8b91624603f9aa4f38a6676e73fbedc842b7c708",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3544,19 +3541,23 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-05T10:40:22.594641+00:00",
+        "generated_at": "2026-07-05T10:51:41.211624+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "2ed0fa52cb62daadd38783504082d615f8c001fe",
+        "source_commit_sha": "8b91624603f9aa4f38a6676e73fbedc842b7c708",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "gap_closure_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T07:42:21.976217+00:00",
@@ -3571,7 +3572,11 @@
       {
         "artifact": "commercial_gap_ledger_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T07:42:21.644037+00:00",
@@ -3586,7 +3591,11 @@
       {
         "artifact": "gap_ledger_evidence_audit",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T07:42:22.083023+00:00",
@@ -3601,7 +3610,11 @@
       {
         "artifact": "phase1_core_api_contract",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T07:42:20.507990+00:00",
@@ -3616,31 +3629,35 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-05T10:40:22.262598+00:00",
+        "generated_at": "2026-07-05T10:51:34.623920+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "2ed0fa52cb62daadd38783504082d615f8c001fe",
+        "source_commit_sha": "8b91624603f9aa4f38a6676e73fbedc842b7c708",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-05T10:40:22.254639+00:00",
+        "generated_at": "2026-07-05T10:51:34.782216+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "2ed0fa52cb62daadd38783504082d615f8c001fe",
+        "source_commit_sha": "8b91624603f9aa4f38a6676e73fbedc842b7c708",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T07:42:18.984493+00:00",
@@ -3655,7 +3672,11 @@
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T07:42:19.109398+00:00",
@@ -3670,19 +3691,23 @@
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-05T10:40:03.986333+00:00",
+        "generated_at": "2026-07-05T10:51:27.489180+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "2ed0fa52cb62daadd38783504082d615f8c001fe",
+        "source_commit_sha": "8b91624603f9aa4f38a6676e73fbedc842b7c708",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "g1_f2g_f2h_cause_narrowing_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T09:42:02.804887+00:00",
@@ -3697,7 +3722,11 @@
       {
         "artifact": "customer_shadow_evidence_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T07:35:29.708651+00:00",
@@ -3712,7 +3741,11 @@
       {
         "artifact": "workstation_delivery_readiness",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T07:42:20.636281+00:00",
@@ -3727,7 +3760,11 @@
       {
         "artifact": "independent_product_readiness",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T07:42:21.331842+00:00",
@@ -3742,7 +3779,11 @@
       {
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T08:31:37.173121+00:00",
@@ -3757,7 +3798,11 @@
       {
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T07:35:29.597225+00:00",
@@ -3772,7 +3817,11 @@
       {
         "artifact": "license_status_closure_report",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T07:35:29.670294+00:00",
@@ -3787,7 +3836,11 @@
       {
         "artifact": "paid_pilot_scope_guard_report",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T07:42:22.258098+00:00",
@@ -3802,7 +3855,11 @@
       {
         "artifact": "external_benchmark_submission_readiness",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T07:35:29.749021+00:00",
@@ -3817,7 +3874,11 @@
       {
         "artifact": "external_benchmark_submission_updates",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T08:11:07.261112+00:00",
@@ -3832,7 +3893,11 @@
       {
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T07:45:18.457129+00:00",
@@ -3847,7 +3912,11 @@
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T07:45:18.507287+00:00",
@@ -3862,7 +3931,11 @@
       {
         "artifact": "structural_scope_owner_decision_application_plan",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T07:45:18.570774+00:00",
@@ -3877,19 +3950,23 @@
       {
         "artifact": "structural_scope_release_surface_owner_handoff_check",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-05T10:40:29.174181+00:00",
+        "generated_at": "2026-07-05T10:51:41.562212+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "2ed0fa52cb62daadd38783504082d615f8c001fe",
+        "source_commit_sha": "8b91624603f9aa4f38a6676e73fbedc842b7c708",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "developer_preview_final_gate_owner_packet",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
         ],
         "generated_at": "2026-07-05T08:28:17.903872+00:00",
@@ -3903,8 +3980,8 @@
       }
     ],
     "open_blocker_counts": {
-      "README.md": 15,
-      "docs/commercialization-gap-current-state.md": 15,
+      "README.md": 16,
+      "docs/commercialization-gap-current-state.md": 16,
       "pm_release_blocker_action_register": 16
     },
     "release_area_counts": {
@@ -3931,37 +4008,17 @@
         "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
         "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
         "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
         "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
         "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
         "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
         "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
         "implementation/phase1/release_evidence/productization/structural_scope_release_surface_owner_handoff_check.json",
-        "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-        "scripts/run_g1_full_load_hip_newton_lane.py",
-        "tests/test_mgt_residual_jacobian_consistency_probe.py",
-        "tests/test_run_g1_full_load_hip_newton_lane.py",
-        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
-        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
-        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_probe.json",
-        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
-        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_probe.json",
-        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_breakdown_probe.json",
-        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
-        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_probe.json"
+        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz"
       ],
       "non_receipt_dirty_paths": [
-        "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-        "scripts/run_g1_full_load_hip_newton_lane.py",
-        "tests/test_mgt_residual_jacobian_consistency_probe.py",
-        "tests/test_run_g1_full_load_hip_newton_lane.py",
-        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
-        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
-        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
-        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz"
+        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz"
       ],
       "phase3_release_control_cleanup_plan": {
         "candidate_release_control_commit_set_count": 0,
@@ -3992,27 +4049,14 @@
         " M implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
         " M implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
         " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
         " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
         " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
         " M implementation/phase1/release_evidence/productization/structural_scope_release_surface_owner_handoff_check.json",
-        " M implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-        " M scripts/run_g1_full_load_hip_newton_lane.py",
-        " M tests/test_mgt_residual_jacobian_consistency_probe.py",
-        " M tests/test_run_g1_full_load_hip_newton_lane.py",
-        "?? implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
-        "?? implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
-        "?? implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_probe.json",
-        "?? implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
-        "?? implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_probe.json",
-        "?? implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_breakdown_probe.json",
-        "?? implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_candidate.npz",
-        "?? implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_scaled_krylov_probe.json"
+        "?? implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz"
       ]
     }
   },
