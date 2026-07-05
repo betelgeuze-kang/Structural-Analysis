@@ -688,6 +688,88 @@ def test_partial_hip_consistency_proof_blocks_lane_promotion(
     assert not child.exists()
 
 
+def test_partial_hip_proof_uses_current_child_receipt_as_deferred_observation(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+    lane_source_commit = "lane-head-commit"
+    monkeypatch.setattr(
+        run_g1_full_load_hip_newton_lane,
+        "_git_head",
+        lambda: lane_source_commit,
+    )
+    child.write_text(
+        json.dumps(
+            {
+                "schema_version": "mgt-direct-residual-newton-probe.v1",
+                "source_commit_sha": lane_source_commit,
+                "reused_evidence": False,
+                "status": "partial",
+                "direct_residual_newton_ready": False,
+                "gate_assessment": {
+                    "direct_residual_gate_passed": False,
+                    "relative_increment_gate_passed": False,
+                    "full_load_closure_passed": True,
+                    "fallback_zero_passed": True,
+                    "material_newton_breadth_passed": False,
+                    "consistent_residual_jacobian_newton_passed": False,
+                    "full_load_closure_gate": {
+                        "observed_load_scale": 1.0,
+                        "required_load_scale": 1.0,
+                    },
+                },
+                "blockers": [
+                    "direct_residual_gate_not_closed",
+                    "consistent_jacobian_or_globalization_required",
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    def fake_run(command: list[str], *, check: bool) -> Any:
+        raise AssertionError("child probe must not run while HIP proof is blocked")
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=lane_source_commit,
+        gate_passed=False,
+        blockers=["rocm_hip_runtime_unavailable"],
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["child_exit_code"] is None
+    assert payload["preexisting_child_probe_evidence"][
+        "usable_as_deferred_child_evidence"
+    ] is True
+    assert payload["child_gate_evidence"]["observed_load_scale"] == 1.0
+    assert payload["child_gate_evidence"]["load_scale_passed"] is True
+    assert payload["child_gate_evidence"]["full_load_closure_passed"] is True
+    assert payload["child_gate_evidence"]["fallback_zero_passed"] is True
+    assert payload["child_gate_evidence"]["direct_residual_gate_passed"] is False
+    next_actions = {row["id"]: row for row in payload["lane_next_actions"]}
+    deferred_child = next_actions[
+        "defer_full_load_child_direct_probe_until_upstream_gates_close"
+    ]
+    assert "child_observed_load_scale_below_required_full_load" not in deferred_child[
+        "required_child_gate_blockers"
+    ]
+    assert "child_direct_residual_gate_not_proven" in deferred_child[
+        "required_child_gate_blockers"
+    ]
+
+
 def test_cause_narrowing_context_routes_consistent_newton_rocm_action(
     tmp_path: Path,
     monkeypatch: Any,
@@ -2787,6 +2869,7 @@ def test_child_consistent_residual_jacobian_blockers_with_passed_flag_blocks_lan
 def test_cli_writes_blocked_receipt_and_fails_when_requested(tmp_path: Path) -> None:
     checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=0.75)
     out = tmp_path / "lane.json"
+    child = tmp_path / "child.json"
 
     exit_code = run_g1_full_load_hip_newton_lane.main(
         [
@@ -2794,6 +2877,8 @@ def test_cli_writes_blocked_receipt_and_fails_when_requested(tmp_path: Path) -> 
             str(checkpoint),
             "--out",
             str(out),
+            "--child-output-json",
+            str(child),
             "--skip-workspace-checkpoint-inventory",
             "--fail-blocked",
         ]
@@ -2825,6 +2910,7 @@ def test_cli_dry_run_receipt_keeps_child_hip_evidence_contract(
     checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
     proof = tmp_path / "hip-proof.json"
     out = tmp_path / "lane.json"
+    child = tmp_path / "child.json"
     _write_hip_consistency_proof(
         proof,
         source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
@@ -2838,6 +2924,8 @@ def test_cli_dry_run_receipt_keeps_child_hip_evidence_contract(
             str(proof),
             "--out",
             str(out),
+            "--child-output-json",
+            str(child),
             "--dry-run",
             "--skip-workspace-checkpoint-inventory",
         ]

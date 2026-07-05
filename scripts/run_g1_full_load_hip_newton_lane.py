@@ -1580,6 +1580,70 @@ def _load_json_payload(path: Path) -> dict[str, Any]:
     return loaded if isinstance(loaded, dict) else {}
 
 
+def _preexisting_child_probe_payload(
+    path: Path,
+    *,
+    lane_source_commit_sha: str,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    payload = _load_json_payload(path)
+    if not payload:
+        return {}, {
+            "schema_version": "g1-preexisting-child-probe-evidence.v1",
+            "path": str(path),
+            "present": False,
+            "usable_as_deferred_child_evidence": False,
+            "blockers": ["preexisting_child_probe_missing_or_unreadable"],
+            "claim_boundary": (
+                "A preexisting child probe can only populate deferred child "
+                "observations. It cannot run the lane, bypass HIP proof, or "
+                "promote G1 closure."
+            ),
+        }
+    source_commit_sha = str(payload.get("source_commit_sha") or "")
+    blockers: list[str] = []
+    if source_commit_sha != lane_source_commit_sha:
+        blockers.append("preexisting_child_probe_source_commit_mismatch")
+    if payload.get("reused_evidence") is not False:
+        blockers.append("preexisting_child_probe_reused_evidence_not_false")
+    if not isinstance(payload.get("gate_assessment"), dict):
+        blockers.append("preexisting_child_probe_gate_assessment_missing")
+    usable = not blockers
+    gate = payload.get("gate_assessment")
+    gate = gate if isinstance(gate, dict) else {}
+    closure_gate = gate.get("full_load_closure_gate")
+    closure_gate = closure_gate if isinstance(closure_gate, dict) else {}
+    return (payload if usable else {}), {
+        "schema_version": "g1-preexisting-child-probe-evidence.v1",
+        "path": str(path),
+        "present": True,
+        "usable_as_deferred_child_evidence": usable,
+        "source_commit_sha": source_commit_sha,
+        "source_commit_matches_lane": source_commit_sha == lane_source_commit_sha,
+        "reused_evidence": payload.get("reused_evidence"),
+        "status": payload.get("status"),
+        "direct_residual_newton_ready": payload.get("direct_residual_newton_ready")
+        is True,
+        "observed_load_scale": closure_gate.get("observed_load_scale"),
+        "full_load_closure_passed": gate.get("full_load_closure_passed") is True,
+        "direct_residual_gate_passed": gate.get("direct_residual_gate_passed")
+        is True,
+        "relative_increment_gate_passed": gate.get("relative_increment_gate_passed")
+        is True,
+        "fallback_zero_passed": gate.get("fallback_zero_passed") is True,
+        "material_newton_breadth_passed": gate.get("material_newton_breadth_passed")
+        is True,
+        "consistent_residual_jacobian_newton_passed": (
+            gate.get("consistent_residual_jacobian_newton_passed") is True
+        ),
+        "blockers": blockers,
+        "claim_boundary": (
+            "This is deferred child-probe observation only. It does not bypass "
+            "HIP proof, production ROCm/HIP residual/JVP residency, or the lane's "
+            "child execution safety gates."
+        ),
+    }
+
+
 def _string_list(value: Any) -> list[str]:
     if not isinstance(value, list):
         return []
@@ -1956,6 +2020,12 @@ def build_lane_report(
         proof_json=hip_consistency_proof_json,
         lane_source_commit_sha=source_commit_sha,
     )
+    preexisting_child_payload, preexisting_child_probe_evidence = (
+        _preexisting_child_probe_payload(
+            output_json,
+            lane_source_commit_sha=source_commit_sha,
+        )
+    )
     cause_narrowing = _cause_narrowing_context(cause_narrowing_status_path)
     workspace_checkpoint_inventory = _workspace_checkpoint_inventory(
         scan_root=workspace_checkpoint_scan_root,
@@ -1974,16 +2044,23 @@ def build_lane_report(
                 mgt_path,
                 hip_consistency_proof_json,
                 cause_narrowing_status_path,
+                output_json if output_json.exists() else None,
             )
             if path is not None
         ),
         *evidence_sources,
         DIRECT_PROBE,
     ]
-    initial_child_hip_residual_refresh_evidence = _child_hip_residual_refresh_evidence({})
+    preexisting_child_gate = preexisting_child_payload.get("gate_assessment")
+    preexisting_child_gate = (
+        preexisting_child_gate if isinstance(preexisting_child_gate, dict) else {}
+    )
+    initial_child_hip_residual_refresh_evidence = (
+        _child_hip_residual_refresh_evidence(preexisting_child_payload)
+    )
     initial_child_gate_evidence = _child_gate_evidence(
-        {},
-        {},
+        preexisting_child_payload,
+        preexisting_child_gate,
         required_load_scale=float(required_load_scale),
         full_load_tolerance=float(full_load_tolerance),
     )
@@ -2037,6 +2114,8 @@ def build_lane_report(
         "f2g_f2h_cause_narrowing_context": cause_narrowing,
         "dry_run": bool(dry_run),
         "command": command,
+        "child_output_json": str(output_json),
+        "preexisting_child_probe_evidence": preexisting_child_probe_evidence,
         "hip_consistency_proof": hip_consistency_proof,
         "blocker_partition": blocker_partition,
         "lane_next_actions": lane_next_actions,

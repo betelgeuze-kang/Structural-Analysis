@@ -261,13 +261,13 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert gap_visibility["source_contract_pass"] is True
     assert gap_visibility["source_full_gap_ledger_ready"] is False
     assert gap_visibility["closure_requirement_count"] == 19
-    assert gap_visibility["closure_requirement_pass_count"] == 3
-    assert gap_visibility["closure_requirement_fail_count"] == 16
+    assert gap_visibility["closure_requirement_pass_count"] == 4
+    assert gap_visibility["closure_requirement_fail_count"] == 15
     assert gap_visibility["nonclosed_rows_with_failed_closure_requirements_count"] == 3
     assert "G1:full_load_scale_1_0_reached" in gap_visibility[
         "nonclosed_failed_closure_requirement_ids"
     ]
-    assert "G1:strict_full_load_hip_newton_checkpoint_available" in gap_visibility[
+    assert "G1:strict_full_load_hip_newton_checkpoint_available" not in gap_visibility[
         "nonclosed_failed_closure_requirement_ids"
     ]
     assert "G6:eb_receipt_hardest_external_10case" in gap_visibility[
@@ -845,10 +845,10 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "G1 full nonlinear full-mesh" in payload["claim_boundary"]
     markdown = module._markdown(payload)
     assert "## Known Limitation Closure Requirements" in markdown
-    assert "`closure_requirements`: `3/19`" in markdown
-    assert "`failed_closure_requirements`: `16`" in markdown
+    assert "`closure_requirements`: `4/19`" in markdown
+    assert "`failed_closure_requirements`: `15`" in markdown
     assert "`G1:full_load_scale_1_0_reached`" in markdown
-    assert "`G1:strict_full_load_hip_newton_checkpoint_available`" in markdown
+    assert "`G1:strict_full_load_hip_newton_checkpoint_available`" not in markdown
     assert "does not add Developer Preview blockers" in markdown
     assert "deliverable_blocked:sample_acquisition_command" not in payload["blockers"]
     assert "deliverable_blocked:dataset_license_manifest" not in payload["blockers"]
