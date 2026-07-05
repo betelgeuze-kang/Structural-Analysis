@@ -12,6 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "implementation" / "phase1"))
 
 import run_mgt_direct_residual_adaptive_preconditioned_global_newton as adaptive  # noqa: E402
+import run_mgt_direct_residual_newton_probe as direct_probe  # noqa: E402
 
 
 def _hip_residual_engine_contract() -> dict[str, object]:
@@ -23,6 +24,73 @@ def _hip_residual_engine_contract() -> dict[str, object]:
         "hip_residual_engine_backends": ["hip_full_residual"],
         "hip_residual_engine_blockers": [],
     }
+
+
+def test_global_krylov_only_hip_refresh_can_skip_tangent_refresh() -> None:
+    global_krylov = {
+        "enabled": True,
+        "attempted": True,
+        "promoted_to_final_state": True,
+        "batch_replay_backend": "hip_full_residual_resident",
+        "require_hip_batch_replay": True,
+        "require_hip_krylov_solver": True,
+        "hip_krylov_solver_used": True,
+        "accepted_state_refresh_backend": "hip_full_residual_resident",
+        "accepted_state_refresh_hip_used": True,
+        "accepted_state_refresh_cpu_used": False,
+        "accepted_state_tangent_refresh_backend": (
+            "not_refreshed_not_needed_after_global_krylov"
+        ),
+        "accepted_state_tangent_refresh_cpu_used": False,
+        "accepted_state_tangent_refresh_skipped_reason": (
+            "no_downstream_current_tangent_row_correction"
+        ),
+    }
+    row_correction = {"enabled": False, "attempted": False}
+
+    contract = direct_probe._g1_hip_residual_engine_contract(
+        global_krylov,
+        row_correction,
+    )
+    fallback = direct_probe._g1_fallback_zero_audit(global_krylov, row_correction)
+
+    assert contract["hip_residual_engine_contract_passed"] is True
+    assert contract["hip_residual_engine_blockers"] == []
+    assert fallback["fallback_zero_passed"] is True
+    assert fallback["fallback_zero_boundary_count"] == 0
+
+
+def test_global_krylov_only_cpu_refresh_still_blocks_tangent_skip() -> None:
+    global_krylov = {
+        "enabled": True,
+        "attempted": True,
+        "promoted_to_final_state": True,
+        "batch_replay_backend": "hip_full_residual_resident",
+        "require_hip_batch_replay": True,
+        "require_hip_krylov_solver": True,
+        "hip_krylov_solver_used": True,
+        "accepted_state_refresh_backend": "cpu_full_assembly",
+        "accepted_state_refresh_hip_used": False,
+        "accepted_state_refresh_cpu_used": True,
+        "accepted_state_tangent_refresh_backend": (
+            "not_refreshed_not_needed_after_global_krylov"
+        ),
+        "accepted_state_tangent_refresh_cpu_used": False,
+    }
+    row_correction = {"enabled": False, "attempted": False}
+
+    contract = direct_probe._g1_hip_residual_engine_contract(
+        global_krylov,
+        row_correction,
+    )
+    fallback = direct_probe._g1_fallback_zero_audit(global_krylov, row_correction)
+
+    assert contract["hip_residual_engine_contract_passed"] is False
+    assert (
+        "matrix_free_global_krylov::accepted_state_refresh_cpu_used"
+        in contract["hip_residual_engine_blockers"]
+    )
+    assert fallback["fallback_zero_passed"] is False
 
 
 def test_adaptive_global_newton_child_timeout_writes_receipt(

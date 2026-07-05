@@ -1,0 +1,588 @@
+{
+  "schema_version": "mgt-direct-residual-adaptive-preconditioned-global-newton.v1",
+  "generated_at": "2026-07-05T06:59:14.852121+00:00",
+  "status": "partial",
+  "adaptive_preconditioned_global_newton_ready": false,
+  "hip_preflight": {
+    "checked_at": "2026-07-05T06:59:14.852164+00:00",
+    "hip_available": true,
+    "torch_importable": true,
+    "cuda_device_count": 1,
+    "diagnostic": ""
+  },
+  "controller": {
+    "enabled": true,
+    "attempted": true,
+    "promotion_count": 1,
+    "max_controller_steps": 1,
+    "stop_reason": "max_controller_steps_reached",
+    "tangent_regularization_factors": [
+      1e-08,
+      3e-08
+    ],
+    "matrix_free_global_krylov_max_iterations": 3,
+    "matrix_free_global_krylov_difference_scheme": "forward",
+    "matrix_free_global_krylov_alpha_values": [
+      1.0,
+      0.5,
+      0.25,
+      0.125,
+      0.0625
+    ],
+    "matrix_free_global_krylov_preconditioner_input_scales": [
+      1.0
+    ],
+    "matrix_free_global_krylov_residual_scale_floor": 1.0,
+    "matrix_free_global_krylov_preconditioner_mode": "none",
+    "matrix_free_global_krylov_preconditioner_mode_disabled_reason": "hip_batch_replay_required_suppresses_cpu_current_tangent_preconditioner",
+    "matrix_free_global_krylov_max_alpha": 8.0,
+    "matrix_free_global_krylov_full_assembly_trial_replay": true,
+    "matrix_free_global_krylov_batch_replay_backend": "hip_full_residual_resident",
+    "matrix_free_global_krylov_require_hip_batch_replay": true,
+    "hip_preflight": {
+      "checked_at": "2026-07-05T06:59:14.852164+00:00",
+      "hip_available": true,
+      "torch_importable": true,
+      "cuda_device_count": 1,
+      "diagnostic": ""
+    },
+    "matrix_free_global_krylov_linear_solver_backend": "torch_hip_gmres",
+    "matrix_free_global_krylov_linear_solver_backend_auto_selected_reason": "",
+    "minimum_relative_improvement": 1e-06,
+    "secant_family_seed_enabled": false,
+    "max_secant_family_promotions": 1,
+    "secant_family_window_sizes": [
+      4,
+      8,
+      16
+    ],
+    "secant_family_ridge_factors": [
+      0.0,
+      1e-08
+    ],
+    "secant_family_alpha_values": [
+      1.0,
+      0.5,
+      0.25,
+      0.125,
+      0.0625
+    ],
+    "secant_family_minimum_relative_improvement": 1e-06,
+    "shell_pressure_load_path_policy": "all_components",
+    "apply_shell_material_tangent": true,
+    "allow_frozen_shell_material_tangent_hip_replay": false,
+    "allow_state_dependent_shell_material_tangent_hip_replay": true,
+    "compact_output_final_checkpoint": true,
+    "runtime_budget_seconds": null,
+    "runtime_budget_exceeded": false,
+    "child_timeout_seconds": null
+  },
+  "initial_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step11_material_active_set_ls_rows32_candidate.npz",
+  "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step12_adaptive_preconditioned_global_newton_candidate.npz",
+  "final_direct_residual_inf_n": 5.9836299750827076,
+  "rows": [
+    {
+      "step_index": 1,
+      "tangent_regularization_factor": 1e-08,
+      "preconditioner_input_scale": 1.0,
+      "child_receipt_path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step12_adaptive_preconditioned_children/mgt_residual_jacobian_step12_adaptive_preconditioned_global_newton_probe_step1_reg1em08_scale1e00.json",
+      "child_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step12_adaptive_preconditioned_children/mgt_residual_jacobian_step12_adaptive_preconditioned_global_newton_probe_step1_reg1em08_scale1e00_final_checkpoint.npz",
+      "status": "partial",
+      "child_gate_assessment": {
+        "residual_tolerance_n": 0.0005,
+        "direct_residual_gate_passed": false,
+        "relative_increment_tolerance": 0.0001,
+        "relative_increment_gate_verified": true,
+        "relative_increment_gate_passed": true,
+        "direct_residual_newton_ready_requires_increment_gate": true,
+        "full_load_closure_gate": {
+          "required": true,
+          "required_load_scale": 1.0,
+          "observed_load_scale": 1.0,
+          "tolerance": 1e-12,
+          "passed": true,
+          "claim_boundary": "Full G1 closure requires the representative full mesh at full load scale 1.0. A sub-full-load checkpoint can be diagnostic evidence, but it must not be promoted to full-mesh/full-load nonlinear equilibrium closure."
+        },
+        "full_load_closure_passed": true,
+        "direct_residual_newton_ready_requires_full_load": true,
+        "material_newton_breadth_passed": false,
+        "material_newton_breadth_blockers": [
+          "material_newton_breadth_not_proven",
+          "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+        ],
+        "consistent_residual_jacobian_newton_passed": false,
+        "consistent_residual_jacobian_newton_blockers": [
+          "consistent_residual_jacobian_newton_not_proven",
+          "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+        ],
+        "hip_batch_replay_required_unavailable": false,
+        "host_krylov_solver_closure_blocked": false,
+        "hip_krylov_solver_required_unavailable": false,
+        "hip_residual_engine_gate_passed": true,
+        "cpu_acceptance_refresh_closure_blocked": false,
+        "fallback_zero_audit": {
+          "fallback_zero_passed": true,
+          "fallback_zero_boundary_count": 0,
+          "fallback_zero_boundaries": []
+        },
+        "fallback_zero_passed": true
+      },
+      "child_claim_boundary": "This is the direct residual/Jacobian bridge required before G1 closure. It evaluates the physical residual without solver regularization and iterates regularized Newton correction directions with trust-region line-search plus a directional finite-difference residual-Jacobian alpha probe, accepted-history secant subspace, an opt-in ridge/windowed secant-family subspace, and matrix-free finite-difference consistent-Jacobian subspace, an opt-in global matrix-free residual-JVP Krylov direction, plus a current-tangent residual-row least-squares correction. It is not full closure unless both direct residual and increment gates pass at full load scale 1.0. State-dependent shell-material tangent HIP replay computes the shell material tangent from each candidate state and evaluates through a candidate-specific HIP backend. Shell CSR/operator refresh happens on host; this is state-dependent material tangent HIP residual replay but not full production ROCm/HIP residency closure.",
+      "child_blockers": [
+        "direct_residual_gate_not_closed",
+        "consistent_jacobian_or_globalization_required",
+        "regularized_fixed_point_residual_must_not_be_used_as_physical_residual"
+      ],
+      "child_residual_contract": {
+        "definition": "R(u, lambda) = F_int(u) - lambda * F_ext",
+        "physical_internal_force_model": "corotational_force_based_6dof_plus_force_consistent_shell_plus_springs_with_shell_material_tangent",
+        "direct_residual_uses_solver_regularization": false,
+        "regularization_used_only_for_linear_correction_direction": true,
+        "external_load_vector_configuration": "reference",
+        "external_load_vector_reassembled_with_displacement": false,
+        "shell_pressure_load_path_policy": "all_components",
+        "shell_pressure_load_path_meta": {
+          "shell_pressure_load_path_policy": "all_components",
+          "pressure_load_filter_enabled": false
+        },
+        "shell_material_tangent_residual_applied": true,
+        "material_newton_gate_passed": false,
+        "state_dependent_material_newton_closure_passed": false,
+        "consistent_residual_jacobian_newton_gate_passed": false,
+        "consistent_residual_jacobian_newton_blockers": [
+          "consistent_residual_jacobian_newton_not_proven",
+          "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+        ],
+        "material_newton_breadth_blockers": [
+          "material_newton_breadth_not_proven",
+          "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+        ],
+        "allow_frozen_shell_material_tangent_hip_replay": false,
+        "allow_state_dependent_shell_material_tangent_hip_replay": true,
+        "frozen_shell_material_tangent_hip_replay_is_not_material_newton_closure": false,
+        "state_dependent_shell_material_tangent_hip_replay_is_not_production_residency": true,
+        "frame_geometric_equilibrium_included": true,
+        "authored_support_restraints_included": true,
+        "finite_elastic_link_springs_included": true,
+        "shell_surface_equilibrium_included": true,
+        "service_material_tangent_used_for_newton_direction_only": true,
+        "quasi_tangent_residual_inf_n": 18372.967910958854,
+        "directional_residual_jacobian_globalization_included": true,
+        "secant_family_globalization_included": false,
+        "matrix_free_consistent_jacobian_subspace_included": false,
+        "matrix_free_global_krylov_included": true,
+        "current_tangent_residual_row_correction_included": false,
+        "residual_component_breakdown_included": false,
+        "finite_difference_residual_row_jacobian_included": false,
+        "hip_residual_engine_contract_passed": true,
+        "hip_residual_engine_required": true,
+        "hip_residual_engine_required_lane_count": 1,
+        "hip_residual_engine_passed_lane_count": 1,
+        "hip_residual_engine_backends": [
+          "hip_full_residual_resident"
+        ],
+        "hip_residual_engine_rows": [
+          {
+            "component": "matrix_free_global_krylov",
+            "active": true,
+            "attempted": true,
+            "promoted_to_final_state": true,
+            "require_hip": true,
+            "batch_replay_backend": "hip_full_residual_resident",
+            "backend_is_hip": true,
+            "require_hip_krylov_solver": true,
+            "hip_krylov_solver_used": true,
+            "passed": true,
+            "blockers": []
+          },
+          {
+            "component": "current_tangent_residual_row_correction",
+            "active": false,
+            "attempted": false,
+            "promoted_to_final_state": false,
+            "require_hip": false,
+            "batch_replay_backend": "",
+            "backend_is_hip": false,
+            "require_hip_krylov_solver": false,
+            "hip_krylov_solver_used": false,
+            "passed": false,
+            "blockers": [
+              "component_not_active",
+              "hip_not_required"
+            ]
+          }
+        ],
+        "hip_residual_engine_blockers": []
+      },
+      "child_hip_residual_engine_contract_passed": true,
+      "child_strict_hip_promotion_blockers": [],
+      "accepted": true,
+      "stop_reason": "accepted",
+      "base_direct_residual_inf_n": 5.983811906434452,
+      "final_direct_residual_inf_n": 5.9836299750827076,
+      "final_relative_improvement": 3.0403922213692808e-05,
+      "component_acceptance": {
+        "secant_family": false,
+        "matrix_free_global_krylov": true,
+        "matrix_free_jacobian_subspace": false,
+        "current_tangent_residual_row": false
+      },
+      "best_candidate_direct_residual_inf_n": 5.9836299750827076,
+      "best_candidate_relative_improvement": 3.0403911938033812e-05,
+      "best_candidate_alpha": -0.25,
+      "best_candidate_alpha_source": "matrix_free_global_krylov_negative",
+      "relative_increment_gate_passed": true,
+      "residual_gate_passed": false,
+      "matvec_count": 3,
+      "difference_scheme": "forward",
+      "residual_only_matvec_count": 3,
+      "full_assembly_matvec_count": 0,
+      "residual_only_trial_count": 12,
+      "full_assembly_trial_count": 0,
+      "preconditioner_solve_count": 0,
+      "preconditioner_regularization": 0.0,
+      "child_runtime_seconds": 162.38960101205157,
+      "runtime_budget_seconds": null,
+      "child_timeout_seconds": null
+    }
+  ],
+  "promoted_rows": [
+    {
+      "step_index": 1,
+      "tangent_regularization_factor": 1e-08,
+      "preconditioner_input_scale": 1.0,
+      "child_receipt_path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step12_adaptive_preconditioned_children/mgt_residual_jacobian_step12_adaptive_preconditioned_global_newton_probe_step1_reg1em08_scale1e00.json",
+      "child_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step12_adaptive_preconditioned_children/mgt_residual_jacobian_step12_adaptive_preconditioned_global_newton_probe_step1_reg1em08_scale1e00_final_checkpoint.npz",
+      "status": "partial",
+      "child_gate_assessment": {
+        "residual_tolerance_n": 0.0005,
+        "direct_residual_gate_passed": false,
+        "relative_increment_tolerance": 0.0001,
+        "relative_increment_gate_verified": true,
+        "relative_increment_gate_passed": true,
+        "direct_residual_newton_ready_requires_increment_gate": true,
+        "full_load_closure_gate": {
+          "required": true,
+          "required_load_scale": 1.0,
+          "observed_load_scale": 1.0,
+          "tolerance": 1e-12,
+          "passed": true,
+          "claim_boundary": "Full G1 closure requires the representative full mesh at full load scale 1.0. A sub-full-load checkpoint can be diagnostic evidence, but it must not be promoted to full-mesh/full-load nonlinear equilibrium closure."
+        },
+        "full_load_closure_passed": true,
+        "direct_residual_newton_ready_requires_full_load": true,
+        "material_newton_breadth_passed": false,
+        "material_newton_breadth_blockers": [
+          "material_newton_breadth_not_proven",
+          "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+        ],
+        "consistent_residual_jacobian_newton_passed": false,
+        "consistent_residual_jacobian_newton_blockers": [
+          "consistent_residual_jacobian_newton_not_proven",
+          "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+        ],
+        "hip_batch_replay_required_unavailable": false,
+        "host_krylov_solver_closure_blocked": false,
+        "hip_krylov_solver_required_unavailable": false,
+        "hip_residual_engine_gate_passed": true,
+        "cpu_acceptance_refresh_closure_blocked": false,
+        "fallback_zero_audit": {
+          "fallback_zero_passed": true,
+          "fallback_zero_boundary_count": 0,
+          "fallback_zero_boundaries": []
+        },
+        "fallback_zero_passed": true
+      },
+      "child_claim_boundary": "This is the direct residual/Jacobian bridge required before G1 closure. It evaluates the physical residual without solver regularization and iterates regularized Newton correction directions with trust-region line-search plus a directional finite-difference residual-Jacobian alpha probe, accepted-history secant subspace, an opt-in ridge/windowed secant-family subspace, and matrix-free finite-difference consistent-Jacobian subspace, an opt-in global matrix-free residual-JVP Krylov direction, plus a current-tangent residual-row least-squares correction. It is not full closure unless both direct residual and increment gates pass at full load scale 1.0. State-dependent shell-material tangent HIP replay computes the shell material tangent from each candidate state and evaluates through a candidate-specific HIP backend. Shell CSR/operator refresh happens on host; this is state-dependent material tangent HIP residual replay but not full production ROCm/HIP residency closure.",
+      "child_blockers": [
+        "direct_residual_gate_not_closed",
+        "consistent_jacobian_or_globalization_required",
+        "regularized_fixed_point_residual_must_not_be_used_as_physical_residual"
+      ],
+      "child_residual_contract": {
+        "definition": "R(u, lambda) = F_int(u) - lambda * F_ext",
+        "physical_internal_force_model": "corotational_force_based_6dof_plus_force_consistent_shell_plus_springs_with_shell_material_tangent",
+        "direct_residual_uses_solver_regularization": false,
+        "regularization_used_only_for_linear_correction_direction": true,
+        "external_load_vector_configuration": "reference",
+        "external_load_vector_reassembled_with_displacement": false,
+        "shell_pressure_load_path_policy": "all_components",
+        "shell_pressure_load_path_meta": {
+          "shell_pressure_load_path_policy": "all_components",
+          "pressure_load_filter_enabled": false
+        },
+        "shell_material_tangent_residual_applied": true,
+        "material_newton_gate_passed": false,
+        "state_dependent_material_newton_closure_passed": false,
+        "consistent_residual_jacobian_newton_gate_passed": false,
+        "consistent_residual_jacobian_newton_blockers": [
+          "consistent_residual_jacobian_newton_not_proven",
+          "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+        ],
+        "material_newton_breadth_blockers": [
+          "material_newton_breadth_not_proven",
+          "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+        ],
+        "allow_frozen_shell_material_tangent_hip_replay": false,
+        "allow_state_dependent_shell_material_tangent_hip_replay": true,
+        "frozen_shell_material_tangent_hip_replay_is_not_material_newton_closure": false,
+        "state_dependent_shell_material_tangent_hip_replay_is_not_production_residency": true,
+        "frame_geometric_equilibrium_included": true,
+        "authored_support_restraints_included": true,
+        "finite_elastic_link_springs_included": true,
+        "shell_surface_equilibrium_included": true,
+        "service_material_tangent_used_for_newton_direction_only": true,
+        "quasi_tangent_residual_inf_n": 18372.967910958854,
+        "directional_residual_jacobian_globalization_included": true,
+        "secant_family_globalization_included": false,
+        "matrix_free_consistent_jacobian_subspace_included": false,
+        "matrix_free_global_krylov_included": true,
+        "current_tangent_residual_row_correction_included": false,
+        "residual_component_breakdown_included": false,
+        "finite_difference_residual_row_jacobian_included": false,
+        "hip_residual_engine_contract_passed": true,
+        "hip_residual_engine_required": true,
+        "hip_residual_engine_required_lane_count": 1,
+        "hip_residual_engine_passed_lane_count": 1,
+        "hip_residual_engine_backends": [
+          "hip_full_residual_resident"
+        ],
+        "hip_residual_engine_rows": [
+          {
+            "component": "matrix_free_global_krylov",
+            "active": true,
+            "attempted": true,
+            "promoted_to_final_state": true,
+            "require_hip": true,
+            "batch_replay_backend": "hip_full_residual_resident",
+            "backend_is_hip": true,
+            "require_hip_krylov_solver": true,
+            "hip_krylov_solver_used": true,
+            "passed": true,
+            "blockers": []
+          },
+          {
+            "component": "current_tangent_residual_row_correction",
+            "active": false,
+            "attempted": false,
+            "promoted_to_final_state": false,
+            "require_hip": false,
+            "batch_replay_backend": "",
+            "backend_is_hip": false,
+            "require_hip_krylov_solver": false,
+            "hip_krylov_solver_used": false,
+            "passed": false,
+            "blockers": [
+              "component_not_active",
+              "hip_not_required"
+            ]
+          }
+        ],
+        "hip_residual_engine_blockers": []
+      },
+      "child_hip_residual_engine_contract_passed": true,
+      "child_strict_hip_promotion_blockers": [],
+      "accepted": true,
+      "stop_reason": "accepted",
+      "base_direct_residual_inf_n": 5.983811906434452,
+      "final_direct_residual_inf_n": 5.9836299750827076,
+      "final_relative_improvement": 3.0403922213692808e-05,
+      "component_acceptance": {
+        "secant_family": false,
+        "matrix_free_global_krylov": true,
+        "matrix_free_jacobian_subspace": false,
+        "current_tangent_residual_row": false
+      },
+      "best_candidate_direct_residual_inf_n": 5.9836299750827076,
+      "best_candidate_relative_improvement": 3.0403911938033812e-05,
+      "best_candidate_alpha": -0.25,
+      "best_candidate_alpha_source": "matrix_free_global_krylov_negative",
+      "relative_increment_gate_passed": true,
+      "residual_gate_passed": false,
+      "matvec_count": 3,
+      "difference_scheme": "forward",
+      "residual_only_matvec_count": 3,
+      "full_assembly_matvec_count": 0,
+      "residual_only_trial_count": 12,
+      "full_assembly_trial_count": 0,
+      "preconditioner_solve_count": 0,
+      "preconditioner_regularization": 0.0,
+      "child_runtime_seconds": 162.38960101205157,
+      "runtime_budget_seconds": null,
+      "child_timeout_seconds": null
+    }
+  ],
+  "best_candidate_row": {
+    "step_index": 1,
+    "tangent_regularization_factor": 1e-08,
+    "preconditioner_input_scale": 1.0,
+    "child_receipt_path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step12_adaptive_preconditioned_children/mgt_residual_jacobian_step12_adaptive_preconditioned_global_newton_probe_step1_reg1em08_scale1e00.json",
+    "child_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step12_adaptive_preconditioned_children/mgt_residual_jacobian_step12_adaptive_preconditioned_global_newton_probe_step1_reg1em08_scale1e00_final_checkpoint.npz",
+    "status": "partial",
+    "child_gate_assessment": {
+      "residual_tolerance_n": 0.0005,
+      "direct_residual_gate_passed": false,
+      "relative_increment_tolerance": 0.0001,
+      "relative_increment_gate_verified": true,
+      "relative_increment_gate_passed": true,
+      "direct_residual_newton_ready_requires_increment_gate": true,
+      "full_load_closure_gate": {
+        "required": true,
+        "required_load_scale": 1.0,
+        "observed_load_scale": 1.0,
+        "tolerance": 1e-12,
+        "passed": true,
+        "claim_boundary": "Full G1 closure requires the representative full mesh at full load scale 1.0. A sub-full-load checkpoint can be diagnostic evidence, but it must not be promoted to full-mesh/full-load nonlinear equilibrium closure."
+      },
+      "full_load_closure_passed": true,
+      "direct_residual_newton_ready_requires_full_load": true,
+      "material_newton_breadth_passed": false,
+      "material_newton_breadth_blockers": [
+        "material_newton_breadth_not_proven",
+        "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+      ],
+      "consistent_residual_jacobian_newton_passed": false,
+      "consistent_residual_jacobian_newton_blockers": [
+        "consistent_residual_jacobian_newton_not_proven",
+        "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+      ],
+      "hip_batch_replay_required_unavailable": false,
+      "host_krylov_solver_closure_blocked": false,
+      "hip_krylov_solver_required_unavailable": false,
+      "hip_residual_engine_gate_passed": true,
+      "cpu_acceptance_refresh_closure_blocked": false,
+      "fallback_zero_audit": {
+        "fallback_zero_passed": true,
+        "fallback_zero_boundary_count": 0,
+        "fallback_zero_boundaries": []
+      },
+      "fallback_zero_passed": true
+    },
+    "child_claim_boundary": "This is the direct residual/Jacobian bridge required before G1 closure. It evaluates the physical residual without solver regularization and iterates regularized Newton correction directions with trust-region line-search plus a directional finite-difference residual-Jacobian alpha probe, accepted-history secant subspace, an opt-in ridge/windowed secant-family subspace, and matrix-free finite-difference consistent-Jacobian subspace, an opt-in global matrix-free residual-JVP Krylov direction, plus a current-tangent residual-row least-squares correction. It is not full closure unless both direct residual and increment gates pass at full load scale 1.0. State-dependent shell-material tangent HIP replay computes the shell material tangent from each candidate state and evaluates through a candidate-specific HIP backend. Shell CSR/operator refresh happens on host; this is state-dependent material tangent HIP residual replay but not full production ROCm/HIP residency closure.",
+    "child_blockers": [
+      "direct_residual_gate_not_closed",
+      "consistent_jacobian_or_globalization_required",
+      "regularized_fixed_point_residual_must_not_be_used_as_physical_residual"
+    ],
+    "child_residual_contract": {
+      "definition": "R(u, lambda) = F_int(u) - lambda * F_ext",
+      "physical_internal_force_model": "corotational_force_based_6dof_plus_force_consistent_shell_plus_springs_with_shell_material_tangent",
+      "direct_residual_uses_solver_regularization": false,
+      "regularization_used_only_for_linear_correction_direction": true,
+      "external_load_vector_configuration": "reference",
+      "external_load_vector_reassembled_with_displacement": false,
+      "shell_pressure_load_path_policy": "all_components",
+      "shell_pressure_load_path_meta": {
+        "shell_pressure_load_path_policy": "all_components",
+        "pressure_load_filter_enabled": false
+      },
+      "shell_material_tangent_residual_applied": true,
+      "material_newton_gate_passed": false,
+      "state_dependent_material_newton_closure_passed": false,
+      "consistent_residual_jacobian_newton_gate_passed": false,
+      "consistent_residual_jacobian_newton_blockers": [
+        "consistent_residual_jacobian_newton_not_proven",
+        "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+      ],
+      "material_newton_breadth_blockers": [
+        "material_newton_breadth_not_proven",
+        "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+      ],
+      "allow_frozen_shell_material_tangent_hip_replay": false,
+      "allow_state_dependent_shell_material_tangent_hip_replay": true,
+      "frozen_shell_material_tangent_hip_replay_is_not_material_newton_closure": false,
+      "state_dependent_shell_material_tangent_hip_replay_is_not_production_residency": true,
+      "frame_geometric_equilibrium_included": true,
+      "authored_support_restraints_included": true,
+      "finite_elastic_link_springs_included": true,
+      "shell_surface_equilibrium_included": true,
+      "service_material_tangent_used_for_newton_direction_only": true,
+      "quasi_tangent_residual_inf_n": 18372.967910958854,
+      "directional_residual_jacobian_globalization_included": true,
+      "secant_family_globalization_included": false,
+      "matrix_free_consistent_jacobian_subspace_included": false,
+      "matrix_free_global_krylov_included": true,
+      "current_tangent_residual_row_correction_included": false,
+      "residual_component_breakdown_included": false,
+      "finite_difference_residual_row_jacobian_included": false,
+      "hip_residual_engine_contract_passed": true,
+      "hip_residual_engine_required": true,
+      "hip_residual_engine_required_lane_count": 1,
+      "hip_residual_engine_passed_lane_count": 1,
+      "hip_residual_engine_backends": [
+        "hip_full_residual_resident"
+      ],
+      "hip_residual_engine_rows": [
+        {
+          "component": "matrix_free_global_krylov",
+          "active": true,
+          "attempted": true,
+          "promoted_to_final_state": true,
+          "require_hip": true,
+          "batch_replay_backend": "hip_full_residual_resident",
+          "backend_is_hip": true,
+          "require_hip_krylov_solver": true,
+          "hip_krylov_solver_used": true,
+          "passed": true,
+          "blockers": []
+        },
+        {
+          "component": "current_tangent_residual_row_correction",
+          "active": false,
+          "attempted": false,
+          "promoted_to_final_state": false,
+          "require_hip": false,
+          "batch_replay_backend": "",
+          "backend_is_hip": false,
+          "require_hip_krylov_solver": false,
+          "hip_krylov_solver_used": false,
+          "passed": false,
+          "blockers": [
+            "component_not_active",
+            "hip_not_required"
+          ]
+        }
+      ],
+      "hip_residual_engine_blockers": []
+    },
+    "child_hip_residual_engine_contract_passed": true,
+    "child_strict_hip_promotion_blockers": [],
+    "accepted": true,
+    "stop_reason": "accepted",
+    "base_direct_residual_inf_n": 5.983811906434452,
+    "final_direct_residual_inf_n": 5.9836299750827076,
+    "final_relative_improvement": 3.0403922213692808e-05,
+    "component_acceptance": {
+      "secant_family": false,
+      "matrix_free_global_krylov": true,
+      "matrix_free_jacobian_subspace": false,
+      "current_tangent_residual_row": false
+    },
+    "best_candidate_direct_residual_inf_n": 5.9836299750827076,
+    "best_candidate_relative_improvement": 3.0403911938033812e-05,
+    "best_candidate_alpha": -0.25,
+    "best_candidate_alpha_source": "matrix_free_global_krylov_negative",
+    "relative_increment_gate_passed": true,
+    "residual_gate_passed": false,
+    "matvec_count": 3,
+    "difference_scheme": "forward",
+    "residual_only_matvec_count": 3,
+    "full_assembly_matvec_count": 0,
+    "residual_only_trial_count": 12,
+    "full_assembly_trial_count": 0,
+    "preconditioner_solve_count": 0,
+    "preconditioner_regularization": 0.0,
+    "child_runtime_seconds": 162.38960101205157,
+    "runtime_budget_seconds": null,
+    "child_timeout_seconds": null
+  },
+  "runtime_seconds": 163.56609750300413,
+  "claim_boundary": {
+    "cpu_diagnostic_only": false,
+    "official_rocm_hip_closure_required": false,
+    "residual_replay_is_regularization_free": true,
+    "regularization_used_only_for_preconditioner_direction": true,
+    "ai_residual_correction_is_candidate_generation_only": true,
+    "host_shell_csr_operator_refresh_not_full_production_rocm_hip_residency": true
+  }
+}

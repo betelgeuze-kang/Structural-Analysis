@@ -2344,7 +2344,7 @@
   "engine_version": "1.0.0",
   "fixed_point_residual_promoted_to_physical": false,
   "g1_closure_claim": false,
-  "generated_at": "2026-07-05T00:55:06.149682+00:00",
+  "generated_at": "2026-07-05T06:15:12.341273+00:00",
   "globalization": "backtracking_line_search",
   "input_checksums": {
     "scripts/build_g1_assembly_contract_seed_report.py": "sha256:98191f8bb1646d7d8b551519edf127eac9bad4fcd2a3a9872b8c73489d21bd69",
@@ -2379,7 +2379,7 @@
   ],
   "residual_formula": "F_internal_minus_F_external",
   "schema_version": "g1-assembly-contract-seed-report.v1",
-  "source_commit_sha": "f779666af7356914e11290547c4a001151062cb6",
+  "source_commit_sha": "8671416366878591fe768ca283ee8d4c777440ee",
   "state_updated_material_newton_breadth_closed": false,
   "state_updated_material_newton_breadth_seed_coverage_ready": true,
   "state_updated_material_newton_seed_case_count": 9,

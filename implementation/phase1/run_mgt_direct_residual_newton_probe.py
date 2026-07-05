@@ -1406,6 +1406,17 @@ def _component_tangent_refresh_missing(
         == GLOBAL_TANGENT_REFRESH_DEFERRED_TO_ROW
     ):
         return not downstream_hip_tangent_refresh
+    if backend == "not_refreshed_not_needed_after_global_krylov":
+        residual_backend = str(component.get("accepted_state_refresh_backend", "") or "")
+        return not bool(
+            component.get("accepted_state_refresh_hip_used")
+            and not component.get("accepted_state_refresh_cpu_used")
+            and residual_backend in HIP_RESIDUAL_REPLAY_BACKENDS
+            and not component.get("accepted_state_tangent_refresh_cpu_used")
+            and not component.get("accepted_state_tangent_refresh_closure_blocked")
+            and not component.get("hip_required_tangent_refresh_unavailable_after_promotion")
+            and not component.get("frozen_support_graph_after_hip_residual_promotion")
+        )
     return bool(
         component.get("accepted_state_tangent_refresh_closure_blocked")
         or component.get("hip_required_tangent_refresh_unavailable_after_promotion")
