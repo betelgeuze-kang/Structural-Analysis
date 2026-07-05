@@ -3500,6 +3500,10 @@ def build_runner_packet(
     hip_required_consistency_direct_probe_summary = (
         _hip_required_consistency_direct_probe_summary(payload=hip_probe)
     )
+    hip_required_consistency_direct_checkpoint_path = Path(
+        hip_required_consistency_direct_probe_summary["output_checkpoint_path"]
+        or DEFAULT_HIP_REQUIRED_CONSISTENCY_DIRECT_FRONTIER_CANDIDATE.as_posix()
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -3556,7 +3560,7 @@ def build_runner_packet(
                 sparse_direct_adaptive_jvp_eps_gmres_shifted_ilu_incomplete_preview_probe_path,
                 hip_required_full_load_residual_jvp_frontier_probe_path,
                 hip_required_full_load_residual_jvp_frontier_candidate_path,
-                DEFAULT_HIP_REQUIRED_CONSISTENCY_DIRECT_FRONTIER_CANDIDATE,
+                hip_required_consistency_direct_checkpoint_path,
             ],
             reused_evidence=True,
             reuse_policy=(
@@ -5480,8 +5484,7 @@ def build_runner_packet(
                 hip_required_full_load_residual_jvp_frontier_candidate_path.as_posix()
             ),
             "mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate": (
-                hip_required_consistency_direct_probe_summary["output_checkpoint_path"]
-                or DEFAULT_HIP_REQUIRED_CONSISTENCY_DIRECT_FRONTIER_CANDIDATE.as_posix()
+                hip_required_consistency_direct_checkpoint_path.as_posix()
             ),
         },
         "claim_boundary": (
