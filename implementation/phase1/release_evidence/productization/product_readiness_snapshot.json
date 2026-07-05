@@ -140,7 +140,7 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 15,
+      "blocker_count": 37,
       "blockers": [
         "ci_streak::nightly::github_actions_job_start_blocked",
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -154,6 +154,28 @@
         "pm_release::github_sync::github_sync_preflight_not_synced",
         "pm_release::github_sync::github_sync_remote_sync_pending",
         "self_hosted_runner::self_hosted_runner_matching_labels_not_online",
+        "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
+        "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
+        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
+        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
+        "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
+        "stale_or_inconsistent:source_commit_mismatch:g1_f2g_f2h_cause_narrowing_status",
+        "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
+        "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
+        "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
+        "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
+        "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
+        "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
+        "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
+        "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
+        "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
+        "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
+        "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
+        "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
+        "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
+        "stale_or_inconsistent:source_commit_mismatch:structural_scope_release_surface_owner_handoff_check",
+        "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
+        "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness",
         "structural_scope::owner_decision_pending_count=251",
         "structural_scope::owner_decisions_missing",
         "structural_scope::release_surface_owner_decision_required_count=3"
@@ -167,7 +189,7 @@
       ]
     }
   },
-  "blocker_count": 44,
+  "blocker_count": 66,
   "blockers": [
     "ci_streak::nightly::github_actions_job_start_blocked",
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -210,6 +232,28 @@
     "pm_release::github_sync::github_sync_remote_sync_pending",
     "pm_release::security::license_status_not_configured",
     "self_hosted_runner::self_hosted_runner_matching_labels_not_online",
+    "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
+    "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
+    "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
+    "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
+    "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
+    "stale_or_inconsistent:source_commit_mismatch:g1_f2g_f2h_cause_narrowing_status",
+    "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
+    "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
+    "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
+    "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
+    "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
+    "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
+    "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
+    "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
+    "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
+    "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
+    "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
+    "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
+    "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
+    "stale_or_inconsistent:source_commit_mismatch:structural_scope_release_surface_owner_handoff_check",
+    "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
+    "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness",
     "structural_scope::owner_decision_pending_count=251",
     "structural_scope::owner_decisions_missing",
     "structural_scope::release_surface_owner_decision_required_count=3"
@@ -232,8 +276,9 @@
   "components": {
     "assisted_service_pilot": {
       "acceptance_package_ready": true,
-      "blocker_count": 4,
+      "blocker_count": 5,
       "blockers": [
+        "snapshot_source_state_not_consistent",
         "full_quality_not_ready",
         "github_sync_not_clean",
         "human_ux_observation_not_ready",
@@ -255,7 +300,7 @@
       "human_ux_observation_ready": false,
       "license_approval_ready": false,
       "ready": false,
-      "snapshot_source_state_consistent": true,
+      "snapshot_source_state_consistent": false,
       "supported_scope_guard_ready": true,
       "workstation_delivery_8_of_8": true
     },
@@ -2754,8 +2799,9 @@
       "remote_github_sync_clean": false
     },
     "solver_product": {
-      "blocker_count": 6,
+      "blocker_count": 7,
       "blockers": [
+        "snapshot_source_state_not_consistent",
         "independent_product_not_ready",
         "g1_full_mesh_full_load_not_ready",
         "g1_full_load_hip_newton_lane_not_ready",
@@ -2770,7 +2816,7 @@
       "g1_full_mesh_full_load_ready": false,
       "independent_product_ready": false,
       "ready": false,
-      "snapshot_source_state_consistent": true
+      "snapshot_source_state_consistent": false
     },
     "structural_scope_cleanup": {
       "application_ready": false,
@@ -3107,9 +3153,9 @@
     }
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "evidence_fresh": true,
+  "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-05T19:25:31.430689+00:00",
+  "generated_at": "2026-07-05T20:18:37.922910+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
@@ -3119,9 +3165,9 @@
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:6d19efb2e241e2980d66af7428132ec0a9eb16ca82ef7047cf43133687a7303f",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:d0b4549a80362ff1280665e78ea3888354afdcdfb3432dad59f055f52b760f6e",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:a882fdc28b53aec9b385a1261a78a99a4544f655155db6d5fdb5ab2f0ef2c98b",
-    "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:49ec54619265af87163ed7435f6b1df2a86889519d637e829c7bea497a4caa78",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:a26045cef019244868f397d79d4ff3f6b40a980215014754b7495e712f27b2d0",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:6fba46645e29b44e79b90264d7952b06d14ae0275b40d69ae59e20e437dd0717",
+    "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:cee4bd8fd691e10ea95fb85e529f378dd813dfe92ea1ea2e0348110e73d92996",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:868f86575d94fa3ab3f0421612ec3622f48611a9433595d9bcfe911e1faef7f7",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:bc13d287028458971de9666ef07c172ab271fe39eb7ff9bd9c4fad9d388adb75",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:fa3806bcf6e163bf42e5263a3deee30886c9972be7e8f53c1d5c3982ae8da89c",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:5681fe6c6a0f259605d8d3d9c97ff37564c76a02a1d8fb24873edc32e53b4442",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:382956916ff532ef84df6648062a284d6899e7e62b48b9b8386142e7d4411235",
@@ -3149,7 +3195,7 @@
   },
   "limited_commercial_ready": false,
   "paid_pilot_ready": false,
-  "reason_code": "BLOCKED",
+  "reason_code": "STALE_OR_INCONSISTENT",
   "release_decision": {
     "approval_token_count": 8,
     "blocked_release_count": 9,
@@ -3429,12 +3475,34 @@
     },
     "release freshness/sync": {
       "blocked": true,
-      "blocker_count": 4,
+      "blocker_count": 26,
       "blockers": [
         "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
         "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
         "pm_release::github_sync::github_sync_preflight_not_synced",
-        "pm_release::github_sync::github_sync_remote_sync_pending"
+        "pm_release::github_sync::github_sync_remote_sync_pending",
+        "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
+        "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
+        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
+        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
+        "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
+        "stale_or_inconsistent:source_commit_mismatch:g1_f2g_f2h_cause_narrowing_status",
+        "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
+        "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
+        "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
+        "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
+        "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
+        "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
+        "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
+        "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
+        "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
+        "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
+        "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
+        "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
+        "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
+        "stale_or_inconsistent:source_commit_mismatch:structural_scope_release_surface_owner_handoff_check",
+        "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
+        "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
       ]
     },
     "structural scope": {
@@ -3449,10 +3517,10 @@
   },
   "schema_valid": true,
   "schema_version": "product-readiness-snapshot.v1",
-  "snapshot_source_state_consistent": true,
+  "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "b9bff5c80cda97ea6d326a8f42cff2964bb3c2cb",
-  "stale_or_inconsistent": false,
+  "source_commit_sha": "dc7732f9861e3bc8b226633a65c03c891bda9359",
+  "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
       "blockers": [],
@@ -3549,22 +3617,12 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T17:49:42.009350+00:00",
         "input_checksum_present": true,
@@ -3572,28 +3630,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "5ca12d4abfc26eac90e60e5811889a3c52df699e",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "gap_closure_status",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T17:42:43.992067+00:00",
         "input_checksum_present": true,
@@ -3601,28 +3649,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "a973f6f9bc2bc4c01d8793cc32794d25fb7bda51",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "commercial_gap_ledger_status",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T17:42:43.663619+00:00",
         "input_checksum_present": true,
@@ -3630,28 +3668,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "a973f6f9bc2bc4c01d8793cc32794d25fb7bda51",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "gap_ledger_evidence_audit",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T17:42:44.092704+00:00",
         "input_checksum_present": true,
@@ -3659,29 +3687,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "a973f6f9bc2bc4c01d8793cc32794d25fb7bda51",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "phase1_core_api_contract",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T16:53:10.369448+00:00",
         "input_checksum_present": true,
@@ -3689,62 +3706,54 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "developer_preview_readiness",
-        "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-05T19:25:28.930939+00:00",
+        "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.md",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md"
+        ],
+        "generated_at": "2026-07-05T20:17:36.754852+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
-        "source_commit_sha": "b9bff5c80cda97ea6d326a8f42cff2964bb3c2cb",
+        "source_commit_matches_head": false,
+        "source_commit_sha": "a1193cdbe14185975efc3a4a3bab7f4e90be1f98",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py"
+          "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.md",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md"
         ],
-        "generated_at": "2026-07-05T18:13:05.297698+00:00",
+        "generated_at": "2026-07-05T20:17:36.538776+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": false,
-        "source_commit_sha": "a0e02505e852f54dd0e0bb77a9cf845574fa5621",
+        "source_commit_sha": "a1193cdbe14185975efc3a4a3bab7f4e90be1f98",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T16:52:31.405387+00:00",
         "input_checksum_present": true,
@@ -3752,29 +3761,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T16:52:30.437423+00:00",
         "input_checksum_present": true,
@@ -3782,14 +3780,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T19:15:15.205679+00:00",
         "input_checksum_present": true,
@@ -3797,29 +3799,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "49990694c8affff1114aea09d3b1bb6aead62cc0",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "g1_f2g_f2h_cause_narrowing_status",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T16:52:30.462486+00:00",
         "input_checksum_present": true,
@@ -3827,29 +3818,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "customer_shadow_evidence_status",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T16:54:37.886326+00:00",
         "input_checksum_present": true,
@@ -3857,29 +3837,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "workstation_delivery_readiness",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T16:54:37.929353+00:00",
         "input_checksum_present": true,
@@ -3887,29 +3856,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "independent_product_readiness",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T16:56:41.036349+00:00",
         "input_checksum_present": true,
@@ -3917,29 +3875,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T08:31:37.173121+00:00",
         "input_checksum_present": true,
@@ -3947,29 +3894,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T16:52:39.719127+00:00",
         "input_checksum_present": true,
@@ -3977,29 +3913,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "license_status_closure_report",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T16:52:39.681340+00:00",
         "input_checksum_present": true,
@@ -4007,29 +3932,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "paid_pilot_scope_guard_report",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T16:53:08.966998+00:00",
         "input_checksum_present": true,
@@ -4037,29 +3951,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "external_benchmark_submission_readiness",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T16:56:40.098999+00:00",
         "input_checksum_present": true,
@@ -4067,29 +3970,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "external_benchmark_submission_updates",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T16:56:40.058487+00:00",
         "input_checksum_present": true,
@@ -4097,29 +3989,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T16:54:49.879211+00:00",
         "input_checksum_present": true,
@@ -4127,29 +4008,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T16:53:08.992039+00:00",
         "input_checksum_present": true,
@@ -4157,29 +4027,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "structural_scope_owner_decision_application_plan",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T16:53:09.056048+00:00",
         "input_checksum_present": true,
@@ -4187,29 +4046,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "structural_scope_release_surface_owner_handoff_check",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_commercial_gap_ledger_status.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_phase2_material_mesh_newton_artifacts.py",
+          "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
         ],
         "generated_at": "2026-07-05T16:53:09.109783+00:00",
         "input_checksum_present": true,
@@ -4217,37 +4065,26 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "developer_preview_final_gate_owner_packet",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/parse_opensees_to_csr.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "implementation/phase1/run_opensees_canonical_breadth_gate.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_mgt_residual_jacobian_consistency_probe.py",
-          "tests/test_opensees_topology_parser.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_run_opensees_canonical_breadth_gate.py"
+          "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.md",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md"
         ],
-        "generated_at": "2026-07-05T17:49:41.723166+00:00",
+        "generated_at": "2026-07-05T20:17:36.583811+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "5ca12d4abfc26eac90e60e5811889a3c52df699e",
+        "source_commit_sha": "a1193cdbe14185975efc3a4a3bab7f4e90be1f98",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "receipt_only_commit"
       }
     ],
     "open_blocker_counts": {
@@ -4271,13 +4108,7 @@
     },
     "worktree": {
       "dirty": false,
-      "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
-        "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
-        "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json",
-        "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
-        "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.md"
-      ],
+      "dirty_paths": [],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
         "candidate_release_control_commit_set_count": 0,
@@ -4300,15 +4131,9 @@
         "status": "ready",
         "track_or_add_required_path_count": 0
       },
-      "status_rows": [
-        " M implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
-        " M implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
-        " M implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json",
-        " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
-        " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.md"
-      ]
+      "status_rows": []
     }
   },
-  "status": "blocked",
+  "status": "stale_or_inconsistent",
   "workstation_delivery_ready": true
 }
