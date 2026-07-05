@@ -942,7 +942,7 @@
     "residual_inf_n": 0.42740724991695345,
     "status": "ready"
   },
-  "generated_at": "2026-07-05T17:42:43.438655+00:00",
+  "generated_at": "2026-07-05T18:34:50.847606+00:00",
   "global_tangent_scaled_sweep": {
     "base_residual_inf_n": 0.4278304040181992,
     "best_alpha": 0.00390625,
@@ -1358,7 +1358,7 @@
     "implementation/phase1/release_evidence/productization/g1_current_frontier_operator_mismatch_audit.json": "sha256:0868801f649300a959a5d8fecafc0de5243e9961e44aa182c41ce16110380c54",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:382956916ff532ef84df6648062a284d6899e7e62b48b9b8386142e7d4411235",
     "implementation/phase1/release_evidence/productization/g1_frame_tangent_fd_epsilon_sweep_probe.json": "sha256:81c2ad32a078db886d09c6637cd7d1369719d2ed6c8f5fac88ae5ac410c4291d",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:31e6b2cc009b07e435bb692b4d42fe2f88c5275d720e16f1182c49f4dc2b0614",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:44c201c2437c6549593c350ecbecafc1dbdcca0025092cafa62e89f28b128e97",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:42f77c9c6856a124859510d049d0419cf5fa41a7d71e8f15f2f8c883f7301c73",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.json": "sha256:e6582053c0d7dc2c99c3737f0c7ffa94579855a5520cdb416efc2abd01aa3ee9",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe.json": "sha256:83a0e92b346a14a6f8833bb39b572437f405fdafe62e631d55da9d7c7c3fa4da",
@@ -1380,8 +1380,8 @@
     "implementation/phase1/release_evidence/productization/g1_true_newton_from_active_set_ls_trust_mu_0p03_candidate.json": "sha256:a2fed692736a3bea5c3f16eea175651db99d8ad4712974f7f4d88518a2ab4b48",
     "implementation/phase1/release_evidence/productization/g1_true_newton_from_active_set_ls_trust_service_tangent_mu_0p03_candidate.json": "sha256:eceb8b94cbba35d1d3f67c83ea9b8d7cb419e909bba5a58e86c3dfbbf09b07e4",
     "implementation/phase1/release_evidence/productization/g1_true_newton_from_active_set_mu_sweep_probe.json": "sha256:37c65291c66cb545b17330ba59c0b7b51ea251382f4165406b5b57898f1c6ed7",
-    "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:bca092efd7ca3c1021443dbe5a1e8497b8fcbbf1896e33d82547a5f6b3d3681f",
-    "implementation/phase1/release_evidence/productization/g1_true_newton_load_sweep_status.json": "sha256:c1d7def7b0a08e99f117fdbf462d82b371129e88cf2cbd518be1fbf1abc4375c",
+    "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:ddce67fd21c8c076e559c94bcbd54bfd87d1205db5db1aacf212f979e419f75a",
+    "implementation/phase1/release_evidence/productization/g1_true_newton_load_sweep_status.json": "sha256:590fc4544bdb18b4ca92ec36f478ed9109735501e1bccda7c0ea528915bb4545",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:aa267ba9c523f3ce0e120082c72869985aecf2d8e8d0000171ef64a7c3573cf7",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz": "sha256:a468d557226aca0b86956c3fa86fb510e57d9bd05684385bf3e4545e7de39244",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_saved_probe.json": "sha256:5623392295298850dac907721158ca3ae040439329ae475632f1e8ef6d082028",
@@ -2095,7 +2095,7 @@
     "row_count": 8,
     "status": "ready"
   },
-  "source_commit_sha": "a973f6f9bc2bc4c01d8793cc32794d25fb7bda51",
+  "source_commit_sha": "7c8a44e7bc8377a919c40539cece07634c8602cf",
   "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe": {
     "assembled_tangent_parity_max_absolute_error": 0.006011962890625,
     "assembled_tangent_parity_max_relative_error": 2.683381287585585e-15,
@@ -2934,7 +2934,7 @@
     "true_newton_from_active_set_service_tangent_present": true,
     "true_newton_from_active_set_service_tangent_stop_reason": "line_search_no_descent",
     "true_newton_from_active_set_stop_reason": "line_search_no_descent",
-    "true_newton_full_load_checkpoint_candidate_direct_residual_n": 0.42788072459938853,
+    "true_newton_full_load_checkpoint_candidate_direct_residual_n": 1384.2531989367426,
     "true_newton_full_load_checkpoint_candidate_path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
     "true_newton_full_load_checkpoint_candidate_present": true,
     "true_newton_full_load_checkpoint_candidate_written": true,
@@ -3051,7 +3051,7 @@
       "full_mesh_nonlinear_equilibrium_not_proven_by_true_newton_checkpoint_candidate",
       "material_newton_breadth_not_proven_by_true_newton_checkpoint_candidate"
     ],
-    "checkpoint_direct_residual_inf_n": 0.42788072459938853,
+    "checkpoint_direct_residual_inf_n": 1384.2531989367426,
     "checkpoint_load_scale": 1.0,
     "checkpoint_path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
     "checkpoint_schema": "mgt-direct-residual-newton-state.v1",
@@ -3062,9 +3062,9 @@
     "present": true,
     "promotes_g1_closure": false,
     "status": "candidate_created",
-    "true_newton_final_residual_n": 0.42788072459938853,
+    "true_newton_final_residual_n": 1384.2531989367426,
     "true_newton_residual_gate_passed": false,
-    "true_newton_steps": 6
+    "true_newton_steps": 36
   },
   "true_newton_load_sweep": {
     "blockers": [
