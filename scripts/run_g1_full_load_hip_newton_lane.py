@@ -259,6 +259,11 @@ def _load_checkpoint_meta(path: Path) -> tuple[dict[str, Any], list[str]]:
             )
             frontier_load_scale = _read_optional_float(archive, "frontier_load_scale")
             failed_bracket_load_scales = _read_failed_bracket_load_scales(archive)
+            shell_pressure_load_path_policy = (
+                str(np.asarray(archive["shell_pressure_load_path_policy"]).item())
+                if "shell_pressure_load_path_policy" in archive.files
+                else ""
+            )
     except Exception as exc:
         return {
             "path": str(path),
@@ -274,6 +279,7 @@ def _load_checkpoint_meta(path: Path) -> tuple[dict[str, Any], list[str]]:
         "dof_count": dof_count,
         "frontier_load_scale": frontier_load_scale,
         "failed_bracket_load_scales": failed_bracket_load_scales,
+        "shell_pressure_load_path_policy": shell_pressure_load_path_policy,
         "load_path_provenance_present": bool(
             frontier_load_scale is not None or failed_bracket_load_scales
         ),
@@ -1491,6 +1497,7 @@ def _direct_probe_command(
     checkpoint_npz: Path,
     output_json: Path,
     mgt_path: Path | None,
+    shell_pressure_load_path_policy: str,
 ) -> list[str]:
     command = [
         sys.executable,
@@ -1499,6 +1506,8 @@ def _direct_probe_command(
         str(checkpoint_npz),
         "--output-json",
         str(output_json),
+        "--shell-pressure-load-path-policy",
+        str(shell_pressure_load_path_policy),
         "--apply-shell-material-tangent",
         "--allow-state-dependent-shell-material-tangent-hip-replay",
         "--enable-matrix-free-global-krylov",
@@ -1903,6 +1912,9 @@ def build_lane_report(
         checkpoint_npz=resolved_checkpoint or DEFAULT_CHECKPOINT,
         output_json=output_json,
         mgt_path=mgt_path,
+        shell_pressure_load_path_policy=(
+            str(checkpoint_meta.get("shell_pressure_load_path_policy") or "all_components")
+        ),
     )
     source_commit_sha = _git_head()
     hip_consistency_proof, hip_consistency_blockers = _hip_consistency_proof_assessment(

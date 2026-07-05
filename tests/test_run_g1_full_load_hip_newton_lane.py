@@ -52,6 +52,7 @@ def _checkpoint(
     load_scale: float,
     frontier_load_scale: float | None = None,
     failed_bracket_load_scales: list[float] | None = None,
+    shell_pressure_load_path_policy: str | None = None,
 ) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     payload: dict[str, Any] = {
@@ -67,6 +68,10 @@ def _checkpoint(
         payload["failed_bracket_load_scales"] = np.asarray(
             [float(value) for value in failed_bracket_load_scales],
             dtype=np.float64,
+        )
+    if shell_pressure_load_path_policy is not None:
+        payload["shell_pressure_load_path_policy"] = np.asarray(
+            str(shell_pressure_load_path_policy)
         )
     np.savez_compressed(path, **payload)
     return path
@@ -424,7 +429,11 @@ def test_cause_narrowing_priority_routes_full_load_action_without_row_exhaustion
 
 
 def test_full_load_dry_run_builds_hip_required_direct_probe_command(tmp_path: Path) -> None:
-    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    checkpoint = _checkpoint(
+        tmp_path / "state.npz",
+        load_scale=1.0,
+        shell_pressure_load_path_policy="structural_components_only",
+    )
     proof = tmp_path / "hip-proof.json"
     _write_hip_consistency_proof(
         proof,
@@ -448,6 +457,11 @@ def test_full_load_dry_run_builds_hip_required_direct_probe_command(tmp_path: Pa
     assert checkpoint_resolution_gate["passed"] is True
     assert checkpoint_resolution_gate["full_load_candidate_count"] == 1
     assert checkpoint_resolution_gate["selected_checkpoint_load_scale"] == 1.0
+    assert payload["checkpoint"]["shell_pressure_load_path_policy"] == (
+        "structural_components_only"
+    )
+    policy_index = command.index("--shell-pressure-load-path-policy")
+    assert command[policy_index + 1] == "structural_components_only"
     assert "--matrix-free-global-krylov-require-hip-batch-replay" in command
     assert "--current-tangent-residual-row-require-hip-batch-replay" in command
     assert "--allow-state-dependent-shell-material-tangent-hip-replay" in command

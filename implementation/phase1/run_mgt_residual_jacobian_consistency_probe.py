@@ -52,6 +52,7 @@ CONSISTENT_NEWTON_FULL_LOAD_RUNNER_ID = (
 CONSISTENT_NEWTON_FULL_LOAD_GENERATOR_ID = (
     "consistent_residual_jacobian_newton_rocm_full_load_candidate"
 )
+G1_ASSEMBLY_CONTRACT_SCHEMA = "g1-assembly-result.v1"
 DISALLOWED_ROW_ONLY_RETRY_ACTION_IDS = [
     "repeat_largest_rows_target128_support8_row_only_retuning",
 ]
@@ -225,6 +226,50 @@ def _hip_required_direct_probe_kwargs(
     }
 
 
+def _live_g1_assembly_contract_from_child_payload(
+    child_payload: dict[str, Any],
+) -> dict[str, Any]:
+    live_contract = child_payload.get("live_g1_assembly_contract")
+    live_contract = live_contract if isinstance(live_contract, dict) else {}
+    if not live_contract:
+        return {
+            "present": False,
+            "contract_pass": False,
+            "blockers": ["live_g1_assembly_contract_receipt_missing"],
+            "uses_assembly_result_contract": False,
+            "assembly_result_schema": "",
+            "residual_formula": "",
+            "residual_source": "",
+            "tangent_definition": "",
+            "required_fields_present": False,
+            "required_fields": [],
+            "fixed_point_residual_promoted_to_physical": False,
+            "regularized_fixed_point_substitute": False,
+        }
+    blockers = [
+        str(item)
+        for item in live_contract.get("blockers", [])
+        if isinstance(item, str) and item
+    ]
+    if live_contract.get("uses_assembly_result_contract") is not True:
+        blockers.append("live_g1_assembly_contract_not_used")
+    if str(live_contract.get("assembly_result_schema") or "") != G1_ASSEMBLY_CONTRACT_SCHEMA:
+        blockers.append("live_g1_assembly_contract_schema_mismatch")
+    if live_contract.get("required_fields_present") is not True:
+        blockers.append("live_g1_assembly_contract_required_fields_missing")
+    if live_contract.get("fixed_point_residual_promoted_to_physical") is not False:
+        blockers.append("live_g1_assembly_contract_fixed_point_residual_promoted")
+    if live_contract.get("regularized_fixed_point_substitute") is not False:
+        blockers.append("live_g1_assembly_contract_regularized_fixed_point_substitute")
+    blockers = sorted(dict.fromkeys(blockers))
+    return {
+        **live_contract,
+        "present": True,
+        "contract_pass": bool(live_contract.get("contract_pass") is True and not blockers),
+        "blockers": blockers,
+    }
+
+
 def _assess_hip_required_direct_probe_payload(
     child_payload: dict[str, Any],
 ) -> dict[str, Any]:
@@ -238,6 +283,9 @@ def _assess_hip_required_direct_probe_payload(
     global_krylov = global_krylov if isinstance(global_krylov, dict) else {}
     row_correction = child_payload.get("current_tangent_residual_row_correction")
     row_correction = row_correction if isinstance(row_correction, dict) else {}
+    live_g1_assembly_contract = _live_g1_assembly_contract_from_child_payload(
+        child_payload
+    )
 
     hip_required = bool(residual_contract.get("hip_residual_engine_required"))
     hip_contract_passed = bool(
@@ -288,6 +336,11 @@ def _assess_hip_required_direct_probe_payload(
                 blockers.append(f"consistent_residual_jacobian::{blocker}")
     if gate_assessment.get("fallback_zero_passed") is not True:
         blockers.append("hip_direct_probe_fallback_zero_not_closed")
+    if live_g1_assembly_contract.get("contract_pass") is not True:
+        blockers.append("hip_direct_probe_live_g1_assembly_contract_not_closed")
+        for blocker in live_g1_assembly_contract.get("blockers") or []:
+            if isinstance(blocker, str) and blocker:
+                blockers.append(f"live_g1_assembly_contract::{blocker}")
     hip_contract_rows = residual_contract.get("hip_residual_engine_rows")
     hip_contract_rows = hip_contract_rows if isinstance(hip_contract_rows, list) else []
     hip_contract_blockers = residual_contract.get("hip_residual_engine_blockers")
@@ -314,6 +367,7 @@ def _assess_hip_required_direct_probe_payload(
         "production_hip_residual_jacobian_path": production_hip_path,
         "hip_residual_engine_contract_passed": hip_contract_passed,
         "consistent_residual_jacobian_newton_gate_passed": consistent_gate_passed,
+        "live_g1_assembly_contract": live_g1_assembly_contract,
         "blockers": sorted(dict.fromkeys(blockers)),
         "direct_residual_summary": _direct_residual_summary(child_payload),
         "checkpoint": {
@@ -3272,6 +3326,7 @@ def run_mgt_residual_jacobian_consistency_probe(
             hip_proof["production_hip_residual_jacobian_path"]
             and hip_proof["hip_residual_engine_contract_passed"]
             and hip_proof["consistent_residual_jacobian_newton_gate_passed"]
+            and hip_proof["live_g1_assembly_contract"]["contract_pass"]
             and worker_contract["ready"]
             and not blockers
         )
@@ -3293,6 +3348,7 @@ def run_mgt_residual_jacobian_consistency_probe(
             ),
             "rocm_hip_runtime_preflight": hip_preflight,
             "production_rocm_hip_residual_jvp_worker": worker_contract,
+            "live_g1_assembly_contract": hip_proof["live_g1_assembly_contract"],
             "component_only": bool(component_only),
             "checkpoint": {"path": str(checkpoint_npz)},
             "load_scale": (
@@ -3328,6 +3384,9 @@ def run_mgt_residual_jacobian_consistency_probe(
                 ),
                 "hip_residual_engine_contract": hip_proof[
                     "hip_residual_engine_contract"
+                ],
+                "live_g1_assembly_contract": hip_proof[
+                    "live_g1_assembly_contract"
                 ],
                 "direct_residual_summary": hip_proof["direct_residual_summary"],
                 "gate_assessment": hip_proof["gate_assessment"],

@@ -196,6 +196,17 @@ DEFAULT_SOLVER_HIP_E2E = Path(
 RUNNER_ID = "build_consistent_newton_full_load_checkpoint_candidate_runner"
 PREFERRED_GENERATOR = "consistent_residual_jacobian_newton_rocm_full_load_candidate"
 PRIMARY_NEXT_LANE = "consistent_residual_jacobian_newton_rocm_worker"
+LIVE_ASSEMBLY_CONTRACT_SCHEMA = "g1-assembly-result.v1"
+LIVE_ASSEMBLY_RESIDUAL_SOURCE = "physical_direct_residual"
+LIVE_ASSEMBLY_TANGENT_DEFINITION = "dR_du_consistent"
+LIVE_ASSEMBLY_REQUIRED_FIELDS = (
+    "residual_free",
+    "tangent_free",
+    "internal_forces",
+    "external_forces",
+    "material_state_next",
+    "metrics",
+)
 DISALLOWED_RETRY_ACTION_IDS = [
     "repeat_largest_rows_target128_support8_row_only_retuning",
 ]
@@ -324,6 +335,96 @@ def _assembly_contract_seed_blockers(assembly_contract_seed: dict[str, Any]) -> 
     if assembly_contract_seed.get("consistent_residual_jacobian_newton_gate_passed") is not False:
         blockers.append("g1_assembly_contract_seed_claims_full_consistent_newton_gate")
     return blockers
+
+
+def _live_assembly_contract_from_hip_probe(hip_probe: dict[str, Any]) -> dict[str, Any]:
+    live_contract = _as_dict(hip_probe.get("live_g1_assembly_contract"))
+    if live_contract:
+        return live_contract
+    return _as_dict(hip_probe.get("assembly_contract"))
+
+
+def _live_assembly_contract_blockers(hip_probe: dict[str, Any]) -> list[str]:
+    blockers: list[str] = []
+    if not hip_probe:
+        return blockers
+    live_contract = _live_assembly_contract_from_hip_probe(hip_probe)
+    if not live_contract:
+        return ["live_g1_assembly_contract_receipt_missing"]
+    if live_contract.get("uses_assembly_result_contract") is not True:
+        blockers.append("live_g1_assembly_contract_not_used")
+    schema = str(
+        live_contract.get("assembly_result_schema")
+        or live_contract.get("schema_version")
+        or ""
+    )
+    if schema != LIVE_ASSEMBLY_CONTRACT_SCHEMA:
+        blockers.append("live_g1_assembly_contract_schema_mismatch")
+    if live_contract.get("residual_formula") != "F_internal_minus_F_external":
+        blockers.append("live_g1_assembly_contract_residual_formula_mismatch")
+    if (
+        str(live_contract.get("residual_source") or "")
+        != LIVE_ASSEMBLY_RESIDUAL_SOURCE
+    ):
+        blockers.append("live_g1_assembly_contract_residual_source_mismatch")
+    if (
+        str(live_contract.get("tangent_definition") or "")
+        != LIVE_ASSEMBLY_TANGENT_DEFINITION
+    ):
+        blockers.append("live_g1_assembly_contract_tangent_definition_mismatch")
+    if live_contract.get("required_fields_present") is not True:
+        required_fields = set(_strings(live_contract.get("required_fields")))
+        missing_fields = [
+            field
+            for field in LIVE_ASSEMBLY_REQUIRED_FIELDS
+            if field not in required_fields
+        ]
+        if missing_fields:
+            blockers.append("live_g1_assembly_contract_required_fields_missing")
+    if live_contract.get("fixed_point_residual_promoted_to_physical") is not False:
+        blockers.append("live_g1_assembly_contract_fixed_point_residual_promoted")
+    if live_contract.get("regularized_fixed_point_substitute") is not False:
+        blockers.append("live_g1_assembly_contract_regularized_fixed_point_substitute")
+    return blockers
+
+
+def _live_assembly_contract_summary(hip_probe: dict[str, Any]) -> dict[str, Any]:
+    live_contract = _live_assembly_contract_from_hip_probe(hip_probe)
+    blockers = _live_assembly_contract_blockers(hip_probe)
+    return {
+        "present": bool(live_contract),
+        "contract_pass": bool(live_contract) and not blockers,
+        "blockers": blockers,
+        "uses_assembly_result_contract": live_contract.get(
+            "uses_assembly_result_contract"
+        )
+        is True,
+        "assembly_result_schema": str(
+            live_contract.get("assembly_result_schema")
+            or live_contract.get("schema_version")
+            or ""
+        ),
+        "residual_formula": str(live_contract.get("residual_formula") or ""),
+        "residual_source": str(live_contract.get("residual_source") or ""),
+        "tangent_definition": str(live_contract.get("tangent_definition") or ""),
+        "required_fields_present": live_contract.get("required_fields_present")
+        is True,
+        "required_fields": _strings(live_contract.get("required_fields")),
+        "fixed_point_residual_promoted_to_physical": live_contract.get(
+            "fixed_point_residual_promoted_to_physical"
+        )
+        is True,
+        "regularized_fixed_point_substitute": live_contract.get(
+            "regularized_fixed_point_substitute"
+        )
+        is True,
+        "claim_boundary": (
+            "The seed AssemblyResult contract is not enough for G1 closure. "
+            "The HIP/full-load residual-Jacobian proof must also report that "
+            "the live G1 runner used the same residual_free/tangent_free/"
+            "internal_forces/external_forces/material_state_next contract."
+        ),
+    }
 
 
 def _routing_blockers(
@@ -2530,6 +2631,7 @@ def build_runner_packet(
         ),
         *routing_blockers,
         *_assembly_contract_seed_blockers(assembly_contract_seed),
+        *_live_assembly_contract_blockers(hip_probe),
     ]
     if worker and worker.get("residual_jvp_worker_path_ready") is not True:
         contract_blockers.append("production_rocm_hip_residual_jvp_worker_path_not_ready")
@@ -4137,6 +4239,12 @@ def build_runner_packet(
                 "cpu_seed_consistent_newton_gate_passed"
             )
             is True,
+            "live_g1_assembly_contract_present": _live_assembly_contract_summary(
+                hip_probe
+            )["present"],
+            "live_g1_assembly_contract_passed": _live_assembly_contract_summary(
+                hip_probe
+            )["contract_pass"],
             "contract_blocker_count": len(contract_blockers),
             "closure_blocker_count": len(closure_blockers),
             "residual_jvp_worker_path_ready": worker.get(
@@ -4460,6 +4568,7 @@ def build_runner_packet(
             is True,
             "case_count": _as_int(assembly_contract_seed.get("case_count")),
         },
+        "live_g1_assembly_contract": _live_assembly_contract_summary(hip_probe),
         "worker_path_repair_plan": worker_path_repair_plan,
         "worker_path_operator_sequence": worker_path_operator_sequence,
         "verification_commands": [

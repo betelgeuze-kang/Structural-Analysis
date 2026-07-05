@@ -105,6 +105,24 @@ def _hip_probe_payload() -> dict:
         "consistent_residual_jacobian_newton_gate_passed": False,
         "cpu_diagnostic_assembler_used": False,
         "production_hip_residual_jacobian_path": True,
+        "live_g1_assembly_contract": {
+            "uses_assembly_result_contract": True,
+            "assembly_result_schema": "g1-assembly-result.v1",
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_source": "physical_direct_residual",
+            "tangent_definition": "dR_du_consistent",
+            "required_fields_present": True,
+            "required_fields": [
+                "residual_free",
+                "tangent_free",
+                "internal_forces",
+                "external_forces",
+                "material_state_next",
+                "metrics",
+            ],
+            "fixed_point_residual_promoted_to_physical": False,
+            "regularized_fixed_point_substitute": False,
+        },
         "blockers": [
             "consistent_residual_jacobian::consistent_residual_jacobian_newton_not_proven",
             "production_rocm_hip_residual_jvp_worker::consistent_residual_jacobian_newton_gate_not_passed",
@@ -3034,6 +3052,13 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     }
     assert payload["summary"]["assembly_contract_seed_ready"] is True
     assert payload["summary"]["assembly_contract_cpu_seed_newton_gate_passed"] is True
+    assert payload["summary"]["live_g1_assembly_contract_present"] is True
+    assert payload["summary"]["live_g1_assembly_contract_passed"] is True
+    assert payload["live_g1_assembly_contract"]["contract_pass"] is True
+    assert payload["live_g1_assembly_contract"]["assembly_result_schema"] == (
+        "g1-assembly-result.v1"
+    )
+    assert payload["live_g1_assembly_contract"]["required_fields_present"] is True
     assert payload["hip_worker_contract"]["residual_jvp_worker_path_ready"] is True
     assert payload["hip_worker_contract"]["g1_closure_gate_ready"] is False
     assert payload["worker_path_repair_plan"] == {
@@ -3126,6 +3151,36 @@ def test_runner_packet_accepts_missing_generator_action_after_full_load_checkpoi
     assert payload["summary"]["highest_observed_load_scale"] == 1.0
     assert payload["summary"]["full_load_candidate_count"] == 1
     assert "consistent_newton_runner_next_action_missing" not in payload["blockers"]
+
+
+def test_runner_packet_blocks_without_live_assembly_contract_receipt(
+    tmp_path: Path,
+) -> None:
+    paths = _write_inputs(tmp_path)
+    hip_payload = json.loads(paths["hip"].read_text(encoding="utf-8"))
+    hip_payload.pop("live_g1_assembly_contract")
+    _write_json(paths["hip"], hip_payload)
+
+    payload = runner.build_runner_packet(
+        repo_root=tmp_path,
+        g1_lane_path=paths["g1_lane"],
+        cause_narrowing_path=paths["cause"],
+        hip_probe_path=paths["hip"],
+        global_connectivity_path=paths["global"],
+        assembly_contract_seed_path=paths["assembly"],
+        true_newton_load_sweep_path=paths["sweep"],
+        true_newton_full_load_checkpoint_candidate_path=paths["checkpoint_candidate"],
+    )
+
+    assert payload["status"] == "blocked_runner_contract"
+    assert payload["contract_pass"] is False
+    assert "live_g1_assembly_contract_receipt_missing" in payload["blockers"]
+    assert payload["summary"]["live_g1_assembly_contract_present"] is False
+    assert payload["summary"]["live_g1_assembly_contract_passed"] is False
+    assert payload["live_g1_assembly_contract"]["contract_pass"] is False
+    assert payload["live_g1_assembly_contract"]["blockers"] == [
+        "live_g1_assembly_contract_receipt_missing"
+    ]
 
 
 def test_runner_packet_classifies_blocked_worker_path_repair_plan(tmp_path: Path) -> None:

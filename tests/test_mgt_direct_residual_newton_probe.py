@@ -24,6 +24,7 @@ from run_mgt_direct_residual_newton_probe import (  # noqa: E402
     _full_load_closure_gate,
     _g1_fallback_zero_audit,
     _g1_hip_residual_engine_contract,
+    _live_g1_assembly_contract_receipt,
     _load_checkpoint,
     _load_frontier_component_top_rows,
     _parse_matrix_free_basis_sources,
@@ -58,6 +59,33 @@ def test_write_json_payload_summarizes_sparse_matrices(tmp_path: Path) -> None:
     }
     assert payload["nested"]["value"] == 1.25
     assert payload["nested"]["path"].endswith("x")
+
+
+def test_live_g1_assembly_contract_receipt_checks_physical_residual_shape() -> None:
+    receipt = _live_g1_assembly_contract_receipt(
+        stiffness=diags([4.0, 5.0, 6.0], format="csr"),
+        free=np.asarray([0, 2], dtype=np.int64),
+        residual=np.asarray([3.0, -2.0], dtype=np.float64),
+        rhs=np.asarray([10.0, 7.0], dtype=np.float64),
+        load_scale=1.0,
+        assembly_meta={
+            "physical_internal_force_model": "fixture_physical_internal_force",
+            "external_load_source": "reference_configuration",
+        },
+        apply_shell_material_tangent=True,
+        allow_state_dependent_shell_material_tangent_hip_replay=True,
+    )
+
+    assert receipt["contract_pass"] is True
+    assert receipt["uses_assembly_result_contract"] is True
+    assert receipt["assembly_result_schema"] == "g1-assembly-result.v1"
+    assert receipt["residual_formula"] == "F_internal_minus_F_external"
+    assert receipt["residual_source"] == "physical_direct_residual"
+    assert receipt["tangent_definition"] == "dR_du_consistent"
+    assert receipt["required_fields_present"] is True
+    assert receipt["field_shapes"]["tangent_free"] == [2, 2]
+    assert receipt["fixed_point_residual_promoted_to_physical"] is False
+    assert receipt["regularized_fixed_point_substitute"] is False
 
 
 def test_active_free_excludes_restrained_dofs() -> None:

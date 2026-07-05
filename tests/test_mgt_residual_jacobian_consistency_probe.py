@@ -32,6 +32,31 @@ from run_mgt_residual_jacobian_consistency_probe import (  # noqa: E402
 from run_mgt_full_frame_6dof_sparse_equilibrium import FrameElement  # noqa: E402
 
 
+def _live_g1_assembly_contract_fixture() -> dict[str, object]:
+    return {
+        "receipt_schema_version": "g1-live-assembly-contract-receipt.v1",
+        "uses_assembly_result_contract": True,
+        "assembly_result_schema": "g1-assembly-result.v1",
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_source": "physical_direct_residual",
+        "tangent_definition": "dR_du_consistent",
+        "required_fields_present": True,
+        "required_fields": [
+            "residual_free",
+            "tangent_free",
+            "internal_forces",
+            "external_forces",
+            "material_state_next",
+            "metrics",
+        ],
+        "fixed_point_residual_promoted_to_physical": False,
+        "regularized_fixed_point_substitute": False,
+        "contract_pass": True,
+        "blockers": [],
+        "free_dof_count": 2,
+    }
+
+
 def test_hip_required_direct_probe_kwargs_broaden_row_fd_refresh_lane(
     tmp_path: Path,
 ) -> None:
@@ -1117,6 +1142,7 @@ def test_hip_required_probe_can_pass_only_with_strict_child_hip_contract(
             "status": "partial",
             "direct_residual_newton_ready": False,
             "checkpoint": {"load_scale": 1.0},
+            "live_g1_assembly_contract": _live_g1_assembly_contract_fixture(),
             "residual_contract": {
                 "hip_residual_engine_required": True,
                 "hip_residual_engine_contract_passed": True,
@@ -1175,6 +1201,11 @@ def test_hip_required_probe_can_pass_only_with_strict_child_hip_contract(
     assert payload["production_hip_residual_jacobian_path"] is True
     assert payload["cpu_diagnostic_assembler_used"] is False
     assert payload["blockers"] == []
+    assert payload["live_g1_assembly_contract"]["contract_pass"] is True
+    assert (
+        payload["hip_direct_probe"]["live_g1_assembly_contract"]["assembly_result_schema"]
+        == "g1-assembly-result.v1"
+    )
     worker = payload["production_rocm_hip_residual_jvp_worker"]
     assert worker["ready"] is True
     assert worker["residual_jvp_worker_path_ready"] is True

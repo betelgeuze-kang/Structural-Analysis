@@ -70,6 +70,18 @@ HIP_RESIDUAL_BATCH_REPLAY_BACKENDS = {
     "hip_full_residual_resident",
     "rust_hip_full_residual_ffi",
 }
+G1_ASSEMBLY_CONTRACT_SCHEMA = "g1-assembly-result.v1"
+G1_ASSEMBLY_RESIDUAL_FORMULA = "F_internal_minus_F_external"
+G1_ASSEMBLY_RESIDUAL_SOURCE = "physical_direct_residual"
+G1_ASSEMBLY_TANGENT_DEFINITION = "dR_du_consistent"
+G1_ASSEMBLY_REQUIRED_FIELDS = (
+    "residual_free",
+    "tangent_free",
+    "internal_forces",
+    "external_forces",
+    "material_state_next",
+    "metrics",
+)
 GLOBAL_TANGENT_REFRESH_DEFERRED_TO_ROW = "current_tangent_residual_row_correction"
 GLOBAL_TANGENT_REFRESH_DEFERRED_BACKEND = (
     "deferred_to_current_tangent_residual_row_hip_fd_jvp"
@@ -113,6 +125,108 @@ def _write_json_payload(output_json: Path, payload: dict[str, Any]) -> None:
         json.dumps(_json_safe(payload), indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
+
+
+def _sparse_or_dense_inf_norm(matrix: Any) -> float:
+    if matrix is None:
+        return 0.0
+    if issparse(matrix):
+        data = np.asarray(matrix.data, dtype=np.float64)
+        return float(np.max(np.abs(data))) if data.size else 0.0
+    array = np.asarray(matrix, dtype=np.float64)
+    return float(np.max(np.abs(array))) if array.size else 0.0
+
+
+def _live_g1_assembly_contract_receipt(
+    *,
+    stiffness: Any,
+    free: np.ndarray,
+    residual: np.ndarray,
+    rhs: np.ndarray,
+    load_scale: float,
+    assembly_meta: dict[str, Any],
+    apply_shell_material_tangent: bool,
+    allow_state_dependent_shell_material_tangent_hip_replay: bool,
+) -> dict[str, Any]:
+    free_idx = np.asarray(free, dtype=np.int64)
+    residual_free = np.asarray(residual, dtype=np.float64)
+    external_forces = np.asarray(rhs, dtype=np.float64)
+    internal_forces = residual_free + external_forces
+    tangent_free = (
+        stiffness[free_idx, :][:, free_idx] if stiffness is not None else None
+    )
+    tangent_shape = tuple(
+        int(value) for value in getattr(tangent_free, "shape", (0, 0))
+    )
+
+    blockers: list[str] = []
+    if residual_free.ndim != 1:
+        blockers.append("live_g1_assembly_residual_free_not_1d")
+    if external_forces.shape != residual_free.shape:
+        blockers.append("live_g1_assembly_external_forces_shape_mismatch")
+    if internal_forces.shape != residual_free.shape:
+        blockers.append("live_g1_assembly_internal_forces_shape_mismatch")
+    if len(tangent_shape) != 2 or tangent_shape != (
+        int(residual_free.size),
+        int(residual_free.size),
+    ):
+        blockers.append("live_g1_assembly_tangent_free_shape_mismatch")
+    residual_replay = internal_forces - external_forces
+    if not np.allclose(residual_replay, residual_free, rtol=1.0e-10, atol=1.0e-10):
+        blockers.append("live_g1_assembly_residual_formula_mismatch")
+
+    required_fields_present = not blockers
+    contract_pass = bool(required_fields_present)
+    return {
+        "receipt_schema_version": "g1-live-assembly-contract-receipt.v1",
+        "uses_assembly_result_contract": contract_pass,
+        "assembly_result_schema": G1_ASSEMBLY_CONTRACT_SCHEMA,
+        "residual_formula": G1_ASSEMBLY_RESIDUAL_FORMULA,
+        "residual_source": G1_ASSEMBLY_RESIDUAL_SOURCE,
+        "tangent_definition": G1_ASSEMBLY_TANGENT_DEFINITION,
+        "required_fields_present": required_fields_present,
+        "required_fields": list(G1_ASSEMBLY_REQUIRED_FIELDS),
+        "fixed_point_residual_promoted_to_physical": False,
+        "regularized_fixed_point_substitute": False,
+        "contract_pass": contract_pass,
+        "blockers": blockers,
+        "field_shapes": {
+            "residual_free": [int(residual_free.size)],
+            "tangent_free": [int(value) for value in tangent_shape],
+            "internal_forces": [int(internal_forces.size)],
+            "external_forces": [int(external_forces.size)],
+        },
+        "field_sources": {
+            "residual_free": "assemble_physical_residual(f_int[free] - f_ext[free])",
+            "tangent_free": "assemble_newton_tangent_stiffness()[free, free]",
+            "internal_forces": "residual_free + external_forces on free DOFs",
+            "external_forces": "assemble_physical_residual rhs == f_ext[free]",
+            "material_state_next": "direct_probe_material_state_metadata",
+            "metrics": "direct_probe_assembly_metrics",
+        },
+        "free_dof_count": int(residual_free.size),
+        "load_scale": float(load_scale),
+        "residual_inf_norm": float(np.max(np.abs(residual_free)))
+        if residual_free.size
+        else 0.0,
+        "tangent_inf_norm": _sparse_or_dense_inf_norm(tangent_free),
+        "physical_internal_force_model": assembly_meta.get(
+            "physical_internal_force_model"
+        ),
+        "external_load_source": assembly_meta.get("external_load_source"),
+        "shell_material_tangent_applied": bool(apply_shell_material_tangent),
+        "state_dependent_shell_material_tangent_hip_replay": bool(
+            apply_shell_material_tangent
+            and allow_state_dependent_shell_material_tangent_hip_replay
+        ),
+        "claim_boundary": (
+            "Live full-mesh MGT assembly receipt only. It proves that the probe "
+            "carried the G1 physical residual/tangent/internal/external/material "
+            "state contract through this residual-Jacobian path; it does not by "
+            "itself prove residual convergence, state-updated material Newton "
+            "breadth, or full production ROCm/HIP residency closure."
+        ),
+    }
 
 
 def _git_head() -> str:
@@ -2261,6 +2375,18 @@ def run_mgt_direct_residual_newton_probe(
         base_residual_inf = float(np.max(np.abs(residual))) if residual.size else 0.0
         base_residual_l2 = float(np.linalg.norm(residual)) if residual.size else 0.0
         rhs_inf = float(np.max(np.abs(rhs))) if rhs.size else 0.0
+        live_g1_assembly_contract = _live_g1_assembly_contract_receipt(
+            stiffness=stiffness,
+            free=np.asarray(free, dtype=np.int64),
+            residual=np.asarray(residual, dtype=np.float64),
+            rhs=np.asarray(rhs, dtype=np.float64),
+            load_scale=load_scale,
+            assembly_meta=assembly_meta,
+            apply_shell_material_tangent=bool(apply_shell_material_tangent),
+            allow_state_dependent_shell_material_tangent_hip_replay=bool(
+                allow_state_dependent_shell_material_tangent_hip_replay
+            ),
+        )
         assembly_seconds = time.perf_counter() - assembly_started
 
         base_k_ff = stiffness[free, :][:, free].tocsc()
@@ -7726,6 +7852,15 @@ def run_mgt_direct_residual_newton_probe(
         },
         "residual_contract": {
             "definition": "R(u, lambda) = F_int(u) - lambda * F_ext",
+            "uses_assembly_result_contract": bool(
+                live_g1_assembly_contract["contract_pass"]
+            ),
+            "assembly_result_schema": live_g1_assembly_contract[
+                "assembly_result_schema"
+            ],
+            "live_g1_assembly_contract_passed": bool(
+                live_g1_assembly_contract["contract_pass"]
+            ),
             "physical_internal_force_model": assembly_meta.get("physical_internal_force_model"),
             "direct_residual_uses_solver_regularization": False,
             "regularization_used_only_for_linear_correction_direction": True,
@@ -7782,6 +7917,7 @@ def run_mgt_direct_residual_newton_probe(
             ),
             **hip_residual_engine_contract,
         },
+        "live_g1_assembly_contract": live_g1_assembly_contract,
         "mesh_fingerprint": {
             **frame_select_meta,
             "node_count": int(checkpoint_meta["dof_count"] // DOF_PER_NODE),

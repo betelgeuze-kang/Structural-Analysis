@@ -14,7 +14,7 @@
     "local_pr_report_count": 2,
     "release_streak_source_policy": "github_actions_required"
   },
-  "generated_at": "2026-07-05T08:09:05.852377+00:00",
+  "generated_at": "2026-07-05T08:31:46.104645+00:00",
   "lanes": {
     "nightly": {
       "blockers": [
@@ -32,8 +32,8 @@
           "event": "schedule",
           "head_branch": "main",
           "head_sha": "7dd6bc6cf09267eb2dc88b545620d72b58d222e2",
-          "message": "nightly workflow run has remained queued for 749.1 minutes on a self-hosted runner lane.",
-          "queued_minutes": 749.1,
+          "message": "nightly workflow run has remained queued for 772.3 minutes on a self-hosted runner lane.",
+          "queued_minutes": 772.3,
           "queued_threshold_minutes": 15,
           "reason_code": "github_actions_self_hosted_runner_queued_timeout",
           "run_id": 28717454485,
