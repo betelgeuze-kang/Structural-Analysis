@@ -1106,6 +1106,53 @@ def _active_frontier_structural_policy_current_component_row_correction_step2_pa
     return payload
 
 
+def _active_frontier_structural_policy_current_component_row_correction_step3_payload() -> dict:
+    payload = _active_frontier_structural_policy_current_component_row_correction_step2_payload()
+    payload["source_commit_sha"] = "fixture-step3"
+    payload["base_direct_residual"]["direct_residual_inf_n"] = 43.816671401648165
+    payload["final_direct_residual"]["direct_residual_inf_n"] = 43.816671401648165
+    payload["final_direct_residual"]["residual_component_breakdown"]["top_rows"][0][
+        "residual_n"
+    ] = 43.816671401648165
+    row = payload["current_tangent_residual_row_correction"]
+    row["accepted"] = False
+    row["promoted_to_final_state"] = False
+    row["stop_reason"] = "no_residual_descent"
+    row["best_gate_eligible_candidate"] = None
+    row["best_candidate"] = {
+        "target_mode": "current_component_rows",
+        "target_row_count": 1,
+        "support_column_count": 4,
+        "alpha": 0.03125,
+        "direct_residual_inf_n": 43.883829113147186,
+        "improvement_inf_n": -0.06715771149902139,
+        "relative_improvement": -0.0015326977004578046,
+        "relative_increment": 3.333726916654414e-10,
+        "residual_gate_passed": False,
+        "relative_increment_gate_passed": True,
+        "residual_only_assembly": True,
+        "batch_alpha_replay": True,
+        "residual_batch_backend": "cpu_physical_internal_force_batch",
+    }
+    row["passes"] = [
+        {
+            "previous_direct_residual_inf_n": 43.816671401648165,
+            "residual_descent": False,
+            "accepted_state_refresh_cpu_used": False,
+        }
+    ]
+    payload["output_final_checkpoint"] = {
+        "written": False,
+        "path": (
+            "implementation/phase1/release_evidence/productization/"
+            "g1_active_frontier_structural_policy_active_set_current_component_row_correction_step3_candidate.npz"
+        ),
+        "reason": "no_residual_descent",
+        "direct_residual_inf_n": 43.816671401648165,
+    }
+    return payload
+
+
 def _active_frontier_structural_policy_residual_ownership_payload() -> dict:
     payload = _active_frontier_residual_ownership_payload()
     payload["checkpoint_npz"] = (
@@ -1933,6 +1980,10 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
             tmp_path
             / runner.DEFAULT_ACTIVE_FRONTIER_STRUCTURAL_POLICY_ACTIVE_SET_CURRENT_COMPONENT_ROW_CORRECTION_STEP2_PROBE
         ),
+        "structural_policy_component_row_step3": (
+            tmp_path
+            / runner.DEFAULT_ACTIVE_FRONTIER_STRUCTURAL_POLICY_ACTIVE_SET_CURRENT_COMPONENT_ROW_CORRECTION_STEP3_PROBE
+        ),
         "structural_policy_ownership": (
             tmp_path
             / runner.DEFAULT_ACTIVE_FRONTIER_STRUCTURAL_POLICY_RESIDUAL_OWNERSHIP_PROBE
@@ -2077,6 +2128,10 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
     _write_json(
         paths["structural_policy_component_row_step2"],
         _active_frontier_structural_policy_current_component_row_correction_step2_payload(),
+    )
+    _write_json(
+        paths["structural_policy_component_row_step3"],
+        _active_frontier_structural_policy_current_component_row_correction_step3_payload(),
     )
     _write_json(
         paths["structural_policy_ownership"],
@@ -2496,6 +2551,36 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
             "active_frontier_structural_policy_active_set_current_component_row_correction_step2_gate"
         ]
         is False
+    )
+    assert (
+        payload["summary"][
+            "active_frontier_structural_policy_active_set_current_component_row_correction_step3_present"
+        ]
+        is True
+    )
+    assert (
+        payload["summary"][
+            "active_frontier_structural_policy_active_set_current_component_row_correction_step3_accepted"
+        ]
+        is False
+    )
+    assert (
+        payload["summary"][
+            "active_frontier_structural_policy_active_set_current_component_row_correction_step3_stop_reason"
+        ]
+        == "no_residual_descent"
+    )
+    assert payload["summary"][
+        "active_frontier_structural_policy_active_set_current_component_row_correction_step3_best_residual_n"
+    ] == 43.883829113147186
+    assert payload["summary"][
+        "active_frontier_structural_policy_active_set_current_component_row_correction_chain_latest_residual_n"
+    ] == 43.816671401648165
+    assert (
+        payload["summary"][
+            "active_frontier_structural_policy_active_set_current_component_row_correction_chain_no_descent_stop"
+        ]
+        == "no_residual_descent"
     )
     assert (
         payload["summary"][
@@ -3092,6 +3177,36 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
         "g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz"
     )
     assert payload[
+        "active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe"
+    ]["row_correction_accepted"] is False
+    assert payload[
+        "active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe"
+    ]["row_correction_stop_reason"] == "no_residual_descent"
+    assert payload[
+        "active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe"
+    ]["best_candidate_direct_residual_inf_n"] == 43.883829113147186
+    assert payload[
+        "active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe"
+    ]["output_checkpoint_written"] is False
+    assert payload[
+        "active_frontier_structural_policy_active_set_current_component_row_correction_chain"
+    ]["accepted_step_count"] == 2
+    assert payload[
+        "active_frontier_structural_policy_active_set_current_component_row_correction_chain"
+    ]["no_descent_step_count"] == 1
+    assert payload[
+        "active_frontier_structural_policy_active_set_current_component_row_correction_chain"
+    ]["latest_accepted_final_residual_inf_n"] == 43.816671401648165
+    assert payload[
+        "active_frontier_structural_policy_active_set_current_component_row_correction_chain"
+    ]["first_no_descent_best_residual_inf_n"] == 43.883829113147186
+    assert (
+        payload[
+            "active_frontier_structural_policy_active_set_current_component_row_correction_chain"
+        ]["first_no_descent_stop_reason"]
+        == "no_residual_descent"
+    )
+    assert payload[
         "active_frontier_structural_policy_residual_ownership_probe"
     ]["top_row_balance_driver"] == "shell_bending_drilling_internal_force"
     assert payload[
@@ -3652,6 +3767,16 @@ def test_runner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
         "active_frontier_structural_policy_active_set_current_component_row_correction_step2_final_residual_n"
         in markdown
     )
+    assert (
+        "## Active Frontier Structural Policy Current Component Row Correction Step 3"
+        in markdown
+    )
+    assert "no_residual_descent" in markdown
+    assert (
+        "## Active Frontier Structural Policy Current Component Row Correction Chain"
+        in markdown
+    )
+    assert "first_no_descent_best_residual_inf_n" in markdown
     assert "## Active Frontier Structural Policy Residual Ownership" in markdown
     assert "shell_bending_drilling_internal_force" in markdown
     assert "## Active Frontier Structural Policy Linearized After Two-Step" in markdown

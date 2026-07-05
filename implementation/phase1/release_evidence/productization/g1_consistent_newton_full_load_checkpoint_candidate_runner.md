@@ -47,6 +47,8 @@
 - `active_frontier_structural_policy_active_set_current_component_row_correction_improvement_n`: `0.0003377105458639562`
 - `active_frontier_structural_policy_active_set_current_component_row_correction_step2_final_residual_n`: `43.816671401648165`
 - `active_frontier_structural_policy_active_set_current_component_row_correction_step2_improvement_n`: `0.263472421298502`
+- `active_frontier_structural_policy_active_set_current_component_row_correction_chain_latest_residual_n`: `43.816671401648165`
+- `active_frontier_structural_policy_active_set_current_component_row_correction_chain_no_descent_stop`: `no_residual_descent`
 - `active_frontier_structural_policy_top_component`: `shell_bending_drilling`
 - `active_frontier_structural_policy_top_balance_driver`: `shell_bending_drilling_internal_force`
 - `active_frontier_shell_rotation_candidate_residual_n`: `0.04728610099315822`
@@ -264,6 +266,24 @@
 - `accepted_state_refresh_cpu_used`: `True`
 - `output_checkpoint_path`: `implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz`
 - `top_row_dominant_component`: `shell_bending_drilling`
+
+## Active Frontier Structural Policy Current Component Row Correction Step 3
+
+- `present`: `True`
+- `status`: `partial`
+- `base_direct_residual_inf_n`: `43.816671401648165`
+- `final_direct_residual_inf_n`: `43.816671401648165`
+- `row_correction_accepted`: `False`
+- `row_correction_stop_reason`: `no_residual_descent`
+- `best_candidate_direct_residual_inf_n`: `43.883829113147186`
+
+## Active Frontier Structural Policy Current Component Row Correction Chain
+
+- `accepted_step_count`: `2`
+- `latest_accepted_final_residual_inf_n`: `43.816671401648165`
+- `first_no_descent_stop_reason`: `no_residual_descent`
+- `first_no_descent_best_residual_inf_n`: `43.883829113147186`
+- `claim_boundary`: `Non-promoting current-component row-correction chain. It records state-updated physical direct-residual descent attempts and the first no-descent boundary; it does not close G1 without residual gate, material Newton breadth, and production ROCm/HIP residency.`
 
 ## Active Frontier Structural Policy Residual Ownership
 

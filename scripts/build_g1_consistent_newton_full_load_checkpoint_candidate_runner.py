@@ -119,6 +119,10 @@ DEFAULT_ACTIVE_FRONTIER_STRUCTURAL_POLICY_ACTIVE_SET_CURRENT_COMPONENT_ROW_CORRE
     PRODUCTIZATION
     / "g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_probe.json"
 )
+DEFAULT_ACTIVE_FRONTIER_STRUCTURAL_POLICY_ACTIVE_SET_CURRENT_COMPONENT_ROW_CORRECTION_STEP3_PROBE = (
+    PRODUCTIZATION
+    / "g1_active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe.json"
+)
 DEFAULT_ACTIVE_FRONTIER_STRUCTURAL_POLICY_RESIDUAL_OWNERSHIP_PROBE = (
     PRODUCTIZATION / "g1_active_frontier_structural_policy_residual_ownership_probe.json"
 )
@@ -2236,6 +2240,10 @@ def _active_frontier_current_component_row_correction_summary(
         "target_row_count": _as_int(best.get("target_row_count")),
         "support_column_count": _as_int(best.get("support_column_count")),
         "alpha": _as_float(best.get("alpha")),
+        "best_candidate_direct_residual_inf_n": _as_float(
+            best.get("direct_residual_inf_n")
+        ),
+        "best_candidate_improvement_inf_n": _as_float(best.get("improvement_inf_n")),
         "best_relative_improvement": _as_float(best.get("relative_improvement")),
         "best_relative_increment": _as_float(best.get("relative_increment")),
         "best_residual_gate_passed": best.get("residual_gate_passed") is True,
@@ -2260,6 +2268,77 @@ def _active_frontier_current_component_row_correction_summary(
         "top_row_residual_n": _as_float(top_row.get("residual_n")),
         "top_row_dominant_component": str(top_row.get("dominant_component") or ""),
         "claim_boundary": str(payload.get("claim_boundary") or ""),
+    }
+
+
+def _active_frontier_current_component_row_correction_chain_summary(
+    steps: list[dict[str, Any]],
+) -> dict[str, Any]:
+    present_steps = [step for step in steps if step.get("present") is True]
+    accepted_steps = [
+        step for step in present_steps if step.get("row_correction_accepted") is True
+    ]
+    no_descent_steps = [
+        step
+        for step in present_steps
+        if step.get("row_correction_attempted") is True
+        and step.get("row_correction_accepted") is not True
+    ]
+    latest_accepted = accepted_steps[-1] if accepted_steps else {}
+    final_values = [
+        _as_float(step.get("final_direct_residual_inf_n"))
+        for step in accepted_steps
+    ]
+    monotonic = all(
+        final_values[index] <= final_values[index - 1]
+        for index in range(1, len(final_values))
+    )
+    return {
+        "present": bool(present_steps),
+        "present_step_count": len(present_steps),
+        "accepted_step_count": len(accepted_steps),
+        "no_descent_step_count": len(no_descent_steps),
+        "monotonic_accepted_descent": bool(monotonic),
+        "base_direct_residual_inf_n": _as_float(
+            present_steps[0].get("base_direct_residual_inf_n")
+        )
+        if present_steps
+        else 0.0,
+        "latest_accepted_final_residual_inf_n": _as_float(
+            latest_accepted.get("final_direct_residual_inf_n")
+        ),
+        "latest_accepted_improvement_inf_n": _as_float(
+            latest_accepted.get("improvement_inf_n")
+        ),
+        "latest_accepted_checkpoint_path": str(
+            latest_accepted.get("output_checkpoint_path") or ""
+        ),
+        "first_no_descent_step_path": str(
+            no_descent_steps[0].get("path") if no_descent_steps else ""
+        ),
+        "first_no_descent_stop_reason": str(
+            no_descent_steps[0].get("row_correction_stop_reason")
+            if no_descent_steps
+            else ""
+        ),
+        "first_no_descent_best_residual_inf_n": _as_float(
+            no_descent_steps[0].get("best_candidate_direct_residual_inf_n")
+            if no_descent_steps
+            else 0.0
+        ),
+        "direct_residual_gate_passed": any(
+            step.get("direct_residual_gate_passed") is True for step in present_steps
+        ),
+        "uses_cpu_refresh": any(
+            step.get("accepted_state_refresh_cpu_used") is True
+            for step in present_steps
+        ),
+        "claim_boundary": (
+            "Non-promoting current-component row-correction chain. It records "
+            "state-updated physical direct-residual descent attempts and the "
+            "first no-descent boundary; it does not close G1 without residual "
+            "gate, material Newton breadth, and production ROCm/HIP residency."
+        ),
     }
 
 
@@ -2553,6 +2632,9 @@ def build_runner_packet(
     active_frontier_structural_policy_active_set_current_component_row_correction_step2_probe_path: Path = (
         DEFAULT_ACTIVE_FRONTIER_STRUCTURAL_POLICY_ACTIVE_SET_CURRENT_COMPONENT_ROW_CORRECTION_STEP2_PROBE
     ),
+    active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe_path: Path = (
+        DEFAULT_ACTIVE_FRONTIER_STRUCTURAL_POLICY_ACTIVE_SET_CURRENT_COMPONENT_ROW_CORRECTION_STEP3_PROBE
+    ),
     active_frontier_structural_policy_residual_ownership_probe_path: Path = (
         DEFAULT_ACTIVE_FRONTIER_STRUCTURAL_POLICY_RESIDUAL_OWNERSHIP_PROBE
     ),
@@ -2703,6 +2785,12 @@ def build_runner_packet(
         _load_json(
             repo_root,
             active_frontier_structural_policy_active_set_current_component_row_correction_step2_probe_path,
+        )
+    )
+    active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe = (
+        _load_json(
+            repo_root,
+            active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe_path,
         )
     )
     active_frontier_structural_policy_residual_ownership_probe = _load_json(
@@ -3022,6 +3110,23 @@ def build_runner_packet(
                 active_frontier_structural_policy_active_set_current_component_row_correction_step2_probe
             ),
             path=active_frontier_structural_policy_active_set_current_component_row_correction_step2_probe_path,
+        )
+    )
+    active_frontier_structural_policy_active_set_current_component_row_correction_step3_summary = (
+        _active_frontier_current_component_row_correction_summary(
+            payload=(
+                active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe
+            ),
+            path=active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe_path,
+        )
+    )
+    active_frontier_structural_policy_active_set_current_component_row_correction_chain_summary = (
+        _active_frontier_current_component_row_correction_chain_summary(
+            [
+                active_frontier_structural_policy_active_set_current_component_row_correction_summary,
+                active_frontier_structural_policy_active_set_current_component_row_correction_step2_summary,
+                active_frontier_structural_policy_active_set_current_component_row_correction_step3_summary,
+            ]
         )
     )
     active_frontier_structural_policy_residual_ownership_summary = (
@@ -3759,6 +3864,34 @@ def build_runner_packet(
             "active_frontier_structural_policy_active_set_current_component_row_correction_step2_cpu_refresh": (
                 active_frontier_structural_policy_active_set_current_component_row_correction_step2_summary[
                     "accepted_state_refresh_cpu_used"
+                ]
+            ),
+            "active_frontier_structural_policy_active_set_current_component_row_correction_step3_present": bool(
+                active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe
+            ),
+            "active_frontier_structural_policy_active_set_current_component_row_correction_step3_accepted": (
+                active_frontier_structural_policy_active_set_current_component_row_correction_step3_summary[
+                    "row_correction_accepted"
+                ]
+            ),
+            "active_frontier_structural_policy_active_set_current_component_row_correction_step3_stop_reason": (
+                active_frontier_structural_policy_active_set_current_component_row_correction_step3_summary[
+                    "row_correction_stop_reason"
+                ]
+            ),
+            "active_frontier_structural_policy_active_set_current_component_row_correction_step3_best_residual_n": (
+                active_frontier_structural_policy_active_set_current_component_row_correction_step3_summary[
+                    "best_candidate_direct_residual_inf_n"
+                ]
+            ),
+            "active_frontier_structural_policy_active_set_current_component_row_correction_chain_latest_residual_n": (
+                active_frontier_structural_policy_active_set_current_component_row_correction_chain_summary[
+                    "latest_accepted_final_residual_inf_n"
+                ]
+            ),
+            "active_frontier_structural_policy_active_set_current_component_row_correction_chain_no_descent_stop": (
+                active_frontier_structural_policy_active_set_current_component_row_correction_chain_summary[
+                    "first_no_descent_stop_reason"
                 ]
             ),
             "active_frontier_structural_policy_residual_ownership_present": bool(
@@ -4633,6 +4766,10 @@ def build_runner_packet(
                     active_frontier_structural_policy_active_set_current_component_row_correction_step2_probe_path
                     .as_posix()
                 ),
+                (
+                    active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe_path
+                    .as_posix()
+                ),
                 active_frontier_structural_policy_residual_ownership_probe_path.as_posix(),
                 (
                     active_frontier_structural_policy_linearized_active_set_after_two_step_probe_path
@@ -4778,6 +4915,12 @@ def build_runner_packet(
         ),
         "active_frontier_structural_policy_active_set_current_component_row_correction_step2_probe": (
             active_frontier_structural_policy_active_set_current_component_row_correction_step2_summary
+        ),
+        "active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe": (
+            active_frontier_structural_policy_active_set_current_component_row_correction_step3_summary
+        ),
+        "active_frontier_structural_policy_active_set_current_component_row_correction_chain": (
+            active_frontier_structural_policy_active_set_current_component_row_correction_chain_summary
         ),
         "active_frontier_structural_policy_residual_ownership_probe": (
             active_frontier_structural_policy_residual_ownership_summary
@@ -4981,6 +5124,10 @@ def build_runner_packet(
                 active_frontier_structural_policy_active_set_current_component_row_correction_step2_probe_path
                 .as_posix()
             ),
+            "g1_active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe": (
+                active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe_path
+                .as_posix()
+            ),
             "g1_active_frontier_structural_policy_residual_ownership_probe": (
                 active_frontier_structural_policy_residual_ownership_probe_path.as_posix()
             ),
@@ -5105,6 +5252,16 @@ def _markdown(payload: dict[str, Any]) -> str:
             "active_frontier_structural_policy_active_set_current_component_row_correction_step2_probe"
         )
     )
+    structural_policy_component_row_step3 = _as_dict(
+        payload.get(
+            "active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe"
+        )
+    )
+    structural_policy_component_row_chain = _as_dict(
+        payload.get(
+            "active_frontier_structural_policy_active_set_current_component_row_correction_chain"
+        )
+    )
     structural_policy_ownership = _as_dict(
         payload.get("active_frontier_structural_policy_residual_ownership_probe")
     )
@@ -5203,6 +5360,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `active_frontier_structural_policy_active_set_current_component_row_correction_improvement_n`: `{structural_policy_component_row.get('improvement_inf_n')}`",
         f"- `active_frontier_structural_policy_active_set_current_component_row_correction_step2_final_residual_n`: `{structural_policy_component_row_step2.get('final_direct_residual_inf_n')}`",
         f"- `active_frontier_structural_policy_active_set_current_component_row_correction_step2_improvement_n`: `{structural_policy_component_row_step2.get('improvement_inf_n')}`",
+        f"- `active_frontier_structural_policy_active_set_current_component_row_correction_chain_latest_residual_n`: `{structural_policy_component_row_chain.get('latest_accepted_final_residual_inf_n')}`",
+        f"- `active_frontier_structural_policy_active_set_current_component_row_correction_chain_no_descent_stop`: `{structural_policy_component_row_chain.get('first_no_descent_stop_reason')}`",
         f"- `active_frontier_structural_policy_top_component`: `{structural_policy_ownership.get('top_row_dominant_internal_component')}`",
         f"- `active_frontier_structural_policy_top_balance_driver`: `{structural_policy_ownership.get('top_row_balance_driver')}`",
         f"- `active_frontier_shell_rotation_candidate_residual_n`: `{shell_rotation_candidate.get('best_direct_residual_inf_n')}`",
@@ -5686,6 +5845,68 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.append(
             "- `top_row_dominant_component`: "
             f"`{structural_policy_component_row_step2.get('top_row_dominant_component')}`"
+        )
+    if structural_policy_component_row_step3:
+        lines.extend(
+            [
+                "",
+                "## Active Frontier Structural Policy Current Component Row Correction Step 3",
+                "",
+            ]
+        )
+        lines.append(
+            f"- `present`: `{structural_policy_component_row_step3.get('present')}`"
+        )
+        lines.append(
+            f"- `status`: `{structural_policy_component_row_step3.get('status')}`"
+        )
+        lines.append(
+            "- `base_direct_residual_inf_n`: "
+            f"`{structural_policy_component_row_step3.get('base_direct_residual_inf_n')}`"
+        )
+        lines.append(
+            "- `final_direct_residual_inf_n`: "
+            f"`{structural_policy_component_row_step3.get('final_direct_residual_inf_n')}`"
+        )
+        lines.append(
+            "- `row_correction_accepted`: "
+            f"`{structural_policy_component_row_step3.get('row_correction_accepted')}`"
+        )
+        lines.append(
+            "- `row_correction_stop_reason`: "
+            f"`{structural_policy_component_row_step3.get('row_correction_stop_reason')}`"
+        )
+        lines.append(
+            "- `best_candidate_direct_residual_inf_n`: "
+            f"`{structural_policy_component_row_step3.get('best_candidate_direct_residual_inf_n')}`"
+        )
+    if structural_policy_component_row_chain:
+        lines.extend(
+            [
+                "",
+                "## Active Frontier Structural Policy Current Component Row Correction Chain",
+                "",
+            ]
+        )
+        lines.append(
+            "- `accepted_step_count`: "
+            f"`{structural_policy_component_row_chain.get('accepted_step_count')}`"
+        )
+        lines.append(
+            "- `latest_accepted_final_residual_inf_n`: "
+            f"`{structural_policy_component_row_chain.get('latest_accepted_final_residual_inf_n')}`"
+        )
+        lines.append(
+            "- `first_no_descent_stop_reason`: "
+            f"`{structural_policy_component_row_chain.get('first_no_descent_stop_reason')}`"
+        )
+        lines.append(
+            "- `first_no_descent_best_residual_inf_n`: "
+            f"`{structural_policy_component_row_chain.get('first_no_descent_best_residual_inf_n')}`"
+        )
+        lines.append(
+            "- `claim_boundary`: "
+            f"`{structural_policy_component_row_chain.get('claim_boundary')}`"
         )
     if structural_policy_ownership:
         lines.extend(["", "## Active Frontier Structural Policy Residual Ownership", ""])
@@ -6459,6 +6680,9 @@ def write_runner_packet(
     active_frontier_structural_policy_active_set_current_component_row_correction_step2_probe_path: Path = (
         DEFAULT_ACTIVE_FRONTIER_STRUCTURAL_POLICY_ACTIVE_SET_CURRENT_COMPONENT_ROW_CORRECTION_STEP2_PROBE
     ),
+    active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe_path: Path = (
+        DEFAULT_ACTIVE_FRONTIER_STRUCTURAL_POLICY_ACTIVE_SET_CURRENT_COMPONENT_ROW_CORRECTION_STEP3_PROBE
+    ),
     active_frontier_structural_policy_residual_ownership_probe_path: Path = (
         DEFAULT_ACTIVE_FRONTIER_STRUCTURAL_POLICY_RESIDUAL_OWNERSHIP_PROBE
     ),
@@ -6593,6 +6817,9 @@ def write_runner_packet(
         ),
         active_frontier_structural_policy_active_set_current_component_row_correction_step2_probe_path=(
             active_frontier_structural_policy_active_set_current_component_row_correction_step2_probe_path
+        ),
+        active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe_path=(
+            active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe_path
         ),
         active_frontier_structural_policy_residual_ownership_probe_path=(
             active_frontier_structural_policy_residual_ownership_probe_path
@@ -6762,6 +6989,13 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--active-frontier-structural-policy-active-set-current-component-row-correction-step3-probe",
+        type=Path,
+        default=(
+            DEFAULT_ACTIVE_FRONTIER_STRUCTURAL_POLICY_ACTIVE_SET_CURRENT_COMPONENT_ROW_CORRECTION_STEP3_PROBE
+        ),
+    )
+    parser.add_argument(
         "--active-frontier-structural-policy-residual-ownership-probe",
         type=Path,
         default=DEFAULT_ACTIVE_FRONTIER_STRUCTURAL_POLICY_RESIDUAL_OWNERSHIP_PROBE,
@@ -6919,6 +7153,9 @@ def main(argv: list[str] | None = None) -> int:
         ),
         active_frontier_structural_policy_active_set_current_component_row_correction_step2_probe_path=(
             args.active_frontier_structural_policy_active_set_current_component_row_correction_step2_probe
+        ),
+        active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe_path=(
+            args.active_frontier_structural_policy_active_set_current_component_row_correction_step3_probe
         ),
         active_frontier_structural_policy_residual_ownership_probe_path=(
             args.active_frontier_structural_policy_residual_ownership_probe
