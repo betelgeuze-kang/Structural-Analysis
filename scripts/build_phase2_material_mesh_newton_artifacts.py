@@ -120,6 +120,32 @@ def _material_breadth_cross_check(
         )
         is True
     )
+    material_mesh_load_step_history_passed = (
+        payload.get("state_updated_material_mesh_load_step_history_pass")
+        is True
+    )
+    material_mesh_load_step_chain_replay_passed = (
+        payload.get(
+            "state_updated_material_mesh_load_step_history_chain_replay_pass"
+        )
+        is True
+    )
+    material_mesh_load_step_checkpoint_replay_passed = (
+        payload.get(
+            "state_updated_material_mesh_load_step_history_checkpoint_replay_pass"
+        )
+        is True
+    )
+    material_mesh_load_step_jvp_passed = (
+        payload.get("state_updated_material_mesh_load_step_history_jvp_pass")
+        is True
+    )
+    material_mesh_load_step_direct_parity_passed = (
+        payload.get(
+            "state_updated_material_mesh_load_step_history_direct_parity_pass"
+        )
+        is True
+    )
     material_jvp_passed = payload.get("material_jvp_relative_error_pass") is True
     broad_material_closure_claim = (
         payload.get("state_updated_material_newton_breadth_closed") is True
@@ -140,6 +166,11 @@ def _material_breadth_cross_check(
         and frame_shell_load_step_checkpoint_replay_passed
         and frame_shell_load_step_jvp_passed
         and frame_shell_load_step_direct_parity_passed
+        and material_mesh_load_step_history_passed
+        and material_mesh_load_step_chain_replay_passed
+        and material_mesh_load_step_checkpoint_replay_passed
+        and material_mesh_load_step_jvp_passed
+        and material_mesh_load_step_direct_parity_passed
         and material_jvp_passed
     )
     return {
@@ -173,6 +204,21 @@ def _material_breadth_cross_check(
         ),
         "frame_shell_coupled_load_step_history_direct_parity_pass": (
             frame_shell_load_step_direct_parity_passed
+        ),
+        "material_mesh_load_step_history_pass": (
+            material_mesh_load_step_history_passed
+        ),
+        "material_mesh_load_step_history_chain_replay_pass": (
+            material_mesh_load_step_chain_replay_passed
+        ),
+        "material_mesh_load_step_history_checkpoint_replay_pass": (
+            material_mesh_load_step_checkpoint_replay_passed
+        ),
+        "material_mesh_load_step_history_jvp_pass": (
+            material_mesh_load_step_jvp_passed
+        ),
+        "material_mesh_load_step_history_direct_parity_pass": (
+            material_mesh_load_step_direct_parity_passed
         ),
         "material_jvp_relative_error_pass": material_jvp_passed,
         "broad_material_closure_claim": broad_material_closure_claim,
@@ -659,6 +705,31 @@ def build_material_mesh_newton_artifacts(
         "broad_material_frame_shell_coupled_load_step_history_direct_parity_pass": (
             material_breadth_cross_check[
                 "frame_shell_coupled_load_step_history_direct_parity_pass"
+            ]
+        ),
+        "broad_material_mesh_load_step_history_pass": (
+            material_breadth_cross_check[
+                "material_mesh_load_step_history_pass"
+            ]
+        ),
+        "broad_material_mesh_load_step_history_chain_replay_pass": (
+            material_breadth_cross_check[
+                "material_mesh_load_step_history_chain_replay_pass"
+            ]
+        ),
+        "broad_material_mesh_load_step_history_checkpoint_replay_pass": (
+            material_breadth_cross_check[
+                "material_mesh_load_step_history_checkpoint_replay_pass"
+            ]
+        ),
+        "broad_material_mesh_load_step_history_jvp_pass": (
+            material_breadth_cross_check[
+                "material_mesh_load_step_history_jvp_pass"
+            ]
+        ),
+        "broad_material_mesh_load_step_history_direct_parity_pass": (
+            material_breadth_cross_check[
+                "material_mesh_load_step_history_direct_parity_pass"
             ]
         ),
         "broad_material_state_persistence_replay_seed_passed": (

@@ -331,6 +331,60 @@ def assembly_result_from_state_updated_frame_shell_coupled_material_state(
     )
 
 
+def assembly_result_from_state_updated_material_mesh_state(state: Any) -> AssemblyResult:
+    """Adapt a state-updated material mesh seed into G1."""
+
+    element_states = list(state.element_material_states)
+    updated_count = sum(
+        1
+        for row in element_states
+        if dict(row.get("material_state_update") or {}).get(
+            "path_dependent_state_updated"
+        )
+        is True
+    )
+    return AssemblyResult(
+        residual_formula=state.residual_formula,
+        residual_free=state.residual_kn,
+        tangent_free=state.jacobian_kn_per_m,
+        internal_forces=state.internal_forces_kn,
+        external_forces=state.external_forces_kn,
+        material_state_next={
+            "state_schema": "g1-material-state-next.mesh-state-updated-seed.v1",
+            "assembly_scope": "state_updated_material_axial_chain_mesh_seed",
+            "state_updated_material_newton": True,
+            "path_dependent_state": True,
+            "path_dependent_state_updated": updated_count > 0,
+            "state_updated_material_mesh": True,
+            "free_node_indices": list(state.free_node_indices),
+            "displacements_m": state.displacements_m.tolist(),
+            "element_material_states": element_states,
+            "path_dependent_update_element_count": updated_count,
+        },
+        metrics={
+            "assembly_scope": "state_updated_material_axial_chain_mesh_seed",
+            "free_dof_indices": list(state.free_node_indices),
+            "free_dof_count": len(state.free_node_indices),
+            "residual_inf_norm": _inf_norm(state.residual_kn),
+            "tangent_inf_norm": _inf_norm(state.jacobian_kn_per_m),
+            "state_updated_material_newton": True,
+            "path_dependent_state": True,
+            "path_dependent_state_updated": updated_count > 0,
+            "state_updated_material_mesh": True,
+            "path_dependent_update_element_count": updated_count,
+            "material_algorithmic_tangent_source": (
+                "element_return_mapping_consistent_tangent_global_assembly"
+            ),
+            "material_state_persistence_required": True,
+            "fixed_point_residual_used_as_physical": False,
+            "map_residual_used_as_physical": False,
+            "regularized_fixed_point_substitute": False,
+            "solver_normalized_residual_used_as_physical": False,
+            "g1_closure_claim": False,
+        },
+    )
+
+
 def assemble_g1_state(model: Any, state: Any | None = None) -> AssemblyResult:
     """Dispatch an existing assembly state into the G1 physical contract.
 
@@ -347,6 +401,11 @@ def assemble_g1_state(model: Any, state: Any | None = None) -> AssemblyResult:
         return assembly_result_from_state_updated_frame_shell_coupled_material_state(
             candidate
         )
+    if hasattr(candidate, "element_material_states") and hasattr(
+        candidate,
+        "free_node_indices",
+    ):
+        return assembly_result_from_state_updated_material_mesh_state(candidate)
     if hasattr(candidate, "material_state_update") and hasattr(
         candidate,
         "material_algorithm_tangent_kn_per_m",

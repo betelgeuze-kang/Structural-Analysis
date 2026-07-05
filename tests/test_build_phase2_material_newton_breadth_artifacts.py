@@ -146,6 +146,31 @@ def test_phase2_material_newton_breadth_builds_honest_seed_artifacts() -> None:
         ]
         is True
     )
+    assert summary["state_updated_material_mesh_load_step_history_pass"] is True
+    assert summary["state_updated_material_mesh_load_step_history_step_count"] == 4
+    assert (
+        summary["state_updated_material_mesh_load_step_history_update_step_count"]
+        == 4
+    )
+    assert (
+        summary["state_updated_material_mesh_load_step_history_chain_replay_pass"]
+        is True
+    )
+    assert (
+        summary[
+            "state_updated_material_mesh_load_step_history_checkpoint_replay_pass"
+        ]
+        is True
+    )
+    assert summary["state_updated_material_mesh_load_step_history_jvp_pass"] is True
+    assert (
+        summary[
+            "state_updated_material_mesh_load_step_history_direct_parity_pass"
+        ]
+        is True
+    )
+    assert summary["state_updated_material_mesh_load_step_history_free_node_count"] == 2
+    assert summary["state_updated_material_mesh_load_step_history_element_count"] == 2
     assert summary["material_jvp_relative_error_pass"] is True
     assert summary["material_jvp_max_relative_error"] <= 1.0e-6
     assert summary["frame_material_newton_seed_pass"] is True
@@ -302,6 +327,46 @@ def test_phase2_material_newton_breadth_builds_honest_seed_artifacts() -> None:
         ]
         is True
     )
+    assert (
+        state_updated_payload["state_updated_material_mesh_load_step_history_pass"]
+        is True
+    )
+    assert (
+        state_updated_payload[
+            "state_updated_material_mesh_load_step_history_step_count"
+        ]
+        == 4
+    )
+    assert (
+        state_updated_payload[
+            "state_updated_material_mesh_load_step_history_update_step_count"
+        ]
+        == 4
+    )
+    assert (
+        state_updated_payload[
+            "state_updated_material_mesh_load_step_history_chain_replay_pass"
+        ]
+        is True
+    )
+    assert (
+        state_updated_payload[
+            "state_updated_material_mesh_load_step_history_checkpoint_replay_pass"
+        ]
+        is True
+    )
+    assert (
+        state_updated_payload[
+            "state_updated_material_mesh_load_step_history_jvp_pass"
+        ]
+        is True
+    )
+    assert (
+        state_updated_payload[
+            "state_updated_material_mesh_load_step_history_direct_parity_pass"
+        ]
+        is True
+    )
     assert state_updated_payload["material_jvp_relative_error_pass"] is True
     assert state_updated_payload["frame_material_newton_seed_pass"] is True
     assert state_updated_payload["shell_material_newton_seed_pass"] is True
@@ -445,6 +510,47 @@ def test_phase2_material_newton_breadth_builds_honest_seed_artifacts() -> None:
         row["jvp_finite_difference_pass"] is True
         and row["direct_residual_newton_parity_pass"] is True
         for row in load_step_history["steps"]
+    )
+
+    mesh_load_step_history = state_updated_payload[
+        "state_updated_material_mesh_load_step_history_seed"
+    ]
+    assert mesh_load_step_history["status"] == "ready"
+    assert mesh_load_step_history["contract_pass"] is True
+    assert (
+        mesh_load_step_history["history_id"]
+        == "state_updated_material_axial_chain_mesh_load_step_history"
+    )
+    assert mesh_load_step_history["step_count"] == 4
+    assert mesh_load_step_history["path_dependent_update_step_count"] == 4
+    assert mesh_load_step_history["committed_element_state_chain_pass"] is True
+    assert mesh_load_step_history["checkpoint_replay_pass"] is True
+    assert mesh_load_step_history["chain_replay_pass"] is True
+    assert mesh_load_step_history["step_replay_pass"] is True
+    assert mesh_load_step_history["jvp_finite_difference_pass"] is True
+    assert mesh_load_step_history["direct_residual_newton_parity_pass"] is True
+    assert mesh_load_step_history["mesh_free_node_count"] == 2
+    assert mesh_load_step_history["mesh_element_count"] == 2
+    assert mesh_load_step_history["mesh_update_element_count"] == 4
+    assert (
+        mesh_load_step_history["material_mesh_load_step_checkpoint_replay_check"][
+            "pass"
+        ]
+        is True
+    )
+    assert [
+        row["path_dependent_update_element_count"]
+        for row in mesh_load_step_history["steps"]
+    ] == [2, 0, 2, 0]
+    assert all(row["contract_pass"] is True for row in mesh_load_step_history["steps"])
+    assert all(
+        row["previous_element_committed_state_matches_carried_state"] is True
+        for row in mesh_load_step_history["steps"]
+    )
+    assert all(
+        row["jvp_finite_difference_pass"] is True
+        and row["direct_residual_newton_parity_pass"] is True
+        for row in mesh_load_step_history["steps"]
     )
 
     for row in law_results:

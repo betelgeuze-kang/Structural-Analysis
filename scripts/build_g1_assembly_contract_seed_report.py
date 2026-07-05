@@ -33,18 +33,22 @@ from structural_analysis.assembly.g1_contract import (  # noqa: E402
 )
 from structural_analysis.assembly.material_state import (  # noqa: E402
     assemble_state_updated_frame_shell_coupled_material_state,
+    assemble_state_updated_material_axial_chain_mesh_state,
     assemble_state_updated_material_newton_state,
     check_frame_shell_coupled_material_load_step_replay,
+    check_material_mesh_load_step_replay,
     check_state_updated_material_checkpoint_replay,
     check_state_updated_material_path_history_replay,
     default_state_updated_frame_shell_coupled_material_problem,
     default_state_updated_bilinear_material_breadth_problems,
     frame_shell_coupled_material_load_step_checkpoint_payload,
+    material_mesh_load_step_checkpoint_payload,
     material_path_history_checkpoint_payload,
     material_state_checkpoint_payload,
     solve_default_state_updated_material_path_histories,
     solve_state_updated_frame_shell_coupled_material_load_step_history,
     solve_state_updated_frame_shell_coupled_material_newton,
+    solve_state_updated_material_mesh_load_step_history,
     solve_state_updated_material_newton,
 )
 from structural_analysis.assembly.nonlinear_static import (  # noqa: E402
@@ -450,6 +454,76 @@ def build_g1_assembly_contract_seed_report(
         }
         coupled_material_load_step_cases.append(step_case)
 
+    material_mesh_load_step_cases = []
+    material_mesh_load_step_history = (
+        solve_state_updated_material_mesh_load_step_history(config=config)
+    )
+    material_mesh_load_step_checkpoint = material_mesh_load_step_checkpoint_payload(
+        material_mesh_load_step_history
+    )
+    material_mesh_load_step_replay = check_material_mesh_load_step_replay(
+        json.loads(
+            json.dumps(
+                material_mesh_load_step_checkpoint,
+                ensure_ascii=False,
+            )
+        )
+    )
+    for step in material_mesh_load_step_history.steps:
+        step_assembly = assemble_g1_state(step.problem, step.state)
+        step_jvp = finite_difference_g1_jvp_check(
+            lambda free_u, problem=step.problem: assemble_g1_state(
+                problem,
+                assemble_state_updated_material_axial_chain_mesh_state(
+                    problem,
+                    free_u,
+                ),
+            ),
+            step.solution.free_displacements_m,
+        )
+        step_newton_parity = direct_residual_newton_parity_check(
+            lambda free_u, problem=step.problem: assemble_g1_state(
+                problem,
+                assemble_state_updated_material_axial_chain_mesh_state(
+                    problem,
+                    free_u,
+                ),
+            ),
+            step.solution,
+        )
+        step_case = _case_payload(
+            case_id=step.problem.case_id,
+            assembly_scope="state_updated_material_axial_chain_mesh_load_step_history",
+            solution=step.solution,
+            assembly_result=step_assembly,
+            jvp_check=step_jvp,
+            newton_parity_check=step_newton_parity,
+        )
+        step_case["material_mesh_load_step_history"] = {
+            "history_id": material_mesh_load_step_history.history_id,
+            "history_step_index": step.history_step_index,
+            "step_kind": step.step_kind,
+            "external_force_kn": [
+                {"node_index": node, "force_kn": force}
+                for node, force in step.external_force_kn
+            ],
+            "carried_element_committed_state_previous": (
+                step.carried_element_committed_state_previous
+            ),
+            "previous_element_committed_state_matches_carried_state": (
+                step.previous_element_committed_state_matches_carried_state
+            ),
+            "history_checkpoint_replay_pass": bool(
+                material_mesh_load_step_replay["pass"]
+            ),
+            "history_chain_replay_pass": bool(
+                material_mesh_load_step_replay[
+                    "committed_element_state_chain_replay_pass"
+                ]
+            ),
+        }
+        material_mesh_load_step_cases.append(step_case)
+
     cases = [
         axial_case,
         coupled_case,
@@ -457,6 +531,7 @@ def build_g1_assembly_contract_seed_report(
         *material_path_history_cases,
         coupled_material_case,
         *coupled_material_load_step_cases,
+        *material_mesh_load_step_cases,
     ]
     contract_pass = all(row["contract_pass"] for row in cases)
     cpu_seed_newton_gate_passed = all(
@@ -598,6 +673,22 @@ def build_g1_assembly_contract_seed_report(
         is True
         for row in coupled_material_load_step_cases
     )
+    material_mesh_load_step_history_passed = (
+        material_mesh_load_step_history.committed_element_state_chain_pass
+        and bool(material_mesh_load_step_replay["pass"])
+        and all(row["contract_pass"] for row in material_mesh_load_step_cases)
+    )
+    material_mesh_load_step_jvp_pass = all(
+        row["jvp_finite_difference_check"]["pass"] is True
+        for row in material_mesh_load_step_cases
+    )
+    material_mesh_load_step_direct_parity_pass = all(
+        row["direct_residual_newton_parity_check"][
+            "cpu_seed_consistent_newton_gate_passed"
+        ]
+        is True
+        for row in material_mesh_load_step_cases
+    )
     payload = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -733,6 +824,33 @@ def build_g1_assembly_contract_seed_report(
         "state_updated_frame_shell_coupled_load_step_history_replay_check": (
             coupled_material_load_step_replay
         ),
+        "state_updated_material_mesh_load_step_history_passed": (
+            material_mesh_load_step_history_passed
+        ),
+        "state_updated_material_mesh_load_step_history_step_count": (
+            len(material_mesh_load_step_cases)
+        ),
+        "state_updated_material_mesh_load_step_history_update_step_count": (
+            material_mesh_load_step_history.path_dependent_update_step_count
+        ),
+        "state_updated_material_mesh_load_step_history_checkpoint_replay_pass": (
+            material_mesh_load_step_replay["pass"] is True
+        ),
+        "state_updated_material_mesh_load_step_history_chain_replay_pass": (
+            material_mesh_load_step_replay[
+                "committed_element_state_chain_replay_pass"
+            ]
+            is True
+        ),
+        "state_updated_material_mesh_load_step_history_jvp_pass": (
+            material_mesh_load_step_jvp_pass
+        ),
+        "state_updated_material_mesh_load_step_history_direct_parity_pass": (
+            material_mesh_load_step_direct_parity_pass
+        ),
+        "state_updated_material_mesh_load_step_history_replay_check": (
+            material_mesh_load_step_replay
+        ),
         "state_updated_material_newton_breadth_seed_coverage_ready": (
             state_updated_material_seed_passed
             and material_state_persistence_replay_passed
@@ -740,6 +858,7 @@ def build_g1_assembly_contract_seed_report(
             and material_path_history_chain_replay_pass
             and coupled_material_seed_passed
             and coupled_material_load_step_history_passed
+            and material_mesh_load_step_history_passed
             and {"reinforced_concrete", "steel", "src_composite"}.issubset(
                 set(material_families)
             )
@@ -780,7 +899,8 @@ def build_g1_assembly_contract_seed_report(
             "residual/Newton residual parity and residual descent, including "
             "carried-state unload/reverse/reload path histories and a two-DOF "
             "frame/shell coupled state-updated material seed plus a coupled "
-            "frame/shell load-step material-state history. It does not "
+            "frame/shell load-step material-state history and a two-element "
+            "state-updated material mesh load-step history. It does not "
             "create a full-load 1.0 checkpoint, prove full-mesh nonlinear "
             "equilibrium, close state-updated material Newton breadth, execute "
             "ROCm/HIP, or promote G1."
