@@ -3,6 +3,7 @@
   "artifacts": {
     "related_scalar_newton_globalization_summary": "implementation/phase1/release_evidence/productization/phase2_newton_globalization_summary.json",
     "scalar_axial_laws": "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_scalar_axial_laws.json",
+    "state_updated_material_seeds": "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_state_updated_seeds.json",
     "summary": "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json"
   },
   "blockers_remaining": [
@@ -11,21 +12,26 @@
     "mesh_load_step_nonlinear_convergence_suite_not_closed",
     "sparse_matrix_backend_not_closed",
     "production_rocm_hip_parity_not_closed",
-    "general_newton_jacobian_assembly_not_closed"
+    "general_newton_jacobian_assembly_not_closed",
+    "full_load_g1_material_newton_breadth_not_closed_by_seed_artifact"
   ],
-  "claim_boundary": "Deterministic scalar material-Newton breadth seed across multiple constitutive laws using the same explicit F_internal_minus_F_external residual contract, consistent tangent, residual/increment gates, and backtracking line search without regularization or fallback false PASS. This does not close G1 full-mesh/full-load nonlinear equilibrium, general frame/shell/material coupling, sparse production matrix backends, or production GPU/HIP gates.",
+  "claim_boundary": "Deterministic material-Newton breadth seeds using the explicit F_internal_minus_F_external residual contract. This includes scalar analytic material laws plus a state-updated frame/shell/composite return-mapping seed suite with material-state checkpoint replay and finite-difference JVP checks. It does not close G1 full-mesh/full-load nonlinear equilibrium, sparse production matrix backends, or production GPU/HIP gates.",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "contract_pass": true,
   "engine_version": "1.0.0",
+  "frame_material_newton_seed_pass": true,
   "g1_closure_claim": false,
-  "generated_at": "2026-06-22T16:08:07.965010+00:00",
+  "generated_at": "2026-07-05T14:27:04.320223+00:00",
   "globalization": "backtracking_line_search",
   "input_checksums": {
-    "scripts/build_phase2_material_newton_breadth_artifacts.py": "sha256:70ddf9616395c00cbc1e69d27b8e6dafa160c2d36e3445bfc12b4ac7e6d13248",
-    "scripts/verify_quality_gate.py": "sha256:66126113aac6cf144f6a21e501bab13f87a49172e51af03f33769fcde55f3e2c",
+    "scripts/build_phase2_material_newton_breadth_artifacts.py": "sha256:41d89db011035df1de4f0d9d6ea489273015f265b7bf367ecec6cc0dd95a8481",
+    "scripts/verify_quality_gate.py": "sha256:589ff71bb2c56a188c18273926646e38f8c2070157e349d1dd64028fab99b5fc",
+    "src/structural_analysis/assembly/g1_contract.py": "sha256:efbf68dbb1e27a177af0763bc0e0af3ad54dce6469e4fcbf9b315d6cf6c11b87",
+    "src/structural_analysis/assembly/material_state.py": "sha256:48c2db734d7c65f47e57069417df511c93f6bfa54905fb2f0168c02f464160f3",
     "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:00ca9b4fddc088aafb6a536e0f6190172772e25af8f7ad5faefdb5c2a65567f5",
-    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:361f7664cf24b517888123d014d1141687c6273f5b4d9c2fee23123b459c61eb",
-    "tests/test_build_phase2_material_newton_breadth_artifacts.py": "sha256:d38dee83861672f3a9fb8f84982ca28fb5dc07b0ebb65a59b4cfd494c0b95893"
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:c43772246853be09cacee662312fadac9de5d87b91e9ff2d105e9cb6342d16c6",
+    "tests/test_build_phase2_material_newton_breadth_artifacts.py": "sha256:52fdd33ca393518ecc8b615013d1cae01204e7a1cab16557d881c9e259d93af0",
+    "tests/test_g1_assembly_contract.py": "sha256:49d6cf2ec0e0e5a70b63d73faeaf7c26f6dab5e79c6790d814934cc93dbf2373"
   },
   "law_summaries": [
     {
@@ -57,18 +63,67 @@
       "tangent_gate_passed": true
     }
   ],
+  "material_jvp_max_relative_error": 8.429443131654742e-09,
+  "material_jvp_relative_error_pass": true,
+  "material_jvp_relative_error_tolerance": 1e-06,
   "material_law_count": 2,
   "material_newton_closure_claim": false,
+  "material_state_persistence_replay_seed_passed": true,
   "matrix_backend": "numpy_linalg_solve_scalar",
   "model_kinds": [
     "scalar_nonlinear_axial_cubic_spring",
     "scalar_nonlinear_axial_bilinear_hardening"
   ],
+  "path_dependent_material_replay_seed_case_count": 9,
+  "path_dependent_material_update_seed_case_count": 6,
   "residual_contract": "F_internal_minus_F_external",
   "residual_formula": "F_internal_minus_F_external",
   "schema_version": "phase2-material-newton-breadth-artifacts.v1",
-  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "shell_material_newton_seed_pass": true,
+  "source_commit_sha": "6a4085c424e821cd29b2620dfb4d604198d5936e",
   "sparse_backend_used": false,
+  "state_updated_material_newton_breadth_closed": false,
+  "state_updated_material_newton_breadth_seed_coverage_ready": true,
+  "state_updated_material_newton_seed_case_count": 9,
+  "state_updated_material_newton_seed_case_kinds": [
+    "monotonic_tension_yield",
+    "monotonic_steel_tension_yield",
+    "elastic_only_replay",
+    "monotonic_compression_yield",
+    "monotonic_shell_bending_yield",
+    "elastic_drilling_stiffness_replay",
+    "plastic_reloading_from_committed_state",
+    "elastic_unloading_from_committed_state",
+    "reverse_compression_from_committed_state"
+  ],
+  "state_updated_material_newton_seed_material_families": [
+    "reinforced_concrete",
+    "shell_equivalent_plate",
+    "src_composite",
+    "steel"
+  ],
+  "state_updated_material_newton_seed_passed": true,
+  "state_updated_material_newton_seed_section_integrations": [
+    "composite_fiber",
+    "frame_fiber",
+    "layered_shell"
+  ],
+  "state_updated_material_newton_seed_strain_modes": [
+    "axial",
+    "axial_reverse",
+    "bending",
+    "drilling",
+    "membrane"
+  ],
+  "state_updated_material_newton_seed_structural_components": [
+    "frame_fiber_axial",
+    "rc_frame_fiber_axial",
+    "shell_drilling_stiffness",
+    "shell_layer_bending",
+    "shell_layer_membrane",
+    "src_composite_axial",
+    "steel_frame_fiber_axial"
+  ],
   "status": "ready",
   "truth_class": "analytic_truth"
 }

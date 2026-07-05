@@ -141,7 +141,7 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 36,
+      "blocker_count": 37,
       "blockers": [
         "ci_streak::nightly::github_actions_job_start_blocked",
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -161,6 +161,7 @@
         "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
         "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
         "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
+        "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
         "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
         "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
         "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
@@ -189,7 +190,7 @@
       ]
     }
   },
-  "blocker_count": 66,
+  "blocker_count": 67,
   "blockers": [
     "ci_streak::nightly::github_actions_job_start_blocked",
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -239,6 +240,7 @@
     "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
     "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
     "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
+    "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
     "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
     "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
     "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
@@ -517,12 +519,12 @@
       "status": "blocked"
     },
     "developer_preview_readiness": {
-      "blocker_count": 31,
+      "blocker_count": 33,
       "category_counts": {
         "benchmark": 2,
         "future commercial": 35,
-        "numerical": 5,
-        "software product": 24
+        "numerical": 6,
+        "software product": 25
       },
       "claim_boundary": "Developer Preview is an open benchmark workstation preview, not a commercial structural solver beta. Customer shadow, commercial license/legal approval, license-server operation, commercial SLA, 30-run CI streak, and external approval receipts remain visible as future Commercial Release blockers. Remote GitHub sync/push approval is a release-publication handoff and does not block the local Developer Preview evidence bar. AI/GNN/surrogate truth claims stay frozen until the deterministic reference solver, residual/Jacobian/Newton closure, and benchmark truth are fixed.",
       "developer_preview_ready": false,
@@ -2705,14 +2707,14 @@
       "cleanup_plan_status": "ready",
       "cleanup_plan_track_or_add_required_path_count": 0,
       "codex_commit_or_push_performed": false,
-      "dirty_path_count": 5,
+      "dirty_path_count": 2,
       "human_git_action_required": false,
       "human_handoff_next_action": "rerun_git_clean_clone_reproduction",
       "human_handoff_push_or_release_command_included": false,
       "human_handoff_status": "ready",
       "human_handoff_suggested_command_count": 3,
       "local_worktree_dirty": true,
-      "non_receipt_dirty_path_count": 5,
+      "non_receipt_dirty_path_count": 2,
       "remote_github_sync_blocker_count": 4,
       "remote_github_sync_blockers": [
         "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
@@ -3079,22 +3081,22 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-05T14:19:20.429007+00:00",
+  "generated_at": "2026-07-05T14:32:06.360831+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
-    "README.md": "sha256:51e5428e9cb79779795154240af5c6cd601d9f59a763be3747573eaec39f8fdf",
-    "docs/commercialization-gap-current-state.md": "sha256:12b147fcd74cbdcb39ffce344dda180b51fc6d4ecd3490fced3c9ce57a0058c4",
+    "README.md": "sha256:86d1df312925414aa9b7b16c42e546179395301dc7a2e135865c94f4050af07a",
+    "docs/commercialization-gap-current-state.md": "sha256:e54a8b3eafc925e0adc4829d84c56393ac72bbcadc68b815263319c632c6b0db",
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:c4a21ef31b6606231a9622652c5e94e57de6f7e0572f7e42afdfa2addd6d314a",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:d2fdac0bedd30f70c70bf93c4485c5414a43eac50fd5c847b60cb4c274eb548d",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:f3276b89e0984fe83d84fa1e9eae05fed6d9a5eac56c8b21fd7ee54702ea3667",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:ed32dcfc42e783e07320ea30a9e3e6417cb295df174b5625d3eaff344e6d4865",
     "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:b4d7fb16bd51b75de337797bbf0651b1801e895f0f651062aeded0e4ad546531",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:1f1e66bec3f91574f60a07b0c96aeb5404d6cb1828408175f42aa3f51b8b8718",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:b3d3a5b99c08521f7f34ac13567cb7834c60c80851309f8a6f82f54562f230e4",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:304c5efc89c7879a054cddbf7f72ecf3324ef9583386ff614ca04c1c26540e80",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:5cb1817f5001d5bc2a428bfc9ca4748febb554aa5edff8ab95316bb26390024a",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:b83383261c90420ed89cd42c98383887404da18514324fe28d4d4a7c867da3b2",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:8cdd4232a99e080753e1b651c0f122466a6fd6109d3e1fd5602a982c58eb9bbb",
-    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:fdfc39689d02630150157b372fbe038268734240f65fc3b66d2bd8c33725e661",
+    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:10f9562a12a617784795532db5efd7a59e9d9b6479e33c9fc0a622b213c66570",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:019e1db2e3a6774821c5f8679ab26ad1b4caf889b5fe9ddba5bfa49e4581a1a1",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:a33733e0cdba8a4ca84fa88825e1339af11bda21d8b35ac66787f91669918002",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:40b1b46562249340f70f9c1aeb2364b5efbefd0a0b348b781b1417e444ec0e5e",
@@ -3105,8 +3107,8 @@
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:66d6027aa5089c91489ae966693e938254fe8fca247749d6303bfece8a3552a0",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:01911ef80b1cd08db6b03d5570ebb919d12287be47b550129ecf1a0b39b71b6a",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:0e23ebf0627dcfb3b253f284045272d569dcd424b0b39aac97c5d3a15a7dbbf8",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:77b93c4ee99684f3c06862cf7972fcb78e2ae17c23f9ac1d6d91f4c053583f5e",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d7accd8c23f8c31bdb42003018772fd860316cecf75552af94bac60c4d3b2bcb",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:587b6b593368456ceb92cf366cc41fe5654439f8b434ca4cb9a428709d1f59e0",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:71aa6dac4c27bce1193bb09417e16abe08ea80240bbe1b8eedff3ebdd7222dec",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:2dd335461534767886bc08ce07d463d36e2617cab30e8306d9da5e0e51e8aa3b",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:4f8ea099cd22b4eff4bda273b6425f22da1b9b908d99ebe70a2c352d0a5b23d2",
@@ -3400,7 +3402,7 @@
     },
     "release freshness/sync": {
       "blocked": true,
-      "blocker_count": 25,
+      "blocker_count": 26,
       "blockers": [
         "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
         "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
@@ -3412,6 +3414,7 @@
         "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
         "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
         "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
+        "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
         "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
         "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
         "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
@@ -3443,7 +3446,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "e2229edc7318c62410188d8f5e955018780998a1",
+  "source_commit_sha": "6a4085c424e821cd29b2620dfb4d604198d5936e",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3541,18 +3544,19 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-05T14:16:46.250696+00:00",
+        "generated_at": "2026-07-05T14:29:44.026153+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "e2229edc7318c62410188d8f5e955018780998a1",
+        "source_commit_sha": "6a4085c424e821cd29b2620dfb4d604198d5936e",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "gap_closure_status",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -3567,7 +3571,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T07:42:21.976217+00:00",
         "input_checksum_present": true,
@@ -3581,6 +3586,7 @@
       {
         "artifact": "commercial_gap_ledger_status",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -3595,7 +3601,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T07:42:21.644037+00:00",
         "input_checksum_present": true,
@@ -3609,6 +3616,7 @@
       {
         "artifact": "gap_ledger_evidence_audit",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -3623,7 +3631,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T07:42:22.083023+00:00",
         "input_checksum_present": true,
@@ -3637,6 +3646,7 @@
       {
         "artifact": "phase1_core_api_contract",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -3651,7 +3661,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T07:42:20.507990+00:00",
         "input_checksum_present": true,
@@ -3665,30 +3676,31 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-05T14:19:15.017427+00:00",
+        "generated_at": "2026-07-05T14:31:58.538417+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "e2229edc7318c62410188d8f5e955018780998a1",
+        "source_commit_sha": "6a4085c424e821cd29b2620dfb4d604198d5936e",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-05T14:19:17.648951+00:00",
+        "generated_at": "2026-07-05T14:32:02.476110+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "e2229edc7318c62410188d8f5e955018780998a1",
+        "source_commit_sha": "6a4085c424e821cd29b2620dfb4d604198d5936e",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -3703,7 +3715,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T07:42:18.984493+00:00",
         "input_checksum_present": true,
@@ -3717,6 +3730,7 @@
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -3731,7 +3745,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T07:42:19.109398+00:00",
         "input_checksum_present": true,
@@ -3745,8 +3760,8 @@
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py"
+          "docs/g1-global-operator-mismatch-audit.md",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T13:40:10.440430+00:00",
         "input_checksum_present": true,
@@ -3754,24 +3769,25 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "54123a5200d97300eb2a8dd4f7ed75c805159527",
-        "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "g1_f2g_f2h_cause_narrowing_status",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-05T14:19:03.121292+00:00",
+        "generated_at": "2026-07-05T14:29:11.816260+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "e2229edc7318c62410188d8f5e955018780998a1",
+        "source_commit_sha": "6a4085c424e821cd29b2620dfb4d604198d5936e",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "customer_shadow_evidence_status",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -3786,7 +3802,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T07:35:29.708651+00:00",
         "input_checksum_present": true,
@@ -3800,6 +3817,7 @@
       {
         "artifact": "workstation_delivery_readiness",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -3814,7 +3832,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T07:42:20.636281+00:00",
         "input_checksum_present": true,
@@ -3828,6 +3847,7 @@
       {
         "artifact": "independent_product_readiness",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -3842,7 +3862,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T07:42:21.331842+00:00",
         "input_checksum_present": true,
@@ -3856,6 +3877,7 @@
       {
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -3870,7 +3892,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T08:31:37.173121+00:00",
         "input_checksum_present": true,
@@ -3884,6 +3907,7 @@
       {
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -3898,7 +3922,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T07:35:29.597225+00:00",
         "input_checksum_present": true,
@@ -3912,6 +3937,7 @@
       {
         "artifact": "license_status_closure_report",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -3926,7 +3952,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T07:35:29.670294+00:00",
         "input_checksum_present": true,
@@ -3940,6 +3967,7 @@
       {
         "artifact": "paid_pilot_scope_guard_report",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -3954,7 +3982,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T07:42:22.258098+00:00",
         "input_checksum_present": true,
@@ -3968,6 +3997,7 @@
       {
         "artifact": "external_benchmark_submission_readiness",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -3982,7 +4012,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T07:35:29.749021+00:00",
         "input_checksum_present": true,
@@ -3996,6 +4027,7 @@
       {
         "artifact": "external_benchmark_submission_updates",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -4010,7 +4042,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T08:11:07.261112+00:00",
         "input_checksum_present": true,
@@ -4024,6 +4057,7 @@
       {
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -4038,7 +4072,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T07:45:18.457129+00:00",
         "input_checksum_present": true,
@@ -4052,6 +4087,7 @@
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -4066,7 +4102,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T07:45:18.507287+00:00",
         "input_checksum_present": true,
@@ -4080,6 +4117,7 @@
       {
         "artifact": "structural_scope_owner_decision_application_plan",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -4094,7 +4132,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T07:45:18.570774+00:00",
         "input_checksum_present": true,
@@ -4108,6 +4147,7 @@
       {
         "artifact": "structural_scope_release_surface_owner_handoff_check",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -4115,7 +4155,8 @@
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz"
+          "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T11:07:27.746010+00:00",
         "input_checksum_present": true,
@@ -4129,6 +4170,7 @@
       {
         "artifact": "developer_preview_final_gate_owner_packet",
         "changed_paths_since_source_commit": [
+          "docs/g1-global-operator-mismatch-audit.md",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_current_component_row_correction_step2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_active_set_ls_trust_third_step_schedule_probe.npz",
@@ -4143,7 +4185,8 @@
           "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz",
           "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py"
+          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
         ],
         "generated_at": "2026-07-05T08:28:17.903872+00:00",
         "input_checksum_present": true,
@@ -4177,30 +4220,29 @@
     "worktree": {
       "dirty": true,
       "dirty_paths": [
-        "docs/g1-global-operator-mismatch-audit.md",
+        "README.md",
+        "docs/commercialization-gap-current-state.md",
         "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
         "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
         "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
+        "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json",
         "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
-        "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.md",
         "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json",
+        "implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_summary.json",
+        "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json",
         "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
         "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
         "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
         "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-        "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        "implementation/phase1/release_evidence/productization/g1_current_frontier_operator_mismatch_audit.json",
-        "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
-        "tests/test_build_g1_current_frontier_operator_mismatch_audit.py"
+        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
+        "scripts/build_phase2_material_newton_breadth_artifacts.py",
+        "tests/test_build_phase2_material_newton_breadth_artifacts.py",
+        "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_state_updated_seeds.json"
       ],
       "non_receipt_dirty_paths": [
-        "docs/g1-global-operator-mismatch-audit.md",
-        "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
-        "tests/test_build_g1_current_frontier_operator_mismatch_audit.py"
+        "scripts/build_phase2_material_newton_breadth_artifacts.py",
+        "tests/test_build_phase2_material_newton_breadth_artifacts.py"
       ],
       "phase3_release_control_cleanup_plan": {
         "candidate_release_control_commit_set_count": 0,
@@ -4224,23 +4266,25 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M docs/g1-global-operator-mismatch-audit.md",
+        " M README.md",
+        " M docs/commercialization-gap-current-state.md",
         " M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
         " M implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
         " M implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
+        " M implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json",
         " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
-        " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.md",
         " M implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json",
+        " M implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_summary.json",
+        " M implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json",
         " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
         " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
         " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-        " M scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        " M tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-        "?? implementation/phase1/release_evidence/productization/g1_current_frontier_operator_mismatch_audit.json",
-        "?? scripts/build_g1_current_frontier_operator_mismatch_audit.py",
-        "?? tests/test_build_g1_current_frontier_operator_mismatch_audit.py"
+        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
+        " M scripts/build_phase2_material_newton_breadth_artifacts.py",
+        " M tests/test_build_phase2_material_newton_breadth_artifacts.py",
+        "?? implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_state_updated_seeds.json"
       ]
     }
   },
