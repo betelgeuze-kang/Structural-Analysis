@@ -730,6 +730,7 @@
     "mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
     "mgt_residual_jacobian_step16_material_active_set_ls_rows32_child_direct_no_descent_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step16_material_active_set_ls_rows32_child_direct_no_descent_probe.json",
     "mgt_residual_jacobian_step16_scaled_global_krylov_direct_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step16_scaled_global_krylov_direct_probe.json",
+    "phase2_material_mesh_newton_summary": "implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_summary.json",
     "phase2_material_newton_breadth_state_updated_seeds": "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_state_updated_seeds.json",
     "phase2_material_newton_breadth_summary": "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json"
   },
@@ -980,7 +981,7 @@
     "residual_inf_n": 0.42740724991695345,
     "status": "ready"
   },
-  "generated_at": "2026-07-05T19:15:32.772467+00:00",
+  "generated_at": "2026-07-05T19:23:19.893005+00:00",
   "global_tangent_scaled_sweep": {
     "base_residual_inf_n": 0.4278304040181992,
     "best_alpha": 0.00390625,
@@ -1392,7 +1393,7 @@
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_residual_gradient_tiny_sweep_probe.json": "sha256:e106b463733e101d2840d0dbed7b2f90bd7cd5bc8c207055b416f481fe231a43",
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_shell_diag_sweep_probe.json": "sha256:3fb896191af710575f7c4a7198de670b974250b26c3e6a93682ec033677f5ac6",
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_shell_jvp_probe.json": "sha256:1f50ad798a79bccf5a36b3f3fe4306ea17ab4305eca998703f41ae849b88da5e",
-    "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json": "sha256:a25c9c30d291e4094bcf928d5741b16adac7b489f9ad308cc8695eb3b704bbb9",
+    "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json": "sha256:efdb26868e464e5604f81c94619ee1a62edf912855d8555c86ff6b4b8748f8dd",
     "implementation/phase1/release_evidence/productization/g1_current_frontier_operator_mismatch_audit.json": "sha256:0868801f649300a959a5d8fecafc0de5243e9961e44aa182c41ce16110380c54",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:382956916ff532ef84df6648062a284d6899e7e62b48b9b8386142e7d4411235",
     "implementation/phase1/release_evidence/productization/g1_frame_tangent_fd_epsilon_sweep_probe.json": "sha256:81c2ad32a078db886d09c6637cd7d1369719d2ed6c8f5fac88ae5ac410c4291d",
@@ -1427,9 +1428,10 @@
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz": "sha256:865e2daee190803fb8349aff5f08d170b6b88794ac6cfb3ca4f43f912b30239a",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step16_material_active_set_ls_rows32_child_direct_no_descent_probe.json": "sha256:20fcc89b4f29a58699f88509e4e186c7b632441f243e75467a9a2656f744570f",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step16_scaled_global_krylov_direct_probe.json": "sha256:e7eb74f06319595eb5f99cc22decd68976819a0020317713335f9b659cd0a860",
+    "implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_summary.json": "sha256:5afb7fca63ca67334a10fa0f7c5b6139e55172154a438a2516d77cc0a1d492eb",
     "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_state_updated_seeds.json": "sha256:871d93734eafec214f912f96d2cd749aca0f32918ea38d6bcec7a0cd7a76aa42",
     "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json": "sha256:fa8e8d753831a5eba30a207777ce82294cff8e94f7bf6a595cc6c077f2141735",
-    "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:49094d84b1e03f3f66d82bf458e5861867e5ca6aed93909a62cf4708bf8af3ca"
+    "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:115c6e0b5683b450f2a08a49295f46233be5b9ef3a9cca9336a3a8361a4499bd"
   },
   "live_g1_assembly_contract": {
     "assembly_result_schema": "",
@@ -1511,6 +1513,65 @@
       "status": "required"
     }
   ],
+  "phase2_material_mesh_newton_summary": {
+    "analysis_type": "nonlinear_static_material_mesh_newton_seed",
+    "artifacts": {
+      "axial_chain_result": "implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_axial_chain_result.json",
+      "related_material_newton_breadth_summary": "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json",
+      "summary": "implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_summary.json"
+    },
+    "blockers_remaining": [
+      "full_mesh_full_load_nonlinear_equilibrium_not_closed",
+      "frame_shell_material_coupling_not_closed",
+      "general_mesh_load_step_nonlinear_convergence_suite_not_closed",
+      "general_sparse_matrix_backend_not_closed",
+      "production_rocm_hip_parity_not_closed",
+      "broad_material_newton_breadth_not_closed"
+    ],
+    "claim_boundary": "This records one tiny 1D axial mesh where scalar material laws are assembled into global residual/Jacobian and solved with Newton residual/increment gates without regularization or fallback false PASS. It does not close G1 full-mesh/full-load nonlinear equilibrium, general frame/shell/material coupling, sparse production matrix backends, broad material Newton breadth, or GPU/HIP parity.",
+    "claim_boundary_version": "developer-preview-core-api-v1",
+    "contract_pass": true,
+    "element_count": 2,
+    "engine_version": "1.0.0",
+    "final_tip_displacement_spread_m": 1.1102230246251565e-16,
+    "full_mesh_closure_claim": false,
+    "g1_closure_claim": false,
+    "generated_at": "2026-07-05T14:27:47.529098+00:00",
+    "globalization": "backtracking_line_search",
+    "input_checksums": {
+      "scripts/build_phase2_material_mesh_newton_artifacts.py": "sha256:9f5619c056e7f0b9ecf89d918869e65a7d0bfbaeab7bac62d013330a6488349d",
+      "scripts/verify_quality_gate.py": "sha256:589ff71bb2c56a188c18273926646e38f8c2070157e349d1dd64028fab99b5fc",
+      "src/structural_analysis/assembly/__init__.py": "sha256:ccb7e9b1de89661f8fdecee0e68c659478d36a4374c2a8a45b13cf9a1aad31f8",
+      "src/structural_analysis/assembly/nonlinear_static.py": "sha256:afc7ecf37b7fe7c2fc172b9b223d18640a44c22f6896aa47c20fdf35761fb41b",
+      "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:00ca9b4fddc088aafb6a536e0f6190172772e25af8f7ad5faefdb5c2a65567f5",
+      "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:c43772246853be09cacee662312fadac9de5d87b91e9ff2d105e9cb6342d16c6",
+      "tests/test_build_phase2_material_mesh_newton_artifacts.py": "sha256:6cbf762c49d5596aafa5298b6b27b40793d65c4d2170cd3347dbf8261970cc17"
+    },
+    "load_step_gate_passed": true,
+    "material_newton_closure_claim": false,
+    "matrix_backend": "numpy_linalg_solve_dense",
+    "mesh_refinement_element_counts": [
+      1,
+      2,
+      4
+    ],
+    "mesh_refinement_tip_displacement_spread_m": 0.0,
+    "model_kind": "scalar_nonlinear_axial_cubic_spring",
+    "narrow_mesh_refinement_gate_passed": true,
+    "narrow_sparse_backend_equivalence_gate_passed": true,
+    "node_count": 3,
+    "residual_contract": "F_internal_minus_F_external",
+    "residual_formula": "F_internal_minus_F_external",
+    "schema_version": "phase2-material-mesh-newton-artifacts.v1",
+    "series_force_gate_passed": true,
+    "source_commit_sha": "6a4085c424e821cd29b2620dfb4d604198d5936e",
+    "sparse_backend_equivalence_matrix_backend": "scipy_sparse_spsolve_cpu",
+    "sparse_backend_used": false,
+    "status": "ready",
+    "tangent_gate_passed": true,
+    "tip_displacement_m": 0.7860054779422102,
+    "truth_class": "assembled_mesh_truth"
+  },
   "phase2_material_newton_breadth_state_updated_seeds": {
     "blockers_remaining": [
       "full_mesh_full_load_nonlinear_equilibrium_not_closed",
@@ -2094,7 +2155,8 @@
       "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_shell_rotation_row_second_probe.json",
       "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_shell_rotation_row_third_probe.json",
       "implementation/phase1/release_evidence/productization/g1_active_frontier_structural_policy_shell_rotation_second_candidate_residual_ownership_probe.json",
-      "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_shell_rotation_frontier_probe.json"
+      "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_scaled_lsmr_from_shell_rotation_frontier_probe.json",
+      "implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_summary.json"
     ],
     "required_load_scale": 1.0,
     "rerun_command": "python3 scripts/run_g1_full_load_hip_newton_lane.py --checkpoint-npz <full-load-checkpoint.npz> --fail-blocked",
@@ -2134,7 +2196,7 @@
     "row_count": 8,
     "status": "ready"
   },
-  "source_commit_sha": "49990694c8affff1114aea09d3b1bb6aead62cc0",
+  "source_commit_sha": "b9bff5c80cda97ea6d326a8f42cff2964bb3c2cb",
   "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe": {
     "assembled_tangent_parity_max_absolute_error": 0.006011962890625,
     "assembled_tangent_parity_max_relative_error": 2.683381287585585e-15,
@@ -2825,6 +2887,12 @@
       "close_consistent_residual_jacobian_newton_gate",
       "prove_production_rocm_hip_residual_jvp_worker"
     ],
+    "phase2_material_mesh_newton_broad_material_closure_claim": false,
+    "phase2_material_mesh_newton_full_mesh_closure_claim": false,
+    "phase2_material_mesh_newton_load_step_gate_passed": true,
+    "phase2_material_mesh_newton_ready": true,
+    "phase2_material_mesh_newton_refinement_gate_passed": true,
+    "phase2_material_mesh_newton_sparse_cpu_equivalence_passed": true,
     "phase2_material_newton_breadth_seed_coverage_ready": true,
     "phase2_state_updated_material_breadth_closed": false,
     "phase2_state_updated_material_jvp_pass": true,

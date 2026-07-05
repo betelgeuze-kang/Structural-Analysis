@@ -85,6 +85,9 @@
 - `phase2_material_newton_breadth_seed_coverage_ready`: `True`
 - `phase2_state_updated_material_seed_case_count`: `9`
 - `phase2_state_updated_material_breadth_closed`: `False`
+- `phase2_material_mesh_newton_load_step_gate_passed`: `True`
+- `phase2_material_mesh_newton_sparse_cpu_equivalence_passed`: `True`
+- `phase2_material_mesh_newton_full_mesh_closure_claim`: `False`
 - `worker_path_ready`: `False`
 - `worker_g1_closure_gate_ready`: `False`
 - `assembly_contract_seed_ready`: `True`
