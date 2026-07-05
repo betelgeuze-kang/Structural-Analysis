@@ -1,12 +1,12 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-07-05T07:42:21.644037+00:00",
-  "source_commit_sha": "42eccb4207eaba2b209cf59d2773554f1ca52477",
+  "generated_at": "2026-07-05T15:17:13.211076+00:00",
+  "source_commit_sha": "3454f2afc59f2fcc7bb19a123b15204bc8eb2fa3",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "input_checksums": {
     "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b8f1b140751f430e4c7dc594f3440320433be9b3e3f055f3e7fad62a2999b8af",
     "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:b57d2296755145322bbad09abb1a471a18da9051eb202185d8bbfbddcb2b4c24",
-    "implementation/phase1/commercial_gap_ledger_status.py": "sha256:5b4a353a69395ac2b4d7d3030dde55f800db5150759ff3773732df03a201f9f9"
+    "implementation/phase1/commercial_gap_ledger_status.py": "sha256:77e1653ca85357ffc238d1fe9595727108c748069d84efbaf70799064bbde38f"
   },
   "reused_evidence": true,
   "reuse_policy": "summarizes_existing_gap_ledgers_and_productization_receipts; does_not_create_authoritative_closure_evidence",
@@ -118,7 +118,7 @@
               "full_load_candidate_count": ">=1",
               "required_load_scale": 1.0
             },
-            "passed": true,
+            "passed": false,
             "blocker": "full_load_gate_not_closed"
           },
           {
@@ -318,6 +318,7 @@
           "material_newton_direct_residual_gate_passed": false,
           "full_load_hip_newton_lane_status": "blocked",
           "full_load_hip_newton_lane_blockers": [
+            "hip_consistency_proof_source_commit_sha_mismatch",
             "hip_consistency_proof_gate_not_passed",
             "hip_consistency_proof_worker_g1_closure_gate_not_ready",
             "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
@@ -32459,17 +32460,19 @@
               "blocking_reasons": [
                 "receipt_not_ready",
                 "residual_jacobian_consistency_not_ready",
-                "rocm_hip_runtime_unavailable",
-                "hip_runtime::dev_kfd_missing",
-                "hip_runtime::dev_dri_missing",
-                "hip_residual_jacobian_consistency_preflight_only",
-                "hip_residual_jacobian_consistency_not_executed",
+                "consistent_residual_jacobian::consistent_residual_jacobian_newton_not_proven",
+                "consistent_residual_jacobian::state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency",
+                "hip_direct_probe::consistent_jacobian_or_globalization_required",
+                "hip_direct_probe::direct_residual_gate_not_closed",
+                "hip_direct_probe::full_load_gate_not_closed",
+                "hip_direct_probe::regularized_fixed_point_residual_must_not_be_used_as_physical_residual",
+                "hip_direct_probe_consistent_residual_jacobian_not_closed",
+                "production_rocm_hip_residual_jvp_worker::consistent_residual_jacobian_newton_gate_not_passed",
                 "residual_gate_not_closed",
                 "production_in_process_rocm_hip_residency_not_claimed",
-                "latest_checkpoint_not_advertised",
-                "claim_boundary_disclaims_closure"
+                "latest_checkpoint_not_advertised"
               ],
-              "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested, but this receipt only records the ROCm/HIP runtime preflight. The HIP-required direct residual Newton proof was not executed, this module's CPU diagnostic assembler was not used, and this receipt does not close G1.",
+              "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested and routed to the HIP-required direct residual Newton proof path. The probe does not use this module's CPU diagnostic assembler. This receipt closes neither full G1 nor release readiness unless the child HIP residual engine contract and consistent residual/Jacobian Newton gate both pass without blockers.",
               "component_only": false,
               "contract_pass": false,
               "controller_start_checkpoint": null,
@@ -32479,7 +32482,7 @@
               "latest_checkpoint_promoted_by_summary": null,
               "latest_checkpoint_retained_by_summary": null,
               "latest_remaining_residual_margin_to_gate_n": null,
-              "load_scale": null,
+              "load_scale": 0.656,
               "missing_controller_replay_artifact_count": 0,
               "missing_controller_replay_artifacts": [],
               "next_solver_step": null,

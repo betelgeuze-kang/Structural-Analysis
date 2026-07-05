@@ -3458,9 +3458,7 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                             "full_load_candidate_count": ">=1",
                             "required_load_scale": 1.0,
                         },
-                        "passed": bool(
-                            g1_full_load_checkpoint_resolution_gate.get("passed")
-                        ),
+                        "passed": bool(g1_full_load_gate_closed),
                         "blocker": "full_load_gate_not_closed",
                     },
                     {
