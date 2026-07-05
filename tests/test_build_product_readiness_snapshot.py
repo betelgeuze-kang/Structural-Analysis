@@ -1967,6 +1967,67 @@ def test_snapshot_separates_assisted_service_from_solver_product_gate(
     assert frontier_context["non_promoting_launch_receipt_count"] == 1
 
 
+def test_snapshot_prefers_gap_ledger_g1_blockers_over_legacy_terminal_gate(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
+        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "full_g1_closure_ready": False,
+        "full_g1_closure_blockers": [
+            "full_load_gate_not_closed",
+            "full_mesh_nonlinear_equilibrium_not_closed",
+            "material_newton_breadth_not_closed",
+            "production_rocm_hip_residency_not_closed",
+        ],
+        "claim_boundary": "Legacy terminal slice; does not close full G1.",
+        "blockers": [],
+    })
+    ledger_path = tmp_path / "commercial_gap_ledger_status.json"
+    ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+    g1_blockers = [
+        "full_mesh_nonlinear_equilibrium_not_closed",
+        "material_newton_breadth_not_closed",
+        "production_rocm_hip_residency_not_closed",
+    ]
+    ledger["status"] = "open"
+    ledger["commercial_solver_gap_ready"] = False
+    ledger["full_gap_ledger_ready"] = False
+    ledger["blockers"] = [f"G1:{item}" for item in g1_blockers]
+    for row in ledger["rows"]:
+        if row["id"] == "G1":
+            row["status"] = "partial"
+            row["closed"] = False
+            row["blockers"] = g1_blockers
+            break
+    _write_json(ledger_path, ledger)
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    g1_component = payload["components"]["g1"]
+    assert (
+        g1_component["top_level_blocker_source"]
+        == "commercial_gap_ledger_status.rows.G1.blockers"
+    )
+    assert "g1::full_load_gate_not_closed" not in payload["blockers"]
+    assert "g1::full_load_gate_not_closed" not in g1_component["top_level_blockers"]
+    assert g1_component["top_level_blockers"] == [
+        "g1::full_mesh_nonlinear_equilibrium_not_closed",
+        "g1::material_newton_breadth_not_closed",
+        "g1::production_rocm_hip_residency_not_closed",
+    ]
+    assert g1_component["blocker_grouping_metadata"]["root_blocker_count"] == 3
+
+
 def test_snapshot_classifies_residual_holdout_as_solver_evidence_gap(
     tmp_path: Path,
 ) -> None:

@@ -1480,6 +1480,13 @@ def _gap_ledger_split_summary(rows: list[Any]) -> dict[str, dict[str, Any]]:
     return summary
 
 
+def _gap_ledger_row_by_id(rows: list[Any], row_id: str) -> dict[str, Any] | None:
+    for row in rows:
+        if isinstance(row, dict) and str(row.get("id", "")) == row_id:
+            return row
+    return None
+
+
 def _gap_ledger_audit_split_summary(row_outcomes: list[Any]) -> dict[str, dict[str, Any]]:
     summary: dict[str, dict[str, Any]] = {}
     for ledger_name in ("commercial_solver", "ai_engine"):
@@ -2303,9 +2310,38 @@ def build_snapshot(
             and "full-load" in g1_claim_boundary.lower()
             and not _as_list(g1.get("blockers"))
         )
-    g1_root_blockers = [
-        f"g1::{item}" for item in _as_list(g1.get("full_g1_closure_blockers"))
-    ]
+    g1_gap_ledger_row = _gap_ledger_row_by_id(gap_ledger_rows, "G1")
+    g1_gap_ledger_blockers = (
+        _as_list(g1_gap_ledger_row.get("blockers"))
+        if g1_gap_ledger_row is not None
+        else []
+    )
+    g1_gap_ledger_status = (
+        str(g1_gap_ledger_row.get("status", "")).lower()
+        if g1_gap_ledger_row is not None
+        else ""
+    )
+    g1_gap_ledger_closed = bool(
+        g1_gap_ledger_row is not None
+        and (g1_gap_ledger_row.get("closed") is True or g1_gap_ledger_status == "closed")
+    )
+    if (
+        g1_gap_ledger_row is not None
+        and "blockers" in g1_gap_ledger_row
+        and (g1_gap_ledger_blockers or not g1_gap_ledger_closed)
+    ):
+        g1_root_blocker_values = g1_gap_ledger_blockers
+        g1_root_blocker_source = "commercial_gap_ledger_status.rows.G1.blockers"
+        g1_root_blockers_authoritative = True
+    elif "full_g1_closure_blockers" in g1:
+        g1_root_blocker_values = _as_list(g1.get("full_g1_closure_blockers"))
+        g1_root_blocker_source = "mgt_g1_direct_residual_terminal_gate_report.full_g1_closure_blockers"
+        g1_root_blockers_authoritative = True
+    else:
+        g1_root_blocker_values = _as_list(g1.get("blockers"))
+        g1_root_blocker_source = "mgt_g1_direct_residual_terminal_gate_report.blockers"
+        g1_root_blockers_authoritative = bool(g1_root_blocker_values)
+    g1_root_blockers = [f"g1::{item}" for item in g1_root_blocker_values]
     g1_suppressed_detail_blockers: list[str] = []
     if not g1_full_mesh_ready:
         g1_suppressed_detail_blockers.append("g1_full_mesh_full_load_not_closed")
@@ -2368,7 +2404,11 @@ def build_snapshot(
         if not lane_blockers:
             g1_suppressed_detail_blockers.append("g1_full_load_lane:not_ready")
     g1_suppressed_detail_blockers = sorted(dict.fromkeys(g1_suppressed_detail_blockers))
-    if not g1_root_blockers and (not g1_full_mesh_ready or not g1_full_load_lane_ready):
+    if (
+        not g1_root_blockers
+        and not g1_root_blockers_authoritative
+        and (not g1_full_mesh_ready or not g1_full_load_lane_ready)
+    ):
         blockers.append("g1::full_load_gate_not_closed")
     g1_cause_summary = _as_dict(g1_cause_narrowing.get("summary"))
     g1_cause_signals = _as_dict(g1_cause_narrowing.get("signals"))
@@ -3312,6 +3352,7 @@ def build_snapshot(
                 "contract_pass": bool(g1.get("contract_pass")),
                 "full_mesh_full_load_ready": g1_full_mesh_ready,
                 "full_g1_closure_ready": bool(g1.get("full_g1_closure_ready")),
+                "top_level_blocker_source": g1_root_blocker_source,
                 "top_level_blockers": g1_root_blockers,
                 "suppressed_detail_blocker_count": len(g1_suppressed_detail_blockers),
                 "suppressed_detail_blockers": g1_suppressed_detail_blockers,
