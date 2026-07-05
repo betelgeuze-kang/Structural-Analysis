@@ -734,15 +734,14 @@
       "blocker_grouping_metadata": {
         "detail_blocker_represented_by_root_group": {
           "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven": "g1::material_newton_breadth_not_closed",
-          "g1_full_load_lane::child_current_tangent_residual_row_component_missing": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::child_current_tangent_residual_row_hip_not_required": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::child_current_tangent_residual_row_hip_residual_refresh_not_proven": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::child_direct_residual_gate_not_proven": "g1::full_mesh_nonlinear_equilibrium_not_closed",
           "g1_full_load_lane::child_direct_residual_newton_ready_not_proven": "g1::full_mesh_nonlinear_equilibrium_not_closed",
-          "g1_full_load_lane::child_fallback_zero_not_proven": "g1::material_newton_breadth_not_closed",
-          "g1_full_load_lane::child_full_load_closure_not_proven": "g1::full_load_gate_not_closed",
-          "g1_full_load_lane::child_global_krylov_component_missing": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::child_global_krylov_hip_not_required": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::child_global_krylov_hip_residual_refresh_not_proven": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::child_global_krylov_not_promoted_to_final_state": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::child_material_newton_breadth_not_proven": "g1::material_newton_breadth_not_closed",
-          "g1_full_load_lane::child_observed_load_scale_below_required_full_load": "g1::full_load_gate_not_closed",
-          "g1_full_load_lane::child_relative_increment_gate_not_proven": "g1::full_mesh_nonlinear_equilibrium_not_closed",
           "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_gate_not_passed": "g1::material_newton_breadth_not_closed",
           "g1_full_load_lane::hip_consistency_proof_has_blockers": "g1::production_rocm_hip_residency_not_closed",
@@ -750,6 +749,7 @@
           "g1_full_load_lane::hip_consistency_proof_residual_jvp_worker_path_not_ready": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed": "g1::material_newton_breadth_not_closed",
           "g1_full_load_lane::hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_worker::direct_probe_not_executed": "g1::production_rocm_hip_residency_not_closed",
@@ -772,30 +772,32 @@
           {
             "active": false,
             "closure_dimension": "cpu_full_load_1_0_residual_increment_gate",
-            "represented_detail_blocker_count": 2,
+            "represented_detail_blocker_count": 0,
             "root_blocker": "g1::full_load_gate_not_closed"
           },
           {
             "active": true,
             "closure_dimension": "cpu_full_mesh_full_building_nonlinear_equilibrium",
-            "represented_detail_blocker_count": 4,
+            "represented_detail_blocker_count": 3,
             "root_blocker": "g1::full_mesh_nonlinear_equilibrium_not_closed"
           },
           {
             "active": true,
             "closure_dimension": "cpu_material_newton_consistent_residual_jacobian",
-            "represented_detail_blocker_count": 6,
+            "represented_detail_blocker_count": 5,
             "root_blocker": "g1::material_newton_breadth_not_closed"
           },
           {
             "active": true,
             "closure_dimension": "gpu_hip_followup_performance_and_residency",
-            "represented_detail_blocker_count": 18,
+            "represented_detail_blocker_count": 22,
             "root_blocker": "g1::production_rocm_hip_residency_not_closed"
           }
         ],
-        "suppressed_detail_blocker_count": 30,
-        "unmatched_detail_blockers": []
+        "suppressed_detail_blocker_count": 31,
+        "unmatched_detail_blockers": [
+          "g1_full_load_lane::child_current_tangent_residual_row_cpu_residual_refresh_used"
+        ]
       },
       "cause_narrowing_claim_boundary": "This receipt narrows the next G1 diagnostic direction from existing F2g/F2h evidence. It does not close G1, promote full-load 1.0, or prove production ROCm/HIP residency.",
       "cause_narrowing_contract_pass": true,
@@ -886,15 +888,15 @@
       "contract_pass": true,
       "detail_blocker_represented_by": {
         "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven": "g1::*",
-        "g1_full_load_lane::child_current_tangent_residual_row_component_missing": "g1::*",
+        "g1_full_load_lane::child_current_tangent_residual_row_cpu_residual_refresh_used": "g1::*",
+        "g1_full_load_lane::child_current_tangent_residual_row_hip_not_required": "g1::*",
+        "g1_full_load_lane::child_current_tangent_residual_row_hip_residual_refresh_not_proven": "g1::*",
         "g1_full_load_lane::child_direct_residual_gate_not_proven": "g1::*",
         "g1_full_load_lane::child_direct_residual_newton_ready_not_proven": "g1::*",
-        "g1_full_load_lane::child_fallback_zero_not_proven": "g1::*",
-        "g1_full_load_lane::child_full_load_closure_not_proven": "g1::*",
-        "g1_full_load_lane::child_global_krylov_component_missing": "g1::*",
+        "g1_full_load_lane::child_global_krylov_hip_not_required": "g1::*",
+        "g1_full_load_lane::child_global_krylov_hip_residual_refresh_not_proven": "g1::*",
+        "g1_full_load_lane::child_global_krylov_not_promoted_to_final_state": "g1::*",
         "g1_full_load_lane::child_material_newton_breadth_not_proven": "g1::*",
-        "g1_full_load_lane::child_observed_load_scale_below_required_full_load": "g1::*",
-        "g1_full_load_lane::child_relative_increment_gate_not_proven": "g1::*",
         "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_gate_not_passed": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_has_blockers": "g1::*",
@@ -902,6 +904,7 @@
         "g1_full_load_lane::hip_consistency_proof_residual_jvp_worker_path_not_ready": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing": "g1::*",
+        "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_worker::direct_probe_not_executed": "g1::*",
@@ -922,34 +925,26 @@
           "child_consistent_residual_jacobian_newton_not_proven",
           "child_direct_residual_gate_not_proven",
           "child_direct_residual_newton_ready_not_proven",
-          "child_fallback_zero_not_proven",
-          "child_full_load_closure_not_proven",
-          "child_material_newton_breadth_not_proven",
-          "child_observed_load_scale_below_required_full_load",
-          "child_relative_increment_gate_not_proven"
+          "child_material_newton_breadth_not_proven"
         ],
         "evidence": {
           "blockers": [
             "child_consistent_residual_jacobian_newton_not_proven",
             "child_direct_residual_gate_not_proven",
             "child_direct_residual_newton_ready_not_proven",
-            "child_fallback_zero_not_proven",
-            "child_full_load_closure_not_proven",
-            "child_material_newton_breadth_not_proven",
-            "child_observed_load_scale_below_required_full_load",
-            "child_relative_increment_gate_not_proven"
+            "child_material_newton_breadth_not_proven"
           ],
           "consistent_residual_jacobian_newton_passed": false,
           "direct_residual_gate_passed": false,
           "direct_residual_newton_ready": false,
-          "fallback_zero_passed": false,
-          "full_load_closure_passed": false,
+          "fallback_zero_passed": true,
+          "full_load_closure_passed": true,
           "full_load_tolerance": 1e-12,
-          "load_scale_passed": false,
+          "load_scale_passed": true,
           "material_newton_breadth_passed": false,
-          "observed_load_scale": null,
+          "observed_load_scale": 1.0,
           "ready": false,
-          "relative_increment_gate_passed": false,
+          "relative_increment_gate_passed": true,
           "required_load_scale": 1.0,
           "schema_version": "g1-child-gate-evidence.v1"
         },
@@ -958,19 +953,23 @@
       "full_load_hip_newton_child_gate_ready": false,
       "full_load_hip_newton_child_hip_residual_refresh": {
         "blockers": [
-          "child_current_tangent_residual_row_component_missing",
-          "child_global_krylov_component_missing",
+          "child_current_tangent_residual_row_cpu_residual_refresh_used",
+          "child_current_tangent_residual_row_hip_not_required",
+          "child_current_tangent_residual_row_hip_residual_refresh_not_proven",
+          "child_global_krylov_hip_not_required",
+          "child_global_krylov_hip_residual_refresh_not_proven",
+          "child_global_krylov_not_promoted_to_final_state",
           "current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready",
           "matrix_free_global_krylov_child_hip_residual_refresh_not_ready"
         ],
         "components": {
           "current_tangent_residual_row_correction": {
-            "accepted_state_refresh_backend": "",
-            "accepted_state_refresh_cpu_used": false,
+            "accepted_state_refresh_backend": "cpu_full_assembly",
+            "accepted_state_refresh_cpu_used": true,
             "accepted_state_refresh_hip_used": false,
             "hip_required": false,
-            "present": false,
-            "promoted_to_final_state": false,
+            "present": true,
+            "promoted_to_final_state": true,
             "ready": false
           },
           "matrix_free_global_krylov": {
@@ -978,7 +977,7 @@
             "accepted_state_refresh_cpu_used": false,
             "accepted_state_refresh_hip_used": false,
             "hip_required": false,
-            "present": false,
+            "present": true,
             "promoted_to_final_state": false,
             "ready": false
           }
@@ -2137,6 +2136,7 @@
           "hip_consistency_proof_residual_jvp_worker_path_not_ready",
           "hip_consistency_proof_runtime::dev_dri_missing",
           "hip_consistency_proof_runtime::dev_kfd_missing",
+          "hip_consistency_proof_source_commit_sha_mismatch",
           "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
           "hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven",
           "hip_consistency_proof_worker::direct_probe_not_executed",
@@ -2149,7 +2149,13 @@
           "hip_consistency_proof_worker::runtime::dev_kfd_missing",
           "hip_consistency_proof_worker_g1_closure_gate_not_ready"
         ],
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "scripts/build_g1_assembly_contract_seed_report.py",
+          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "src/structural_analysis/assembly/__init__.py",
+          "src/structural_analysis/assembly/g1_contract.py",
+          "src/structural_analysis/assembly/material_state.py"
+        ],
         "consistent_residual_jacobian_newton_gate_passed": false,
         "cpu_diagnostic_assembler_used": false,
         "execution_mode": "hip_required_runtime_unavailable_no_cpu_fallback",
@@ -2204,8 +2210,8 @@
           "dev_dri_missing"
         ],
         "source_commit_sha": "49990694c8affff1114aea09d3b1bb6aead62cc0",
-        "source_state_fresh": true,
-        "source_state_kind": "exact",
+        "source_state_fresh": false,
+        "source_state_kind": "g1_hip_paths_changed",
         "status": "partial"
       },
       "full_load_hip_newton_hip_consistency_proof_ready": false,
@@ -2217,18 +2223,18 @@
       "full_load_hip_newton_lane_reused_evidence": false,
       "full_load_hip_newton_lane_status": "blocked",
       "full_mesh_full_load_ready": false,
-      "suppressed_detail_blocker_count": 30,
+      "suppressed_detail_blocker_count": 31,
       "suppressed_detail_blockers": [
         "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven",
-        "g1_full_load_lane::child_current_tangent_residual_row_component_missing",
+        "g1_full_load_lane::child_current_tangent_residual_row_cpu_residual_refresh_used",
+        "g1_full_load_lane::child_current_tangent_residual_row_hip_not_required",
+        "g1_full_load_lane::child_current_tangent_residual_row_hip_residual_refresh_not_proven",
         "g1_full_load_lane::child_direct_residual_gate_not_proven",
         "g1_full_load_lane::child_direct_residual_newton_ready_not_proven",
-        "g1_full_load_lane::child_fallback_zero_not_proven",
-        "g1_full_load_lane::child_full_load_closure_not_proven",
-        "g1_full_load_lane::child_global_krylov_component_missing",
+        "g1_full_load_lane::child_global_krylov_hip_not_required",
+        "g1_full_load_lane::child_global_krylov_hip_residual_refresh_not_proven",
+        "g1_full_load_lane::child_global_krylov_not_promoted_to_final_state",
         "g1_full_load_lane::child_material_newton_breadth_not_proven",
-        "g1_full_load_lane::child_observed_load_scale_below_required_full_load",
-        "g1_full_load_lane::child_relative_increment_gate_not_proven",
         "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready",
         "g1_full_load_lane::hip_consistency_proof_gate_not_passed",
         "g1_full_load_lane::hip_consistency_proof_has_blockers",
@@ -2236,6 +2242,7 @@
         "g1_full_load_lane::hip_consistency_proof_residual_jvp_worker_path_not_ready",
         "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing",
         "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing",
+        "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch",
         "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
         "g1_full_load_lane::hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven",
         "g1_full_load_lane::hip_consistency_proof_worker::direct_probe_not_executed",
@@ -3161,7 +3168,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-05T20:58:20.825771+00:00",
+  "generated_at": "2026-07-05T21:12:48.577848+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
@@ -3170,14 +3177,14 @@
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:478a9c312d6163e1fd1bd823a4626dba56182b1129eebeaa245927df98d08fa6",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:6d19efb2e241e2980d66af7428132ec0a9eb16ca82ef7047cf43133687a7303f",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:d0b4549a80362ff1280665e78ea3888354afdcdfb3432dad59f055f52b760f6e",
-    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:a882fdc28b53aec9b385a1261a78a99a4544f655155db6d5fdb5ab2f0ef2c98b",
+    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:e09d2696d9e1631af036cd9bf75506484ab50d472b202bf32c8efc93f5dae6dd",
     "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:bba88f13ad13f63e3e2c132e66c50fa8a2d3f05900b5f593adc2c5428271b83a",
     "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:027fa4b250beb01a6237f96faedb6fc6d33ac82604d0e8b2bfd978b7d9e03af4",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:d4dd52e0abf0d986eaf5bbb8b1103cd29c1d4ae1284e6368b509eec1d95baafd",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:fa3806bcf6e163bf42e5263a3deee30886c9972be7e8f53c1d5c3982ae8da89c",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:5681fe6c6a0f259605d8d3d9c97ff37564c76a02a1d8fb24873edc32e53b4442",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:382956916ff532ef84df6648062a284d6899e7e62b48b9b8386142e7d4411235",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:29e1f1cc76c7fc886caf785bbcd8c2dd633481dada26ce7e27f89556b9409afa",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:ede5f9d6d0e2f8de5935172026db258b6cfec271da5c85b742ba018084060253",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:dec51cbc2801d0714fa04b126f285f3b057f46561abd5243f17617a83c9d770c",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:93e3c17ffa7073d354e213aeb562c8bfe8515034d6904d102de683885d0103d1",
     "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:04cf7cfc75aeb44778710d7487aee31879126364eaf2d4f3ec4d905a7f979a9a",
@@ -3528,7 +3535,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "874189c6936c3d0ed58571026ed5d93272a2a768",
+  "source_commit_sha": "85934ad0293ec803ec8420c07d8eeb66963e1d50",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3626,6 +3633,7 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -3645,6 +3653,7 @@
       {
         "artifact": "gap_closure_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -3664,25 +3673,21 @@
       {
         "artifact": "commercial_gap_ledger_status",
         "changed_paths_since_source_commit": [
-          "scripts/build_g1_assembly_contract_seed_report.py",
-          "scripts/build_phase2_material_mesh_newton_artifacts.py",
-          "scripts/build_phase2_material_newton_breadth_artifacts.py",
-          "src/structural_analysis/assembly/__init__.py",
-          "src/structural_analysis/assembly/g1_contract.py",
-          "src/structural_analysis/assembly/material_state.py"
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz"
         ],
-        "generated_at": "2026-07-05T17:42:43.663619+00:00",
+        "generated_at": "2026-07-05T21:11:34.464111+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": false,
-        "source_commit_sha": "a973f6f9bc2bc4c01d8793cc32794d25fb7bda51",
+        "source_commit_sha": "3008c04eab0f648eb40fbfeb35ba7fd0d382feb2",
         "source_state_fresh": false,
         "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "gap_ledger_evidence_audit",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -3702,6 +3707,7 @@
       {
         "artifact": "phase1_core_api_contract",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -3721,6 +3727,7 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -3740,6 +3747,7 @@
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -3759,6 +3767,7 @@
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -3778,6 +3787,7 @@
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -3797,25 +3807,21 @@
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [
-          "scripts/build_g1_assembly_contract_seed_report.py",
-          "scripts/build_phase2_material_mesh_newton_artifacts.py",
-          "scripts/build_phase2_material_newton_breadth_artifacts.py",
-          "src/structural_analysis/assembly/__init__.py",
-          "src/structural_analysis/assembly/g1_contract.py",
-          "src/structural_analysis/assembly/material_state.py"
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz"
         ],
-        "generated_at": "2026-07-05T19:15:15.205679+00:00",
+        "generated_at": "2026-07-05T21:11:24.191299+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "49990694c8affff1114aea09d3b1bb6aead62cc0",
+        "source_commit_sha": "3008c04eab0f648eb40fbfeb35ba7fd0d382feb2",
         "source_state_fresh": false,
         "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "g1_f2g_f2h_cause_narrowing_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -3835,6 +3841,7 @@
       {
         "artifact": "customer_shadow_evidence_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -3854,6 +3861,7 @@
       {
         "artifact": "workstation_delivery_readiness",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -3873,6 +3881,7 @@
       {
         "artifact": "independent_product_readiness",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -3892,6 +3901,7 @@
       {
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -3911,6 +3921,7 @@
       {
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -3930,6 +3941,7 @@
       {
         "artifact": "license_status_closure_report",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -3949,6 +3961,7 @@
       {
         "artifact": "paid_pilot_scope_guard_report",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -3968,6 +3981,7 @@
       {
         "artifact": "external_benchmark_submission_readiness",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -3987,6 +4001,7 @@
       {
         "artifact": "external_benchmark_submission_updates",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -4006,6 +4021,7 @@
       {
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -4025,6 +4041,7 @@
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -4044,6 +4061,7 @@
       {
         "artifact": "structural_scope_owner_decision_application_plan",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -4063,6 +4081,7 @@
       {
         "artifact": "structural_scope_release_surface_owner_handoff_check",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -4082,6 +4101,7 @@
       {
         "artifact": "developer_preview_final_gate_owner_packet",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe_final_checkpoint.npz",
           "scripts/build_g1_assembly_contract_seed_report.py",
           "scripts/build_phase2_material_mesh_newton_artifacts.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
@@ -4120,15 +4140,7 @@
     },
     "worktree": {
       "dirty": false,
-      "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json",
-        "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
-        "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.md",
-        "implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_summary.json",
-        "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_state_updated_seeds.json",
-        "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json",
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
-      ],
+      "dirty_paths": [],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
         "candidate_release_control_commit_set_count": 0,
@@ -4151,15 +4163,7 @@
         "status": "ready",
         "track_or_add_required_path_count": 0
       },
-      "status_rows": [
-        " M implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json",
-        " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
-        " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.md",
-        " M implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_summary.json",
-        " M implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_state_updated_seeds.json",
-        " M implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json",
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
-      ]
+      "status_rows": []
     }
   },
   "status": "stale_or_inconsistent",

@@ -1,7 +1,7 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-07-05T17:42:43.663619+00:00",
-  "source_commit_sha": "a973f6f9bc2bc4c01d8793cc32794d25fb7bda51",
+  "generated_at": "2026-07-05T21:11:34.464111+00:00",
+  "source_commit_sha": "3008c04eab0f648eb40fbfeb35ba7fd0d382feb2",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "input_checksums": {
     "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b8f1b140751f430e4c7dc594f3440320433be9b3e3f055f3e7fad62a2999b8af",
@@ -197,7 +197,7 @@
               "full_load_candidate_count": 1,
               "highest_observed_load_scale": 1.0,
               "child_full_load_closure_passed": true,
-              "child_relative_increment_gate_passed": false
+              "child_relative_increment_gate_passed": true
             },
             "non_closing_reasons": []
           },
@@ -324,6 +324,7 @@
           "material_newton_direct_residual_gate_passed": false,
           "full_load_hip_newton_lane_status": "blocked",
           "full_load_hip_newton_lane_blockers": [
+            "hip_consistency_proof_source_commit_sha_mismatch",
             "hip_consistency_proof_production_hip_path_not_proven",
             "hip_consistency_proof_gate_not_passed",
             "hip_consistency_proof_residual_jvp_worker_path_not_ready",
