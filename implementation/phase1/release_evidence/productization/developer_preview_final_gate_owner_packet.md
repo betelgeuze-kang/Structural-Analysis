@@ -20,7 +20,7 @@
 
 | Gate | Owner | Blockers | Closure Decision |
 |---|---|---:|---|
-| `selected_medium_models_pass_or_approved_review` | `benchmark_validation_owner` | 7 | `five_PASS_or_explicit_APPROVED_REVIEW_rows` |
+| `selected_medium_models_pass_or_approved_review` | `benchmark_validation_owner` | 6 | `five_PASS_or_explicit_APPROVED_REVIEW_rows` |
 | `linux_windows_reproducibility_confirmed` | `release_reproducibility_owner` | 1 | `direct_windows_replay_receipt_passes` |
 | `new_user_core_workflow_observation_passed` | `ux_research_owner` | 17 | `accepted_human_new_user_observation` |
 
@@ -71,7 +71,6 @@
 ## Gate Unblock Plan
 
 ### `selected_medium_models_pass_or_approved_review`
-- `select_additional_medium_model_cases` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
 - `complete_product_legal_license_review` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
 - `attach_medium_reference_outputs` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
 - `record_medium_canonical_normalization` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
@@ -95,7 +94,7 @@
 ### `selected_medium_models_pass_or_approved_review`
 | Artifact | Status | Pass | Plan Rows | Blockers |
 |---|---|---:|---:|---:|
-| `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json` | `blocked` | `False` | 7 | 5 |
+| `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json` | `blocked` | `False` | 6 | 5 |
 
 ### `linux_windows_reproducibility_confirmed`
 | Artifact | Status | Pass | Plan Rows | Blockers |

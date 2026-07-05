@@ -18,10 +18,10 @@
   "evidence_refresh_command_count": 12,
   "final_gate_count": 9,
   "final_gate_pass_count": 6,
-  "generated_at": "2026-07-05T17:49:41.723166+00:00",
+  "generated_at": "2026-07-05T20:17:36.583811+00:00",
   "input_checksums": {
     "docs/developer_preview_final_gate_action_register.md": "sha256:25abda7d736edfe0f37503a7f00a6125b37f7c448be98b5cde8dbe8949a460cb",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:4736e622dbbcb06f71db79a48e65a908b161077433afd6359daf6210ee517885",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:868f86575d94fa3ab3f0421612ec3622f48611a9433595d9bcfe911e1faef7f7",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:6ff8dceb28c2ea5ee700ecf5d6065e099c326c1da50bf13775979a622450c0c7",
     "scripts/build_developer_preview_final_gate_owner_packet.py": "sha256:199c0ec9a351a377203728c9651ffb2a94fd198448371f5772146a89f42bd821"
   },
@@ -203,7 +203,7 @@
   "owner_packets": [
     {
       "blocker_grouping_metadata": {
-        "blocker_count": 7,
+        "blocker_count": 6,
         "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
         "groups": {
           "large_quantity_shortfall": {
@@ -219,10 +219,9 @@
             "scope": "large_model_execution_lane"
           },
           "medium_quantity_shortfall": {
-            "blocker_count": 2,
+            "blocker_count": 1,
             "blockers": [
-              "medium_model_pass_or_review_below_required:0/5",
-              "medium_structural_models_current_below_required:3/5"
+              "medium_model_pass_or_review_below_required:0/5"
             ],
             "description": "Medium-model count and PASS/REVIEW quantity shortfalls.",
             "scope": "medium_model_quantity_gate"
@@ -264,9 +263,8 @@
       ],
       "closure_decision_required": "five_PASS_or_explicit_APPROVED_REVIEW_rows",
       "contract_pass": false,
-      "current_blocker_count": 7,
+      "current_blocker_count": 6,
       "current_blockers": [
-        "medium_structural_models_current_below_required:3/5",
         "license_review_pending",
         "medium_model_pass_or_review_missing",
         "normalization_receipts_missing",
@@ -302,30 +300,6 @@
       "owner": "benchmark_validation_owner",
       "owner_action": "Attach product/legal source approval, five selected medium structural model cases, reference outputs or approved REVIEW baselines, normalization receipts, and per-case scorecard receipts.",
       "owner_unblock_plan": [
-        {
-          "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
-          "clears_blockers": [
-            "medium_structural_models_current_below_required:3/5"
-          ],
-          "evidence_artifacts": [
-            "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
-            "operator-attached source/license/reference/normalization rows for each added case"
-          ],
-          "minimum_evidence": [
-            "five authoritative medium structural model cases selected",
-            "each selected case has stable source id and checksum",
-            "case selection remains parser-only until reference, normalization, scorecard, and review evidence pass"
-          ],
-          "owner": "benchmark_operator",
-          "remaining_case_count": 2,
-          "slot_id": "select_additional_medium_model_cases",
-          "source_artifact": "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
-          "validation_commands": [
-            "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
-            "python3 scripts/build_phase6_benchmark_scale_status.py --check",
-            "python3 scripts/build_developer_preview_rc_status.py --check"
-          ]
-        },
         {
           "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
           "clears_blockers": [
@@ -451,9 +425,8 @@
           ]
         }
       ],
-      "owner_unblock_plan_count": 7,
+      "owner_unblock_plan_count": 6,
       "owner_unblock_slot_ids": [
-        "select_additional_medium_model_cases",
         "complete_product_legal_license_review",
         "attach_medium_reference_outputs",
         "record_medium_canonical_normalization",
@@ -552,29 +525,6 @@
           },
           "contract_pass": false,
           "gate_unblock_plan": [
-            {
-              "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
-              "clears_blockers": [
-                "medium_structural_models_current_below_required:3/5"
-              ],
-              "evidence_artifacts": [
-                "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
-                "operator-attached source/license/reference/normalization rows for each added case"
-              ],
-              "minimum_evidence": [
-                "five authoritative medium structural model cases selected",
-                "each selected case has stable source id and checksum",
-                "case selection remains parser-only until reference, normalization, scorecard, and review evidence pass"
-              ],
-              "owner": "benchmark_operator",
-              "remaining_case_count": 2,
-              "slot_id": "select_additional_medium_model_cases",
-              "validation_commands": [
-                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
-                "python3 scripts/build_phase6_benchmark_scale_status.py --check",
-                "python3 scripts/build_developer_preview_rc_status.py --check"
-              ]
-            },
             {
               "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
               "clears_blockers": [
@@ -694,7 +644,7 @@
               ]
             }
           ],
-          "gate_unblock_plan_count": 7,
+          "gate_unblock_plan_count": 6,
           "missing_evidence_breakdown": [
             {
               "blocker": "license_review_pending",
@@ -766,28 +716,8 @@
             }
           ],
           "missing_evidence_count": 5,
-          "operator_next_action_count": 6,
+          "operator_next_action_count": 5,
           "operator_next_actions": [
-            {
-              "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
-              "clears_blockers": [
-                "medium_structural_models_current_below_required:3/5"
-              ],
-              "current_candidate_case_count": 3,
-              "evidence_artifacts": [
-                "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
-                "operator-attached source/license/reference/normalization rows for each added case"
-              ],
-              "id": "select_additional_medium_model_cases",
-              "owner": "benchmark_operator",
-              "remaining_case_count": 2,
-              "required_candidate_case_count": 5,
-              "validation_commands": [
-                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
-                "python3 scripts/build_phase6_benchmark_scale_status.py --check",
-                "python3 scripts/build_developer_preview_rc_status.py --check"
-              ]
-            },
             {
               "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
               "clears_blockers": [
@@ -871,28 +801,8 @@
             }
           ],
           "present": true,
-          "recommended_next_action_count": 6,
+          "recommended_next_action_count": 5,
           "recommended_next_actions": [
-            {
-              "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
-              "clears_blockers": [
-                "medium_structural_models_current_below_required:3/5"
-              ],
-              "current_candidate_case_count": 3,
-              "evidence_artifacts": [
-                "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
-                "operator-attached source/license/reference/normalization rows for each added case"
-              ],
-              "id": "select_additional_medium_model_cases",
-              "owner": "benchmark_operator",
-              "remaining_case_count": 2,
-              "required_candidate_case_count": 5,
-              "validation_commands": [
-                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
-                "python3 scripts/build_phase6_benchmark_scale_status.py --check",
-                "python3 scripts/build_developer_preview_rc_status.py --check"
-              ]
-            },
             {
               "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
               "clears_blockers": [
@@ -1821,7 +1731,7 @@
     }
   ],
   "owner_review_required": true,
-  "owner_unblock_plan_count": 14,
+  "owner_unblock_plan_count": 13,
   "ready_gate_items": [
     "analytic_component_benchmark_all_pass",
     "large_models_crash_oom_free",
@@ -1835,7 +1745,7 @@
   "reuse_policy": "developer_preview_final_gate_owner_packet_from_rc_status",
   "reused_evidence": false,
   "schema_version": "developer-preview-final-gate-owner-packet.v1",
-  "source_commit_sha": "5ca12d4abfc26eac90e60e5811889a3c52df699e",
+  "source_commit_sha": "a1193cdbe14185975efc3a4a3bab7f4e90be1f98",
   "status": "ready_for_owner_review",
   "summary_line": "Developer Preview final gate owner packet: READY_FOR_OWNER_REVIEW | blocked_gates=3/9 | handoff_rows=3"
 }
