@@ -11,7 +11,7 @@
 - `true_newton_full_load_gate`: `False`
 - `true_newton_full_load_final_residual_n`: `716.2398790963002`
 - `true_newton_checkpoint_candidate_written`: `True`
-- `true_newton_checkpoint_candidate_residual_n`: `655.1039650392886`
+- `true_newton_checkpoint_candidate_residual_n`: `0.43348967208192946`
 - `true_newton_from_active_set_final_residual_n`: `0.42740724991695345`
 - `true_newton_from_active_set_stop_reason`: `line_search_no_descent`
 - `true_newton_from_active_set_max_jvp_gap_relative_inf`: `4.088178091005261`
@@ -93,7 +93,7 @@
 - `status`: `candidate_created`
 - `checkpoint_written`: `True`
 - `checkpoint_path`: `implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz`
-- `checkpoint_direct_residual_inf_n`: `655.1039650392886`
+- `checkpoint_direct_residual_inf_n`: `0.43348967208192946`
 
 ## True-Newton From Active-Set Frontier
 

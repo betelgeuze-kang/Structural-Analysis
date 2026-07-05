@@ -32,7 +32,7 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-05T11:07:27.433323+00:00",
+  "generated_at": "2026-07-05T11:27:24.913500+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:2cc4b6349f681fa058d246ca588abd32fd6a04bf201830efc545e01971f5c494",
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:4e292e214108da681bd4e02425a91626cfdf1f55ff04a08e989d14e87a9f7812",
@@ -2234,7 +2234,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "b870aba742b105f0afa0408ab3e37e02f2530433",
+  "source_commit_sha": "40a003a581cf8b8db8f69bf365acd02188c16756",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 14,

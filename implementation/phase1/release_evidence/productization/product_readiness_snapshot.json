@@ -141,7 +141,7 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 36,
+      "blocker_count": 39,
       "blockers": [
         "ci_streak::nightly::github_actions_job_start_blocked",
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -158,6 +158,7 @@
         "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
         "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
         "stale_or_inconsistent:source_commit_mismatch:developer_preview_final_gate_owner_packet",
+        "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
         "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
         "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
         "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
@@ -170,9 +171,11 @@
         "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
         "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
         "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
+        "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
+        "stale_or_inconsistent:source_commit_mismatch:structural_scope_release_surface_owner_handoff_check",
         "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
         "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness",
         "stale_or_inconsistent:worktree_dirty",
@@ -189,7 +192,7 @@
       ]
     }
   },
-  "blocker_count": 66,
+  "blocker_count": 69,
   "blockers": [
     "ci_streak::nightly::github_actions_job_start_blocked",
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -236,6 +239,7 @@
     "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
     "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
     "stale_or_inconsistent:source_commit_mismatch:developer_preview_final_gate_owner_packet",
+    "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
     "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
     "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
     "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
@@ -248,9 +252,11 @@
     "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
     "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
     "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
+    "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
     "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
     "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
     "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
+    "stale_or_inconsistent:source_commit_mismatch:structural_scope_release_surface_owner_handoff_check",
     "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
     "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness",
     "stale_or_inconsistent:worktree_dirty",
@@ -2099,7 +2105,10 @@
           "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
           "hip_consistency_proof_worker_g1_closure_gate_not_ready"
         ],
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz"
+        ],
         "consistent_residual_jacobian_newton_gate_passed": false,
         "cpu_diagnostic_assembler_used": false,
         "execution_mode": "hip_required_direct_probe_no_cpu_fallback",
@@ -2136,7 +2145,7 @@
         "runtime_blockers": [],
         "source_commit_sha": "b870aba742b105f0afa0408ab3e37e02f2530433",
         "source_state_fresh": true,
-        "source_state_kind": "exact",
+        "source_state_kind": "non_g1_hip_paths_changed",
         "status": "partial"
       },
       "full_load_hip_newton_hip_consistency_proof_ready": false,
@@ -2705,14 +2714,14 @@
       "cleanup_plan_status": "ready",
       "cleanup_plan_track_or_add_required_path_count": 0,
       "codex_commit_or_push_performed": false,
-      "dirty_path_count": 2,
+      "dirty_path_count": 5,
       "human_git_action_required": false,
       "human_handoff_next_action": "rerun_git_clean_clone_reproduction",
       "human_handoff_push_or_release_command_included": false,
       "human_handoff_status": "ready",
       "human_handoff_suggested_command_count": 3,
       "local_worktree_dirty": true,
-      "non_receipt_dirty_path_count": 2,
+      "non_receipt_dirty_path_count": 5,
       "remote_github_sync_blocker_count": 4,
       "remote_github_sync_blockers": [
         "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
@@ -3079,23 +3088,23 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-05T11:07:28.010910+00:00",
+  "generated_at": "2026-07-05T11:27:25.057132+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
-    "README.md": "sha256:bf0bd08cdd15c7f2ba51c281fd4b3db05a1d5b5a1893f3b4b0d03e017580fe05",
-    "docs/commercialization-gap-current-state.md": "sha256:ccee1fae6cbc5abaf4f66f27ed2743b17788a06635d546d818a958eb5500a24a",
+    "README.md": "sha256:51e5428e9cb79779795154240af5c6cd601d9f59a763be3747573eaec39f8fdf",
+    "docs/commercialization-gap-current-state.md": "sha256:12b147fcd74cbdcb39ffce344dda180b51fc6d4ecd3490fced3c9ce57a0058c4",
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:c4a21ef31b6606231a9622652c5e94e57de6f7e0572f7e42afdfa2addd6d314a",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:d2fdac0bedd30f70c70bf93c4485c5414a43eac50fd5c847b60cb4c274eb548d",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:f3276b89e0984fe83d84fa1e9eae05fed6d9a5eac56c8b21fd7ee54702ea3667",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:ed32dcfc42e783e07320ea30a9e3e6417cb295df174b5625d3eaff344e6d4865",
     "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:b4d7fb16bd51b75de337797bbf0651b1801e895f0f651062aeded0e4ad546531",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:df4ba451902abd7eee1340377472af81b7467fa171a71d37af3cce3938cfcce2",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:f47063427682e3b74b77ea679ac0709da73b0a68728dcf8548beb5ae3d0b9af8",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:8e7f8c0ce691c7d84eed044438b864e9f9c063ce2e9692b0d6183c7d97184105",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:3bf644bffcecb5c7767b7fa2b6793ca0cf419f659748e09c419585deafdf0c2b",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:b83383261c90420ed89cd42c98383887404da18514324fe28d4d4a7c867da3b2",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:8cdd4232a99e080753e1b651c0f122466a6fd6109d3e1fd5602a982c58eb9bbb",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:77f3f517e096efb64215d42472053a94e4f9dd8836f1ca2cfe9090c158dc3c5d",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:597823a8f63a3f7c1c8da5b76b905aeea2a1f72d142117ea99a7283ea4fbc704",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:f931be82e586bf9cc3461410f9eb128df6df109c3912b3052459c1b2f1c9a93c",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:a33733e0cdba8a4ca84fa88825e1339af11bda21d8b35ac66787f91669918002",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:40b1b46562249340f70f9c1aeb2364b5efbefd0a0b348b781b1417e444ec0e5e",
     "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:499e7fdb4a0633071dbbab0245198daec1756f1fe29f04a1c1dedcabbe4393a5",
@@ -3105,7 +3114,7 @@
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:66d6027aa5089c91489ae966693e938254fe8fca247749d6303bfece8a3552a0",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:01911ef80b1cd08db6b03d5570ebb919d12287be47b550129ecf1a0b39b71b6a",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:e1623c1ce17c24ecd25719fdf7850e753306bc22df960e03be96f1d510216f1b",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d0fcac5729e8e3b6d18c00d18830cdfc5991dcec19864c2bb1a597a4bd0540fd",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:62ba20136a033513787d81c321120855fc0b801ac9efe672e1cd8a36253f4146",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:71aa6dac4c27bce1193bb09417e16abe08ea80240bbe1b8eedff3ebdd7222dec",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:2dd335461534767886bc08ce07d463d36e2617cab30e8306d9da5e0e51e8aa3b",
@@ -3400,7 +3409,7 @@
     },
     "release freshness/sync": {
       "blocked": true,
-      "blocker_count": 25,
+      "blocker_count": 28,
       "blockers": [
         "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
         "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
@@ -3409,6 +3418,7 @@
         "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
         "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
         "stale_or_inconsistent:source_commit_mismatch:developer_preview_final_gate_owner_packet",
+        "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
         "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
         "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
         "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
@@ -3421,9 +3431,11 @@
         "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
         "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
         "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
+        "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
+        "stale_or_inconsistent:source_commit_mismatch:structural_scope_release_surface_owner_handoff_check",
         "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
         "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness",
         "stale_or_inconsistent:worktree_dirty"
@@ -3443,7 +3455,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "b870aba742b105f0afa0408ab3e37e02f2530433",
+  "source_commit_sha": "40a003a581cf8b8db8f69bf365acd02188c16756",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3540,20 +3552,25 @@
     "metadata_rows": [
       {
         "artifact": "pm_release_gate_report",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz"
+        ],
         "generated_at": "2026-07-05T11:07:21.185525+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "b870aba742b105f0afa0408ab3e37e02f2530433",
-        "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "gap_closure_status",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3574,6 +3591,8 @@
         "artifact": "commercial_gap_ledger_status",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3594,6 +3613,8 @@
         "artifact": "gap_ledger_evidence_audit",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3614,6 +3635,8 @@
         "artifact": "phase1_core_api_contract",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3632,25 +3655,28 @@
       },
       {
         "artifact": "developer_preview_readiness",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz"
+        ],
         "generated_at": "2026-07-05T11:07:21.010602+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "b870aba742b105f0afa0408ab3e37e02f2530433",
-        "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-05T11:07:21.073691+00:00",
+        "generated_at": "2026-07-05T11:27:24.910091+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "b870aba742b105f0afa0408ab3e37e02f2530433",
+        "source_commit_sha": "40a003a581cf8b8db8f69bf365acd02188c16756",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -3658,6 +3684,8 @@
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3678,6 +3706,8 @@
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3697,12 +3727,12 @@
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-05T11:07:19.850198+00:00",
+        "generated_at": "2026-07-05T11:27:16.405916+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "b870aba742b105f0afa0408ab3e37e02f2530433",
+        "source_commit_sha": "40a003a581cf8b8db8f69bf365acd02188c16756",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -3710,6 +3740,8 @@
         "artifact": "g1_f2g_f2h_cause_narrowing_status",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3730,6 +3762,8 @@
         "artifact": "customer_shadow_evidence_status",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3750,6 +3784,8 @@
         "artifact": "workstation_delivery_readiness",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3770,6 +3806,8 @@
         "artifact": "independent_product_readiness",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3790,6 +3828,8 @@
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3810,6 +3850,8 @@
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3830,6 +3872,8 @@
         "artifact": "license_status_closure_report",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3850,6 +3894,8 @@
         "artifact": "paid_pilot_scope_guard_report",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3870,6 +3916,8 @@
         "artifact": "external_benchmark_submission_readiness",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3890,6 +3938,8 @@
         "artifact": "external_benchmark_submission_updates",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3910,6 +3960,8 @@
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3930,6 +3982,8 @@
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3950,6 +4004,8 @@
         "artifact": "structural_scope_owner_decision_application_plan",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -3968,20 +4024,25 @@
       },
       {
         "artifact": "structural_scope_release_surface_owner_handoff_check",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz"
+        ],
         "generated_at": "2026-07-05T11:07:27.746010+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "b870aba742b105f0afa0408ab3e37e02f2530433",
-        "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "developer_preview_final_gate_owner_packet",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child2_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
+          "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup2_candidate.npz",
           "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_residual_followup3_candidate.npz",
@@ -4021,24 +4082,28 @@
     "worktree": {
       "dirty": true,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-        "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
-        "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
         "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
+        "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.md",
         "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
-        "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_release_surface_owner_handoff_check.json",
-        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
-        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz"
+        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json",
+        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.md",
+        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_child4_breakdown_probe.json",
+        "implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_candidate.npz",
+        "implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_continuation_candidate.npz",
+        "implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_continuation_probe.json",
+        "implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_mu_0p001_candidate.npz",
+        "implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_mu_0p001_probe.json",
+        "implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_mu_0p01_candidate.npz",
+        "implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_mu_0p01_probe.json",
+        "implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_probe.json"
       ],
       "non_receipt_dirty_paths": [
-        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
-        "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz"
+        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+        "implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_candidate.npz",
+        "implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_continuation_candidate.npz",
+        "implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_mu_0p001_candidate.npz",
+        "implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_mu_0p01_candidate.npz"
       ],
       "phase3_release_control_cleanup_plan": {
         "candidate_release_control_commit_set_count": 0,
@@ -4062,20 +4127,21 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-        " M implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
-        " M implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
         " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
+        " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.md",
         " M implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
-        " M implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_release_surface_owner_handoff_check.json",
-        "?? implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child3_candidate.npz",
-        "?? implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz"
+        " M implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+        " M implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json",
+        " M implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.md",
+        "?? implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_child4_breakdown_probe.json",
+        "?? implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_candidate.npz",
+        "?? implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_continuation_candidate.npz",
+        "?? implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_continuation_probe.json",
+        "?? implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_mu_0p001_candidate.npz",
+        "?? implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_mu_0p001_probe.json",
+        "?? implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_mu_0p01_candidate.npz",
+        "?? implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_mu_0p01_probe.json",
+        "?? implementation/phase1/release_evidence/productization/g1_true_newton_from_child4_probe.json"
       ]
     }
   },
