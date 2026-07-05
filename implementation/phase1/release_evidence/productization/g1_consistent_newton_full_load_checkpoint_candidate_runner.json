@@ -786,6 +786,29 @@
     "production_rocm_hip_worker_g1_closure_gate_not_ready"
   ],
   "contract_pass": false,
+  "cpu_live_g1_assembly_contract_probe": {
+    "assembly_result_schema": "g1-assembly-result.v1",
+    "blockers": [],
+    "claim_boundary": "CPU diagnostic full-load live AssemblyResult contract evidence only. This does not satisfy the HIP-required live G1 assembly contract, production ROCm/HIP residual/JVP residency, residual convergence, or material Newton breadth closure gates.",
+    "contract_pass": true,
+    "cpu_diagnostic_assembler_used": true,
+    "direct_residual_gate_passed": false,
+    "direct_residual_newton_ready": false,
+    "fallback_zero_passed": true,
+    "free_dof_count": 58998,
+    "load_scale": 1.0,
+    "material_newton_breadth_passed": false,
+    "path": "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe.json",
+    "present": true,
+    "promotes_g1_closure": false,
+    "relative_increment_gate_passed": false,
+    "residual_formula": "F_internal_minus_F_external",
+    "residual_inf_n": 1384.2531989367426,
+    "residual_source": "physical_direct_residual",
+    "source_commit_sha": "68bbfcb50a1dced53de55080a1c898cc7ae77fd5",
+    "status": "partial",
+    "tangent_definition": "dR_du_consistent"
+  },
   "current_frontier_operator_mismatch_audit": {
     "audit_complete": true,
     "blockers_remaining": [
@@ -942,7 +965,7 @@
     "residual_inf_n": 0.42740724991695345,
     "status": "ready"
   },
-  "generated_at": "2026-07-05T18:34:50.847606+00:00",
+  "generated_at": "2026-07-05T18:48:42.469278+00:00",
   "global_tangent_scaled_sweep": {
     "base_residual_inf_n": 0.4278304040181992,
     "best_alpha": 0.00390625,
@@ -1354,11 +1377,12 @@
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_residual_gradient_tiny_sweep_probe.json": "sha256:e106b463733e101d2840d0dbed7b2f90bd7cd5bc8c207055b416f481fe231a43",
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_shell_diag_sweep_probe.json": "sha256:3fb896191af710575f7c4a7198de670b974250b26c3e6a93682ec033677f5ac6",
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_shell_jvp_probe.json": "sha256:1f50ad798a79bccf5a36b3f3fe4306ea17ab4305eca998703f41ae849b88da5e",
-    "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json": "sha256:b8f03e5070952e48378a141738a1b93b9e2ca5597128c3f17577aa1450781838",
+    "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json": "sha256:ceac792fd1804539c05a51b3c8dd3239682b1d5d97b525c38120a7ce20b26d44",
     "implementation/phase1/release_evidence/productization/g1_current_frontier_operator_mismatch_audit.json": "sha256:0868801f649300a959a5d8fecafc0de5243e9961e44aa182c41ce16110380c54",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:382956916ff532ef84df6648062a284d6899e7e62b48b9b8386142e7d4411235",
     "implementation/phase1/release_evidence/productization/g1_frame_tangent_fd_epsilon_sweep_probe.json": "sha256:81c2ad32a078db886d09c6637cd7d1369719d2ed6c8f5fac88ae5ac410c4291d",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:44c201c2437c6549593c350ecbecafc1dbdcca0025092cafa62e89f28b128e97",
+    "implementation/phase1/release_evidence/productization/g1_full_load_cpu_live_assembly_contract_probe.json": "sha256:d5fc8aaf3078f28c07832256e9345360a2490ea3f7f46a5103c2565877243d75",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:a17a741fb556d8bad025d3cf401a21416158b2ddb3864c2306e0060228a05231",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:42f77c9c6856a124859510d049d0419cf5fa41a7d71e8f15f2f8c883f7301c73",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.json": "sha256:e6582053c0d7dc2c99c3737f0c7ffa94579855a5520cdb416efc2abd01aa3ee9",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe.json": "sha256:83a0e92b346a14a6f8833bb39b572437f405fdafe62e631d55da9d7c7c3fa4da",
@@ -1390,7 +1414,7 @@
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step16_scaled_global_krylov_direct_probe.json": "sha256:e7eb74f06319595eb5f99cc22decd68976819a0020317713335f9b659cd0a860",
     "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_state_updated_seeds.json": "sha256:871d93734eafec214f912f96d2cd749aca0f32918ea38d6bcec7a0cd7a76aa42",
     "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json": "sha256:fa8e8d753831a5eba30a207777ce82294cff8e94f7bf6a595cc6c077f2141735",
-    "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:e831158623818c022eafa7af76be33bbb368132b1879e193709af57df91077c5"
+    "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:20eff69be853167ad2e140a4cd498443950c2116e98999b9187647285d578ebd"
   },
   "live_g1_assembly_contract": {
     "assembly_result_schema": "",
@@ -2095,7 +2119,7 @@
     "row_count": 8,
     "status": "ready"
   },
-  "source_commit_sha": "7c8a44e7bc8377a919c40539cece07634c8602cf",
+  "source_commit_sha": "68bbfcb50a1dced53de55080a1c898cc7ae77fd5",
   "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe": {
     "assembled_tangent_parity_max_absolute_error": 0.006011962890625,
     "assembled_tangent_parity_max_relative_error": 2.683381287585585e-15,
@@ -2727,6 +2751,9 @@
     "contract_blocker_count": 2,
     "contract_pass": false,
     "contract_status": "blocked_runner_contract",
+    "cpu_live_g1_assembly_contract_passed": true,
+    "cpu_live_g1_assembly_contract_present": true,
+    "cpu_live_g1_assembly_contract_residual_inf_n": 1384.2531989367426,
     "current_frontier_full_load_no_descent": true,
     "current_frontier_next_required_operator": "physical_consistent_frame_shell_material_geometric_with_state_updated_material_tangent_and_full_residual_globalization",
     "current_frontier_operator_family_no_descent": true,
