@@ -480,13 +480,13 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-05T17:23:01.446406+00:00",
+  "generated_at": "2026-07-05T17:42:44.525166+00:00",
   "input_checksums": {
     ".github/workflows/dp-windows-parity.yml": "sha256:1a25e658ec3fabfa5fee9fcdaee8c708b145989df373759424eea78914c4e5cd",
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:16e36f318a0f7030a0f79b78d4a63cc5b57873c6899e208ffdeea598b89ee21c",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:6a221e95cdf848534a89416151d87d6ec4f30c3cc4ef52c88dd4f848c3f730ff",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:2d8ec6ac75d210af270cbb3dc04686889324695216ea1544c5d75d4741dd6ef9",
-    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:b3772f2c4b697eac0a0c140fd5c8ab5e08f7dfe3aaa18bc58423dc162870b70e",
+    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:93e3c17ffa7073d354e213aeb562c8bfe8515034d6904d102de683885d0103d1",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:d2378d95155a66e3cfa3b48424b04a1d0a841cb098cac78d3ee7edc7f71cec91",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:500f9bbd82c6983a2a5e0ac22afa21f92c6ade3bc399e7e08a52c665268091e3",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:2c8e8f61015ac45c829d2c585da1fce9c33745ecb7be9c8c274fd8c4053ac41a",
@@ -1301,8 +1301,8 @@
       "autonomous_ai_engine_claim_ready": false,
       "claim_boundary": "This is a visibility summary for existing gap-ledger closure requirements. It does not add Developer Preview blockers, close G1/G6/G7, create external receipts, promote commercial readiness, or promote autonomous AI engine claims.",
       "closure_requirement_count": 19,
-      "closure_requirement_fail_count": 16,
-      "closure_requirement_pass_count": 3,
+      "closure_requirement_fail_count": 15,
+      "closure_requirement_pass_count": 4,
       "ledgers": {
         "ai_engine": {
           "closure_requirement_count": 0,
@@ -1315,8 +1315,8 @@
         },
         "commercial_solver": {
           "closure_requirement_count": 19,
-          "closure_requirement_fail_count": 16,
-          "closure_requirement_pass_count": 3,
+          "closure_requirement_fail_count": 15,
+          "closure_requirement_pass_count": 4,
           "nonclosed_failed_closure_requirement_ids": [
             "G1:coupled_frame_surface_nonlinear_equilibrium_closed",
             "G1:fallback_and_regularization_free_full_path",
@@ -1324,7 +1324,6 @@
             "G1:full_line_mesh_nonlinear_equilibrium_closed",
             "G1:full_load_scale_1_0_reached",
             "G1:state_updated_material_newton_breadth_closed",
-            "G1:strict_full_load_hip_newton_checkpoint_available",
             "G6:eb_receipt_hardest_external_10case",
             "G6:eb_receipt_korean_public_structures",
             "G6:eb_receipt_peer_spd_hinge",
@@ -1347,7 +1346,6 @@
         "G1:full_line_mesh_nonlinear_equilibrium_closed",
         "G1:full_load_scale_1_0_reached",
         "G1:state_updated_material_newton_breadth_closed",
-        "G1:strict_full_load_hip_newton_checkpoint_available",
         "G6:eb_receipt_hardest_external_10case",
         "G6:eb_receipt_korean_public_structures",
         "G6:eb_receipt_peer_spd_hinge",
@@ -3237,6 +3235,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "777e42c7b97d4670726701099c2c7f497f9a8964",
+  "source_commit_sha": "a973f6f9bc2bc4c01d8793cc32794d25fb7bda51",
   "status": "blocked"
 }

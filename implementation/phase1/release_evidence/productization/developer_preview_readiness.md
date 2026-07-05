@@ -5,7 +5,7 @@
 - `commercial_release_ready`: `False`
 - `blocker_count`: `10`
 - `future_commercial_blocker_count`: `35`
-- `source_commit_sha`: `777e42c7b97d4670726701099c2c7f497f9a8964`
+- `source_commit_sha`: `a973f6f9bc2bc4c01d8793cc32794d25fb7bda51`
 - `reuse_policy`: `derived_readiness_judgment_from_product_snapshot_and_dataset_license_manifest; does_not_create_authoritative_closure_evidence`
 - `input_checksum_policy`: `product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata`
 
@@ -22,8 +22,8 @@
 
 - `source_status`: `ready`
 - `source_full_gap_ledger_ready`: `False`
-- `closure_requirements`: `3/19`
-- `failed_closure_requirements`: `16`
+- `closure_requirements`: `4/19`
+- `failed_closure_requirements`: `15`
 - `nonclosed_rows_with_failed_closure_requirements`: `3`
 
 Failed requirement IDs:
@@ -33,7 +33,6 @@ Failed requirement IDs:
 - `G1:full_line_mesh_nonlinear_equilibrium_closed`
 - `G1:full_load_scale_1_0_reached`
 - `G1:state_updated_material_newton_breadth_closed`
-- `G1:strict_full_load_hip_newton_checkpoint_available`
 - `G6:eb_receipt_hardest_external_10case`
 - `G6:eb_receipt_korean_public_structures`
 - `G6:eb_receipt_peer_spd_hinge`

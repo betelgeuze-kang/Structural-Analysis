@@ -22,7 +22,6 @@
       "gap_closure_status": "implementation/phase1/release_evidence/productization/gap_closure_status.json"
     },
     "blockers": [
-      "G1:full_load_gate_not_closed",
       "G1:full_mesh_nonlinear_equilibrium_not_closed",
       "G1:material_newton_breadth_not_closed",
       "G1:production_rocm_hip_residency_not_closed",
@@ -60,7 +59,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-07-05T17:18:53.546540+00:00",
+  "generated_at": "2026-07-05T17:42:44.852258+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -100,13 +99,13 @@
     "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json": "sha256:92d0eb0334e90227d4e1b28ae8145df9b5c1e7389bd98466fe9791495291c574",
     "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json": "sha256:1ab4545e43b847f5268789ebefcb8ac1721d4a4537df6e5a589d070bc5beb17c",
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:43ba7edb98c39c8a6cbac5a227573090f3f4761bf8e6e52de695a76296b9bc18",
-    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:35c5ef8c26faca2c5c8c097d4b868da9d39f0eec5c77dbdccaf3c10662b4fb41",
+    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:a882fdc28b53aec9b385a1261a78a99a4544f655155db6d5fdb5ab2f0ef2c98b",
     "implementation/phase1/release_evidence/productization/core_family_p95_accuracy_report.json": "sha256:a09a6f069955dc132241f1cf62a09410fa22e829cdce922ea88ca69bc0cd5b6c",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:5681fe6c6a0f259605d8d3d9c97ff37564c76a02a1d8fb24873edc32e53b4442",
     "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json": "sha256:60766fe101aaac8fe37a5228f7f31dfd193b1320a9844f5d9996a8afb710c364",
     "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json": "sha256:bdb7c158aabaccf54301f87bada5ae67418c62bf8e4cc205884b56fa2f28a229",
     "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json": "sha256:efe9834d56292cffa7a61e4b9217a565d2710f49b276344a6b715f52b31e0956",
-    "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:02b300ea43afeaaca520c8cce5e3f21ee30ea1c570f15cdb844c9411367a928e",
+    "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:dec51cbc2801d0714fa04b126f285f3b057f46561abd5243f17617a83c9d770c",
     "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:fcf17441d9a61d79f0d686cdf489571c660f92f61521f803e5b68e8bbdae7aed",
     "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json": "sha256:8b7d7cd8f7dea63a6b5701e1e55b486104d7a5d55ccf5d12f09aeada282bb530",
     "implementation/phase1/release_evidence/productization/license_status_closure_report.json": "sha256:332989a15a69b83e6884571ad5cbcb0049e9ea44fe288c4c8c56769423a950d5",
@@ -119,7 +118,7 @@
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:f24aae873fa989f2b1eaed2ad18ba77fc169d9ce447a4e5f86786b9f9ceae5a5",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:d1a3b927dba2109957fc0cfe90db750d6f88c37de311bb3e9b9c58636c44b0ff",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:c47a9d061ea9cdde96704875b00cc6a617a78fd5b55012c6b4bd11bb4766c775",
     "implementation/phase1/release_evidence/productization/residual_level3_status.json": "sha256:ac890000466348b538e25fdc3d57eedf9a0619fb314c6b0fe64d50bdbae9136c",
     "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json": "sha256:439c9b906fc717604ad7e20176715673931e207b5f0c94854537c988c81ea577",
     "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
@@ -531,7 +530,7 @@
       "summary": {
         "artifact_count": 14,
         "blocker_count": 0,
-        "current_source_commit_sha": "777e42c7b97d4670726701099c2c7f497f9a8964",
+        "current_source_commit_sha": "a973f6f9bc2bc4c01d8793cc32794d25fb7bda51",
         "max_age_days": 30.0,
         "pass_count": 14
       },
@@ -982,6 +981,7 @@
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_g1_current_frontier_operator_mismatch_audit.py",
           "scripts/build_phase2_material_newton_breadth_artifacts.py",
+          "scripts/build_product_readiness_snapshot.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
@@ -992,7 +992,7 @@
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
-        "current_head_sha": "777e42c7b97d4670726701099c2c7f497f9a8964",
+        "current_head_sha": "a973f6f9bc2bc4c01d8793cc32794d25fb7bda51",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 230,
@@ -1271,6 +1271,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "777e42c7b97d4670726701099c2c7f497f9a8964",
+  "source_commit_sha": "a973f6f9bc2bc4c01d8793cc32794d25fb7bda51",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304"
 }
