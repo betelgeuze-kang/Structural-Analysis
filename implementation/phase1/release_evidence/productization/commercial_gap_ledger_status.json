@@ -1,7 +1,7 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-07-05T15:30:06.297104+00:00",
-  "source_commit_sha": "83d23d0e0e3d053f62338fff59efaae7badf0874",
+  "generated_at": "2026-07-05T16:56:41.254230+00:00",
+  "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "input_checksums": {
     "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b8f1b140751f430e4c7dc594f3440320433be9b3e3f055f3e7fad62a2999b8af",
@@ -109,10 +109,10 @@
           {
             "id": "strict_full_load_hip_newton_checkpoint_available",
             "observed": {
-              "full_load_candidate_count": 1,
-              "highest_observed_load_scale": 1.0,
-              "loadable_count": 1,
-              "candidate_count": 1
+              "full_load_candidate_count": 0,
+              "highest_observed_load_scale": 0.656,
+              "loadable_count": 42,
+              "candidate_count": 50
             },
             "target": {
               "full_load_candidate_count": ">=1",
@@ -195,13 +195,14 @@
             },
             "observed": {
               "load_scale_reached": 0.5,
-              "full_load_candidate_count": 1,
-              "highest_observed_load_scale": 1.0,
+              "full_load_candidate_count": 0,
+              "highest_observed_load_scale": 0.656,
               "child_full_load_closure_passed": false,
               "child_relative_increment_gate_passed": false
             },
             "non_closing_reasons": [
               "load_scale_below_full_load",
+              "full_load_checkpoint_candidate_missing",
               "child_full_load_closure_not_proven"
             ]
           },
@@ -328,6 +329,8 @@
           "material_newton_direct_residual_gate_passed": false,
           "full_load_hip_newton_lane_status": "blocked",
           "full_load_hip_newton_lane_blockers": [
+            "checkpoint_load_scale_below_required_full_load",
+            "checkpoint_resolution_no_full_load_candidate",
             "hip_consistency_proof_production_hip_path_not_proven",
             "hip_consistency_proof_gate_not_passed",
             "hip_consistency_proof_residual_jvp_worker_path_not_ready",
@@ -347,21 +350,23 @@
             "hip_consistency_proof_runtime::dev_dri_missing"
           ],
           "full_load_hip_newton_checkpoint_resolution_gate": {
-            "blockers": [],
-            "candidate_count": 1,
+            "blockers": [
+              "checkpoint_resolution_no_full_load_candidate"
+            ],
+            "candidate_count": 50,
             "claim_boundary": "This gate proves only whether the scanned checkpoint evidence contains a loadable checkpoint at the required full-load scale. It does not prove residual, increment, material Newton, or production ROCm/HIP closure.",
-            "full_load_candidate_count": 1,
+            "full_load_candidate_count": 0,
             "full_load_tolerance": 1e-12,
-            "highest_observed_gap_to_required_load_scale": 0.0,
-            "highest_observed_load_scale": 1.0,
-            "loadable_count": 1,
-            "mode": "explicit",
-            "passed": true,
+            "highest_observed_gap_to_required_load_scale": 0.344,
+            "highest_observed_load_scale": 0.656,
+            "loadable_count": 42,
+            "mode": "auto_select",
+            "passed": false,
             "required_load_scale": 1.0,
             "schema_version": "g1-checkpoint-resolution-gate.v1",
-            "selected_checkpoint_load_scale": 1.0,
-            "selected_checkpoint_meets_full_load": true,
-            "unloadable_count": 0
+            "selected_checkpoint_load_scale": 0.656,
+            "selected_checkpoint_meets_full_load": false,
+            "unloadable_count": 8
           },
           "full_load_gate_closed": false,
           "material_newton_breadth_closed": false,
@@ -32482,20 +32487,18 @@
               "blocking_reasons": [
                 "receipt_not_ready",
                 "residual_jacobian_consistency_not_ready",
-                "consistent_residual_jacobian::consistent_residual_jacobian_newton_not_proven",
-                "consistent_residual_jacobian::state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency",
-                "hip_direct_probe::consistent_jacobian_or_globalization_required",
-                "hip_direct_probe::direct_residual_gate_not_closed",
-                "hip_direct_probe::full_load_gate_not_closed",
-                "hip_direct_probe::regularized_fixed_point_residual_must_not_be_used_as_physical_residual",
-                "hip_direct_probe_consistent_residual_jacobian_not_closed",
-                "production_rocm_hip_residual_jvp_worker::consistent_residual_jacobian_newton_gate_not_passed",
+                "component_only_diagnostic_not_consistency_closure",
+                "rocm_hip_runtime_unavailable",
+                "hip_runtime::dev_kfd_missing",
+                "hip_runtime::dev_dri_missing",
+                "hip_residual_jacobian_consistency_not_executed",
                 "residual_gate_not_closed",
                 "production_in_process_rocm_hip_residency_not_claimed",
-                "latest_checkpoint_not_advertised"
+                "latest_checkpoint_not_advertised",
+                "claim_boundary_disclaims_closure"
               ],
-              "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested and routed to the HIP-required direct residual Newton proof path. The probe does not use this module's CPU diagnostic assembler. This receipt closes neither full G1 nor release readiness unless the child HIP residual engine contract and consistent residual/Jacobian Newton gate both pass without blockers.",
-              "component_only": false,
+              "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested, but no usable HIP runtime was available. The probe did not fall back to the CPU diagnostic path and does not close G1.",
+              "component_only": true,
               "contract_pass": false,
               "controller_start_checkpoint": null,
               "controller_start_checkpoint_exists": null,
@@ -32504,7 +32507,7 @@
               "latest_checkpoint_promoted_by_summary": null,
               "latest_checkpoint_retained_by_summary": null,
               "latest_remaining_residual_margin_to_gate_n": null,
-              "load_scale": 0.656,
+              "load_scale": null,
               "missing_controller_replay_artifact_count": 0,
               "missing_controller_replay_artifacts": [],
               "next_solver_step": null,

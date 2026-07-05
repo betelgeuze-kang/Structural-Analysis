@@ -128,7 +128,7 @@
       "status": "ready"
     }
   ],
-  "generated_at": "2026-07-05T16:24:36.257932+00:00",
+  "generated_at": "2026-07-05T16:53:09.609517+00:00",
   "independent_commercial_product_ready": false,
   "input_checksums": {
     "README.md": "sha256:2704f4bfca7f7edb4b502dbaa32c6f69ce80dde7555021e2ab859869676ca76a",
@@ -162,7 +162,7 @@
   "recommended_claim": "Commercial engineer-in-loop acceleration for 95-99% repeated workflows; not a full autonomous commercial replacement.",
   "reused_evidence": false,
   "schema_version": "independent-commercial-product-readiness.v1",
-  "source_commit_sha": "cc9d0e344185a5dfbe21d14b9d7ffae97b6c5044",
+  "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
   "status": "blocked",
   "summary_line": "Independent commercial product readiness: BLOCKED | score=80.0/100 | full_autonomous_replacement_ready=False",
   "workstation_delivery_service": {

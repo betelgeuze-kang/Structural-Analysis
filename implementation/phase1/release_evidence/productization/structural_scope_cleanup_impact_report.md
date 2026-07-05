@@ -30,9 +30,9 @@
 
 | Path | References | Blocking | Governance | Cleanup Ready After Owner Decision |
 |---|---:|---:|---:|---:|
-| `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json` | 40 | 1 | 39 | `False` |
-| `implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json` | 35 | 0 | 35 | `True` |
-| `implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json` | 41 | 1 | 40 | `False` |
+| `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json` | 39 | 1 | 38 | `False` |
+| `implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json` | 34 | 0 | 34 | `True` |
+| `implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json` | 40 | 1 | 39 | `False` |
 
 ## Blocking References
 
