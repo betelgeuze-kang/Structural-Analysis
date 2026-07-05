@@ -604,7 +604,7 @@
     "residual_inf_n": 0.42740724991695345,
     "status": "ready"
   },
-  "generated_at": "2026-07-05T11:27:12.308823+00:00",
+  "generated_at": "2026-07-05T11:41:47.290717+00:00",
   "global_tangent_scaled_sweep": {
     "base_residual_inf_n": 0.4278304040181992,
     "best_alpha": 0.00390625,
@@ -717,9 +717,9 @@
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_shell_diag_sweep_probe.json": "sha256:3fb896191af710575f7c4a7198de670b974250b26c3e6a93682ec033677f5ac6",
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_shell_jvp_probe.json": "sha256:1f50ad798a79bccf5a36b3f3fe4306ea17ab4305eca998703f41ae849b88da5e",
     "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json": "sha256:d22636072d5e435c501577f2e98c0d296292ff1971b76e7066e0e8584a0214eb",
-    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:77f3f517e096efb64215d42472053a94e4f9dd8836f1ca2cfe9090c158dc3c5d",
+    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:d8fa32f927c5a4c2e7126453beeecda10a17c4bc3e366e3e7f9b61afcbfbd9f4",
     "implementation/phase1/release_evidence/productization/g1_frame_tangent_fd_epsilon_sweep_probe.json": "sha256:81c2ad32a078db886d09c6637cd7d1369719d2ed6c8f5fac88ae5ac410c4291d",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:597823a8f63a3f7c1c8da5b76b905aeea2a1f72d142117ea99a7283ea4fbc704",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:f931be82e586bf9cc3461410f9eb128df6df109c3912b3052459c1b2f1c9a93c",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:42f77c9c6856a124859510d049d0419cf5fa41a7d71e8f15f2f8c883f7301c73",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.json": "sha256:e6582053c0d7dc2c99c3737f0c7ffa94579855a5520cdb416efc2abd01aa3ee9",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe.json": "sha256:83a0e92b346a14a6f8833bb39b572437f405fdafe62e631d55da9d7c7c3fa4da",
@@ -741,7 +741,7 @@
     "implementation/phase1/release_evidence/productization/g1_true_newton_from_active_set_ls_trust_mu_0p03_candidate.json": "sha256:a2fed692736a3bea5c3f16eea175651db99d8ad4712974f7f4d88518a2ab4b48",
     "implementation/phase1/release_evidence/productization/g1_true_newton_from_active_set_ls_trust_service_tangent_mu_0p03_candidate.json": "sha256:eceb8b94cbba35d1d3f67c83ea9b8d7cb419e909bba5a58e86c3dfbbf09b07e4",
     "implementation/phase1/release_evidence/productization/g1_true_newton_from_active_set_mu_sweep_probe.json": "sha256:37c65291c66cb545b17330ba59c0b7b51ea251382f4165406b5b57898f1c6ed7",
-    "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:4ea5c266f22843419c5f616ade3edc38f37f5a7d6940b6b3a0bc256e35138559",
+    "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:ae97e161c5fdc4d9fb8764972b900f4d69afe55381c9015e2bcc778e67732345",
     "implementation/phase1/release_evidence/productization/g1_true_newton_load_sweep_status.json": "sha256:c1a862c28a6f31163f15f8cbe03334e0060a6cbb81138b9e3819d53fad497aca",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:55a28ce5255823f78b29d4c1ca8f15894632c4f208c92e23da3795ff756446d8",
     "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:d763431c00478f0769039f419c8fc472cff9fb3d328f09d7c736f8c7a46de93d"
@@ -970,7 +970,7 @@
     "row_count": 8,
     "status": "ready"
   },
-  "source_commit_sha": "40a003a581cf8b8db8f69bf365acd02188c16756",
+  "source_commit_sha": "80185ce7be693ca37417617fdebf485cee1c17ee",
   "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe": {
     "assembled_tangent_parity_max_absolute_error": 0.006011962890625,
     "assembled_tangent_parity_max_relative_error": 2.683381287585585e-15,
@@ -1758,7 +1758,7 @@
     "true_newton_from_active_set_service_tangent_present": true,
     "true_newton_from_active_set_service_tangent_stop_reason": "line_search_no_descent",
     "true_newton_from_active_set_stop_reason": "line_search_no_descent",
-    "true_newton_full_load_checkpoint_candidate_direct_residual_n": 0.43348967208192946,
+    "true_newton_full_load_checkpoint_candidate_direct_residual_n": 0.42788072459938853,
     "true_newton_full_load_checkpoint_candidate_path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
     "true_newton_full_load_checkpoint_candidate_present": true,
     "true_newton_full_load_checkpoint_candidate_written": true,
@@ -1875,7 +1875,7 @@
       "full_mesh_nonlinear_equilibrium_not_proven_by_true_newton_checkpoint_candidate",
       "material_newton_breadth_not_proven_by_true_newton_checkpoint_candidate"
     ],
-    "checkpoint_direct_residual_inf_n": 0.43348967208192946,
+    "checkpoint_direct_residual_inf_n": 0.42788072459938853,
     "checkpoint_load_scale": 1.0,
     "checkpoint_path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
     "checkpoint_schema": "mgt-direct-residual-newton-state.v1",
@@ -1886,9 +1886,9 @@
     "present": true,
     "promotes_g1_closure": false,
     "status": "candidate_created",
-    "true_newton_final_residual_n": 0.43348967208192946,
+    "true_newton_final_residual_n": 0.42788072459938853,
     "true_newton_residual_gate_passed": false,
-    "true_newton_steps": 12
+    "true_newton_steps": 6
   },
   "true_newton_load_sweep": {
     "blockers": [
