@@ -516,12 +516,12 @@
       "status": "blocked"
     },
     "developer_preview_readiness": {
-      "blocker_count": 9,
+      "blocker_count": 31,
       "category_counts": {
         "benchmark": 2,
         "future commercial": 35,
-        "numerical": 3,
-        "software product": 4
+        "numerical": 5,
+        "software product": 24
       },
       "claim_boundary": "Developer Preview is an open benchmark workstation preview, not a commercial structural solver beta. Customer shadow, commercial license/legal approval, license-server operation, commercial SLA, 30-run CI streak, and external approval receipts remain visible as future Commercial Release blockers. Remote GitHub sync/push approval is a release-publication handoff and does not block the local Developer Preview evidence bar. AI/GNN/surrogate truth claims stay frozen until the deterministic reference solver, residual/Jacobian/Newton closure, and benchmark truth are fixed.",
       "developer_preview_ready": false,
@@ -3155,7 +3155,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-05T20:18:37.922910+00:00",
+  "generated_at": "2026-07-05T20:22:20.940565+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
@@ -3165,9 +3165,9 @@
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:6d19efb2e241e2980d66af7428132ec0a9eb16ca82ef7047cf43133687a7303f",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:d0b4549a80362ff1280665e78ea3888354afdcdfb3432dad59f055f52b760f6e",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:a882fdc28b53aec9b385a1261a78a99a4544f655155db6d5fdb5ab2f0ef2c98b",
-    "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:cee4bd8fd691e10ea95fb85e529f378dd813dfe92ea1ea2e0348110e73d92996",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:868f86575d94fa3ab3f0421612ec3622f48611a9433595d9bcfe911e1faef7f7",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:bc13d287028458971de9666ef07c172ab271fe39eb7ff9bd9c4fad9d388adb75",
+    "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:bba88f13ad13f63e3e2c132e66c50fa8a2d3f05900b5f593adc2c5428271b83a",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:027fa4b250beb01a6237f96faedb6fc6d33ac82604d0e8b2bfd978b7d9e03af4",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:d4dd52e0abf0d986eaf5bbb8b1103cd29c1d4ae1284e6368b509eec1d95baafd",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:fa3806bcf6e163bf42e5263a3deee30886c9972be7e8f53c1d5c3982ae8da89c",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:5681fe6c6a0f259605d8d3d9c97ff37564c76a02a1d8fb24873edc32e53b4442",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:382956916ff532ef84df6648062a284d6899e7e62b48b9b8386142e7d4411235",
@@ -3519,7 +3519,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "dc7732f9861e3bc8b226633a65c03c891bda9359",
+  "source_commit_sha": "56ee301f23728c612daf3300c65a67ac239ba494",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3713,17 +3713,18 @@
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json",
-          "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.md",
           "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
           "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
-          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md"
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
+          "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
+          "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json"
         ],
-        "generated_at": "2026-07-05T20:17:36.754852+00:00",
+        "generated_at": "2026-07-05T20:21:46.512522+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "a1193cdbe14185975efc3a4a3bab7f4e90be1f98",
+        "source_commit_sha": "482c1d3f44cb41dffe2cacd6a179088157c97abc",
         "source_state_fresh": true,
         "source_state_kind": "receipt_only_commit"
       },
@@ -3731,17 +3732,18 @@
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json",
-          "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.md",
           "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
           "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
-          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md"
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
+          "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
+          "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json"
         ],
-        "generated_at": "2026-07-05T20:17:36.538776+00:00",
+        "generated_at": "2026-07-05T20:21:46.296332+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": false,
-        "source_commit_sha": "a1193cdbe14185975efc3a4a3bab7f4e90be1f98",
+        "source_commit_sha": "482c1d3f44cb41dffe2cacd6a179088157c97abc",
         "source_state_fresh": true,
         "source_state_kind": "receipt_only_commit"
       },
@@ -4072,17 +4074,18 @@
         "artifact": "developer_preview_final_gate_owner_packet",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json",
-          "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.md",
           "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
           "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
-          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md"
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
+          "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
+          "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json"
         ],
-        "generated_at": "2026-07-05T20:17:36.583811+00:00",
+        "generated_at": "2026-07-05T20:21:46.341138+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "a1193cdbe14185975efc3a4a3bab7f4e90be1f98",
+        "source_commit_sha": "482c1d3f44cb41dffe2cacd6a179088157c97abc",
         "source_state_fresh": true,
         "source_state_kind": "receipt_only_commit"
       }
