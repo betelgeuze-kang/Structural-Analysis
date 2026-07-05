@@ -6393,16 +6393,16 @@
   "engine_version": "1.0.0",
   "fixed_point_residual_promoted_to_physical": false,
   "g1_closure_claim": false,
-  "generated_at": "2026-07-05T21:43:34.004520+00:00",
+  "generated_at": "2026-07-05T21:48:29.139150+00:00",
   "globalization": "backtracking_line_search",
   "input_checksums": {
-    "scripts/build_g1_assembly_contract_seed_report.py": "sha256:9e3c7482cd9af120f91b44365f099686e8e0fbf1fd065b6f960723b8dfa58561",
+    "scripts/build_g1_assembly_contract_seed_report.py": "sha256:16cf938b575a3bc173c82adca96d4726c64696c0b7342295f08efe99449f04e2",
     "src/structural_analysis/assembly/coupled_static.py": "sha256:56e1c3f1b09b6e47181d3c877397d6a109af41b5dc3fa459973cf650df9e611a",
     "src/structural_analysis/assembly/g1_contract.py": "sha256:ca288065bd737d25adbf42dab407b7d4b7fffbb54e71089c84e22b2941976ba2",
     "src/structural_analysis/assembly/material_state.py": "sha256:0e9eac80bef67cfe8f56a38b0360d5705921b5d1ee640f93953ac098585859be",
     "src/structural_analysis/assembly/nonlinear_static.py": "sha256:afc7ecf37b7fe7c2fc172b9b223d18640a44c22f6896aa47c20fdf35761fb41b",
     "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:c43772246853be09cacee662312fadac9de5d87b91e9ff2d105e9cb6342d16c6",
-    "tests/test_g1_assembly_contract.py": "sha256:716d7408671c800d106e6900edf6336705c4a508203b15db738ba3416599208f"
+    "tests/test_g1_assembly_contract.py": "sha256:f93aad16de8c515296269f1763b2101401f78bd788e210056375433b014b9f15"
   },
   "material_jvp_max_relative_error": 8.429443131654742e-09,
   "material_state_persistence_replay_seed_case_count": 9,
@@ -6428,7 +6428,7 @@
   ],
   "residual_formula": "F_internal_minus_F_external",
   "schema_version": "g1-assembly-contract-seed-report.v1",
-  "source_commit_sha": "2e524a5e2536cfd9fba0d21f15082ea920a75a6b",
+  "source_commit_sha": "a13bd88984c2db792512d28a3df37378d7a26471",
   "state_updated_frame_shell_coupled_load_step_history_chain_replay_pass": true,
   "state_updated_frame_shell_coupled_load_step_history_checkpoint_replay_pass": true,
   "state_updated_frame_shell_coupled_load_step_history_direct_parity_pass": true,
