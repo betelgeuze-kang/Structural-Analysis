@@ -526,6 +526,8 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
             "scripts/check_customer_shadow_evidence_status.py",
         },
         "developer_preview_rc_status": {
+            "implementation/phase1/parse_opensees_to_csr.py",
+            "implementation/phase1/run_opensees_canonical_breadth_gate.py",
             "scripts/build_developer_preview_rc_status.py",
             "scripts/build_phase3_large_model_runner_readiness_receipt.py",
             "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
