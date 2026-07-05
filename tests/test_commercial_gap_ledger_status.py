@@ -186,10 +186,10 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert g1_requirements["strict_full_load_hip_newton_checkpoint_available"] == {
         "id": "strict_full_load_hip_newton_checkpoint_available",
         "observed": {
-            "full_load_candidate_count": 0,
-            "highest_observed_load_scale": 0.656,
-            "loadable_count": 42,
-            "candidate_count": 50,
+            "full_load_candidate_count": 1,
+            "highest_observed_load_scale": 1.0,
+            "loadable_count": 1,
+            "candidate_count": 1,
         },
         "target": {
             "full_load_candidate_count": ">=1",
@@ -243,8 +243,8 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         "child_relative_increment_gate_passed": True,
     }
     assert full_load_terminal["observed"]["load_scale_reached"] == 0.5
-    assert full_load_terminal["observed"]["full_load_candidate_count"] == 0
-    assert "full_load_checkpoint_candidate_missing" in full_load_terminal[
+    assert full_load_terminal["observed"]["full_load_candidate_count"] == 1
+    assert "full_load_checkpoint_candidate_missing" not in full_load_terminal[
         "non_closing_reasons"
     ]
     assert "child_full_load_closure_not_proven" in full_load_terminal[
@@ -317,16 +317,14 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert g1_gap["production_rocm_hip_residency_closed"] is False
     assert g1_gap["full_load_hip_newton_lane_status"] == "blocked"
     strict_checkpoint_gate = g1_gap["full_load_hip_newton_checkpoint_resolution_gate"]
-    assert strict_checkpoint_gate["passed"] is False
-    assert strict_checkpoint_gate["mode"] == "auto_select"
-    assert strict_checkpoint_gate["candidate_count"] == 50
-    assert strict_checkpoint_gate["loadable_count"] == 42
-    assert strict_checkpoint_gate["full_load_candidate_count"] == 0
-    assert strict_checkpoint_gate["highest_observed_load_scale"] == 0.656
-    assert strict_checkpoint_gate["highest_observed_gap_to_required_load_scale"] == 0.344
-    assert strict_checkpoint_gate["blockers"] == [
-        "checkpoint_resolution_no_full_load_candidate"
-    ]
+    assert strict_checkpoint_gate["passed"] is True
+    assert strict_checkpoint_gate["mode"] == "explicit"
+    assert strict_checkpoint_gate["candidate_count"] == 1
+    assert strict_checkpoint_gate["loadable_count"] == 1
+    assert strict_checkpoint_gate["full_load_candidate_count"] == 1
+    assert strict_checkpoint_gate["highest_observed_load_scale"] == 1.0
+    assert strict_checkpoint_gate["highest_observed_gap_to_required_load_scale"] == 0.0
+    assert strict_checkpoint_gate["blockers"] == []
     assert "sub-load receipts remain non-closing evidence" in g1_gap["claim_boundary"]
     terminal_gate_scope = rows["G1"]["evidence"]["direct_residual_terminal_gate_scope"]
     assert terminal_gate_scope["receipt"] == (

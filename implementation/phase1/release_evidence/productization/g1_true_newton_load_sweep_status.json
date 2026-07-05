@@ -14,7 +14,7 @@
   "full_load_true_newton_residual_descent_observed": true,
   "full_load_true_newton_residual_gate_passed": false,
   "full_load_true_newton_total_reduction_ratio": 0.5976735626429456,
-  "generated_at": "2026-07-05T16:42:14.494025+00:00",
+  "generated_at": "2026-07-05T17:09:10.066919+00:00",
   "input_checksums": {
     "implementation/phase1/g1_assembled_tangent_solve.py": "sha256:c5e7519b7d9f1b1fd73954369f59392f0746bf35f72654fc67230c37307ee23d",
     "implementation/phase1/g1_regularized_direction.py": "sha256:233f392c815eacd7b7eacb0de34218267feeffea41a66c07c2b1ba4c5dbc2c4e",
@@ -86,7 +86,7 @@
     }
   ],
   "schema_version": "g1-true-newton-load-sweep-status.v1",
-  "source_commit_sha": "4466867e3f508b5134e24bb807e8104a4d00fa0f",
+  "source_commit_sha": "777e42c7b97d4670726701099c2c7f497f9a8964",
   "status": "partial",
   "summary_line": "G1 true-Newton load sweep: PARTIAL | max_load=1.0 | full_load_descent=True | full_load_gate=False"
 }

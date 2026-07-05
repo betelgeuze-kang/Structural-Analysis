@@ -942,7 +942,7 @@
     "residual_inf_n": 0.42740724991695345,
     "status": "ready"
   },
-  "generated_at": "2026-07-05T16:47:25.719353+00:00",
+  "generated_at": "2026-07-05T17:18:52.165795+00:00",
   "global_tangent_scaled_sweep": {
     "base_residual_inf_n": 0.4278304040181992,
     "best_alpha": 0.00390625,
@@ -1004,7 +1004,7 @@
     "production_hip_residual_jacobian_path": false,
     "relative_increment_gate_passed": false,
     "residual_jvp_worker_path_ready": false,
-    "source_commit_sha": "6c0aa28f5b6149885dd39f5817c85c553e6fc52f",
+    "source_commit_sha": "777e42c7b97d4670726701099c2c7f497f9a8964",
     "status": "partial"
   },
   "hip_required_frontier_no_descent_receipts": [
@@ -1354,11 +1354,11 @@
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_residual_gradient_tiny_sweep_probe.json": "sha256:e106b463733e101d2840d0dbed7b2f90bd7cd5bc8c207055b416f481fe231a43",
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_shell_diag_sweep_probe.json": "sha256:3fb896191af710575f7c4a7198de670b974250b26c3e6a93682ec033677f5ac6",
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_shell_jvp_probe.json": "sha256:1f50ad798a79bccf5a36b3f3fe4306ea17ab4305eca998703f41ae849b88da5e",
-    "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json": "sha256:58d6fb85198d66f9045b31b589ad2533d520d7f9fccf0a27f2dda6be77f4bc12",
+    "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json": "sha256:b8f03e5070952e48378a141738a1b93b9e2ca5597128c3f17577aa1450781838",
     "implementation/phase1/release_evidence/productization/g1_current_frontier_operator_mismatch_audit.json": "sha256:0868801f649300a959a5d8fecafc0de5243e9961e44aa182c41ce16110380c54",
-    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:b9ab6438e333f6051985ab5a73e2615a36abebbda2a2aaacb9f2a981dd96b553",
+    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:382956916ff532ef84df6648062a284d6899e7e62b48b9b8386142e7d4411235",
     "implementation/phase1/release_evidence/productization/g1_frame_tangent_fd_epsilon_sweep_probe.json": "sha256:81c2ad32a078db886d09c6637cd7d1369719d2ed6c8f5fac88ae5ac410c4291d",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:b21a399564ab236d66f37fc1d549d455bb3a01c77599ef1b0454566be190f8f3",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:46105acfd3b2a13a1a8fdcff0c7f68981b30772c8a26d89cd5036af90da0b3b6",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:42f77c9c6856a124859510d049d0419cf5fa41a7d71e8f15f2f8c883f7301c73",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.json": "sha256:e6582053c0d7dc2c99c3737f0c7ffa94579855a5520cdb416efc2abd01aa3ee9",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe.json": "sha256:83a0e92b346a14a6f8833bb39b572437f405fdafe62e631d55da9d7c7c3fa4da",
@@ -1380,9 +1380,9 @@
     "implementation/phase1/release_evidence/productization/g1_true_newton_from_active_set_ls_trust_mu_0p03_candidate.json": "sha256:a2fed692736a3bea5c3f16eea175651db99d8ad4712974f7f4d88518a2ab4b48",
     "implementation/phase1/release_evidence/productization/g1_true_newton_from_active_set_ls_trust_service_tangent_mu_0p03_candidate.json": "sha256:eceb8b94cbba35d1d3f67c83ea9b8d7cb419e909bba5a58e86c3dfbbf09b07e4",
     "implementation/phase1/release_evidence/productization/g1_true_newton_from_active_set_mu_sweep_probe.json": "sha256:37c65291c66cb545b17330ba59c0b7b51ea251382f4165406b5b57898f1c6ed7",
-    "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:09eb25d0f81cc0f47a9001000d9f018cedcef1255ae91a0b9fa662f0b75eda89",
-    "implementation/phase1/release_evidence/productization/g1_true_newton_load_sweep_status.json": "sha256:319d53b268d4d4f51925b7a014038f11ac0902f58d21bf97562affffd6e5ab6b",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:9d2186a1f4fb11700d53f7b7dcf052f49a2e32ba64208c061d6eb07b1f51dc7e",
+    "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:bca092efd7ca3c1021443dbe5a1e8497b8fcbbf1896e33d82547a5f6b3d3681f",
+    "implementation/phase1/release_evidence/productization/g1_true_newton_load_sweep_status.json": "sha256:c1d7def7b0a08e99f117fdbf462d82b371129e88cf2cbd518be1fbf1abc4375c",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:aa267ba9c523f3ce0e120082c72869985aecf2d8e8d0000171ef64a7c3573cf7",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_candidate.npz": "sha256:a468d557226aca0b86956c3fa86fb510e57d9bd05684385bf3e4545e7de39244",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step14_material_active_set_ls_rows32_child_direct_saved_probe.json": "sha256:5623392295298850dac907721158ca3ae040439329ae475632f1e8ef6d082028",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz": "sha256:865e2daee190803fb8349aff5f08d170b6b88794ac6cfb3ca4f43f912b30239a",
@@ -2095,7 +2095,7 @@
     "row_count": 8,
     "status": "ready"
   },
-  "source_commit_sha": "4466867e3f508b5134e24bb807e8104a4d00fa0f",
+  "source_commit_sha": "777e42c7b97d4670726701099c2c7f497f9a8964",
   "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe": {
     "assembled_tangent_parity_max_absolute_error": 0.006011962890625,
     "assembled_tangent_parity_max_relative_error": 2.683381287585585e-15,

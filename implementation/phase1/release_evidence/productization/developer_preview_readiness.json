@@ -211,7 +211,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-07-05T16:57:53.974850+00:00",
+  "generated_at": "2026-07-05T17:23:01.384086+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -230,11 +230,11 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:f93e436b24657fb08f890ff1fa4ba988294397f41f4d002b4e3d84f4014ee275",
+      "input_checksum": "sha256:297f1b5a314ece107ee39f46ceb8f819941194825241723a3a66697aac94cea2",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
+      "source_commit_sha": "777e42c7b97d4670726701099c2c7f497f9a8964",
       "status": "blocked"
     }
   },
@@ -242,7 +242,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:d2378d95155a66e3cfa3b48424b04a1d0a841cb098cac78d3ee7edc7f71cec91",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:f93e436b24657fb08f890ff1fa4ba988294397f41f4d002b4e3d84f4014ee275"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:297f1b5a314ece107ee39f46ceb8f819941194825241723a3a66697aac94cea2"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "blocked",
@@ -383,7 +383,6 @@
     "g1": {
       "blocker_grouping_metadata": {
         "detail_blocker_represented_by_root_group": {
-          "g1_full_load_lane::checkpoint_load_scale_below_required_full_load": "g1::full_load_gate_not_closed",
           "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven": "g1::material_newton_breadth_not_closed",
           "g1_full_load_lane::child_current_tangent_residual_row_component_missing": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::child_direct_residual_gate_not_proven": "g1::full_mesh_nonlinear_equilibrium_not_closed",
@@ -395,7 +394,6 @@
           "g1_full_load_lane::child_observed_load_scale_below_required_full_load": "g1::full_load_gate_not_closed",
           "g1_full_load_lane::child_relative_increment_gate_not_proven": "g1::full_mesh_nonlinear_equilibrium_not_closed",
           "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready": "g1::production_rocm_hip_residency_not_closed",
-          "g1_full_load_lane::full_load_input_not_pass": "g1::full_load_gate_not_closed",
           "g1_full_load_lane::hip_consistency_proof_gate_not_passed": "g1::material_newton_breadth_not_closed",
           "g1_full_load_lane::hip_consistency_proof_has_blockers": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_production_hip_path_not_proven": "g1::production_rocm_hip_residency_not_closed",
@@ -414,7 +412,6 @@
           "g1_full_load_lane::hip_consistency_proof_worker::runtime::dev_kfd_missing": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready": "g1::material_newton_breadth_not_closed",
           "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready": "g1::production_rocm_hip_residency_not_closed",
-          "g1_full_load_lane::observed_load_scale_below_required_full_load": "g1::full_load_gate_not_closed",
           "g1_full_mesh_full_load_not_closed": "g1::full_mesh_nonlinear_equilibrium_not_closed"
         },
         "detail_blockers_remain_visible": true,
@@ -425,7 +422,7 @@
           {
             "active": true,
             "closure_dimension": "cpu_full_load_1_0_residual_increment_gate",
-            "represented_detail_blocker_count": 5,
+            "represented_detail_blocker_count": 2,
             "root_blocker": "g1::full_load_gate_not_closed"
           },
           {
@@ -447,10 +444,8 @@
             "root_blocker": "g1::production_rocm_hip_residency_not_closed"
           }
         ],
-        "suppressed_detail_blocker_count": 34,
-        "unmatched_detail_blockers": [
-          "g1_full_load_lane::checkpoint_resolution_no_full_load_candidate"
-        ]
+        "suppressed_detail_blocker_count": 30,
+        "unmatched_detail_blockers": []
       },
       "cause_narrowing_claim_boundary": "This receipt narrows the next G1 diagnostic direction from existing F2g/F2h evidence. It does not close G1, promote full-load 1.0, or prove production ROCm/HIP residency.",
       "cause_narrowing_contract_pass": true,
@@ -540,8 +535,6 @@
       },
       "contract_pass": true,
       "detail_blocker_represented_by": {
-        "g1_full_load_lane::checkpoint_load_scale_below_required_full_load": "g1::*",
-        "g1_full_load_lane::checkpoint_resolution_no_full_load_candidate": "g1::*",
         "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven": "g1::*",
         "g1_full_load_lane::child_current_tangent_residual_row_component_missing": "g1::*",
         "g1_full_load_lane::child_direct_residual_gate_not_proven": "g1::*",
@@ -553,7 +546,6 @@
         "g1_full_load_lane::child_observed_load_scale_below_required_full_load": "g1::*",
         "g1_full_load_lane::child_relative_increment_gate_not_proven": "g1::*",
         "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready": "g1::*",
-        "g1_full_load_lane::full_load_input_not_pass": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_gate_not_passed": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_has_blockers": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_production_hip_path_not_proven": "g1::*",
@@ -572,7 +564,6 @@
         "g1_full_load_lane::hip_consistency_proof_worker::runtime::dev_kfd_missing": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready": "g1::*",
         "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready": "g1::*",
-        "g1_full_load_lane::observed_load_scale_below_required_full_load": "g1::*",
         "g1_full_mesh_full_load_not_closed": "g1::*"
       },
       "full_g1_closure_ready": false,
@@ -1802,13 +1793,7 @@
           "hip_consistency_proof_worker::runtime::dev_kfd_missing",
           "hip_consistency_proof_worker_g1_closure_gate_not_ready"
         ],
-        "changed_paths_since_source_commit": [
-          "implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json",
-          "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
-          "implementation/phase1/release_evidence/performance/performance_bottleneck_map.md",
-          "implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.json",
-          "implementation/phase1/release_evidence/performance/performance_profiling_gate_report.json"
-        ],
+        "changed_paths_since_source_commit": [],
         "consistent_residual_jacobian_newton_gate_passed": false,
         "cpu_diagnostic_assembler_used": false,
         "execution_mode": "hip_required_runtime_unavailable_no_cpu_fallback",
@@ -1862,24 +1847,22 @@
           "dev_kfd_missing",
           "dev_dri_missing"
         ],
-        "source_commit_sha": "6c0aa28f5b6149885dd39f5817c85c553e6fc52f",
+        "source_commit_sha": "777e42c7b97d4670726701099c2c7f497f9a8964",
         "source_state_fresh": true,
-        "source_state_kind": "non_g1_hip_paths_changed",
+        "source_state_kind": "exact",
         "status": "partial"
       },
       "full_load_hip_newton_hip_consistency_proof_ready": false,
-      "full_load_hip_newton_lane_full_load_input_pass": false,
-      "full_load_hip_newton_lane_observed_load_scale": 0.656,
+      "full_load_hip_newton_lane_full_load_input_pass": true,
+      "full_load_hip_newton_lane_observed_load_scale": 1.0,
       "full_load_hip_newton_lane_observed_load_scale_source": "checkpoint",
       "full_load_hip_newton_lane_ready": false,
       "full_load_hip_newton_lane_required_load_scale": 1.0,
       "full_load_hip_newton_lane_reused_evidence": false,
       "full_load_hip_newton_lane_status": "blocked",
       "full_mesh_full_load_ready": false,
-      "suppressed_detail_blocker_count": 34,
+      "suppressed_detail_blocker_count": 30,
       "suppressed_detail_blockers": [
-        "g1_full_load_lane::checkpoint_load_scale_below_required_full_load",
-        "g1_full_load_lane::checkpoint_resolution_no_full_load_candidate",
         "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven",
         "g1_full_load_lane::child_current_tangent_residual_row_component_missing",
         "g1_full_load_lane::child_direct_residual_gate_not_proven",
@@ -1891,7 +1874,6 @@
         "g1_full_load_lane::child_observed_load_scale_below_required_full_load",
         "g1_full_load_lane::child_relative_increment_gate_not_proven",
         "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready",
-        "g1_full_load_lane::full_load_input_not_pass",
         "g1_full_load_lane::hip_consistency_proof_gate_not_passed",
         "g1_full_load_lane::hip_consistency_proof_has_blockers",
         "g1_full_load_lane::hip_consistency_proof_production_hip_path_not_proven",
@@ -1910,7 +1892,6 @@
         "g1_full_load_lane::hip_consistency_proof_worker::runtime::dev_kfd_missing",
         "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready",
         "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready",
-        "g1_full_load_lane::observed_load_scale_below_required_full_load",
         "g1_full_mesh_full_load_not_closed"
       ],
       "top_level_blockers": [
@@ -2235,6 +2216,6 @@
       }
     }
   },
-  "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
+  "source_commit_sha": "777e42c7b97d4670726701099c2c7f497f9a8964",
   "status": "blocked"
 }

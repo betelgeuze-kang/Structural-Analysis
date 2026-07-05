@@ -480,13 +480,13 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-05T16:58:25.979571+00:00",
+  "generated_at": "2026-07-05T17:23:01.446406+00:00",
   "input_checksums": {
     ".github/workflows/dp-windows-parity.yml": "sha256:1a25e658ec3fabfa5fee9fcdaee8c708b145989df373759424eea78914c4e5cd",
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:60f84a0359453d9ee78f986a04d1d93338e8e56cf9cf5ea50852628ca3f8cdc6",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:16e36f318a0f7030a0f79b78d4a63cc5b57873c6899e208ffdeea598b89ee21c",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:2d8ec6ac75d210af270cbb3dc04686889324695216ea1544c5d75d4741dd6ef9",
-    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:6f0896a6e5e46d85c845e60a9ff8f61bb75327e6759abacd47b3a6cba8ad9b9d",
+    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:b3772f2c4b697eac0a0c140fd5c8ab5e08f7dfe3aaa18bc58423dc162870b70e",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:d2378d95155a66e3cfa3b48424b04a1d0a841cb098cac78d3ee7edc7f71cec91",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:500f9bbd82c6983a2a5e0ac22afa21f92c6ade3bc399e7e08a52c665268091e3",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:2c8e8f61015ac45c829d2c585da1fce9c33745ecb7be9c8c274fd8c4053ac41a",
@@ -3237,6 +3237,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "69b48f05ad9a68056ae55bdb3e2092cf4f04d0de",
+  "source_commit_sha": "777e42c7b97d4670726701099c2c7f497f9a8964",
   "status": "blocked"
 }
