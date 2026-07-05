@@ -453,6 +453,86 @@ def test_state_updated_material_path_histories_carry_committed_state() -> None:
             assert result.metrics["g1_closure_claim"] is False
 
 
+def test_state_updated_frame_shell_coupled_load_step_history_carries_component_states() -> None:
+    from structural_analysis.assembly.g1_contract import (
+        assemble_g1_state,
+        direct_residual_newton_parity_check,
+        finite_difference_g1_jvp_check,
+    )
+    from structural_analysis.assembly.material_state import (
+        assemble_state_updated_frame_shell_coupled_material_state,
+        check_frame_shell_coupled_material_load_step_replay,
+        frame_shell_coupled_material_load_step_checkpoint_payload,
+        solve_state_updated_frame_shell_coupled_material_load_step_history,
+    )
+    from structural_analysis.solvers.nonlinear.newton import NewtonRaphsonConfig
+
+    history = solve_state_updated_frame_shell_coupled_material_load_step_history(
+        config=NewtonRaphsonConfig(
+            residual_tolerance=1.0e-10,
+            increment_tolerance=1.0e-12,
+            max_iterations=25,
+        )
+    )
+
+    assert history.history_id == "frame_shell_coupled_material_load_step_reversal_history"
+    assert len(history.steps) == 4
+    assert history.committed_component_state_chain_pass is True
+    assert history.path_dependent_update_step_count == 4
+    checkpoint = frame_shell_coupled_material_load_step_checkpoint_payload(history)
+    replay = check_frame_shell_coupled_material_load_step_replay(
+        json.loads(json.dumps(checkpoint, ensure_ascii=False))
+    )
+    assert replay["pass"] is True
+    assert replay["step_count"] == 4
+    assert replay["step_replay_pass"] is True
+    assert replay["committed_component_state_chain_replay_pass"] is True
+    assert replay["component_material_state_replay_match"] is True
+
+    return_mappings = []
+    for step in history.steps:
+        result = assemble_g1_state(step.problem, step.state)
+        jvp_check = finite_difference_g1_jvp_check(
+            lambda free_u, problem=step.problem: assemble_g1_state(
+                problem,
+                assemble_state_updated_frame_shell_coupled_material_state(
+                    problem,
+                    free_u,
+                ),
+            ),
+            step.solution.free_displacements_m,
+        )
+        newton_parity = direct_residual_newton_parity_check(
+            lambda free_u, problem=step.problem: assemble_g1_state(
+                problem,
+                assemble_state_updated_frame_shell_coupled_material_state(
+                    problem,
+                    free_u,
+                ),
+            ),
+            step.solution,
+        )
+        material_state = result.material_state_next
+        return_mappings.append(
+            (
+                material_state["component_return_mappings"]["frame"],
+                material_state["component_return_mappings"]["shell"],
+            )
+        )
+        assert step.previous_component_committed_state_matches_carried_state is True
+        assert material_state["frame_shell_state_updated_material_coupling"] is True
+        assert result.metrics["g1_closure_claim"] is False
+        assert jvp_check["pass"] is True
+        assert newton_parity["cpu_seed_consistent_newton_gate_passed"] is True
+
+    assert return_mappings == [
+        ("plastic_corrector", "plastic_corrector"),
+        ("elastic_trial_state", "elastic_trial_state"),
+        ("plastic_corrector", "plastic_corrector"),
+        ("elastic_trial_state", "elastic_trial_state"),
+    ]
+
+
 def test_g1_assembly_contract_rejects_fixed_point_physical_residual_substitute() -> None:
     from structural_analysis.assembly.g1_contract import AssemblyResult
 
@@ -558,7 +638,40 @@ def test_g1_assembly_contract_seed_report_is_non_promoting_ready_receipt() -> No
         payload["state_updated_frame_shell_coupled_material_direct_parity_pass"]
         is True
     )
-    assert payload["case_count"] == 19
+    assert payload["state_updated_frame_shell_coupled_load_step_history_passed"] is True
+    assert payload["state_updated_frame_shell_coupled_load_step_history_step_count"] == 4
+    assert (
+        payload[
+            "state_updated_frame_shell_coupled_load_step_history_update_step_count"
+        ]
+        == 4
+    )
+    assert (
+        payload[
+            "state_updated_frame_shell_coupled_load_step_history_checkpoint_replay_pass"
+        ]
+        is True
+    )
+    assert (
+        payload[
+            "state_updated_frame_shell_coupled_load_step_history_chain_replay_pass"
+        ]
+        is True
+    )
+    assert payload["state_updated_frame_shell_coupled_load_step_history_jvp_pass"] is True
+    assert (
+        payload[
+            "state_updated_frame_shell_coupled_load_step_history_direct_parity_pass"
+        ]
+        is True
+    )
+    assert (
+        payload["state_updated_frame_shell_coupled_load_step_history_replay_check"][
+            "pass"
+        ]
+        is True
+    )
+    assert payload["case_count"] == 23
     assert all(row["contract_pass"] is True for row in payload["cases"])
     material_cases = [
         row
@@ -568,12 +681,12 @@ def test_g1_assembly_contract_seed_report_is_non_promoting_ready_receipt() -> No
         )
         is True
     ]
-    assert len(material_cases) == 17
+    assert len(material_cases) == 21
     material_states = [
         row["assembly_result"]["material_state_next"] for row in material_cases
     ]
     assert all(row["state_updated_material_newton"] is True for row in material_states)
-    assert sum(row["path_dependent_state_updated"] is True for row in material_states) == 11
+    assert sum(row["path_dependent_state_updated"] is True for row in material_states) == 13
     one_dof_material_states = [
         row for row in material_states if "return_mapping" in row
     ]
@@ -586,11 +699,16 @@ def test_g1_assembly_contract_seed_report_is_non_promoting_ready_receipt() -> No
         for row in material_states
         if row.get("frame_shell_state_updated_material_coupling") is True
     ]
-    assert len(coupled_material_states) == 1
-    assert coupled_material_states[0]["component_return_mappings"] == {
-        "frame": "plastic_corrector",
-        "shell": "plastic_corrector",
-    }
+    assert len(coupled_material_states) == 5
+    assert [
+        row["component_return_mappings"] for row in coupled_material_states
+    ] == [
+        {"frame": "plastic_corrector", "shell": "plastic_corrector"},
+        {"frame": "plastic_corrector", "shell": "plastic_corrector"},
+        {"frame": "elastic_trial_state", "shell": "elastic_trial_state"},
+        {"frame": "plastic_corrector", "shell": "plastic_corrector"},
+        {"frame": "elastic_trial_state", "shell": "elastic_trial_state"},
+    ]
     path_history_cases = [
         row for row in material_cases if "material_path_history" in row
     ]
@@ -605,6 +723,24 @@ def test_g1_assembly_contract_seed_report_is_non_promoting_ready_receipt() -> No
     assert all(
         row["material_path_history"]["history_chain_replay_pass"] is True
         for row in path_history_cases
+    )
+    coupled_load_step_cases = [
+        row
+        for row in material_cases
+        if "frame_shell_coupled_load_step_history" in row
+    ]
+    assert len(coupled_load_step_cases) == 4
+    assert all(
+        row["frame_shell_coupled_load_step_history"][
+            "previous_component_committed_state_matches_carried_state"
+        ]
+        is True
+        for row in coupled_load_step_cases
+    )
+    assert all(
+        row["frame_shell_coupled_load_step_history"]["history_chain_replay_pass"]
+        is True
+        for row in coupled_load_step_cases
     )
     assert all(
         row["material_state_persistence_replay_check"]["pass"] is True

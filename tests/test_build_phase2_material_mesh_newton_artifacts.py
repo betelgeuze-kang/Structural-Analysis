@@ -52,6 +52,29 @@ def test_phase2_material_mesh_newton_builds_honest_seed_artifacts() -> None:
     assert summary["broad_material_path_history_chain_replay_pass"] is True
     assert summary["broad_material_path_history_whole_checkpoint_replay_pass"] is True
     assert summary["broad_material_frame_shell_coupled_seed_pass"] is True
+    assert summary["broad_material_frame_shell_coupled_load_step_history_pass"] is True
+    assert (
+        summary[
+            "broad_material_frame_shell_coupled_load_step_history_chain_replay_pass"
+        ]
+        is True
+    )
+    assert (
+        summary[
+            "broad_material_frame_shell_coupled_load_step_history_checkpoint_replay_pass"
+        ]
+        is True
+    )
+    assert (
+        summary["broad_material_frame_shell_coupled_load_step_history_jvp_pass"]
+        is True
+    )
+    assert (
+        summary[
+            "broad_material_frame_shell_coupled_load_step_history_direct_parity_pass"
+        ]
+        is True
+    )
     assert summary["broad_material_state_persistence_replay_seed_passed"] is True
     assert summary["broad_material_jvp_relative_error_pass"] is True
     assert summary["broad_material_closure_claim"] is False
@@ -85,6 +108,20 @@ def test_phase2_material_mesh_newton_builds_honest_seed_artifacts() -> None:
     assert cross_check["path_history_chain_replay_pass"] is True
     assert cross_check["path_history_whole_checkpoint_replay_pass"] is True
     assert cross_check["frame_shell_coupled_material_seed_pass"] is True
+    assert cross_check["frame_shell_coupled_load_step_history_pass"] is True
+    assert (
+        cross_check["frame_shell_coupled_load_step_history_chain_replay_pass"]
+        is True
+    )
+    assert (
+        cross_check["frame_shell_coupled_load_step_history_checkpoint_replay_pass"]
+        is True
+    )
+    assert cross_check["frame_shell_coupled_load_step_history_jvp_pass"] is True
+    assert (
+        cross_check["frame_shell_coupled_load_step_history_direct_parity_pass"]
+        is True
+    )
     assert cross_check["broad_material_closure_claim"] is False
     assert cross_check["cross_check_pass"] is True
 
