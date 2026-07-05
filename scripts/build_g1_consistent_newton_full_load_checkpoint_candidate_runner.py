@@ -235,6 +235,9 @@ DEFAULT_PHASE2_MATERIAL_NEWTON_BREADTH_SUMMARY = (
 DEFAULT_PHASE2_MATERIAL_NEWTON_BREADTH_STATE_UPDATED_SEEDS = (
     PRODUCTIZATION / "phase2_material_newton_breadth_state_updated_seeds.json"
 )
+DEFAULT_PHASE2_MATERIAL_MESH_NEWTON_SUMMARY = (
+    PRODUCTIZATION / "phase2_material_mesh_newton_summary.json"
+)
 DEFAULT_OUT = PRODUCTIZATION / "g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_SOLVER_HIP_E2E = Path(
@@ -3190,6 +3193,9 @@ def build_runner_packet(
     phase2_material_newton_breadth_state_updated_seeds_path: Path = (
         DEFAULT_PHASE2_MATERIAL_NEWTON_BREADTH_STATE_UPDATED_SEEDS
     ),
+    phase2_material_mesh_newton_summary_path: Path = (
+        DEFAULT_PHASE2_MATERIAL_MESH_NEWTON_SUMMARY
+    ),
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     g1_lane = _load_json(repo_root, g1_lane_path)
@@ -3214,6 +3220,10 @@ def build_runner_packet(
     phase2_material_newton_breadth_state_updated_seeds = _load_json(
         repo_root,
         phase2_material_newton_breadth_state_updated_seeds_path,
+    )
+    phase2_material_mesh_newton_summary = _load_json(
+        repo_root,
+        phase2_material_mesh_newton_summary_path,
     )
     global_connectivity = _load_json(repo_root, global_connectivity_path)
     assembly_contract_seed = _load_json(repo_root, assembly_contract_seed_path)
@@ -3877,6 +3887,7 @@ def build_runner_packet(
                 current_frontier_operator_mismatch_audit_path,
                 phase2_material_newton_breadth_summary_path,
                 phase2_material_newton_breadth_state_updated_seeds_path,
+                phase2_material_mesh_newton_summary_path,
             ],
             reused_evidence=True,
             reuse_policy=(
@@ -5448,6 +5459,35 @@ def build_runner_packet(
                 )
                 is True
             ),
+            "phase2_material_mesh_newton_ready": (
+                phase2_material_mesh_newton_summary.get("contract_pass") is True
+            ),
+            "phase2_material_mesh_newton_load_step_gate_passed": (
+                phase2_material_mesh_newton_summary.get("load_step_gate_passed")
+                is True
+            ),
+            "phase2_material_mesh_newton_refinement_gate_passed": (
+                phase2_material_mesh_newton_summary.get(
+                    "narrow_mesh_refinement_gate_passed"
+                )
+                is True
+            ),
+            "phase2_material_mesh_newton_sparse_cpu_equivalence_passed": (
+                phase2_material_mesh_newton_summary.get(
+                    "narrow_sparse_backend_equivalence_gate_passed"
+                )
+                is True
+            ),
+            "phase2_material_mesh_newton_full_mesh_closure_claim": (
+                phase2_material_mesh_newton_summary.get("full_mesh_closure_claim")
+                is True
+            ),
+            "phase2_material_mesh_newton_broad_material_closure_claim": (
+                phase2_material_mesh_newton_summary.get(
+                    "material_newton_closure_claim"
+                )
+                is True
+            ),
             "row_only_correction_loop_stopped": _row_only_loop_stopped(
                 cause_narrowing,
                 action,
@@ -5532,6 +5572,7 @@ def build_runner_packet(
                     .as_posix()
                 ),
                 sparse_direct_scaled_lsmr_frontier_probe_path.as_posix(),
+                phase2_material_mesh_newton_summary_path.as_posix(),
             ],
             "acceptance_criteria": [
                 "g1_assembly_contract_seed_report_contract_passes",
@@ -5750,6 +5791,7 @@ def build_runner_packet(
         "phase2_material_newton_breadth_state_updated_seeds": (
             phase2_material_newton_breadth_state_updated_seeds
         ),
+        "phase2_material_mesh_newton_summary": phase2_material_mesh_newton_summary,
         "hip_worker_contract": {
             "worker_id": str(worker.get("worker_id") or ""),
             "residual_jvp_worker_path_ready": worker.get(
@@ -5965,6 +6007,9 @@ def build_runner_packet(
             "phase2_material_newton_breadth_state_updated_seeds": (
                 phase2_material_newton_breadth_state_updated_seeds_path.as_posix()
             ),
+            "phase2_material_mesh_newton_summary": (
+                phase2_material_mesh_newton_summary_path.as_posix()
+            ),
         },
         "claim_boundary": (
             "This packet defines the next G1 runner contract for generating a "
@@ -6026,6 +6071,7 @@ def _markdown(payload: dict[str, Any]) -> str:
     material_seed_suite = _as_dict(
         payload.get("phase2_material_newton_breadth_state_updated_seeds")
     )
+    material_mesh = _as_dict(payload.get("phase2_material_mesh_newton_summary"))
     frame_eps_sweep = _as_dict(payload.get("frame_tangent_fd_epsilon_sweep"))
     mu_sweep = _as_dict(payload.get("true_newton_from_active_set_mu_sweep"))
     load_param = _as_dict(payload.get("active_set_load_parameter_probe"))
@@ -6214,6 +6260,12 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"`{material_breadth.get('state_updated_material_newton_seed_case_count')}`",
         "- `phase2_state_updated_material_breadth_closed`: "
         f"`{material_breadth.get('state_updated_material_newton_breadth_closed')}`",
+        "- `phase2_material_mesh_newton_load_step_gate_passed`: "
+        f"`{material_mesh.get('load_step_gate_passed')}`",
+        "- `phase2_material_mesh_newton_sparse_cpu_equivalence_passed`: "
+        f"`{material_mesh.get('narrow_sparse_backend_equivalence_gate_passed')}`",
+        "- `phase2_material_mesh_newton_full_mesh_closure_claim`: "
+        f"`{material_mesh.get('full_mesh_closure_claim')}`",
         f"- `worker_path_ready`: `{hip.get('residual_jvp_worker_path_ready')}`",
         f"- `worker_g1_closure_gate_ready`: `{hip.get('g1_closure_gate_ready')}`",
         f"- `assembly_contract_seed_ready`: `{assembly.get('contract_pass')}`",
@@ -7801,6 +7853,9 @@ def write_runner_packet(
     phase2_material_newton_breadth_state_updated_seeds_path: Path = (
         DEFAULT_PHASE2_MATERIAL_NEWTON_BREADTH_STATE_UPDATED_SEEDS
     ),
+    phase2_material_mesh_newton_summary_path: Path = (
+        DEFAULT_PHASE2_MATERIAL_MESH_NEWTON_SUMMARY
+    ),
     out: Path = DEFAULT_OUT,
     out_md: Path = DEFAULT_OUT_MD,
 ) -> dict[str, Any]:
@@ -7960,6 +8015,9 @@ def write_runner_packet(
         ),
         phase2_material_newton_breadth_state_updated_seeds_path=(
             phase2_material_newton_breadth_state_updated_seeds_path
+        ),
+        phase2_material_mesh_newton_summary_path=(
+            phase2_material_mesh_newton_summary_path
         ),
     )
     resolved_out = _resolve(repo_root, out)
@@ -8217,6 +8275,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_PHASE2_MATERIAL_NEWTON_BREADTH_STATE_UPDATED_SEEDS,
     )
+    parser.add_argument(
+        "--phase2-material-mesh-newton-summary",
+        type=Path,
+        default=DEFAULT_PHASE2_MATERIAL_MESH_NEWTON_SUMMARY,
+    )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
     parser.add_argument("--json", action="store_true")
@@ -8358,6 +8421,9 @@ def main(argv: list[str] | None = None) -> int:
         ),
         phase2_material_newton_breadth_state_updated_seeds_path=(
             args.phase2_material_newton_breadth_state_updated_seeds
+        ),
+        phase2_material_mesh_newton_summary_path=(
+            args.phase2_material_mesh_newton_summary
         ),
         out=args.out,
         out_md=args.out_md,

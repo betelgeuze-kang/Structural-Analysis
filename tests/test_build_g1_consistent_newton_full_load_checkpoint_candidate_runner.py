@@ -370,6 +370,28 @@ def _phase2_material_newton_breadth_state_updated_seeds_payload() -> dict:
     }
 
 
+def _phase2_material_mesh_newton_summary_payload() -> dict:
+    return {
+        "schema_version": "phase2-material-mesh-newton-artifacts.v1",
+        "status": "ready",
+        "contract_pass": True,
+        "g1_closure_claim": False,
+        "material_newton_closure_claim": False,
+        "full_mesh_closure_claim": False,
+        "load_step_gate_passed": True,
+        "narrow_mesh_refinement_gate_passed": True,
+        "narrow_sparse_backend_equivalence_gate_passed": True,
+        "sparse_backend_equivalence_matrix_backend": "scipy_sparse_spsolve_cpu",
+        "blockers_remaining": [
+            "full_mesh_full_load_nonlinear_equilibrium_not_closed",
+            "broad_material_newton_breadth_not_closed",
+        ],
+        "claim_boundary": (
+            "Tiny material mesh Newton fixture; not a G1 full-mesh closure."
+        ),
+    }
+
+
 def _true_newton_load_sweep_payload() -> dict:
     return {
         "schema_version": "g1-true-newton-load-sweep-status.v1",
@@ -2542,6 +2564,9 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
         "phase2_material_newton_breadth_state_updated_seeds": (
             tmp_path / runner.DEFAULT_PHASE2_MATERIAL_NEWTON_BREADTH_STATE_UPDATED_SEEDS
         ),
+        "phase2_material_mesh_newton_summary": (
+            tmp_path / runner.DEFAULT_PHASE2_MATERIAL_MESH_NEWTON_SUMMARY
+        ),
     }
     _write_json(paths["g1_lane"], _g1_lane_payload(action_id=action_id))
     _write_json(paths["cause"], _cause_narrowing_payload())
@@ -2723,6 +2748,10 @@ def _write_inputs(tmp_path: Path, *, action_id: str | None = runner.RUNNER_ID) -
     _write_json(
         paths["phase2_material_newton_breadth_state_updated_seeds"],
         _phase2_material_newton_breadth_state_updated_seeds_payload(),
+    )
+    _write_json(
+        paths["phase2_material_mesh_newton_summary"],
+        _phase2_material_mesh_newton_summary_payload(),
     )
     return paths
 
@@ -3715,12 +3744,46 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     assert payload["phase2_material_newton_breadth_state_updated_seeds"][
         "state_updated_material_newton_seed_case_count"
     ] == 9
+    assert payload["summary"]["phase2_material_mesh_newton_ready"] is True
+    assert (
+        payload["summary"]["phase2_material_mesh_newton_load_step_gate_passed"]
+        is True
+    )
+    assert (
+        payload["summary"]["phase2_material_mesh_newton_refinement_gate_passed"]
+        is True
+    )
+    assert (
+        payload["summary"][
+            "phase2_material_mesh_newton_sparse_cpu_equivalence_passed"
+        ]
+        is True
+    )
+    assert (
+        payload["summary"]["phase2_material_mesh_newton_full_mesh_closure_claim"]
+        is False
+    )
+    assert (
+        payload["summary"][
+            "phase2_material_mesh_newton_broad_material_closure_claim"
+        ]
+        is False
+    )
+    assert payload["phase2_material_mesh_newton_summary"][
+        "load_step_gate_passed"
+    ] is True
+    assert payload["phase2_material_mesh_newton_summary"][
+        "narrow_sparse_backend_equivalence_gate_passed"
+    ] is True
     assert payload["artifacts"]["phase2_material_newton_breadth_summary"].endswith(
         "phase2_material_newton_breadth_summary.json"
     )
     assert payload["artifacts"][
         "phase2_material_newton_breadth_state_updated_seeds"
     ].endswith("phase2_material_newton_breadth_state_updated_seeds.json")
+    assert payload["artifacts"]["phase2_material_mesh_newton_summary"].endswith(
+        "phase2_material_mesh_newton_summary.json"
+    )
     assert payload["hip_required_full_load_residual_jvp_frontier"]["load_scale"] == 1.0
     assert payload["hip_required_full_load_residual_jvp_frontier"][
         "final_direct_residual_inf_n"
