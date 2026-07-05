@@ -4,13 +4,12 @@
     "phase1_core_api_contract": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
     "product_readiness_snapshot": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
   },
-  "blocker_count": 32,
+  "blocker_count": 31,
   "blockers": [
     "g1::full_load_gate_not_closed",
     "g1::full_mesh_nonlinear_equilibrium_not_closed",
     "g1::material_newton_breadth_not_closed",
     "g1::production_rocm_hip_residency_not_closed",
-    "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
     "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
     "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed",
     "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed:validation_command_exit_1",
@@ -91,13 +90,12 @@
     },
     "numerical": {
       "blocked": true,
-      "blocker_count": 6,
+      "blocker_count": 5,
       "blockers": [
         "g1::full_load_gate_not_closed",
         "g1::full_mesh_nonlinear_equilibrium_not_closed",
         "g1::material_newton_breadth_not_closed",
         "g1::production_rocm_hip_residency_not_closed",
-        "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
         "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report"
       ]
     },
@@ -253,7 +251,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-07-05T14:39:08.681682+00:00",
+  "generated_at": "2026-07-05T15:05:53.888960+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -272,11 +270,11 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:063db734461ab603062272d667902f3d5377fc1a887bee8cc3159bc98e12c178",
+      "input_checksum": "sha256:d537a472e2230fece1adfca2c6b9b1cd9db13794ec7f4a6e3d24865d0ae82763",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "6a4085c424e821cd29b2620dfb4d604198d5936e",
+      "source_commit_sha": "a5b4da5969ad25c05bdce187a351e113ee857346",
       "status": "stale_or_inconsistent"
     }
   },
@@ -284,7 +282,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:01911ef80b1cd08db6b03d5570ebb919d12287be47b550129ecf1a0b39b71b6a",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:063db734461ab603062272d667902f3d5377fc1a887bee8cc3159bc98e12c178"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:d537a472e2230fece1adfca2c6b9b1cd9db13794ec7f4a6e3d24865d0ae82763"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "stale_or_inconsistent",
@@ -438,6 +436,7 @@
           "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_gate_not_passed": "g1::material_newton_breadth_not_closed",
           "g1_full_load_lane::hip_consistency_proof_has_blockers": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed": "g1::material_newton_breadth_not_closed",
           "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready": "g1::material_newton_breadth_not_closed",
           "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready": "g1::production_rocm_hip_residency_not_closed",
@@ -469,11 +468,11 @@
           {
             "active": true,
             "closure_dimension": "gpu_hip_followup_performance_and_residency",
-            "represented_detail_blocker_count": 5,
+            "represented_detail_blocker_count": 6,
             "root_blocker": "g1::production_rocm_hip_residency_not_closed"
           }
         ],
-        "suppressed_detail_blocker_count": 17,
+        "suppressed_detail_blocker_count": 18,
         "unmatched_detail_blockers": []
       },
       "cause_narrowing_claim_boundary": "This receipt narrows the next G1 diagnostic direction from existing F2g/F2h evidence. It does not close G1, promote full-load 1.0, or prove production ROCm/HIP residency.",
@@ -577,6 +576,7 @@
         "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_gate_not_passed": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_has_blockers": "g1::*",
+        "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready": "g1::*",
         "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready": "g1::*",
@@ -1793,10 +1793,14 @@
         "blockers": [
           "hip_consistency_proof_gate_not_passed",
           "hip_consistency_proof_has_blockers",
+          "hip_consistency_proof_source_commit_sha_mismatch",
           "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
           "hip_consistency_proof_worker_g1_closure_gate_not_ready"
         ],
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+        ],
         "consistent_residual_jacobian_newton_gate_passed": false,
         "cpu_diagnostic_assembler_used": false,
         "execution_mode": "hip_required_direct_probe_no_cpu_fallback",
@@ -1832,8 +1836,8 @@
         "rocm_hip_required": true,
         "runtime_blockers": [],
         "source_commit_sha": "54123a5200d97300eb2a8dd4f7ed75c805159527",
-        "source_state_fresh": true,
-        "source_state_kind": "exact",
+        "source_state_fresh": false,
+        "source_state_kind": "g1_hip_paths_changed",
         "status": "partial"
       },
       "full_load_hip_newton_hip_consistency_proof_ready": false,
@@ -1845,7 +1849,7 @@
       "full_load_hip_newton_lane_reused_evidence": false,
       "full_load_hip_newton_lane_status": "blocked",
       "full_mesh_full_load_ready": false,
-      "suppressed_detail_blocker_count": 17,
+      "suppressed_detail_blocker_count": 18,
       "suppressed_detail_blockers": [
         "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven",
         "g1_full_load_lane::child_current_tangent_residual_row_component_missing",
@@ -1860,6 +1864,7 @@
         "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready",
         "g1_full_load_lane::hip_consistency_proof_gate_not_passed",
         "g1_full_load_lane::hip_consistency_proof_has_blockers",
+        "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch",
         "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
         "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready",
         "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready",
@@ -1976,7 +1981,7 @@
       },
       "release freshness/sync": {
         "blocked": true,
-        "blocker_count": 26,
+        "blocker_count": 25,
         "blockers": [
           "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
           "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
@@ -1988,7 +1993,6 @@
           "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
           "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
           "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
-          "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
           "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
           "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
           "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
@@ -2209,6 +2213,6 @@
       }
     }
   },
-  "source_commit_sha": "cdbe88c95142b662af1a57644a1cd385b1e1947c",
+  "source_commit_sha": "a5b4da5969ad25c05bdce187a351e113ee857346",
   "status": "blocked"
 }

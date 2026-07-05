@@ -758,6 +758,7 @@
   },
   "claim_boundary": "This packet defines the next G1 runner contract for generating a consistent residual/Jacobian Newton full-load checkpoint candidate. It does not create the checkpoint, close the consistent Newton gate, prove full-load 1.0 equilibrium, promote G1 closure, or allow an exhausted row-only support/link retuning loop to count as progress.",
   "closure_blockers": [
+    "hip_consistency_proof_source_commit_sha_mismatch",
     "hip_consistency_proof_gate_not_passed",
     "hip_consistency_proof_worker_g1_closure_gate_not_ready",
     "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
@@ -929,7 +930,7 @@
     "residual_inf_n": 0.42740724991695345,
     "status": "ready"
   },
-  "generated_at": "2026-07-05T14:38:45.839565+00:00",
+  "generated_at": "2026-07-05T14:48:30.457179+00:00",
   "global_tangent_scaled_sweep": {
     "base_residual_inf_n": 0.4278304040181992,
     "best_alpha": 0.00390625,
@@ -1214,9 +1215,9 @@
     "implementation/phase1/release_evidence/productization/g1_adaptive_fixed_signed_all_components_from_structural_shell_jvp_probe.json": "sha256:1f50ad798a79bccf5a36b3f3fe4306ea17ab4305eca998703f41ae849b88da5e",
     "implementation/phase1/release_evidence/productization/g1_assembly_contract_seed_report.json": "sha256:58d6fb85198d66f9045b31b589ad2533d520d7f9fccf0a27f2dda6be77f4bc12",
     "implementation/phase1/release_evidence/productization/g1_current_frontier_operator_mismatch_audit.json": "sha256:0868801f649300a959a5d8fecafc0de5243e9961e44aa182c41ce16110380c54",
-    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:10f9562a12a617784795532db5efd7a59e9d9b6479e33c9fc0a622b213c66570",
+    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:6034790aeb8e791a760398fa5766f6d8d51357723ce946eb792782a9e0056096",
     "implementation/phase1/release_evidence/productization/g1_frame_tangent_fd_epsilon_sweep_probe.json": "sha256:81c2ad32a078db886d09c6637cd7d1369719d2ed6c8f5fac88ae5ac410c4291d",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:019e1db2e3a6774821c5f8679ab26ad1b4caf889b5fe9ddba5bfa49e4581a1a1",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:4ba9abcaaf01c993e6aa5dd536193ecbb48e3ce1cc9cb82902caf1f0565b0c0a",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:42f77c9c6856a124859510d049d0419cf5fa41a7d71e8f15f2f8c883f7301c73",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_ilu_probe.json": "sha256:e6582053c0d7dc2c99c3737f0c7ffa94579855a5520cdb416efc2abd01aa3ee9",
     "implementation/phase1/release_evidence/productization/g1_mgt_sparse_direct_adaptive_jvp_eps_gmres_matrix_free_probe.json": "sha256:83a0e92b346a14a6f8833bb39b572437f405fdafe62e631d55da9d7c7c3fa4da",
@@ -1958,7 +1959,7 @@
     "row_count": 8,
     "status": "ready"
   },
-  "source_commit_sha": "cdbe88c95142b662af1a57644a1cd385b1e1947c",
+  "source_commit_sha": "a5b4da5969ad25c05bdce187a351e113ee857346",
   "sparse_direct_adaptive_jvp_eps_gmres_ilu_probe": {
     "assembled_tangent_parity_max_absolute_error": 0.006011962890625,
     "assembled_tangent_parity_max_relative_error": 2.683381287585585e-15,
@@ -2585,7 +2586,7 @@
     "adaptive_all_components_frontier_residual_gate_passed": false,
     "assembly_contract_cpu_seed_newton_gate_passed": true,
     "assembly_contract_seed_ready": true,
-    "closure_blocker_count": 13,
+    "closure_blocker_count": 14,
     "consistent_residual_jacobian_newton_gate_passed": false,
     "contract_blocker_count": 0,
     "contract_pass": true,
@@ -2807,7 +2808,7 @@
     "worker_path_repair_category_count": 0,
     "worker_path_repair_next_action_id": "rerun_g1_full_load_hip_newton_lane"
   },
-  "summary_line": "G1 consistent Newton full-load runner contract: READY_FOR_RUNNER_IMPLEMENTATION | contract_pass=True | observed_load=1/1 | closure_blockers=13",
+  "summary_line": "G1 consistent Newton full-load runner contract: READY_FOR_RUNNER_IMPLEMENTATION | contract_pass=True | observed_load=1/1 | closure_blockers=14",
   "true_newton_frame_tangent_source_comparison": {
     "both_dominant_gap_component_frame": true,
     "both_line_search_no_descent": true,

@@ -667,6 +667,23 @@ def test_partial_hip_consistency_proof_blocks_lane_promotion(
         ]
         == "consistent_residual_jacobian_newton_rocm_worker"
     )
+    deferred_child = next_actions[
+        "defer_full_load_child_direct_probe_until_upstream_gates_close"
+    ]
+    assert deferred_child["promotes_g1_closure"] is False
+    assert deferred_child["upstream_blocking_requirement_ids"] == [
+        "hip_consistent_residual_jacobian_newton_proof",
+        "production_rocm_hip_residual_jvp_worker",
+    ]
+    assert (
+        "child_material_newton_breadth_not_proven"
+        in deferred_child["required_child_gate_blockers"]
+    )
+    assert (
+        "child_global_krylov_component_missing"
+        in deferred_child["required_hip_refresh_blockers"]
+    )
+    assert "run_full_load_child_direct_probe_with_hip_refresh" not in next_actions
     assert payload["child_exit_code"] is None
     assert not child.exists()
 
@@ -1360,6 +1377,62 @@ def test_hip_proof_non_receipt_source_commit_still_blocks(
     assert summary["changed_paths_since_source_commit"] == [
         "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
     ]
+
+
+def test_child_probe_defers_until_production_worker_gate_is_ready(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+        gate_passed=True,
+        worker_contract={
+            "schema_version": "production-rocm-hip-residual-jvp-worker-contract.v1",
+            "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
+            "ready": False,
+            "status": "blocked",
+            "blockers": [],
+            "residual_jvp_worker_path_ready": True,
+            "residual_jvp_worker_path_blockers": [],
+            "g1_closure_gate_ready": False,
+            "g1_closure_gate_blockers": [
+                "consistent_residual_jacobian_newton_gate_not_passed"
+            ],
+            "required_for_g1_closure": True,
+            "promotes_g1_closure": False,
+            "cpu_fallback_allowed": False,
+        },
+    )
+
+    def fake_run(command: list[str], *, check: bool) -> None:
+        raise AssertionError("child probe must not run before worker gate is ready")
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    next_actions = {row["id"]: row for row in payload["lane_next_actions"]}
+    deferred_child = next_actions[
+        "defer_full_load_child_direct_probe_until_upstream_gates_close"
+    ]
+    assert deferred_child["upstream_blocking_requirement_ids"] == [
+        "production_rocm_hip_residual_jvp_worker"
+    ]
+    assert deferred_child["promotes_g1_closure"] is False
+    assert "run_full_load_child_direct_probe_with_hip_refresh" not in next_actions
+    assert payload["child_exit_code"] is None
+    assert not child.exists()
 
 
 def test_hip_proof_unrelated_release_helpers_do_not_stale_g1_lane(

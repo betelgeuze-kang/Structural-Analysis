@@ -1058,6 +1058,14 @@ def _g1_lane_next_actions(
         )
     worker = hip_consistency_proof.get("production_rocm_hip_residual_jvp_worker")
     worker = worker if isinstance(worker, dict) else {}
+    worker_ready = bool(
+        worker.get("ready") is True
+        and worker.get("residual_jvp_worker_path_ready") is True
+        and worker.get("g1_closure_gate_ready") is True
+        and not _string_list(worker.get("blockers"))
+        and not _string_list(worker.get("residual_jvp_worker_path_blockers"))
+        and not _string_list(worker.get("g1_closure_gate_blockers"))
+    )
     if hip_consistency_proof.get("source_state_fresh") is False:
         actions.append(
             {
@@ -1136,26 +1144,56 @@ def _g1_lane_next_actions(
                 }
             )
         actions.append(action)
+    child_gate_blockers = _string_list(child_gate_evidence.get("blockers"))
+    child_hip_refresh_blockers = _string_list(
+        child_hip_residual_refresh_evidence.get("blockers")
+    )
+    child_probe_ready = bool(
+        child_gate_evidence.get("ready") is True
+        and child_hip_residual_refresh_evidence.get("ready") is True
+    )
+    child_upstream_blockers: list[str] = []
+    if checkpoint_resolution_gate.get("passed") is not True:
+        child_upstream_blockers.append("full_load_checkpoint_1p0")
+    if (
+        hip_consistency_proof.get("consistent_residual_jacobian_newton_gate_passed")
+        is not True
+    ):
+        child_upstream_blockers.append(
+            "hip_consistent_residual_jacobian_newton_proof"
+        )
+    if not worker_ready:
+        child_upstream_blockers.append("production_rocm_hip_residual_jvp_worker")
+    if (
+        checkpoint_resolution_gate.get("passed") is True
+        and child_upstream_blockers
+        and not child_probe_ready
+    ):
+        actions.append(
+            {
+                "id": "defer_full_load_child_direct_probe_until_upstream_gates_close",
+                "reason": "child_direct_probe_deferred_upstream_blocked",
+                "upstream_blocking_requirement_ids": child_upstream_blockers,
+                "command": command,
+                "required_child_gate_blockers": child_gate_blockers,
+                "required_hip_refresh_blockers": child_hip_refresh_blockers,
+                "promotes_g1_closure": False,
+            }
+        )
     if (
         checkpoint_resolution_gate.get("passed") is True
         and hip_consistency_proof.get("consistent_residual_jacobian_newton_gate_passed")
         is True
-        and (
-            child_gate_evidence.get("ready") is not True
-            or child_hip_residual_refresh_evidence.get("ready") is not True
-        )
+        and worker_ready
+        and not child_probe_ready
     ):
         actions.append(
             {
                 "id": "run_full_load_child_direct_probe_with_hip_refresh",
                 "reason": "child_direct_probe_evidence_missing_or_blocked",
                 "command": command,
-                "required_child_gate_blockers": _string_list(
-                    child_gate_evidence.get("blockers")
-                ),
-                "required_hip_refresh_blockers": _string_list(
-                    child_hip_residual_refresh_evidence.get("blockers")
-                ),
+                "required_child_gate_blockers": child_gate_blockers,
+                "required_hip_refresh_blockers": child_hip_refresh_blockers,
             }
         )
     actions.append(

@@ -48,6 +48,7 @@
     {
       "classification": "required_for_production_residency",
       "evidence": [
+        "hip_consistency_proof_source_commit_sha_mismatch",
         "hip_consistency_proof_gate_not_passed",
         "hip_consistency_proof_worker_g1_closure_gate_not_ready",
         "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
@@ -82,6 +83,7 @@
       "g1_closure::full_load_1p0_checkpoint_candidate_missing",
       "g1_closure::consistent_residual_jacobian_newton_required",
       "g1_closure::production_rocm_hip_residual_jvp_worker_required",
+      "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch",
       "g1_full_load_lane::hip_consistency_proof_gate_not_passed",
       "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready",
       "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
@@ -159,17 +161,18 @@
     "solver_hip_strict_probe_pass": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "g1_closure_blocker_id_count": 7,
+  "g1_closure_blocker_id_count": 8,
   "g1_closure_blocker_ids": [
     "g1_closure::full_load_1p0_checkpoint_candidate_missing",
     "g1_closure::consistent_residual_jacobian_newton_required",
     "g1_closure::production_rocm_hip_residual_jvp_worker_required",
+    "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch",
     "g1_full_load_lane::hip_consistency_proof_gate_not_passed",
     "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready",
     "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
     "g1_full_load_lane::hip_consistency_proof_has_blockers"
   ],
-  "generated_at": "2026-07-05T14:39:02.389887+00:00",
+  "generated_at": "2026-07-05T14:48:30.837427+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -218,6 +221,7 @@
     {
       "classification": "required_for_production_residency",
       "evidence": [
+        "hip_consistency_proof_source_commit_sha_mismatch",
         "hip_consistency_proof_gate_not_passed",
         "hip_consistency_proof_worker_g1_closure_gate_not_ready",
         "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
@@ -237,8 +241,8 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json": "sha256:51fcb241f9223f1055fb222f08cedf7e004abb7b3227116defd73232505d3089",
     "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:e18438d69a6f45a18cc8cd0afd15c2b30dd81228ec70b58b8e38204a942a62df",
-    "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:485db3ac7abd491e62330331ef8c7a2fed00978874d62e88ba4a0f35013ea630",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:019e1db2e3a6774821c5f8679ab26ad1b4caf889b5fe9ddba5bfa49e4581a1a1",
+    "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:6f9ac515e499d2e93007fb17e2ee9137b2e03c23b8a00c565e5a5e2d3fae8b60",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:4ba9abcaaf01c993e6aa5dd536193ecbb48e3ce1cc9cb82902caf1f0565b0c0a",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:42f77c9c6856a124859510d049d0419cf5fa41a7d71e8f15f2f8c883f7301c73",
     "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:b39062c3bb3ad05d34a4fa67e2126f264d545dbe08ccbd1fe42f625f0bb6e13d",
     "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:8b437a017f328f541ca1a99edc6ff3302ea02cefed1dced8c9d2f62f4111645c",
@@ -418,7 +422,7 @@
     "solver_hip_strict_probe_pass": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "source_commit_sha": "cdbe88c95142b662af1a57644a1cd385b1e1947c",
+  "source_commit_sha": "a5b4da5969ad25c05bdce187a351e113ee857346",
   "status": "ready",
   "summary": {
     "dominant_near_null_rows": 64,
@@ -429,7 +433,7 @@
     "f2h_lightweight_0p1_0p2_0p4_ready": true,
     "f2h_max_converged_load_scale": 0.4,
     "f2h_residual_trend_across_increasing_load": "nondecreasing",
-    "g1_closure_blocker_id_count": 7,
+    "g1_closure_blocker_id_count": 8,
     "global_frame_shell_tangent_integration_ready": false,
     "load_dependent_geometric_softening_signal": "active_secondary",
     "load_dependent_near_null_geometric_stiffness_comparison_status": "ready",

@@ -11,8 +11,8 @@
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing",
       "security::license_status_not_configured",
-      "github_sync::github_sync_preflight::remote_fetch_failed",
       "github_sync::github_sync_preflight::remote_mutation_approval_required",
+      "github_sync::github_sync_preflight::local_head_mismatch",
       "github_sync::github_sync_remote_sync_pending",
       "github_sync::github_sync_preflight_not_synced"
     ],
@@ -23,7 +23,7 @@
   "claim_boundary": "This packet groups open PM blocker and release-tier evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA approval, or any other external release evidence. When reviewer handoff evidence is supplied, each open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps the owner handoff blocked except for explicit non-tier structural scope cleanup adjunct handoffs. This packet does not convert missing evidence into a release pass.",
   "contract_pass": true,
   "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
-  "generated_at": "2026-07-03T02:27:45.090292+00:00",
+  "generated_at": "2026-07-05T15:03:33.283508+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tier_requirements": [],
   "missing_release_tier_impacts": [],
@@ -59,12 +59,13 @@
         {
           "claim_boundary": "This packet is an owner handoff checklist for CI streak evidence. It independently re-verifies github_actions_ci_streak_evidence.json and does not convert local gate artifacts or manifest-only claims into release streak credit; PR and nightly release credit still require tracked consecutive-pass GitHub Actions evidence for the configured release window.",
           "contract_pass": false,
-          "current_blocker_count": 10,
+          "current_blocker_count": 11,
           "current_blockers": [
-            "pr:pr_github_actions_job_start_blocked",
+            "pr:pr_pull_request_run_source_absent",
             "pr:pr_ci_30_consecutive_pass_evidence_missing",
             "pr:github_actions_lane_threshold_not_pass",
             "pr:github_actions_lane_streak_below_threshold",
+            "pr:github_actions_filtered_run_count_below_threshold",
             "nightly:nightly_github_actions_job_start_blocked",
             "nightly:nightly_ci_30_consecutive_pass_evidence_missing",
             "nightly:github_actions_lane_threshold_not_pass",
@@ -78,10 +79,11 @@
           "lane_request_rows": [
             {
               "blockers": [
-                "pr_github_actions_job_start_blocked",
+                "pr_pull_request_run_source_absent",
                 "pr_ci_30_consecutive_pass_evidence_missing",
                 "github_actions_lane_threshold_not_pass",
-                "github_actions_lane_streak_below_threshold"
+                "github_actions_lane_streak_below_threshold",
+                "github_actions_filtered_run_count_below_threshold"
               ],
               "consecutive_pass_count": 0,
               "github_actions_consecutive_pass_count": 0,
@@ -96,7 +98,7 @@
               ],
               "missing_consecutive_pass_count": 30,
               "source_evidence_release_credit_pass": false,
-              "streak_source": "github_actions_job_start_blocked",
+              "streak_source": "no_pull_request_run_source",
               "threshold": 30,
               "threshold_pass": false
             },
@@ -132,10 +134,10 @@
           "signoff_request_count": 0,
           "signoff_request_rows": [],
           "summary": {
-            "blocker_id_count": 12,
+            "blocker_id_count": 13,
             "evidence_intake_artifact_count": 6,
-            "job_start_blocker_count": 6,
-            "job_start_blocker_lane_count": 2,
+            "job_start_blocker_count": 1,
+            "job_start_blocker_lane_count": 1,
             "lane_count": 2,
             "lane_pass_count": 0,
             "nightly_github_actions_workflow_registered": true,
@@ -144,12 +146,12 @@
             "nightly_local_workflow_present": true,
             "nightly_missing_consecutive_pass_count": 30,
             "nightly_source_threshold_pass": false,
-            "open_blocker_count": 10,
+            "open_blocker_count": 11,
             "pr_github_actions_workflow_registered": true,
             "pr_github_actions_workflow_state": "active",
             "pr_local_required_trigger_present": true,
             "pr_missing_consecutive_pass_count": 30,
-            "pr_pull_request_run_source_present": true,
+            "pr_pull_request_run_source_present": false,
             "pr_source_threshold_pass": false,
             "release_area_blocker_count": 2,
             "runner_matching_runner_count": 1,
@@ -159,16 +161,16 @@
             "runner_precondition_pass": false,
             "runner_ready_runner_count": 0,
             "runner_status": "blocked",
-            "source_evidence_age_hours": 39.93,
+            "source_evidence_age_hours": 0.002,
             "source_evidence_freshness_pass": true,
-            "source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
+            "source_evidence_generated_at": "2026-07-04T09:02:06.092465+00:00",
             "source_evidence_pass": false,
             "source_evidence_schema_pass": true,
             "threshold": 30,
-            "workflow_queue_backlog_count": 0,
-            "workflow_queue_backlog_lane_count": 0
+            "workflow_queue_backlog_count": 1,
+            "workflow_queue_backlog_lane_count": 1
           },
-          "summary_line": "CI streak intake: BLOCKED | lanes=0/2 | pr_missing=30 | nightly_missing=30 | blockers=10 | runner=blocked"
+          "summary_line": "CI streak intake: BLOCKED | lanes=0/2 | pr_missing=30 | nightly_missing=30 | blockers=11 | runner=blocked"
         }
       ],
       "expected_intake_paths": [
@@ -177,10 +179,11 @@
       "external_input_required": true,
       "incomplete_blockers": [],
       "intake_current_blockers": [
-        "pr:pr_github_actions_job_start_blocked",
+        "pr:pr_pull_request_run_source_absent",
         "pr:pr_ci_30_consecutive_pass_evidence_missing",
         "pr:github_actions_lane_threshold_not_pass",
         "pr:github_actions_lane_streak_below_threshold",
+        "pr:github_actions_filtered_run_count_below_threshold",
         "nightly:nightly_github_actions_job_start_blocked",
         "nightly:nightly_ci_30_consecutive_pass_evidence_missing",
         "nightly:github_actions_lane_threshold_not_pass",
@@ -192,10 +195,11 @@
       "intake_lane_request_rows": [
         {
           "blockers": [
-            "pr_github_actions_job_start_blocked",
+            "pr_pull_request_run_source_absent",
             "pr_ci_30_consecutive_pass_evidence_missing",
             "github_actions_lane_threshold_not_pass",
-            "github_actions_lane_streak_below_threshold"
+            "github_actions_lane_streak_below_threshold",
+            "github_actions_filtered_run_count_below_threshold"
           ],
           "consecutive_pass_count": 0,
           "github_actions_consecutive_pass_count": 0,
@@ -210,7 +214,7 @@
           ],
           "missing_consecutive_pass_count": 30,
           "source_evidence_release_credit_pass": false,
-          "streak_source": "github_actions_job_start_blocked",
+          "streak_source": "no_pull_request_run_source",
           "threshold": 30,
           "threshold_pass": false
         },
@@ -241,13 +245,13 @@
       ],
       "intake_signoff_request_rows": [],
       "next_actions": [
-        "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
+        "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, No pull_request-triggered CI runs have been observed for the CI workflow (500 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
         "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the nightly GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff."
       ],
       "owner": "release_ci_owner",
-      "owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
+      "owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, No pull_request-triggered CI runs have been observed for the CI workflow (500 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
       "owner_actions": [
-        "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
+        "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, No pull_request-triggered CI runs have been observed for the CI workflow (500 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
         "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the nightly GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff."
       ],
       "owner_input_required": true,
@@ -285,12 +289,13 @@
           "expected_intake_detail": {
             "claim_boundary": "This packet is an owner handoff checklist for CI streak evidence. It independently re-verifies github_actions_ci_streak_evidence.json and does not convert local gate artifacts or manifest-only claims into release streak credit; PR and nightly release credit still require tracked consecutive-pass GitHub Actions evidence for the configured release window.",
             "contract_pass": false,
-            "current_blocker_count": 10,
+            "current_blocker_count": 11,
             "current_blockers": [
-              "pr:pr_github_actions_job_start_blocked",
+              "pr:pr_pull_request_run_source_absent",
               "pr:pr_ci_30_consecutive_pass_evidence_missing",
               "pr:github_actions_lane_threshold_not_pass",
               "pr:github_actions_lane_streak_below_threshold",
+              "pr:github_actions_filtered_run_count_below_threshold",
               "nightly:nightly_github_actions_job_start_blocked",
               "nightly:nightly_ci_30_consecutive_pass_evidence_missing",
               "nightly:github_actions_lane_threshold_not_pass",
@@ -304,10 +309,11 @@
             "lane_request_rows": [
               {
                 "blockers": [
-                  "pr_github_actions_job_start_blocked",
+                  "pr_pull_request_run_source_absent",
                   "pr_ci_30_consecutive_pass_evidence_missing",
                   "github_actions_lane_threshold_not_pass",
-                  "github_actions_lane_streak_below_threshold"
+                  "github_actions_lane_streak_below_threshold",
+                  "github_actions_filtered_run_count_below_threshold"
                 ],
                 "consecutive_pass_count": 0,
                 "github_actions_consecutive_pass_count": 0,
@@ -322,7 +328,7 @@
                 ],
                 "missing_consecutive_pass_count": 30,
                 "source_evidence_release_credit_pass": false,
-                "streak_source": "github_actions_job_start_blocked",
+                "streak_source": "no_pull_request_run_source",
                 "threshold": 30,
                 "threshold_pass": false
               },
@@ -358,10 +364,10 @@
             "signoff_request_count": 0,
             "signoff_request_rows": [],
             "summary": {
-              "blocker_id_count": 12,
+              "blocker_id_count": 13,
               "evidence_intake_artifact_count": 6,
-              "job_start_blocker_count": 6,
-              "job_start_blocker_lane_count": 2,
+              "job_start_blocker_count": 1,
+              "job_start_blocker_lane_count": 1,
               "lane_count": 2,
               "lane_pass_count": 0,
               "nightly_github_actions_workflow_registered": true,
@@ -370,12 +376,12 @@
               "nightly_local_workflow_present": true,
               "nightly_missing_consecutive_pass_count": 30,
               "nightly_source_threshold_pass": false,
-              "open_blocker_count": 10,
+              "open_blocker_count": 11,
               "pr_github_actions_workflow_registered": true,
               "pr_github_actions_workflow_state": "active",
               "pr_local_required_trigger_present": true,
               "pr_missing_consecutive_pass_count": 30,
-              "pr_pull_request_run_source_present": true,
+              "pr_pull_request_run_source_present": false,
               "pr_source_threshold_pass": false,
               "release_area_blocker_count": 2,
               "runner_matching_runner_count": 1,
@@ -385,22 +391,22 @@
               "runner_precondition_pass": false,
               "runner_ready_runner_count": 0,
               "runner_status": "blocked",
-              "source_evidence_age_hours": 39.93,
+              "source_evidence_age_hours": 0.002,
               "source_evidence_freshness_pass": true,
-              "source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
+              "source_evidence_generated_at": "2026-07-04T09:02:06.092465+00:00",
               "source_evidence_pass": false,
               "source_evidence_schema_pass": true,
               "threshold": 30,
-              "workflow_queue_backlog_count": 0,
-              "workflow_queue_backlog_lane_count": 0
+              "workflow_queue_backlog_count": 1,
+              "workflow_queue_backlog_lane_count": 1
             },
-            "summary_line": "CI streak intake: BLOCKED | lanes=0/2 | pr_missing=30 | nightly_missing=30 | blockers=10 | runner=blocked"
+            "summary_line": "CI streak intake: BLOCKED | lanes=0/2 | pr_missing=30 | nightly_missing=30 | blockers=11 | runner=blocked"
           },
           "expected_intake_path": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
+          "next_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, No pull_request-triggered CI runs have been observed for the CI workflow (500 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/build_github_actions_ci_streak_evidence.py --out implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
@@ -442,12 +448,13 @@
           "expected_intake_detail": {
             "claim_boundary": "This packet is an owner handoff checklist for CI streak evidence. It independently re-verifies github_actions_ci_streak_evidence.json and does not convert local gate artifacts or manifest-only claims into release streak credit; PR and nightly release credit still require tracked consecutive-pass GitHub Actions evidence for the configured release window.",
             "contract_pass": false,
-            "current_blocker_count": 10,
+            "current_blocker_count": 11,
             "current_blockers": [
-              "pr:pr_github_actions_job_start_blocked",
+              "pr:pr_pull_request_run_source_absent",
               "pr:pr_ci_30_consecutive_pass_evidence_missing",
               "pr:github_actions_lane_threshold_not_pass",
               "pr:github_actions_lane_streak_below_threshold",
+              "pr:github_actions_filtered_run_count_below_threshold",
               "nightly:nightly_github_actions_job_start_blocked",
               "nightly:nightly_ci_30_consecutive_pass_evidence_missing",
               "nightly:github_actions_lane_threshold_not_pass",
@@ -461,10 +468,11 @@
             "lane_request_rows": [
               {
                 "blockers": [
-                  "pr_github_actions_job_start_blocked",
+                  "pr_pull_request_run_source_absent",
                   "pr_ci_30_consecutive_pass_evidence_missing",
                   "github_actions_lane_threshold_not_pass",
-                  "github_actions_lane_streak_below_threshold"
+                  "github_actions_lane_streak_below_threshold",
+                  "github_actions_filtered_run_count_below_threshold"
                 ],
                 "consecutive_pass_count": 0,
                 "github_actions_consecutive_pass_count": 0,
@@ -479,7 +487,7 @@
                 ],
                 "missing_consecutive_pass_count": 30,
                 "source_evidence_release_credit_pass": false,
-                "streak_source": "github_actions_job_start_blocked",
+                "streak_source": "no_pull_request_run_source",
                 "threshold": 30,
                 "threshold_pass": false
               },
@@ -515,10 +523,10 @@
             "signoff_request_count": 0,
             "signoff_request_rows": [],
             "summary": {
-              "blocker_id_count": 12,
+              "blocker_id_count": 13,
               "evidence_intake_artifact_count": 6,
-              "job_start_blocker_count": 6,
-              "job_start_blocker_lane_count": 2,
+              "job_start_blocker_count": 1,
+              "job_start_blocker_lane_count": 1,
               "lane_count": 2,
               "lane_pass_count": 0,
               "nightly_github_actions_workflow_registered": true,
@@ -527,12 +535,12 @@
               "nightly_local_workflow_present": true,
               "nightly_missing_consecutive_pass_count": 30,
               "nightly_source_threshold_pass": false,
-              "open_blocker_count": 10,
+              "open_blocker_count": 11,
               "pr_github_actions_workflow_registered": true,
               "pr_github_actions_workflow_state": "active",
               "pr_local_required_trigger_present": true,
               "pr_missing_consecutive_pass_count": 30,
-              "pr_pull_request_run_source_present": true,
+              "pr_pull_request_run_source_present": false,
               "pr_source_threshold_pass": false,
               "release_area_blocker_count": 2,
               "runner_matching_runner_count": 1,
@@ -542,16 +550,16 @@
               "runner_precondition_pass": false,
               "runner_ready_runner_count": 0,
               "runner_status": "blocked",
-              "source_evidence_age_hours": 39.93,
+              "source_evidence_age_hours": 0.002,
               "source_evidence_freshness_pass": true,
-              "source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
+              "source_evidence_generated_at": "2026-07-04T09:02:06.092465+00:00",
               "source_evidence_pass": false,
               "source_evidence_schema_pass": true,
               "threshold": 30,
-              "workflow_queue_backlog_count": 0,
-              "workflow_queue_backlog_lane_count": 0
+              "workflow_queue_backlog_count": 1,
+              "workflow_queue_backlog_lane_count": 1
             },
-            "summary_line": "CI streak intake: BLOCKED | lanes=0/2 | pr_missing=30 | nightly_missing=30 | blockers=10 | runner=blocked"
+            "summary_line": "CI streak intake: BLOCKED | lanes=0/2 | pr_missing=30 | nightly_missing=30 | blockers=11 | runner=blocked"
           },
           "expected_intake_path": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
           "external_input_required": true,
@@ -1938,14 +1946,14 @@
       ],
       "blocker_count": 4,
       "blocker_ids": [
-        "github_sync::github_sync_preflight::remote_fetch_failed",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
+        "github_sync::github_sync_preflight::local_head_mismatch",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced"
       ],
       "evidence_intake_artifacts": [],
       "evidence_states": [
-        "blocked"
+        "approval_required"
       ],
       "expected_intake_artifacts": [],
       "expected_intake_details": [],
@@ -1957,12 +1965,12 @@
       "intake_lane_request_rows": [],
       "intake_signoff_request_rows": [],
       "next_actions": [
-        "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`."
+        "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate."
       ],
       "owner": "release_owner",
-      "owner_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+      "owner_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
       "owner_actions": [
-        "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`."
+        "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate."
       ],
       "owner_input_required": true,
       "reproduction_commands": [
@@ -1982,20 +1990,20 @@
             "release_tier.limited_commercial_full_gate_ready",
             "release_tier.ga_enterprise_evidence_gate_pass"
           ],
-          "blocker_id": "github_sync::github_sync_preflight::remote_fetch_failed",
+          "blocker_id": "github_sync::github_sync_preflight::remote_mutation_approval_required",
           "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
           "evidence_artifacts": {
             "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
             "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
           },
-          "evidence_state": "blocked",
+          "evidence_state": "approval_required",
           "expected_intake_artifact": "",
           "expected_intake_detail": {},
           "expected_intake_path": "",
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+          "next_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
@@ -2021,20 +2029,20 @@
             "release_tier.limited_commercial_full_gate_ready",
             "release_tier.ga_enterprise_evidence_gate_pass"
           ],
-          "blocker_id": "github_sync::github_sync_preflight::remote_mutation_approval_required",
+          "blocker_id": "github_sync::github_sync_preflight::local_head_mismatch",
           "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
           "evidence_artifacts": {
             "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
             "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
           },
-          "evidence_state": "blocked",
+          "evidence_state": "approval_required",
           "expected_intake_artifact": "",
           "expected_intake_detail": {},
           "expected_intake_path": "",
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+          "next_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
@@ -2066,14 +2074,14 @@
             "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
             "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
           },
-          "evidence_state": "blocked",
+          "evidence_state": "approval_required",
           "expected_intake_artifact": "",
           "expected_intake_detail": {},
           "expected_intake_path": "",
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+          "next_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
@@ -2105,14 +2113,14 @@
             "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
             "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
           },
-          "evidence_state": "blocked",
+          "evidence_state": "approval_required",
           "expected_intake_artifact": "",
           "expected_intake_detail": {},
           "expected_intake_path": "",
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+          "next_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
@@ -2545,7 +2553,7 @@
           "signoff_request_count": 0,
           "signoff_request_rows": [],
           "summary": {},
-          "summary_line": "Structural scope owner decision application plan: PENDING_OWNER_DECISIONS | recorded=0 | pending=86 | cleanup_pending=0 | delete=0 | extract=0 | retain=0 | unquarantined=0"
+          "summary_line": "Structural scope owner decision application plan: PENDING_OWNER_DECISIONS | recorded=0 | pending=251 | cleanup_pending=0 | delete=0 | extract=0 | retain=0 | unquarantined=0"
         }
       ],
       "expected_intake_paths": [
@@ -2558,12 +2566,12 @@
       "intake_lane_request_rows": [],
       "intake_signoff_request_rows": [],
       "next_actions": [
-        "Complete structural scope cleanup before feature expansion: record owner `delete_from_structural_repository` or `extract_to_molecular_or_science_repository` decisions for the 3 release-surface-first path(s) and the 86/86 pending quarantined PocketMD/GPCR/MD3Bead-family path(s), then rerun the structural scope application plan and contamination audit. First release-surface paths: implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json, implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json, implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json."
+        "Complete structural scope cleanup before feature expansion: record owner `delete_from_structural_repository` or `extract_to_molecular_or_science_repository` decisions for the 3 release-surface-first path(s) and the 251/251 pending quarantined PocketMD/GPCR/MD3Bead-family path(s), then rerun the structural scope application plan and contamination audit. First release-surface paths: implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json, implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json, implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json."
       ],
       "owner": "release_scope_owner",
-      "owner_action": "Complete structural scope cleanup before feature expansion: record owner `delete_from_structural_repository` or `extract_to_molecular_or_science_repository` decisions for the 3 release-surface-first path(s) and the 86/86 pending quarantined PocketMD/GPCR/MD3Bead-family path(s), then rerun the structural scope application plan and contamination audit. First release-surface paths: implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json, implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json, implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json.",
+      "owner_action": "Complete structural scope cleanup before feature expansion: record owner `delete_from_structural_repository` or `extract_to_molecular_or_science_repository` decisions for the 3 release-surface-first path(s) and the 251/251 pending quarantined PocketMD/GPCR/MD3Bead-family path(s), then rerun the structural scope application plan and contamination audit. First release-surface paths: implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json, implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json, implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json.",
       "owner_actions": [
-        "Complete structural scope cleanup before feature expansion: record owner `delete_from_structural_repository` or `extract_to_molecular_or_science_repository` decisions for the 3 release-surface-first path(s) and the 86/86 pending quarantined PocketMD/GPCR/MD3Bead-family path(s), then rerun the structural scope application plan and contamination audit. First release-surface paths: implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json, implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json, implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json."
+        "Complete structural scope cleanup before feature expansion: record owner `delete_from_structural_repository` or `extract_to_molecular_or_science_repository` decisions for the 3 release-surface-first path(s) and the 251/251 pending quarantined PocketMD/GPCR/MD3Bead-family path(s), then rerun the structural scope application plan and contamination audit. First release-surface paths: implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json, implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json, implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json."
       ],
       "owner_input_required": true,
       "reproduction_commands": [
@@ -2618,13 +2626,13 @@
             "signoff_request_count": 0,
             "signoff_request_rows": [],
             "summary": {},
-            "summary_line": "Structural scope owner decision application plan: PENDING_OWNER_DECISIONS | recorded=0 | pending=86 | cleanup_pending=0 | delete=0 | extract=0 | retain=0 | unquarantined=0"
+            "summary_line": "Structural scope owner decision application plan: PENDING_OWNER_DECISIONS | recorded=0 | pending=251 | cleanup_pending=0 | delete=0 | extract=0 | retain=0 | unquarantined=0"
           },
           "expected_intake_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Complete structural scope cleanup before feature expansion: record owner `delete_from_structural_repository` or `extract_to_molecular_or_science_repository` decisions for the 3 release-surface-first path(s) and the 86/86 pending quarantined PocketMD/GPCR/MD3Bead-family path(s), then rerun the structural scope application plan and contamination audit. First release-surface paths: implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json, implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json, implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json.",
+          "next_action": "Complete structural scope cleanup before feature expansion: record owner `delete_from_structural_repository` or `extract_to_molecular_or_science_repository` decisions for the 3 release-surface-first path(s) and the 251/251 pending quarantined PocketMD/GPCR/MD3Bead-family path(s), then rerun the structural scope application plan and contamination audit. First release-surface paths: implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json, implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json, implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/check_structural_scope_contamination.py --out implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json --out-md implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.md",
@@ -2824,8 +2832,8 @@
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
-        "github_sync::github_sync_preflight::remote_fetch_failed",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
+        "github_sync::github_sync_preflight::local_head_mismatch",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced"
       ],
@@ -2863,8 +2871,8 @@
             "ux::human_new_user_observation_missing_or_failed",
             "ux::human_new_user_30min_sample_evidence_missing",
             "security::license_status_not_configured",
-            "github_sync::github_sync_preflight::remote_fetch_failed",
             "github_sync::github_sync_preflight::remote_mutation_approval_required",
+            "github_sync::github_sync_preflight::local_head_mismatch",
             "github_sync::github_sync_remote_sync_pending",
             "github_sync::github_sync_preflight_not_synced"
           ],
@@ -2913,8 +2921,8 @@
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
-        "github_sync::github_sync_preflight::remote_fetch_failed",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
+        "github_sync::github_sync_preflight::local_head_mismatch",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced"
       ],
@@ -3193,8 +3201,8 @@
             "ux::human_new_user_observation_missing_or_failed",
             "ux::human_new_user_30min_sample_evidence_missing",
             "security::license_status_not_configured",
-            "github_sync::github_sync_preflight::remote_fetch_failed",
             "github_sync::github_sync_preflight::remote_mutation_approval_required",
+            "github_sync::github_sync_preflight::local_head_mismatch",
             "github_sync::github_sync_remote_sync_pending",
             "github_sync::github_sync_preflight_not_synced"
           ],
@@ -3366,7 +3374,7 @@
     "expected_intake_count": 6,
     "expected_intake_field_request_count": 24,
     "expected_intake_lane_request_count": 2,
-    "expected_intake_open_blocker_count": 35,
+    "expected_intake_open_blocker_count": 36,
     "expected_intake_signoff_request_count": 3,
     "external_input_required_count": 14,
     "full_release_gate_ready": false,

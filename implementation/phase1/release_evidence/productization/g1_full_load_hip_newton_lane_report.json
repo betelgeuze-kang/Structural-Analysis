@@ -39,7 +39,7 @@
         "production_rocm_hip_residual_jvp_worker::consistent_residual_jacobian_newton_gate_not_passed"
       ],
       "runtime_blockers": [],
-      "source_state_fresh": true
+      "source_state_fresh": false
     },
     "load_path_provenance": {
       "blockers": [],
@@ -98,6 +98,7 @@
     "schema_version": "g1-full-load-hip-newton-blocker-partition.v1"
   },
   "blockers": [
+    "hip_consistency_proof_source_commit_sha_mismatch",
     "hip_consistency_proof_gate_not_passed",
     "hip_consistency_proof_worker_g1_closure_gate_not_ready",
     "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
@@ -109,13 +110,13 @@
     "frontier_load_scale": null,
     "load_path_provenance_present": false,
     "load_scale": 1.0,
-    "path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
+    "path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
     "schema": "mgt-direct-residual-newton-state.v1",
-    "shell_pressure_load_path_policy": "all_components"
+    "shell_pressure_load_path_policy": ""
   },
   "checkpoint_resolution": {
     "mode": "explicit",
-    "requested_path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
+    "requested_path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
     "selection": null
   },
   "checkpoint_resolution_gate": {
@@ -206,7 +207,7 @@
     "/usr/bin/python3",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
     "--checkpoint-npz",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
+    "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
     "--output-json",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_direct_probe.json",
     "--shell-pressure-load-path-policy",
@@ -247,7 +248,7 @@
     ],
     "row_only_correction_loop_stopped": true,
     "schema_version": "g1-full-load-cause-narrowing-context.v1",
-    "source_commit_sha": "a8086418c37e8eaaa41747e5cc221a233b98d2a4",
+    "source_commit_sha": "a5b4da5969ad25c05bdce187a351e113ee857346",
     "status": "ready",
     "summary_line": "G1 F2g/F2h cause narrowing: READY | support_or_link_row_gap_disfavored=True | f2h_0p4_ready=True | next=consistent_residual_jacobian_newton_rocm_worker",
     "support_or_link_row_gap_disfavored": true
@@ -1391,9 +1392,12 @@
   },
   "full_load_input_pass": true,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-07-05T13:40:10.440430+00:00",
+  "generated_at": "2026-07-05T14:48:17.212629+00:00",
   "hip_consistency_proof": {
-    "changed_paths_since_source_commit": [],
+    "changed_paths_since_source_commit": [
+      "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+      "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+    ],
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
     "execution_mode": "hip_required_direct_probe_no_cpu_fallback",
@@ -1465,19 +1469,28 @@
     "rocm_hip_required": true,
     "runtime_blockers": [],
     "source_commit_sha": "54123a5200d97300eb2a8dd4f7ed75c805159527",
-    "source_state_fresh": true,
-    "source_state_kind": "exact",
+    "source_state_fresh": false,
+    "source_state_kind": "g1_hip_paths_changed",
     "status": "partial"
   },
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json": "sha256:b35be5bd18a33d52ec5afab1ee79b4953d6f9a8c933336e8a3680ddea36c4b24",
-    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:8993a72029bea378e05f73d21778c52caec62e2e2a431026fe14cd3423a54b39",
+    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:6034790aeb8e791a760398fa5766f6d8d51357723ce946eb792782a9e0056096",
+    "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz": "sha256:59e4ec6720751f42864c0c8bb2647b120d22ae666f6c90e62a80672f8d24c955",
     "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:826ccc4f116c02d8d75c8b0d78d77b63a70371ef3cb8e7e516126a75ed008dc3",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:06aab2f3a27aeb5816e0bd545c47092b2afe9a88cddfcf475a6d4da8b21ebc01",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz": "sha256:865e2daee190803fb8349aff5f08d170b6b88794ac6cfb3ca4f43f912b30239a",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:715b40736e3f4b5420a2edc5e3f7b533d72d9f7d3da8887ee4d1d3334167c17d"
   },
   "lane_next_actions": [
+    {
+      "changed_paths_since_source_commit": [
+        "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+        "scripts/build_g1_current_frontier_operator_mismatch_audit.py"
+      ],
+      "id": "refresh_hip_consistency_proof_for_current_head",
+      "reason": "hip_consistency_proof_source_commit_sha_mismatch",
+      "source_state_kind": "g1_hip_paths_changed"
+    },
     {
       "cause_narrowing_primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
       "cause_narrowing_required_next_receipts": [
@@ -1514,6 +1527,57 @@
       "worker_residual_jvp_path_ready": true
     },
     {
+      "command": [
+        "/usr/bin/python3",
+        "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+        "--checkpoint-npz",
+        "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
+        "--output-json",
+        "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_direct_probe.json",
+        "--shell-pressure-load-path-policy",
+        "all_components",
+        "--apply-shell-material-tangent",
+        "--allow-state-dependent-shell-material-tangent-hip-replay",
+        "--enable-matrix-free-global-krylov",
+        "--matrix-free-global-krylov-batch-replay-backend",
+        "hip_full_residual_resident",
+        "--matrix-free-global-krylov-require-hip-batch-replay",
+        "--matrix-free-global-krylov-linear-solver-backend",
+        "torch_hip_gmres",
+        "--matrix-free-global-krylov-scaling-mode",
+        "residual_diagonal_displacement",
+        "--enable-current-tangent-residual-row-correction",
+        "--current-tangent-residual-row-use-residual-only-assembly",
+        "--current-tangent-residual-row-per-state-batch-replay",
+        "--current-tangent-residual-row-batch-replay-backend",
+        "hip_full_residual",
+        "--current-tangent-residual-row-require-hip-batch-replay",
+        "--current-tangent-residual-row-jacobian-mode",
+        "finite_difference"
+      ],
+      "id": "defer_full_load_child_direct_probe_until_upstream_gates_close",
+      "promotes_g1_closure": false,
+      "reason": "child_direct_probe_deferred_upstream_blocked",
+      "required_child_gate_blockers": [
+        "child_consistent_residual_jacobian_newton_not_proven",
+        "child_direct_residual_gate_not_proven",
+        "child_direct_residual_newton_ready_not_proven",
+        "child_fallback_zero_not_proven",
+        "child_full_load_closure_not_proven",
+        "child_material_newton_breadth_not_proven",
+        "child_observed_load_scale_below_required_full_load",
+        "child_relative_increment_gate_not_proven"
+      ],
+      "required_hip_refresh_blockers": [
+        "child_global_krylov_component_missing",
+        "child_current_tangent_residual_row_component_missing"
+      ],
+      "upstream_blocking_requirement_ids": [
+        "hip_consistent_residual_jacobian_newton_proof",
+        "production_rocm_hip_residual_jvp_worker"
+      ]
+    },
+    {
       "id": "preserve_non_promoting_boundary_until_all_g1_receipts_pass",
       "promotes_g1_closure": false,
       "reason": "g1_closure_requires_full_load_child_and_external_hip_proof"
@@ -1529,7 +1593,7 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "54123a5200d97300eb2a8dd4f7ed75c805159527",
+  "source_commit_sha": "a5b4da5969ad25c05bdce187a351e113ee857346",
   "status": "blocked",
   "terminal_requirement_breakdown": {
     "active_terminal_requirement_id": "hip_consistent_residual_jacobian_newton_proof",
@@ -1574,6 +1638,7 @@
       {
         "acceptance_evidence": "mgt_residual_jacobian_consistency_hip_required_probe.json passes the consistent residual/Jacobian Newton gate on the production ROCm/HIP path with no CPU diagnostic assembler or receipt blockers.",
         "blockers": [
+          "hip_consistency_proof_source_commit_sha_mismatch",
           "hip_consistency_proof_gate_not_passed",
           "hip_consistency_proof_has_blockers"
         ],
@@ -1588,8 +1653,8 @@
           "present": true,
           "receipt_blocker_count": 7,
           "runtime_blocker_count": 0,
-          "source_state_fresh": true,
-          "source_state_kind": "exact"
+          "source_state_fresh": false,
+          "source_state_kind": "g1_hip_paths_changed"
         },
         "ready": false,
         "rerun_command": "python3 implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py --require-hip-residual-engine --checkpoint-npz <full-load-checkpoint.npz> --output-json implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
@@ -1679,7 +1744,7 @@
             "/usr/bin/python3",
             "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
             "--checkpoint-npz",
-            "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz",
+            "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
             "--output-json",
             "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_direct_probe.json",
             "--shell-pressure-load-path-policy",

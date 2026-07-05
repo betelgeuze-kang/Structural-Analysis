@@ -8,8 +8,8 @@
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing",
       "security::license_status_not_configured",
-      "github_sync::github_sync_preflight::remote_fetch_failed",
       "github_sync::github_sync_preflight::remote_mutation_approval_required",
+      "github_sync::github_sync_preflight::local_head_mismatch",
       "github_sync::github_sync_remote_sync_pending",
       "github_sync::github_sync_preflight_not_synced"
     ],
@@ -19,7 +19,7 @@
   },
   "claim_boundary": "This reviewer handoff packages PM blocker review actions and verdict-change conditions. It does not convert missing tracked CI streak, human UX observation, license approval, release-tier blockers, or other external evidence into a release pass.",
   "contract_pass": true,
-  "generated_at": "2026-07-03T02:27:45.014118+00:00",
+  "generated_at": "2026-07-05T15:03:28.979330+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tiers": [],
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
@@ -63,8 +63,8 @@
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
-        "github_sync::github_sync_preflight::remote_fetch_failed",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
+        "github_sync::github_sync_preflight::local_head_mismatch",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced"
       ],
@@ -93,8 +93,8 @@
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
-        "github_sync::github_sync_preflight::remote_fetch_failed",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
+        "github_sync::github_sync_preflight::local_head_mismatch",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced"
       ],
@@ -138,7 +138,7 @@
       "evidence_state": "release_surface_owner_decisions_pending",
       "external_input_required": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Complete structural scope cleanup before feature expansion: record owner `delete_from_structural_repository` or `extract_to_molecular_or_science_repository` decisions for the 3 release-surface-first path(s) and the 86/86 pending quarantined PocketMD/GPCR/MD3Bead-family path(s), then rerun the structural scope application plan and contamination audit. First release-surface paths: implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json, implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json, implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json.",
+      "next_action": "Complete structural scope cleanup before feature expansion: record owner `delete_from_structural_repository` or `extract_to_molecular_or_science_repository` decisions for the 3 release-surface-first path(s) and the 251/251 pending quarantined PocketMD/GPCR/MD3Bead-family path(s), then rerun the structural scope application plan and contamination audit. First release-surface paths: implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json, implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json, implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json.",
       "owner": "release_scope_owner",
       "owner_input_required": true,
       "release_area_requirement_id": "",
@@ -193,7 +193,7 @@
       "evidence_state": "self_hosted_runner_offline",
       "external_input_required": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
+      "next_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, No pull_request-triggered CI runs have been observed for the CI workflow (500 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
       "owner": "release_ci_owner",
       "owner_input_required": true,
       "release_area_requirement_id": "release_area.basic_ci",
@@ -419,17 +419,17 @@
         "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
         "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
       ],
-      "blocker_id": "github_sync::github_sync_preflight::remote_fetch_failed",
+      "blocker_id": "github_sync::github_sync_preflight::remote_mutation_approval_required",
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
       "closure_state": "external_owner_input_ready",
       "evidence_artifact_paths": {
         "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
-      "evidence_state": "blocked",
+      "evidence_state": "approval_required",
       "external_input_required": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+      "next_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
       "owner": "release_owner",
       "owner_input_required": true,
       "release_area_requirement_id": "release_area.github_sync",
@@ -441,9 +441,9 @@
       ],
       "verdict_change_conditions": [
         "`release_area.github_sync` status is `pass` in `pm_release_gate_completion_audit.json`",
-        "`github_sync::github_sync_preflight::remote_fetch_failed` is absent from `pm_release_gate_report.json.release_area_blockers`",
+        "`github_sync::github_sync_preflight::remote_mutation_approval_required` is absent from `pm_release_gate_report.json.release_area_blockers`",
         "The owning release-area row has no blocker-specific false check in the PM report.",
-        "Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`"
+        "Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`, `github_sync_preflight_head_matches_current`, `github_sync_preflight_source_state_fresh`"
       ],
       "verdict_requirement_group": "release_area",
       "verdict_requirement_id": "release_area.github_sync",
@@ -461,17 +461,17 @@
         "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
         "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
       ],
-      "blocker_id": "github_sync::github_sync_preflight::remote_mutation_approval_required",
+      "blocker_id": "github_sync::github_sync_preflight::local_head_mismatch",
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
       "closure_state": "external_owner_input_ready",
       "evidence_artifact_paths": {
         "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
-      "evidence_state": "blocked",
+      "evidence_state": "approval_required",
       "external_input_required": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+      "next_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
       "owner": "release_owner",
       "owner_input_required": true,
       "release_area_requirement_id": "release_area.github_sync",
@@ -483,9 +483,9 @@
       ],
       "verdict_change_conditions": [
         "`release_area.github_sync` status is `pass` in `pm_release_gate_completion_audit.json`",
-        "`github_sync::github_sync_preflight::remote_mutation_approval_required` is absent from `pm_release_gate_report.json.release_area_blockers`",
+        "`github_sync::github_sync_preflight::local_head_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`",
         "The owning release-area row has no blocker-specific false check in the PM report.",
-        "Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`"
+        "Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`, `github_sync_preflight_head_matches_current`, `github_sync_preflight_source_state_fresh`"
       ],
       "verdict_requirement_group": "release_area",
       "verdict_requirement_id": "release_area.github_sync",
@@ -510,10 +510,10 @@
         "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
-      "evidence_state": "blocked",
+      "evidence_state": "approval_required",
       "external_input_required": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+      "next_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
       "owner": "release_owner",
       "owner_input_required": true,
       "release_area_requirement_id": "release_area.github_sync",
@@ -527,7 +527,7 @@
         "`release_area.github_sync` status is `pass` in `pm_release_gate_completion_audit.json`",
         "`github_sync::github_sync_remote_sync_pending` is absent from `pm_release_gate_report.json.release_area_blockers`",
         "The owning release-area row has no blocker-specific false check in the PM report.",
-        "Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`"
+        "Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`, `github_sync_preflight_head_matches_current`, `github_sync_preflight_source_state_fresh`"
       ],
       "verdict_requirement_group": "release_area",
       "verdict_requirement_id": "release_area.github_sync",
@@ -552,10 +552,10 @@
         "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
-      "evidence_state": "blocked",
+      "evidence_state": "approval_required",
       "external_input_required": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+      "next_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
       "owner": "release_owner",
       "owner_input_required": true,
       "release_area_requirement_id": "release_area.github_sync",
@@ -569,7 +569,7 @@
         "`release_area.github_sync` status is `pass` in `pm_release_gate_completion_audit.json`",
         "`github_sync::github_sync_preflight_not_synced` is absent from `pm_release_gate_report.json.release_area_blockers`",
         "The owning release-area row has no blocker-specific false check in the PM report.",
-        "Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`"
+        "Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`, `github_sync_preflight_head_matches_current`, `github_sync_preflight_source_state_fresh`"
       ],
       "verdict_requirement_group": "release_area",
       "verdict_requirement_id": "release_area.github_sync",
