@@ -247,7 +247,7 @@
     ],
     "row_only_correction_loop_stopped": true,
     "schema_version": "g1-full-load-cause-narrowing-context.v1",
-    "source_commit_sha": "e23636036abea57313836810b6cd971652912c10",
+    "source_commit_sha": "a8086418c37e8eaaa41747e5cc221a233b98d2a4",
     "status": "ready",
     "summary_line": "G1 F2g/F2h cause narrowing: READY | support_or_link_row_gap_disfavored=True | f2h_0p4_ready=True | next=consistent_residual_jacobian_newton_rocm_worker",
     "support_or_link_row_gap_disfavored": true
@@ -1391,7 +1391,7 @@
   },
   "full_load_input_pass": true,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-07-05T13:17:12.068811+00:00",
+  "generated_at": "2026-07-05T13:40:10.440430+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [],
     "consistent_residual_jacobian_newton_gate_passed": false,
@@ -1464,16 +1464,16 @@
     "reused_evidence": false,
     "rocm_hip_required": true,
     "runtime_blockers": [],
-    "source_commit_sha": "a8086418c37e8eaaa41747e5cc221a233b98d2a4",
+    "source_commit_sha": "54123a5200d97300eb2a8dd4f7ed75c805159527",
     "source_state_fresh": true,
     "source_state_kind": "exact",
     "status": "partial"
   },
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json": "sha256:b35be5bd18a33d52ec5afab1ee79b4953d6f9a8c933336e8a3680ddea36c4b24",
-    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:2f7a9e33d7d9124d99d1b49b96074f2c578ae2d81d902f06d8b24c7bf7014e7a",
+    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:8993a72029bea378e05f73d21778c52caec62e2e2a431026fe14cd3423a54b39",
     "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:826ccc4f116c02d8d75c8b0d78d77b63a70371ef3cb8e7e516126a75ed008dc3",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:8c49ce32c05c834e42d2471f91e5a7887df370cd7fc7e4cd61b3477040f10ab9",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:06aab2f3a27aeb5816e0bd545c47092b2afe9a88cddfcf475a6d4da8b21ebc01",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz": "sha256:865e2daee190803fb8349aff5f08d170b6b88794ac6cfb3ca4f43f912b30239a",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:715b40736e3f4b5420a2edc5e3f7b533d72d9f7d3da8887ee4d1d3334167c17d"
   },
@@ -1529,7 +1529,7 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "a8086418c37e8eaaa41747e5cc221a233b98d2a4",
+  "source_commit_sha": "54123a5200d97300eb2a8dd4f7ed75c805159527",
   "status": "blocked",
   "terminal_requirement_breakdown": {
     "active_terminal_requirement_id": "hip_consistent_residual_jacobian_newton_proof",
