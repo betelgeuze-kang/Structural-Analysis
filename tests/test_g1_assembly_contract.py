@@ -909,3 +909,43 @@ def test_g1_assembly_contract_seed_report_check_detects_missing_output(
 
     assert ok is False
     assert message.startswith("g1_assembly_contract_seed_report_missing:")
+
+
+def test_g1_assembly_contract_seed_report_check_ignores_wrapper_source_commit(
+    tmp_path: Path,
+) -> None:
+    out = tmp_path / "g1_assembly_contract_seed_report.json"
+    payload = module.write_g1_assembly_contract_seed_report(
+        repo_root=REPO_ROOT,
+        out=out,
+    )
+    payload["source_commit_sha"] = "receipt-only-followup-commit"
+    out.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    ok, message = module.check_g1_assembly_contract_seed_report(
+        repo_root=REPO_ROOT,
+        out=out,
+    )
+
+    assert ok is True
+    assert message == "g1_assembly_contract_seed_report_consistent"
+
+
+def test_g1_assembly_contract_seed_report_check_detects_semantic_mismatch(
+    tmp_path: Path,
+) -> None:
+    out = tmp_path / "g1_assembly_contract_seed_report.json"
+    payload = module.write_g1_assembly_contract_seed_report(
+        repo_root=REPO_ROOT,
+        out=out,
+    )
+    payload["contract_pass"] = False
+    out.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    ok, message = module.check_g1_assembly_contract_seed_report(
+        repo_root=REPO_ROOT,
+        out=out,
+    )
+
+    assert ok is False
+    assert message == "g1_assembly_contract_seed_report_mismatch"
