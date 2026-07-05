@@ -21,7 +21,7 @@
   "engine_version": "1.0.0",
   "frame_material_newton_seed_pass": true,
   "g1_closure_claim": false,
-  "generated_at": "2026-07-05T14:27:04.320223+00:00",
+  "generated_at": "2026-07-05T16:38:53.424186+00:00",
   "globalization": "backtracking_line_search",
   "input_checksums": {
     "scripts/build_phase2_material_newton_breadth_artifacts.py": "sha256:41d89db011035df1de4f0d9d6ea489273015f265b7bf367ecec6cc0dd95a8481",
@@ -80,7 +80,7 @@
   "residual_formula": "F_internal_minus_F_external",
   "schema_version": "phase2-material-newton-breadth-artifacts.v1",
   "shell_material_newton_seed_pass": true,
-  "source_commit_sha": "6a4085c424e821cd29b2620dfb4d604198d5936e",
+  "source_commit_sha": "4466867e3f508b5134e24bb807e8104a4d00fa0f",
   "sparse_backend_used": false,
   "state_updated_material_newton_breadth_closed": false,
   "state_updated_material_newton_breadth_seed_coverage_ready": true,

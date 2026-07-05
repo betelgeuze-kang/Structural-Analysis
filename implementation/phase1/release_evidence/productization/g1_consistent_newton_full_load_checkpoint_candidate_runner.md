@@ -1,7 +1,7 @@
 # G1 Consistent Newton Full-Load Runner Contract
 
-- `summary_line`: `G1 consistent Newton full-load runner contract: READY_FOR_RUNNER_IMPLEMENTATION | contract_pass=True | observed_load=1/1 | closure_blockers=14`
-- `contract_pass`: `True`
+- `summary_line`: `G1 consistent Newton full-load runner contract: BLOCKED_RUNNER_CONTRACT | contract_pass=False | observed_load=1/1 | closure_blockers=23`
+- `contract_pass`: `False`
 - `evidence_closure_pass`: `False`
 - `runner_id`: `build_consistent_newton_full_load_checkpoint_candidate_runner`
 - `preferred_candidate_generator`: `consistent_residual_jacobian_newton_rocm_full_load_candidate`
@@ -9,7 +9,7 @@
 - `required_load_scale`: `1.0`
 - `true_newton_full_load_descent`: `True`
 - `true_newton_full_load_gate`: `False`
-- `true_newton_full_load_final_residual_n`: `716.2398790963002`
+- `true_newton_full_load_final_residual_n`: `5321.097774504554`
 - `true_newton_checkpoint_candidate_written`: `True`
 - `true_newton_checkpoint_candidate_residual_n`: `0.42788072459938853`
 - `true_newton_from_active_set_final_residual_n`: `0.42740724991695345`
@@ -73,10 +73,10 @@
 - `hip_required_full_load_residual_jvp_frontier_residual_gate`: `False`
 - `hip_required_full_load_residual_jvp_frontier_global_krylov_hip_solver`: `True`
 - `hip_required_full_load_residual_jvp_frontier_hip_components_passed`: `True`
-- `hip_required_consistency_direct_probe_final_residual_n`: `5.571832446441612`
-- `hip_required_consistency_direct_probe_worker_path_ready`: `True`
-- `hip_required_consistency_direct_probe_jvp_rows_retained`: `True`
-- `hip_required_consistency_direct_probe_output_checkpoint_written`: `True`
+- `hip_required_consistency_direct_probe_final_residual_n`: `0.0`
+- `hip_required_consistency_direct_probe_worker_path_ready`: `False`
+- `hip_required_consistency_direct_probe_jvp_rows_retained`: `False`
+- `hip_required_consistency_direct_probe_output_checkpoint_written`: `False`
 - `hip_required_frontier_no_descent_receipt_count`: `2`
 - `hip_required_frontier_no_descent_all_no_descent`: `True`
 - `current_frontier_operator_mismatch_audit_complete`: `True`
@@ -85,7 +85,7 @@
 - `phase2_material_newton_breadth_seed_coverage_ready`: `True`
 - `phase2_state_updated_material_seed_case_count`: `9`
 - `phase2_state_updated_material_breadth_closed`: `False`
-- `worker_path_ready`: `True`
+- `worker_path_ready`: `False`
 - `worker_g1_closure_gate_ready`: `False`
 - `assembly_contract_seed_ready`: `True`
 - `cpu_seed_newton_parity`: `True`
@@ -595,17 +595,17 @@
 
 ## HIP-Required Consistency Direct Probe
 
-- `present`: `True`
-- `executed`: `True`
+- `present`: `False`
+- `executed`: `False`
 - `status`: `partial`
-- `load_scale`: `1.0`
-- `base_direct_residual_inf_n`: `5.584111205195331`
-- `final_direct_residual_inf_n`: `5.571832446441612`
+- `load_scale`: `0.0`
+- `base_direct_residual_inf_n`: `0.0`
+- `final_direct_residual_inf_n`: `0.0`
 - `direct_residual_gate_passed`: `False`
-- `residual_jvp_worker_path_ready`: `True`
-- `matrix_free_global_krylov_jvp_rows_retained`: `True`
-- `output_checkpoint_path`: `implementation/phase1/release_evidence/productization/mgt_residual_jacobian_step15_material_active_set_ls_rows32_child_direct_candidate.npz`
-- `blocker_count`: `7`
+- `residual_jvp_worker_path_ready`: `False`
+- `matrix_free_global_krylov_jvp_rows_retained`: `False`
+- `output_checkpoint_path`: ``
+- `blocker_count`: `4`
 - `claim_boundary`: `HIP-required consistency proof child summary. It proves the production HIP residual/JVP worker path progressed on a full-load checkpoint, but it does not close G1 while direct residual, material breadth, and consistent residual/Jacobian Newton gates remain open.`
 
 ## HIP-Required Frontier No-Descent Receipts
@@ -669,32 +669,51 @@
 - `close_consistent_residual_jacobian_newton_gate`: owner=`solver_numerics_owner`, status=`required`
 - `prove_production_rocm_hip_residual_jvp_worker`: owner=`runtime_rocm_owner`, status=`required`
 
+## Contract Blockers
+
+- `live_g1_assembly_contract_receipt_missing`
+- `production_rocm_hip_residual_jvp_worker_path_not_ready`
+
 ## Worker Path Repair Plan
 
-- `next_action_id`: `rerun_g1_full_load_hip_newton_lane`
-- `blocker_count`: `0`
+- `next_action_id`: `repair_production_rocm_hip_residual_jvp_worker_path`
+- `blocker_count`: `9`
+- `runtime_device_interface`: `3`
+- `production_hip_residual_jacobian_path`: `1`
+- `matrix_free_global_krylov`: `3`
+- `current_tangent_residual_row_replay`: `1`
+- `other`: `1`
 
 ## Worker Path Operator Sequence
 
-- `verify_rocm_runtime_device_interface`: owner=`runtime_rocm_owner`, status=`ready`
-- `run_hip_required_direct_probe`: owner=`runtime_rocm_owner`, status=`ready`
-- `refresh_runner_contract_after_hip_probe`: owner=`g1_solver_owner`, status=`ready`
+- `verify_rocm_runtime_device_interface`: owner=`runtime_rocm_owner`, status=`required`
+- `run_hip_required_direct_probe`: owner=`runtime_rocm_owner`, status=`required`
+- `refresh_runner_contract_after_hip_probe`: owner=`g1_solver_owner`, status=`required`
 - `rerun_g1_full_load_lane_with_full_load_checkpoint`: owner=`g1_solver_owner`, status=`required`
 
 ## Closure Blockers
 
-- `hip_consistency_proof_source_commit_sha_mismatch`
+- `hip_consistency_proof_production_hip_path_not_proven`
 - `hip_consistency_proof_gate_not_passed`
+- `hip_consistency_proof_residual_jvp_worker_path_not_ready`
 - `hip_consistency_proof_worker_g1_closure_gate_not_ready`
 - `hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed`
+- `hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven`
+- `hip_consistency_proof_worker::direct_probe_not_executed`
+- `hip_consistency_proof_worker::global_krylov_accepted_state_tangent_refresh_hip_not_proven`
+- `hip_consistency_proof_worker::global_krylov_hip_solver_not_proven`
+- `hip_consistency_proof_worker::global_krylov_jvp_rows_not_retained`
+- `hip_consistency_proof_worker::production_hip_residual_jacobian_path_not_proven`
+- `hip_consistency_proof_worker::rocm_hip_runtime_unavailable`
+- `hip_consistency_proof_worker::runtime::dev_dri_missing`
+- `hip_consistency_proof_worker::runtime::dev_kfd_missing`
 - `hip_consistency_proof_has_blockers`
-- `consistent_residual_jacobian::consistent_residual_jacobian_newton_not_proven`
-- `consistent_residual_jacobian::state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency`
-- `hip_direct_probe::consistent_jacobian_or_globalization_required`
-- `hip_direct_probe::direct_residual_gate_not_closed`
-- `hip_direct_probe::regularized_fixed_point_residual_must_not_be_used_as_physical_residual`
-- `hip_direct_probe_consistent_residual_jacobian_not_closed`
-- `production_rocm_hip_residual_jvp_worker::consistent_residual_jacobian_newton_gate_not_passed`
+- `hip_consistency_proof_runtime::dev_kfd_missing`
+- `hip_consistency_proof_runtime::dev_dri_missing`
+- `rocm_hip_runtime_unavailable`
+- `hip_runtime::dev_kfd_missing`
+- `hip_runtime::dev_dri_missing`
+- `hip_residual_jacobian_consistency_not_executed`
 - `consistent_residual_jacobian_newton_gate_not_passed`
 - `production_rocm_hip_worker_g1_closure_gate_not_ready`
 

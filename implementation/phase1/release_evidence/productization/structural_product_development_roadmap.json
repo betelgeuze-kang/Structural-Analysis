@@ -1,5 +1,5 @@
 {
-  "blocked_stage_count": 7,
+  "blocked_stage_count": 8,
   "claim_boundary": "This surface summarizes current evidence-readiness progress for the structural solver product. It is not a product-complete, paid-pilot, limited-commercial, or GA/enterprise claim while any stage remains blocked.",
   "contract_pass": false,
   "current_position": {
@@ -11,39 +11,39 @@
     "pm_milestones": "5/5",
     "pm_release_areas": "12/16",
     "release_ready": false,
-    "snapshot_blocker_count": 45,
-    "snapshot_status": "blocked",
+    "snapshot_blocker_count": 67,
+    "snapshot_status": "stale_or_inconsistent",
     "structural_scope_owner_decisions": "0/251",
     "structural_scope_release_surface_cleanup_decisions": "0/3",
     "structural_scope_release_surface_owner_handoff_check": "pass",
     "workstation_delivery_ready": true
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "evidence_requirement_progress_percent": 64.2,
-  "generated_at": "2026-07-05T16:33:06.586695+00:00",
+  "evidence_requirement_progress_percent": 60.4,
+  "generated_at": "2026-07-05T16:48:07.946179+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:65d296a6b225ee06854ff635565b86e8a4daa7268e17bd794ba0f353c336d0ac",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:adb864006a29a891979263e52b411fac121c0295e5433b0b28df0876f2380ec2",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:b7836f0506498ff55bec34dccf65879500ae695f0ce93b34e2d9faa168e901af",
-    "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:6f9ac515e499d2e93007fb17e2ee9137b2e03c23b8a00c565e5a5e2d3fae8b60",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:48d3e93ec9532e41e0da93a3b1a76ee2829cbef4a46682e32d890492ad0b100f",
+    "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:3c9a71b062aa928ab34153e1e2093355d423c2cdb30720f94ce80268941cd33a",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:b9ab6438e333f6051985ab5a73e2615a36abebbda2a2aaacb9f2a981dd96b553",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:b21a399564ab236d66f37fc1d549d455bb3a01c77599ef1b0454566be190f8f3",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:42f77c9c6856a124859510d049d0419cf5fa41a7d71e8f15f2f8c883f7301c73",
     "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:b39062c3bb3ad05d34a4fa67e2126f264d545dbe08ccbd1fe42f625f0bb6e13d",
-    "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:ae97e161c5fdc4d9fb8764972b900f4d69afe55381c9015e2bcc778e67732345",
+    "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate_status.json": "sha256:09eb25d0f81cc0f47a9001000d9f018cedcef1255ae91a0b9fa662f0b75eda89",
     "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:1aceecc7a1774c17ee9982c1a8909e6ec60a663dde267d3bfbd680756b21e563",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:32e788113ab642253585edbf18cf23e7910f6d5432d563ebd76700bf6733a284",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:2255ecd2d51a8fa6ddeaa1c48eae75fa3aba5d0441b8003dc68dd89398e0f0d8",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:781c70309a980659b79044b3d6ade4268e7bff9aed570250b05eca12df844724",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:69285c5dcf0a4bdc30c7a71d48b86dabde7af6e458925f250a4e3f9b9616e109",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:e07d6b1e30e40db86c764dcc3bacdddebbeb09ad89a17b0b6eb031e8875b5177",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:5ac2e790ec94d1b23706be2168dea03703d126a0533f1a00586eb218243ab2aa",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:f4fce828083d10e69eafd8612ea27f88ded383d6bce10e155f999633101eabfa",
     "scripts/build_structural_product_development_roadmap.py": "sha256:cf95b50331efcf0c35ee3ec253232e524b52ab9e2881b08b4d7c7e7e2cc017ea"
   },
-  "passed_evidence_requirement_count": 34,
-  "primary_blocker": "release_surface_owner_decision_pending_count=3",
+  "passed_evidence_requirement_count": 32,
+  "primary_blocker": "freshness_or_snapshot_integrity_not_closed",
   "product_completion_claim": false,
-  "ready_stage_count": 1,
+  "ready_stage_count": 0,
   "recommended_next_slice": [
     "close_structural_scope_owner_review_and_release_surface_cleanup",
     "land_ci_license_ux_release_area_evidence",
@@ -208,8 +208,8 @@
         "adaptive_all_components_frontier_final_residual_n": 0.4278304040181992,
         "adaptive_all_components_frontier_present": true,
         "adaptive_all_components_frontier_residual_gate_passed": false,
-        "consistent_newton_full_load_runner_contract_pass": true,
-        "consistent_newton_full_load_runner_contract_status": "ready_for_runner_implementation",
+        "consistent_newton_full_load_runner_contract_pass": false,
+        "consistent_newton_full_load_runner_contract_status": "blocked_runner_contract",
         "consistent_newton_full_load_runner_id": "build_consistent_newton_full_load_checkpoint_candidate_runner",
         "direct_residual_terminal_gate_ready": true,
         "frame_tangent_fd_epsilon_sweep_best_eps": 0.001,
@@ -228,10 +228,16 @@
         "residual_norm_gradient_tiny_sweep_inf_descent_observed": false,
         "residual_norm_gradient_tiny_sweep_l2_descent_observed": true,
         "residual_norm_gradient_tiny_sweep_present": true,
-        "rocm_worker_path_repair_blocker_count": 0,
-        "rocm_worker_path_repair_category_counts": {},
-        "rocm_worker_path_repair_next_action": "rerun_g1_full_load_hip_newton_lane",
-        "rocm_worker_path_repair_status": "ready",
+        "rocm_worker_path_repair_blocker_count": 9,
+        "rocm_worker_path_repair_category_counts": {
+          "current_tangent_residual_row_replay": 1,
+          "matrix_free_global_krylov": 3,
+          "other": 1,
+          "production_hip_residual_jacobian_path": 1,
+          "runtime_device_interface": 3
+        },
+        "rocm_worker_path_repair_next_action": "repair_production_rocm_hip_residual_jvp_worker_path",
+        "rocm_worker_path_repair_status": "blocked",
         "row_only_correction_loop_stopped": true,
         "shell_hotspot_diagonal_sweep_best_improvement_n": -2.0477105863392353e-05,
         "shell_hotspot_diagonal_sweep_best_residual_n": 0.4278508811240626,
@@ -332,7 +338,7 @@
         "true_newton_full_load_checkpoint_candidate_path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
         "true_newton_full_load_checkpoint_candidate_residual_n": 0.42788072459938853,
         "true_newton_full_load_checkpoint_candidate_written": true,
-        "true_newton_full_load_final_residual_n": 716.2398790963002,
+        "true_newton_full_load_final_residual_n": 5321.097774504554,
         "true_newton_full_load_residual_descent_observed": true,
         "true_newton_full_load_residual_gate_passed": false
       },
@@ -390,7 +396,9 @@
   "reused_evidence": true,
   "roadmap_stages": [
     {
-      "blockers": [],
+      "blockers": [
+        "freshness_or_snapshot_integrity_not_closed"
+      ],
       "claim_boundary": "Fresh metadata does not replace heavy validation or external release evidence.",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
@@ -400,16 +408,16 @@
       "next_actions": [
         "keep_release_evidence_freshness_report_green"
       ],
-      "passed_count": 3,
-      "progress_percent": 100.0,
+      "passed_count": 1,
+      "progress_percent": 33.3,
       "required_count": 3,
       "stage_id": "evidence_freshness_and_snapshot_integrity",
-      "status": "ready",
+      "status": "partial",
       "summary": {
         "fresh_artifact_count": 14,
         "fresh_artifact_pass_count": 14,
-        "snapshot_blocker_count": 45,
-        "stale_or_inconsistent": false
+        "snapshot_blocker_count": 67,
+        "stale_or_inconsistent": true
       }
     },
     {
@@ -656,8 +664,8 @@
         "adaptive_all_components_frontier_final_residual_n": 0.4278304040181992,
         "adaptive_all_components_frontier_present": true,
         "adaptive_all_components_frontier_residual_gate_passed": false,
-        "consistent_newton_full_load_runner_contract_pass": true,
-        "consistent_newton_full_load_runner_contract_status": "ready_for_runner_implementation",
+        "consistent_newton_full_load_runner_contract_pass": false,
+        "consistent_newton_full_load_runner_contract_status": "blocked_runner_contract",
         "consistent_newton_full_load_runner_evidence_closure_pass": false,
         "consistent_newton_full_load_runner_id": "build_consistent_newton_full_load_checkpoint_candidate_runner",
         "consistent_newton_full_load_runner_preferred_generator": "consistent_residual_jacobian_newton_rocm_full_load_candidate",
@@ -692,10 +700,16 @@
         "residual_norm_gradient_tiny_sweep_inf_descent_observed": false,
         "residual_norm_gradient_tiny_sweep_l2_descent_observed": true,
         "residual_norm_gradient_tiny_sweep_present": true,
-        "rocm_worker_path_repair_blocker_count": 0,
-        "rocm_worker_path_repair_category_counts": {},
-        "rocm_worker_path_repair_next_action": "rerun_g1_full_load_hip_newton_lane",
-        "rocm_worker_path_repair_status": "ready",
+        "rocm_worker_path_repair_blocker_count": 9,
+        "rocm_worker_path_repair_category_counts": {
+          "current_tangent_residual_row_replay": 1,
+          "matrix_free_global_krylov": 3,
+          "other": 1,
+          "production_hip_residual_jacobian_path": 1,
+          "runtime_device_interface": 3
+        },
+        "rocm_worker_path_repair_next_action": "repair_production_rocm_hip_residual_jvp_worker_path",
+        "rocm_worker_path_repair_status": "blocked",
         "row_only_correction_loop_stopped": true,
         "shell_hotspot_diagonal_sweep_best_improvement_n": -2.0477105863392353e-05,
         "shell_hotspot_diagonal_sweep_best_residual_n": 0.4278508811240626,
@@ -797,7 +811,7 @@
         "true_newton_full_load_checkpoint_candidate_path": "implementation/phase1/release_evidence/productization/g1_true_newton_full_load_checkpoint_candidate.npz",
         "true_newton_full_load_checkpoint_candidate_residual_n": 0.42788072459938853,
         "true_newton_full_load_checkpoint_candidate_written": true,
-        "true_newton_full_load_final_residual_n": 716.2398790963002,
+        "true_newton_full_load_final_residual_n": 5321.097774504554,
         "true_newton_full_load_residual_descent_observed": true,
         "true_newton_full_load_residual_gate_passed": false
       }
@@ -836,6 +850,7 @@
     },
     {
       "blockers": [
+        "snapshot_source_state_not_consistent",
         "independent_product_not_ready",
         "g1_full_mesh_full_load_not_ready",
         "g1_full_load_hip_newton_lane_not_ready",
@@ -863,7 +878,7 @@
       "summary": {
         "limited_commercial_milestone_ready": true,
         "limited_commercial_ready": false,
-        "solver_product_blocker_count": 6,
+        "solver_product_blocker_count": 7,
         "solver_product_ready": false
       }
     },
@@ -898,11 +913,11 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "6c0aa28f5b6149885dd39f5817c85c553e6fc52f",
-  "stage_average_progress_percent": 56.0,
+  "source_commit_sha": "4466867e3f508b5134e24bb807e8104a4d00fa0f",
+  "stage_average_progress_percent": 47.6,
   "stage_count": 8,
   "status": "blocked",
-  "summary_line": "Structural product roadmap: BLOCKED | evidence_progress=64.2% | stage_average=56.0% | ready_stages=1/8 | primary_blocker=release_surface_owner_decision_pending_count=3",
+  "summary_line": "Structural product roadmap: BLOCKED | evidence_progress=60.4% | stage_average=47.6% | ready_stages=0/8 | primary_blocker=freshness_or_snapshot_integrity_not_closed",
   "surface_id": "structural_product_development_roadmap",
   "surface_scope": "structural_solver_product_completion"
 }

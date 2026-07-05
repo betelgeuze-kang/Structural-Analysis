@@ -32,7 +32,7 @@
   "frame_tangent_source": "force_based_residual_tangent",
   "full_load_true_newton_residual_descent_observed": true,
   "full_load_true_newton_residual_gate_passed": false,
-  "generated_at": "2026-07-05T11:41:32.779275+00:00",
+  "generated_at": "2026-07-05T16:47:13.237804+00:00",
   "initial_checkpoint_npz": "implementation/phase1/release_evidence/productization/g1_full_load_shifted_splu_material_hip_consistency_child4_candidate.npz",
   "initial_state": {
     "checkpoint": {
@@ -78,7 +78,7 @@
     "signed_direction_step_count": 0,
     "used": false
   },
-  "source_commit_sha": "80185ce7be693ca37417617fdebf485cee1c17ee",
+  "source_commit_sha": "4466867e3f508b5134e24bb807e8104a4d00fa0f",
   "status": "candidate_created",
   "summary_line": "G1 true-Newton full-load checkpoint candidate: CANDIDATE_CREATED | checkpoint_written=True | final_residual=0.42788072459938853 | residual_gate=False",
   "true_newton_candidate": {
