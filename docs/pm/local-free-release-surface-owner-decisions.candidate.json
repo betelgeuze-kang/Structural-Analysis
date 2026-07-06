@@ -1,0 +1,108 @@
+{
+  "schema_version": "local-free-release-surface-owner-decision-candidate.v1",
+  "status": "owner_input_required",
+  "claim_boundary": "This candidate is prepared for owner fill-in. It is not an authoritative owner-decision artifact until OWNER_INPUT_REQUIRED fields are replaced by an authorized owner, validated, merged into the canonical owner-decision artifact, and followed by owner-approved cleanup plus evidence regeneration.",
+  "source_context": {
+    "current_release_surface_cleanup_decisions": "0/3",
+    "current_owner_decisions": "0/86",
+    "unquarantined_non_structural_paths": 0,
+    "release_surface_text_leak_count": 0,
+    "next_owner_review_batch": "release_surface_first"
+  },
+  "batch": {
+    "batch_id": "release_surface_first",
+    "path_area": "release_surface",
+    "path_count": 3,
+    "priority": 1,
+    "retain_exception_allowed": false,
+    "owner_fill_required": true
+  },
+  "allowed_owner_roles": [
+    "product_owner",
+    "repository_owner",
+    "technical_owner",
+    "delegated_release_owner"
+  ],
+  "allowed_decisions": [
+    "delete_from_structural_repository",
+    "extract_to_molecular_or_science_repository"
+  ],
+  "disallowed_decisions_for_this_batch": [
+    "retain_quarantined_with_signed_owner_exception"
+  ],
+  "decision_rows": [
+    {
+      "path": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+      "path_area": "release_surface",
+      "family": "molecular_docking",
+      "recommended_decision": "extract_to_molecular_or_science_repository",
+      "fallback_decision": "delete_from_structural_repository",
+      "cleanup_action_required": true,
+      "recommended_destination_family": "molecular_or_science_repository",
+      "rationale": "GPCR hard-decoy evidence belongs to a molecular/science validation surface and should not remain in the structural solver release surface. Extraction preserves provenance without allowing the artifact to influence structural readiness.",
+      "owner_identity": "OWNER_INPUT_REQUIRED",
+      "owner_role": "OWNER_INPUT_REQUIRED",
+      "owner_decision": "OWNER_INPUT_REQUIRED",
+      "decision_timestamp_utc": "OWNER_INPUT_REQUIRED",
+      "evidence_ref": "OWNER_INPUT_REQUIRED",
+      "owner_rationale": "OWNER_INPUT_REQUIRED"
+    },
+    {
+      "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+      "path_area": "release_surface",
+      "family": "molecular_science_evidence",
+      "recommended_decision": "extract_to_molecular_or_science_repository",
+      "fallback_decision": "delete_from_structural_repository",
+      "cleanup_action_required": true,
+      "recommended_destination_family": "molecular_or_science_repository",
+      "rationale": "Hydrogen-bond backmapping evidence is non-structural and should not contribute to structural solver release claims. Extraction is preferred so the science artifact can remain available outside the structural repository.",
+      "owner_identity": "OWNER_INPUT_REQUIRED",
+      "owner_role": "OWNER_INPUT_REQUIRED",
+      "owner_decision": "OWNER_INPUT_REQUIRED",
+      "decision_timestamp_utc": "OWNER_INPUT_REQUIRED",
+      "evidence_ref": "OWNER_INPUT_REQUIRED",
+      "owner_rationale": "OWNER_INPUT_REQUIRED"
+    },
+    {
+      "path": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+      "path_area": "release_surface",
+      "family": "molecular_dynamics",
+      "recommended_decision": "extract_to_molecular_or_science_repository",
+      "fallback_decision": "delete_from_structural_repository",
+      "cleanup_action_required": true,
+      "recommended_destination_family": "molecular_or_science_repository",
+      "rationale": "PocketMD lite science product evidence is a separate molecular/science product surface. It should not remain in the structural solver release surface even if quarantined.",
+      "owner_identity": "OWNER_INPUT_REQUIRED",
+      "owner_role": "OWNER_INPUT_REQUIRED",
+      "owner_decision": "OWNER_INPUT_REQUIRED",
+      "decision_timestamp_utc": "OWNER_INPUT_REQUIRED",
+      "evidence_ref": "OWNER_INPUT_REQUIRED",
+      "owner_rationale": "OWNER_INPUT_REQUIRED"
+    }
+  ],
+  "validation_rules": [
+    "Every OWNER_INPUT_REQUIRED placeholder must be replaced before this candidate is merged into a canonical artifact.",
+    "owner_decision must be delete_from_structural_repository or extract_to_molecular_or_science_repository.",
+    "retain_quarantined_with_signed_owner_exception is not valid for this release-surface-first batch.",
+    "owner_role must be one of the allowed_owner_roles.",
+    "evidence_ref must be retrievable and distinct from generated readiness gate artifacts.",
+    "cleanup_action_required must remain true for all three release-surface paths."
+  ],
+  "post_owner_execution_sequence": [
+    "validate_filled_release_surface_first_decisions",
+    "merge_filled_decisions_to_candidate_owner_decisions",
+    "apply_owner_approved_delete_or_extract_cleanup",
+    "rerun_structural_scope_contamination_audit",
+    "rerun_structural_scope_owner_review_packet",
+    "rerun_structural_scope_owner_decision_application_plan",
+    "rerun_product_readiness_snapshot_check",
+    "rerun_structural_product_development_roadmap"
+  ],
+  "acceptance_criteria": [
+    "release_surface_cleanup_decisions == 3/3",
+    "owner_decisions_recorded == 86/86",
+    "owner-approved cleanup applied",
+    "structural scope audit passes after cleanup",
+    "product readiness snapshot no longer reports structural-scope blockers"
+  ]
+}
