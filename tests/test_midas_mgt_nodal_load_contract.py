@@ -13,19 +13,26 @@ structural_analysis = importlib.import_module("structural_analysis")
 load_model = structural_analysis.load_model
 
 
-def test_mgt_conload_rows_expand_to_canonical_single_node_loads(tmp_path: Path) -> None:
-    mgt_path = tmp_path / "conload_range.mgt"
-    mgt_path.write_text(
-        """*UNIT
+def _write_conload_model(path: Path, target_expr: str) -> None:
+    path.write_text(
+        f"""*UNIT
 KN, M, C
 *NODE
 1, 0.0, 0.0, 0.0
 2, 1.0, 0.0, 0.0
+3, 2.0, 0.0, 0.0
+4, 3.0, 0.0, 0.0
+5, 4.0, 0.0, 0.0
 *CONLOAD
-1 to 2, 10.0, -2.0, 0.5, 1.0, 2.0, 3.0
+{target_expr}, 10.0, -2.0, 0.5, 1.0, 2.0, 3.0
 """,
         encoding="utf-8",
     )
+
+
+def test_mgt_conload_rows_expand_to_canonical_single_node_loads(tmp_path: Path) -> None:
+    mgt_path = tmp_path / "conload_range.mgt"
+    _write_conload_model(mgt_path, "1 to 2")
 
     model = load_model(mgt_path)
     nodal_loads = [row for row in model.loads if row.get("kind") == "nodal_load"]
@@ -37,3 +44,25 @@ KN, M, C
         assert row["source"] == "midas_mgt_conload"
         assert row["components"] == {"FX": 10.0, "FY": -2.0, "FZ": 0.5}
         assert row["moments"] == {"MX": 1.0, "MY": 2.0, "MZ": 3.0}
+
+
+def test_mgt_conload_rows_preserve_stepped_node_ranges(tmp_path: Path) -> None:
+    mgt_path = tmp_path / "conload_stepped_range.mgt"
+    _write_conload_model(mgt_path, "1 to 5 by 2")
+
+    model = load_model(mgt_path)
+    nodal_loads = [row for row in model.loads if row.get("kind") == "nodal_load"]
+
+    assert [row["node"] for row in nodal_loads] == ["1", "3", "5"]
+    assert model.metadata["load_summary"]["nodal_load_count"] == 3
+
+
+def test_mgt_conload_rows_preserve_descending_stepped_node_ranges(tmp_path: Path) -> None:
+    mgt_path = tmp_path / "conload_descending_stepped_range.mgt"
+    _write_conload_model(mgt_path, "5 to 1 by 2")
+
+    model = load_model(mgt_path)
+    nodal_loads = [row for row in model.loads if row.get("kind") == "nodal_load"]
+
+    assert [row["node"] for row in nodal_loads] == ["5", "3", "1"]
+    assert model.metadata["load_summary"]["nodal_load_count"] == 3
