@@ -239,6 +239,50 @@ test.describe('Workbench v2 — compare set & live mode', () => {
     // The data-mode badge reflects LIVE even though the case is missing.
     await expect(page.locator('[data-wb2-provider="live"]')).toHaveAttribute('aria-pressed', 'true')
   })
+
+  test('live mode rejects non-SI units instead of coercing them to SI', async ({ page }) => {
+    await page.route('**/evidence/workbench-case.json', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json; charset=utf-8',
+        body: JSON.stringify({
+          schemaVersion: 'workbench-case.v2',
+          provenance: {
+            sourcePath: 'fixture/non-si-workbench-case.json',
+            sourceSha256: 'sha256:non-si-unit-test',
+            sourceCommitSha: 'test',
+            engineVersion: 'test',
+            generatedAt: '2026-01-01T00:00:00.000Z',
+          },
+          model: {
+            unitSystem: 'US_CUSTOMARY',
+            coordinateSystem: 'global_xyz',
+            nodeCount: 2,
+            elementCount: 1,
+            dofCount: 6,
+          },
+          analysis: {
+            type: 'linear_static',
+            solver: 'fixture',
+            converged: true,
+            loadScale: 1,
+            iterationCount: 1,
+            residualTolerance: 1e-8,
+            finalNormalizedResidual: 0,
+            finalRelativeIncrement: 0,
+          },
+          residualHistory: [],
+        }),
+      })
+    })
+
+    await open(page)
+    await page.locator('[data-wb2-provider="live"]').click()
+    await expect(page.locator('#wb2-sec-project [data-wb2-unavailable]')).toContainText(
+      /unsupported model\.unitSystem: US_CUSTOMARY \(expected SI\)/,
+    )
+    await expect(page.getByText('Case & provenance')).toHaveCount(0)
+  })
 })
 
 test.describe('Workbench v2 — viewer, mobile, a11y', () => {
