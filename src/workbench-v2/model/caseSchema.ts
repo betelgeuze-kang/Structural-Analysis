@@ -119,7 +119,12 @@ export function validateWorkbenchCaseV2(raw: unknown): CaseValidation {
   if (!str(prov.sourceSha256)) errors.push('provenance.sourceSha256 is missing (source checksum required)')
 
   const model = isRecord(raw.model) ? raw.model : {}
-  if (!str(model.unitSystem)) errors.push('model.unitSystem is missing (units required)')
+  const unitSystem = str(model.unitSystem)
+  if (!unitSystem) {
+    errors.push('model.unitSystem is missing (units required)')
+  } else if (unitSystem !== 'SI') {
+    errors.push(`unsupported model.unitSystem: ${unitSystem} (expected SI)`)
+  }
 
   const analysis = isRecord(raw.analysis) ? raw.analysis : null
   const convergenceAvailable = analysis != null && typeof analysis.converged === 'boolean'
@@ -130,7 +135,9 @@ export function validateWorkbenchCaseV2(raw: unknown): CaseValidation {
   }
 
   // Build a typed value; unknown fields on `raw` are retained via the index
-  // signature, satisfying the "unknown fields allowed" policy.
+  // signature, satisfying the "unknown fields allowed" policy. The only
+  // supported workbench v2 display unit contract is SI; unsupported unit tokens
+  // are hard-blocked above instead of being coerced into SI.
   const value = {
     ...raw,
     schemaVersion: 'workbench-case.v2',
