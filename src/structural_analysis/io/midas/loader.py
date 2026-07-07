@@ -468,19 +468,27 @@ def _parse_nodal_loads(rows: list[str], node_ids: set[int]) -> list[dict[str, An
         values = [_as_float(token) for token in tokens[1:7]]
         if not target_nodes or any(value is None for value in values):
             continue
-        loads.append(
-            {
-                "kind": "nodal_load",
-                "nodes": target_nodes,
-                "fx": float(values[0]),
-                "fy": float(values[1]),
-                "fz": float(values[2]),
-                "mx": float(values[3]),
-                "my": float(values[4]),
-                "mz": float(values[5]),
-                "raw": row,
-            }
-        )
+        force_components = {
+            "FX": float(values[0]),
+            "FY": float(values[1]),
+            "FZ": float(values[2]),
+        }
+        moment_components = {
+            "MX": float(values[3]),
+            "MY": float(values[4]),
+            "MZ": float(values[5]),
+        }
+        for node_id in target_nodes:
+            loads.append(
+                {
+                    "kind": "nodal_load",
+                    "node": node_id,
+                    "components": dict(force_components),
+                    "moments": dict(moment_components),
+                    "source": "midas_mgt_conload",
+                    "raw": row,
+                }
+            )
     return loads
 
 
