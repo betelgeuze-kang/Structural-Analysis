@@ -26,11 +26,12 @@ def _pytest_targets(commands: list[list[str]]) -> set[str]:
     return targets
 
 
-def test_pr_quality_gate_keeps_core_and_adapter_regression_tests() -> None:
+def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> None:
     gate = _load_quality_gate_module()
 
     targets = _pytest_targets(gate._command_groups("pr"))
 
     assert "tests/test_structural_analysis_core_api.py" in targets
     assert "tests/test_midas_mgt_nodal_load_contract.py" in targets
+    assert "tests/test_structure_viewer_dom_safety_contract.py" in targets
     assert "tests/test_verify_quality_gate_contract.py" in targets
