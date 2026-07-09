@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 import json
 from importlib import metadata
 from pathlib import Path
@@ -12,6 +12,11 @@ from structural_analysis.io.ifc.loader import load_ifc_step
 from structural_analysis.io.midas.loader import load_midas_mgt
 from structural_analysis.io.neutral.loader import load_neutral_json
 from structural_analysis.model.schema import CanonicalModel
+from structural_analysis.analyses.linear_static import (
+    AUTHORITATIVE_CPU_SOLVER_ID,
+    run_authoritative_linear_static,
+)
+from structural_analysis.results.schema import AnalysisResult, ValidationReport
 from structural_analysis.assembly.nonlinear_static import (
     axial_chain_mesh_problem_from_canonical_model,
     finite_difference_assembled_jacobian_check,
@@ -19,7 +24,6 @@ from structural_analysis.assembly.nonlinear_static import (
     solve_axial_chain_mesh,
 )
 from structural_analysis.solvers.nonlinear.newton import NewtonRaphsonConfig
-from structural_analysis.solvers.linear.static import solve_linear_static, solve_linear_static_sparse
 
 CLAIM_BOUNDARY_VERSION = "developer-preview-core-api-v1"
 SUPPORTED_ANALYSIS_TYPES = {
@@ -50,49 +54,6 @@ class AnalysisConfig:
     load_case: str | None = None
     reference: str | None = None
     matrix_backend: str = "numpy_linalg_solve_dense"
-    developer_preview: bool = True
-    claim_boundary_version: str = CLAIM_BOUNDARY_VERSION
-
-    def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
-
-
-@dataclass(frozen=True)
-class AnalysisResult:
-    """Versioned result envelope; this first slice does not claim solver closure."""
-
-    status: str
-    analysis_type: str
-    solver: str
-    engine_version: str
-    input_checksum: str
-    tolerance: float
-    convergence_history: list[dict[str, Any]]
-    unsupported_features: list[dict[str, Any]] = field(default_factory=list)
-    warnings: list[str] = field(default_factory=list)
-    metrics: dict[str, Any] = field(default_factory=dict)
-    developer_preview: bool = True
-    claim_boundary_version: str = CLAIM_BOUNDARY_VERSION
-
-    def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
-
-
-@dataclass(frozen=True)
-class ValidationReport:
-    """Validation envelope that keeps passed and unsupported fields separate."""
-
-    status: str
-    contract_pass: bool
-    engine_version: str
-    input_checksum: str
-    tolerance: float
-    convergence_history: list[dict[str, Any]]
-    passed_fields: list[str] = field(default_factory=list)
-    unsupported_fields: list[str] = field(default_factory=list)
-    developer_preview_blocked_fields: list[str] = field(default_factory=list)
-    comparisons: list[dict[str, Any]] = field(default_factory=list)
-    warnings: list[str] = field(default_factory=list)
     developer_preview: bool = True
     claim_boundary_version: str = CLAIM_BOUNDARY_VERSION
 
@@ -164,14 +125,16 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
         )
 
     if not unsupported and analysis_config.analysis_type == "linear_static":
-        if analysis_config.matrix_backend == "scipy_sparse_spsolve_cpu":
-            solution = solve_linear_static_sparse(model, tolerance=analysis_config.tolerance)
-        else:
-            solution = solve_linear_static(model, tolerance=analysis_config.tolerance)
+        solution = run_authoritative_linear_static(
+            model,
+            tolerance=analysis_config.tolerance,
+            matrix_backend=analysis_config.matrix_backend,
+            load_case=analysis_config.load_case,
+        )
         return AnalysisResult(
             status=solution.status,
             analysis_type=analysis_config.analysis_type,
-            solver=analysis_config.solver,
+            solver=AUTHORITATIVE_CPU_SOLVER_ID,
             engine_version=ANALYSIS_ENGINE_VERSION,
             input_checksum=model.input_checksum,
             tolerance=analysis_config.tolerance,
