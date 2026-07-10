@@ -76,6 +76,12 @@ def _pr_commands(*, p1_failure_mode: str = "core") -> list[list[str]]:
             "tests/test_project_ops_api_service.py",
             "tests/test_source_boundary_ci_contract.py",
             "tests/test_source_boundary_footprint_report.py",
+            "tests/test_structural_analysis_core_api.py",
+            "tests/test_runtime_dependency_contract.py",
+            "tests/test_authoritative_linear_frame.py",
+            "tests/test_authoritative_linear_frame_reference_cases.py",
+            "tests/test_mgt_frame_kernel_extraction.py",
+            "tests/test_result_validation_tolerance.py",
         ],
     ]
 
