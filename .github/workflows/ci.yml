@@ -6,13 +6,15 @@ name: CI
 
 on:
   push:
-    branches: ["main", "codex/**", "web/**", "feat/**"]
+    branches: ["main", "codex/**", "web/**", "feat/**", "solver/**"]
     paths:
       - "implementation/**"
+      - "src/**"
       - "scripts/**/*.py"
       - "tests/**/*.py"
       - "*.py"
       - "pyproject.toml"
+      - "setup.cfg"
       - "pytest.ini"
       - "requirements*.txt"
       - ".betelgeuze/**"
@@ -21,10 +23,12 @@ on:
   pull_request:
     paths:
       - "implementation/**"
+      - "src/**"
       - "scripts/**/*.py"
       - "tests/**/*.py"
       - "*.py"
       - "pyproject.toml"
+      - "setup.cfg"
       - "pytest.ini"
       - "requirements*.txt"
       - ".betelgeuze/**"
