@@ -4,13 +4,16 @@ import path from 'node:path'
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
-// Builds the app (Vite) and serves dist/, then runs the Workbench v2 E2E spec.
+// Builds the app (Vite) and serves dist/, then runs the Workbench v2 E2E specs.
 // SPA: unknown paths fall back to index.html (the route uses a hash, so this is
 // mostly a safety net). Extra args are forwarded to Playwright.
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const distDir = path.join(rootDir, 'dist')
-const spec = 'tests/frontend/workbench-v2-e2e.spec.ts'
+const specs = [
+  'tests/frontend/workbench-v2-e2e.spec.ts',
+  'tests/frontend/workbench-v2-unit-coordinate-guard.spec.ts',
+]
 const passthrough = process.argv.slice(2)
 
 const mime = {
@@ -67,7 +70,7 @@ async function main() {
   const { port } = server.address()
   const playwrightBin = path.join(rootDir, 'node_modules', '.bin', process.platform === 'win32' ? 'playwright.cmd' : 'playwright')
   try {
-    process.exitCode = await run(playwrightBin, ['test', spec, '--reporter=line', ...passthrough], {
+    process.exitCode = await run(playwrightBin, ['test', ...specs, '--reporter=line', ...passthrough], {
       WORKBENCH_V2_BASE_URL: `http://127.0.0.1:${port}`,
     })
   } finally {
