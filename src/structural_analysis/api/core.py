@@ -7,22 +7,25 @@ from importlib import metadata
 from pathlib import Path
 from typing import Any
 
-from structural_analysis.io.ifc.loader import load_ifc_step
-from structural_analysis.io.midas.loader import load_midas_mgt
-from structural_analysis.io.neutral.loader import load_neutral_json
-from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.analyses.linear_static import (
     AUTHORITATIVE_CPU_SOLVER_ID,
     run_authoritative_linear_static,
 )
-from structural_analysis.results.schema import AnalysisResult, ValidationReport
-from structural_analysis.results.validation import validate
 from structural_analysis.assembly.nonlinear_static import (
     axial_chain_mesh_problem_from_canonical_model,
     finite_difference_assembled_jacobian_check,
     mesh_series_force_equilibrium_check,
     solve_axial_chain_mesh,
 )
+from structural_analysis.io.ifc.loader import load_ifc_step
+from structural_analysis.io.midas.loader import load_midas_mgt
+from structural_analysis.io.neutral.loader import load_neutral_json
+from structural_analysis.model.schema import CanonicalModel
+from structural_analysis.results.schema import (
+    AnalysisResult as AnalysisResult,
+    ValidationReport as ValidationReport,
+)
+from structural_analysis.results.validation import validate as validate
 from structural_analysis.solvers.nonlinear.newton import NewtonRaphsonConfig
 
 CLAIM_BOUNDARY_VERSION = "developer-preview-core-api-v1"
@@ -172,9 +175,11 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
         cfg = NewtonRaphsonConfig(
             residual_tolerance=analysis_config.tolerance,
             increment_tolerance=min(analysis_config.tolerance, 1.0e-12),
-            max_iterations=analysis_config.max_iterations
-            if analysis_config.max_iterations > 0
-            else 25,
+            max_iterations=(
+                analysis_config.max_iterations
+                if analysis_config.max_iterations > 0
+                else 25
+            ),
             matrix_backend=analysis_config.matrix_backend,
         )
         solution, final_state = solve_axial_chain_mesh(mesh_problem, config=cfg)
@@ -198,7 +203,9 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
                 "node_count": mesh_problem.node_count,
                 "element_count": len(mesh_problem.elements),
                 "free_dof_count": len(final_state.free_node_indices),
-                "residual_norm": float(max(abs(value) for value in final_state.residual_kn)),
+                "residual_norm": float(
+                    max(abs(value) for value in final_state.residual_kn)
+                ),
                 "tip_displacement_m": float(final_state.displacements_m[-1]),
                 "reactions": final_state.reactions_kn.tolist(),
                 "internal_forces": final_state.internal_forces_kn.tolist(),
@@ -266,7 +273,7 @@ def _model_health_metrics(model: CanonicalModel) -> dict[str, Any]:
         "load_count": len(model.loads),
         "support_count": len(model.supports),
     }
-    metadata = model.metadata if isinstance(model.metadata, dict) else {}
+    metadata_payload = model.metadata if isinstance(model.metadata, dict) else {}
     for key in (
         "record_count",
         "parsed_record_count",
@@ -278,6 +285,6 @@ def _model_health_metrics(model: CanonicalModel) -> dict[str, Any]:
         "text_scan_only",
         "adapter_scope",
     ):
-        if key in metadata:
-            metrics[key] = metadata[key]
+        if key in metadata_payload:
+            metrics[key] = metadata_payload[key]
     return metrics
