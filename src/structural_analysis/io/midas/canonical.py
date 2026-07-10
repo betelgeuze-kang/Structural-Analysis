@@ -75,9 +75,10 @@ def load_midas_mgt(path: Path) -> CanonicalModel:
         {
             "adapter": "structural_analysis.io.midas.load_midas_mgt",
             "adapter_scope": (
-                "topology/model-health import and lossless single-node *CONLOAD "
-                "normalization; complete MGT material/section property mapping and "
-                "deterministic MGT solver closure remain outside this adapter"
+                "topology/model-health import only for topology and raw "
+                "material/section mapping, plus lossless single-node *CONLOAD "
+                "normalization; deterministic MGT solver closure remains outside "
+                "this adapter"
             ),
             "static_load_cases": static_load_cases,
             "load_summary": {
