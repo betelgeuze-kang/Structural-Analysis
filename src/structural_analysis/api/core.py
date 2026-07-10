@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-import json
 from importlib import metadata
 from pathlib import Path
 from typing import Any
@@ -17,6 +16,7 @@ from structural_analysis.analyses.linear_static import (
     run_authoritative_linear_static,
 )
 from structural_analysis.results.schema import AnalysisResult, ValidationReport
+from structural_analysis.results.validation import validate
 from structural_analysis.assembly.nonlinear_static import (
     axial_chain_mesh_problem_from_canonical_model,
     finite_difference_assembled_jacobian_check,
@@ -103,8 +103,8 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
                 "kind": "linear_static_matrix_backend_not_supported",
                 "matrix_backend": analysis_config.matrix_backend,
                 "detail": (
-                    "Developer Preview supports dense NumPy and scoped scipy sparse "
-                    "CPU backends for the narrow axial linear_static slice only."
+                    "Authoritative CPU linear static supports dense NumPy and scoped "
+                    "SciPy sparse CPU backends for frame/truss models."
                 ),
             }
         )
@@ -281,83 +281,3 @@ def _model_health_metrics(model: CanonicalModel) -> dict[str, Any]:
         if key in metadata:
             metrics[key] = metadata[key]
     return metrics
-
-
-def validate(
-    result: AnalysisResult,
-    reference: dict[str, Any] | str | Path | None = None,
-) -> ValidationReport:
-    """Validate a result while preserving unsupported fields as blockers."""
-
-    reference_payload = _load_reference(reference)
-    passed_fields = [
-        "engine_version",
-        "input_checksum",
-        "tolerance",
-        "convergence_history",
-        "claim_boundary_version",
-    ]
-    unsupported_fields = [
-        item.get("kind", "unsupported_feature") for item in result.unsupported_features
-    ]
-    warnings = list(result.warnings)
-    comparisons: list[dict[str, Any]] = []
-
-    if reference_payload:
-        for field_name, expected in reference_payload.items():
-            actual = result.metrics.get(field_name)
-            comparison_status = "pass" if actual == expected else "review"
-            comparisons.append(
-                {
-                    "field": field_name,
-                    "expected": expected,
-                    "actual": actual,
-                    "status": comparison_status,
-                }
-            )
-    elif result.analysis_type != "model_health":
-        warnings.append("No reference payload supplied for non-model-health analysis.")
-
-    reference_mismatches = [
-        str(row["field"]) for row in comparisons if row.get("status") != "pass"
-    ]
-    contract_pass = (
-        result.status == "ready"
-        and not unsupported_fields
-        and not reference_mismatches
-    )
-    report_status = "pass" if contract_pass else "blocked"
-    blocked_fields = unsupported_fields.copy()
-    blocked_fields.extend(
-        f"reference_mismatch:{field_name}" for field_name in reference_mismatches
-    )
-    if result.status != "ready" and not blocked_fields:
-        blocked_fields.append(result.analysis_type)
-
-    return ValidationReport(
-        status=report_status,
-        contract_pass=contract_pass,
-        engine_version=result.engine_version,
-        input_checksum=result.input_checksum,
-        tolerance=result.tolerance,
-        convergence_history=result.convergence_history,
-        passed_fields=passed_fields if contract_pass else [],
-        unsupported_fields=unsupported_fields,
-        developer_preview_blocked_fields=blocked_fields,
-        comparisons=comparisons,
-        warnings=warnings,
-        developer_preview=result.developer_preview,
-        claim_boundary_version=result.claim_boundary_version,
-    )
-
-
-def _load_reference(reference: dict[str, Any] | str | Path | None) -> dict[str, Any]:
-    if reference is None:
-        return {}
-    if isinstance(reference, dict):
-        return reference
-    with Path(reference).open(encoding="utf-8") as handle:
-        payload = json.load(handle)
-    if not isinstance(payload, dict):
-        raise ValueError("Reference payload must be a JSON object.")
-    return payload
