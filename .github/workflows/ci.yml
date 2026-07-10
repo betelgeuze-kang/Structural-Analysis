@@ -74,4 +74,19 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: PR quality gate
-        run: python scripts/verify_quality_gate.py --mode pr
+        shell: bash
+        run: |
+          set +e
+          python scripts/verify_quality_gate.py --mode pr > ci-quality-gate.log 2>&1
+          code=$?
+          tail -n 300 ci-quality-gate.log
+          exit "$code"
+
+      - name: Upload quality-gate log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ci-quality-gate-${{ github.run_id }}
+          path: ci-quality-gate.log
+          if-no-files-found: warn
+          retention-days: 14
