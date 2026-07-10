@@ -1,12 +1,11 @@
 name: CI
 
-# Heavy solver/repository quality gate. Frontend-only PRs are verified by
-# frontend-web-ci.yml, and structure-viewer browser changes by viewer-browser-ci.yml.
-# Workflow-only edits are validated by workflow-contract-ci.yml.
+# Deterministic repository quality gate. Hardware/GPU and private-corpus work is
+# isolated in Nightly Heavy Solver so normal pull requests never wait for a local runner.
 
 on:
   push:
-    branches: ["main", "codex/**", "web/**", "feat/**", "solver/**"]
+    branches: ["main", "codex/**", "web/**", "feat/**", "solver/**", "ci/**"]
     paths:
       - "implementation/**"
       - "src/**"
@@ -20,6 +19,7 @@ on:
       - ".betelgeuze/**"
       - "docs/commercial-structural-solver-product-gap-ledger.md"
       - "docs/structural-analysis-ai-engine-gap-ledger.md"
+      - ".github/workflows/ci.yml"
   pull_request:
     paths:
       - "implementation/**"
@@ -34,6 +34,7 @@ on:
       - ".betelgeuze/**"
       - "docs/commercial-structural-solver-product-gap-ledger.md"
       - "docs/structural-analysis-ai-engine-gap-ledger.md"
+      - ".github/workflows/ci.yml"
   workflow_dispatch:
 
 env:
@@ -45,7 +46,8 @@ concurrency:
 
 jobs:
   verify:
-    runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -54,6 +56,7 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.10"
+          cache: pip
 
       - name: Set up Node
         uses: actions/setup-node@v6
@@ -68,7 +71,7 @@ jobs:
         run: npm ci
 
       - name: Install Playwright browser
-        run: npx playwright install chromium
+        run: npx playwright install --with-deps chromium
 
       - name: PR quality gate
         run: python scripts/verify_quality_gate.py --mode pr
