@@ -1,8 +1,7 @@
 name: Frontend Web CI
 
 # Frontend-only verification for the React workbench and static prototype.
-# The legacy structure-viewer browser smoke is routed to a separate workflow so
-# unrelated Workbench changes are not blocked by viewer-specific failures.
+# Structure-viewer browser smoke remains in Viewer Browser CI.
 
 on:
   pull_request:
@@ -18,7 +17,7 @@ on:
       - "vite.config.ts"
       - ".github/workflows/frontend-web-ci.yml"
   push:
-    branches: ["main", "codex/**", "web/**", "feat/**"]
+    branches: ["main", "codex/**", "web/**", "feat/**", "ci/**"]
     paths:
       - "index.html"
       - "prototype/**"
@@ -41,7 +40,8 @@ env:
 
 jobs:
   frontend:
-    runs-on: ${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -58,8 +58,8 @@ jobs:
       - name: Dependency audit
         run: npm audit --audit-level high || echo "::warning::npm audit found advisories (non-blocking)"
 
-      - name: Build evidence bundle (read-only; non-blocking until single-commit)
-        run: npm run build:evidence-bundle || echo "::warning::Evidence bundle not built; the Workbench will show evidence as unavailable."
+      - name: Build evidence bundle (read-only)
+        run: npm run build:evidence-bundle || echo "::warning::Evidence bundle unavailable; Workbench must show an unavailable state."
 
       - name: Type-check and build
         run: npm run build
