@@ -7,14 +7,18 @@ Use this repository as a normal local codebase by default.
 - Do not auto-start or auto-resume a Betelgeuze/Codex goal session.
 - Do not read `.betelgeuze/` state, trace, worker outputs, or productization evidence unless the user explicitly asks for readiness/gap-closure work.
 - Keep searches narrow. Default `rg` respects `.ignore`; use `--no-ignore` only when intentionally inspecting ignored evidence or runtime state.
-- Treat legacy worker-orchestration files as inactive compatibility artifacts. Do not invoke them unless the user explicitly requests that exact external worker.
+- Preserve the orchestration files and worker wrappers. See `docs/ai/ORCHESTRATION.md` only when the user asks for worker orchestration.
 
-## Agent Execution
+## Optional Orchestration
 
-- Use the active coding agent's default tools and safety settings.
-- Do not route implementation to Cursor, Cursor Agent, or Cursor host-bridge wrappers.
-- Do not auto-create worker prompts or resume historical dispatch instructions.
-- If the user explicitly asks for delegation in a future task, use only the delegation mechanism available in that active session and keep the scope bounded.
+When the user explicitly requests scoped worker delegation:
+
+- Create a short prompt under `docs/ai/dispatch/`.
+- Use `./scripts/ai-run-kiro-design.sh <prompt-file>` for Kiro `opus-4.8` design slices so the prompt check runs before launch.
+- Use `./scripts/ai-worker-cursor.sh <prompt-file>` for Cursor delegation.
+- Use `./scripts/ai-worker-opencode.sh <prompt-file>` only as the compatibility entrypoint routed to Cursor.
+- Keep worker prompts to goal, scope, candidate files, and verification criteria.
+- Do not read full worker raw logs by default; inspect summaries, changed files, named failures, and targeted diffs.
 
 ## Readiness Work
 
