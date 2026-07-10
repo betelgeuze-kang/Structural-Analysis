@@ -1,15 +1,14 @@
 name: Workflow Contract CI
 
 # Lightweight syntax/shape validation for every GitHub Actions workflow. This
-# keeps scheduled, release, deploy, AI, frontend, viewer, and heavy CI edits
-# covered without forcing the full solver gate to run for YAML-only changes.
+# lane must remain independent of workstation availability.
 
 on:
   pull_request:
     paths:
       - ".github/workflows/**"
   push:
-    branches: ["main", "codex/**", "web/**", "feat/**"]
+    branches: ["main", "codex/**", "web/**", "feat/**", "ci/**"]
     paths:
       - ".github/workflows/**"
   workflow_dispatch:
@@ -23,7 +22,8 @@ concurrency:
 
 jobs:
   validate:
-    runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -32,6 +32,7 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.10"
+          cache: pip
 
       - name: Install YAML parser
         run: python -m pip install --disable-pip-version-check PyYAML==6.0.2
