@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check that GitHub Actions workflows avoid paid GitHub-hosted runners by default."""
+"""Validate GitHub-hosted deterministic lanes and self-hosted hardware lanes."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import argparse
 import json
 from pathlib import Path
 import re
-from typing import Any
+from typing import Any, Collection
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -16,6 +16,18 @@ GITHUB_HOSTED_LABEL_RE = re.compile(
     r"\b(?:ubuntu|windows|macos)-(?:latest|\d{2}\.\d{2})\b|"
     r"\b(?:ubuntu|windows|macos)-latest-(?:\d+core|\w+)\b",
     flags=re.IGNORECASE,
+)
+DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
+    {
+        ".github/workflows/authoritative-core-evidence-resync.yml",
+        ".github/workflows/authoritative-linear-core-ci.yml",
+        ".github/workflows/ci.yml",
+        ".github/workflows/frontend-web-ci.yml",
+        ".github/workflows/nightly-full-quality.yml",
+        ".github/workflows/runtime-input-viewer-ci.yml",
+        ".github/workflows/viewer-browser-ci.yml",
+        ".github/workflows/workflow-contract-ci.yml",
+    }
 )
 
 
@@ -129,43 +141,86 @@ def _runs_on_entries(lines: list[str]) -> list[tuple[int, str]]:
     return entries
 
 
-def check_runner_policy(*, workflow_dir: Path = DEFAULT_WORKFLOW_DIR) -> dict[str, Any]:
+def check_runner_policy(
+    *,
+    workflow_dir: Path = DEFAULT_WORKFLOW_DIR,
+    github_hosted_allowlist: Collection[str] | None = None,
+) -> dict[str, Any]:
+    """Require explicit execution classes instead of a repository-wide runner type."""
+
     workflow_dir = workflow_dir if workflow_dir.is_absolute() else ROOT / workflow_dir
+    allowlist = set(
+        DEFAULT_GITHUB_HOSTED_WORKFLOWS
+        if github_hosted_allowlist is None
+        else github_hosted_allowlist
+    )
     rows: list[dict[str, Any]] = []
     blockers: list[str] = []
     for workflow in _workflow_files(workflow_dir):
         rel_path = _display_path(workflow, workflow_dir)
+        deterministic_hosted = rel_path in allowlist
         lines = workflow.read_text(encoding="utf-8").splitlines()
         for line_number, value in _runs_on_entries(lines):
             github_hosted = bool(GITHUB_HOSTED_LABEL_RE.search(value))
-            uses_self_hosted_default = "self-hosted" in value
-            row = {
-                "workflow": rel_path,
-                "line": line_number,
-                "runs_on": value,
-                "github_hosted_label": github_hosted,
-                "self_hosted_default": uses_self_hosted_default,
-                "ok": bool(not github_hosted and uses_self_hosted_default),
-            }
-            rows.append(row)
-            if github_hosted:
-                blockers.append(f"{rel_path}:{line_number}:github_hosted_runner_label:{value}")
-            elif not uses_self_hosted_default:
-                blockers.append(f"{rel_path}:{line_number}:self_hosted_default_missing:{value}")
+            self_hosted = "self-hosted" in value
+            if deterministic_hosted:
+                ok = github_hosted and not self_hosted
+                execution_class = "deterministic_github_hosted"
+                if not github_hosted:
+                    blockers.append(
+                        f"{rel_path}:{line_number}:github_hosted_runner_required:{value}"
+                    )
+                if self_hosted:
+                    blockers.append(
+                        f"{rel_path}:{line_number}:deterministic_lane_uses_self_hosted:{value}"
+                    )
+            else:
+                ok = self_hosted and not github_hosted
+                execution_class = "hardware_or_private_self_hosted"
+                if github_hosted:
+                    blockers.append(
+                        f"{rel_path}:{line_number}:unapproved_github_hosted_runner:{value}"
+                    )
+                if not self_hosted:
+                    blockers.append(
+                        f"{rel_path}:{line_number}:self_hosted_default_missing:{value}"
+                    )
+            rows.append(
+                {
+                    "workflow": rel_path,
+                    "line": line_number,
+                    "runs_on": value,
+                    "execution_class": execution_class,
+                    "github_hosted_allowlisted": deterministic_hosted,
+                    "github_hosted_label": github_hosted,
+                    "self_hosted_default": self_hosted,
+                    "ok": ok,
+                }
+            )
     if not rows:
         blockers.append(f"{_display_path(workflow_dir, workflow_dir)}:runs_on_missing")
     blockers = sorted(dict.fromkeys(blockers))
     return {
-        "schema_version": "github-actions-runner-policy.v1",
+        "schema_version": "github-actions-runner-policy.v2",
         "status": "pass" if not blockers else "blocked",
         "contract_pass": not blockers,
         "workflow_count": len(_workflow_files(workflow_dir)),
         "runs_on_count": len(rows),
+        "github_hosted_allowlist": sorted(allowlist),
+        "deterministic_github_hosted_count": sum(
+            row["execution_class"] == "deterministic_github_hosted" for row in rows
+        ),
+        "hardware_or_private_self_hosted_count": sum(
+            row["execution_class"] == "hardware_or_private_self_hosted" for row in rows
+        ),
         "rows": rows,
         "blockers": blockers,
         "claim_boundary": (
-            "This is a repository workflow policy check only. It does not mutate billing, "
-            "install a self-hosted runner, verify runner online status, or create CI streak evidence."
+            "Deterministic CI, frontend, viewer, workflow-contract, and canonical nightly "
+            "lanes may use explicitly allowlisted GitHub-hosted runners so pull requests "
+            "and pass streaks do not depend on a workstation. Hardware, GPU, private-corpus, "
+            "release publication, and other non-allowlisted lanes must remain self-hosted. "
+            "This policy does not prove runner availability or create CI streak credit."
         ),
     }
 
