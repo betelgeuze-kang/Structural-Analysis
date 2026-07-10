@@ -80,7 +80,7 @@ export class LiveWorkbenchProvider implements WorkbenchDataProvider {
   constructor(options: { url?: string; fetchImpl?: typeof fetch; timeoutMs?: number; maxBytes?: number } = {}) {
     this.url = options.url ?? '/evidence/workbench-case.json'
     this.sourceLabel = `live:${this.url}`
-    this.fetchImpl = options.fetchImpl ?? fetch
+    this.fetchImpl = options.fetchImpl ?? globalThis.fetch.bind(globalThis)
     this.timeoutMs = options.timeoutMs ?? LIVE_CASE_TIMEOUT_MS
     this.maxBytes = options.maxBytes ?? LIVE_CASE_MAX_BYTES
   }
