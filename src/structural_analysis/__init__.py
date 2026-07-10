@@ -8,9 +8,9 @@ from structural_analysis.api.core import (
     ValidationReport,
     analyze,
     load_model,
-    validate,
 )
 from structural_analysis.model.schema import CanonicalModel
+from structural_analysis.results.validation import validate
 
 __all__ = [
     "ANALYSIS_ENGINE_VERSION",

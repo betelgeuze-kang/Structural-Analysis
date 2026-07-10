@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import sys
 import time
 from typing import Any
 
@@ -16,8 +17,20 @@ import numpy as np
 from scipy.sparse import coo_matrix, eye
 from scipy.sparse.linalg import spsolve
 
-from parse_mgt_section_material_properties import load_mgt_section_material_properties
-from run_story_model_reanalysis import build_mgt_reanalysis_provenance
+SRC_ROOT = Path(__file__).resolve().parents[2] / "src"
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
+
+from structural_analysis.elements.frame3d import (  # noqa: E402
+    FrameProps,
+    frame_rotation_matrix as _rotation_matrix,
+    local_frame_stiffness as _local_frame_stiffness,
+    rigid_end_offset_transform as _rigid_end_offset_transform,
+    transform_stiffness as _transform_stiffness,
+)
+
+from parse_mgt_section_material_properties import load_mgt_section_material_properties  # noqa: E402
+from run_story_model_reanalysis import build_mgt_reanalysis_provenance  # noqa: E402
 
 
 SCHEMA_VERSION = "mgt-full-frame-6dof-sparse-equilibrium.v1"
@@ -42,16 +55,6 @@ class FrameElement:
     local_axis_angle_deg: float = 0.0
     offset_i_global_m: tuple[float, float, float] = (0.0, 0.0, 0.0)
     offset_j_global_m: tuple[float, float, float] = (0.0, 0.0, 0.0)
-
-
-@dataclass(frozen=True)
-class FrameProps:
-    area_m2: float
-    e_n_per_m2: float
-    g_n_per_m2: float
-    iy_m4: float
-    iz_m4: float
-    j_m4: float
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -298,49 +301,6 @@ def _frame_props(
     )
 
 
-def _local_frame_stiffness(props: FrameProps, length_m: float) -> np.ndarray:
-    length = max(float(length_m), 1.0e-6)
-    k = np.zeros((12, 12), dtype=np.float64)
-    ea_l = props.e_n_per_m2 * props.area_m2 / length
-    gj_l = props.g_n_per_m2 * props.j_m4 / length
-    eiy = props.e_n_per_m2 * props.iy_m4
-    eiz = props.e_n_per_m2 * props.iz_m4
-
-    for a, b, val in ((0, 0, ea_l), (0, 6, -ea_l), (6, 0, -ea_l), (6, 6, ea_l)):
-        k[a, b] += val
-    for a, b, val in ((3, 3, gj_l), (3, 9, -gj_l), (9, 3, -gj_l), (9, 9, gj_l)):
-        k[a, b] += val
-
-    l2 = length * length
-    l3 = l2 * length
-    sub_z = np.array(
-        [
-            [12.0 * eiz / l3, 6.0 * eiz / l2, -12.0 * eiz / l3, 6.0 * eiz / l2],
-            [6.0 * eiz / l2, 4.0 * eiz / length, -6.0 * eiz / l2, 2.0 * eiz / length],
-            [-12.0 * eiz / l3, -6.0 * eiz / l2, 12.0 * eiz / l3, -6.0 * eiz / l2],
-            [6.0 * eiz / l2, 2.0 * eiz / length, -6.0 * eiz / l2, 4.0 * eiz / length],
-        ],
-        dtype=np.float64,
-    )
-    for a, ia in enumerate((1, 5, 7, 11)):
-        for b, ib in enumerate((1, 5, 7, 11)):
-            k[ia, ib] += sub_z[a, b]
-
-    sub_y = np.array(
-        [
-            [12.0 * eiy / l3, -6.0 * eiy / l2, -12.0 * eiy / l3, -6.0 * eiy / l2],
-            [-6.0 * eiy / l2, 4.0 * eiy / length, 6.0 * eiy / l2, 2.0 * eiy / length],
-            [-12.0 * eiy / l3, 6.0 * eiy / l2, 12.0 * eiy / l3, 6.0 * eiy / l2],
-            [-6.0 * eiy / l2, 2.0 * eiy / length, 6.0 * eiy / l2, 4.0 * eiy / length],
-        ],
-        dtype=np.float64,
-    )
-    for a, ia in enumerate((2, 4, 8, 10)):
-        for b, ib in enumerate((2, 4, 8, 10)):
-            k[ia, ib] += sub_y[a, b]
-    return 0.5 * (k + k.T)
-
-
 def _local_frame_geometric_stiffness(axial_force_n: float, length_m: float) -> np.ndarray:
     p = max(float(axial_force_n), 0.0)
     if p <= 0.0:
@@ -362,55 +322,6 @@ def _local_frame_geometric_stiffness(axial_force_n: float, length_m: float) -> n
             for b, ib in enumerate(dofs):
                 kg[ia, ib] += sub[a, b]
     return 0.5 * (kg + kg.T)
-
-
-def _rotation_matrix(pi: np.ndarray, pj: np.ndarray, roll_deg: float = 0.0) -> np.ndarray:
-    x_axis = np.asarray(pj - pi, dtype=np.float64)
-    x_axis /= max(float(np.linalg.norm(x_axis)), 1.0e-12)
-    reference = np.array([0.0, 0.0, 1.0], dtype=np.float64)
-    if abs(float(np.dot(x_axis, reference))) > 0.95:
-        reference = np.array([0.0, 1.0, 0.0], dtype=np.float64)
-    y_axis = np.cross(reference, x_axis)
-    y_axis /= max(float(np.linalg.norm(y_axis)), 1.0e-12)
-    z_axis = np.cross(x_axis, y_axis)
-    z_axis /= max(float(np.linalg.norm(z_axis)), 1.0e-12)
-    if abs(float(roll_deg)) > 1.0e-12:
-        angle = np.deg2rad(float(roll_deg))
-        c = float(np.cos(angle))
-        s = float(np.sin(angle))
-        y_base = y_axis.copy()
-        z_base = z_axis.copy()
-        y_axis = c * y_base + s * z_base
-        z_axis = -s * y_base + c * z_base
-        y_axis /= max(float(np.linalg.norm(y_axis)), 1.0e-12)
-        z_axis /= max(float(np.linalg.norm(z_axis)), 1.0e-12)
-    return np.vstack([x_axis, y_axis, z_axis])
-
-
-def _transform_stiffness(k_local: np.ndarray, rotation: np.ndarray) -> np.ndarray:
-    transform = np.zeros((12, 12), dtype=np.float64)
-    for offset in (0, 3, 6, 9):
-        transform[offset : offset + 3, offset : offset + 3] = rotation
-    return transform.T @ k_local @ transform
-
-
-def _skew(vec: np.ndarray) -> np.ndarray:
-    x, y, z = [float(value) for value in np.asarray(vec, dtype=np.float64)]
-    return np.array(
-        [
-            [0.0, -z, y],
-            [z, 0.0, -x],
-            [-y, x, 0.0],
-        ],
-        dtype=np.float64,
-    )
-
-
-def _rigid_end_offset_transform(offset_i: np.ndarray, offset_j: np.ndarray) -> np.ndarray:
-    transform = np.eye(12, dtype=np.float64)
-    transform[0:3, 3:6] = -_skew(offset_i)
-    transform[6:9, 9:12] = -_skew(offset_j)
-    return transform
 
 
 def _element_end_points(elem: FrameElement, node_xyz: np.ndarray) -> tuple[np.ndarray, np.ndarray]:

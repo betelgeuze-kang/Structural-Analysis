@@ -551,7 +551,7 @@ def test_linear_static_blocks_unsupported_frame_without_false_pass(tmp_path: Pat
 
     assert result.status == "blocked"
     unsupported_kinds = {row["kind"] for row in result.unsupported_features}
-    assert "linear_static_element_not_supported" in unsupported_kinds
+    assert "linear_static_element_properties_invalid" in unsupported_kinds
     assert "linear_static_loads_missing" in unsupported_kinds
     assert "linear_static_supports_missing" in unsupported_kinds
     assert report.status == "blocked"

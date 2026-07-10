@@ -7,7 +7,8 @@ import json
 from pathlib import Path
 from typing import Sequence
 
-from structural_analysis.api.core import AnalysisConfig, analyze, load_model, validate
+from structural_analysis.api.core import AnalysisConfig, analyze, load_model
+from structural_analysis.results.validation import validate
 
 
 def main(argv: Sequence[str] | None = None) -> int:

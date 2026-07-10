@@ -2,24 +2,31 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
-import json
+from dataclasses import asdict, dataclass
 from importlib import metadata
 from pathlib import Path
 from typing import Any
 
-from structural_analysis.io.ifc.loader import load_ifc_step
-from structural_analysis.io.midas.loader import load_midas_mgt
-from structural_analysis.io.neutral.loader import load_neutral_json
-from structural_analysis.model.schema import CanonicalModel
+from structural_analysis.analyses.linear_static import (
+    AUTHORITATIVE_CPU_SOLVER_ID,
+    run_authoritative_linear_static,
+)
 from structural_analysis.assembly.nonlinear_static import (
     axial_chain_mesh_problem_from_canonical_model,
     finite_difference_assembled_jacobian_check,
     mesh_series_force_equilibrium_check,
     solve_axial_chain_mesh,
 )
+from structural_analysis.io.ifc.loader import load_ifc_step
+from structural_analysis.io.midas.loader import load_midas_mgt
+from structural_analysis.io.neutral.loader import load_neutral_json
+from structural_analysis.model.schema import CanonicalModel
+from structural_analysis.results.schema import (
+    AnalysisResult as AnalysisResult,
+    ValidationReport as ValidationReport,
+)
+from structural_analysis.results.validation import validate as validate
 from structural_analysis.solvers.nonlinear.newton import NewtonRaphsonConfig
-from structural_analysis.solvers.linear.static import solve_linear_static, solve_linear_static_sparse
 
 CLAIM_BOUNDARY_VERSION = "developer-preview-core-api-v1"
 SUPPORTED_ANALYSIS_TYPES = {
@@ -50,49 +57,6 @@ class AnalysisConfig:
     load_case: str | None = None
     reference: str | None = None
     matrix_backend: str = "numpy_linalg_solve_dense"
-    developer_preview: bool = True
-    claim_boundary_version: str = CLAIM_BOUNDARY_VERSION
-
-    def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
-
-
-@dataclass(frozen=True)
-class AnalysisResult:
-    """Versioned result envelope; this first slice does not claim solver closure."""
-
-    status: str
-    analysis_type: str
-    solver: str
-    engine_version: str
-    input_checksum: str
-    tolerance: float
-    convergence_history: list[dict[str, Any]]
-    unsupported_features: list[dict[str, Any]] = field(default_factory=list)
-    warnings: list[str] = field(default_factory=list)
-    metrics: dict[str, Any] = field(default_factory=dict)
-    developer_preview: bool = True
-    claim_boundary_version: str = CLAIM_BOUNDARY_VERSION
-
-    def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
-
-
-@dataclass(frozen=True)
-class ValidationReport:
-    """Validation envelope that keeps passed and unsupported fields separate."""
-
-    status: str
-    contract_pass: bool
-    engine_version: str
-    input_checksum: str
-    tolerance: float
-    convergence_history: list[dict[str, Any]]
-    passed_fields: list[str] = field(default_factory=list)
-    unsupported_fields: list[str] = field(default_factory=list)
-    developer_preview_blocked_fields: list[str] = field(default_factory=list)
-    comparisons: list[dict[str, Any]] = field(default_factory=list)
-    warnings: list[str] = field(default_factory=list)
     developer_preview: bool = True
     claim_boundary_version: str = CLAIM_BOUNDARY_VERSION
 
@@ -142,8 +106,8 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
                 "kind": "linear_static_matrix_backend_not_supported",
                 "matrix_backend": analysis_config.matrix_backend,
                 "detail": (
-                    "Developer Preview supports dense NumPy and scoped scipy sparse "
-                    "CPU backends for the narrow axial linear_static slice only."
+                    "Authoritative CPU linear static supports dense NumPy and scoped "
+                    "SciPy sparse CPU backends for frame/truss models."
                 ),
             }
         )
@@ -164,14 +128,16 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
         )
 
     if not unsupported and analysis_config.analysis_type == "linear_static":
-        if analysis_config.matrix_backend == "scipy_sparse_spsolve_cpu":
-            solution = solve_linear_static_sparse(model, tolerance=analysis_config.tolerance)
-        else:
-            solution = solve_linear_static(model, tolerance=analysis_config.tolerance)
+        solution = run_authoritative_linear_static(
+            model,
+            tolerance=analysis_config.tolerance,
+            matrix_backend=analysis_config.matrix_backend,
+            load_case=analysis_config.load_case,
+        )
         return AnalysisResult(
             status=solution.status,
             analysis_type=analysis_config.analysis_type,
-            solver=analysis_config.solver,
+            solver=AUTHORITATIVE_CPU_SOLVER_ID,
             engine_version=ANALYSIS_ENGINE_VERSION,
             input_checksum=model.input_checksum,
             tolerance=analysis_config.tolerance,
@@ -209,9 +175,11 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
         cfg = NewtonRaphsonConfig(
             residual_tolerance=analysis_config.tolerance,
             increment_tolerance=min(analysis_config.tolerance, 1.0e-12),
-            max_iterations=analysis_config.max_iterations
-            if analysis_config.max_iterations > 0
-            else 25,
+            max_iterations=(
+                analysis_config.max_iterations
+                if analysis_config.max_iterations > 0
+                else 25
+            ),
             matrix_backend=analysis_config.matrix_backend,
         )
         solution, final_state = solve_axial_chain_mesh(mesh_problem, config=cfg)
@@ -235,7 +203,9 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
                 "node_count": mesh_problem.node_count,
                 "element_count": len(mesh_problem.elements),
                 "free_dof_count": len(final_state.free_node_indices),
-                "residual_norm": float(max(abs(value) for value in final_state.residual_kn)),
+                "residual_norm": float(
+                    max(abs(value) for value in final_state.residual_kn)
+                ),
                 "tip_displacement_m": float(final_state.displacements_m[-1]),
                 "reactions": final_state.reactions_kn.tolist(),
                 "internal_forces": final_state.internal_forces_kn.tolist(),
@@ -303,7 +273,7 @@ def _model_health_metrics(model: CanonicalModel) -> dict[str, Any]:
         "load_count": len(model.loads),
         "support_count": len(model.supports),
     }
-    metadata = model.metadata if isinstance(model.metadata, dict) else {}
+    metadata_payload = model.metadata if isinstance(model.metadata, dict) else {}
     for key in (
         "record_count",
         "parsed_record_count",
@@ -315,86 +285,6 @@ def _model_health_metrics(model: CanonicalModel) -> dict[str, Any]:
         "text_scan_only",
         "adapter_scope",
     ):
-        if key in metadata:
-            metrics[key] = metadata[key]
+        if key in metadata_payload:
+            metrics[key] = metadata_payload[key]
     return metrics
-
-
-def validate(
-    result: AnalysisResult,
-    reference: dict[str, Any] | str | Path | None = None,
-) -> ValidationReport:
-    """Validate a result while preserving unsupported fields as blockers."""
-
-    reference_payload = _load_reference(reference)
-    passed_fields = [
-        "engine_version",
-        "input_checksum",
-        "tolerance",
-        "convergence_history",
-        "claim_boundary_version",
-    ]
-    unsupported_fields = [
-        item.get("kind", "unsupported_feature") for item in result.unsupported_features
-    ]
-    warnings = list(result.warnings)
-    comparisons: list[dict[str, Any]] = []
-
-    if reference_payload:
-        for field_name, expected in reference_payload.items():
-            actual = result.metrics.get(field_name)
-            comparison_status = "pass" if actual == expected else "review"
-            comparisons.append(
-                {
-                    "field": field_name,
-                    "expected": expected,
-                    "actual": actual,
-                    "status": comparison_status,
-                }
-            )
-    elif result.analysis_type != "model_health":
-        warnings.append("No reference payload supplied for non-model-health analysis.")
-
-    reference_mismatches = [
-        str(row["field"]) for row in comparisons if row.get("status") != "pass"
-    ]
-    contract_pass = (
-        result.status == "ready"
-        and not unsupported_fields
-        and not reference_mismatches
-    )
-    report_status = "pass" if contract_pass else "blocked"
-    blocked_fields = unsupported_fields.copy()
-    blocked_fields.extend(
-        f"reference_mismatch:{field_name}" for field_name in reference_mismatches
-    )
-    if result.status != "ready" and not blocked_fields:
-        blocked_fields.append(result.analysis_type)
-
-    return ValidationReport(
-        status=report_status,
-        contract_pass=contract_pass,
-        engine_version=result.engine_version,
-        input_checksum=result.input_checksum,
-        tolerance=result.tolerance,
-        convergence_history=result.convergence_history,
-        passed_fields=passed_fields if contract_pass else [],
-        unsupported_fields=unsupported_fields,
-        developer_preview_blocked_fields=blocked_fields,
-        comparisons=comparisons,
-        warnings=warnings,
-        developer_preview=result.developer_preview,
-        claim_boundary_version=result.claim_boundary_version,
-    )
-
-
-def _load_reference(reference: dict[str, Any] | str | Path | None) -> dict[str, Any]:
-    if reference is None:
-        return {}
-    if isinstance(reference, dict):
-        return reference
-    with Path(reference).open(encoding="utf-8") as handle:
-        payload = json.load(handle)
-    if not isinstance(payload, dict):
-        raise ValueError("Reference payload must be a JSON object.")
-    return payload
