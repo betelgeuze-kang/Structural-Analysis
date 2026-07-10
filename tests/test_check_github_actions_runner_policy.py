@@ -36,7 +36,8 @@ def test_runner_policy_blocks_unapproved_github_hosted_runner(tmp_path: Path) ->
     assert payload["contract_pass"] is False
     assert payload["status"] == "blocked"
     assert payload["blockers"] == [
-        ".github/workflows/custom.yml:4:unapproved_github_hosted_runner:ubuntu-latest"
+        ".github/workflows/custom.yml:4:self_hosted_default_missing:ubuntu-latest",
+        ".github/workflows/custom.yml:4:unapproved_github_hosted_runner:ubuntu-latest",
     ]
 
 
@@ -155,7 +156,8 @@ def test_runner_policy_blocks_multiline_unapproved_github_hosted_labels(
 
     assert payload["contract_pass"] is False
     assert payload["blockers"] == [
-        ".github/workflows/custom.yml:4:unapproved_github_hosted_runner:ubuntu-latest"
+        ".github/workflows/custom.yml:4:self_hosted_default_missing:ubuntu-latest",
+        ".github/workflows/custom.yml:4:unapproved_github_hosted_runner:ubuntu-latest",
     ]
 
 
