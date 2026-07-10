@@ -1,0 +1,14 @@
+---
+alwaysApply: true
+---
+
+# Cursor Project Rules
+
+- Use `AGENTS.md` as the default source of truth.
+- Do not auto-resume Betelgeuze/Codex goal state for ordinary edits.
+- Do not inspect `.betelgeuze/`, worker raw logs, or productization evidence unless the user explicitly requests readiness/gap-closure work.
+- For delegated implementation, keep prompt files short and use the wrappers in `docs/ai/ORCHESTRATION.md`.
+- Treat 50+ LOC, 3+ files, broad search, repeated test-fix loops, or long evidence diagnosis as worker candidates.
+- Do not run push/deploy/publish/release/migration/payment/cloud/permission-escalation commands without human approval.
+- Do not read or print `.env`, `.env.*`, `*.env`, or `*.env.*`.
+- Report changed files, tests, failed tests, core diff summary, and blockers.
