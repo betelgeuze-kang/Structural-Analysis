@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from math import isfinite
 from typing import Any, Mapping
 
 
@@ -18,14 +19,20 @@ class ElasticIsotropicMaterial:
     def __post_init__(self) -> None:
         if not self.material_id:
             raise ValueError("material id must be non-empty")
-        if self.elastic_modulus <= 0.0:
-            raise ValueError(f"Material {self.material_id} elastic modulus must be positive.")
-        if not (-1.0 < self.poisson_ratio < 0.5):
+        if not isfinite(self.elastic_modulus) or self.elastic_modulus <= 0.0:
             raise ValueError(
-                f"Material {self.material_id} Poisson ratio must be between -1 and 0.5."
+                f"Material {self.material_id} elastic modulus must be finite and positive."
             )
-        if self.density is not None and self.density <= 0.0:
-            raise ValueError(f"Material {self.material_id} density must be positive.")
+        if not isfinite(self.poisson_ratio) or not (-1.0 < self.poisson_ratio < 0.5):
+            raise ValueError(
+                f"Material {self.material_id} Poisson ratio must be finite and between -1 and 0.5."
+            )
+        if self.density is not None and (
+            not isfinite(self.density) or self.density <= 0.0
+        ):
+            raise ValueError(
+                f"Material {self.material_id} density must be finite and positive."
+            )
 
     @property
     def shear_modulus(self) -> float:
