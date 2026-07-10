@@ -73,6 +73,19 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
+      - name: Materialize deterministic structural-scope audit candidate
+        run: python scripts/check_structural_scope_contamination.py --tracked-only
+
+      - name: Upload structural-scope audit candidate
+        uses: actions/upload-artifact@v7
+        with:
+          name: structural-scope-audit-${{ github.run_id }}
+          path: |
+            implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json
+            implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.md
+          if-no-files-found: error
+          retention-days: 14
+
       - name: PR quality gate
         shell: bash
         run: |
