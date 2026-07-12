@@ -3,9 +3,9 @@
 - `status`: `blocked`
 - `developer_preview_ready`: `False`
 - `commercial_release_ready`: `False`
-- `blocker_count`: `90`
+- `blocker_count`: `92`
 - `future_commercial_blocker_count`: `27`
-- `source_commit_sha`: `e83307a606aa969eb3808c392dcdb0af64fab166`
+- `source_commit_sha`: `17432480a573281d7affe6a09f91b6e0890d0b4e`
 - `reuse_policy`: `derived_readiness_judgment_from_product_snapshot_and_dataset_license_manifest; does_not_create_authoritative_closure_evidence`
 - `input_checksum_policy`: `product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata`
 
@@ -13,8 +13,8 @@
 
 | Category | Count | Developer Preview Blocking |
 |---|---:|---|
-| numerical | 10 | yes |
-| benchmark | 2 | yes |
+| numerical | 11 | yes |
+| benchmark | 3 | yes |
 | software product | 78 | yes |
 | future commercial | 27 | no, future commercial only |
 
