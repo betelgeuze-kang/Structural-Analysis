@@ -19,6 +19,8 @@ SUPPORTED_MATRIX_BACKENDS = {
 }
 LOAD_COMPONENT_LABELS = ("FX", "FY", "FZ", "MX", "MY", "MZ")
 FRAME_ELEMENT_TYPES = {"frame", "beam", "column"}
+CANONICAL_AXIS_ORDER = ("X", "Y", "Z")
+CANONICAL_UP_AXIS = "Z"
 
 
 def run_authoritative_linear_static(
@@ -29,9 +31,13 @@ def run_authoritative_linear_static(
     load_case: str | None = None,
 ) -> LinearStaticSolution:
     if matrix_backend not in SUPPORTED_MATRIX_BACKENDS:
-        raise ValueError(f"Unsupported authoritative CPU matrix backend: {matrix_backend}")
+        raise ValueError(
+            f"Unsupported authoritative CPU matrix backend: {matrix_backend}"
+        )
 
-    normalized_load_case = load_case.strip() if isinstance(load_case, str) else load_case
+    normalized_load_case = (
+        load_case.strip() if isinstance(load_case, str) else load_case
+    )
     normalized_load_case = normalized_load_case or None
     unsupported = _public_preflight(
         model,
@@ -39,7 +45,11 @@ def run_authoritative_linear_static(
         load_case=normalized_load_case,
     )
     if unsupported:
-        return _blocked_solution(model, matrix_backend=matrix_backend, unsupported=unsupported)
+        return _blocked_solution(
+            model,
+            matrix_backend=matrix_backend,
+            unsupported=unsupported,
+        )
 
     if matrix_backend == "scipy_sparse_spsolve_cpu":
         return solve_linear_static_sparse(
@@ -67,6 +77,27 @@ def _public_preflight(
                 "kind": "linear_static_tolerance_invalid",
                 "tolerance": tolerance,
                 "detail": "Authoritative CPU v1 requires a finite positive tolerance.",
+            }
+        )
+
+    axis_order = tuple(
+        str(axis).strip().upper()
+        for axis in model.coordinate_system.axis_order
+    )
+    up_axis = str(model.coordinate_system.up_axis).strip().upper()
+    if axis_order != CANONICAL_AXIS_ORDER or up_axis != CANONICAL_UP_AXIS:
+        unsupported.append(
+            {
+                "kind": "linear_static_coordinate_system_not_supported",
+                "axis_order": list(axis_order),
+                "up_axis": up_axis,
+                "required_axis_order": list(CANONICAL_AXIS_ORDER),
+                "required_up_axis": CANONICAL_UP_AXIS,
+                "detail": (
+                    "Authoritative CPU linear-static v1 consumes canonical global XYZ "
+                    "coordinates with Z-up only. Importers must normalize other axis "
+                    "orders before analysis; no implicit coordinate remapping is applied."
+                ),
             }
         )
 
@@ -128,7 +159,12 @@ def _public_preflight(
                     }
                 )
             break
-        for key in ("offset_i_global_m", "offset_i", "offset_j_global_m", "offset_j"):
+        for key in (
+            "offset_i_global_m",
+            "offset_i",
+            "offset_j_global_m",
+            "offset_j",
+        ):
             if key not in element or element.get(key) is None:
                 continue
             if not _finite_vector3(element[key]):
@@ -136,7 +172,9 @@ def _public_preflight(
                     {
                         "kind": "linear_static_element_properties_invalid",
                         "element": element_id,
-                        "detail": f"{key} must be a finite three-component vector.",
+                        "detail": (
+                            f"{key} must be a finite three-component vector."
+                        ),
                     }
                 )
 
@@ -154,9 +192,15 @@ def _load_case_label(load: Mapping[str, Any]) -> str | None:
 def _load_component_error(load: Mapping[str, Any]) -> str | None:
     raw = load.get("components")
     if raw is None:
-        values = [load.get(label, load.get(label.lower(), 0.0)) for label in LOAD_COMPONENT_LABELS]
+        values = [
+            load.get(label, load.get(label.lower(), 0.0))
+            for label in LOAD_COMPONENT_LABELS
+        ]
     elif isinstance(raw, Mapping):
-        values = [raw.get(label, raw.get(label.lower(), 0.0)) for label in LOAD_COMPONENT_LABELS]
+        values = [
+            raw.get(label, raw.get(label.lower(), 0.0))
+            for label in LOAD_COMPONENT_LABELS
+        ]
     elif isinstance(raw, (list, tuple)) and len(raw) in {3, 6}:
         values = list(raw)
         if len(values) == 3:
@@ -194,7 +238,9 @@ def _blocked_solution(
     unsupported: list[dict[str, Any]],
 ) -> LinearStaticSolution:
     sparse_backend_used = matrix_backend == "scipy_sparse_spsolve_cpu"
-    element_types = {str(element.get("type", "")).lower() for element in model.elements}
+    element_types = {
+        str(element.get("type", "")).lower() for element in model.elements
+    }
     claim_boundary = (
         "linear_static_axial_truss_preview_only"
         if element_types <= {"truss", "axial"}
@@ -215,7 +261,9 @@ def _blocked_solution(
             "automatic_support_generation_used": False,
             "regularization_used": False,
             "fallback_used": False,
-            "stiffness_storage": "scipy_sparse_csr" if sparse_backend_used else "dense_numpy",
+            "stiffness_storage": (
+                "scipy_sparse_csr" if sparse_backend_used else "dense_numpy"
+            ),
             "matrix_backend": matrix_backend,
             "sparse_backend_used": sparse_backend_used,
         },
