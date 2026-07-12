@@ -79,7 +79,7 @@
   "expected_frame_model_input_checksum": "sha256:95f14f348f51867a9bdc89550cb7deeefe86efd384d5d90f114c6a007b5abecc",
   "expected_model_input_checksum": "sha256:13c744509263c945d713018b5595619c03a192b4c594249d46810c13940cb96e",
   "frame_model_input_checksum": "sha256:95f14f348f51867a9bdc89550cb7deeefe86efd384d5d90f114c6a007b5abecc",
-  "generated_at": "2026-07-12T23:11:16.439121+00:00",
+  "generated_at": "2026-07-12T23:41:26.433470+00:00",
   "input_checksums": {
     "src/structural_analysis/analyses/linear_static.py": "sha256:571c836469c0b246d3fc1b787c5519af8faca69fbc61ad668090bf2359c52511",
     "src/structural_analysis/api/cli.py": "sha256:07874025ee61bf5fad7c2c91ba0c526cd763c6d327d46dfb53c15a841c88bffa",
@@ -177,12 +177,12 @@
     "validation_report_schema": "src/structural_analysis/schemas/validation_report.schema.json"
   },
   "schema_version": "phase1-core-api-contract-artifacts.v2",
-  "source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+  "source_commit_sha": "00f93dad8ea545c57ab27fec6f81086edeb69a66",
   "source_state_policy": {
     "allowed_post_source_scope": "generated_phase1_and_readiness_evidence_only",
     "exact_head_verification_required": true,
     "mode": "source_commit_then_evidence_only_commit",
-    "source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e"
+    "source_commit_sha": "00f93dad8ea545c57ab27fec6f81086edeb69a66"
   },
   "status": "ready",
   "supported_preview_analysis_types": [
