@@ -143,26 +143,39 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          git add implementation/phase1/release_evidence/productization/phase1_core_api_*
-          for path in \
-            implementation/phase1/release_evidence/productization/developer_preview_readiness.json \
-            implementation/phase1/release_evidence/productization/developer_preview_readiness.md \
-            implementation/phase1/release_evidence/productization/developer_preview_rc_status.json \
-            implementation/phase1/release_evidence/productization/developer_preview_rc_status.md \
-            implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json \
-            implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md \
-            implementation/phase1/release_evidence/productization/pm_release_gate_report.json \
-            implementation/phase1/release_evidence/productization/pm_release_gate_report.md \
-            implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json \
-            implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md \
-            implementation/phase1/release_evidence/productization/product_readiness_snapshot.json \
-            implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json \
-            implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md
-          do
-            if [[ -e "$path" ]]; then
-              git add "$path"
-            fi
-          done
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess
+
+          from scripts.verify_phase1_evidence_source_state import _is_evidence_path
+
+          tracked = subprocess.check_output(
+              ["git", "diff", "--name-only"],
+              text=True,
+          ).splitlines()
+          untracked = subprocess.check_output(
+              ["git", "ls-files", "--others", "--exclude-standard"],
+              text=True,
+          ).splitlines()
+          changed = sorted({path.strip() for path in [*tracked, *untracked] if path.strip()})
+          allowed = [path for path in changed if _is_evidence_path(path)]
+          disallowed = [path for path in changed if not _is_evidence_path(path)]
+
+          report = Path("${{ runner.temp }}/generated-evidence-paths.txt")
+          report.write_text(
+              "allowed:\n"
+              + "\n".join(f"  {path}" for path in allowed)
+              + "\ndisallowed:\n"
+              + "\n".join(f"  {path}" for path in disallowed)
+              + "\n",
+              encoding="utf-8",
+          )
+          print(report.read_text(encoding="utf-8"), end="")
+          if disallowed:
+              raise SystemExit(2)
+          if allowed:
+              subprocess.check_call(["git", "add", "--", *allowed])
+          PY
           if ! git diff --cached --quiet; then
             git commit -m "Regenerate authoritative core readiness evidence"
           fi
@@ -195,6 +208,7 @@ jobs:
           name: authoritative-core-evidence-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/authoritative-core-evidence-tests.log
+            ${{ runner.temp }}/generated-evidence-paths.txt
             ${{ runner.temp }}/phase1-evidence-preflight-receipt.json
             ${{ runner.temp }}/phase1-evidence-source-state-receipt.json
             implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json
