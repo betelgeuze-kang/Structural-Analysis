@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
 from math import isfinite
 from pathlib import Path
 import re
@@ -47,10 +48,9 @@ def parse_int_token(token: Any) -> int | None:
 
 def parse_float_token(token: Any) -> float | None:
     try:
-        value = float(str(token).strip())
+        return float(str(token).strip())
     except ValueError:
         return None
-    return value
 
 
 def expand_integer_expression(expr: str) -> tuple[list[int], str | None]:
@@ -101,6 +101,7 @@ class MidasRawModel:
     """Immutable section-level parse result before canonical normalization."""
 
     source_path: str
+    source_checksum: str
     line_count: int
     section_rows: tuple[tuple[str, tuple[str, ...]], ...]
 
@@ -122,6 +123,7 @@ class MidasRawModel:
     def to_dict(self) -> dict[str, Any]:
         return {
             "source_path": self.source_path,
+            "source_checksum": self.source_checksum,
             "line_count": self.line_count,
             "sections": {
                 name: list(rows)
@@ -131,10 +133,13 @@ class MidasRawModel:
 
 
 def parse_midas_mgt(path: Path) -> MidasRawModel:
+    source_bytes = path.read_bytes()
+    source_checksum = f"sha256:{hashlib.sha256(source_bytes).hexdigest()}"
     sections: dict[str, list[str]] = {}
     current = "ROOT"
     line_count = 0
-    for raw in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+    text = source_bytes.decode("utf-8", errors="ignore")
+    for raw in text.splitlines():
         line_count += 1
         line = clean_mgt_line(raw)
         if not line:
@@ -147,6 +152,7 @@ def parse_midas_mgt(path: Path) -> MidasRawModel:
         sections.setdefault(current, []).append(line)
     return MidasRawModel(
         source_path=str(path),
+        source_checksum=source_checksum,
         line_count=line_count,
         section_rows=tuple(
             (name, tuple(rows))
