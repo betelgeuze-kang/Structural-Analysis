@@ -1,7 +1,7 @@
 name: CI
 
-# Canonical structural-product integration gate. Legacy evidence and molecular
-# quarantine code have independent ownership workflows and cannot redefine this lane.
+# Canonical structural-product integration gate. Legacy evidence and quarantined
+# science code have independent ownership workflows and cannot redefine this lane.
 
 on:
   push:
@@ -21,7 +21,7 @@ on:
       - "docs/structural-analysis-ai-engine-gap-ledger.md"
       - ".github/workflows/ci.yml"
       - ".github/workflows/legacy-evidence-ci.yml"
-      - ".github/workflows/molecular-quarantine-ci.yml"
+      - ".github/workflows/science-quarantine-ci.yml"
   pull_request:
     paths:
       - "implementation/**"
@@ -38,7 +38,7 @@ on:
       - "docs/structural-analysis-ai-engine-gap-ledger.md"
       - ".github/workflows/ci.yml"
       - ".github/workflows/legacy-evidence-ci.yml"
-      - ".github/workflows/molecular-quarantine-ci.yml"
+      - ".github/workflows/science-quarantine-ci.yml"
   workflow_dispatch:
 
 env:
@@ -85,8 +85,7 @@ jobs:
           --fail-blocked
 
       - name: Verify structural core Python lane
-        run: >-
-          python scripts/run_product_ci_lane.py --lane core --ruff --compile
+        run: python scripts/run_product_ci_lane.py --lane core --ruff --compile
 
       - name: Materialize deterministic structural-scope audit candidate
         run: python scripts/check_structural_scope_contamination.py --tracked-only
