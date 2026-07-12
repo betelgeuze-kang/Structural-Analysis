@@ -10,6 +10,7 @@ on:
       - "tests/test_mgt_frame_kernel_extraction.py"
       - "tests/test_result_validation_tolerance.py"
       - "tests/test_structural_analysis_core_api.py"
+      - "tests/test_typed_domain_model.py"
       - "pyproject.toml"
       - "setup.cfg"
       - ".github/workflows/authoritative-linear-core-ci.yml"
@@ -23,6 +24,7 @@ on:
       - "tests/test_mgt_frame_kernel_extraction.py"
       - "tests/test_result_validation_tolerance.py"
       - "tests/test_structural_analysis_core_api.py"
+      - "tests/test_typed_domain_model.py"
       - "pyproject.toml"
       - "setup.cfg"
       - ".github/workflows/authoritative-linear-core-ci.yml"
@@ -62,6 +64,7 @@ jobs:
           tests/test_mgt_frame_kernel_extraction.py
           tests/test_result_validation_tolerance.py
           tests/test_structural_analysis_core_api.py
+          tests/test_typed_domain_model.py
 
       - name: Compile public package and shared MGT runner
         run: >-
@@ -79,3 +82,4 @@ jobs:
           tests/test_mgt_frame_kernel_extraction.py
           tests/test_result_validation_tolerance.py
           tests/test_structural_analysis_core_api.py
+          tests/test_typed_domain_model.py
