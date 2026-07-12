@@ -52,11 +52,7 @@ jobs:
           --fail-blocked
 
       - name: Ruff and compile legacy evidence lane
-        run: >-
-          python scripts/run_product_ci_lane.py
-          --lane legacy_evidence
-          --ruff
-          --compile
+        run: python scripts/run_product_ci_lane.py --lane legacy_evidence --ruff --compile
 
       - name: Deterministic legacy evidence contracts
         run: >-
