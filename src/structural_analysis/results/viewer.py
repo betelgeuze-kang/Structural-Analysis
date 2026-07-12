@@ -7,6 +7,7 @@ from typing import Any
 import numpy as np
 
 REACTION_LABELS = ("FX", "FY", "FZ", "MX", "MY", "MZ")
+VIEWER_SCHEMA_VERSION = "structural-analysis-viewer-payload.v2"
 
 
 def build_linear_static_viewer_payload(
@@ -16,9 +17,17 @@ def build_linear_static_viewer_payload(
     dof_labels: tuple[str, ...],
     displacements: np.ndarray,
     reactions: np.ndarray,
+    equilibrium_residuals: np.ndarray,
     member_forces: list[dict[str, Any]],
     solver_path_id: str,
 ) -> dict[str, Any]:
+    """Project one authoritative solution into the versioned viewer envelope.
+
+    ``reaction`` contains constrained-DOF support reactions only. Free-DOF
+    numerical imbalance is exposed separately as ``equilibrium_residual`` so it
+    cannot be mistaken for a physical support reaction.
+    """
+
     width = len(dof_labels)
     nodes = []
     for index, node_id in enumerate(node_ids):
@@ -35,13 +44,23 @@ def build_linear_static_viewer_payload(
                     REACTION_LABELS[offset]: float(reactions[base + offset])
                     for offset in range(width)
                 },
+                "equilibrium_residual": {
+                    REACTION_LABELS[offset]: float(
+                        equilibrium_residuals[base + offset]
+                    )
+                    for offset in range(width)
+                },
             }
         )
     return {
-        "schema_version": "structural-analysis-viewer-payload.v1",
+        "schema_version": VIEWER_SCHEMA_VERSION,
         "source": "authoritative_solver_result",
         "solver_path_id": solver_path_id,
         "analysis_fidelity": "cpu_reference_linear_fea",
+        "reaction_definition": "constrained_dof_internal_minus_external_force",
+        "equilibrium_residual_definition": (
+            "free_dof_internal_minus_external_force; constrained entries are zero"
+        ),
         "nodes": nodes,
         "elements": member_forces,
     }
