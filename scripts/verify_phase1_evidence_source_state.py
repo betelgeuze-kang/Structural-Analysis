@@ -32,6 +32,7 @@ EVIDENCE_ONLY_EXACT_PATHS = frozenset(
         "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
     }
 )
+INTEGRATION_REQUIREMENT = "regular_merge_commit_preserves_source_ancestry"
 
 
 def _git(
@@ -114,12 +115,15 @@ def verify_source_state(
             "mode": "source_commit_then_evidence_only_commit",
             "allowed_prefix": EVIDENCE_ONLY_PREFIX,
             "allowed_exact_paths": sorted(EVIDENCE_ONLY_EXACT_PATHS),
+            "integration_requirement": INTEGRATION_REQUIREMENT,
         },
         "claim_boundary": (
             "This receipt proves only that every committed path after the recorded "
             "source commit belongs to the declared generated Phase 1/readiness evidence "
-            "surface. It does not prove scientific correctness beyond the generators "
-            "and focused tests executed by the authoritative evidence workflow."
+            "surface. A regular merge commit is required so the recorded source remains "
+            "an ancestor of the integrated main head. It does not prove scientific "
+            "correctness beyond the generators and focused tests executed by the "
+            "authoritative evidence workflow."
         ),
     }
 
