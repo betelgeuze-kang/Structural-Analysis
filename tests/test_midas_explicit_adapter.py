@@ -59,6 +59,7 @@ def test_raw_parser_is_immutable_section_level_input(tmp_path: Path) -> None:
 
     assert isinstance(raw, MidasRawModel)
     assert raw.source_path == str(path)
+    assert raw.source_checksum.startswith("sha256:")
     assert raw.section_names == (
         "CONLOAD",
         "ELEMENT",
@@ -94,6 +95,7 @@ def test_explicit_canonicalizer_normalizes_load_ranges(tmp_path: Path) -> None:
         "load_midas_mgt_topology",
         "canonicalize_midas_mgt",
     ]
+    assert model.metadata["raw_source_checksum"] == topology.input_checksum
     assert model.metadata["raw_section_counts"]["CONLOAD"] == 1
 
 
@@ -105,6 +107,18 @@ def test_explicit_canonicalizer_rejects_mixed_source_models(tmp_path: Path) -> N
     topology = load_midas_mgt_topology(topology_path)
 
     with pytest.raises(ValueError, match="raw/topology source mismatch"):
+        canonicalize_midas_mgt(raw, topology)
+
+
+def test_explicit_canonicalizer_rejects_same_path_content_drift(
+    tmp_path: Path,
+) -> None:
+    path = _write_model(tmp_path / "model.mgt")
+    raw = parse_midas_mgt(path)
+    path.write_text(path.read_text(encoding="utf-8") + "$ changed\n", encoding="utf-8")
+    topology = load_midas_mgt_topology(path)
+
+    with pytest.raises(ValueError, match="raw/topology checksum mismatch"):
         canonicalize_midas_mgt(raw, topology)
 
 
