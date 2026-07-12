@@ -50,11 +50,7 @@ jobs:
           --fail-blocked
 
       - name: Ruff and compile quarantined Python
-        run: >-
-          python scripts/run_product_ci_lane.py
-          --lane molecular_quarantine
-          --ruff
-          --compile
+        run: python scripts/run_product_ci_lane.py --lane molecular_quarantine --ruff --compile
 
       - name: Collect quarantined tests without product promotion
         shell: bash
