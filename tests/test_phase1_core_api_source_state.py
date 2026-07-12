@@ -127,3 +127,14 @@ def test_source_commit_remains_part_of_nonvolatile_comparison() -> None:
     right = {"source_commit_sha": "def", "generated_at": "two"}
 
     assert module._strip_volatile(left) != module._strip_volatile(right)
+
+
+def test_resync_workflow_tracks_source_state_contract() -> None:
+    workflow = (
+        Path(__file__).resolve().parents[1]
+        / ".github/workflows/authoritative-core-evidence-resync.yml"
+    ).read_text(encoding="utf-8")
+
+    assert 'tests/test_phase1_core_api_source_state.py' in workflow
+    assert 'source_commit_then_evidence_only_commit' in workflow
+    assert 'Verify exact evidence head' in workflow
