@@ -187,23 +187,38 @@ def _migrate_streak_builder() -> None:
 
 def _migrate_streak_tests() -> None:
     path = ROOT / "tests/test_build_ci_streak_intake_packet.py"
-    text = path.read_text(encoding="utf-8")
+    lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
+    output: list[str] = []
+    replacements = 0
+    index = 0
+    needle = '                    "local_workflow_runs_on": [\n'
+    while index < len(lines):
+        if lines[index] == needle:
+            if (
+                index + 4 >= len(lines)
+                or "STRUCTURAL_ACTIONS_RUNNER_LABELS" not in lines[index + 1]
+                or lines[index + 2].strip() != "],"
+                or "local_self_hosted_runner_default" not in lines[index + 3]
+                or "local_github_hosted_runner_default" not in lines[index + 4]
+            ):
+                raise RuntimeError("unexpected CI streak runner fixture")
+            output.extend(
+                [
+                    '                    "local_workflow_runs_on": ["ubuntu-latest"],\n',
+                    '                    "local_self_hosted_runner_default": False,\n',
+                    '                    "local_github_hosted_runner_default": True,\n',
+                ]
+            )
+            index += 5
+            replacements += 1
+            continue
+        output.append(lines[index])
+        index += 1
+    if replacements != 2:
+        raise RuntimeError(f"valid hosted fixture replacement count={replacements}")
+    text = "".join(output)
 
-    old_fixture = '''                    "local_workflow_runs_on": [
-                        "${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
-                    ],
-                    "local_self_hosted_runner_default": True,
-                    "local_github_hosted_runner_default": False,'''
-    new_fixture = '''                    "local_workflow_runs_on": ["ubuntu-latest"],
-                    "local_self_hosted_runner_default": False,
-                    "local_github_hosted_runner_default": True,'''
-    if text.count(old_fixture) != 2:
-        raise RuntimeError(
-            f"valid hosted fixture replacement count={text.count(old_fixture)}"
-        )
-    text = text.replace(old_fixture, new_fixture, 2)
-
-    replacements = {
+    replacements_map = {
         '"runner_class": "self-hosted linux x64",': (
             '"runner_class": "GitHub-hosted deterministic PR/nightly lanes",'
         ),
@@ -242,7 +257,7 @@ def _migrate_streak_tests() -> None:
             'assert payload["gate_unblock_plan"][0]["slot_id"] == "collect_pr_30_consecutive_passes"'
         ),
     }
-    for old, new in replacements.items():
+    for old, new in replacements_map.items():
         text = _replace_once(text, old, new, old)
     path.write_text(text, encoding="utf-8")
 
