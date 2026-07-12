@@ -34,11 +34,15 @@ def linear_static_residual(
     displacements: np.ndarray,
 ) -> np.ndarray:
     """Residual R(u)=F_internal(u)-F_external for the narrow linear-static slice."""
+
     return assembly.stiffness @ displacements - assembly.loads
 
 
-def linear_static_tangent_jacobian(assembly: LinearStaticAssembly) -> np.ndarray | csr_matrix:
+def linear_static_tangent_jacobian(
+    assembly: LinearStaticAssembly,
+) -> np.ndarray | csr_matrix:
     """Consistent tangent dR/du equals assembled global stiffness for linear elasticity."""
+
     return assembly.stiffness
 
 
@@ -94,8 +98,11 @@ def _stiffness_symmetry_error(stiffness: np.ndarray | csr_matrix) -> float:
     return float(np.linalg.norm(diff, ord=np.inf))
 
 
-def _small_sparse_rank_deficiency_detail(free_stiffness: csr_matrix) -> str | None:
-    """Small-preview guard to block singular sparse systems before SuperLU emits output."""
+def _small_sparse_rank_deficiency_detail(
+    free_stiffness: csr_matrix,
+) -> str | None:
+    """Block small singular sparse systems before SuperLU emits output."""
+
     if free_stiffness.shape[0] > 64:
         return None
     dense = free_stiffness.toarray()
@@ -104,6 +111,25 @@ def _small_sparse_rank_deficiency_detail(free_stiffness: csr_matrix) -> str | No
     if rank < order:
         return f"small_sparse_rank_precheck_failed:rank={rank}:order={order}"
     return None
+
+
+def _partition_residual(
+    residual: np.ndarray,
+    *,
+    free_dofs: list[int],
+    constrained_dofs: set[int],
+) -> tuple[np.ndarray, np.ndarray]:
+    """Split numerical equilibrium residuals from physical support reactions."""
+
+    reactions = np.zeros_like(residual, dtype=float)
+    equilibrium_residuals = np.zeros_like(residual, dtype=float)
+    if constrained_dofs:
+        constrained_indices = np.asarray(sorted(constrained_dofs), dtype=int)
+        reactions[constrained_indices] = residual[constrained_indices]
+    if free_dofs:
+        free_indices = np.asarray(free_dofs, dtype=int)
+        equilibrium_residuals[free_indices] = residual[free_indices]
+    return reactions, equilibrium_residuals
 
 
 def _solve_linear_static(
@@ -164,23 +190,45 @@ def _solve_linear_static(
     internal_forces = assembly.stiffness @ displacements
     external_forces = assembly.loads
     residual = linear_static_residual(assembly, displacements)
-    reactions = residual.copy()
-    residual_free = residual[free]
-    residual_constrained = residual[sorted(constrained)] if constrained else np.array([])
-    residual_norm = float(np.linalg.norm(residual_free, ord=np.inf)) if residual_free.size else 0.0
-    constrained_reaction_norm = (
-        float(np.linalg.norm(residual_constrained, ord=np.inf))
-        if residual_constrained.size
+    reactions, equilibrium_residuals = _partition_residual(
+        residual,
+        free_dofs=free,
+        constrained_dofs=constrained,
+    )
+    residual_free = equilibrium_residuals[free]
+    reaction_constrained = (
+        reactions[sorted(constrained)] if constrained else np.array([])
+    )
+    residual_norm = (
+        float(np.linalg.norm(residual_free, ord=np.inf))
+        if residual_free.size
         else 0.0
     )
-    load_norm = float(np.linalg.norm(assembly.loads, ord=np.inf)) if assembly.loads.size else 0.0
-    displacement_norm = float(np.linalg.norm(displacements, ord=np.inf)) if displacements.size else 0.0
+    constrained_reaction_norm = (
+        float(np.linalg.norm(reaction_constrained, ord=np.inf))
+        if reaction_constrained.size
+        else 0.0
+    )
+    load_norm = (
+        float(np.linalg.norm(assembly.loads, ord=np.inf))
+        if assembly.loads.size
+        else 0.0
+    )
+    displacement_norm = (
+        float(np.linalg.norm(displacements, ord=np.inf))
+        if displacements.size
+        else 0.0
+    )
     relative_residual = residual_norm / max(load_norm, 1.0)
     strain_energy = float(0.5 * displacements @ internal_forces)
     linear_ramp_external_work = float(0.5 * displacements @ external_forces)
     energy_balance_error = abs(strain_energy - linear_ramp_external_work)
     stiffness_symmetry_error = _stiffness_symmetry_error(assembly.stiffness)
-    status = "ready" if residual_norm <= tolerance * max(load_norm, 1.0) else "degraded"
+    status = (
+        "ready"
+        if residual_norm <= tolerance * max(load_norm, 1.0)
+        else "degraded"
+    )
     warnings = list(assembly.warnings)
     if status == "degraded":
         warnings.append("Linear static residual exceeded configured tolerance.")
@@ -192,6 +240,7 @@ def _solve_linear_static(
         dof_labels=DOF_LABELS,
         displacements=displacements,
         reactions=reactions,
+        equilibrium_residuals=equilibrium_residuals,
         member_forces=member_forces,
         solver_path_id=AUTHORITATIVE_CPU_SOLVER_ID,
     )
@@ -220,13 +269,22 @@ def _solve_linear_static(
             "active_dof_count": len(active),
             "constrained_dof_count": len(constrained),
             "residual_formula": RESIDUAL_FORMULA,
+            "reaction_definition": (
+                "constrained_dof_internal_minus_external_force"
+            ),
+            "equilibrium_residual_definition": (
+                "free_dof_internal_minus_external_force"
+            ),
             "tangent_jacobian_equals_assembled_stiffness": True,
             "tangent_jacobian_storage": assembly.stiffness_storage,
             "residual_norm": residual_norm,
             "free_residual_norm": residual_norm,
+            "free_equilibrium_residual_norm": residual_norm,
             "constrained_reaction_norm": constrained_reaction_norm,
             "relative_residual": relative_residual,
             "max_displacement": displacement_norm,
+            "increment_norm": displacement_norm,
+            "relative_increment_applicable": False,
             "regularization_used": False,
             "fallback_used": False,
             "stiffness_storage": assembly.stiffness_storage,
@@ -238,10 +296,23 @@ def _solve_linear_static(
             "linear_ramp_external_work": linear_ramp_external_work,
             "energy_balance_error": energy_balance_error,
             "stiffness_symmetry_error": stiffness_symmetry_error,
-            "external_forces": _node_vector_rows(assembly.node_ids, external_forces),
-            "internal_forces": _node_vector_rows(assembly.node_ids, internal_forces),
-            "displacements": _node_vector_rows(assembly.node_ids, displacements),
+            "external_forces": _node_vector_rows(
+                assembly.node_ids,
+                external_forces,
+            ),
+            "internal_forces": _node_vector_rows(
+                assembly.node_ids,
+                internal_forces,
+            ),
+            "displacements": _node_vector_rows(
+                assembly.node_ids,
+                displacements,
+            ),
             "reactions": _node_vector_rows(assembly.node_ids, reactions),
+            "equilibrium_residuals": _node_vector_rows(
+                assembly.node_ids,
+                equilibrium_residuals,
+            ),
             "member_forces": member_forces,
             "viewer_payload": viewer_payload,
             "claim_boundary": claim_boundary,
@@ -252,7 +323,12 @@ def _solve_linear_static(
                 "iteration": 1,
                 "residual_norm": residual_norm,
                 "relative_residual": relative_residual,
-                "relative_increment": displacement_norm,
+                "increment_norm": displacement_norm,
+                "relative_increment": 0.0,
+                "relative_increment_applicable": False,
+                "increment_definition": (
+                    "single_direct_linear_solve; no iterative relative increment"
+                ),
                 "status": status,
             }
         ],
@@ -335,7 +411,10 @@ def _blocked_response(
     )
 
 
-def _node_vector_rows(node_ids: tuple[str, ...], vector: np.ndarray) -> dict[str, dict[str, float]]:
+def _node_vector_rows(
+    node_ids: tuple[str, ...],
+    vector: np.ndarray,
+) -> dict[str, dict[str, float]]:
     rows: dict[str, dict[str, float]] = {}
     for node_index, node_id in enumerate(node_ids):
         base = len(DOF_LABELS) * node_index
