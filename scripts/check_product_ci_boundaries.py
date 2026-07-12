@@ -64,6 +64,7 @@ CORE_EXACT_PATHS = {
     "tests/test_check_product_ci_boundaries.py",
     "tests/test_elastic_material_contract.py",
     "tests/test_mgt_frame_kernel_extraction.py",
+    "tests/test_midas_explicit_adapter.py",
     "tests/test_midas_mgt_nodal_load_contract.py",
     "tests/test_product_ci_workflow_contract.py",
     "tests/test_project_ops_api_service.py",
@@ -73,6 +74,7 @@ CORE_EXACT_PATHS = {
     "tests/test_source_boundary_footprint_report.py",
     "tests/test_structure_viewer_dom_safety_contract.py",
     "tests/test_structural_analysis_core_api.py",
+    "tests/test_typed_domain_model.py",
     "tests/test_verify_quality_gate_contract.py",
 }
 CORE_TEST_PREFIXES = (
@@ -254,7 +256,11 @@ def build_report(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--quarantine-manifest", type=Path, default=DEFAULT_QUARANTINE_MANIFEST)
+    parser.add_argument(
+        "--quarantine-manifest",
+        type=Path,
+        default=DEFAULT_QUARANTINE_MANIFEST,
+    )
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--out", type=Path)
     parser.add_argument("--print-paths", choices=LANES)
