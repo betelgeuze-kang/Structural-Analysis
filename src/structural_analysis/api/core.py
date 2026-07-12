@@ -18,7 +18,7 @@ from structural_analysis.assembly.nonlinear_static import (
     solve_axial_chain_mesh,
 )
 from structural_analysis.io.ifc.loader import load_ifc_step
-from structural_analysis.io.midas.loader import load_midas_mgt
+from structural_analysis.io.midas import load_midas_mgt
 from structural_analysis.io.neutral.loader import load_neutral_json
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.results.schema import (
@@ -284,21 +284,15 @@ def analyze(
                 "residual_norm": float(
                     max(abs(value) for value in final_state.residual_kn)
                 ),
-                "tip_displacement_m": float(
-                    final_state.displacements_m[-1]
-                ),
+                "tip_displacement_m": float(final_state.displacements_m[-1]),
                 "reactions": final_state.reactions_kn.tolist(),
                 "internal_forces": final_state.internal_forces_kn.tolist(),
                 "external_forces": final_state.external_forces_kn.tolist(),
                 "element_forces": list(final_state.element_forces_kn),
-                "assembled_jacobian": (
-                    final_state.jacobian_kn_per_m.tolist()
-                ),
+                "assembled_jacobian": final_state.jacobian_kn_per_m.tolist(),
                 "assembled_jacobian_fd_pass": bool(jacobian_check["pass"]),
                 "series_force_equilibrium_pass": bool(series_check["pass"]),
-                "regularization_used": solution.metrics.get(
-                    "regularization_used"
-                ),
+                "regularization_used": solution.metrics.get("regularization_used"),
                 "fallback_used": solution.metrics.get("fallback_used"),
                 "claim_boundary": (
                     "nonlinear_material_mesh_axial_chain_preview_only"
