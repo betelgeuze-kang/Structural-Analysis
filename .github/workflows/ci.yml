@@ -1,7 +1,7 @@
 name: CI
 
-# Deterministic repository quality gate. Hardware/GPU, private-corpus, generated
-# release-artifact, and legacy full-suite checks stay in Nightly Heavy Solver.
+# Canonical structural-product integration gate. Legacy evidence and molecular
+# quarantine code have independent ownership workflows and cannot redefine this lane.
 
 on:
   push:
@@ -20,6 +20,8 @@ on:
       - "docs/commercial-structural-solver-product-gap-ledger.md"
       - "docs/structural-analysis-ai-engine-gap-ledger.md"
       - ".github/workflows/ci.yml"
+      - ".github/workflows/legacy-evidence-ci.yml"
+      - ".github/workflows/molecular-quarantine-ci.yml"
   pull_request:
     paths:
       - "implementation/**"
@@ -35,6 +37,8 @@ on:
       - "docs/commercial-structural-solver-product-gap-ledger.md"
       - "docs/structural-analysis-ai-engine-gap-ledger.md"
       - ".github/workflows/ci.yml"
+      - ".github/workflows/legacy-evidence-ci.yml"
+      - ".github/workflows/molecular-quarantine-ci.yml"
   workflow_dispatch:
 
 env:
@@ -73,6 +77,17 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
+      - name: Validate product CI ownership boundaries
+        run: >-
+          python scripts/check_product_ci_boundaries.py
+          --json
+          --out product-ci-boundary-report.json
+          --fail-blocked
+
+      - name: Verify structural core Python lane
+        run: >-
+          python scripts/run_product_ci_lane.py --lane core --ruff --compile
+
       - name: Materialize deterministic structural-scope audit candidate
         run: python scripts/check_structural_scope_contamination.py --tracked-only
 
@@ -83,6 +98,7 @@ jobs:
           path: |
             implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json
             implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.md
+            product-ci-boundary-report.json
           if-no-files-found: error
           retention-days: 14
 
