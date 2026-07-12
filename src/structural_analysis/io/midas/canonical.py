@@ -50,6 +50,11 @@ def canonicalize_midas_mgt(
             "MIDAS raw/topology source mismatch: "
             f"{raw_source} != {topology_source}"
         )
+    if raw_model.source_checksum != topology_model.input_checksum:
+        raise ValueError(
+            "MIDAS raw/topology checksum mismatch: "
+            f"{raw_model.source_checksum} != {topology_model.input_checksum}"
+        )
     if topology_model.source_format != "midas_mgt":
         raise ValueError(
             "MIDAS canonicalization requires a midas_mgt topology model; "
@@ -121,6 +126,7 @@ def canonicalize_midas_mgt(
                 "normalization; deterministic MGT solver closure remains outside "
                 "this adapter"
             ),
+            "raw_source_checksum": raw_model.source_checksum,
             "raw_section_counts": raw_model.section_counts,
             "raw_line_count": raw_model.line_count,
             "static_load_cases": static_load_cases,
