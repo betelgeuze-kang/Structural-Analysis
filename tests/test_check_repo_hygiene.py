@@ -113,6 +113,15 @@ def test_allowed_release_manifest_is_not_blocked() -> None:
     assert check_repo_hygiene.check_tracked_files(["implementation/phase1/release_artifacts_manifest.json"]) == []
 
 
+def test_canonical_opensees_breadth_manifest_is_not_blocked() -> None:
+    assert check_repo_hygiene.check_tracked_files(
+        [
+            "implementation/phase1/release/benchmark_expansion/"
+            "opensees_canonical_breadth_report.json"
+        ]
+    ) == []
+
+
 def test_release_directory_remains_blocked() -> None:
     errors = check_repo_hygiene.check_tracked_files(["implementation/phase1/release/bundle.zip"])
 

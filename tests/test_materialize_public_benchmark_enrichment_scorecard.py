@@ -120,7 +120,7 @@ def test_public_benchmark_enrichment_materializer_scores_targets() -> None:
     assert rows["ESR1"]["roc_auc"] == 1.0
 
 
-def test_public_benchmark_enrichment_materializer_blocks_duplicate_row_identities() -> None:
+def test_public_benchmark_enrichment_materializer_blocks_duplicate_target_and_molecule_rows() -> None:
     intake = json.loads(json.dumps(_valid_intake()))
     targets = intake["targets"]
     assert isinstance(targets, list)
@@ -286,7 +286,7 @@ def test_public_benchmark_enrichment_materializer_blocks_local_proxy_receipts() 
     assert "operator_receipts_required" in scorecard["root_cause_tags"]
 
 
-def test_public_benchmark_enrichment_materializer_blocks_duplicate_row_identities() -> None:
+def test_public_benchmark_enrichment_materializer_blocks_cross_target_and_molecule_duplicate_identities() -> None:
     intake = _valid_intake()
     targets = intake["targets"]
     assert isinstance(targets, list)

@@ -27,7 +27,6 @@ from build_g1_support_elastic_link_reconciliation_audit import (  # noqa: E402
 )
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 from run_g1_null_space_mode_audit import (  # noqa: E402
-    DEFAULT_OUTPUT_JSON as DEFAULT_BASELINE_NEAR_NULL,
     run_g1_null_space_mode_audit as run_null_space_audit,
 )
 

@@ -1,17 +1,26 @@
 name: Workflow Contract CI
 
-# Lightweight syntax/shape validation for every GitHub Actions workflow. This
-# keeps scheduled, release, deploy, AI, frontend, viewer, and heavy CI edits
-# covered without forcing the full solver gate to run for YAML-only changes.
+# Lightweight syntax, runner-class, and trigger validation for every workflow.
+# This lane is intentionally independent of workstation availability.
 
 on:
   pull_request:
     paths:
       - ".github/workflows/**"
+      - "scripts/check_github_actions_runner_policy.py"
+      - "scripts/build_github_actions_ci_streak_evidence.py"
+      - "tests/test_check_github_actions_runner_policy.py"
+      - "tests/test_build_github_actions_ci_streak_evidence.py"
+      - "tests/test_verify_quality_gate.py"
   push:
-    branches: ["main", "codex/**", "web/**", "feat/**"]
+    branches: ["main", "codex/**", "web/**", "feat/**", "ci/**"]
     paths:
       - ".github/workflows/**"
+      - "scripts/check_github_actions_runner_policy.py"
+      - "scripts/build_github_actions_ci_streak_evidence.py"
+      - "tests/test_check_github_actions_runner_policy.py"
+      - "tests/test_build_github_actions_ci_streak_evidence.py"
+      - "tests/test_verify_quality_gate.py"
   workflow_dispatch:
 
 permissions:
@@ -23,7 +32,8 @@ concurrency:
 
 jobs:
   validate:
-    runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -32,9 +42,10 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.10"
+          cache: pip
 
-      - name: Install YAML parser
-        run: python -m pip install --disable-pip-version-check PyYAML==6.0.2
+      - name: Install workflow validation tools
+        run: python -m pip install -e .[dev] PyYAML==6.0.2
 
       - name: Validate workflow YAML and required shape
         shell: bash
@@ -73,3 +84,28 @@ jobs:
 
           print(f'validated {len(paths)} workflow file(s)')
           PY
+
+      - name: Validate deterministic and hardware runner classes
+        run: python scripts/check_github_actions_runner_policy.py --json --fail-blocked
+
+      - name: Verify workflow and CI-streak contracts
+        shell: bash
+        run: |
+          set +e
+          python -m pytest -q \
+            tests/test_check_github_actions_runner_policy.py \
+            tests/test_build_github_actions_ci_streak_evidence.py \
+            tests/test_verify_quality_gate.py \
+            > workflow-contract-tests.log 2>&1
+          code=$?
+          cat workflow-contract-tests.log
+          exit "$code"
+
+      - name: Upload workflow contract test log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: workflow-contract-tests-${{ github.run_id }}
+          path: workflow-contract-tests.log
+          if-no-files-found: warn
+          retention-days: 14
