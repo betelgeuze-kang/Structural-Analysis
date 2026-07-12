@@ -6,6 +6,10 @@ from dataclasses import asdict, dataclass, field
 from typing import Any
 
 
+RESULT_SCHEMA_VERSION = "structural-analysis-result.v2"
+CLAIM_BOUNDARY_VERSION = "developer-preview-core-api-v1"
+
+
 @dataclass(frozen=True)
 class AnalysisResult:
     status: str
@@ -18,8 +22,9 @@ class AnalysisResult:
     unsupported_features: list[dict[str, Any]] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     metrics: dict[str, Any] = field(default_factory=dict)
+    result_schema_version: str = RESULT_SCHEMA_VERSION
     developer_preview: bool = True
-    claim_boundary_version: str = "developer-preview-core-api-v1"
+    claim_boundary_version: str = CLAIM_BOUNDARY_VERSION
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -39,7 +44,7 @@ class ValidationReport:
     comparisons: list[dict[str, Any]] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     developer_preview: bool = True
-    claim_boundary_version: str = "developer-preview-core-api-v1"
+    claim_boundary_version: str = CLAIM_BOUNDARY_VERSION
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
