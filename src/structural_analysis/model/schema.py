@@ -114,8 +114,14 @@ class CanonicalModel:
 
         return {
             "schema_version": self.schema_version,
-            "units": self.units.to_dict(),
-            "coordinate_system": self.coordinate_system.to_dict(),
+            "units": {
+                "length": self.units.length,
+                "force": self.units.force,
+            },
+            "coordinate_system": {
+                "axis_order": list(self.coordinate_system.axis_order),
+                "up_axis": self.coordinate_system.up_axis,
+            },
             "nodes": json.loads(json.dumps(self.nodes)),
             "elements": json.loads(json.dumps(self.elements)),
             "materials": json.loads(json.dumps(self.materials)),
