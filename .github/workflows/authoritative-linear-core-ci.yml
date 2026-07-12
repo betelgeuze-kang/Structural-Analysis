@@ -10,11 +10,12 @@ on:
       - "tests/test_mgt_frame_kernel_extraction.py"
       - "tests/test_result_validation_tolerance.py"
       - "tests/test_structural_analysis_core_api.py"
+      - "tests/test_typed_domain_model.py"
       - "pyproject.toml"
       - "setup.cfg"
       - ".github/workflows/authoritative-linear-core-ci.yml"
   push:
-    branches: ["main", "agent/**", "solver/**"]
+    branches: ["main", "agent/**", "solver/**", "core/**"]
     paths:
       - "src/structural_analysis/**"
       - "implementation/phase1/run_mgt_full_frame_6dof_sparse_equilibrium.py"
@@ -23,6 +24,7 @@ on:
       - "tests/test_mgt_frame_kernel_extraction.py"
       - "tests/test_result_validation_tolerance.py"
       - "tests/test_structural_analysis_core_api.py"
+      - "tests/test_typed_domain_model.py"
       - "pyproject.toml"
       - "setup.cfg"
       - ".github/workflows/authoritative-linear-core-ci.yml"
@@ -61,6 +63,7 @@ jobs:
           tests/test_mgt_frame_kernel_extraction.py
           tests/test_result_validation_tolerance.py
           tests/test_structural_analysis_core_api.py
+          tests/test_typed_domain_model.py
 
       - name: Compile public package and shared MGT runner
         run: >-
@@ -77,3 +80,4 @@ jobs:
           tests/test_mgt_frame_kernel_extraction.py
           tests/test_result_validation_tolerance.py
           tests/test_structural_analysis_core_api.py
+          tests/test_typed_domain_model.py
