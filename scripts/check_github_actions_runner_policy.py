@@ -23,6 +23,8 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/authoritative-linear-core-ci.yml",
         ".github/workflows/ci.yml",
         ".github/workflows/frontend-web-ci.yml",
+        ".github/workflows/legacy-evidence-ci.yml",
+        ".github/workflows/molecular-quarantine-ci.yml",
         ".github/workflows/nightly-full-quality.yml",
         ".github/workflows/runtime-input-viewer-ci.yml",
         ".github/workflows/viewer-browser-ci.yml",
@@ -45,7 +47,10 @@ def _display_path(path: Path, workflow_dir: Path) -> str:
     try:
         return str(path.relative_to(ROOT))
     except ValueError:
-        if workflow_dir.name == "workflows" and workflow_dir.parent.name == ".github":
+        if (
+            workflow_dir.name == "workflows"
+            and workflow_dir.parent.name == ".github"
+        ):
             return str(Path(".github/workflows") / path.name)
         return str(path)
 
@@ -148,7 +153,11 @@ def check_runner_policy(
 ) -> dict[str, Any]:
     """Require explicit execution classes instead of a repository-wide runner type."""
 
-    workflow_dir = workflow_dir if workflow_dir.is_absolute() else ROOT / workflow_dir
+    workflow_dir = (
+        workflow_dir
+        if workflow_dir.is_absolute()
+        else ROOT / workflow_dir
+    )
     allowlist = set(
         DEFAULT_GITHUB_HOSTED_WORKFLOWS
         if github_hosted_allowlist is None
@@ -168,22 +177,26 @@ def check_runner_policy(
                 execution_class = "deterministic_github_hosted"
                 if not github_hosted:
                     blockers.append(
-                        f"{rel_path}:{line_number}:github_hosted_runner_required:{value}"
+                        f"{rel_path}:{line_number}:"
+                        f"github_hosted_runner_required:{value}"
                     )
                 if self_hosted:
                     blockers.append(
-                        f"{rel_path}:{line_number}:deterministic_lane_uses_self_hosted:{value}"
+                        f"{rel_path}:{line_number}:"
+                        f"deterministic_lane_uses_self_hosted:{value}"
                     )
             else:
                 ok = self_hosted and not github_hosted
                 execution_class = "hardware_or_private_self_hosted"
                 if github_hosted:
                     blockers.append(
-                        f"{rel_path}:{line_number}:unapproved_github_hosted_runner:{value}"
+                        f"{rel_path}:{line_number}:"
+                        f"unapproved_github_hosted_runner:{value}"
                     )
                 if not self_hosted:
                     blockers.append(
-                        f"{rel_path}:{line_number}:self_hosted_default_missing:{value}"
+                        f"{rel_path}:{line_number}:"
+                        f"self_hosted_default_missing:{value}"
                     )
             rows.append(
                 {
@@ -198,7 +211,9 @@ def check_runner_policy(
                 }
             )
     if not rows:
-        blockers.append(f"{_display_path(workflow_dir, workflow_dir)}:runs_on_missing")
+        blockers.append(
+            f"{_display_path(workflow_dir, workflow_dir)}:runs_on_missing"
+        )
     blockers = sorted(dict.fromkeys(blockers))
     return {
         "schema_version": "github-actions-runner-policy.v2",
@@ -208,26 +223,33 @@ def check_runner_policy(
         "runs_on_count": len(rows),
         "github_hosted_allowlist": sorted(allowlist),
         "deterministic_github_hosted_count": sum(
-            row["execution_class"] == "deterministic_github_hosted" for row in rows
+            row["execution_class"] == "deterministic_github_hosted"
+            for row in rows
         ),
         "hardware_or_private_self_hosted_count": sum(
-            row["execution_class"] == "hardware_or_private_self_hosted" for row in rows
+            row["execution_class"] == "hardware_or_private_self_hosted"
+            for row in rows
         ),
         "rows": rows,
         "blockers": blockers,
         "claim_boundary": (
-            "Deterministic CI, frontend, viewer, workflow-contract, and canonical nightly "
-            "lanes may use explicitly allowlisted GitHub-hosted runners so pull requests "
-            "and pass streaks do not depend on a workstation. Hardware, GPU, private-corpus, "
-            "release publication, and other non-allowlisted lanes must remain self-hosted. "
-            "This policy does not prove runner availability or create CI streak credit."
+            "Deterministic structural-core, frontend, viewer, legacy-evidence, "
+            "molecular-quarantine, workflow-contract, and canonical nightly lanes "
+            "may use explicitly allowlisted GitHub-hosted runners. Hardware, GPU, "
+            "private-corpus, release-publication, and other non-allowlisted lanes "
+            "must remain self-hosted. Molecular-quarantine execution does not promote "
+            "that code into the structural product surface."
         ),
     }
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--workflow-dir", type=Path, default=DEFAULT_WORKFLOW_DIR)
+    parser.add_argument(
+        "--workflow-dir",
+        type=Path,
+        default=DEFAULT_WORKFLOW_DIR,
+    )
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     return parser
@@ -237,7 +259,14 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     payload = check_runner_policy(workflow_dir=args.workflow_dir)
     if args.json:
-        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        print(
+            json.dumps(
+                payload,
+                ensure_ascii=False,
+                indent=2,
+                sort_keys=True,
+            )
+        )
     else:
         print(f"GitHub Actions runner policy: {payload['status']}")
     return 1 if args.fail_blocked and not payload["contract_pass"] else 0
