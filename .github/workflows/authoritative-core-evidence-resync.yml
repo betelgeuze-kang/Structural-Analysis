@@ -1,14 +1,15 @@
 name: Authoritative Core Evidence Resync
 
 on:
-  push:
-    branches: ["evidence/authoritative-core-resync"]
+  pull_request:
     paths:
       - "src/structural_analysis/**"
       - "scripts/build_phase1_core_api_contract_artifacts.py"
+      - "scripts/verify_phase1_evidence_source_state.py"
       - "tests/test_build_phase1_core_api_contract_artifacts.py"
       - "tests/test_phase1_core_api_source_state.py"
       - "tests/test_authoritative_linear_evidence_contract.py"
+      - "tests/test_authoritative_linear_evidence_workflow_contract.py"
       - "pyproject.toml"
       - ".github/workflows/authoritative-core-evidence-resync.yml"
       - ".github/workflows/authoritative-linear-core-ci.yml"
@@ -18,31 +19,31 @@ permissions:
   contents: write
 
 concurrency:
-  group: authoritative-core-evidence-resync-${{ github.ref_name }}
+  group: authoritative-core-evidence-resync-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
   resync:
-    if: github.actor != 'github-actions[bot]'
+    if: >-
+      github.actor != 'github-actions[bot]' &&
+      (github.event_name == 'workflow_dispatch' ||
+       github.head_ref == 'evidence/authoritative-core-resync')
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
-      - name: Checkout evidence branch
+      - name: Checkout source branch
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: evidence/authoritative-core-resync
+          ref: ${{ github.head_ref || github.ref_name }}
 
-      - name: Synchronize current main
+      - name: Configure evidence writer
         shell: bash
         run: |
           set -euxo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          if ! git merge-base --is-ancestor origin/main HEAD; then
-            git merge --no-edit origin/main
-          fi
+          echo "EVIDENCE_SOURCE_COMMIT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -53,213 +54,28 @@ jobs:
       - name: Install package
         run: python -m pip install -e .[dev]
 
-      - name: Define source-state evidence policy
+      - name: Verify generator, provenance, and final core
         shell: bash
         run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          path = Path("scripts/build_phase1_core_api_contract_artifacts.py")
-          text = path.read_text(encoding="utf-8")
-
-          anchor = 'AUTHORITATIVE_CPU_SOLVER_ID = "authoritative_cpu_linear_fea_3d_v1"\n'
-          constants = '''AUTHORITATIVE_CPU_SOLVER_ID = "authoritative_cpu_linear_fea_3d_v1"
-          EVIDENCE_ONLY_PATH_PREFIX = (
-              "implementation/phase1/release_evidence/productization/phase1_core_api_"
-          )
-          EVIDENCE_ONLY_EXACT_PATHS = {
-              "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
-              "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
-              "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-              "implementation/phase1/release_evidence/productization/developer_preview_rc_status.md",
-              "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-              "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-              "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-              "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-              "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-              "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
-              "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-              "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-              "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
-          }
-          '''
-          if "EVIDENCE_ONLY_PATH_PREFIX" not in text:
-              if text.count(anchor) != 1:
-                  raise SystemExit("authoritative solver constant anchor not found exactly once")
-              text = text.replace(anchor, constants, 1)
-
-          summary_anchor = "    summary_payload = {\n"
-          summary_definition = (
-              "    evidence_source_commit = (\n"
-              "        os.environ.get(\"EVIDENCE_SOURCE_COMMIT_SHA\", \"\").strip()\n"
-              "        or git_head(repo_root)\n"
-              "    )\n\n"
-              "    summary_payload = {\n"
-          )
-          if "evidence_source_commit = (" not in text:
-              if text.count(summary_anchor) != 1:
-                  raise SystemExit("summary payload anchor not found exactly once")
-              text = text.replace(summary_anchor, summary_definition, 1)
-
-          old_source = '        "source_commit_sha": git_head(repo_root),\n'
-          new_source = (
-              '        "source_commit_sha": evidence_source_commit,\n'
-              '        "source_state_policy": {\n'
-              '            "mode": "source_commit_then_evidence_only_commit",\n'
-              '            "source_commit_sha": evidence_source_commit,\n'
-              '            "exact_head_verification_required": True,\n'
-              '            "allowed_post_source_scope": "generated_phase1_and_readiness_evidence_only",\n'
-              '        },\n'
-          )
-          if old_source in text:
-              text = text.replace(old_source, new_source, 1)
-          elif new_source not in text:
-              raise SystemExit("source commit summary field not found")
-
-          old_strip = '''def _strip_volatile(payload: Any) -> Any:
-              if isinstance(payload, dict):
-                  return {
-                      key: _strip_volatile(value)
-                      for key, value in payload.items()
-                      if key not in {"generated_at", "source_commit_sha"}
-                  }
-              if isinstance(payload, list):
-                  return [_strip_volatile(item) for item in payload]
-              return payload
-          '''
-          new_strip = '''def _strip_volatile(payload: Any) -> Any:
-              if isinstance(payload, dict):
-                  return {
-                      key: _strip_volatile(value)
-                      for key, value in payload.items()
-                      if key != "generated_at"
-                  }
-              if isinstance(payload, list):
-                  return [_strip_volatile(item) for item in payload]
-              return payload
-
-
-          def _expected_summary_for_verified_source_state(
-              *,
-              existing: dict[str, Any],
-              expected: dict[str, Any],
-              repo_root: Path,
-          ) -> dict[str, Any]:
-              """Normalize expected provenance only after verifying an evidence-only commit."""
-
-              source_commit = str(existing.get("source_commit_sha", "")).strip()
-              current_head = git_head(repo_root)
-              if not source_commit:
-                  raise ValueError("source_commit_sha_missing")
-              if source_commit == current_head:
-                  return expected
-
-              policy = existing.get("source_state_policy")
-              if not isinstance(policy, dict):
-                  raise ValueError("source_state_policy_missing")
-              if policy.get("mode") != "source_commit_then_evidence_only_commit":
-                  raise ValueError("source_state_policy_mode_invalid")
-              if str(policy.get("source_commit_sha", "")).strip() != source_commit:
-                  raise ValueError("source_state_policy_source_commit_mismatch")
-
-              ancestor = subprocess.run(
-                  ["git", "merge-base", "--is-ancestor", source_commit, current_head],
-                  cwd=repo_root,
-                  check=False,
-                  stdout=subprocess.DEVNULL,
-                  stderr=subprocess.DEVNULL,
-              )
-              if ancestor.returncode != 0:
-                  raise ValueError("source_commit_not_ancestor_of_head")
-
-              completed = subprocess.run(
-                  ["git", "diff", "--name-only", f"{source_commit}..{current_head}"],
-                  cwd=repo_root,
-                  check=True,
-                  text=True,
-                  capture_output=True,
-              )
-              changed_paths = [
-                  row.strip()
-                  for row in completed.stdout.splitlines()
-                  if row.strip()
-              ]
-              disallowed = [
-                  changed_path
-                  for changed_path in changed_paths
-                  if not changed_path.startswith(EVIDENCE_ONLY_PATH_PREFIX)
-                  and changed_path not in EVIDENCE_ONLY_EXACT_PATHS
-              ]
-              if disallowed:
-                  raise ValueError(
-                      "non_evidence_paths_changed_after_source_commit:"
-                      + ",".join(disallowed)
-                  )
-
-              normalized = json.loads(json.dumps(expected))
-              normalized["source_commit_sha"] = source_commit
-              normalized_policy = normalized.get("source_state_policy")
-              if not isinstance(normalized_policy, dict):
-                  raise ValueError("expected_source_state_policy_missing")
-              normalized_policy["source_commit_sha"] = source_commit
-              return normalized
-          '''
-          if old_strip in text:
-              text = text.replace(old_strip, new_strip, 1)
-          elif new_strip not in text:
-              raise SystemExit("volatile-field comparison block not found")
-
-          old_compare = '''        if _strip_volatile(existing) != _strip_volatile(expected[key]):
-                  return False, f"phase1_core_api_contract_mismatch:{key}"
-          '''
-          new_compare = '''        expected_payload = expected[key]
-              if key == "summary":
-                  try:
-                      expected_payload = _expected_summary_for_verified_source_state(
-                          existing=existing,
-                          expected=expected_payload,
-                          repo_root=repo_root,
-                      )
-                  except (OSError, subprocess.SubprocessError, ValueError) as exc:
-                      return False, (
-                          "phase1_core_api_contract_source_state_invalid:"
-                          f"{exc}"
-                      )
-              if _strip_volatile(existing) != _strip_volatile(expected_payload):
-                  return False, f"phase1_core_api_contract_mismatch:{key}"
-          '''
-          if old_compare in text:
-              text = text.replace(old_compare, new_compare, 1)
-          elif new_compare not in text:
-              raise SystemExit("contract comparison block not found")
-
-          path.write_text(text, encoding="utf-8")
-          PY
-          if ! git diff --quiet -- scripts/build_phase1_core_api_contract_artifacts.py; then
-            git add scripts/build_phase1_core_api_contract_artifacts.py
-            git commit -m "Verify authoritative evidence source-state provenance"
-          fi
-          echo "EVIDENCE_SOURCE_COMMIT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
-
-      - name: Verify generator and authoritative core
-        shell: bash
-        run: |
-          set +e
+          set -o pipefail
           python -m pytest -q \
             tests/test_build_phase1_core_api_contract_artifacts.py \
             tests/test_phase1_core_api_source_state.py \
             tests/test_authoritative_linear_evidence_contract.py \
+            tests/test_authoritative_linear_evidence_workflow_contract.py \
+            tests/test_authoritative_linear_engineering_semantics.py \
             tests/test_authoritative_linear_frame.py \
             tests/test_authoritative_linear_frame_reference_cases.py \
+            tests/test_typed_domain_model.py \
+            tests/test_midas_explicit_adapter.py \
+            tests/test_midas_mgt_nodal_load_contract.py \
             tests/test_build_ci_streak_intake_packet.py \
             tests/test_build_product_readiness_snapshot.py \
             tests/test_check_github_actions_runner_policy.py \
+            tests/test_check_product_ci_boundaries.py \
             tests/test_result_validation_tolerance.py \
             tests/test_structural_analysis_core_api.py \
-            > authoritative-core-tests.log 2>&1
-          code=$?
-          cat authoritative-core-tests.log
-          exit "$code"
+            2>&1 | tee authoritative-core-evidence-tests.log
 
       - name: Generate Phase 1 API and frame evidence
         run: python scripts/build_phase1_core_api_contract_artifacts.py --json
@@ -282,7 +98,7 @@ jobs:
       - name: Check generated Phase 1 contract
         run: python scripts/build_phase1_core_api_contract_artifacts.py --check
 
-      - name: Commit generated evidence
+      - name: Commit generated evidence only
         shell: bash
         run: |
           set -euxo pipefail
@@ -309,116 +125,37 @@ jobs:
           if ! git diff --cached --quiet; then
             git commit -m "Regenerate authoritative core readiness evidence"
           fi
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "Uncommitted generated changes remain:" >&2
+            git status --short >&2
+            exit 1
+          fi
 
       - name: Verify exact evidence head
         shell: bash
         run: |
           set -euxo pipefail
           python scripts/build_phase1_core_api_contract_artifacts.py --check
-          python - <<'PY'
-          from datetime import datetime, timezone
-          import json
-          import os
-          from pathlib import Path
-          import subprocess
+          python scripts/verify_phase1_evidence_source_state.py \
+            --source-commit "$EVIDENCE_SOURCE_COMMIT_SHA" \
+            --head-commit HEAD \
+            --out phase1-evidence-source-state-receipt.json \
+            --json \
+            --fail-blocked
 
-          source = os.environ["EVIDENCE_SOURCE_COMMIT_SHA"]
-          head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
-          summary_path = Path(
-              "implementation/phase1/release_evidence/productization/"
-              "phase1_core_api_contract_summary.json"
-          )
-          summary = json.loads(summary_path.read_text(encoding="utf-8"))
-          if summary.get("source_commit_sha") != source:
-              raise SystemExit(
-                  "summary source commit mismatch: "
-                  f"{summary.get('source_commit_sha')} != {source}"
-              )
-          policy = summary.get("source_state_policy") or {}
-          if policy.get("mode") != "source_commit_then_evidence_only_commit":
-              raise SystemExit("source-state policy missing or invalid")
+      - name: Push generated evidence
+        run: git push origin HEAD:${{ github.head_ref || github.ref_name }}
 
-          changed = subprocess.check_output(
-              ["git", "diff", "--name-only", f"{source}..{head}"],
-              text=True,
-          ).splitlines()
-          allowed_exact = {
-              "implementation/phase1/release_evidence/productization/"
-              "developer_preview_readiness.json",
-              "implementation/phase1/release_evidence/productization/"
-              "developer_preview_readiness.md",
-              "implementation/phase1/release_evidence/productization/"
-              "developer_preview_rc_status.json",
-              "implementation/phase1/release_evidence/productization/"
-              "developer_preview_rc_status.md",
-              "implementation/phase1/release_evidence/productization/"
-              "release_evidence_freshness_report.json",
-              "implementation/phase1/release_evidence/productization/"
-              "release_evidence_freshness_report.md",
-              "implementation/phase1/release_evidence/productization/"
-              "pm_release_gate_report.json",
-              "implementation/phase1/release_evidence/productization/"
-              "pm_release_gate_report.md",
-              "implementation/phase1/release_evidence/productization/"
-              "pm_release_blocker_action_register.json",
-              "implementation/phase1/release_evidence/productization/"
-              "pm_release_blocker_action_register.md",
-              "implementation/phase1/release_evidence/productization/"
-              "product_readiness_snapshot.json",
-              "implementation/phase1/release_evidence/productization/"
-              "structural_product_development_roadmap.json",
-              "implementation/phase1/release_evidence/productization/"
-              "structural_product_development_roadmap.md",
-          }
-          disallowed = [
-              path
-              for path in changed
-              if not path.startswith(
-                  "implementation/phase1/release_evidence/productization/phase1_core_api_"
-              )
-              and path not in allowed_exact
-          ]
-          if disallowed:
-              raise SystemExit(f"non-evidence paths changed after source commit: {disallowed}")
-
-          receipt = {
-              "schema_version": "phase1-core-api-exact-head-receipt.v1",
-              "generated_at": datetime.now(timezone.utc).isoformat(),
-              "source_commit_sha": source,
-              "evidence_head_sha": head,
-              "source_is_ancestor": True,
-              "changed_paths": changed,
-              "changed_path_count": len(changed),
-              "disallowed_changed_paths": disallowed,
-              "contract_pass": not disallowed,
-              "claim_boundary": (
-                  "This receipt proves the current evidence head differs from the recorded "
-                  "source commit only by generated Phase 1 and readiness evidence."
-              ),
-          }
-          Path("phase1_core_api_exact_head_receipt.json").write_text(
-              json.dumps(receipt, indent=2, sort_keys=True) + "\n",
-              encoding="utf-8",
-          )
-          print(json.dumps(receipt, indent=2, sort_keys=True))
-          PY
-
-      - name: Push synchronized source and evidence
-        shell: bash
-        run: |
-          set -euxo pipefail
-          git push origin HEAD:evidence/authoritative-core-resync
-
-      - name: Upload verification receipts
+      - name: Upload evidence receipt
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: authoritative-core-evidence-resync-${{ github.run_id }}
+          name: authoritative-core-evidence-${{ github.run_id }}
           path: |
-            authoritative-core-tests.log
-            phase1_core_api_exact_head_receipt.json
+            authoritative-core-evidence-tests.log
+            phase1-evidence-source-state-receipt.json
             implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json
-            implementation/phase1/release_evidence/productization/product_readiness_snapshot.json
             implementation/phase1/release_evidence/productization/developer_preview_rc_status.json
+            implementation/phase1/release_evidence/productization/product_readiness_snapshot.json
           if-no-files-found: warn
           retention-days: 30
