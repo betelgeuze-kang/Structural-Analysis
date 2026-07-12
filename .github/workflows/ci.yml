@@ -2,6 +2,7 @@ name: CI
 
 # Deterministic repository quality gate. Hardware/GPU and private-corpus work is
 # isolated in Nightly Heavy Solver so normal pull requests never wait for a local runner.
+# Every branch repair is followed by an exact-head Actions run before merge.
 
 on:
   push:
