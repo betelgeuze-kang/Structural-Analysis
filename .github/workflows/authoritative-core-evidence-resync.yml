@@ -185,10 +185,15 @@ jobs:
             exit 1
           fi
 
-      - name: Verify exact evidence head
+      - name: Verify exact evidence head and integration base
         shell: bash
         run: |
           set -euxo pipefail
+          git fetch origin main
+          if ! git merge-base --is-ancestor origin/main "$EVIDENCE_SOURCE_COMMIT_SHA"; then
+            echo "Evidence source commit does not contain the current main head." >&2
+            exit 1
+          fi
           python scripts/build_phase1_core_api_contract_artifacts.py --check
           python scripts/verify_phase1_evidence_source_state.py \
             --source-commit "$EVIDENCE_SOURCE_COMMIT_SHA" \
