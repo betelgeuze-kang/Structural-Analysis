@@ -1,21 +1,18 @@
 from __future__ import annotations
 
 import importlib.util
-import json
 from pathlib import Path
 import subprocess
 import sys
-
-import pytest
 
 
 SCRIPT_PATH = (
     Path(__file__).resolve().parent.parent
     / "scripts"
-    / "build_phase1_core_api_contract_artifacts.py"
+    / "verify_phase1_evidence_source_state.py"
 )
 SPEC = importlib.util.spec_from_file_location(
-    "build_phase1_core_api_contract_artifacts_source_state",
+    "verify_phase1_evidence_source_state_test",
     SCRIPT_PATH,
 )
 assert SPEC is not None
@@ -51,29 +48,9 @@ def _commit_all(path: Path, message: str) -> str:
     ).strip()
 
 
-def _summaries(source: str, head: str) -> tuple[dict, dict]:
-    existing = {
-        "schema_version": "phase1-core-api-contract-artifacts.v2",
-        "generated_at": "2026-07-12T00:00:00+00:00",
-        "source_commit_sha": source,
-        "source_state_policy": {
-            "mode": "source_commit_then_evidence_only_commit",
-            "source_commit_sha": source,
-            "exact_head_verification_required": True,
-            "allowed_post_source_scope": (
-                "generated_phase1_and_readiness_evidence_only"
-            ),
-        },
-        "contract_pass": True,
-    }
-    expected = json.loads(json.dumps(existing))
-    expected["source_commit_sha"] = head
-    expected["source_state_policy"]["source_commit_sha"] = head
-    expected["generated_at"] = "2026-07-12T00:00:01+00:00"
-    return existing, expected
-
-
-def test_source_state_accepts_one_evidence_only_commit(tmp_path: Path) -> None:
+def test_source_state_accepts_generated_evidence_only_commit(
+    tmp_path: Path,
+) -> None:
     _init_repo(tmp_path)
     (tmp_path / "source.py").write_text("SOURCE = True\n", encoding="utf-8")
     source = _commit_all(tmp_path, "source")
@@ -87,21 +64,22 @@ def test_source_state_accepts_one_evidence_only_commit(tmp_path: Path) -> None:
     evidence.write_text("{}\n", encoding="utf-8")
     head = _commit_all(tmp_path, "evidence")
 
-    existing, expected = _summaries(source, head)
-    normalized = module._expected_summary_for_verified_source_state(
-        existing=existing,
-        expected=expected,
+    receipt = module.verify_source_state(
         repo_root=tmp_path,
+        source_commit=source,
+        head_commit=head,
     )
 
-    assert normalized["source_commit_sha"] == source
-    assert normalized["source_state_policy"]["source_commit_sha"] == source
-    assert module._strip_volatile(existing) == module._strip_volatile(normalized)
+    assert receipt["contract_pass"] is True
+    assert receipt["source_is_ancestor"] is True
+    assert receipt["changed_paths"] == [
+        "implementation/phase1/release_evidence/productization/"
+        "phase1_core_api_contract_summary.json"
+    ]
+    assert receipt["disallowed_paths"] == []
 
 
-def test_source_state_rejects_non_evidence_change_after_source(
-    tmp_path: Path,
-) -> None:
+def test_source_state_rejects_code_change_after_source(tmp_path: Path) -> None:
     _init_repo(tmp_path)
     source_file = tmp_path / "source.py"
     source_file.write_text("SOURCE = True\n", encoding="utf-8")
@@ -110,31 +88,46 @@ def test_source_state_rejects_non_evidence_change_after_source(
     source_file.write_text("SOURCE = False\n", encoding="utf-8")
     head = _commit_all(tmp_path, "semantic source change")
 
-    existing, expected = _summaries(source, head)
-    with pytest.raises(
-        ValueError,
-        match="non_evidence_paths_changed_after_source_commit:source.py",
-    ):
-        module._expected_summary_for_verified_source_state(
-            existing=existing,
-            expected=expected,
-            repo_root=tmp_path,
-        )
+    receipt = module.verify_source_state(
+        repo_root=tmp_path,
+        source_commit=source,
+        head_commit=head,
+    )
+
+    assert receipt["contract_pass"] is False
+    assert receipt["disallowed_paths"] == ["source.py"]
+    assert receipt["blockers"] == [
+        "non_evidence_path_changed_after_source:source.py"
+    ]
 
 
-def test_source_commit_remains_part_of_nonvolatile_comparison() -> None:
-    left = {"source_commit_sha": "abc", "generated_at": "one"}
-    right = {"source_commit_sha": "def", "generated_at": "two"}
+def test_source_state_rejects_unrelated_history(tmp_path: Path) -> None:
+    _init_repo(tmp_path)
+    (tmp_path / "source.py").write_text("SOURCE = True\n", encoding="utf-8")
+    source = _commit_all(tmp_path, "source")
 
-    assert module._strip_volatile(left) != module._strip_volatile(right)
+    subprocess.check_call(["git", "checkout", "--orphan", "other"], cwd=tmp_path)
+    subprocess.check_call(["git", "rm", "-rf", "."], cwd=tmp_path)
+    (tmp_path / "other.py").write_text("OTHER = True\n", encoding="utf-8")
+    head = _commit_all(tmp_path, "other history")
+
+    receipt = module.verify_source_state(
+        repo_root=tmp_path,
+        source_commit=source,
+        head_commit=head,
+    )
+
+    assert receipt["contract_pass"] is False
+    assert receipt["source_is_ancestor"] is False
+    assert receipt["blockers"] == ["source_commit_not_ancestor_of_head"]
 
 
-def test_resync_workflow_tracks_source_state_contract() -> None:
+def test_resync_workflow_invokes_exact_head_verifier() -> None:
     workflow = (
         Path(__file__).resolve().parents[1]
         / ".github/workflows/authoritative-core-evidence-resync.yml"
     ).read_text(encoding="utf-8")
 
-    assert 'tests/test_phase1_core_api_source_state.py' in workflow
-    assert 'source_commit_then_evidence_only_commit' in workflow
-    assert 'Verify exact evidence head' in workflow
+    assert "scripts/verify_phase1_evidence_source_state.py" in workflow
+    assert "--source-commit" in workflow
+    assert "--fail-blocked" in workflow
