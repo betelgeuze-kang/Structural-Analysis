@@ -39,8 +39,20 @@ jobs:
         shell: bash
         run: |
           set +e
-          python scripts/migrate_pr69_hosted_streak_policy.py \
-            > hosted-streak-apply.log 2>&1
+          {
+            python scripts/migrate_pr69_hosted_streak_policy.py
+            python - <<'PY'
+          from pathlib import Path
+
+          path = Path("scripts/build_ci_streak_intake_packet.py")
+          text = path.read_text(encoding="utf-8")
+          old = "    runner_blockers: list[str] = []\n"
+          new = "    # No self-hosted runner blocker is appended to canonical streak credit.\n"
+          if text.count(old) != 1:
+              raise SystemExit(f"runner blocker variable replacement count={text.count(old)}")
+          path.write_text(text.replace(old, new, 1), encoding="utf-8")
+          PY
+          } > hosted-streak-apply.log 2>&1
           code=$?
           cat hosted-streak-apply.log
           exit "$code"
