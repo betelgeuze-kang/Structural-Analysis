@@ -57,7 +57,19 @@ def run_lane(*, lane: str, ruff: bool, compile_python: bool) -> int:
 
     if ruff:
         for chunk in _chunks(paths):
-            _run([sys.executable, "-m", "ruff", "check", *chunk])
+            # Explicit path lists normally override Ruff's configured excludes.
+            # Preserve repository exclusions for vendored/generated trees while
+            # still linting every owned non-excluded path in the lane.
+            _run(
+                [
+                    sys.executable,
+                    "-m",
+                    "ruff",
+                    "check",
+                    "--force-exclude",
+                    *chunk,
+                ]
+            )
     if compile_python:
         for chunk in _chunks(paths):
             _run([sys.executable, "-m", "py_compile", *chunk])
