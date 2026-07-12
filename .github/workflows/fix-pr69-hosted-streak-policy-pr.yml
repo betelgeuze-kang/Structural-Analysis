@@ -1,0 +1,86 @@
+name: Fix PR69 Hosted Streak Policy PR
+
+on:
+  pull_request:
+    paths:
+      - "scripts/migrate_pr69_hosted_streak_policy.py"
+      - ".github/workflows/fix-pr69-hosted-streak-policy-pr.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fix-pr69-hosted-streak-policy-pr-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  migrate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ci/hosted-release-lanes
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install package and test tools
+        run: python -m pip install -e .[dev]
+
+      - name: Apply hosted streak migration
+        run: python scripts/migrate_pr69_hosted_streak_policy.py
+
+      - name: Run focused lint and regressions
+        shell: bash
+        run: |
+          set +e
+          python -m ruff check \
+            scripts/build_ci_streak_intake_packet.py \
+            scripts/migrate_pr69_hosted_streak_policy.py \
+            tests/test_build_ci_streak_intake_packet.py \
+            tests/test_build_product_readiness_snapshot.py \
+            > hosted-streak-migration.log 2>&1
+          ruff_code=$?
+          if [[ $ruff_code -eq 0 ]]; then
+            python -m pytest -q \
+              tests/test_build_ci_streak_intake_packet.py \
+              tests/test_build_product_readiness_snapshot.py \
+              >> hosted-streak-migration.log 2>&1
+            test_code=$?
+          else
+            test_code=0
+          fi
+          cat hosted-streak-migration.log
+          if [[ $ruff_code -ne 0 ]]; then exit $ruff_code; fi
+          exit $test_code
+
+      - name: Upload focused migration log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hosted-streak-migration-pr-${{ github.run_id }}
+          path: hosted-streak-migration.log
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Commit migration and remove temporary helpers
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rm -f \
+            .github/workflows/fix-pr69-hosted-streak-policy.yml \
+            .github/workflows/fix-pr69-hosted-streak-policy-pr.yml \
+            scripts/migrate_pr69_hosted_streak_policy.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Align CI streak and readiness contracts with hosted lanes"
+          git push origin HEAD:ci/hosted-release-lanes
