@@ -54,15 +54,8 @@ jobs:
       - name: Ruff and compile legacy evidence lane
         shell: bash
         run: |
-          set +e
-          python scripts/run_product_ci_lane.py \
-            --lane legacy_evidence \
-            --ruff \
-            --compile \
-            > legacy-evidence-lane.log 2>&1
-          code=$?
-          tail -n 300 legacy-evidence-lane.log
-          exit "$code"
+          set -o pipefail
+          python scripts/run_product_ci_lane.py --lane legacy_evidence --ruff --compile 2>&1 | tee legacy-evidence-lane.log
 
       - name: Deterministic legacy evidence contracts
         run: >-
