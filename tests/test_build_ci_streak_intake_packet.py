@@ -39,11 +39,9 @@ def _valid_github_actions_evidence(path: Path, *, now: datetime, threshold: int 
                     "registered_workflow": {"state": "active"},
                     "local_workflow_present": True,
                     "local_workflow_trigger_events": ["pull_request", "push"],
-                    "local_workflow_runs_on": [
-                        "${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
-                    ],
-                    "local_self_hosted_runner_default": True,
-                    "local_github_hosted_runner_default": False,
+                    "local_workflow_runs_on": ["ubuntu-latest"],
+                    "local_self_hosted_runner_default": False,
+                    "local_github_hosted_runner_default": True,
                     "local_required_trigger_present": True,
                     "local_pull_request_trigger_present": True,
                     "query_error": "",
@@ -59,11 +57,9 @@ def _valid_github_actions_evidence(path: Path, *, now: datetime, threshold: int 
                     "registered_workflow": {"state": "active"},
                     "local_workflow_present": True,
                     "local_workflow_trigger_events": ["schedule", "workflow_dispatch"],
-                    "local_workflow_runs_on": [
-                        "${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
-                    ],
-                    "local_self_hosted_runner_default": True,
-                    "local_github_hosted_runner_default": False,
+                    "local_workflow_runs_on": ["ubuntu-latest"],
+                    "local_self_hosted_runner_default": False,
+                    "local_github_hosted_runner_default": True,
                     "local_required_trigger_present": True,
                     "local_schedule_trigger_present": True,
                     "local_workflow_dispatch_trigger_present": True,
@@ -172,9 +168,9 @@ def test_ci_streak_intake_packet_surfaces_missing_pr_streak(tmp_path: Path) -> N
     assert payload["reason_code"] == "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE"
     assert payload["summary_line"] == (
         "CI streak intake: BLOCKED | lanes=0/2 | pr_missing=30 | "
-        "nightly_missing=30 | blockers=12 | runner=not_evaluated"
+        "nightly_missing=30 | blockers=10 | runner=not_evaluated"
     )
-    assert payload["current_blocker_count"] == 12
+    assert payload["current_blocker_count"] == 10
     assert payload["release_area"] == "basic_ci"
     assert payload["release_area_blocker_ids"] == [
         "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
@@ -186,11 +182,11 @@ def test_ci_streak_intake_packet_surfaces_missing_pr_streak(tmp_path: Path) -> N
     assert "ci_streak::nightly:github_actions_query_error" in payload[
         "blocker_ids"
     ]
-    assert payload["blocker_id_count"] == 14
+    assert payload["blocker_id_count"] == 12
     assert payload["evidence_intake_artifact_count"] == 5
     assert str(manifest) in payload["evidence_intake_artifacts"]
     assert payload["summary"]["release_area_blocker_count"] == 2
-    assert payload["summary"]["blocker_id_count"] == 14
+    assert payload["summary"]["blocker_id_count"] == 12
     assert payload["ci_release_credit_policy"]["required_consecutive_pass_count"] == 30
     assert payload["ci_evidence_policy"] == payload["ci_release_credit_policy"]
     assert payload["streak_requirements"] == {
@@ -199,7 +195,7 @@ def test_ci_streak_intake_packet_surfaces_missing_pr_streak(tmp_path: Path) -> N
         "required_consecutive_pass_count": 30,
         "required_lane_count": 2,
         "required_lanes": ["pr", "nightly"],
-        "runner_class": "self-hosted linux x64",
+        "runner_class": "GitHub-hosted deterministic PR/nightly lanes",
         "source_schema_version": "github-actions-ci-streak-evidence.v1",
     }
     assert payload["required_field_count"] == 13
@@ -679,20 +675,15 @@ def test_ci_streak_intake_packet_surfaces_offline_self_hosted_runner(
     assert payload["runner_precondition"]["contract_pass"] is False
     assert payload["summary"]["runner_precondition_pass"] is False
     assert payload["summary"]["runner_online_matching_runner_count"] == 0
-    assert (
-        "runner:self_hosted_runner_matching_labels_not_online"
-        in payload["current_blockers"]
-    )
+    assert not any(item.startswith("runner:") for item in payload["current_blockers"])
     assert payload["summary_line"] == (
         "CI streak intake: BLOCKED | lanes=0/2 | pr_missing=30 | "
-        "nightly_missing=30 | blockers=9 | runner=blocked"
+        "nightly_missing=30 | blockers=6 | runner=blocked"
     )
-    assert payload["current_blocker_count"] == 9
-    assert payload["derived_checks"][4]["field"] == "self_hosted_runner_precondition"
-    assert payload["derived_checks"][4]["closure_check_pass"] is False
-    assert payload["gate_unblock_plan"][0]["slot_id"] == (
-        "restore_self_hosted_runner_precondition"
-    )
+    assert payload["current_blocker_count"] == 6
+    assert payload["derived_checks"][4]["field"] == "heavy_runner_precondition_informational"
+    assert payload["derived_checks"][4]["closure_check_pass"] is True
+    assert payload["gate_unblock_plan"][0]["slot_id"] == "collect_pr_30_consecutive_passes"
     assert "Runner Precondition" in markdown
     assert "self-hosted, linux, x64" in payload["runner_precondition"]["owner_action"]
 
@@ -743,10 +734,11 @@ def test_ci_streak_intake_packet_passes_closed_manifest_with_valid_source_eviden
     assert payload["summary"]["pr_local_required_trigger_present"] is True
     assert payload["summary"]["nightly_local_required_trigger_present"] is True
     assert payload["source_evidence"]["lanes"]["pr"]["workflow_active"] is True
-    assert payload["source_evidence"]["lanes"]["pr"]["local_self_hosted_runner_default"] is True
+    assert payload["source_evidence"]["lanes"]["pr"]["local_github_hosted_runner_default"] is True
+    assert payload["source_evidence"]["lanes"]["pr"]["local_self_hosted_runner_default"] is False
 
 
-def test_ci_streak_intake_packet_rejects_github_hosted_runner_default(tmp_path: Path) -> None:
+def test_ci_streak_intake_packet_rejects_self_hosted_runner_default_for_canonical_lane(tmp_path: Path) -> None:
     now = datetime(2026, 6, 16, tzinfo=timezone.utc)
     manifest = _write_json(
         tmp_path / "ci_consecutive_pass_manifest.json",
@@ -764,9 +756,9 @@ def test_ci_streak_intake_packet_rejects_github_hosted_runner_default(tmp_path: 
         now=now,
     )
     payload = json.loads(github_actions.read_text(encoding="utf-8"))
-    payload["lanes"]["pr"]["local_workflow_runs_on"] = ["ubuntu-latest"]
-    payload["lanes"]["pr"]["local_self_hosted_runner_default"] = False
-    payload["lanes"]["pr"]["local_github_hosted_runner_default"] = True
+    payload["lanes"]["pr"]["local_workflow_runs_on"] = ["self-hosted", "linux", "x64"]
+    payload["lanes"]["pr"]["local_self_hosted_runner_default"] = True
+    payload["lanes"]["pr"]["local_github_hosted_runner_default"] = False
     github_actions.write_text(json.dumps(payload), encoding="utf-8")
 
     packet = build_ci_streak_intake_packet.build_packet(
@@ -776,8 +768,8 @@ def test_ci_streak_intake_packet_rejects_github_hosted_runner_default(tmp_path: 
     )
 
     assert packet["contract_pass"] is False
-    assert "pr:local_workflow_uses_github_hosted_runner" in packet["current_blockers"]
-    assert "pr:local_self_hosted_runner_default_missing" in packet["current_blockers"]
+    assert "pr:local_workflow_uses_self_hosted_runner" in packet["current_blockers"]
+    assert "pr:local_github_hosted_runner_default_missing" in packet["current_blockers"]
 
 
 def test_ci_streak_intake_packet_rejects_stale_source_evidence(tmp_path: Path) -> None:
