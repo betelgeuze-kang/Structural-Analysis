@@ -15,11 +15,11 @@
 - `commercial_solver_gap_ready`: `False`
 - `ai_engine_gap_ready`: `False`
 - `release_allowed`: `False`
-- `blocked_release_count`: `57`
+- `blocked_release_count`: `58`
 - `first_blocker`: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
-- `operator_action_count`: `65`
+- `operator_action_count`: `66`
 - `approval_token_count`: `5`
-- `stale_artifact_count`: `19`
+- `stale_artifact_count`: `20`
 - `evidence_surface_count`: `8`
 - `missing_evidence_surface_count`: `0`
 - `locked_evidence_surface_count`: `0`
@@ -38,7 +38,7 @@
 |---|---|---|
 | basic_ci Basic CI | blocked | pr_ci_30_consecutive_pass_evidence_missing, nightly_ci_30_consecutive_pass_evidence_missing |
 | strict_ci Strict CI | blocked | direct_require_hip_failed_without_cpu_only_scope |
-| evidence_freshness Evidence Freshness | blocked | p0_closure_status::producer_newer_than_artifact, p1_readiness_status::producer_newer_than_artifact, p1_benchmark_breadth_status::producer_newer_than_artifact, p1_benchmark_breadth_status::input_dependency_newer_than_artifact, real_project_corpus_measured_status::input_dependency_newer_than_artifact, customer_shadow_evidence_status::input_dependency_newer_than_artifact, customer_shadow_evidence_intake_packet::producer_newer_than_artifact, fresh_full_validation_lane_status::producer_newer_than_artifact, fresh_full_validation_lane_status::input_dependency_newer_than_artifact, g1_direct_residual_terminal_gate_report::producer_newer_than_artifact, g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact, g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact, evidence_console_scope_status::source_commit_mismatch, evidence_console_scope_status::producer_newer_than_artifact, evidence_console_scope_status::input_dependency_newer_than_artifact, accuracy_parity_scorecard::producer_newer_than_artifact, accuracy_parity_scorecard::input_dependency_newer_than_artifact, product_production_ai_checkpoint_readiness::producer_newer_than_artifact, product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact |
+| evidence_freshness Evidence Freshness | blocked | p0_closure_status::producer_newer_than_artifact, p1_readiness_status::producer_newer_than_artifact, p1_benchmark_breadth_status::producer_newer_than_artifact, p1_benchmark_breadth_status::input_dependency_newer_than_artifact, real_project_corpus_measured_status::input_dependency_newer_than_artifact, customer_shadow_evidence_status::input_dependency_newer_than_artifact, customer_shadow_evidence_intake_packet::producer_newer_than_artifact, fresh_full_validation_lane_status::producer_newer_than_artifact, fresh_full_validation_lane_status::input_dependency_newer_than_artifact, g1_direct_residual_terminal_gate_report::producer_newer_than_artifact, g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact, g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact, g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact, evidence_console_scope_status::source_commit_mismatch, evidence_console_scope_status::producer_newer_than_artifact, evidence_console_scope_status::input_dependency_newer_than_artifact, accuracy_parity_scorecard::producer_newer_than_artifact, accuracy_parity_scorecard::input_dependency_newer_than_artifact, product_production_ai_checkpoint_readiness::producer_newer_than_artifact, product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact |
 | core_engine Core Engine | blocked | core_depth_milestone_not_green, commercial_readiness_contract_not_green, commercial_accuracy_contract_not_green |
 | ndtha NDTHA | pass | none |
 | residual Residual | pass | none |

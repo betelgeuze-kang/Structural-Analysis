@@ -480,14 +480,14 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-12T23:41:28.534924+00:00",
+  "generated_at": "2026-07-12T23:56:25.959309+00:00",
   "input_checksums": {
     ".github/workflows/dp-windows-parity.yml": "sha256:1a25e658ec3fabfa5fee9fcdaee8c708b145989df373759424eea78914c4e5cd",
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:4ea063c96c65a375a00734c488965517433ab06ed681e6c064e8268a339887c6",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:c8e8488ea54a0f17e41b897068b5ff405853d85e2ff6b88fd84dae3cfe927dca",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:72e06d12205155989c9daa6786862d8311c893432ed2f172f95cef5742e46ca6",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:53af198ecca38e58f0756ae7f70c2cecf2028a326909932edeb44b8edb1cb61f",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:e719cf76add1710d91dcea7d641bedc9ca699652d509e562b44dc037f453a52d",
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:3567b00b69de803b2737b9fec0a638b9ea59f3b71268d977ddc6b566b975055a",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:2d3fd50ad43bed838d61a6527750819eb5474283cb3c5143562958a6feca9712",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:a1e86d8ff00587e679ce8caf5ea651aff128a7b676e679d9ef493aa70b56d401",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
@@ -1272,13 +1272,14 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 91,
+    "developer_preview_blocker_count": 92,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
       "pm_release::M2::nonlinear_residual_integrated_case_missing",
+      "pm_release::evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
       "pm_release::evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
       "pm_release::evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
       "pm_release::evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
@@ -1292,8 +1293,7 @@
       "missing_artifact:implementation/phase1/release/external_benchmark_submission_readiness.json",
       "missing_artifact:implementation/phase1/release/independent_product_readiness.json",
       "pm_release::M2::contact_material_coupled_case_count_lt_10_or_missing",
-      "pm_release::M2::element_material_breadth_gate_not_green",
-      "pm_release::M2::panel_contact_failure_reason_code_missing"
+      "pm_release::M2::element_material_breadth_gate_not_green"
     ],
     "final_gate_blockers": [
       "final_gate_blocked:selected_medium_models_pass_or_approved_review",
@@ -3247,6 +3247,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "00f93dad8ea545c57ab27fec6f81086edeb69a66",
+  "source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
   "status": "blocked"
 }

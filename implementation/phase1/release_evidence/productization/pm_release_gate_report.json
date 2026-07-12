@@ -47,6 +47,7 @@
     "evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact",
     "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
     "evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+    "evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
     "evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
     "evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
     "evidence_freshness::evidence_console_scope_status::source_commit_mismatch",
@@ -124,7 +125,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-07-12T23:41:28.931446+00:00",
+  "generated_at": "2026-07-12T23:56:26.353608+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -178,12 +179,12 @@
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
     "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json": "sha256:591741c395b8d77e12d7a7f2801bb3b3087a9e24457de28f68777ee2f7af82e1",
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:468be9e7c053c3bedec25df06403a4e1f8fa8b5ae20e389405326d66c24df11c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:08b060c236e6ae0f9ab0e66f0ad8cc73fd7c7cd2f7f017e7c3f8220773ef80b1",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:a78a6c6b190b2945f86a540acac3e4ccfb211a3913a1de1498282186169e1868",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:3016132ed83e743a96c13faf97e674190842538b6eaf0415b510013c6ddb9a2b",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:64f640b1a5e9a42ef076a222311fc0b0d957f04ba951e00767a057a2a443196a",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:5d48400e2c387511a3d7c78718f56a8b61e779e211b0bebbaaedca84f313862d",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:ef1b852638eb4e0f007a05377ecbf7b3c3cbd51ee15ab4ce4de07919df3a6f19",
     "implementation/phase1/release_evidence/productization/residual_level3_status.json": "sha256:ac890000466348b538e25fdc3d57eedf9a0619fb314c6b0fe64d50bdbae9136c",
     "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json": "sha256:439c9b906fc717604ad7e20176715673931e207b5f0c94854537c988c81ea577",
     "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
@@ -420,15 +421,15 @@
         "pm_blocker_closure_board_open_blocker_count": 12,
         "pm_blocker_register_external_owner_input_ready_count": 11,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 64,
-        "pm_blocker_register_open_blocker_count": 64,
-        "pm_blocker_register_release_area_blocker_count": 42,
+        "pm_blocker_register_handoff_ready_count": 65,
+        "pm_blocker_register_open_blocker_count": 65,
+        "pm_blocker_register_release_area_blocker_count": 43,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
         "pm_release_reproduction_command_audit_command_count": 509,
         "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=509 | violations=0",
         "pm_release_reproduction_command_audit_violation_count": 0,
         "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        "release_evidence_freshness_blocker_count": 19,
+        "release_evidence_freshness_blocker_count": 20,
         "release_evidence_freshness_contract_pass": false,
         "release_registry_artifact_count": 0,
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
@@ -488,6 +489,7 @@
     "evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact",
     "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
     "evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+    "evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
     "evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
     "evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
     "evidence_freshness::evidence_console_scope_status::source_commit_mismatch",
@@ -640,6 +642,7 @@
         "fresh_full_validation_lane_status::producer_newer_than_artifact",
         "fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
         "g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+        "g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
         "g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
         "g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
         "evidence_console_scope_status::source_commit_mismatch",
@@ -664,8 +667,8 @@
       "status": "blocked",
       "summary": {
         "artifact_count": 14,
-        "blocker_count": 19,
-        "current_source_commit_sha": "00f93dad8ea545c57ab27fec6f81086edeb69a66",
+        "blocker_count": 20,
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -1015,9 +1018,9 @@
         "pm_blocker_closure_board_open_blocker_count": 12,
         "pm_blocker_register_external_owner_input_ready_count": 11,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 64,
-        "pm_blocker_register_open_blocker_count": 64,
-        "pm_blocker_register_release_area_blocker_count": 42,
+        "pm_blocker_register_handoff_ready_count": 65,
+        "pm_blocker_register_open_blocker_count": 65,
+        "pm_blocker_register_release_area_blocker_count": 43,
         "pm_failure_bundle_coverage_index": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
         "pm_failure_bundle_coverage_index_sha256": "8cdd5aec8a0374c4e9d2b834191f6700b355eabc51388c19706315a38241e1ed",
         "pm_owner_evidence_request_packet": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
@@ -1214,7 +1217,7 @@
           "tests/test_verify_quality_gate.py",
           "tests/test_verify_quality_gate_contract.py"
         ],
-        "current_head_sha": "00f93dad8ea545c57ab27fec6f81086edeb69a66",
+        "current_head_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 0,
@@ -1239,7 +1242,7 @@
   ],
   "release_decision": {
     "approval_token_count": 5,
-    "blocked_release_count": 57,
+    "blocked_release_count": 58,
     "claim_boundary": "Evidence surface counts include only structural-analysis evidence surfaces. Non-structural product domains are outside this structural solver release gate and must not influence release readiness.",
     "evidence_surface_count": 8,
     "evidence_surface_dir": "implementation/phase1/release_evidence/surface",
@@ -1412,7 +1415,7 @@
     "locked_evidence_surface_count": 0,
     "missing_evidence_surface_count": 0,
     "non_structural_evidence_surface_excluded_count": 3,
-    "operator_action_count": 65,
+    "operator_action_count": 66,
     "operator_actions": [
       {
         "action_id": "refresh_release_evidence_freshness",
@@ -1423,7 +1426,7 @@
     ],
     "public_benchmark_ready": false,
     "release_allowed": false,
-    "stale_artifact_count": 19,
+    "stale_artifact_count": 20,
     "stale_artifact_refresh_required": true,
     "structural_evidence_surface_allowlist_ids": [
       "element_material_breadth_gate_report",
@@ -1479,6 +1482,7 @@
       "evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact",
       "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
       "evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+      "evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
       "evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
       "evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
       "evidence_freshness::evidence_console_scope_status::source_commit_mismatch",
@@ -1529,6 +1533,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "00f93dad8ea545c57ab27fec6f81086edeb69a66",
+  "source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
   "summary_line": "PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=2/5 | release_areas_green=4/16 | measured_cases=304"
 }

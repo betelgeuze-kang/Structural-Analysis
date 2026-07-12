@@ -10,6 +10,7 @@
     "fresh_full_validation_lane_status::producer_newer_than_artifact",
     "fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
     "g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+    "g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
     "g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
     "g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
     "evidence_console_scope_status::source_commit_mismatch",
@@ -22,9 +23,9 @@
   ],
   "claim_boundary": "Freshness audit records whether release evidence exposes source commit, engine version, input checksum, reuse marker, generated_at, producer dependency mtime, and declared input-checksum file dependency mtime. It does not rerun heavy validation by itself.",
   "contract_pass": false,
-  "current_source_commit_sha": "00f93dad8ea545c57ab27fec6f81086edeb69a66",
+  "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-12T23:41:28.775048+00:00",
+  "generated_at": "2026-07-12T23:56:26.195069+00:00",
   "input_checksums": {
     "implementation/phase1/check_customer_shadow_evidence_status.py": "sha256:818c1670c8df8f30abc1528d67055bb5605f67b45af309e2c2cc931383b6e058",
     "implementation/phase1/check_real_project_corpus_measured_status.py": "sha256:74dce5a5860f524b18a5099ee5affb1533fde25849dce720d6eb4a7de7c73c3d",
@@ -34,7 +35,7 @@
     "implementation/phase1/real_project_corpus_measured_status.json": "sha256:b2cb16d090bf7eafb3db1ce14dca338f96d07f60e27b95b8659a8b65bb6f2be3",
     "implementation/phase1/release_evidence/productization/ai_engine_productization_contracts.json": "sha256:208f7a05a7a53fa57d1dde4de4a5318c931afad067ca5e9680f87ade218a7806",
     "implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json": "sha256:d89e1ba226d53079166d45cc76748a3e2fe731d0d62d1ba29173b492157e41d7",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:001b367b52e46e1a9f8e2386e26f689d84b6f7c0930539de3a45979a2715af88",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:cb43f61999b786d94d70d65fa53fdd8fc55100a00bb1354b907add7278fc691a",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:72e06d12205155989c9daa6786862d8311c893432ed2f172f95cef5742e46ca6",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:11d736909bd208fdfe058578b1b015278e533da3f57f516f4abb41dba72ad1fa",
     "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:4e5f08fa9c5f6f82b30083d8127c4b75523a503b4a614f3c8d5b9860215c480d",
@@ -71,13 +72,13 @@
       "dependency_mtime_details": [
         {
           "dependency_kind": "producer",
-          "dependency_mtime": 1783899639.2072227,
+          "dependency_mtime": 1783900535.8613203,
           "dependency_path": "<producer>",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.9445314,
+          "dependency_mtime": 1783900534.1101055,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_artifacts_manifest.json",
           "newer_than_artifact": false
         }
@@ -85,7 +86,7 @@
       "dependency_mtime_pass": false,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 10.37648846400463,
+      "generated_age_days": 10.386875274583334,
       "generated_at": "2026-07-02T14:39:19.992818+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -112,31 +113,31 @@
       "dependency_mtime_details": [
         {
           "dependency_kind": "producer",
-          "dependency_mtime": 1783899639.2082226,
+          "dependency_mtime": 1783900535.8613203,
           "dependency_path": "<producer>",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.9320297,
+          "dependency_mtime": 1783900534.0973022,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/open_data_external_artifacts_manifest.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.9352145,
+          "dependency_mtime": 1783900534.1013021,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/peer_tbi_benchmark_metric_records.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.9432144,
+          "dependency_mtime": 1783900534.1083024,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/real_project_parser_coverage_matrix.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.9432144,
+          "dependency_mtime": 1783900534.1093023,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/real_project_row_provenance_report.json",
           "newer_than_artifact": false
         }
@@ -144,7 +145,7 @@
       "dependency_mtime_pass": false,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 10.37642694511574,
+      "generated_age_days": 10.386813755694444,
       "generated_at": "2026-07-02T14:39:25.308050+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -175,85 +176,85 @@
       "dependency_mtime_details": [
         {
           "dependency_kind": "producer",
-          "dependency_mtime": 1783899639.2072227,
+          "dependency_mtime": 1783900535.8613203,
           "dependency_path": "<producer>",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.1852095,
+          "dependency_mtime": 1783900533.3512943,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/commercial_readiness_report.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.2202098,
+          "dependency_mtime": 1783900533.3872945,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/hf_benchmark_report.atwood_open.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.2202098,
+          "dependency_mtime": 1783900533.3872945,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/hf_benchmark_report.from_csv.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.2202098,
+          "dependency_mtime": 1783900533.3872945,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/hf_benchmark_report.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.2212098,
+          "dependency_mtime": 1783900533.3872945,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/hf_benchmark_report.opstool_nightly.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.2212098,
+          "dependency_mtime": 1783900533.3872945,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/hf_benchmark_report.opstool_pr.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.2212098,
+          "dependency_mtime": 1783900533.3872945,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/hf_benchmark_report.rwth_zenodo.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.4752114,
+          "dependency_mtime": 1783900533.6422973,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/open_data/irregular/irregular_top5_execution_manifest.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.5152116,
+          "dependency_mtime": 1783900533.6832979,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/open_data/korea/korean_public_structure_collection_report.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.7436917,
+          "dependency_mtime": 1783900533.9083002,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/open_data/pbd_hinge/peer_spd_hinge_benchmark_gate_report.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.9320297,
+          "dependency_mtime": 1783900534.0973022,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/open_data/wind/tpu_hffb_benchmark_gate_report.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.9658089,
+          "dependency_mtime": 1783900534.1343484,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.8252203,
+          "dependency_mtime": 1783900535.4793165,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "newer_than_artifact": true
         }
@@ -261,7 +262,7 @@
       "dependency_mtime_pass": false,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 10.067150746122685,
+      "generated_age_days": 10.077537556701389,
       "generated_at": "2026-07-02T22:04:46.771643+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -300,19 +301,19 @@
       "dependency_mtime_details": [
         {
           "dependency_kind": "producer",
-          "dependency_mtime": 1783899637.1712093,
+          "dependency_mtime": 1783900533.338294,
           "dependency_path": "<producer>",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.9352145,
+          "dependency_mtime": 1783900534.1013021,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/peer_tbi_benchmark_metric_records.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.9432144,
+          "dependency_mtime": 1783900534.1093023,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/real_project_row_provenance_report.json",
           "newer_than_artifact": true
         }
@@ -320,7 +321,7 @@
       "dependency_mtime_pass": false,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 23.158852544618053,
+      "generated_age_days": 23.16923935519676,
       "generated_at": "2026-06-19T19:52:43.736253+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -348,25 +349,25 @@
       "dependency_mtime_details": [
         {
           "dependency_kind": "producer",
-          "dependency_mtime": 1783899637.1712093,
+          "dependency_mtime": 1783900533.337294,
           "dependency_path": "<producer>",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.189476,
+          "dependency_mtime": 1783900533.3554344,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/customer_shadow_evidence",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.1882095,
+          "dependency_mtime": 1783900533.3542943,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/customer_shadow_evidence.schema.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899639.1622224,
+          "dependency_mtime": 1783900535.8173199,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/validate_customer_shadow_evidence.py",
           "newer_than_artifact": true
         }
@@ -374,7 +375,7 @@
       "dependency_mtime_pass": false,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 10.069368787210648,
+      "generated_age_days": 10.079755597789351,
       "generated_at": "2026-07-02T22:01:35.132893+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -403,25 +404,25 @@
       "dependency_mtime_details": [
         {
           "dependency_kind": "producer",
-          "dependency_mtime": 1783899639.1902227,
+          "dependency_mtime": 1783900535.84432,
           "dependency_path": "<producer>",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.1644723,
+          "dependency_mtime": 1783900533.3304324,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/docs/templates/customer_shadow_evidence.template.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.1882095,
+          "dependency_mtime": 1783900533.3542943,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/customer_shadow_evidence.schema.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.189476,
+          "dependency_mtime": 1783900533.3554344,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/customer_shadow_evidence_status.json",
           "newer_than_artifact": false
         }
@@ -429,7 +430,7 @@
       "dependency_mtime_pass": false,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 10.067745473252314,
+      "generated_age_days": 10.078132283831017,
       "generated_at": "2026-07-02T22:03:55.387219+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -459,73 +460,73 @@
       "dependency_mtime_details": [
         {
           "dependency_kind": "producer",
-          "dependency_mtime": 1783899639.1912227,
+          "dependency_mtime": 1783900535.8453202,
           "dependency_path": "<producer>",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.1582093,
+          "dependency_mtime": 1783900533.325294,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/docs/commercialization-gap-current-state.md",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.1612093,
+          "dependency_mtime": 1783900533.328294,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/docs/release-publication-runbook.md",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.9449325,
+          "dependency_mtime": 1783900534.1104789,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/commercial/commercial_readiness_report.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.9454563,
+          "dependency_mtime": 1783900534.1113024,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/full_validation",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.9454563,
+          "dependency_mtime": 1783900534.1113024,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.9468424,
+          "dependency_mtime": 1783900534.1124103,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/midas",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.9476295,
+          "dependency_mtime": 1783900534.1133022,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/performance",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.9622147,
+          "dependency_mtime": 1783900534.1303024,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_smoke_report.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.036215,
+          "dependency_mtime": 1783900534.6973083,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.7982202,
+          "dependency_mtime": 1783900535.4533162,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.8372204,
+          "dependency_mtime": 1783900535.4913166,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/surface",
           "newer_than_artifact": true
         }
@@ -533,7 +534,7 @@
       "dependency_mtime_pass": false,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 10.069246580925926,
+      "generated_age_days": 10.07963339150463,
       "generated_at": "2026-07-02T22:01:45.691516+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -568,13 +569,13 @@
       "dependency_mtime_details": [
         {
           "dependency_kind": "producer",
-          "dependency_mtime": 1783899637.1722095,
+          "dependency_mtime": 1783900533.338294,
           "dependency_path": "<producer>",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.7982202,
+          "dependency_mtime": 1783900535.4533162,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json",
           "newer_than_artifact": false
         }
@@ -582,7 +583,7 @@
       "dependency_mtime_pass": true,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 19.30368612599537,
+      "generated_age_days": 19.314072936574075,
       "generated_at": "2026-06-23T16:24:10.114822+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -603,39 +604,40 @@
       "artifact_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
       "artifact_sha256": "4e5f08fa9c5f6f82b30083d8127c4b75523a503b4a614f3c8d5b9860215c480d",
       "blockers": [
-        "producer_newer_than_artifact"
+        "producer_newer_than_artifact",
+        "input_dependency_newer_than_artifact"
       ],
       "changed_paths_since_source_commit": [],
       "dependency_mtime_details": [
         {
           "dependency_kind": "producer",
-          "dependency_mtime": 1783899639.1952226,
+          "dependency_mtime": 1783900535.8493202,
           "dependency_path": "<producer>",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.2252164,
+          "dependency_mtime": 1783900534.8913105,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup365_gate_replay_probe.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.3112168,
+          "dependency_mtime": 1783900534.9803112,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup375_structural_terminal_increment_gate_probe.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.347217,
+          "dependency_mtime": 1783900535.0223117,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_g1_followup362_365_attached_equilibrium_newton_gate_summary.json",
-          "newer_than_artifact": false
+          "newer_than_artifact": true
         }
       ],
       "dependency_mtime_pass": false,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 10.065636558530093,
+      "generated_age_days": 10.076023369108796,
       "generated_at": "2026-07-02T22:06:57.597451+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -665,505 +667,505 @@
       "dependency_mtime_details": [
         {
           "dependency_kind": "producer",
-          "dependency_mtime": 1783899639.1952226,
+          "dependency_mtime": 1783900535.8493202,
           "dependency_path": "<producer>",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.186216,
+          "dependency_mtime": 1783900534.85231,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup354_361_after_total_scaled_component_fd_hip_latest_only_controller_summary.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.2772167,
+          "dependency_mtime": 1783900534.943311,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_direct_residual_hip_largest_rows_followup70_72_summary.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.2772167,
+          "dependency_mtime": 1783900534.943311,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_direct_residual_hip_largest_rows_followup73_74_saturation_summary.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.2772167,
+          "dependency_mtime": 1783900534.943311,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_direct_residual_hip_row_backend_followup68_69_summary.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.2872167,
+          "dependency_mtime": 1783900534.954311,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_adaptive_global_krylov_followup396_smoke.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.288757,
+          "dependency_mtime": 1783900534.9554539,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_adaptive_global_krylov_followup397_compact_smoke.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.2893772,
+          "dependency_mtime": 1783900534.9560978,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_tangent_base_followup379_probe.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.2893772,
+          "dependency_mtime": 1783900534.9560978,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_tangent_rowcorr_min_followup380_probe.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.3552172,
+          "dependency_mtime": 1783900535.0313118,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_g1_followup400_strict_hip_target_rows_alternating_smoke.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.3732173,
+          "dependency_mtime": 1783900535.050312,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_followup43_frontier_probe.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.3732173,
+          "dependency_mtime": 1783900535.050312,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_post_shell_followup62_frontier_probe.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.3742173,
+          "dependency_mtime": 1783900535.051312,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_hip_largest_rows_followup69_frontier_probe.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.3752174,
+          "dependency_mtime": 1783900535.052312,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_hip_largest_rows_followup71_frontier_probe.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.3752174,
+          "dependency_mtime": 1783900535.052312,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_hip_largest_rows_followup73_frontier_probe.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.3902175,
+          "dependency_mtime": 1783900535.0673122,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.3912175,
+          "dependency_mtime": 1783900535.0683122,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_residual_jacobian_physical_audit_followup85_86_summary.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.3962176,
+          "dependency_mtime": 1783900535.0743122,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_rocm_backend_newton_row_integration_followup67_summary.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.3982174,
+          "dependency_mtime": 1783900535.0763123,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup382_support8_checkpointed.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.3992176,
+          "dependency_mtime": 1783900535.0763123,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup383_target2_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.3992176,
+          "dependency_mtime": 1783900535.0763123,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup384_target2_support4_compact_checkpoint.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4002175,
+          "dependency_mtime": 1783900535.078051,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup385_continue_target2_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.40136,
+          "dependency_mtime": 1783900535.0783122,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup386_continue_target2_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4022176,
+          "dependency_mtime": 1783900535.0793123,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup387_target4_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4029977,
+          "dependency_mtime": 1783900535.0803177,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup388_multistep_target4_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4034822,
+          "dependency_mtime": 1783900535.080855,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup389_multistep_target4_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4039834,
+          "dependency_mtime": 1783900535.0813816,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_children/mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_candidate1_target4_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4042175,
+          "dependency_mtime": 1783900535.0813816,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup391_multistep_target4_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4055157,
+          "dependency_mtime": 1783900535.082973,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup392_multistep_target4_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4060743,
+          "dependency_mtime": 1783900535.083524,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup393_multistep_target4_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4067075,
+          "dependency_mtime": 1783900535.0841537,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup394_multistep_target4_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4072735,
+          "dependency_mtime": 1783900535.0843124,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup395_multistep_target4_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4078162,
+          "dependency_mtime": 1783900535.0851874,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4083033,
+          "dependency_mtime": 1783900535.0853124,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup399_target_rows_strict_hip_smoke.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4083033,
+          "dependency_mtime": 1783900535.0863123,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup401_target4_support4_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4096894,
+          "dependency_mtime": 1783900535.0872698,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup402_target4_support4_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4102643,
+          "dependency_mtime": 1783900535.0873125,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup403_target4_support4_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4110804,
+          "dependency_mtime": 1783900535.0885043,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup404_target4_support4_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4110804,
+          "dependency_mtime": 1783900535.0885043,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup405_target8_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup405_target8_support4_cpu_continuation_candidate1_target8_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4112177,
+          "dependency_mtime": 1783900535.0892408,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup406_target8_support8_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4112177,
+          "dependency_mtime": 1783900535.0893123,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup407_target16_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup407_target16_support4_cpu_continuation_candidate1_target16_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.412793,
+          "dependency_mtime": 1783900535.0900123,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup408_target16_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup408_target16_support4_cpu_continuation_candidate1_target16_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4136214,
+          "dependency_mtime": 1783900535.0903125,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup408_target16_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup408_target16_support8_cpu_continuation_candidate1_target16_support8.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4141607,
+          "dependency_mtime": 1783900535.0911703,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup409_target16_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup409_target16_support4_cpu_continuation_candidate1_target16_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.414802,
+          "dependency_mtime": 1783900535.0913124,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup410_target16_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup410_target16_support4_cpu_continuation_candidate1_target16_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.415693,
+          "dependency_mtime": 1783900535.092504,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup411_target16_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup411_target16_support4_cpu_continuation_candidate1_target16_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.416849,
+          "dependency_mtime": 1783900535.0934994,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup412_target16_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup412_target16_support4_cpu_continuation_candidate1_target16_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4173393,
+          "dependency_mtime": 1783900535.0940285,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup413_target16_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup413_target16_support4_cpu_continuation_candidate1_target16_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4179356,
+          "dependency_mtime": 1783900535.0943124,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup414_target16_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup414_target16_support4_cpu_continuation_candidate1_target16_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4184906,
+          "dependency_mtime": 1783900535.0953124,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup415_target16_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup415_target16_support4_cpu_continuation_candidate1_target16_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4191122,
+          "dependency_mtime": 1783900535.0953124,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup416_target32_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup416_target32_support4_cpu_continuation_candidate1_target32_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4201307,
+          "dependency_mtime": 1783900535.09687,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup417_target32_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup417_target32_support4_cpu_continuation_candidate1_target32_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4208639,
+          "dependency_mtime": 1783900535.0973125,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup418_target32_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup418_target32_support4_cpu_continuation_candidate1_target32_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4222176,
+          "dependency_mtime": 1783900535.0993125,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup419_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup419_target64_support4_cpu_continuation_candidate1_target64_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4238703,
+          "dependency_mtime": 1783900535.1011195,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup420_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup420_target64_support4_cpu_continuation_candidate1_target64_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4244804,
+          "dependency_mtime": 1783900535.1013124,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup421_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup421_target64_support4_cpu_continuation_candidate1_target64_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4251485,
+          "dependency_mtime": 1783900535.102433,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup422_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup422_target64_support4_cpu_continuation_candidate1_target64_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4259365,
+          "dependency_mtime": 1783900535.1033125,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup423_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup423_target64_support4_cpu_continuation_candidate1_target64_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4266088,
+          "dependency_mtime": 1783900535.1043127,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup424_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup424_target64_support4_cpu_continuation_candidate1_target64_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4274108,
+          "dependency_mtime": 1783900535.1053126,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup425_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup425_target64_support4_cpu_continuation_candidate1_target64_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4280972,
+          "dependency_mtime": 1783900535.1053126,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup426_target64_support4_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4280972,
+          "dependency_mtime": 1783900535.1053126,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup427_target128_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup427_target128_support4_cpu_continuation_candidate1_target128_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4288902,
+          "dependency_mtime": 1783900535.1063125,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup428_target128_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup428_target128_support4_cpu_continuation_candidate1_target128_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.42965,
+          "dependency_mtime": 1783900535.1074605,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup429_target128_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup429_target128_support4_cpu_continuation_candidate1_target128_support4.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4306831,
+          "dependency_mtime": 1783900535.1083126,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup430_target256_support4_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4306831,
+          "dependency_mtime": 1783900535.1093125,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4312177,
+          "dependency_mtime": 1783900535.1093125,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup432_target128_support16_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4312177,
+          "dependency_mtime": 1783900535.1093125,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup433_target192_support8_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4322176,
+          "dependency_mtime": 1783900535.1103127,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup434_target96_support8_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4332178,
+          "dependency_mtime": 1783900535.1113126,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup435_bending_drilling_support8_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4332178,
+          "dependency_mtime": 1783900535.1113126,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup436_normal_rows_support8_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4342177,
+          "dependency_mtime": 1783900535.1123126,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup436_shell_normal_support8_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4342177,
+          "dependency_mtime": 1783900535.1123126,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup437_geometry_normal_support8_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4342177,
+          "dependency_mtime": 1783900535.1123126,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup438_geometry_normal_bending_support8_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4342177,
+          "dependency_mtime": 1783900535.1123126,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup439_shell_element_blocks_support8_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4352176,
+          "dependency_mtime": 1783900535.1133127,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup440_element_blocks_support8_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4352176,
+          "dependency_mtime": 1783900535.1133127,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup441_frame_element_blocks_support8_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4362178,
+          "dependency_mtime": 1783900535.1143126,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup442_node_blocks_support8_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4372177,
+          "dependency_mtime": 1783900535.1153126,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup443_current_component_rows_support8_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4372177,
+          "dependency_mtime": 1783900535.1153126,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup444_frontier_component_rows_support8_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4372177,
+          "dependency_mtime": 1783900535.1153126,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup445_fd_largest_rows_support8_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4372177,
+          "dependency_mtime": 1783900535.1153126,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup446_residual_weighted_support8_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4382176,
+          "dependency_mtime": 1783900535.1163127,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup447_fd_target_rows_support8_cpu_continuation.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.4382176,
+          "dependency_mtime": 1783900535.1163127,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup448_fd_residual_weighted_support8_cpu_continuation.json",
           "newer_than_artifact": true
         }
@@ -1171,7 +1173,7 @@
       "dependency_mtime_pass": false,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 10.343989786886574,
+      "generated_age_days": 10.354376597465277,
       "generated_at": "2026-07-02T15:26:07.878521+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -1284,55 +1286,55 @@
       "dependency_mtime_details": [
         {
           "dependency_kind": "producer",
-          "dependency_mtime": 1783899639.1912227,
+          "dependency_mtime": 1783900535.8453202,
           "dependency_path": "<producer>",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.1382935,
+          "dependency_mtime": 1783900533.3032937,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/README.md",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.1582093,
+          "dependency_mtime": 1783900533.325294,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/docs/commercialization-gap-current-state.md",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.1632094,
+          "dependency_mtime": 1783900533.329294,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/docs/structure-viewer-product-workspace.md",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.189476,
+          "dependency_mtime": 1783900533.3554344,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/customer_shadow_evidence_status.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.9422145,
+          "dependency_mtime": 1783900534.1083024,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/real_project_corpus_measured_status.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.80222,
+          "dependency_mtime": 1783900535.4563162,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/p0_closure_status.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.80222,
+          "dependency_mtime": 1783900535.4573162,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.80322,
+          "dependency_mtime": 1783900535.4573162,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/p1_readiness_status.json",
           "newer_than_artifact": true
         }
@@ -1340,7 +1342,7 @@
       "dependency_mtime_pass": false,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 10.066639294467592,
+      "generated_age_days": 10.077026105046295,
       "generated_at": "2026-07-02T22:05:30.961066+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -1366,187 +1368,187 @@
     {
       "artifact_exists": true,
       "artifact_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-      "artifact_sha256": "001b367b52e46e1a9f8e2386e26f689d84b6f7c0930539de3a45979a2715af88",
+      "artifact_sha256": "cb43f61999b786d94d70d65fa53fdd8fc55100a00bb1354b907add7278fc691a",
       "blockers": [],
       "changed_paths_since_source_commit": [],
       "dependency_mtime_details": [
         {
           "dependency_kind": "producer",
-          "dependency_mtime": 1783899639.1912227,
+          "dependency_mtime": 1783900535.8453202,
           "dependency_path": "<producer>",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.137431,
+          "dependency_mtime": 1783900533.3023212,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/.github/workflows/dp-windows-parity.yml",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.9632146,
+          "dependency_mtime": 1783900534.1313026,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899688.4402862,
+          "dependency_mtime": 1783900585.8688214,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.9642146,
+          "dependency_mtime": 1783900534.1333025,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/evidence_console_scope_status.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.0312152,
+          "dependency_mtime": 1783900534.6923082,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899686.4386277,
+          "dependency_mtime": 1783900584.2002387,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.8052201,
+          "dependency_mtime": 1783900535.4603162,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.8052201,
+          "dependency_mtime": 1783900535.4603162,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.80622,
+          "dependency_mtime": 1783900535.4603162,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.80622,
+          "dependency_mtime": 1783900535.4603162,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.80622,
+          "dependency_mtime": 1783900535.4603162,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.80622,
+          "dependency_mtime": 1783900535.4603162,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.80622,
+          "dependency_mtime": 1783900535.461316,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.80622,
+          "dependency_mtime": 1783900535.461316,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.80622,
+          "dependency_mtime": 1783900535.461316,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.8072202,
+          "dependency_mtime": 1783900535.4623163,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.8082201,
+          "dependency_mtime": 1783900535.4633162,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.80922,
+          "dependency_mtime": 1783900535.4633162,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.80922,
+          "dependency_mtime": 1783900535.4633162,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.80922,
+          "dependency_mtime": 1783900535.4643161,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.80922,
+          "dependency_mtime": 1783900535.4643161,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.8102202,
+          "dependency_mtime": 1783900535.4643161,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.8102202,
+          "dependency_mtime": 1783900535.4643161,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.8102202,
+          "dependency_mtime": 1783900535.4643161,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.8322203,
+          "dependency_mtime": 1783900535.4863164,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.8322203,
+          "dependency_mtime": 1783900535.4863164,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899639.1897137,
+          "dependency_mtime": 1783900535.8434937,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/pyproject.toml",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899639.2002227,
+          "dependency_mtime": 1783900535.8543203,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/scripts/build_phase6_platform_replay_receipt.py",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899639.2192228,
+          "dependency_mtime": 1783900535.8733203,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/setup.cfg",
           "newer_than_artifact": false
         }
@@ -1554,8 +1556,8 @@
       "dependency_mtime_pass": true,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 7.081481481481482e-07,
-      "generated_at": "2026-07-12T23:41:28.534924+00:00",
+      "generated_age_days": 6.624189814814815e-07,
+      "generated_at": "2026-07-12T23:56:25.959309+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
         "/home/runner/work/Structural-Analysis/Structural-Analysis/.github/workflows/dp-windows-parity.yml",
@@ -1594,7 +1596,7 @@
       "producer_exists": true,
       "producer_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/scripts/build_developer_preview_rc_status.py",
       "reuse_marker_present": true,
-      "source_commit": "00f93dad8ea545c57ab27fec6f81086edeb69a66",
+      "source_commit": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
       "source_commit_exact_match": true,
       "source_commit_match": true
     },
@@ -1610,37 +1612,37 @@
       "dependency_mtime_details": [
         {
           "dependency_kind": "producer",
-          "dependency_mtime": 1783899638.8602204,
+          "dependency_mtime": 1783900535.5143168,
           "dependency_path": "<producer>",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.8602204,
+          "dependency_mtime": 1783900535.5143168,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/run_real_accuracy_validation.py",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.1672094,
+          "dependency_mtime": 1783900533.3332942,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/build_cases_from_rwth_zenodo.py",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.1667101,
+          "dependency_mtime": 1783900533.3327146,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/benchmark_kpi_contract.py",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.8622205,
+          "dependency_mtime": 1783900535.516317,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/run_topk_precision_experiments.py",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.8622205,
+          "dependency_mtime": 1783900535.516317,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/runtime_contracts.py",
           "newer_than_artifact": true
         }
@@ -1648,7 +1650,7 @@
       "dependency_mtime_pass": false,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 10.348738638587962,
+      "generated_age_days": 10.359125449166665,
       "generated_at": "2026-07-02T15:19:17.577734+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -1680,25 +1682,25 @@
       "dependency_mtime_details": [
         {
           "dependency_kind": "producer",
-          "dependency_mtime": 1783899639.1900294,
+          "dependency_mtime": 1783900535.8437948,
           "dependency_path": "<producer>",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899637.1667101,
+          "dependency_mtime": 1783900533.3332942,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/build_ai_engine_productization_contracts.py",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899639.1900294,
+          "dependency_mtime": 1783900535.8437948,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/scripts/build_ai_engine_productization_contracts.py",
           "newer_than_artifact": true
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1783899638.7982202,
+          "dependency_mtime": 1783900535.452316,
           "dependency_path": "/home/runner/work/Structural-Analysis/Structural-Analysis/implementation/phase1/release_evidence/productization/ml_multi_objective_status.json",
           "newer_than_artifact": true
         }
@@ -1706,7 +1708,7 @@
       "dependency_mtime_pass": false,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 10.83824249835648,
+      "generated_age_days": 10.848629308935186,
       "generated_at": "2026-07-02T03:34:24.444250+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -1726,7 +1728,7 @@
     }
   ],
   "schema_version": "release-evidence-freshness-report.v1",
-  "source_commit_sha": "00f93dad8ea545c57ab27fec6f81086edeb69a66",
+  "source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
@@ -1798,7 +1800,7 @@
   ],
   "summary": {
     "artifact_count": 14,
-    "blocker_count": 19,
+    "blocker_count": 20,
     "dependency_mtime_pass_count": 2,
     "engine_version_present_count": 14,
     "input_checksum_present_count": 14,
