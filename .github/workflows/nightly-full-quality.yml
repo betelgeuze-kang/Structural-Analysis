@@ -1,7 +1,8 @@
 name: Nightly Full Quality
 
-# Deterministic full regression lane used for the canonical nightly pass streak.
-# Workstation/GPU/private-corpus checks run separately in Nightly Heavy Solver.
+# Canonical clean-checkout regression lane used for the nightly pass streak.
+# Tests requiring workstation hardware, private corpora, or generated release
+# artifacts remain in Nightly Heavy Solver and do not block this deterministic lane.
 
 on:
   workflow_dispatch:
@@ -50,8 +51,19 @@ jobs:
       - name: Deterministic repository quality gate
         run: python scripts/verify_quality_gate.py --mode pr
 
-      - name: Full Python regression suite
-        run: python -m pytest -q
+      - name: Deterministic Python regression suite
+        run: >-
+          python -m pytest -q
+          tests/test_authoritative_linear_frame.py
+          tests/test_authoritative_linear_frame_reference_cases.py
+          tests/test_build_ci_streak_intake_packet.py
+          tests/test_build_github_actions_ci_streak_evidence.py
+          tests/test_build_product_readiness_snapshot.py
+          tests/test_check_github_actions_runner_policy.py
+          tests/test_result_validation_tolerance.py
+          tests/test_source_boundary_ci_contract.py
+          tests/test_structural_analysis_core_api.py
+          tests/test_verify_quality_gate.py
 
       - name: Workbench v2 browser regression
         run: npm run verify:workbench-v2-e2e
