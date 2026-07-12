@@ -23,7 +23,7 @@ jobs:
       - name: Checkout PR branch
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           ref: ci/hosted-release-lanes
 
       - name: Set up Python
@@ -36,7 +36,23 @@ jobs:
         run: python -m pip install -e .[dev]
 
       - name: Apply hosted streak migration
-        run: python scripts/migrate_pr69_hosted_streak_policy.py
+        shell: bash
+        run: |
+          set +e
+          python scripts/migrate_pr69_hosted_streak_policy.py \
+            > hosted-streak-apply.log 2>&1
+          code=$?
+          cat hosted-streak-apply.log
+          exit "$code"
+
+      - name: Upload migration apply log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hosted-streak-apply-${{ github.run_id }}
+          path: hosted-streak-apply.log
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Run focused lint and regressions
         shell: bash
