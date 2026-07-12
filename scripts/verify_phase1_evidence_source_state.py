@@ -33,6 +33,7 @@ EVIDENCE_ONLY_EXACT_PATHS = frozenset(
     }
 )
 INTEGRATION_REQUIREMENT = "regular_merge_commit_preserves_source_ancestry"
+BASE_ALIGNMENT_REQUIREMENT = "source_commit_contains_current_main_at_integration"
 
 
 def _git(
@@ -116,14 +117,16 @@ def verify_source_state(
             "allowed_prefix": EVIDENCE_ONLY_PREFIX,
             "allowed_exact_paths": sorted(EVIDENCE_ONLY_EXACT_PATHS),
             "integration_requirement": INTEGRATION_REQUIREMENT,
+            "base_alignment_requirement": BASE_ALIGNMENT_REQUIREMENT,
         },
         "claim_boundary": (
             "This receipt proves only that every committed path after the recorded "
             "source commit belongs to the declared generated Phase 1/readiness evidence "
-            "surface. A regular merge commit is required so the recorded source remains "
-            "an ancestor of the integrated main head. It does not prove scientific "
-            "correctness beyond the generators and focused tests executed by the "
-            "authoritative evidence workflow."
+            "surface. Integration requires both a regular merge commit and confirmation "
+            "that the source commit contains the current main head at merge time; either "
+            "condition alone is insufficient. It does not prove scientific correctness "
+            "beyond the generators and focused tests executed by the authoritative "
+            "evidence workflow."
         ),
     }
 
