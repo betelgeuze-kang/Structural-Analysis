@@ -77,6 +77,9 @@ def test_source_state_accepts_generated_evidence_only_commit(
         "phase1_core_api_contract_summary.json"
     ]
     assert receipt["disallowed_paths"] == []
+    assert receipt["policy"]["integration_requirement"] == (
+        "regular_merge_commit_preserves_source_ancestry"
+    )
 
 
 def test_source_state_rejects_code_change_after_source(tmp_path: Path) -> None:
