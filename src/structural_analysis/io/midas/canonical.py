@@ -116,7 +116,8 @@ def canonicalize_midas_mgt(
                 "structural_analysis.io.midas.canonical.canonicalize_midas_mgt"
             ),
             "adapter_scope": (
-                "topology/model-health import plus lossless single-node *CONLOAD "
+                "topology/model-health import only for topology and raw "
+                "material/section mapping, plus lossless single-node *CONLOAD "
                 "normalization; deterministic MGT solver closure remains outside "
                 "this adapter"
             ),
