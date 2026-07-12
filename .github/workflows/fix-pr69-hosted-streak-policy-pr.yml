@@ -44,13 +44,77 @@ jobs:
             python - <<'PY'
           from pathlib import Path
 
+          def replace_once(text: str, old: str, new: str, label: str) -> str:
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{label}: expected one occurrence, found {count}")
+              return text.replace(old, new, 1)
+
           path = Path("scripts/build_ci_streak_intake_packet.py")
           text = path.read_text(encoding="utf-8")
-          old = "    runner_blockers: list[str] = []\n"
-          new = "    # No self-hosted runner blocker is appended to canonical streak credit.\n"
-          if text.count(old) != 1:
-              raise SystemExit(f"runner blocker variable replacement count={text.count(old)}")
-          path.write_text(text.replace(old, new, 1), encoding="utf-8")
+          text = replace_once(
+              text,
+              "    runner_blockers: list[str] = []\n",
+              "    # No self-hosted runner blocker is appended to canonical streak credit.\n",
+              "runner blocker variable",
+          )
+          path.write_text(text, encoding="utf-8")
+
+          path = Path("tests/test_build_ci_streak_intake_packet.py")
+          text = path.read_text(encoding="utf-8")
+
+          start = text.index("def test_ci_streak_intake_packet_surfaces_missing_pr_streak")
+          end = text.index("\ndef test_ci_streak_intake_packet_blocks_closed_manifest", start)
+          segment = text[start:end]
+          for old, new in (
+              ("blockers=12 | runner=not_evaluated", "blockers=10 | runner=not_evaluated"),
+              ('assert payload["current_blocker_count"] == 12', 'assert payload["current_blocker_count"] == 10'),
+              ('assert payload["blocker_id_count"] == 14', 'assert payload["blocker_id_count"] == 12'),
+              ('assert payload["summary"]["blocker_id_count"] == 14', 'assert payload["summary"]["blocker_id_count"] == 12'),
+          ):
+              segment = replace_once(segment, old, new, f"missing-pr:{old}")
+          text = text[:start] + segment + text[end:]
+
+          start = text.index("def test_ci_streak_intake_packet_surfaces_offline_self_hosted_runner")
+          end = text.index("\ndef test_ci_streak_intake_packet_passes_closed_manifest", start)
+          segment = text[start:end]
+          segment = replace_once(
+              segment,
+              "blockers=8 | runner=blocked",
+              "blockers=6 | runner=blocked",
+              "offline-runner summary count",
+          )
+          segment = replace_once(
+              segment,
+              'assert payload["current_blocker_count"] == 8',
+              'assert payload["current_blocker_count"] == 6',
+              "offline-runner blocker count",
+          )
+          text = text[:start] + segment + text[end:]
+          path.write_text(text, encoding="utf-8")
+
+          path = Path("tests/test_build_product_readiness_snapshot.py")
+          text = path.read_text(encoding="utf-8")
+          old_name = "def test_snapshot_blocks_github_hosted_actions_runner_policy"
+          new_name = "def test_snapshot_blocks_self_hosted_runner_in_deterministic_ci_policy"
+          text = replace_once(text, old_name, new_name, "readiness negative test name")
+          start = text.index(new_name)
+          end = text.index("\ndef test_snapshot_blocks_missing_self_hosted_runner_status", start)
+          segment = text[start:end]
+          segment = replace_once(
+              segment,
+              "runs-on: ubuntu-latest\\n",
+              "runs-on: self-hosted\\n",
+              "readiness negative runner",
+          )
+          segment = replace_once(
+              segment,
+              "github_hosted_runner_label",
+              "github_hosted_runner_required",
+              "readiness negative blocker",
+          )
+          text = text[:start] + segment + text[end:]
+          path.write_text(text, encoding="utf-8")
           PY
           } > hosted-streak-apply.log 2>&1
           code=$?
