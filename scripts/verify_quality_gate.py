@@ -31,7 +31,23 @@ def _lane_command(lane: str) -> list[str]:
     ]
 
 
-def _pr_commands(*, p1_failure_mode: str = "core") -> list[list[str]]:
+def _structural_scope_command(*, fail_blocked: bool) -> list[str]:
+    command = [
+        _python(),
+        "scripts/check_structural_scope_contamination.py",
+        "--tracked-only",
+        "--check",
+    ]
+    if fail_blocked:
+        command.append("--fail-blocked")
+    return command
+
+
+def _pr_commands(
+    *,
+    p1_failure_mode: str = "core",
+    fail_structural_scope_blocked: bool = False,
+) -> list[list[str]]:
     source_boundary = [
         _python(),
         "scripts/plan_source_boundary_cleanup.py",
@@ -48,13 +64,7 @@ def _pr_commands(*, p1_failure_mode: str = "core") -> list[list[str]]:
         [_python(), "scripts/check_repo_hygiene.py", "--show-ok"],
         source_boundary,
         [_python(), "scripts/report_source_boundary_footprint.py", "--check"],
-        [
-            _python(),
-            "scripts/check_structural_scope_contamination.py",
-            "--tracked-only",
-            "--check",
-            "--fail-blocked",
-        ],
+        _structural_scope_command(fail_blocked=fail_structural_scope_blocked),
         [
             _python(),
             "scripts/check_product_ci_boundaries.py",
@@ -112,7 +122,14 @@ def _pr_commands(*, p1_failure_mode: str = "core") -> list[list[str]]:
 
 def _command_groups(mode: str) -> list[list[str]]:
     if mode == "pr":
-        return _pr_commands(p1_failure_mode="core")
+        # Quarantined non-structural paths are valid while they remain fully
+        # manifested and excluded from the structural product surface. The PR
+        # lane checks audit consistency but leaves owner-decision closure to the
+        # full/release lane and the dedicated quarantine workflow.
+        return _pr_commands(
+            p1_failure_mode="core",
+            fail_structural_scope_blocked=False,
+        )
     if mode == "release":
         return [
             *_command_groups("full"),
@@ -150,7 +167,10 @@ def _command_groups(mode: str) -> list[list[str]]:
         ]
     return [
         [_python(), "scripts/check_p0_closure_status.py", "--json", "--fail-open"],
-        *_pr_commands(p1_failure_mode="blocked"),
+        *_pr_commands(
+            p1_failure_mode="blocked",
+            fail_structural_scope_blocked=True,
+        ),
         _lane_command("legacy_evidence"),
         _lane_command("molecular_quarantine"),
         [_python(), "-m", "pytest", "-q"],
