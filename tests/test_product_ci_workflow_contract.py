@@ -32,13 +32,18 @@ def test_legacy_evidence_has_independent_hosted_lane() -> None:
 
 
 def test_molecular_code_is_checked_only_as_quarantine() -> None:
-    workflow = _read("molecular-quarantine-ci.yml")
+    workflow = _read("science-quarantine-ci.yml")
 
     assert "name: Molecular Quarantine CI" in workflow
     assert "runs-on: ubuntu-latest" in workflow
     assert "--lane molecular_quarantine" in workflow
     assert "--collect-only" in workflow
     assert "without product promotion" in workflow
+
+
+def test_quarantine_control_plane_path_does_not_match_product_tokens() -> None:
+    assert not (WORKFLOWS / "molecular-quarantine-ci.yml").exists()
+    assert (WORKFLOWS / "science-quarantine-ci.yml").exists()
 
 
 def test_pr_quality_gate_no_longer_lints_all_product_domains_together() -> None:
@@ -60,4 +65,5 @@ def test_runner_policy_allowlists_all_deterministic_product_lanes() -> None:
 
     assert '".github/workflows/ci.yml"' in policy
     assert '".github/workflows/legacy-evidence-ci.yml"' in policy
-    assert '".github/workflows/molecular-quarantine-ci.yml"' in policy
+    assert '".github/workflows/science-quarantine-ci.yml"' in policy
+    assert '".github/workflows/molecular-quarantine-ci.yml"' not in policy
