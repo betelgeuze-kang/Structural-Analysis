@@ -143,6 +143,9 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
+          runtime_checkpoint_dir="implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints"
+          git restore --source=HEAD --staged --worktree -- "$runtime_checkpoint_dir" || true
+          git clean -fd -- "$runtime_checkpoint_dir"
           python - <<'PY'
           from pathlib import Path
           import subprocess
