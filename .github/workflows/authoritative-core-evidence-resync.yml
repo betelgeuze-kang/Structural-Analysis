@@ -43,7 +43,7 @@ jobs:
           set -euxo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          echo "EVIDENCE_SOURCE_COMMIT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          echo "CURRENT_HEAD_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -53,6 +53,40 @@ jobs:
 
       - name: Install package
         run: python -m pip install -e .[dev]
+
+      - name: Determine whether regeneration is required
+        id: preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          summary="implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json"
+          needs_regen=true
+          recorded_source=""
+          if [[ -f "$summary" ]]; then
+            recorded_source="$(python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json")
+          payload = json.loads(path.read_text(encoding="utf-8"))
+          print(str(payload.get("source_commit_sha", "")).strip())
+          PY
+          )"
+            if [[ -n "$recorded_source" ]] && \
+               python scripts/verify_phase1_evidence_source_state.py \
+                 --source-commit "$recorded_source" \
+                 --head-commit "$CURRENT_HEAD_SHA" \
+                 --out "$RUNNER_TEMP/phase1-evidence-preflight-receipt.json" \
+                 --fail-blocked; then
+              needs_regen=false
+            fi
+          fi
+          echo "needs_regen=$needs_regen" >> "$GITHUB_OUTPUT"
+          echo "recorded_source=$recorded_source" >> "$GITHUB_OUTPUT"
+          if [[ "$needs_regen" == "true" ]]; then
+            echo "EVIDENCE_SOURCE_COMMIT_SHA=$CURRENT_HEAD_SHA" >> "$GITHUB_ENV"
+          else
+            echo "EVIDENCE_SOURCE_COMMIT_SHA=$recorded_source" >> "$GITHUB_ENV"
+          fi
 
       - name: Verify generator, provenance, and final core
         shell: bash
@@ -76,9 +110,11 @@ jobs:
             2>&1 | tee "$RUNNER_TEMP/authoritative-core-evidence-tests.log"
 
       - name: Generate Phase 1 API and frame evidence
+        if: steps.preflight.outputs.needs_regen == 'true'
         run: python scripts/build_phase1_core_api_contract_artifacts.py --json
 
       - name: Propagate current evidence through readiness surfaces
+        if: steps.preflight.outputs.needs_regen == 'true'
         shell: bash
         run: |
           set -euxo pipefail
@@ -103,6 +139,7 @@ jobs:
           tests/test_authoritative_linear_evidence_workflow_contract.py
 
       - name: Commit generated evidence only
+        if: steps.preflight.outputs.needs_regen == 'true'
         shell: bash
         run: |
           set -euxo pipefail
@@ -148,6 +185,7 @@ jobs:
             --fail-blocked
 
       - name: Push generated evidence
+        if: steps.preflight.outputs.needs_regen == 'true'
         run: git push origin HEAD:${{ github.head_ref || github.ref_name }}
 
       - name: Upload evidence receipt
@@ -157,6 +195,7 @@ jobs:
           name: authoritative-core-evidence-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/authoritative-core-evidence-tests.log
+            ${{ runner.temp }}/phase1-evidence-preflight-receipt.json
             ${{ runner.temp }}/phase1-evidence-source-state-receipt.json
             implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json
             implementation/phase1/release_evidence/productization/developer_preview_rc_status.json
