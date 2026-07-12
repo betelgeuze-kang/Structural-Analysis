@@ -20,7 +20,34 @@ def _npm() -> str:
     return "npm.cmd" if sys.platform == "win32" else "npm"
 
 
-def _pr_commands(*, p1_failure_mode: str = "core") -> list[list[str]]:
+def _lane_command(lane: str) -> list[str]:
+    return [
+        _python(),
+        "scripts/run_product_ci_lane.py",
+        "--lane",
+        lane,
+        "--ruff",
+        "--compile",
+    ]
+
+
+def _structural_scope_command(*, fail_blocked: bool) -> list[str]:
+    command = [
+        _python(),
+        "scripts/check_structural_scope_contamination.py",
+        "--tracked-only",
+        "--check",
+    ]
+    if fail_blocked:
+        command.append("--fail-blocked")
+    return command
+
+
+def _pr_commands(
+    *,
+    p1_failure_mode: str = "core",
+    fail_structural_scope_blocked: bool = False,
+) -> list[list[str]]:
     source_boundary = [
         _python(),
         "scripts/plan_source_boundary_cleanup.py",
@@ -30,23 +57,29 @@ def _pr_commands(*, p1_failure_mode: str = "core") -> list[list[str]]:
         "implementation/phase1/source_boundary_allowlist.json",
         "--fail-on-candidates",
     ]
-    p1_failure_flag = "--fail-blocked" if p1_failure_mode == "blocked" else "--fail-core-open"
+    p1_failure_flag = (
+        "--fail-blocked" if p1_failure_mode == "blocked" else "--fail-core-open"
+    )
     return [
         [_python(), "scripts/check_repo_hygiene.py", "--show-ok"],
         source_boundary,
         [_python(), "scripts/report_source_boundary_footprint.py", "--check"],
+        _structural_scope_command(fail_blocked=fail_structural_scope_blocked),
         [
             _python(),
-            "scripts/check_structural_scope_contamination.py",
-            "--tracked-only",
-            "--check",
+            "scripts/check_product_ci_boundaries.py",
             "--fail-blocked",
         ],
         [_python(), "scripts/check_git_remote_safety.py", "--show-ok"],
-        [_python(), "-m", "ruff", "check", "."],
+        _lane_command("core"),
         [_python(), "scripts/check_p0_closure_status.py", "--json", "--fail-core-open"],
         [_python(), "scripts/check_p1_readiness_status.py", "--json", p1_failure_flag],
-        [_python(), "scripts/check_p1_benchmark_breadth_status.py", "--json", p1_failure_flag],
+        [
+            _python(),
+            "scripts/check_p1_benchmark_breadth_status.py",
+            "--json",
+            p1_failure_flag,
+        ],
         [_npm(), "ci"],
         [_npm(), "audit", "--audit-level", "high"],
         [
@@ -80,6 +113,8 @@ def _pr_commands(*, p1_failure_mode: str = "core") -> list[list[str]]:
             "tests/test_runtime_dependency_contract.py",
             "tests/test_midas_mgt_nodal_load_contract.py",
             "tests/test_structure_viewer_dom_safety_contract.py",
+            "tests/test_check_product_ci_boundaries.py",
+            "tests/test_product_ci_workflow_contract.py",
             "tests/test_verify_quality_gate_contract.py",
         ],
     ]
@@ -87,7 +122,14 @@ def _pr_commands(*, p1_failure_mode: str = "core") -> list[list[str]]:
 
 def _command_groups(mode: str) -> list[list[str]]:
     if mode == "pr":
-        return _pr_commands(p1_failure_mode="core")
+        # Quarantined non-structural paths are valid while they remain fully
+        # manifested and excluded from the structural product surface. The PR
+        # lane checks audit consistency but leaves owner-decision closure to the
+        # full/release lane and the dedicated quarantine workflow.
+        return _pr_commands(
+            p1_failure_mode="core",
+            fail_structural_scope_blocked=False,
+        )
     if mode == "release":
         return [
             *_command_groups("full"),
@@ -100,7 +142,8 @@ def _command_groups(mode: str) -> list[list[str]]:
                 _python(),
                 "scripts/check_github_actions_self_hosted_runner_status.py",
                 "--out",
-                "implementation/phase1/release_evidence/productization/github_actions_self_hosted_runner_status.json",
+                "implementation/phase1/release_evidence/productization/"
+                "github_actions_self_hosted_runner_status.json",
                 "--check",
                 "--fail-blocked",
             ],
@@ -108,7 +151,8 @@ def _command_groups(mode: str) -> list[list[str]]:
                 _python(),
                 "scripts/build_product_readiness_snapshot.py",
                 "--out",
-                "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+                "implementation/phase1/release_evidence/productization/"
+                "product_readiness_snapshot.json",
                 "--check",
                 "--fail-blocked",
             ],
@@ -123,7 +167,12 @@ def _command_groups(mode: str) -> list[list[str]]:
         ]
     return [
         [_python(), "scripts/check_p0_closure_status.py", "--json", "--fail-open"],
-        *_pr_commands(p1_failure_mode="blocked"),
+        *_pr_commands(
+            p1_failure_mode="blocked",
+            fail_structural_scope_blocked=True,
+        ),
+        _lane_command("legacy_evidence"),
+        _lane_command("molecular_quarantine"),
         [_python(), "-m", "pytest", "-q"],
         [_npm(), "run", "verify:frontend-browser-smoke"],
         [_npm(), "run", "verify:viewer-report-pdf"],
@@ -145,8 +194,16 @@ def _command_groups(mode: str) -> list[list[str]]:
         [_python(), "scripts/build_phase2_material_newton_breadth_artifacts.py", "--check"],
         [_python(), "scripts/build_phase2_material_mesh_newton_artifacts.py", "--check"],
         [_python(), "scripts/build_phase2_patch_rigidbody_artifacts.py", "--check"],
-        [_python(), "scripts/build_phase2_mesh_load_step_convergence_artifacts.py", "--check"],
-        [_python(), "scripts/build_phase2_frame_shell_material_coupling_artifacts.py", "--check"],
+        [
+            _python(),
+            "scripts/build_phase2_mesh_load_step_convergence_artifacts.py",
+            "--check",
+        ],
+        [
+            _python(),
+            "scripts/build_phase2_frame_shell_material_coupling_artifacts.py",
+            "--check",
+        ],
         [_python(), "scripts/build_phase3_benchmark_factory_artifacts.py", "--check"],
         [_python(), "scripts/check_workstation_delivery_readiness.py", "--json"],
         [_python(), "scripts/check_independent_product_readiness.py", "--json"],

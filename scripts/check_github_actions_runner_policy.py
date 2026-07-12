@@ -23,8 +23,10 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/authoritative-linear-core-ci.yml",
         ".github/workflows/ci.yml",
         ".github/workflows/frontend-web-ci.yml",
+        ".github/workflows/legacy-evidence-ci.yml",
         ".github/workflows/nightly-full-quality.yml",
         ".github/workflows/runtime-input-viewer-ci.yml",
+        ".github/workflows/science-quarantine-ci.yml",
         ".github/workflows/viewer-browser-ci.yml",
         ".github/workflows/workflow-contract-ci.yml",
     }
@@ -216,11 +218,12 @@ def check_runner_policy(
         "rows": rows,
         "blockers": blockers,
         "claim_boundary": (
-            "Deterministic CI, frontend, viewer, workflow-contract, and canonical nightly "
-            "lanes may use explicitly allowlisted GitHub-hosted runners so pull requests "
-            "and pass streaks do not depend on a workstation. Hardware, GPU, private-corpus, "
-            "release publication, and other non-allowlisted lanes must remain self-hosted. "
-            "This policy does not prove runner availability or create CI streak credit."
+            "Deterministic structural-core, frontend, viewer, legacy-evidence, "
+            "science-quarantine, workflow-contract, and canonical nightly lanes may use "
+            "explicitly allowlisted GitHub-hosted runners. Hardware, GPU, private-corpus, "
+            "release-publication, and other non-allowlisted lanes must remain self-hosted. "
+            "Science-quarantine execution does not promote that code into the structural "
+            "product surface."
         ),
     }
 
