@@ -4,7 +4,7 @@
     "phase1_core_api_contract": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
     "product_readiness_snapshot": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
   },
-  "blocker_count": 88,
+  "blocker_count": 90,
   "blockers": [
     "g1::full_load_gate_not_closed",
     "g1::full_mesh_nonlinear_equilibrium_not_closed",
@@ -32,6 +32,7 @@
     "pm_release::M3::require_hip_failed_without_cpu_only_product_mode",
     "pm_release::M5::audit_trail_action_source_trace_missing",
     "pm_release::M5::pdf_report_or_reviewer_package_missing",
+    "pm_release::M5::pm_blocker_closure_board_count_mismatch",
     "pm_release::M5::signed_release_registry_missing_or_failed",
     "pm_release::M5::viewer_reviewer_customer_preset_missing",
     "pm_release::M5::workflow_productization_gate_not_green",
@@ -66,6 +67,7 @@
     "pm_release::runtime::strict_runtime_milestone_not_green",
     "pm_release::security::repro_build_not_green",
     "pm_release::strict_ci::direct_require_hip_failed_without_cpu_only_scope",
+    "pm_release::support::pm_blocker_closure_board_count_mismatch",
     "schema_invalid:missing_schema_version:external_benchmark_submission_readiness",
     "schema_invalid:missing_schema_version:independent_product_readiness",
     "schema_invalid:required_snapshot_inputs_missing",
@@ -155,7 +157,7 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 76,
+      "blocker_count": 78,
       "blockers": [
         "human_ux::observation_file_missing",
         "independent_product:not_ready",
@@ -171,6 +173,7 @@
         "pm_release::M3::require_hip_failed_without_cpu_only_product_mode",
         "pm_release::M5::audit_trail_action_source_trace_missing",
         "pm_release::M5::pdf_report_or_reviewer_package_missing",
+        "pm_release::M5::pm_blocker_closure_board_count_mismatch",
         "pm_release::M5::signed_release_registry_missing_or_failed",
         "pm_release::M5::viewer_reviewer_customer_preset_missing",
         "pm_release::M5::workflow_productization_gate_not_green",
@@ -205,6 +208,7 @@
         "pm_release::runtime::strict_runtime_milestone_not_green",
         "pm_release::security::repro_build_not_green",
         "pm_release::strict_ci::direct_require_hip_failed_without_cpu_only_scope",
+        "pm_release::support::pm_blocker_closure_board_count_mismatch",
         "schema_invalid:missing_schema_version:external_benchmark_submission_readiness",
         "schema_invalid:missing_schema_version:independent_product_readiness",
         "schema_invalid:required_snapshot_inputs_missing",
@@ -351,7 +355,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-07-12T23:04:28.520465+00:00",
+  "generated_at": "2026-07-12T23:08:16.574733+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -362,27 +366,27 @@
       "status": "ready"
     },
     "phase1_core_api_contract": {
-      "input_checksum": "sha256:1890e335481b8f485575091fcf29d1bd3b7bc49ea01a31c2af23ae45072dcff3",
+      "input_checksum": "sha256:3ad5c2b98ff689772acfb9156c2e89d4f8361f6d9e9c86cf1d6c9f688ae5013d",
       "path": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
       "present": true,
       "schema_version": "phase1-core-api-contract-artifacts.v2",
-      "source_commit_sha": "7175a26773619db6d6420eb1a8c1e880eb615fb8",
+      "source_commit_sha": "e83307a606aa969eb3808c392dcdb0af64fab166",
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:43f7d9c4f234a5804239f45138c45859d3c04ef65f0d13df3a977b37889e242d",
+      "input_checksum": "sha256:0ff027bd71cdbebb0a669d1acb9cf67ceba661ae5de0571de1100a03e83eff8e",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "7175a26773619db6d6420eb1a8c1e880eb615fb8",
+      "source_commit_sha": "e83307a606aa969eb3808c392dcdb0af64fab166",
       "status": "stale_or_inconsistent"
     }
   },
   "input_checksum_policy": "product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:1890e335481b8f485575091fcf29d1bd3b7bc49ea01a31c2af23ae45072dcff3",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:43f7d9c4f234a5804239f45138c45859d3c04ef65f0d13df3a977b37889e242d"
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:3ad5c2b98ff689772acfb9156c2e89d4f8361f6d9e9c86cf1d6c9f688ae5013d",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:0ff027bd71cdbebb0a669d1acb9cf67ceba661ae5de0571de1100a03e83eff8e"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "stale_or_inconsistent",
@@ -2165,7 +2169,7 @@
       },
       "release freshness/sync": {
         "blocked": true,
-        "blocker_count": 76,
+        "blocker_count": 78,
         "blockers": [
           "independent_product:not_ready",
           "missing_artifact:implementation/phase1/release/external_benchmark_submission_readiness.json",
@@ -2181,6 +2185,7 @@
           "pm_release::M3::require_hip_failed_without_cpu_only_product_mode",
           "pm_release::M5::audit_trail_action_source_trace_missing",
           "pm_release::M5::pdf_report_or_reviewer_package_missing",
+          "pm_release::M5::pm_blocker_closure_board_count_mismatch",
           "pm_release::M5::signed_release_registry_missing_or_failed",
           "pm_release::M5::viewer_reviewer_customer_preset_missing",
           "pm_release::M5::workflow_productization_gate_not_green",
@@ -2216,6 +2221,7 @@
           "pm_release::runtime::strict_runtime_milestone_not_green",
           "pm_release::security::repro_build_not_green",
           "pm_release::strict_ci::direct_require_hip_failed_without_cpu_only_scope",
+          "pm_release::support::pm_blocker_closure_board_count_mismatch",
           "schema_invalid:missing_schema_version:external_benchmark_submission_readiness",
           "schema_invalid:missing_schema_version:independent_product_readiness",
           "schema_invalid:required_snapshot_inputs_missing",
@@ -2448,6 +2454,6 @@
       }
     }
   },
-  "source_commit_sha": "7175a26773619db6d6420eb1a8c1e880eb615fb8",
+  "source_commit_sha": "e83307a606aa969eb3808c392dcdb0af64fab166",
   "status": "blocked"
 }
