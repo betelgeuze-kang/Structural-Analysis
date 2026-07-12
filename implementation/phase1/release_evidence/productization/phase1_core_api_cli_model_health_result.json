@@ -17,11 +17,13 @@
     "element_count": 1,
     "load_count": 0,
     "node_count": 2,
+    "provenance_policy": "engine_owned",
     "support_count": 0,
     "unit_force": "kN",
     "unit_length": "m",
     "up_axis": "Z"
   },
+  "result_schema_version": "structural-analysis-result.v2",
   "solver": "developer_preview_model_health",
   "status": "ready",
   "tolerance": 1e-08,

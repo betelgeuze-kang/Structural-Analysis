@@ -1,0 +1,278 @@
+{
+  "analysis_type": "linear_static",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "convergence_history": [
+    {
+      "increment_definition": "single_direct_linear_solve; no iterative relative increment",
+      "increment_norm": 0.0026666666666666666,
+      "iteration": 1,
+      "relative_increment": 0.0,
+      "relative_increment_applicable": false,
+      "relative_residual": 8.326672684688674e-17,
+      "residual_norm": 8.326672684688674e-16,
+      "status": "ready",
+      "step": "linear_static"
+    }
+  ],
+  "developer_preview": true,
+  "engine_version": "1.0.0",
+  "input_checksum": "sha256:95f14f348f51867a9bdc89550cb7deeefe86efd384d5d90f114c6a007b5abecc",
+  "metrics": {
+    "active_dof_count": 12,
+    "analysis_fidelity": "cpu_reference_linear_fea",
+    "automatic_support_generation_used": false,
+    "claim_boundary": "linear_static_3d_frame_cpu_reference_v1",
+    "constrained_dof_count": 6,
+    "constrained_reaction_norm": 20.0,
+    "displacements": {
+      "N1": {
+        "RX": 0.0,
+        "RY": 0.0,
+        "RZ": 0.0,
+        "UX": 0.0,
+        "UY": 0.0,
+        "UZ": 0.0
+      },
+      "N2": {
+        "RX": 0.0,
+        "RY": 0.0,
+        "RZ": -0.002,
+        "UX": 0.0,
+        "UY": -0.0026666666666666666,
+        "UZ": 0.0
+      }
+    },
+    "element_count": 1,
+    "energy_balance_error": 0.0,
+    "equilibrium_residual_definition": "free_dof_internal_minus_external_force",
+    "equilibrium_residuals": {
+      "N1": {
+        "RX": 0.0,
+        "RY": 0.0,
+        "RZ": 0.0,
+        "UX": 0.0,
+        "UY": 0.0,
+        "UZ": 0.0
+      },
+      "N2": {
+        "RX": 0.0,
+        "RY": 0.0,
+        "RZ": -8.326672684688674e-16,
+        "UX": 0.0,
+        "UY": 0.0,
+        "UZ": 0.0
+      }
+    },
+    "external_forces": {
+      "N1": {
+        "RX": 0.0,
+        "RY": 0.0,
+        "RZ": 0.0,
+        "UX": 0.0,
+        "UY": 0.0,
+        "UZ": 0.0
+      },
+      "N2": {
+        "RX": 0.0,
+        "RY": 0.0,
+        "RZ": 0.0,
+        "UX": 0.0,
+        "UY": -10.0,
+        "UZ": 0.0
+      }
+    },
+    "fallback_used": false,
+    "free_dof_count": 6,
+    "free_equilibrium_residual_norm": 8.326672684688674e-16,
+    "free_residual_norm": 8.326672684688674e-16,
+    "free_stiffness_order": 6,
+    "implicit_property_fallback_used": false,
+    "increment_norm": 0.0026666666666666666,
+    "internal_forces": {
+      "N1": {
+        "RX": 0.0,
+        "RY": 0.0,
+        "RZ": 20.0,
+        "UX": 0.0,
+        "UY": 10.0,
+        "UZ": 0.0
+      },
+      "N2": {
+        "RX": 0.0,
+        "RY": 0.0,
+        "RZ": -8.326672684688674e-16,
+        "UX": 0.0,
+        "UY": -10.0,
+        "UZ": 0.0
+      }
+    },
+    "linear_ramp_external_work": 0.013333333333333332,
+    "load_count": 1,
+    "matrix_backend": "numpy_linalg_solve_dense",
+    "max_displacement": 0.0026666666666666666,
+    "member_forces": [
+      {
+        "id": "F1",
+        "local_end_forces": {
+          "FX_I": 0.0,
+          "FX_J": 0.0,
+          "FY_I": 10.0,
+          "FY_J": -10.0,
+          "FZ_I": 0.0,
+          "FZ_J": 0.0,
+          "MX_I": 0.0,
+          "MX_J": 0.0,
+          "MY_I": 0.0,
+          "MY_J": 0.0,
+          "MZ_I": 20.0,
+          "MZ_J": -8.326672684688674e-16
+        },
+        "nodes": [
+          "N1",
+          "N2"
+        ],
+        "type": "frame"
+      }
+    ],
+    "node_count": 2,
+    "production_fail_closed": true,
+    "provenance_policy": "engine_owned",
+    "reaction_definition": "constrained_dof_internal_minus_external_force",
+    "reactions": {
+      "N1": {
+        "RX": 0.0,
+        "RY": 0.0,
+        "RZ": 20.0,
+        "UX": 0.0,
+        "UY": 10.0,
+        "UZ": 0.0
+      },
+      "N2": {
+        "RX": 0.0,
+        "RY": 0.0,
+        "RZ": 0.0,
+        "UX": 0.0,
+        "UY": 0.0,
+        "UZ": 0.0
+      }
+    },
+    "regularization_used": false,
+    "relative_increment_applicable": false,
+    "relative_residual": 8.326672684688674e-17,
+    "residual_formula": "F_internal_minus_F_external",
+    "residual_norm": 8.326672684688674e-16,
+    "solver_path_id": "authoritative_cpu_linear_fea_3d_v1",
+    "sparse_backend_used": false,
+    "stiffness_order": 12,
+    "stiffness_storage": "dense_numpy",
+    "stiffness_symmetry_error": 0.0,
+    "strain_energy": 0.013333333333333332,
+    "support_count": 1,
+    "tangent_jacobian_equals_assembled_stiffness": true,
+    "tangent_jacobian_storage": "dense_numpy",
+    "viewer_payload": {
+      "analysis_fidelity": "cpu_reference_linear_fea",
+      "elements": [
+        {
+          "id": "F1",
+          "local_end_forces": {
+            "FX_I": 0.0,
+            "FX_J": 0.0,
+            "FY_I": 10.0,
+            "FY_J": -10.0,
+            "FZ_I": 0.0,
+            "FZ_J": 0.0,
+            "MX_I": 0.0,
+            "MX_J": 0.0,
+            "MY_I": 0.0,
+            "MY_J": 0.0,
+            "MZ_I": 20.0,
+            "MZ_J": -8.326672684688674e-16
+          },
+          "nodes": [
+            "N1",
+            "N2"
+          ],
+          "type": "frame"
+        }
+      ],
+      "equilibrium_residual_definition": "free_dof_internal_minus_external_force; constrained entries are zero",
+      "nodes": [
+        {
+          "coordinates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "displacement": {
+            "RX": 0.0,
+            "RY": 0.0,
+            "RZ": 0.0,
+            "UX": 0.0,
+            "UY": 0.0,
+            "UZ": 0.0
+          },
+          "equilibrium_residual": {
+            "FX": 0.0,
+            "FY": 0.0,
+            "FZ": 0.0,
+            "MX": 0.0,
+            "MY": 0.0,
+            "MZ": 0.0
+          },
+          "id": "N1",
+          "reaction": {
+            "FX": 0.0,
+            "FY": 10.0,
+            "FZ": 0.0,
+            "MX": 0.0,
+            "MY": 0.0,
+            "MZ": 20.0
+          }
+        },
+        {
+          "coordinates": [
+            2.0,
+            0.0,
+            0.0
+          ],
+          "displacement": {
+            "RX": 0.0,
+            "RY": 0.0,
+            "RZ": -0.002,
+            "UX": 0.0,
+            "UY": -0.0026666666666666666,
+            "UZ": 0.0
+          },
+          "equilibrium_residual": {
+            "FX": 0.0,
+            "FY": 0.0,
+            "FZ": 0.0,
+            "MX": 0.0,
+            "MY": 0.0,
+            "MZ": -8.326672684688674e-16
+          },
+          "id": "N2",
+          "reaction": {
+            "FX": 0.0,
+            "FY": 0.0,
+            "FZ": 0.0,
+            "MX": 0.0,
+            "MY": 0.0,
+            "MZ": 0.0
+          }
+        }
+      ],
+      "reaction_definition": "constrained_dof_internal_minus_external_force",
+      "schema_version": "structural-analysis-viewer-payload.v2",
+      "solver_path_id": "authoritative_cpu_linear_fea_3d_v1",
+      "source": "authoritative_solver_result"
+    }
+  },
+  "result_schema_version": "structural-analysis-result.v2",
+  "solver": "authoritative_cpu_linear_fea_3d_v1",
+  "status": "ready",
+  "tolerance": 1e-08,
+  "unsupported_features": [],
+  "warnings": []
+}
