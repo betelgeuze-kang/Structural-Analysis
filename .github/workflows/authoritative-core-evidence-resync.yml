@@ -73,7 +73,7 @@ jobs:
             tests/test_check_product_ci_boundaries.py \
             tests/test_result_validation_tolerance.py \
             tests/test_structural_analysis_core_api.py \
-            2>&1 | tee authoritative-core-evidence-tests.log
+            2>&1 | tee "$RUNNER_TEMP/authoritative-core-evidence-tests.log"
 
       - name: Generate Phase 1 API and frame evidence
         run: python scripts/build_phase1_core_api_contract_artifacts.py --json
@@ -143,7 +143,7 @@ jobs:
           python scripts/verify_phase1_evidence_source_state.py \
             --source-commit "$EVIDENCE_SOURCE_COMMIT_SHA" \
             --head-commit HEAD \
-            --out phase1-evidence-source-state-receipt.json \
+            --out "$RUNNER_TEMP/phase1-evidence-source-state-receipt.json" \
             --json \
             --fail-blocked
 
@@ -156,8 +156,8 @@ jobs:
         with:
           name: authoritative-core-evidence-${{ github.run_id }}
           path: |
-            authoritative-core-evidence-tests.log
-            phase1-evidence-source-state-receipt.json
+            ${{ runner.temp }}/authoritative-core-evidence-tests.log
+            ${{ runner.temp }}/phase1-evidence-source-state-receipt.json
             implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json
             implementation/phase1/release_evidence/productization/developer_preview_rc_status.json
             implementation/phase1/release_evidence/productization/product_readiness_snapshot.json
