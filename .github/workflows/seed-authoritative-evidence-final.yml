@@ -1,6 +1,9 @@
 name: Seed Final Authoritative Evidence Resync
 
 on:
+  pull_request:
+    paths:
+      - ".github/workflows/seed-authoritative-evidence-final.yml"
   push:
     branches: ["evidence/authoritative-core-resync-final"]
     paths:
@@ -11,7 +14,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: seed-authoritative-evidence-final
+  group: seed-authoritative-evidence-final-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
