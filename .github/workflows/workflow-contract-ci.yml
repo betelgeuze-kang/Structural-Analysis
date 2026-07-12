@@ -1,6 +1,6 @@
 name: Workflow Contract CI
 
-# Lightweight syntax, runner-class, and trigger validation for every workflow.
+# Lightweight syntax, runner-class, trigger, and product-ownership validation.
 # This lane is intentionally independent of workstation availability.
 
 on:
@@ -8,8 +8,13 @@ on:
     paths:
       - ".github/workflows/**"
       - "scripts/check_github_actions_runner_policy.py"
+      - "scripts/check_product_ci_boundaries.py"
+      - "scripts/run_product_ci_lane.py"
       - "scripts/build_github_actions_ci_streak_evidence.py"
+      - "scripts/verify_quality_gate.py"
       - "tests/test_check_github_actions_runner_policy.py"
+      - "tests/test_check_product_ci_boundaries.py"
+      - "tests/test_product_ci_workflow_contract.py"
       - "tests/test_build_github_actions_ci_streak_evidence.py"
       - "tests/test_verify_quality_gate.py"
   push:
@@ -17,8 +22,13 @@ on:
     paths:
       - ".github/workflows/**"
       - "scripts/check_github_actions_runner_policy.py"
+      - "scripts/check_product_ci_boundaries.py"
+      - "scripts/run_product_ci_lane.py"
       - "scripts/build_github_actions_ci_streak_evidence.py"
+      - "scripts/verify_quality_gate.py"
       - "tests/test_check_github_actions_runner_policy.py"
+      - "tests/test_check_product_ci_boundaries.py"
+      - "tests/test_product_ci_workflow_contract.py"
       - "tests/test_build_github_actions_ci_streak_evidence.py"
       - "tests/test_verify_quality_gate.py"
   workflow_dispatch:
@@ -88,12 +98,17 @@ jobs:
       - name: Validate deterministic and hardware runner classes
         run: python scripts/check_github_actions_runner_policy.py --json --fail-blocked
 
-      - name: Verify workflow and CI-streak contracts
+      - name: Validate product CI ownership boundaries
+        run: python scripts/check_product_ci_boundaries.py --json --fail-blocked
+
+      - name: Verify workflow, boundary, and CI-streak contracts
         shell: bash
         run: |
           set +e
           python -m pytest -q \
             tests/test_check_github_actions_runner_policy.py \
+            tests/test_check_product_ci_boundaries.py \
+            tests/test_product_ci_workflow_contract.py \
             tests/test_build_github_actions_ci_streak_evidence.py \
             tests/test_verify_quality_gate.py \
             > workflow-contract-tests.log 2>&1
