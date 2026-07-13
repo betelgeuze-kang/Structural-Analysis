@@ -275,5 +275,5 @@ Wheel을 빈 target에 `--no-deps`로 설치한 뒤 그 target의 top-level cano
 
 1. invalid CSR/non-finite source가 multi-block destination을 부분 오염시키지 않는 destination atomicity를 구현·native 검증한다.
 2. sealed capability를 후속 checkpoint transaction context와 소유권 단절 없이 연결하고 decide·commit·finalize의 seal consume/clear를 receipt에 결속한다.
-3. later columns/restarts와 final guard, completion/export를 연결한 뒤 CPU oracle·GPU-tree oracle·native parity를 닫는다.
+3. v0.2.23 global suffix owner가 later column과 fixed guard submission을 연결했다. 남은 active later-restart/final-guard integrated coverage, completion/export와 product outcome observation을 닫은 뒤 model-family CPU/HIP parity를 검증한다.
 4. 그 후에만 iteration host-copy-zero, O(N) 복잡도, 속도 향상, 상용 승격을 별도 evidence gate로 평가한다.

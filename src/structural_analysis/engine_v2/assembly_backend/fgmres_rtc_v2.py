@@ -93,6 +93,7 @@ _SOURCE_PATH = Path(__file__).with_name("kernels") / Path(_SOURCE_RESOURCE).name
 _FIXED_OPTION_SUFFIX = ("-O3", "-std=c++17", "-ffp-contract=off")
 _INT32_MAX = (1 << 31) - 1
 _UINTPTR_MAX = (1 << (8 * ctypes.sizeof(ctypes.c_void_p))) - 1
+_HIP_ERROR_NOT_READY = 600
 _KERNEL_OWNER_MINT = object()
 
 _SYMBOL_ITEMS = (
@@ -1095,6 +1096,7 @@ _IMPLEMENTED_CONTROL_MODES = frozenset(
         "VECTOR_ACCEPT",
         "CHECKPOINT_DECIDE",
         "CHECKPOINT_FINALIZE",
+        "FINAL_GUARD",
         "PREDECESSOR_VALIDATE",
     )
 )
@@ -1596,7 +1598,9 @@ class _HipRtcFgmresV2BindingWitness:
     expected_device_ordinal: int | None
     identity: HipRtcFgmresV2KernelIdentity
     identity_payload_hash: str
+    identity_value_snapshot: tuple[Any, ...]
     stream_synchronize_callable: Any | None = None
+    stream_query_callable: Any | None = None
     memset_async_callable: Any | None = None
 
 
@@ -1607,6 +1611,26 @@ _KERNEL_BINDINGS: weakref.WeakKeyDictionary[
 ] = weakref.WeakKeyDictionary()
 
 
+def _exact_function_pointer_values(value: object) -> tuple[tuple[str, int], ...]:
+    """Return only an exact built-in tuple/str/int function-handle table."""
+
+    if type(value) is not tuple:
+        return ()
+    rows: list[tuple[str, int]] = []
+    for row in value:
+        if (
+            type(row) is not tuple
+            or len(row) != 2
+            or type(row[0]) is not str
+            or not row[0]
+            or type(row[1]) is not int
+            or row[1] <= 0
+        ):
+            return ()
+        rows.append((row[0], row[1]))
+    return tuple(rows)
+
+
 def _checkpoint_binding_snapshot_values(
     witness: _HipRtcFgmresV2BindingWitness,
 ) -> tuple[Any, ...]:
@@ -1614,18 +1638,153 @@ def _checkpoint_binding_snapshot_values(
         id(witness.runtime_api),
         id(witness.loaded_runtime),
         id(witness.loader_provenance_witness),
-        witness.module_pointer,
-        witness.function_pointers,
+        (type(witness.module_pointer), witness.module_pointer),
+        tuple(
+            (type(name), name, type(pointer), pointer)
+            for name, pointer in witness.function_pointers
+        ),
         id(witness.launch_callable),
         id(witness.unload_callable),
         id(witness.get_device_callable),
-        witness.module_device_ordinal,
-        witness.expected_device_ordinal,
+        (type(witness.module_device_ordinal), witness.module_device_ordinal),
+        (type(witness.expected_device_ordinal), witness.expected_device_ordinal),
         id(witness.stream_synchronize_callable),
+        id(witness.stream_query_callable),
         id(witness.memset_async_callable),
         id(witness.identity),
         witness.identity_payload_hash,
     )
+
+
+def _typed_identity_value(name: str, value: Any) -> tuple[Any, ...]:
+    """Capture one exact-type identity value without replaying its hashes."""
+
+    if type(value) is tuple:
+        return (
+            name,
+            tuple,
+            tuple((type(item), item) for item in value),
+        )
+    return (name, type(value), value)
+
+
+def _kernel_identity_value_snapshot(
+    identity: HipRtcFgmresV2KernelIdentity,
+) -> tuple[Any, ...]:
+    """Return an injective fixed-field snapshot of one validated identity.
+
+    The compiler performs the authoritative semantic validation and canonical
+    hashing before this witness is published.  Repeated launch and checkpoint
+    operations only need to prove that none of those already-validated values
+    drifted.  Keeping the exact Python type alongside every scalar also avoids
+    equality aliases such as ``True == 1``.
+    """
+
+    hiprtc = identity.hiprtc_library
+    runtime = identity.runtime_library
+    return (
+        ("identity", type(identity)),
+        _typed_identity_value("schema_version", identity.schema_version),
+        _typed_identity_value("abi_version", identity.abi_version),
+        _typed_identity_value(
+            "recurrence_abi_version",
+            identity.recurrence_abi_version,
+        ),
+        _typed_identity_value("control_abi_version", identity.control_abi_version),
+        _typed_identity_value("kernel_name", identity.kernel_name),
+        _typed_identity_value("kernel_symbols", identity.kernel_symbols),
+        _typed_identity_value("control_block_size", identity.control_block_size),
+        _typed_identity_value("vector_block_size", identity.vector_block_size),
+        _typed_identity_value(
+            "reduction_values_per_block",
+            identity.reduction_values_per_block,
+        ),
+        _typed_identity_value(
+            "control_state_abi_hash",
+            identity.control_state_abi_hash,
+        ),
+        _typed_identity_value("solve_record_abi_hash", identity.solve_record_abi_hash),
+        _typed_identity_value(
+            "kernel_interface_hash",
+            identity.kernel_interface_hash,
+        ),
+        _typed_identity_value("source_resource", identity.source_resource),
+        _typed_identity_value("source_sha256", identity.source_sha256),
+        _typed_identity_value("compile_options", identity.compile_options),
+        _typed_identity_value("architecture", identity.architecture),
+        _typed_identity_value(
+            "hiprtc_version_major",
+            identity.hiprtc_version_major,
+        ),
+        _typed_identity_value(
+            "hiprtc_version_minor",
+            identity.hiprtc_version_minor,
+        ),
+        ("hiprtc_library", type(hiprtc)),
+        _typed_identity_value(
+            "hiprtc_library.discovery_source",
+            hiprtc.discovery_source,
+        ),
+        _typed_identity_value(
+            "hiprtc_library.requested_name",
+            hiprtc.requested_name,
+        ),
+        _typed_identity_value("hiprtc_library.loaded_name", hiprtc.loaded_name),
+        _typed_identity_value("hiprtc_library.resolved_path", hiprtc.resolved_path),
+        _typed_identity_value("hiprtc_library.sha256", hiprtc.sha256),
+        ("runtime_library", type(runtime)),
+        _typed_identity_value(
+            "runtime_library.discovery_source",
+            runtime.discovery_source,
+        ),
+        _typed_identity_value(
+            "runtime_library.requested_name",
+            runtime.requested_name,
+        ),
+        _typed_identity_value("runtime_library.loaded_name", runtime.loaded_name),
+        _typed_identity_value("runtime_library.resolved_path", runtime.resolved_path),
+        _typed_identity_value("runtime_library.sha256", runtime.sha256),
+        _typed_identity_value(
+            "code_object_byte_length",
+            identity.code_object_byte_length,
+        ),
+        _typed_identity_value("code_object_sha256", identity.code_object_sha256),
+        _typed_identity_value("identity_hash", identity.identity_hash),
+        _typed_identity_value(
+            "_code_object_witness",
+            identity._code_object_witness,
+        ),
+    )
+
+
+def _require_expected_prior_pending_count(
+    pending_streams: dict[int, int],
+    *,
+    stream_pointer: int,
+    expected_count: int | None,
+) -> None:
+    """Require an exact pre-launch reservation map under the owner lock."""
+
+    if expected_count is None:
+        return
+    if type(expected_count) is not int or not 0 <= expected_count <= _INT32_MAX:
+        raise _launch_contract_error(
+            "checkpoint expected prior pending count must be an exact "
+            "nonnegative int32 value."
+        )
+    valid = (
+        not pending_streams
+        if expected_count == 0
+        else (
+            len(pending_streams) == 1
+            and pending_streams.get(stream_pointer) == expected_count
+        )
+    )
+    if not valid:
+        raise _launch_contract_error(
+            "checkpoint expected prior pending count does not match the exact "
+            "leased stream reservation map."
+        )
 
 
 def _runtime_loader_provenance_witness(loaded_runtime: object) -> object | None:
@@ -1717,12 +1876,15 @@ class HipRtcFgmresV2Kernel:
         "_module_pointer",
         "_function_pointers",
         "_identity",
+        "_identity_payload_hash_snapshot",
+        "_identity_value_snapshot",
         "_ownership_cell",
         "_closed",
         "_pending_streams",
         "_checkpoint_owner_lock",
         "_checkpoint_owner_token",
         "_checkpoint_owner_poisoned",
+        "_checkpoint_owner_binding_snapshot",
     )
 
     def __init__(
@@ -1781,12 +1943,15 @@ class HipRtcFgmresV2Kernel:
         self._module_pointer = module_pointer
         self._function_pointers = function_pointers
         self._identity = identity
+        self._identity_payload_hash_snapshot = canonical_hash(identity.to_dict())
+        self._identity_value_snapshot = _kernel_identity_value_snapshot(identity)
         self._ownership_cell = ownership_cell
         self._closed = False
         self._pending_streams: dict[int, int] = {}
         self._checkpoint_owner_lock = threading.RLock()
         self._checkpoint_owner_token: object | None = None
         self._checkpoint_owner_poisoned = False
+        self._checkpoint_owner_binding_snapshot: tuple[Any, ...] | None = None
         witness = _HipRtcFgmresV2BindingWitness(
             runtime_api=runtime,
             loaded_runtime=runtime._runtime,
@@ -1801,7 +1966,8 @@ class HipRtcFgmresV2Kernel:
             module_device_ordinal=module_device_ordinal,
             expected_device_ordinal=None,
             identity=identity,
-            identity_payload_hash=canonical_hash(identity.to_dict()),
+            identity_payload_hash=self._identity_payload_hash_snapshot,
+            identity_value_snapshot=self._identity_value_snapshot,
         )
         with _KERNEL_BINDING_LOCK:
             _KERNEL_BINDINGS[self] = witness
@@ -1831,7 +1997,9 @@ class HipRtcFgmresV2Kernel:
         with _KERNEL_BINDING_LOCK:
             witness = _KERNEL_BINDINGS.get(self)
             try:
-                identity_payload_hash = canonical_hash(self._identity.to_dict())
+                identity_value_snapshot = _kernel_identity_value_snapshot(
+                    self._identity
+                )
                 loader_provenance_witness = _runtime_loader_provenance_witness(
                     self._runtime._runtime
                 )
@@ -1848,26 +2016,39 @@ class HipRtcFgmresV2Kernel:
                 or self._runtime._launch_kernel is not witness.launch_callable
                 or self._runtime._unload is not witness.unload_callable
                 or self._ownership_cell.owner is not self
+                or type(self._module_pointer) is not int
+                or self._module_pointer <= 0
+                or type(witness.module_pointer) is not int
+                or witness.module_pointer <= 0
                 or self._module_pointer != witness.module_pointer
+                or not self._function_pointers
+                or _exact_function_pointer_values(self._function_pointers)
+                != self._function_pointers
+                or _exact_function_pointer_values(witness.function_pointers)
+                != self._function_pointers
                 or self._function_pointers != witness.function_pointers
                 or not callable(witness.get_device_callable)
+                or (
+                    witness.stream_query_callable is not None
+                    and not callable(witness.stream_query_callable)
+                )
                 or (
                     witness.memset_async_callable is not None
                     and not callable(witness.memset_async_callable)
                 )
-                or isinstance(witness.module_device_ordinal, bool)
-                or not isinstance(witness.module_device_ordinal, int)
+                or type(witness.module_device_ordinal) is not int
                 or witness.module_device_ordinal < 0
                 or (
                     witness.expected_device_ordinal is not None
                     and (
-                        isinstance(witness.expected_device_ordinal, bool)
-                        or not isinstance(witness.expected_device_ordinal, int)
+                        type(witness.expected_device_ordinal) is not int
                         or witness.expected_device_ordinal < 0
                     )
                 )
                 or self._identity is not witness.identity
-                or identity_payload_hash != witness.identity_payload_hash
+                or self._identity_payload_hash_snapshot != witness.identity_payload_hash
+                or self._identity_value_snapshot != witness.identity_value_snapshot
+                or identity_value_snapshot != witness.identity_value_snapshot
             ):
                 raise HipRtcFgmresV2Error(
                     "hip_rtc_fgmres_v2_binding_changed",
@@ -1907,6 +2088,7 @@ class HipRtcFgmresV2Kernel:
         solve_record_base: Any,
         *,
         _checkpoint_owner_token: object | None = None,
+        _checkpoint_expected_prior_pending_count: int | None = None,
     ) -> None:
         self._require_open()
         mode = _exact_enum(
@@ -1916,23 +2098,25 @@ class HipRtcFgmresV2Kernel:
         )
         checked_schedule_epoch = _schedule_epoch(expected_schedule_epoch)
         checked_expected_restart = _bounded_int(
-            expected_restart, "expected_restart", minimum=-1, maximum=1
+            expected_restart,
+            "expected_restart",
+            minimum=-1,
+            maximum=HIP_FGMRES_MAX_ITERATIONS,
         )
         checked_expected_column = _bounded_int(
-            expected_column, "expected_column", minimum=-1, maximum=0
+            expected_column,
+            "expected_column",
+            minimum=-1,
+            maximum=HIP_FGMRES_MAX_RESTART_DIMENSION - 1,
         )
-        checked_row = _bounded_int(row_index, "row_index", minimum=-1, maximum=0)
+        checked_row = _bounded_int(
+            row_index,
+            "row_index",
+            minimum=-1,
+            maximum=HIP_FGMRES_MAX_RESTART_DIMENSION - 1,
+        )
         checked_pass = _bounded_int(pass_index, "pass_index", minimum=-1, maximum=1)
         n = _positive_int32(free_dof_count, "free_dof_count")
-        _validate_control_launch(
-            mode,
-            checked_schedule_epoch,
-            checked_expected_restart,
-            checked_expected_column,
-            checked_row,
-            checked_pass,
-            n,
-        )
         restart = _bounded_int(
             restart_dimension,
             "restart_dimension",
@@ -1959,6 +2143,17 @@ class HipRtcFgmresV2Kernel:
                 "maximum_restart_count must equal ceil(max_iterations/"
                 "restart_dimension)."
             )
+        _validate_control_launch(
+            mode,
+            checked_schedule_epoch,
+            checked_expected_restart,
+            checked_expected_column,
+            checked_row,
+            checked_pass,
+            n,
+            restart,
+            iterations,
+        )
         stagnation_limit = _bounded_int(
             stagnation_checkpoint_limit,
             "stagnation_checkpoint_limit",
@@ -2019,6 +2214,9 @@ class HipRtcFgmresV2Kernel:
             ),
             operation="FGMRES v2 control",
             checkpoint_owner_token=_checkpoint_owner_token,
+            checkpoint_expected_prior_pending_count=(
+                _checkpoint_expected_prior_pending_count
+            ),
         )
 
     def launch_vector(
@@ -2044,6 +2242,7 @@ class HipRtcFgmresV2Kernel:
         solve_record_base: Any,
         *,
         _checkpoint_owner_token: object | None = None,
+        _checkpoint_expected_prior_pending_count: int | None = None,
     ) -> None:
         self._require_open()
         mode = _exact_enum(vector_mode, "vector_mode", _IMPLEMENTED_VECTOR_MODES)
@@ -2061,10 +2260,16 @@ class HipRtcFgmresV2Kernel:
         )
         checked_schedule_epoch = _schedule_epoch(expected_schedule_epoch)
         checked_expected_restart = _bounded_int(
-            expected_restart, "expected_restart", minimum=-1, maximum=1
+            expected_restart,
+            "expected_restart",
+            minimum=-1,
+            maximum=HIP_FGMRES_MAX_ITERATIONS,
         )
         checked_expected_column = _bounded_int(
-            expected_column, "expected_column", minimum=-1, maximum=0
+            expected_column,
+            "expected_column",
+            minimum=-1,
+            maximum=HIP_FGMRES_MAX_RESTART_DIMENSION - 1,
         )
         n = _positive_int32(free_dof_count, "free_dof_count")
         index = _bounded_int(
@@ -2115,6 +2320,9 @@ class HipRtcFgmresV2Kernel:
             ),
             operation="FGMRES v2 vector",
             checkpoint_owner_token=_checkpoint_owner_token,
+            checkpoint_expected_prior_pending_count=(
+                _checkpoint_expected_prior_pending_count
+            ),
         )
 
     def launch_csr_spmv_indexed(
@@ -2138,6 +2346,7 @@ class HipRtcFgmresV2Kernel:
         solve_record_base: Any,
         *,
         _checkpoint_owner_token: object | None = None,
+        _checkpoint_expected_prior_pending_count: int | None = None,
     ) -> None:
         self._require_open()
         mode = _exact_enum(
@@ -2147,10 +2356,16 @@ class HipRtcFgmresV2Kernel:
         )
         checked_schedule_epoch = _schedule_epoch(expected_schedule_epoch)
         checked_expected_restart = _bounded_int(
-            expected_restart, "expected_restart", minimum=-1, maximum=1
+            expected_restart,
+            "expected_restart",
+            minimum=-1,
+            maximum=HIP_FGMRES_MAX_ITERATIONS,
         )
         checked_expected_column = _bounded_int(
-            expected_column, "expected_column", minimum=-1, maximum=0
+            expected_column,
+            "expected_column",
+            minimum=-1,
+            maximum=HIP_FGMRES_MAX_RESTART_DIMENSION - 1,
         )
         n = _positive_int32(free_dof_count, "free_dof_count")
         nnz = _positive_int32(nonzero_count, "nonzero_count")
@@ -2203,6 +2418,9 @@ class HipRtcFgmresV2Kernel:
             ),
             operation="FGMRES v2 indexed CSR SpMV",
             checkpoint_owner_token=_checkpoint_owner_token,
+            checkpoint_expected_prior_pending_count=(
+                _checkpoint_expected_prior_pending_count
+            ),
         )
 
     def launch_reduction(
@@ -2227,6 +2445,7 @@ class HipRtcFgmresV2Kernel:
         solve_record_base: Any,
         *,
         _checkpoint_owner_token: object | None = None,
+        _checkpoint_expected_prior_pending_count: int | None = None,
     ) -> None:
         self._require_open()
         mode = _exact_enum(
@@ -2241,10 +2460,16 @@ class HipRtcFgmresV2Kernel:
         )
         checked_schedule_epoch = _schedule_epoch(expected_schedule_epoch)
         checked_expected_restart = _bounded_int(
-            expected_restart, "expected_restart", minimum=-1, maximum=1
+            expected_restart,
+            "expected_restart",
+            minimum=-1,
+            maximum=HIP_FGMRES_MAX_ITERATIONS,
         )
         checked_expected_column = _bounded_int(
-            expected_column, "expected_column", minimum=-1, maximum=0
+            expected_column,
+            "expected_column",
+            minimum=-1,
+            maximum=HIP_FGMRES_MAX_RESTART_DIMENSION - 1,
         )
         checked_epoch = _bounded_int(
             expected_reduction_epoch,
@@ -2302,6 +2527,9 @@ class HipRtcFgmresV2Kernel:
             ),
             operation="FGMRES v2 deterministic reduction",
             checkpoint_owner_token=_checkpoint_owner_token,
+            checkpoint_expected_prior_pending_count=(
+                _checkpoint_expected_prior_pending_count
+            ),
         )
 
     def acknowledge_stream_completion(
@@ -2449,6 +2677,7 @@ class HipRtcFgmresV2Kernel:
             self._pending_streams.clear()
             self._checkpoint_owner_token = None
             self._checkpoint_owner_poisoned = False
+            self._checkpoint_owner_binding_snapshot = None
             self._closed = True
             self._unload_disposition = "terminal"
             if binding_changed:
@@ -2533,6 +2762,20 @@ class HipRtcFgmresV2Kernel:
                         "The exact module runtime could not bind "
                         f"hipStreamSynchronize: {type(exc).__name__}.",
                     ) from exc
+            stream_query = witness.stream_query_callable
+            if witness.stream_query_callable is None:
+                try:
+                    stream_query = witness.loaded_runtime.bind(
+                        "hipStreamQuery",
+                        [ctypes.c_void_p],
+                        ctypes.c_int,
+                    )
+                except Exception as exc:
+                    raise HipRtcFgmresV2Error(
+                        "hip_rtc_fgmres_v2_checkpoint_query_unavailable",
+                        "The exact module runtime could not bind "
+                        f"hipStreamQuery: {type(exc).__name__}.",
+                    ) from exc
             memset_async = witness.memset_async_callable
             if witness.memset_async_callable is None:
                 try:
@@ -2556,18 +2799,27 @@ class HipRtcFgmresV2Kernel:
             witness = replace(
                 witness,
                 stream_synchronize_callable=stream_synchronize,
+                stream_query_callable=stream_query,
                 memset_async_callable=memset_async,
                 expected_device_ordinal=current_device_ordinal,
             )
             self._checkpoint_owner_token = checkpoint_owner_token
             with _KERNEL_BINDING_LOCK:
                 if _KERNEL_BINDINGS.get(self) is not prior_witness:
+                    # This is a definitive pre-publication CAS rejection, not
+                    # an ambiguous interruption.  No owner binding was
+                    # installed, so retaining the provisional token would
+                    # strand the kernel in a half-acquired state whose normal
+                    # release path cannot validate the forged registry row.
+                    self._checkpoint_owner_token = None
+                    self._checkpoint_owner_binding_snapshot = None
                     raise HipRtcFgmresV2Error(
                         "hip_rtc_fgmres_v2_binding_changed",
                         "The fixed binding registry changed during lease setup.",
                     )
                 _KERNEL_BINDINGS[self] = witness
             snapshot = _checkpoint_binding_snapshot_values(witness)
+            self._checkpoint_owner_binding_snapshot = snapshot
             return checkpoint_owner_token, snapshot
 
     def _poison_checkpoint_transaction_owner(self, token: object) -> None:
@@ -2604,6 +2856,7 @@ class HipRtcFgmresV2Kernel:
                 _KERNEL_BINDINGS[self] = released_witness
             self._checkpoint_owner_token = None
             self._checkpoint_owner_poisoned = False
+            self._checkpoint_owner_binding_snapshot = None
 
     def _checkpoint_runtime_owner(self, token: object) -> object:
         """Return the exact loaded runtime bound to the leased code object."""
@@ -2710,6 +2963,70 @@ class HipRtcFgmresV2Kernel:
                     f"{self._runtime.error_string(status)}.",
                 )
 
+    def _query_checkpoint_stream_completion(
+        self,
+        token: object,
+        stream: Any,
+    ) -> bool:
+        """Query one exact leased pending stream without consuming ownership."""
+
+        with self._checkpoint_owner_lock:
+            self._require_open()
+            self._require_checkpoint_owner_access(token, allow_poisoned=True)
+            stream_value = _runtime_pointer(stream, "stream")
+            if (
+                len(self._pending_streams) != 1
+                or type(self._pending_streams.get(stream_value)) is not int
+                or self._pending_streams[stream_value] <= 0
+            ):
+                raise HipRtcFgmresV2Error(
+                    "hip_rtc_fgmres_v2_checkpoint_query_stream_invalid",
+                    "Checkpoint completion may query only the exact leased "
+                    "stream with positive pending reservations.",
+                )
+            witness = self._validated_binding()
+            current_snapshot = _checkpoint_binding_snapshot_values(witness)
+            if (
+                self._checkpoint_owner_binding_snapshot is None
+                or current_snapshot != self._checkpoint_owner_binding_snapshot
+            ):
+                raise HipRtcFgmresV2Error(
+                    "hip_rtc_fgmres_v2_binding_changed",
+                    "The checkpoint query binding changed after lease acquisition.",
+                )
+            _require_expected_device_ordinal(
+                witness,
+                operation="checkpoint stream completion query",
+            )
+            stream_query = witness.stream_query_callable
+            if stream_query is None:
+                raise HipRtcFgmresV2Error(
+                    "hip_rtc_fgmres_v2_checkpoint_query_unavailable",
+                    "The exact runtime completion-query callable is absent from "
+                    "the lease.",
+                )
+            try:
+                status = stream_query(ctypes.c_void_p(stream_value))
+            except Exception as exc:
+                raise HipRtcFgmresV2Error(
+                    "hip_rtc_fgmres_v2_checkpoint_query_failed",
+                    f"hipStreamQuery raised {type(exc).__name__}.",
+                ) from exc
+            if type(status) is not int:
+                raise HipRtcFgmresV2Error(
+                    "hip_rtc_fgmres_v2_checkpoint_query_failed",
+                    "hipStreamQuery returned a non-exact status value.",
+                )
+            if status == 0:
+                return True
+            if status == _HIP_ERROR_NOT_READY:
+                return False
+            raise HipRtcFgmresV2Error(
+                "hip_rtc_fgmres_v2_checkpoint_query_failed",
+                "hipStreamQuery failed with an unrecognized status: "
+                f"{_runtime_error_string(witness.loaded_runtime, status)}.",
+            )
+
     def _checkpoint_memset_zero(
         self,
         token: object,
@@ -2792,11 +3109,17 @@ class HipRtcFgmresV2Kernel:
         arguments: tuple[Any, ...],
         operation: str,
         checkpoint_owner_token: object | None,
+        checkpoint_expected_prior_pending_count: int | None,
     ) -> None:
         with self._checkpoint_owner_lock:
             self._require_open()
             self._require_checkpoint_owner_access(checkpoint_owner_token)
             stream_value = _runtime_pointer(stream, "stream")
+            _require_expected_prior_pending_count(
+                self._pending_streams,
+                stream_pointer=stream_value,
+                expected_count=checkpoint_expected_prior_pending_count,
+            )
             if self._pending_streams and stream_value not in self._pending_streams:
                 raise _launch_contract_error(
                     "all pending FGMRES v2 recurrence work must remain on the "
@@ -4266,6 +4589,7 @@ def _identity_payload(
                 "VECTOR_ACCEPT",
                 "CHECKPOINT_DECIDE",
                 "CHECKPOINT_FINALIZE",
+                "FINAL_GUARD",
             ],
             "vector_modes": [
                 "COPY_INITIAL_X",
@@ -4313,6 +4637,8 @@ def _identity_payload(
             ],
             "initial_dual_gate": True,
             "initial_final_guard": False,
+            "fixed_global_raw_launch_validation": True,
+            "fixed_global_final_guard_raw_launch": True,
             "first_column_partial_schedule_hash": canonical_hash(
                 hip_fgmres_first_column_partial_schedule_payload_v2()
             ),
@@ -4896,31 +5222,16 @@ def _validate_control_launch(
     row_index: int,
     pass_index: int,
     free_dof_count: int,
+    restart_dimension: int,
+    max_iterations: int,
 ) -> None:
     stages = len(reduction_stage_output_counts_v2(free_dof_count))
-    boundary = 7 + 4 * stages
-    variants: dict[int, tuple[tuple[int, int, int, int, int], ...]] = {
+    boundary = _global_initial_schedule_boundary(stages)
+    initial_variants: dict[int, tuple[tuple[int, int, int, int, int], ...]] = {
         _CONTROL_MODES["INIT"]: ((0, -1, -1, -1, -1),),
         _CONTROL_MODES["BIND_RHS"]: ((2 + 2 * stages, -1, -1, -1, -1),),
         _CONTROL_MODES["INITIAL_GATE"]: ((6 + 4 * stages, -1, -1, -1, -1),),
-        _CONTROL_MODES["RESTART_BEGIN"]: ((boundary, 1, -1, -1, -1),),
-        _CONTROL_MODES["PRECONDITION_ACCEPT"]: ((boundary + 3, 1, 0, -1, -1),),
-        _CONTROL_MODES["OPERATOR_ACCEPT"]: (
-            (4 + 2 * stages, -1, -1, -1, -1),
-            (boundary + 5, 1, 0, -1, -1),
-            (24 + 10 * stages, 1, 0, -1, -1),
-        ),
-        _CONTROL_MODES["DOT_ACCEPT"]: (
-            (13 + 6 * stages, 1, 0, 0, 0),
-            (16 + 8 * stages, 1, 0, 0, 1),
-        ),
-        _CONTROL_MODES["DGKS_DECIDE"]: ((15 + 7 * stages, 1, 0, -1, 0),),
-        _CONTROL_MODES["ARNOLDI_GIVENS"]: ((19 + 9 * stages, 1, 0, -1, -1),),
-        _CONTROL_MODES["BACKSUBSTITUTE"]: ((20 + 9 * stages, 1, 0, -1, -1),),
-        _CONTROL_MODES["VECTOR_ACCEPT"]: ((22 + 10 * stages, 1, 0, -1, -1),),
-        _CONTROL_MODES["CHECKPOINT_DECIDE"]: ((26 + 14 * stages, 1, 0, -1, -1),),
-        _CONTROL_MODES["CHECKPOINT_FINALIZE"]: ((28 + 14 * stages, 1, 0, -1, -1),),
-        _CONTROL_MODES["PREDECESSOR_VALIDATE"]: ((26 + 14 * stages, 1, 0, -1, -1),),
+        _CONTROL_MODES["OPERATOR_ACCEPT"]: ((4 + 2 * stages, -1, -1, -1, -1),),
     }
     actual = (
         schedule_epoch,
@@ -4929,10 +5240,107 @@ def _validate_control_launch(
         row_index,
         pass_index,
     )
-    if actual not in variants[mode]:
+    if actual in initial_variants.get(mode, ()):
+        return
+
+    maximum_restart_count = (
+        0
+        if max_iterations == 0
+        else (max_iterations + restart_dimension - 1) // restart_dimension
+    )
+    restart_base = _global_restart_schedule_base(
+        boundary,
+        stages,
+        restart_dimension,
+        expected_restart,
+    )
+    if mode == _CONTROL_MODES["RESTART_BEGIN"]:
+        valid = 1 <= expected_restart <= maximum_restart_count and actual == (
+            restart_base,
+            expected_restart,
+            -1,
+            -1,
+            -1,
+        )
+    elif mode == _CONTROL_MODES["FINAL_GUARD"]:
+        final_epoch = (
+            boundary
+            + maximum_restart_count
+            * _global_restart_schedule_stride(
+                stages,
+                restart_dimension,
+            )
+        )
+        valid = max_iterations > 0 and actual == (
+            final_epoch,
+            maximum_restart_count,
+            restart_dimension - 1,
+            -1,
+            -1,
+        )
+    elif not (
+        1 <= expected_restart <= maximum_restart_count
+        and 0 <= expected_column < restart_dimension
+    ):
+        valid = False
+    else:
+        column = expected_column
+        column_base = _global_column_schedule_base(
+            boundary,
+            stages,
+            restart_dimension,
+            expected_restart,
+            column,
+        )
+        (
+            first_pass_base,
+            after_first_base,
+            second_pass_base,
+            h_next_base,
+            update_base,
+            _metrics_base,
+            checkpoint_base,
+        ) = _global_column_local_bases(column_base, stages, column)
+        fixed_variants: dict[int, tuple[int, int]] = {
+            _CONTROL_MODES["PRECONDITION_ACCEPT"]: (column_base + 1, -1),
+            _CONTROL_MODES["DGKS_DECIDE"]: (after_first_base + stages, 0),
+            _CONTROL_MODES["ARNOLDI_GIVENS"]: (h_next_base + stages + 1, -1),
+            _CONTROL_MODES["BACKSUBSTITUTE"]: (h_next_base + stages + 2, -1),
+            _CONTROL_MODES["VECTOR_ACCEPT"]: (update_base + stages, -1),
+            _CONTROL_MODES["CHECKPOINT_DECIDE"]: (checkpoint_base, -1),
+            _CONTROL_MODES["CHECKPOINT_FINALIZE"]: (checkpoint_base + 2, -1),
+            _CONTROL_MODES["PREDECESSOR_VALIDATE"]: (checkpoint_base, -1),
+        }
+        if mode == _CONTROL_MODES["OPERATOR_ACCEPT"]:
+            valid = row_index == pass_index == -1 and schedule_epoch in (
+                column_base + 3,
+                update_base + stages + 2,
+            )
+        elif mode == _CONTROL_MODES["DOT_ACCEPT"]:
+            valid = 0 <= row_index <= column and (
+                (
+                    pass_index == 0
+                    and schedule_epoch
+                    == first_pass_base + row_index * (stages + 2) + stages
+                )
+                or (
+                    pass_index == 1
+                    and schedule_epoch
+                    == second_pass_base + row_index * (stages + 2) + stages
+                )
+            )
+        elif mode in fixed_variants:
+            required_epoch, required_pass = fixed_variants[mode]
+            valid = (
+                schedule_epoch == required_epoch
+                and row_index == -1
+                and pass_index == required_pass
+            )
+        else:
+            valid = False
+    if not valid:
         raise _launch_contract_error(
-            "control coordinates do not match the canonical initial or "
-            "first-column schedule."
+            "control coordinates do not match the canonical fixed global schedule."
         )
 
 
@@ -4946,33 +5354,11 @@ def _validate_vector_launch(
     free_dof_count: int,
 ) -> None:
     stages = len(reduction_stage_output_counts_v2(free_dof_count))
-    boundary = 7 + 4 * stages
-    variants = {
+    boundary = _global_initial_schedule_boundary(stages)
+    initial_variants = {
         _VECTOR_MODES["COPY_INITIAL_X"]: ((_VECTOR_GATES["ACTIVE"], 1, -1, -1, 0),),
         _VECTOR_MODES["FORM_INITIAL_RESIDUAL"]: (
             (_VECTOR_GATES["ACTIVE"], 5 + 2 * stages, -1, -1, 0),
-        ),
-        _VECTOR_MODES["NORMALIZE_V0"]: (
-            (_VECTOR_GATES["ACTIVE"], boundary + 1, 1, 0, 0),
-        ),
-        _VECTOR_MODES["APPLY_JACOBI_INDEXED"]: (
-            (_VECTOR_GATES["ACTIVE"], boundary + 2, 1, 0, 0),
-        ),
-        _VECTOR_MODES["MGS_SUBTRACT_INDEXED"]: (
-            (_VECTOR_GATES["ACTIVE"], 14 + 6 * stages, 1, 0, 0),
-            (
-                _VECTOR_GATES["DGKS_SECOND_PASS"],
-                17 + 8 * stages,
-                1,
-                0,
-                0,
-            ),
-        ),
-        _VECTOR_MODES["NORMALIZE_V_NEXT"]: (
-            (_VECTOR_GATES["ACTIVE"], 18 + 9 * stages, 1, 0, 1),
-        ),
-        _VECTOR_MODES["BUILD_TRIAL_X"]: (
-            (_VECTOR_GATES["CANDIDATE_REQUIRED"], 21 + 9 * stages, 1, 0, 0),
         ),
     }
     actual = (
@@ -4982,31 +5368,109 @@ def _validate_vector_launch(
         expected_column,
         logical_index,
     )
-    if mode == _VECTOR_MODES["FORM_CANDIDATE_RESIDUAL"]:
-        valid = (
-            gate == _VECTOR_GATES["CANDIDATE_REQUIRED"]
-            and schedule_epoch == 25 + 10 * stages
-            and expected_restart == 1
-            and expected_column == 0
-            and 1 <= logical_index <= HIP_FGMRES_MAX_RESTART_DIMENSION
-        )
-    elif mode in (
-        _VECTOR_MODES["COMMIT_CHECKPOINT"],
-        _VECTOR_MODES["PREFLIGHT_COMMIT_SOURCE"],
-    ):
-        valid = (
-            gate == _VECTOR_GATES["COMMIT_REQUIRED"]
-            and schedule_epoch == 27 + 14 * stages
-            and expected_restart == 1
-            and expected_column == 0
-            and 1 <= logical_index <= HIP_FGMRES_MAX_RESTART_DIMENSION
-        )
-    else:
-        valid = actual in variants[mode]
+    if actual in initial_variants.get(mode, ()):
+        return
+    valid = False
+    if expected_restart >= 1 and expected_column >= 0:
+        for restart_dimension in range(1, HIP_FGMRES_MAX_RESTART_DIMENSION + 1):
+            if expected_column >= restart_dimension:
+                continue
+            restart_base = _global_restart_schedule_base(
+                boundary,
+                stages,
+                restart_dimension,
+                expected_restart,
+            )
+            column_base = _global_column_schedule_base(
+                boundary,
+                stages,
+                restart_dimension,
+                expected_restart,
+                expected_column,
+            )
+            (
+                first_pass_base,
+                _after_first_base,
+                second_pass_base,
+                h_next_base,
+                update_base,
+                _metrics_base,
+                checkpoint_base,
+            ) = _global_column_local_bases(
+                column_base,
+                stages,
+                expected_column,
+            )
+            if mode == _VECTOR_MODES["NORMALIZE_V0"]:
+                candidate = (
+                    _VECTOR_GATES["ACTIVE"],
+                    restart_base + 1,
+                    expected_restart,
+                    0,
+                    0,
+                )
+                valid = actual == candidate
+            elif mode == _VECTOR_MODES["APPLY_JACOBI_INDEXED"]:
+                valid = actual == (
+                    _VECTOR_GATES["ACTIVE"],
+                    column_base,
+                    expected_restart,
+                    expected_column,
+                    expected_column,
+                )
+            elif mode == _VECTOR_MODES["MGS_SUBTRACT_INDEXED"]:
+                valid = 0 <= logical_index <= expected_column and (
+                    (
+                        gate == _VECTOR_GATES["ACTIVE"]
+                        and schedule_epoch
+                        == first_pass_base + logical_index * (stages + 2) + stages + 1
+                    )
+                    or (
+                        gate == _VECTOR_GATES["DGKS_SECOND_PASS"]
+                        and schedule_epoch
+                        == second_pass_base + logical_index * (stages + 2) + stages + 1
+                    )
+                )
+            elif mode == _VECTOR_MODES["NORMALIZE_V_NEXT"]:
+                valid = actual == (
+                    _VECTOR_GATES["ACTIVE"],
+                    h_next_base + stages,
+                    expected_restart,
+                    expected_column,
+                    expected_column + 1,
+                )
+            elif mode == _VECTOR_MODES["BUILD_TRIAL_X"]:
+                valid = actual == (
+                    _VECTOR_GATES["CANDIDATE_REQUIRED"],
+                    update_base - 1,
+                    expected_restart,
+                    expected_column,
+                    expected_column,
+                )
+            elif mode == _VECTOR_MODES["FORM_CANDIDATE_RESIDUAL"]:
+                valid = actual == (
+                    _VECTOR_GATES["CANDIDATE_REQUIRED"],
+                    update_base + stages + 3,
+                    expected_restart,
+                    expected_column,
+                    restart_dimension,
+                )
+            elif mode in (
+                _VECTOR_MODES["COMMIT_CHECKPOINT"],
+                _VECTOR_MODES["PREFLIGHT_COMMIT_SOURCE"],
+            ):
+                valid = actual == (
+                    _VECTOR_GATES["COMMIT_REQUIRED"],
+                    checkpoint_base + 1,
+                    expected_restart,
+                    expected_column,
+                    restart_dimension,
+                )
+            if valid:
+                break
     if not valid:
         raise _launch_contract_error(
-            "vector coordinates do not match the canonical initial or "
-            "first-column schedule."
+            "vector coordinates do not match the canonical fixed global schedule."
         )
 
 
@@ -5019,28 +5483,58 @@ def _validate_spmv_launch(
     free_dof_count: int,
 ) -> None:
     stages = len(reduction_stage_output_counts_v2(free_dof_count))
-    if mode == _SPMV_MODES["CANDIDATE"]:
-        valid = (
-            schedule_epoch == 23 + 10 * stages
-            and expected_restart == 1
-            and expected_column == 0
-            and 1 <= logical_index <= HIP_FGMRES_MAX_RESTART_DIMENSION
-        )
-    else:
-        expected = {
-            _SPMV_MODES["INITIAL"]: (3 + 2 * stages, -1, -1, 0),
-            _SPMV_MODES["ARNOLDI"]: (11 + 4 * stages, 1, 0, 0),
-        }[mode]
-        valid = (
-            schedule_epoch,
-            expected_restart,
-            expected_column,
-            logical_index,
-        ) == expected
+    actual = (
+        schedule_epoch,
+        expected_restart,
+        expected_column,
+        logical_index,
+    )
+    if mode == _SPMV_MODES["INITIAL"] and actual == (
+        3 + 2 * stages,
+        -1,
+        -1,
+        0,
+    ):
+        return
+    valid = False
+    if expected_restart >= 1 and expected_column >= 0:
+        boundary = _global_initial_schedule_boundary(stages)
+        for restart_dimension in range(1, HIP_FGMRES_MAX_RESTART_DIMENSION + 1):
+            if expected_column >= restart_dimension:
+                continue
+            column_base = _global_column_schedule_base(
+                boundary,
+                stages,
+                restart_dimension,
+                expected_restart,
+                expected_column,
+            )
+            *_, update_base, _metrics_base, _checkpoint_base = (
+                _global_column_local_bases(
+                    column_base,
+                    stages,
+                    expected_column,
+                )
+            )
+            if mode == _SPMV_MODES["ARNOLDI"]:
+                valid = actual == (
+                    column_base + 2,
+                    expected_restart,
+                    expected_column,
+                    expected_column,
+                )
+            elif mode == _SPMV_MODES["CANDIDATE"]:
+                valid = actual == (
+                    update_base + stages + 1,
+                    expected_restart,
+                    expected_column,
+                    restart_dimension,
+                )
+            if valid:
+                break
     if not valid:
         raise _launch_contract_error(
-            "SpMV coordinates do not match the canonical initial or "
-            "first-column partial schedule."
+            "SpMV coordinates do not match the canonical fixed global schedule."
         )
 
 
@@ -5054,164 +5548,365 @@ def _validate_reduction_coordinates(
     value_count: int,
     logical_index: int,
 ) -> None:
-    coordinate = (expected_restart, expected_column, logical_index)
-    group_specs = (
-        (
-            (-1, -1, 0),
-            0,
-            2,
-            _REDUCTION_MODES["LASSQ_LOAD"],
-            _REDUCTION_MODES["COMBINE_LASSQ"],
-            _REDUCTION_TARGETS["RHS_L2"],
-        ),
-        (
-            (-1, -1, 0),
-            1,
-            2,
-            _REDUCTION_MODES["LINF_LOAD"],
-            _REDUCTION_MODES["COMBINE_MAX"],
-            _REDUCTION_TARGETS["RHS_LINF"],
-        ),
-        (
-            (-1, -1, 0),
-            2,
-            6,
-            _REDUCTION_MODES["LASSQ_TRUE_RESIDUAL"],
-            _REDUCTION_MODES["COMBINE_LASSQ"],
-            _REDUCTION_TARGETS["INITIAL_L2"],
-        ),
-        (
-            (-1, -1, 0),
-            3,
-            6,
-            _REDUCTION_MODES["LINF_TRUE_RESIDUAL"],
-            _REDUCTION_MODES["COMBINE_MAX"],
-            _REDUCTION_TARGETS["INITIAL_LINF"],
-        ),
-        (
-            (1, 0, 0),
-            4,
-            13,
-            _REDUCTION_MODES["LASSQ_WORK_W"],
-            _REDUCTION_MODES["COMBINE_LASSQ"],
-            _REDUCTION_TARGETS["WORK_BEFORE"],
-        ),
-        (
-            (1, 0, 0),
-            5,
-            13,
-            _REDUCTION_MODES["DOT_W_VI"],
-            _REDUCTION_MODES["COMBINE_SUM"],
-            _REDUCTION_TARGETS["DOT"],
-        ),
-        (
-            (1, 0, 0),
-            6,
-            15,
-            _REDUCTION_MODES["LASSQ_WORK_W"],
-            _REDUCTION_MODES["COMBINE_LASSQ"],
-            _REDUCTION_TARGETS["AFTER_FIRST"],
-        ),
-        (
-            (1, 0, 0),
-            7,
-            16,
-            _REDUCTION_MODES["DOT_W_VI"],
-            _REDUCTION_MODES["COMBINE_SUM"],
-            _REDUCTION_TARGETS["DOT"],
-        ),
-        (
-            (1, 0, 0),
-            8,
-            18,
-            _REDUCTION_MODES["LASSQ_WORK_W"],
-            _REDUCTION_MODES["COMBINE_LASSQ"],
-            _REDUCTION_TARGETS["H_NEXT"],
-        ),
-        (
-            (1, 0, 0),
-            9,
-            22,
-            _REDUCTION_MODES["LASSQ_WORK_W_MINUS_X"],
-            _REDUCTION_MODES["COMBINE_LASSQ"],
-            _REDUCTION_TARGETS["UPDATE_L2"],
-        ),
-        (
-            (1, 0, "M"),
-            10,
-            26,
-            _REDUCTION_MODES["LASSQ_V_M"],
-            _REDUCTION_MODES["COMBINE_LASSQ"],
-            _REDUCTION_TARGETS["CANDIDATE_L2"],
-        ),
-        (
-            (1, 0, "M"),
-            11,
-            26,
-            _REDUCTION_MODES["LINF_V_M"],
-            _REDUCTION_MODES["COMBINE_MAX"],
-            _REDUCTION_TARGETS["CANDIDATE_LINF"],
-        ),
-        (
-            (1, 0, 0),
-            12,
-            26,
-            _REDUCTION_MODES["LASSQ_WORK_W"],
-            _REDUCTION_MODES["COMBINE_LASSQ"],
-            _REDUCTION_TARGETS["TRIAL_X_L2"],
-        ),
-        (
-            (1, 0, 0),
-            13,
-            26,
-            _REDUCTION_MODES["LASSQ_SOLUTION_X"],
-            _REDUCTION_MODES["COMBINE_LASSQ"],
-            _REDUCTION_TARGETS["COMMITTED_X_L2"],
-        ),
-    )
     remaining_stage_count = len(reduction_stage_output_counts_v2(value_count))
     maximum_stage_count = len(reduction_stage_output_counts_v2(_INT32_MAX))
-    valid = False
-    for (
-        required_coordinate,
-        group,
-        schedule_offset,
-        first_mode,
-        combine_mode,
-        final_target,
-    ) in group_specs:
-        if required_coordinate[2] == "M":
-            coordinate_matches = (
-                coordinate[:2] == required_coordinate[:2]
-                and 1 <= logical_index <= HIP_FGMRES_MAX_RESTART_DIMENSION
+    for stages in range(1, maximum_stage_count + 1):
+        if (expected_restart, expected_column, logical_index) == (-1, -1, 0):
+            initial_specs = (
+                (
+                    2,
+                    0,
+                    _REDUCTION_MODES["LASSQ_LOAD"],
+                    _REDUCTION_MODES["COMBINE_LASSQ"],
+                    _REDUCTION_TARGETS["RHS_L2"],
+                ),
+                (
+                    2 + stages,
+                    stages,
+                    _REDUCTION_MODES["LINF_LOAD"],
+                    _REDUCTION_MODES["COMBINE_MAX"],
+                    _REDUCTION_TARGETS["RHS_LINF"],
+                ),
+                (
+                    6 + 2 * stages,
+                    2 * stages,
+                    _REDUCTION_MODES["LASSQ_TRUE_RESIDUAL"],
+                    _REDUCTION_MODES["COMBINE_LASSQ"],
+                    _REDUCTION_TARGETS["INITIAL_L2"],
+                ),
+                (
+                    6 + 3 * stages,
+                    3 * stages,
+                    _REDUCTION_MODES["LINF_TRUE_RESIDUAL"],
+                    _REDUCTION_MODES["COMBINE_MAX"],
+                    _REDUCTION_TARGETS["INITIAL_LINF"],
+                ),
             )
-        else:
-            coordinate_matches = coordinate == required_coordinate
-        if not coordinate_matches:
-            continue
-        for stage_count in range(1, maximum_stage_count + 1):
-            stage = reduction_epoch - group * stage_count
-            if not 0 <= stage < stage_count:
-                continue
-            required_mode = first_mode if stage == 0 else combine_mode
-            required_target = (
-                final_target if stage + 1 == stage_count else _REDUCTION_TARGETS["NONE"]
-            )
-            if (
-                remaining_stage_count == stage_count - stage
-                and schedule_epoch == schedule_offset + reduction_epoch
-                and mode == required_mode
-                and target == required_target
+            if any(
+                _reduction_tree_coordinates_match(
+                    mode,
+                    target,
+                    schedule_epoch,
+                    reduction_epoch,
+                    remaining_stage_count,
+                    stages,
+                    *spec,
+                )
+                for spec in initial_specs
             ):
-                valid = True
-                break
-        if valid:
-            break
-    if not valid:
-        raise _launch_contract_error(
-            "reduction coordinates do not match the canonical initial or "
-            "first-column schedule."
+                return
+
+        if expected_restart < 1 or expected_column < 0:
+            continue
+        boundary = _global_initial_schedule_boundary(stages)
+        column = expected_column
+        for restart_dimension in range(1, HIP_FGMRES_MAX_RESTART_DIMENSION + 1):
+            if column >= restart_dimension:
+                continue
+            column_base = _global_column_schedule_base(
+                boundary,
+                stages,
+                restart_dimension,
+                expected_restart,
+                column,
+            )
+            column_reduction_base = _global_column_reduction_base(
+                stages,
+                restart_dimension,
+                expected_restart,
+                column,
+            )
+            (
+                first_pass_base,
+                after_first_base,
+                second_pass_base,
+                h_next_base,
+                update_base,
+                metrics_base,
+                _checkpoint_base,
+            ) = _global_column_local_bases(column_base, stages, column)
+            specs: list[tuple[int, int, int, int, int, int]] = [
+                (
+                    column,
+                    column_base + 4,
+                    column_reduction_base,
+                    _REDUCTION_MODES["LASSQ_WORK_W"],
+                    _REDUCTION_MODES["COMBINE_LASSQ"],
+                    _REDUCTION_TARGETS["WORK_BEFORE"],
+                )
+            ]
+            specs.extend(
+                (
+                    row,
+                    first_pass_base + row * (stages + 2),
+                    column_reduction_base + (1 + row) * stages,
+                    _REDUCTION_MODES["DOT_W_VI"],
+                    _REDUCTION_MODES["COMBINE_SUM"],
+                    _REDUCTION_TARGETS["DOT"],
+                )
+                for row in range(column + 1)
+            )
+            specs.append(
+                (
+                    column,
+                    after_first_base,
+                    column_reduction_base + (column + 2) * stages,
+                    _REDUCTION_MODES["LASSQ_WORK_W"],
+                    _REDUCTION_MODES["COMBINE_LASSQ"],
+                    _REDUCTION_TARGETS["AFTER_FIRST"],
+                )
+            )
+            specs.extend(
+                (
+                    row,
+                    second_pass_base + row * (stages + 2),
+                    column_reduction_base + (column + 3 + row) * stages,
+                    _REDUCTION_MODES["DOT_W_VI"],
+                    _REDUCTION_MODES["COMBINE_SUM"],
+                    _REDUCTION_TARGETS["DOT"],
+                )
+                for row in range(column + 1)
+            )
+            specs.extend(
+                (
+                    (
+                        column,
+                        h_next_base,
+                        column_reduction_base + (2 * column + 4) * stages,
+                        _REDUCTION_MODES["LASSQ_WORK_W"],
+                        _REDUCTION_MODES["COMBINE_LASSQ"],
+                        _REDUCTION_TARGETS["H_NEXT"],
+                    ),
+                    (
+                        column,
+                        update_base,
+                        column_reduction_base + (2 * column + 5) * stages,
+                        _REDUCTION_MODES["LASSQ_WORK_W_MINUS_X"],
+                        _REDUCTION_MODES["COMBINE_LASSQ"],
+                        _REDUCTION_TARGETS["UPDATE_L2"],
+                    ),
+                    (
+                        restart_dimension,
+                        metrics_base,
+                        column_reduction_base + (2 * column + 6) * stages,
+                        _REDUCTION_MODES["LASSQ_V_M"],
+                        _REDUCTION_MODES["COMBINE_LASSQ"],
+                        _REDUCTION_TARGETS["CANDIDATE_L2"],
+                    ),
+                    (
+                        restart_dimension,
+                        metrics_base + stages,
+                        column_reduction_base + (2 * column + 7) * stages,
+                        _REDUCTION_MODES["LINF_V_M"],
+                        _REDUCTION_MODES["COMBINE_MAX"],
+                        _REDUCTION_TARGETS["CANDIDATE_LINF"],
+                    ),
+                    (
+                        column,
+                        metrics_base + 2 * stages,
+                        column_reduction_base + (2 * column + 8) * stages,
+                        _REDUCTION_MODES["LASSQ_WORK_W"],
+                        _REDUCTION_MODES["COMBINE_LASSQ"],
+                        _REDUCTION_TARGETS["TRIAL_X_L2"],
+                    ),
+                    (
+                        column,
+                        metrics_base + 3 * stages,
+                        column_reduction_base + (2 * column + 9) * stages,
+                        _REDUCTION_MODES["LASSQ_SOLUTION_X"],
+                        _REDUCTION_MODES["COMBINE_LASSQ"],
+                        _REDUCTION_TARGETS["COMMITTED_X_L2"],
+                    ),
+                )
+            )
+            for (
+                required_logical_index,
+                tree_schedule_base,
+                tree_reduction_base,
+                first_mode,
+                combine_mode,
+                final_target,
+            ) in specs:
+                if logical_index != required_logical_index:
+                    continue
+                if _reduction_tree_coordinates_match(
+                    mode,
+                    target,
+                    schedule_epoch,
+                    reduction_epoch,
+                    remaining_stage_count,
+                    stages,
+                    tree_schedule_base,
+                    tree_reduction_base,
+                    first_mode,
+                    combine_mode,
+                    final_target,
+                ):
+                    return
+    raise _launch_contract_error(
+        "reduction coordinates do not match the canonical fixed global schedule."
+    )
+
+
+def _reduction_tree_coordinates_match(
+    mode: int,
+    target: int,
+    schedule_epoch: int,
+    reduction_epoch: int,
+    remaining_stage_count: int,
+    total_stage_count: int,
+    tree_schedule_base: int,
+    tree_reduction_base: int,
+    first_mode: int,
+    combine_mode: int,
+    final_target: int,
+) -> bool:
+    stage = reduction_epoch - tree_reduction_base
+    if not 0 <= stage < total_stage_count:
+        return False
+    return (
+        remaining_stage_count == total_stage_count - stage
+        and schedule_epoch == tree_schedule_base + stage
+        and mode == (first_mode if stage == 0 else combine_mode)
+        and target
+        == (
+            final_target
+            if stage + 1 == total_stage_count
+            else _REDUCTION_TARGETS["NONE"]
         )
+    )
+
+
+def _global_initial_schedule_boundary(reduction_stage_count: int) -> int:
+    """Return ``B``, the first restart's fixed schedule epoch."""
+
+    return 7 + 4 * reduction_stage_count
+
+
+def _global_column_schedule_stride(
+    reduction_stage_count: int,
+    column_index: int,
+) -> int:
+    """Return variable column stride ``L_j`` for one physical slot."""
+
+    return 20 + 4 * column_index + (10 + 2 * column_index) * reduction_stage_count
+
+
+def _global_restart_reduction_stride(
+    reduction_stage_count: int,
+    restart_dimension: int,
+) -> int:
+    """Return ``D``, one restart's fixed reduction-epoch stride."""
+
+    return (
+        restart_dimension * restart_dimension + 9 * restart_dimension
+    ) * reduction_stage_count
+
+
+def _global_restart_schedule_stride(
+    reduction_stage_count: int,
+    restart_dimension: int,
+) -> int:
+    """Return ``H``, restart preamble plus all ``M`` variable columns."""
+
+    return (
+        2
+        + 2 * restart_dimension * restart_dimension
+        + 18 * restart_dimension
+        + _global_restart_reduction_stride(
+            reduction_stage_count,
+            restart_dimension,
+        )
+    )
+
+
+def _global_restart_schedule_base(
+    initial_boundary: int,
+    reduction_stage_count: int,
+    restart_dimension: int,
+    restart_index: int,
+) -> int:
+    return initial_boundary + (restart_index - 1) * _global_restart_schedule_stride(
+        reduction_stage_count,
+        restart_dimension,
+    )
+
+
+def _global_column_schedule_base(
+    initial_boundary: int,
+    reduction_stage_count: int,
+    restart_dimension: int,
+    restart_index: int,
+    column_index: int,
+) -> int:
+    """Return global schedule base ``E[r,j]`` for Jacobi launch ``j``."""
+
+    return (
+        _global_restart_schedule_base(
+            initial_boundary,
+            reduction_stage_count,
+            restart_dimension,
+            restart_index,
+        )
+        + 2
+        + 2 * column_index * column_index
+        + 18 * column_index
+        + (column_index * column_index + 9 * column_index) * reduction_stage_count
+    )
+
+
+def _global_column_reduction_base(
+    reduction_stage_count: int,
+    restart_dimension: int,
+    restart_index: int,
+    column_index: int,
+) -> int:
+    """Return global reduction base ``Q[r,j]`` for work-before tree ``j``."""
+
+    return (
+        4 * reduction_stage_count
+        + (restart_index - 1)
+        * _global_restart_reduction_stride(
+            reduction_stage_count,
+            restart_dimension,
+        )
+        + (column_index * column_index + 9 * column_index) * reduction_stage_count
+    )
+
+
+def _global_column_local_bases(
+    column_schedule_base: int,
+    reduction_stage_count: int,
+    column_index: int,
+) -> tuple[int, int, int, int, int, int, int]:
+    """Return exact local bases from first-pass dots through checkpoint."""
+
+    first_pass_base = column_schedule_base + 4 + reduction_stage_count
+    after_first_base = first_pass_base + (column_index + 1) * (
+        reduction_stage_count + 2
+    )
+    second_pass_base = after_first_base + reduction_stage_count + 1
+    h_next_base = second_pass_base + (column_index + 1) * (reduction_stage_count + 2)
+    update_base = h_next_base + reduction_stage_count + 4
+    metrics_base = update_base + reduction_stage_count + 4
+    checkpoint_base = metrics_base + 4 * reduction_stage_count
+    expected_end = column_schedule_base + _global_column_schedule_stride(
+        reduction_stage_count,
+        column_index,
+    )
+    if checkpoint_base + 3 != expected_end:  # pragma: no cover - algebraic seal
+        raise _launch_contract_error(
+            "the fixed global column schedule formulas are inconsistent."
+        )
+    return (
+        first_pass_base,
+        after_first_base,
+        second_pass_base,
+        h_next_base,
+        update_base,
+        metrics_base,
+        checkpoint_base,
+    )
 
 
 def _positive_int32(value: Any, label: str) -> int:

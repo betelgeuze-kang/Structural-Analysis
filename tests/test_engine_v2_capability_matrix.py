@@ -426,6 +426,12 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         "one_queue_lock_decide_commit_finalize_same_stream_submission"
         in checkpoint_context["supported_scope"]
     )
+    assert {
+        "exact_loaded_runtime_stream_query_sealed_in_checkpoint_lease_witness_snapshot",
+        "hip_stream_query_status_zero_complete_six_hundred_pending_and_other_status_or_exception_fail_closed",
+        "checkpoint_lease_exact_query_callable_runtime_device_stream_and_binding_snapshot",
+        "rtc_v0_2_25_full_111_passed_in_34_77_seconds",
+    }.issubset(checkpoint_context["supported_scope"])
     for fixed_evidence in (
         "v0_2_16_historical_checkpoint_context_source_hash_sha256_52d95b7a57a9c851c52fa8012047e2399e84e8da65cb686346f1ab2694cc2f23",
         "v0_2_16_historical_raw_rtc_python_source_hash_sha256_d6e312fba83d60c87dedc10aa5b8c0525cb1715b4beb5980df9b0f9dc40e7f59",
@@ -456,6 +462,10 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         in checkpoint_context["explicit_exclusions"]
     )
     assert "iteration_host_copy_zero" in checkpoint_context["explicit_exclusions"]
+    assert (
+        "stream_completion_query_as_numerical_or_solver_outcome"
+        in checkpoint_context["explicit_exclusions"]
+    )
     assert "commercial_readiness" in checkpoint_context["explicit_exclusions"]
 
     live_resources = rows["hip_fgmres_live_checkpoint_resource_context_v1"]
@@ -596,6 +606,14 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         "native_gfx1030_valid_canonical_to_sealed_chain",
         "native_gfx1030_late_nonfinite_sealed_source_preserves_full_destination_and_source_bytes",
         "native_terminal_and_pending_status_six_code_forty_seven_with_future_action_gates_cleared",
+        "dead_unconsumed_stream_idle_global_child_weak_lease_lazily_reaped_by_sealed_parent_close",
+        "v0_2_25_parent_owned_weak_liveness_recovery_cell_without_strong_child_context_or_lease_retention",
+        "global_child_gc_callback_marks_abandoned_without_hip_runtime_call",
+        "process_local_abandoned_consumed_pending_query_optional_single_sync_exact_pending_ack_and_terminal_release",
+        "monotonic_interruption_recovery_exact_bool_parent_ledger_reconciliation_and_frozen_authority_validation",
+        "sealed_transaction_v0_2_25_full_30_passed_in_507_23_seconds",
+        "sealed_global_lifecycle_six_passed_in_123_64_seconds",
+        "independent_lifecycle_audit_no_additional_defect",
     }.issubset(sealed["supported_scope"])
     assert {
         "actual_mask_host_observed",
@@ -608,14 +626,157 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         "iteration_host_copy_zero_proven",
         "end_to_end_on_complexity",
         "performance_or_speedup_claim",
+        "process_crash_gpu_reset_or_cross_process_abandoned_owner_recovery",
+        "abandoned_owner_recovery_as_completion_numerical_parity_or_solution_evidence",
         "standalone_receipt_provenance_authenticity_without_expected_context_or_signature",
         "commercial_readiness",
         "promotion_eligible",
     }.issubset(sealed["explicit_exclusions"])
-    assert row_ids[atomicity_index + 2] == "hip_fgmres_full_device_recurrence_abi_v2"
+    assert {
+        "abandoned_unconsumed_factory_result_reaped_before_parent_close",
+        "consume_without_registered_recovery_cell_zero_hip_fail_closed_and_unused_release_reopen",
+        "abandoned_consumed_or_pending_global_child_recovered_by_parent_owned_weak_liveness_cell",
+        "query_optional_single_sync_ack_and_monotonic_terminal_release_interruption_recovery",
+        "stale_pending_partial_close_exact_bool_and_frozen_authority_fail_closed_regressions",
+    }.issubset(sealed["verification_cases"])
+    assert {
+        "combined_kernel_abi_hash_sha256_bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f",
+        "fixed_source_hash_sha256_a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113",
+    }.issubset(sealed["supported_scope"])
+    assert row_ids[atomicity_index + 2] == "hip_fgmres_global_recurrence_owner_v1"
+
+    global_owner = rows["hip_fgmres_global_recurrence_owner_v1"]
+    assert global_owner["implementation_state"] == "implemented"
+    assert global_owner["promotion_state"] == "contract_only"
+    assert global_owner["claim_level"] == (
+        "sealed_continuation_consuming_fixed_suffix_fence_contract_only_"
+        "device_outcome_unobserved_non_promoting"
+    )
+    assert {
+        "immutable_initial_plus_r_times_m_columns_plus_final_guard_schedule",
+        "global_schedule_semantic_contract_hash_sha256_425ea7f4cd30e67a255b1da7490011bd4ecda8537444011e7b7fa005bb477ad4",
+        "current_combined_recurrence_abi_hash_sha256_4078f8f07b3bf605baae04ded1795f8a49038c636910b1c40916b42d3fe8c017",
+        "current_fixed_source_hash_sha256_2ecbbe21f8f95686117e2a12cf8cf0984f7e51b11fa331e7d5c81e15f8ed7967",
+        "v0_2_24_python_host_control_only_cpp_hip_public_schema_and_abi_unchanged",
+        "v0_2_25_exact_stream_query_and_parent_owned_abandoned_child_recovery",
+        "v0_2_25_cpp_hip_public_schema_and_abi_identities_unchanged",
+        "current_global_combined_and_source_hashes_unchanged_from_v0_2_23",
+        "gap_free_nonoverlap_full_sealed_prefix_and_continuation_partition",
+        "sealed_conditional_continuation_capability_reserved_and_consumed_exactly_once",
+        "prefix_replay_rejected_and_suffix_only_submission",
+        "direct_eleven_csr_three_scratch_two_physical_sixteen_continuity",
+        "global_suffix_final_fence_one_and_exact_pending_consume",
+        "global_owner_additional_allocation_borrow_checkpoint_owner_module_h2d_d2h_intermediate_sync_fallback_live_read_and_host_branch_zero",
+        "rtc_flat_exact_type_identity_value_witness_without_per_launch_semantic_serialization",
+        "four_launch_paths_private_expected_prior_pending_count_atomic_owner_lock_gate",
+        "phase_boundary_deep_binding_checks_two_for_l1_and_l35",
+        "per_row_exact_child_frozen_resource_canonical_row_and_pending_count",
+        "fixed_suffix_host_submission_control_o_l_structural_gate_with_fixed_work_per_row",
+        "deterministic_l1_l35_identity_to_dict_zero_and_pending_zero_through_l_minus_one",
+        "registry_sealed_tuple_backed_immutable_dispatch_snapshot_and_canonical_row_value_tuple",
+        "dispatch_transient_toctou_high_fixed_regression_one_passed_in_26_62_seconds",
+        "post_toctou_fix_f12_and_f24_required_gfx1030_cases_two_passed_in_96_11_seconds",
+        "final_independent_linear_reaudit_no_remaining_defect_in_requested_host_control_scope",
+        "linear_reaudit_transient_row_pointer_two_thread_bool_int_value_equal_tuple_and_forged_registry_slot_safe",
+        "signed_zero_float_hex_exact_seal_binding_invalid_zero_launch",
+        "aggregate_deep_validator_counts_l1_l35_enqueue_three_fence_four_constant",
+        "linear_reaudit_focused_four_passed_in_120_65_seconds",
+        "immutable_dispatch_regression_rerun_one_passed_in_26_74_seconds",
+        "linear_reaudit_ruff_format_pycompile_green",
+        "rtc_focused_103_passed",
+        "global_owner_ten_passed_in_246_23_seconds",
+        "sealed_global_lifecycle_six_passed_in_123_64_seconds",
+        "independent_lifecycle_audit_no_additional_defect",
+        "dead_unconsumed_stream_idle_factory_lease_lazily_reaped",
+        "parent_owned_weak_liveness_recovery_cell_without_strong_child_context_or_lease_retention",
+        "abandoned_callback_marks_only_and_makes_no_hip_runtime_call",
+        "abandoned_consumed_pending_child_query_optional_one_successful_exact_checkpoint_sync_query_ack_and_terminal_release",
+        "frozen_kernel_checkpoint_token_stream_runtime_device_and_binding_authority_validated_before_recovery_work",
+        "monotonic_release_phases_and_interruption_safe_exact_parent_ledger_reconciliation",
+        "exact_bool_only_state_repair_and_stale_pending_partial_close_fail_closed",
+        "outcome_free_completion_capability_only",
+        "standalone_receipt_structural_and_semantic_validation_only",
+        "expected_context_or_signed_chain_required_for_provenance_authenticity",
+        "native_raw_gfx1030_f513_m2_i5_three_restart_exhaustion_cpu_oracle_parity",
+        "native_raw_gfx1030_active_valid_and_malformed_final_guard",
+        "native_integrated_gfx1030_f12_nnz144_m2_i2_full_prefix_suffix_84_45_39",
+        "native_integrated_active_later_column_terminal_epoch_e79_q26",
+        "native_integrated_global_product_path_allocation_h2d_d2h_intermediate_sync_zero_and_one_global_fence",
+        "verification_only_cpu_solution_and_residual_exact_parity_after_product_receipt_freeze",
+        "native_integrated_owner_later_column_one_case_passed_in_38_29_seconds_vs_165_02_seconds_4_31x_shorter_test_wall_clock",
+        "native_integrated_active_later_restarts_f24_nnz360_m2_i5_r3_full_prefix_suffix_228_45_183",
+        "native_integrated_restart_one_two_three_terminal_restart3_column0_e179_q58",
+        "native_integrated_cpu_max_iterations_exhausted_iterations_restarts_5_3_operator_preconditioner_9_5_solution_residual_allclose",
+        "native_integrated_active_restart_one_passed_one_deselected_in_59_39_seconds",
+        "native_integrated_final_guard_expected_e215_q70_submitted_inactive_after_terminal_checkpoint_finalize",
+        "native_integrated_gfx1030_f12_m2_i2_suffix_pending_39_to_zero_lifecycle_gate",
+        "native_integrated_recovery_query_not_ready_then_complete_and_successful_sync_one",
+        "native_integrated_recovery_product_malloc_h2d_d2h_runtime_facade_sync_and_verification_d2h_zero",
+        "native_integrated_recovery_lifecycle_only_without_numerical_completion_or_product_outcome_claim",
+        "native_integrated_recovery_one_passed_two_deselected_in_37_42_seconds",
+        "rtc_v0_2_25_full_111_passed_in_34_77_seconds",
+        "checkpoint_context_v2_full_261_passed_in_248_58_seconds",
+        "global_owner_v0_2_25_full_54_passed_in_1387_12_seconds",
+        "sealed_transaction_v0_2_25_full_30_passed_in_507_23_seconds",
+        "independent_v0_2_25_recovery_audit_blocker_high_medium_low_zero",
+        "wheel_875235_bytes_sha256_e6522f810af2a4a0f6d62c770f510bcab57278e64cec4e0070b8fbec2eb2b8e2",
+        "sdist_823734_bytes_sha256_8094a8bcaf30d3aaf954d5c5f0183baaf03881ff96ae62b33b6832276b2b3d3c",
+        "isolated_wheel_global_public_api_schema_and_hip_kernel_resource_import",
+    }.issubset(global_owner["supported_scope"])
+    assert {
+        "actual_terminal_outcome_host_observed_in_product_receipt",
+        "authoritative_terminal_status_proven",
+        "product_receipt_numerical_parity_verified",
+        "solution_ready",
+        "integrated_active_final_guard_fallthrough_proven",
+        "completion_only_solution_record_and_residual_export",
+        "model_family_and_multi_architecture_cpu_hip_full_recurrence_parity",
+        "iteration_host_copy_zero_proven",
+        "end_to_end_on_complexity",
+        "general_n_dof_o_n_claim",
+        "kernel_speedup_claim",
+        "solver_end_to_end_speedup_claim",
+        "performance_or_speedup_claim",
+        "process_crash_gpu_reset_or_cross_process_abandoned_owner_recovery",
+        "abandoned_recovery_as_terminal_numerical_parity_completion_or_solution_evidence",
+        "standalone_receipt_provenance_authenticity_without_expected_context_or_signed_chain",
+        "commercial_readiness",
+        "promotion_eligible",
+    }.issubset(global_owner["explicit_exclusions"])
+    assert (
+        "integrated_active_later_restart_proven"
+        not in (global_owner["explicit_exclusions"])
+    )
+    assert (
+        "final_independent_linear_reaudit_closure"
+        not in global_owner["explicit_exclusions"]
+    )
+    assert {
+        "flat_identity_atomic_pending_and_constant_phase_boundary_deep_check_l1_l35",
+        "validated_immutable_dispatch_snapshot_resists_transient_live_row_and_pointer_drift",
+        "post_toctou_fix_two_required_integrated_hardware_cases_repassed_without_audit_promotion",
+        "final_linear_host_control_reaudit_transient_alias_forgery_and_signed_zero_cases_closed",
+        "direct_and_aggregate_deep_validator_counts_constant_for_l1_and_l35",
+        "final_linear_reaudit_focused_and_immutable_regressions_repassed",
+        "abandoned_unconsumed_lease_and_consumed_pending_owner_process_local_parent_recovery",
+        "abandoned_query_optional_single_sync_ack_and_terminal_release_without_numerical_claim",
+        "recovery_dual_store_release_poison_publication_stale_pending_partial_close_and_false_ready_regressions",
+        "recovery_exact_bool_cleanup_owner_frozen_authority_and_baseexception_fail_closed_regressions",
+        "native_integrated_recovery_not_ready_sync_complete_pending_39_to_zero_zero_product_calls",
+        "native_integrated_active_later_restart_one_through_three_max_iteration_exhaustion",
+        "native_integrated_submitted_but_inactive_final_guard_kept_separate_from_active_fallthrough_claim",
+    }.issubset(global_owner["verification_cases"])
+    assert {
+        "docs/engine-v2-hip-fgmres-global-recurrence-v1.md",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_global_schedule_plan_v1.py",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_global_recurrence_context_v1.py",
+        "src/structural_analysis/schemas/hip_fgmres_global_recurrence_context_v1.schema.json",
+        "tests/test_engine_v2_hip_fgmres_global_recurrence_context_hardware_v1.py",
+    }.issubset(global_owner["evidence_paths"])
+    assert row_ids[atomicity_index + 3] == "hip_fgmres_full_device_recurrence_abi_v2"
 
     recurrence_v2 = rows["hip_fgmres_full_device_recurrence_abi_v2"]
-    assert recurrence_v2["implementation_state"] == "planned"
+    assert recurrence_v2["implementation_state"] == "in_progress"
     assert recurrence_v2["promotion_state"] == "unavailable"
     assert (
         "accepted_256_byte_transient_device_control_state_design"
@@ -652,6 +813,25 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         "implemented_canonical_capability_consuming_live_sealed_checkpoint_transaction_kept_partial"
         in recurrence_v2["supported_scope"]
     )
+    assert {
+        "implemented_global_fixed_schedule_later_columns_restarts_terminal_padding_and_final_guard_raw_kernel",
+        "implemented_gap_free_sealed_prefix_and_continuation_partition",
+        "implemented_conditional_sealed_continuation_consuming_global_suffix_owner_kept_non_promoting",
+        "implemented_process_local_parent_owned_weak_liveness_recovery_for_abandoned_consumed_or_pending_suffix_owner",
+        "implemented_exact_stream_query_optional_single_checkpoint_sync_ack_and_terminal_release_recovery",
+        "recovery_kept_lifecycle_only_without_terminal_numerical_completion_or_solution_promotion",
+        "native_raw_three_restart_exhaustion_early_terminal_padding_and_final_guard_evidence",
+        "native_integrated_active_later_column_and_suffix_zero_copy_one_fence_evidence",
+        "native_integrated_active_later_restarts_one_through_three_evidence",
+        "implemented_fixed_suffix_host_submission_control_o_l_structural_gate_not_general_n_dof_o_n",
+        "implemented_registry_sealed_immutable_dispatch_snapshot_and_canonical_row_tuple",
+        "final_independent_linear_reaudit_no_remaining_defect_in_requested_host_control_scope",
+        "current_global_schedule_semantic_contract_hash_sha256_425ea7f4cd30e67a255b1da7490011bd4ecda8537444011e7b7fa005bb477ad4",
+        "current_combined_recurrence_abi_hash_sha256_4078f8f07b3bf605baae04ded1795f8a49038c636910b1c40916b42d3fe8c017",
+        "current_fixed_source_hash_sha256_2ecbbe21f8f95686117e2a12cf8cf0984f7e51b11fa331e7d5c81e15f8ed7967",
+        "native_integrated_recovery_pending_39_to_zero_query_not_ready_then_complete_sync_one_zero_product_calls",
+        "independent_v0_2_25_recovery_audit_blocker_high_medium_low_zero",
+    }.issubset(recurrence_v2["supported_scope"])
     assert (
         "sealed_predecessor_checkpoint_transaction_integration"
         not in recurrence_v2["explicit_exclusions"]
@@ -662,7 +842,30 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
     )
     assert (
         "later_columns_and_restarts_kernel_implementation"
-        in (recurrence_v2["explicit_exclusions"])
+        not in (recurrence_v2["explicit_exclusions"])
     )
+    assert (
+        "integrated_active_later_restart_execution"
+        not in (recurrence_v2["explicit_exclusions"])
+    )
+    assert {
+        "integrated_active_final_guard_fallthrough",
+        "completion_only_solution_record_and_residual_export",
+        "native_cpu_hip_full_recurrence_parity",
+        "general_n_dof_o_n_claim",
+        "process_crash_gpu_reset_or_cross_process_abandoned_owner_recovery",
+        "abandoned_recovery_as_terminal_numerical_parity_completion_or_solution_evidence",
+    }.issubset(recurrence_v2["explicit_exclusions"])
+    assert (
+        "final_independent_linear_reaudit_closure"
+        not in recurrence_v2["explicit_exclusions"]
+    )
+    assert {
+        "integrated_active_later_restart_kept_separate_from_active_final_guard_and_authoritative_outcome_claims",
+        "fixed_suffix_host_control_o_l_kept_separate_from_general_n_dof_o_n_and_speedup_claims",
+        "final_linear_reaudit_closed_only_requested_host_control_scope_without_product_promotion",
+        "process_local_abandoned_suffix_owner_recovery_kept_separate_from_numerical_completion_claim",
+        "native_integrated_recovery_lifecycle_gate_kept_separate_from_full_recurrence_parity_and_solution",
+    }.issubset(recurrence_v2["verification_cases"])
     assert "iteration_host_copy_zero" in recurrence_v2["explicit_exclusions"]
     assert "commercial_readiness" in recurrence_v2["explicit_exclusions"]

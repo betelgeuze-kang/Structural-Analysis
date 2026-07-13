@@ -1,9 +1,10 @@
 # Engine v2 HIP FGMRES first-column checkpoint transaction context v2
 
-- 상태: Checkpoint owner v0.2.16 implemented; v0.2.22 fixed-four-row recurrence ABI compatibility confirmed, `contract_only`
+- 상태: Checkpoint owner v0.2.16 implemented; current v0.2.25 recurrence ABI compatibility confirmed, `contract_only`
 - 증거 범위: `caller_attested_valid_predecessor_non_promoting`
 - 수치 커널: [initial + first-column checkpoint recurrence v2](engine-v2-hip-fgmres-initial-recurrence-v2.md)
 - 후속 live owner: [canonical-capability-consuming sealed checkpoint transaction v1](engine-v2-hip-fgmres-sealed-checkpoint-transaction-v1.md)
+- 후속 global consumer: [sealed-continuation global recurrence owner v1](engine-v2-hip-fgmres-global-recurrence-v1.md)
 - 전체 설계: [HIP FGMRES full recurrence ABI v2](engine-v2-hip-fgmres-recurrence-abi-v2.md)
 - 상위 기준: [Structural Solver Engine v2 마스터 로드맵](structural-solver-engine-v2-master-roadmap.md)
 
@@ -77,15 +78,17 @@ Process-global registry는 다음을 보장한다.
 
 - exact runtime API와 loaded runtime 객체
 - module handle과 네 function handle
-- raw launch, unload, `hipGetDevice`, `hipStreamSynchronize`, `hipMemsetAsync` callable
+- raw launch, unload, `hipGetDevice`, `hipStreamSynchronize`, `hipStreamQuery`, `hipMemsetAsync` callable
 - module을 load한 실제 device ordinal
 - recurrence identity payload와 source/ABI hash
 
-`LoadedHipRuntime`도 `load_hip_native_runtime()`만 private mint로 만들 수 있고 library identity는 read-only다. Public `cdll`은 호환 view일 뿐 binding authority가 아니다. Native `bind()`는 private handle resolver로 symbol address를 다시 찾고 매 호출마다 고정 prototype의 새 `CFUNCTYPE` instance를 만든다. 따라서 public `ctypes` function의 `argtypes`, `restype`, `errcheck`나 cached symbol attribute를 compile 전후 또는 다른 thread에서 바꿔도 module load/get-function, device query, launch, sync와 unload callable은 변하지 않는다.
+`LoadedHipRuntime`도 `load_hip_native_runtime()`만 private mint로 만들 수 있고 library identity는 read-only다. Public `cdll`은 호환 view일 뿐 binding authority가 아니다. Native `bind()`는 private handle resolver로 symbol address를 다시 찾고 매 호출마다 고정 prototype의 새 `CFUNCTYPE` instance를 만든다. 따라서 public `ctypes` function의 `argtypes`, `restype`, `errcheck`나 cached symbol attribute를 compile 전후 또는 다른 thread에서 바꿔도 module load/get-function, device query, stream query, launch, sync와 unload callable은 변하지 않는다.
 
-Context lease는 raw owner token과 binding snapshot을 한 lock 안에서 원자적으로 획득한다. Lease acquisition 시 exact loaded runtime에서 `hipStreamSynchronize`와 `hipMemsetAsync`를 함께 결속한다. 이 caller-attested four-launch context는 memset을 제출하지 않지만, 같은 exclusive checkpoint lease를 사용하는 v0.2.20 canonical producer는 sealed memset callable을 kernel pending accounting과 동일한 acceptance interval로 추적한다. Public module/function/runtime field drift는 launch 전에 거부되며 실제 launch, memset, sync와 unload는 witness의 private handle/callable만 사용한다.
+Context lease는 raw owner token과 binding snapshot을 한 lock 안에서 원자적으로 획득한다. Lease acquisition 시 exact loaded runtime에서 `hipStreamSynchronize`, `hipStreamQuery`, `hipMemsetAsync`를 함께 결속한다. 이 caller-attested four-launch context는 memset이나 stream query를 제출하지 않지만, 같은 exclusive checkpoint lease를 사용하는 v0.2.20 canonical producer는 sealed memset callable을 kernel pending accounting과 동일한 acceptance interval로 추적하고 v0.2.25 downstream parent recovery는 sealed query callable만 사용한다. Public module/function/runtime field drift는 launch 전에 거부되며 실제 launch, memset, query, sync와 unload는 witness의 private handle/callable만 사용한다.
 
 `hipGetDevice`는 metadata가 아니라 실제 runtime query다. Module binding, lease, 각 launch, pending observation, fence, pending consume, authority 확인과 close에서 module device, lease expected device, current device가 같아야 한다. Device drift는 장치 mutation 전에 실패하며 원래 device를 복원한 뒤 fence 또는 cleanup을 재시도할 수 있다.
+
+Sealed `hipStreamQuery` wrapper는 raw status `0`만 exact `True`(COMPLETE), `600`만 exact `False`(NOT_READY)로 변환한다. 그 밖의 status와 예외는 fail-closed이며 호출자는 `bool`의 exact type만 받아들여 `0/1` 같은 int alias를 허용하지 않는다. Query authority는 exact runtime callable, checkpoint token, device와 sole pending stream snapshot에 결속된다.
 
 현재 sealed native binding의 지원 전제는 CPython/Linux ROCm과 신뢰된 process·설치 filesystem·명시적 runtime-library 설정이다. Package가 hash한 path와 loader mapping 사이를 적대적으로 교체하는 보안 공격, 임의 `dlclose`, private underscore/registry 변조를 방어하는 sandbox나 AMD 서명 검증은 아니다.
 
@@ -133,6 +136,8 @@ Fence는 facade의 주장이나 host callback이 아니라 module을 소유한 e
 
 Context는 reentrant enqueue, fence와 close를 pre-mutation에서 거부하고 raw kernel은 reentrant close를 별도 차단한다. Raw launch/sync 자체에 일반 operation guard가 있다는 주장은 하지 않는다. Raw unload callback이 close를 재진입해도 `hipModuleUnload`는 한 번만 실행한다. Kernel unload 실패는 range registry와 lease를 유지하며, device를 복원하거나 runtime 오류를 해소한 뒤 재시도할 수 있다.
 
+v0.2.25 downstream consumed/pending abandonment recovery는 이 shared lease의 query witness를 사용한다. Sealed parent가 보유하는 recovery cell은 child나 lease를 strong-reference하지 않으며 finalization callback은 abandonment만 기록하고 HIP을 호출하지 않는다. Parent-owned close/retry만 exact token/device/sole pending stream과 frozen binding을 다시 검사한 뒤 `query -> 필요 시 successful sync 1회 -> query -> pending pop -> terminal release` 순서로 진행한다. 첫 query가 COMPLETE이면 sync는 0회이고, NOT_READY일 때만 sync 성공 뒤 두 번째 query를 요구한다. Query만으로 pending을 pop하지 않으며 interruption 뒤에는 이미 완료된 단계를 되돌리지 않는 monotonic retry를 수행한다. Stale pending, partial-close, non-bool query result 또는 frozen authority drift는 모두 fail-closed다.
+
 ## 6. 검증과 고정값
 
 v0.2.16 집중 검증은 다음을 통과했다.
@@ -155,16 +160,19 @@ v0.2.16 집중 검증은 다음을 통과했다.
 - combined recurrence ABI: `sha256:31fbff2fa25c221a99f28e170818990a8ed71211169d239e05d28628941941c9`
 - checkpoint schedule: `sha256:d9b9115287e3b5839096e3f4417c04899ffc7592864483d918be55deaf4b4442`
 
-현재 v0.2.22 recurrence identity는 다음과 같다. 위 historical ABI/source와 구분한다.
+현재 v0.2.25 recurrence identity는 다음과 같다. v0.2.23 이후 C++/HIP source, public schema/ABI와 semantic hashes는 바뀌지 않았으며 위 historical ABI/source와 구분한다.
 
 - predecessor validator schedule: `sha256:b083896de86a808b1398d0fde4abe73726cb91f50399651274ef82dc09a5ef58`
-- combined recurrence ABI: `sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f`
-- fixed HIP source: `sha256:a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113`
+- global schedule semantic contract: `sha256:425ea7f4cd30e67a255b1da7490011bd4ecda8537444011e7b7fa005bb477ad4`
+- combined recurrence ABI: `sha256:4078f8f07b3bf605baae04ded1795f8a49038c636910b1c40916b42d3fe8c017`
+- fixed HIP source: `sha256:2ecbbe21f8f95686117e2a12cf8cf0984f7e51b11fa331e7d5c81e15f8ed7967`
 - checkpoint schedule: `sha256:2423da989b6cd419b7c4bef46d6c76f2120825a0c840cb516803bb2643ca11e5`
 
-v0.2.22 source patch는 terminal failure 이후 future `commit_required`/`continuation_required` gate를 clear하는 device semantic change뿐이며 combined ABI와 checkpoint schedule은 불변이다. Gate clear만으로 과거 COMMIT 미실행이나 rollback을 증명하지 않는다. v0.2.21 fixed HIP source `sha256:ce4353f61fc3e8cd1311ad52ce50f21a677c7bfa865a2656aa5447b6ec104a83`와 v0.2.20 combined/source `sha256:d719aebffadafa0c076bb4ff395df35e7b4bd888bdb613b8be9ff7ef0f20335d`/`sha256:cdb8917b8553ceceed047b0c9b3e091afe9d80bccfece8242a778b5d56e00b18`, three-row checkpoint schedule `sha256:d9b9115287e3b5839096e3f4417c04899ffc7592864483d918be55deaf4b4442`는 historical identity다.
+v0.2.22 combined/source `sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f`/`sha256:a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113`, v0.2.21 fixed source와 v0.2.20 combined/source는 historical identity다. Gate clear만으로 과거 COMMIT 미실행이나 rollback을 증명하지 않는다.
 
 v0.2.21 context 신규·인접 focused `77 passed`는 complete row fields, canonical tuple identity, kernel/token/stream/policy/exact 11-pointer tuple의 frozen binding과 dispatch 전 drift 거부를 검증했다. 전체 context 전수 회귀도 `261 passed in 523.33s (0:08:43)`를 통과했다. `control_state`와 `solve_record`를 포함한 모든 11 allocation은 role type·extent뿐 아니라 이 context가 요구하는 exact alignment도 통과해야 한다. 독립 감사에서 발견한 same-kind row mutation, preflight/commit pointer TOCTOU, predecessor state-code source-ABI binding 누락과 u8 role alignment 누락을 수정했고 최종 source에서 남은 High/Medium 결함은 없었다. Ruff format/check, py_compile, canonical hashes와 actual HIP source hash assertion도 통과했다.
+
+v0.2.25 lifecycle 검증은 focused `33 passed`, RTC full `111 passed in 34.77s`, checkpoint context v2 full `261 passed in 248.58s`, global owner full `54 passed in 1387.12s`, sealed transaction full `30 passed in 507.23s`를 통과했고 independent audit은 `BLOCKER/HIGH/MEDIUM/LOW 0/0/0/0`으로 종료했다. Actual RX 6900 XT `gfx1030` F12/M2/I2 abandoned suffix required gate는 pending `39 -> 0`, query `(False, True)`, sync 1, product-path malloc/H2D/D2H/runtime sync 0과 `1 passed, 2 deselected in 37.42s`를 확인했다. 이 증거는 process-local lifecycle recovery에 한정되며 completion, 수치 결과/parity, product outcome, O(N), speedup 또는 commercial readiness를 승격하지 않는다.
 
 기존 native `gfx1030` hardware `12 passed`는 raw valid-predecessor numerical slice의 증거다. 새 context의 allocator/parent 통합 또는 end-to-end native solver 증거로 승격하지 않는다.
 
@@ -172,7 +180,7 @@ v0.2.21 context 신규·인접 focused `77 passed`는 complete row fields, canon
 
 ## 7. Claim boundary와 다음 단계
 
-현재 true인 범위는 caller-attested valid predecessor에 대한 exact typed range registry, exclusive raw lease, same-stream fixed-four-launch host transaction, partial-enqueue poison, exact-runtime/device fence, atomic pending consume와 retryable cleanup이다. `completion_fence_authoritative`는 이 exact raw stream fence에만 true다. Exact registered nonoverlap allocation, same stream, exclusive source ownership과 fixed four-row owner sequence에서는 invalid commit source가 두 destination 전체 bytes를 보존한다. Sealed `hipMemsetAsync` binding은 shared RTC lease의 현재 사실이지만 이 context의 transaction receipt에는 memset 실행 claim이 없다.
+현재 true인 범위는 caller-attested valid predecessor에 대한 exact typed range registry, exclusive raw lease, same-stream fixed-four-launch host transaction, partial-enqueue poison, exact-runtime/device fence, atomic pending consume와 retryable cleanup이다. `completion_fence_authoritative`는 이 exact raw stream fence에만 true다. Exact registered nonoverlap allocation, same stream, exclusive source ownership과 fixed four-row owner sequence에서는 invalid commit source가 두 destination 전체 bytes를 보존한다. Sealed `hipMemsetAsync`와 `hipStreamQuery` binding은 shared RTC lease의 현재 사실이지만 이 context의 transaction receipt에는 memset 실행, downstream recovery 또는 terminal outcome claim이 없다.
 
 다음은 아직 false다.
 
@@ -183,9 +191,9 @@ v0.2.21 context 신규·인접 focused `77 passed`는 complete row fields, canon
 - arbitrary raw duplicate COMMIT, 외부 writer/DMA/device fault까지 포함한 전역 destination atomicity
 - host 측 네 launch enqueue 자체의 불가분 원자성
 - 본 caller-attested receipt가 actual sealed invalid outcome을 host 관찰했다는 claim; 별도 v0.2.22 actual `gfx1030` valid/late-invalid scoped cases `2 passed`도 conditional receipt 경계를 유지함
-- later columns, later restarts와 final guard
+- global later columns/restarts와 final guard의 raw/current 구현이 이 historical caller-attested receipt를 소급 승격한다는 claim
 - full CPU/HIP recurrence parity와 iteration host-copy zero
 - multi-GPU/explicit HIP context, HIP graph/capture와 속도 증거
 - SPD/PCG, AMG/DD, Newton, ResultIR, O(N), signed promotion, commercial readiness
 
-다음 구현은 later-column/restart global control과 final guard로 확장하는 것이다. D2H가 없는 receipt는 exact mask scalar나 validator verdict를 host가 안다고 주장하지 않고 `actual_mask_host_observed=false`, `device_validation_outcome_host_observed=false`를 유지해야 한다.
+다음 구현은 active final-guard fallthrough integrated native coverage이며, 그 뒤 global owner 위 completion-only export와 명시적 outcome observation contract를 닫는다. D2H가 없는 receipt는 exact mask scalar나 validator verdict를 host가 안다고 주장하지 않고 `actual_mask_host_observed=false`, `device_validation_outcome_host_observed=false`를 유지해야 한다.

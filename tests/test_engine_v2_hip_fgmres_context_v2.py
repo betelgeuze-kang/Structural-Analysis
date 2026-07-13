@@ -180,6 +180,10 @@ class BoundFakeLoadedRuntime(FakeLoadedRuntime):
             return self._get_device
         if symbol == "hipStreamSynchronize":
             return self._synchronize
+        if symbol == "hipStreamQuery":
+            return self._query
+        if symbol == "hipMemsetAsync":
+            return self._memset_async
         return lambda *args: 0
 
     def _set_device(self, ordinal: int) -> int:
@@ -214,6 +218,7 @@ class BoundFakeLoadedRuntime(FakeLoadedRuntime):
         if self.sync_fail_count:
             self.sync_fail_count -= 1
             return 7
+        self._stream_completion[int(value)] = True
         return 0
 
 

@@ -1,6 +1,6 @@
 #pragma clang fp contract(off)
 
-// engine-v2-fgmres-recurrence-interface-v2: sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f
+// engine-v2-fgmres-recurrence-interface-v2: sha256:4078f8f07b3bf605baae04ded1795f8a49038c636910b1c40916b42d3fe8c017
 
 #if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && \
     (__BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__)
@@ -407,6 +407,143 @@ __device__ __forceinline__ int engine_v2_reduction_stage_input_count(
   return count;
 }
 
+__device__ __forceinline__ int engine_v2_global_column_reduction_groups(
+    int column) {
+  return 10 + 2 * column;
+}
+
+__device__ __forceinline__ int engine_v2_global_column_schedule_stride(
+    int stages,
+    int column) {
+  return 20 + 4 * column +
+      engine_v2_global_column_reduction_groups(column) * stages;
+}
+
+__device__ __forceinline__ int engine_v2_global_restart_schedule_stride(
+    int stages,
+    int restart_dimension) {
+  return 2 + 2 * restart_dimension * restart_dimension +
+      18 * restart_dimension +
+      (restart_dimension * restart_dimension + 9 * restart_dimension) * stages;
+}
+
+__device__ __forceinline__ int engine_v2_global_restart_reduction_stride(
+    int stages,
+    int restart_dimension) {
+  return (restart_dimension * restart_dimension + 9 * restart_dimension) *
+      stages;
+}
+
+__device__ __forceinline__ int engine_v2_global_restart_schedule_base(
+    int stages,
+    int restart_dimension,
+    int restart) {
+  return 7 + 4 * stages + (restart - 1) *
+      engine_v2_global_restart_schedule_stride(stages, restart_dimension);
+}
+
+__device__ __forceinline__ int engine_v2_global_restart_reduction_base(
+    int stages,
+    int restart_dimension,
+    int restart) {
+  return 4 * stages + (restart - 1) *
+      engine_v2_global_restart_reduction_stride(stages, restart_dimension);
+}
+
+__device__ __forceinline__ int engine_v2_global_column_schedule_base(
+    int stages,
+    int restart_dimension,
+    int restart,
+    int column) {
+  return engine_v2_global_restart_schedule_base(
+             stages, restart_dimension, restart) +
+      2 + 2 * column * column + 18 * column +
+      (column * column + 9 * column) * stages;
+}
+
+__device__ __forceinline__ int engine_v2_global_column_reduction_base(
+    int stages,
+    int restart_dimension,
+    int restart,
+    int column) {
+  return engine_v2_global_restart_reduction_base(
+             stages, restart_dimension, restart) +
+      (column * column + 9 * column) * stages;
+}
+
+__device__ __forceinline__ int engine_v2_global_final_schedule_epoch(
+    int stages,
+    int restart_dimension,
+    int maximum_restart_count) {
+  return 7 + 4 * stages + maximum_restart_count *
+      engine_v2_global_restart_schedule_stride(stages, restart_dimension);
+}
+
+__device__ __forceinline__ int engine_v2_global_final_reduction_epoch(
+    int stages,
+    int restart_dimension,
+    int maximum_restart_count) {
+  return 4 * stages + maximum_restart_count *
+      engine_v2_global_restart_reduction_stride(stages, restart_dimension);
+}
+
+__device__ __forceinline__ int engine_v2_global_after_first_schedule(
+    int column_base,
+    int stages,
+    int column) {
+  return column_base + 4 + stages + (column + 1) * (stages + 2);
+}
+
+__device__ __forceinline__ int engine_v2_global_second_pass_schedule(
+    int column_base,
+    int stages,
+    int column) {
+  return engine_v2_global_after_first_schedule(column_base, stages, column) +
+      stages + 1;
+}
+
+__device__ __forceinline__ int engine_v2_global_h_next_schedule(
+    int column_base,
+    int stages,
+    int column) {
+  return engine_v2_global_second_pass_schedule(column_base, stages, column) +
+      (column + 1) * (stages + 2);
+}
+
+__device__ __forceinline__ int engine_v2_global_update_schedule(
+    int column_base,
+    int stages,
+    int column) {
+  return engine_v2_global_h_next_schedule(column_base, stages, column) +
+      stages + 4;
+}
+
+__device__ __forceinline__ int engine_v2_global_candidate_metrics_schedule(
+    int column_base,
+    int stages,
+    int column) {
+  return engine_v2_global_update_schedule(column_base, stages, column) +
+      stages + 4;
+}
+
+__device__ __forceinline__ int engine_v2_global_checkpoint_schedule(
+    int column_base,
+    int stages,
+    int column) {
+  return engine_v2_global_candidate_metrics_schedule(
+             column_base, stages, column) +
+      4 * stages;
+}
+
+__device__ __forceinline__ bool engine_v2_global_column_coordinate_valid(
+    int restart,
+    int column,
+    int restart_dimension,
+    int maximum_restart_count) {
+  return restart >= 1 && restart <= maximum_restart_count && column >= 0 &&
+      column < restart_dimension;
+}
+
 __device__ __forceinline__ bool engine_v2_record_active(
     const unsigned char* record) {
   return engine_v2_load_i32_le(record, kRecordOffsetActive) == 1;
@@ -432,9 +569,18 @@ __device__ __forceinline__ bool engine_v2_coordinates_valid(
   }
   const int restart_dimension = engine_v2_load_i32_le(
       control, kControlOffsetRestartDimension);
+  const int maximum_restart_count = engine_v2_load_i32_le(
+      control, kControlOffsetMaximumRestartCount);
+  if (stored_column == -1 &&
+      engine_v2_load_i32_le(control, kControlOffsetPhase) ==
+          kPhaseBetweenRestarts) {
+    return stored_restart >= 1 && stored_restart < maximum_restart_count &&
+        expected_restart == engine_v2_load_i32_le(
+            control, kControlOffsetNextExpectedRestart) &&
+        expected_restart == stored_restart + 1 && expected_column == -1;
+  }
   return stored_restart >= 1 &&
-      stored_restart <= engine_v2_load_i32_le(
-          control, kControlOffsetMaximumRestartCount) &&
+      stored_restart <= maximum_restart_count &&
       stored_column >= 0 && stored_column < restart_dimension &&
       expected_restart == stored_restart && expected_column == stored_column;
 }
@@ -557,6 +703,133 @@ __device__ __forceinline__ bool engine_v2_common_state_valid(
       engine_v2_predecessor_validation_shape_valid(control) &&
       engine_v2_coordinates_valid(
           control, expected_restart, expected_column);
+}
+
+__device__ __forceinline__ bool engine_v2_final_guard_exhausted_shape(
+    const unsigned char* control,
+    const unsigned char* record,
+    int restart_dimension,
+    int max_iterations,
+    int maximum_restart_count) {
+  if (restart_dimension < 1 || max_iterations < 1 ||
+      maximum_restart_count < 1) {
+    return false;
+  }
+  const int final_cycle_start =
+      (maximum_restart_count - 1) * restart_dimension;
+  const int final_cycle_width = max_iterations - final_cycle_start;
+  const int false_convergence_count = engine_v2_load_i32_le(
+      record, kRecordOffsetFalseConvergenceCount);
+  const int expected_operator_count = 1 + max_iterations +
+      maximum_restart_count + false_convergence_count;
+  const int restart_base = kHeaderBytes +
+      (maximum_restart_count - 1) * kRestartBytes;
+  const int restart_step_count = engine_v2_load_i32_le(
+      record, restart_base + kRestartOffsetArnoldiStepCount);
+  const int restart_reorth_count = engine_v2_load_i32_le(
+      record, restart_base + kRestartOffsetReorthogonalizationCount);
+  const int restart_flags = engine_v2_load_i32_le(
+      record, restart_base + kRestartOffsetFlags);
+  const double restart_estimated_l2 = engine_v2_load_f64_le(
+      record, restart_base + kRestartOffsetEstimatedResidualL2);
+  const double restart_true_l2 = engine_v2_load_f64_le(
+      record, restart_base + kRestartOffsetTrueResidualL2);
+  const double restart_true_linf = engine_v2_load_f64_le(
+      record, restart_base + kRestartOffsetTrueResidualLinf);
+  const double restart_scaled = engine_v2_load_f64_le(
+      record, restart_base + kRestartOffsetScaledTrueResidual);
+  const double restart_update_l2 = engine_v2_load_f64_le(
+      record, restart_base + kRestartOffsetSolutionUpdateL2);
+  return final_cycle_width == restart_dimension &&
+      engine_v2_load_i32_le(control, kControlOffsetPhase) == kPhaseArnoldi &&
+      engine_v2_load_i32_le(control, kControlOffsetRestartIndex) ==
+          maximum_restart_count &&
+      engine_v2_load_i32_le(control, kControlOffsetCycleStartIteration) ==
+          final_cycle_start &&
+      engine_v2_load_i32_le(control, kControlOffsetCycleWidth) ==
+          final_cycle_width &&
+      engine_v2_load_i32_le(control, kControlOffsetColumnIndex) ==
+          restart_dimension - 1 &&
+      engine_v2_load_i32_le(control, kControlOffsetArnoldiStepCount) ==
+          final_cycle_width &&
+      engine_v2_load_i32_le(control, kControlOffsetReorthogonalizationCount) >=
+          0 &&
+      engine_v2_load_i32_le(control, kControlOffsetReorthogonalizationCount) <=
+          final_cycle_width &&
+      engine_v2_load_i32_le(control, kControlOffsetDgksReorthRequired) == 0 &&
+      engine_v2_load_i32_le(control, kControlOffsetInvariantBreakdown) == 0 &&
+      engine_v2_load_i32_le(control, kControlOffsetCandidateRequired) == 0 &&
+      engine_v2_load_i32_le(control, kControlOffsetCandidateReasonBits) == 0 &&
+      engine_v2_load_i32_le(control, kControlOffsetTriangularBreakdown) == 0 &&
+      engine_v2_load_i32_le(control, kControlOffsetCommitRequired) == 0 &&
+      engine_v2_load_i32_le(control, kControlOffsetContinuationRequired) == 0 &&
+      engine_v2_load_i32_le(control, kControlOffsetPendingTerminalStatus) == 0 &&
+      engine_v2_load_i32_le(control, kControlOffsetPendingTerminationCode) == 0 &&
+      engine_v2_load_i32_le(control, kControlOffsetPendingRestartHint) == 0 &&
+      engine_v2_load_i32_le(control, kControlOffsetPendingRestartFlags) == 0 &&
+      engine_v2_load_i32_le(control, kControlOffsetReductionValidMask) == 0 &&
+      engine_v2_load_i32_le(control, kControlOffsetFailureOrigin) ==
+          kFailureOriginNone &&
+      engine_v2_load_i32_le(control, kControlOffsetNextExpectedRestart) ==
+          maximum_restart_count + 1 &&
+      engine_v2_predecessor_validation_empty(control) &&
+      engine_v2_load_i32_le(record, kRecordOffsetActive) == 1 &&
+      engine_v2_load_i32_le(record, kRecordOffsetTerminalStatus) ==
+          kTerminalNotTerminal &&
+      engine_v2_load_i32_le(record, kRecordOffsetTerminationCode) ==
+          kTerminationNone &&
+      engine_v2_load_i32_le(record, kRecordOffsetDeviceErrorBits) == 0 &&
+      engine_v2_load_i32_le(record, kRecordOffsetScheduledIterations) ==
+          max_iterations &&
+      engine_v2_load_i32_le(record, kRecordOffsetEffectiveIterations) ==
+          max_iterations &&
+      engine_v2_load_i32_le(record, kRecordOffsetScheduledRestarts) ==
+          maximum_restart_count &&
+      engine_v2_load_i32_le(record, kRecordOffsetEffectiveRestarts) ==
+          maximum_restart_count &&
+      engine_v2_load_i32_le(record, kRecordOffsetEffectiveArnoldiDimension) ==
+          final_cycle_width &&
+      false_convergence_count >= 0 &&
+      engine_v2_load_i32_le(record, kRecordOffsetOperatorApplyCount) ==
+          expected_operator_count &&
+      engine_v2_load_i32_le(record, kRecordOffsetPreconditionerApplyCount) ==
+          max_iterations &&
+      engine_v2_load_i32_le(record, kRecordOffsetRestartDimension) ==
+          restart_dimension &&
+      engine_v2_load_i32_le(
+          record, restart_base + kRestartOffsetRestartIndex) ==
+          maximum_restart_count &&
+      engine_v2_load_i32_le(
+          record, restart_base + kRestartOffsetStartIteration) ==
+          final_cycle_start &&
+      engine_v2_load_i32_le(
+          record, restart_base + kRestartOffsetEndIteration) ==
+          max_iterations &&
+      restart_step_count == final_cycle_width &&
+      restart_reorth_count >= 0 && restart_reorth_count <= restart_step_count &&
+      engine_v2_load_i32_le(
+          record, restart_base + kRestartOffsetTerminationHint) ==
+          kRestartHintRestartCompleted &&
+      restart_flags >= 0 && restart_flags <= 255 &&
+      (restart_flags & (1 << kRestartFlagBitTrueResidualReplayed)) != 0 &&
+      engine_v2_load_i32_le(
+          record, restart_base + kRestartOffsetReservedI320) == 0 &&
+      engine_v2_isfinite(restart_estimated_l2) &&
+      restart_estimated_l2 >= 0.0 &&
+      restart_estimated_l2 == engine_v2_load_f64_le(
+          record, kRecordOffsetEstimatedResidualL2) &&
+      engine_v2_isfinite(restart_true_l2) && restart_true_l2 >= 0.0 &&
+      restart_true_l2 == engine_v2_load_f64_le(
+          record, kRecordOffsetFinalResidualL2) &&
+      engine_v2_isfinite(restart_true_linf) && restart_true_linf >= 0.0 &&
+      restart_true_linf == engine_v2_load_f64_le(
+          record, kRecordOffsetFinalResidualLinf) &&
+      engine_v2_isfinite(restart_scaled) && restart_scaled >= 0.0 &&
+      restart_scaled == engine_v2_load_f64_le(
+          record, kRecordOffsetFinalScaledResidual) &&
+      engine_v2_isfinite(restart_update_l2) && restart_update_l2 >= 0.0 &&
+      restart_update_l2 == engine_v2_load_f64_le(
+          record, kRecordOffsetSolutionUpdateL2);
 }
 
 __device__ __forceinline__ bool engine_v2_claim_epoch(
@@ -872,6 +1145,8 @@ engine_v2_checkpoint_decision(
       control, kControlOffsetCycleWidth);
   const int restart_dimension = engine_v2_load_i32_le(
       control, kControlOffsetRestartDimension);
+  const int column_index = engine_v2_load_i32_le(
+      control, kControlOffsetColumnIndex);
   const bool planned_reason =
       (candidate_reason_bits &
        (1 << kCandidateReasonBitPlannedCycleEnd)) != 0;
@@ -881,7 +1156,8 @@ engine_v2_checkpoint_decision(
       (triangular_breakdown != 0 && triangular_breakdown != 1) ||
       (invariant_breakdown != 0 && invariant_breakdown != 1) ||
       cycle_width < 1 || cycle_width > restart_dimension ||
-      planned_reason != (cycle_width == 1) ||
+      column_index < 0 || column_index >= cycle_width ||
+      planned_reason != (column_index + 1 >= cycle_width) ||
       (candidate_required == 0 &&
        (triangular_breakdown != 0 || invariant_breakdown != 0 ||
         valid_mask != 0))) {
@@ -1315,9 +1591,12 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
         solve_record_base,
         kErrorInvalidControlOrGeometry,
         kFailureOriginControl,
-        kTerminationInvalidInputOrControl);
+        control_mode == kControlModeFinalGuard
+            ? kTerminationRestartStateFailed
+            : kTerminationInvalidInputOrControl);
     return;
   }
+  const int stages = engine_v2_reduction_stage_count(free_dof_count);
   if (!engine_v2_common_state_valid(
           control_state_base,
           solve_record_base,
@@ -1347,21 +1626,87 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
         solve_record_base,
         kErrorInvalidControlOrGeometry,
         kFailureOriginControl,
-        kTerminationInvalidInputOrControl);
+        control_mode == kControlModeFinalGuard
+            ? kTerminationRestartStateFailed
+            : kTerminationInvalidInputOrControl);
     return;
   }
 
-  const int stages = engine_v2_reduction_stage_count(free_dof_count);
   const int phase = engine_v2_load_i32_le(
       control_state_base, kControlOffsetPhase);
   const int current_schedule_epoch = engine_v2_load_i32_le(
       control_state_base, kControlOffsetScheduleEpoch);
   const int current_reduction_epoch = engine_v2_load_i32_le(
       control_state_base, kControlOffsetReductionEpoch);
+  const bool recurrence_coordinate =
+      engine_v2_global_column_coordinate_valid(
+          expected_restart,
+          expected_column,
+          restart_dimension,
+          maximum_restart_count);
+  const int column_base = recurrence_coordinate
+      ? engine_v2_global_column_schedule_base(
+            stages,
+            restart_dimension,
+            expected_restart,
+            expected_column)
+      : -1;
+  const int column_reduction_base = recurrence_coordinate
+      ? engine_v2_global_column_reduction_base(
+            stages,
+            restart_dimension,
+            expected_restart,
+            expected_column)
+      : -1;
+  const int after_first_schedule = recurrence_coordinate
+      ? engine_v2_global_after_first_schedule(
+            column_base, stages, expected_column)
+      : -1;
+  const int second_pass_schedule = recurrence_coordinate
+      ? engine_v2_global_second_pass_schedule(
+            column_base, stages, expected_column)
+      : -1;
+  const int h_next_schedule = recurrence_coordinate
+      ? engine_v2_global_h_next_schedule(
+            column_base, stages, expected_column)
+      : -1;
+  const int update_schedule = recurrence_coordinate
+      ? engine_v2_global_update_schedule(
+            column_base, stages, expected_column)
+      : -1;
+  const int candidate_metrics_schedule = recurrence_coordinate
+      ? engine_v2_global_candidate_metrics_schedule(
+            column_base, stages, expected_column)
+      : -1;
+  const int checkpoint_schedule = recurrence_coordinate
+      ? engine_v2_global_checkpoint_schedule(
+            column_base, stages, expected_column)
+      : -1;
+  const int column_reduction_end = recurrence_coordinate
+      ? column_reduction_base +
+            engine_v2_global_column_reduction_groups(expected_column) * stages
+      : -1;
+  const int cycle_start_iteration = engine_v2_load_i32_le(
+      control_state_base, kControlOffsetCycleStartIteration);
+  const int effective_iterations = engine_v2_load_i32_le(
+      solve_record_base, kRecordOffsetEffectiveIterations);
+  const int false_convergence_count = engine_v2_load_i32_le(
+      solve_record_base, kRecordOffsetFalseConvergenceCount);
+  const int prior_candidate_replay_count = recurrence_coordinate
+      ? expected_restart - 1 + false_convergence_count
+      : 0;
+  const int operator_count_before_arnoldi = recurrence_coordinate
+      ? 1 + cycle_start_iteration + expected_column +
+            prior_candidate_replay_count
+      : -1;
+  const int operator_count_after_arnoldi =
+      operator_count_before_arnoldi + 1;
   const bool candidate_operator_accept_stage =
       control_mode == kControlModeOperatorAccept &&
-      current_schedule_epoch == 24 + 10 * stages &&
-      current_reduction_epoch == 10 * stages;
+      recurrence_coordinate &&
+      current_schedule_epoch == candidate_metrics_schedule - 2 &&
+      current_reduction_epoch ==
+          column_reduction_base + (6 + 2 * expected_column) * stages;
   int required_schedule = -1;
   bool row_and_pass_valid = false;
   if (control_mode == kControlModeBindRhs) {
@@ -1369,43 +1714,51 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
     row_and_pass_valid = row_index == -1 && pass_index == -1;
   } else if (control_mode == kControlModeOperatorAccept) {
     required_schedule = candidate_operator_accept_stage
-        ? 24 + 10 * stages
+        ? candidate_metrics_schedule - 2
         : (phase == kPhaseInitialState ? 4 + 2 * stages
-                                       : 12 + 4 * stages);
+                                       : column_base + 3);
     row_and_pass_valid = row_index == -1 && pass_index == -1;
   } else if (control_mode == kControlModeInitialGate) {
     required_schedule = 6 + 4 * stages;
     row_and_pass_valid = row_index == -1 && pass_index == -1;
   } else if (control_mode == kControlModeRestartBegin) {
-    required_schedule = 7 + 4 * stages;
+    required_schedule = engine_v2_global_restart_schedule_base(
+        stages, restart_dimension, expected_restart);
     row_and_pass_valid = row_index == -1 && pass_index == -1;
   } else if (control_mode == kControlModePreconditionAccept) {
-    required_schedule = 10 + 4 * stages;
+    required_schedule = column_base + 1;
     row_and_pass_valid = row_index == -1 && pass_index == -1;
   } else if (control_mode == kControlModeDotAccept) {
     required_schedule = pass_index == 0
-        ? 13 + 6 * stages
-        : (pass_index == 1 ? 16 + 8 * stages : -1);
-    row_and_pass_valid = row_index == 0 &&
+        ? column_base + 4 + 2 * stages + row_index * (stages + 2)
+        : (pass_index == 1
+               ? second_pass_schedule + row_index * (stages + 2) + stages
+               : -1);
+    row_and_pass_valid = recurrence_coordinate && row_index >= 0 &&
+        row_index <= expected_column &&
         (pass_index == 0 || pass_index == 1);
   } else if (control_mode == kControlModeDgksDecide) {
-    required_schedule = 15 + 7 * stages;
+    required_schedule = after_first_schedule + stages;
     row_and_pass_valid = row_index == -1 && pass_index == 0;
   } else if (control_mode == kControlModeArnoldiGivens) {
-    required_schedule = 19 + 9 * stages;
+    required_schedule = h_next_schedule + stages + 1;
     row_and_pass_valid = row_index == -1 && pass_index == -1;
   } else if (control_mode == kControlModeBacksubstitute) {
-    required_schedule = 20 + 9 * stages;
+    required_schedule = h_next_schedule + stages + 2;
     row_and_pass_valid = row_index == -1 && pass_index == -1;
   } else if (control_mode == kControlModeVectorAccept) {
-    required_schedule = 22 + 10 * stages;
+    required_schedule = update_schedule + stages;
     row_and_pass_valid = row_index == -1 && pass_index == -1;
   } else if (control_mode == kControlModePredecessorValidate ||
              control_mode == kControlModeCheckpointDecide) {
-    required_schedule = 26 + 14 * stages;
+    required_schedule = checkpoint_schedule;
     row_and_pass_valid = row_index == -1 && pass_index == -1;
   } else if (control_mode == kControlModeCheckpointFinalize) {
-    required_schedule = 28 + 14 * stages;
+    required_schedule = checkpoint_schedule + 2;
+    row_and_pass_valid = row_index == -1 && pass_index == -1;
+  } else if (control_mode == kControlModeFinalGuard) {
+    required_schedule = engine_v2_global_final_schedule_epoch(
+        stages, restart_dimension, maximum_restart_count);
     row_and_pass_valid = row_index == -1 && pass_index == -1;
   } else {
     engine_v2_terminal_failure(
@@ -1441,8 +1794,7 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
           candidate_required == 1 && triangular_breakdown == 0
           ? 1 << kReductionValidBitUpdateL2
           : 0;
-      admission_valid = phase_matches_candidate && expected_restart == 1 &&
-          expected_column == 0 &&
+      admission_valid = recurrence_coordinate && phase_matches_candidate &&
           (candidate_required == 0 || candidate_required == 1) &&
           candidate_reason_bits >= 0 && candidate_reason_bits < 8 &&
           candidate_required == (candidate_reason_bits != 0 ? 1 : 0) &&
@@ -1452,25 +1804,32 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
               control_state_base, kControlOffsetReductionValidMask) ==
               required_mask &&
           engine_v2_load_i32_le(
-              control_state_base, kControlOffsetArnoldiStepCount) == 1 &&
+              control_state_base, kControlOffsetArnoldiStepCount) ==
+              expected_column + 1 &&
           engine_v2_load_i32_le(
-              solve_record_base, kRecordOffsetEffectiveIterations) == 1 &&
+              solve_record_base, kRecordOffsetEffectiveIterations) ==
+              cycle_start_iteration + expected_column + 1 &&
           engine_v2_load_i32_le(
-              solve_record_base, kRecordOffsetEffectiveArnoldiDimension) == 1 &&
+              solve_record_base, kRecordOffsetEffectiveArnoldiDimension) ==
+              expected_column + 1 &&
           engine_v2_load_i32_le(
-              solve_record_base, kRecordOffsetOperatorApplyCount) == 2 &&
+              solve_record_base, kRecordOffsetOperatorApplyCount) ==
+              operator_count_after_arnoldi &&
           engine_v2_load_i32_le(
-              solve_record_base, kRecordOffsetPreconditionerApplyCount) == 1;
+              solve_record_base, kRecordOffsetPreconditionerApplyCount) ==
+              cycle_start_iteration + expected_column + 1;
     } else {
       const int expected_operator_count =
-          phase == kPhaseInitialState ? 0 : 1;
+          phase == kPhaseInitialState ? 0 : operator_count_before_arnoldi;
       admission_valid =
           (phase == kPhaseInitialState || phase == kPhaseArnoldi) &&
           engine_v2_load_i32_le(
               solve_record_base, kRecordOffsetOperatorApplyCount) ==
               expected_operator_count &&
-          (phase != kPhaseArnoldi || engine_v2_load_i32_le(
-               solve_record_base, kRecordOffsetPreconditionerApplyCount) == 1);
+          (phase != kPhaseArnoldi ||
+           (recurrence_coordinate && engine_v2_load_i32_le(
+                solve_record_base, kRecordOffsetPreconditionerApplyCount) ==
+                cycle_start_iteration + expected_column + 1));
     }
   } else if (control_mode == kControlModeInitialGate) {
     const int required_mask = (1 << kReductionValidBitInitialL2) |
@@ -1484,30 +1843,54 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
         engine_v2_load_i32_le(
             solve_record_base, kRecordOffsetOperatorApplyCount) == 1;
   } else if (control_mode == kControlModeRestartBegin) {
-    const double beta = engine_v2_load_f64_le(
-        solve_record_base, kRecordOffsetInitialResidualL2);
-    admission_valid = phase == kPhaseRestartReady && max_iterations > 0 &&
-        maximum_restart_count > 0 && expected_column == -1 &&
+    const double beta = expected_restart == 1
+        ? engine_v2_load_f64_le(
+              solve_record_base, kRecordOffsetInitialResidualL2)
+        : engine_v2_load_f64_le(
+              control_state_base, kControlOffsetCycleBeta);
+    const int expected_cycle_start = (expected_restart - 1) * restart_dimension;
+    const int expected_operator_count =
+        1 + expected_cycle_start + (expected_restart - 1) +
+        false_convergence_count;
+    admission_valid =
+        ((expected_restart == 1 && phase == kPhaseRestartReady) ||
+         (expected_restart > 1 && phase == kPhaseBetweenRestarts)) &&
+        max_iterations > 0 && maximum_restart_count > 0 &&
+        expected_restart >= 1 && expected_restart <= maximum_restart_count &&
+        expected_column == -1 &&
         expected_restart == engine_v2_load_i32_le(
             control_state_base, kControlOffsetNextExpectedRestart) &&
-        expected_restart == 1 && engine_v2_isfinite(beta) && beta > 0.0 &&
+        engine_v2_isfinite(beta) && beta > 0.0 &&
         engine_v2_load_i32_le(
-            control_state_base, kControlOffsetReductionEpoch) == 4 * stages &&
+            control_state_base, kControlOffsetReductionEpoch) ==
+            engine_v2_global_restart_reduction_base(
+                stages, restart_dimension, expected_restart) &&
         engine_v2_load_i32_le(
             control_state_base, kControlOffsetReductionValidMask) == 0 &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetEffectiveRestarts) == 0 &&
+            solve_record_base, kRecordOffsetEffectiveRestarts) ==
+            expected_restart - 1 &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetOperatorApplyCount) == 1 &&
+            solve_record_base, kRecordOffsetEffectiveIterations) ==
+            expected_cycle_start &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetPreconditionerApplyCount) == 0;
+            solve_record_base, kRecordOffsetEffectiveArnoldiDimension) ==
+            (expected_restart == 1 ? 0 : restart_dimension) &&
+        engine_v2_load_i32_le(
+            solve_record_base, kRecordOffsetOperatorApplyCount) ==
+            expected_operator_count &&
+        engine_v2_load_i32_le(
+            solve_record_base, kRecordOffsetPreconditionerApplyCount) ==
+            expected_cycle_start;
   } else if (control_mode == kControlModePreconditionAccept) {
-    admission_valid = phase == kPhaseArnoldi && expected_restart == 1 &&
-        expected_column == 0 &&
+    admission_valid = recurrence_coordinate && phase == kPhaseArnoldi &&
+        effective_iterations == cycle_start_iteration + expected_column &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetPreconditionerApplyCount) == 0 &&
+            solve_record_base, kRecordOffsetPreconditionerApplyCount) ==
+            effective_iterations &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetOperatorApplyCount) == 1;
+            solve_record_base, kRecordOffsetOperatorApplyCount) ==
+            operator_count_before_arnoldi;
   } else if (control_mode == kControlModeDotAccept) {
     const int dgks_required = engine_v2_load_i32_le(
         control_state_base, kControlOffsetDgksReorthRequired);
@@ -1518,58 +1901,71 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
         ? ((1 << kReductionValidBitWorkBefore) |
            (1 << kReductionValidBitDot))
         : (dgks_required == 1 ? 1 << kReductionValidBitDot : 0);
-    admission_valid = expected_restart == 1 && expected_column == 0 &&
+    admission_valid = recurrence_coordinate && row_index >= 0 &&
+        row_index <= expected_column &&
         ((pass_index == 0 && dgks_required == 0 &&
           phase == kPhaseArnoldi &&
           engine_v2_load_i32_le(
-              control_state_base, kControlOffsetReductionEpoch) == 6 * stages) ||
+              control_state_base, kControlOffsetReductionEpoch) ==
+              column_reduction_base + (row_index + 2) * stages) ||
          (pass_index == 1 && phase_matches_dgks &&
           engine_v2_load_i32_le(
-              control_state_base, kControlOffsetReductionEpoch) == 8 * stages)) &&
+              control_state_base, kControlOffsetReductionEpoch) ==
+              column_reduction_base +
+                  (expected_column + row_index + 4) * stages)) &&
         engine_v2_load_i32_le(
             control_state_base, kControlOffsetReductionValidMask) ==
             required_mask &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetOperatorApplyCount) == 2 &&
+            solve_record_base, kRecordOffsetOperatorApplyCount) ==
+            operator_count_after_arnoldi &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetPreconditionerApplyCount) == 1;
+            solve_record_base, kRecordOffsetPreconditionerApplyCount) ==
+            cycle_start_iteration + expected_column + 1;
   } else if (control_mode == kControlModeDgksDecide) {
     const int required_mask = (1 << kReductionValidBitWorkBefore) |
         (1 << kReductionValidBitAfterFirst);
-    admission_valid = phase == kPhaseArnoldi && expected_restart == 1 &&
-        expected_column == 0 &&
+    admission_valid = recurrence_coordinate && phase == kPhaseArnoldi &&
         engine_v2_load_i32_le(
             control_state_base, kControlOffsetDgksReorthRequired) == 0 &&
         engine_v2_load_i32_le(
             control_state_base, kControlOffsetInvariantBreakdown) == 0 &&
         engine_v2_load_i32_le(
-            control_state_base, kControlOffsetArnoldiStepCount) == 0 &&
+            control_state_base, kControlOffsetArnoldiStepCount) ==
+            expected_column &&
         engine_v2_load_i32_le(
-            control_state_base, kControlOffsetReductionEpoch) == 7 * stages &&
+            control_state_base, kControlOffsetReductionEpoch) ==
+            column_reduction_base + (expected_column + 3) * stages &&
         engine_v2_load_i32_le(
             control_state_base, kControlOffsetReductionValidMask) ==
             required_mask &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetOperatorApplyCount) == 2 &&
+            solve_record_base, kRecordOffsetOperatorApplyCount) ==
+            operator_count_after_arnoldi &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetPreconditionerApplyCount) == 1;
+            solve_record_base, kRecordOffsetPreconditionerApplyCount) ==
+            cycle_start_iteration + expected_column + 1;
   } else if (control_mode == kControlModeArnoldiGivens) {
     const int dgks_required = engine_v2_load_i32_le(
         control_state_base, kControlOffsetDgksReorthRequired);
     const bool phase_matches_dgks =
         (dgks_required == 1 && phase == kPhaseDgksSecondPass) ||
         (dgks_required == 0 && phase == kPhaseArnoldi);
-    admission_valid = phase_matches_dgks && expected_restart == 1 &&
-        expected_column == 0 &&
+    admission_valid = recurrence_coordinate && phase_matches_dgks &&
         engine_v2_load_i32_le(
-            control_state_base, kControlOffsetReductionEpoch) == 9 * stages &&
+            control_state_base, kControlOffsetReductionEpoch) ==
+            column_reduction_base + (2 * expected_column + 5) * stages &&
         engine_v2_load_i32_le(
             control_state_base, kControlOffsetReductionValidMask) ==
             (1 << kReductionValidBitHNext) &&
         engine_v2_load_i32_le(
-            control_state_base, kControlOffsetArnoldiStepCount) == 0 &&
+            control_state_base, kControlOffsetArnoldiStepCount) ==
+            expected_column &&
         engine_v2_load_i32_le(
-            control_state_base, kControlOffsetReorthogonalizationCount) == 0 &&
+            control_state_base, kControlOffsetReorthogonalizationCount) >= 0 &&
+        engine_v2_load_i32_le(
+            control_state_base, kControlOffsetReorthogonalizationCount) <=
+            expected_column &&
         engine_v2_load_i32_le(
             control_state_base, kControlOffsetCandidateRequired) == 0 &&
         engine_v2_load_i32_le(
@@ -1577,13 +1973,17 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
         engine_v2_load_i32_le(
             control_state_base, kControlOffsetTriangularBreakdown) == 0 &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetEffectiveIterations) == 0 &&
+            solve_record_base, kRecordOffsetEffectiveIterations) ==
+            cycle_start_iteration + expected_column &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetEffectiveArnoldiDimension) == 0 &&
+            solve_record_base, kRecordOffsetEffectiveArnoldiDimension) ==
+            expected_column &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetOperatorApplyCount) == 2 &&
+            solve_record_base, kRecordOffsetOperatorApplyCount) ==
+            operator_count_after_arnoldi &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetPreconditionerApplyCount) == 1;
+            solve_record_base, kRecordOffsetPreconditionerApplyCount) ==
+            cycle_start_iteration + expected_column + 1;
   } else if (control_mode == kControlModeBacksubstitute ||
              control_mode == kControlModeVectorAccept) {
     const int candidate_required = engine_v2_load_i32_le(
@@ -1599,8 +1999,7 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
             candidate_required == 1 && triangular_breakdown == 0
         ? 1 << kReductionValidBitUpdateL2
         : 0;
-    admission_valid = phase_matches_candidate && expected_restart == 1 &&
-        expected_column == 0 &&
+    admission_valid = recurrence_coordinate && phase_matches_candidate &&
         (candidate_required == 0 || candidate_required == 1) &&
         candidate_reason_bits >= 0 && candidate_reason_bits < 8 &&
         candidate_required == (candidate_reason_bits != 0 ? 1 : 0) &&
@@ -1610,21 +2009,28 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
          triangular_breakdown == 0) &&
         engine_v2_load_i32_le(
             control_state_base, kControlOffsetReductionEpoch) ==
-            (control_mode == kControlModeBacksubstitute ? 9 * stages
-                                                        : 10 * stages) &&
+            column_reduction_base +
+                (control_mode == kControlModeBacksubstitute
+                     ? 2 * expected_column + 5
+                     : 2 * expected_column + 6) * stages &&
         engine_v2_load_i32_le(
             control_state_base, kControlOffsetReductionValidMask) ==
             required_mask &&
         engine_v2_load_i32_le(
-            control_state_base, kControlOffsetArnoldiStepCount) == 1 &&
+            control_state_base, kControlOffsetArnoldiStepCount) ==
+            expected_column + 1 &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetEffectiveIterations) == 1 &&
+            solve_record_base, kRecordOffsetEffectiveIterations) ==
+            cycle_start_iteration + expected_column + 1 &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetEffectiveArnoldiDimension) == 1 &&
+            solve_record_base, kRecordOffsetEffectiveArnoldiDimension) ==
+            expected_column + 1 &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetOperatorApplyCount) == 2 &&
+            solve_record_base, kRecordOffsetOperatorApplyCount) ==
+            operator_count_after_arnoldi &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetPreconditionerApplyCount) == 1 &&
+            solve_record_base, kRecordOffsetPreconditionerApplyCount) ==
+            cycle_start_iteration + expected_column + 1 &&
         (control_mode != kControlModeVectorAccept ||
          candidate_required == 0 || triangular_breakdown != 0 ||
          (engine_v2_isfinite(engine_v2_load_f64_le(
@@ -1653,15 +2059,15 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
             predecessor_mask == 0 && predecessor_reduction_epoch == 0) ||
            (predecessor_state == kPredecessorValidationArmed &&
             predecessor_mask == valid_mask &&
-            predecessor_reduction_epoch == 14 * stages));
+            predecessor_reduction_epoch == column_reduction_end));
     const bool phase_matches_candidate =
         (candidate_required == 1 && phase == kPhaseCandidate) ||
         (candidate_required == 0 && phase == kPhaseArnoldi);
     admission_valid = predecessor_state_valid && phase_matches_candidate &&
-        expected_restart == 1 &&
-        expected_column == 0 &&
+        recurrence_coordinate &&
         engine_v2_load_i32_le(
-            control_state_base, kControlOffsetReductionEpoch) == 14 * stages &&
+            control_state_base, kControlOffsetReductionEpoch) ==
+            column_reduction_end &&
         engine_v2_load_i32_le(
             solve_record_base, kRecordOffsetDeviceErrorBits) == 0 &&
         (valid_mask == 0 || valid_mask == 1792 || valid_mask == 7936) &&
@@ -1681,16 +2087,21 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
         engine_v2_load_f64_le(
             control_state_base, kControlOffsetXScaleL2) == 0.0 &&
         engine_v2_load_i32_le(
-            control_state_base, kControlOffsetArnoldiStepCount) == 1 &&
+            control_state_base, kControlOffsetArnoldiStepCount) ==
+            expected_column + 1 &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetEffectiveIterations) == 1 &&
+            solve_record_base, kRecordOffsetEffectiveIterations) ==
+            cycle_start_iteration + expected_column + 1 &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetEffectiveArnoldiDimension) == 1 &&
+            solve_record_base, kRecordOffsetEffectiveArnoldiDimension) ==
+            expected_column + 1 &&
         engine_v2_load_i32_le(
             solve_record_base, kRecordOffsetOperatorApplyCount) ==
-            (candidate_required == 1 && triangular_breakdown == 0 ? 3 : 2) &&
+            operator_count_after_arnoldi +
+                (candidate_required == 1 && triangular_breakdown == 0 ? 1 : 0) &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetPreconditionerApplyCount) == 1;
+            solve_record_base, kRecordOffsetPreconditionerApplyCount) ==
+            cycle_start_iteration + expected_column + 1;
   } else if (control_mode == kControlModeCheckpointFinalize) {
     const int valid_mask = engine_v2_load_i32_le(
         control_state_base, kControlOffsetReductionValidMask);
@@ -1705,16 +2116,17 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
         predecessor_state == kPredecessorValidationCommitPreflighted &&
         ((predecessor_mask == 0 && predecessor_reduction_epoch == 0) ||
          (predecessor_mask == valid_mask &&
-          predecessor_reduction_epoch == 14 * stages));
+          predecessor_reduction_epoch == column_reduction_end));
     const int commit_required = engine_v2_load_i32_le(
         control_state_base, kControlOffsetCommitRequired);
     const int continuation_required = engine_v2_load_i32_le(
         control_state_base, kControlOffsetContinuationRequired);
     admission_valid = predecessor_state_valid &&
         phase == kPhaseCheckpointCommit &&
-        expected_restart == 1 && expected_column == 0 &&
+        recurrence_coordinate &&
         engine_v2_load_i32_le(
-            control_state_base, kControlOffsetReductionEpoch) == 14 * stages &&
+            control_state_base, kControlOffsetReductionEpoch) ==
+            column_reduction_end &&
         engine_v2_load_i32_le(
             solve_record_base, kRecordOffsetDeviceErrorBits) == 0 &&
         (valid_mask == 0 || valid_mask == 1792 || valid_mask == 7936) &&
@@ -1737,11 +2149,28 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
         engine_v2_load_i32_le(
             control_state_base, kControlOffsetPendingRestartFlags) <= 255 &&
         engine_v2_load_i32_le(
-            control_state_base, kControlOffsetArnoldiStepCount) == 1 &&
+            control_state_base, kControlOffsetArnoldiStepCount) ==
+            expected_column + 1 &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetEffectiveIterations) == 1 &&
+            solve_record_base, kRecordOffsetEffectiveIterations) ==
+            cycle_start_iteration + expected_column + 1 &&
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetEffectiveArnoldiDimension) == 1;
+            solve_record_base, kRecordOffsetEffectiveArnoldiDimension) ==
+            expected_column + 1;
+  } else if (control_mode == kControlModeFinalGuard) {
+    admission_valid = recurrence_coordinate &&
+        expected_restart == maximum_restart_count &&
+        expected_column == restart_dimension - 1 &&
+        expected_schedule_epoch == engine_v2_global_final_schedule_epoch(
+            stages, restart_dimension, maximum_restart_count) &&
+        current_reduction_epoch == engine_v2_global_final_reduction_epoch(
+            stages, restart_dimension, maximum_restart_count) &&
+        engine_v2_final_guard_exhausted_shape(
+            control_state_base,
+            solve_record_base,
+            restart_dimension,
+            max_iterations,
+            maximum_restart_count);
   } else {
     admission_valid = false;
   }
@@ -1754,7 +2183,9 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
         solve_record_base,
         kErrorInvalidControlOrGeometry,
         kFailureOriginControl,
-        kTerminationInvalidInputOrControl);
+        control_mode == kControlModeFinalGuard
+            ? kTerminationRestartStateFailed
+            : kTerminationInvalidInputOrControl);
     return;
   }
   if (control_mode == kControlModePredecessorValidate) {
@@ -1790,6 +2221,36 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
           solve_record_base,
           expected_schedule_epoch,
           kFailureOriginControl)) {
+    return;
+  }
+
+  if (control_mode == kControlModeFinalGuard) {
+    if (!engine_v2_final_guard_exhausted_shape(
+            control_state_base,
+            solve_record_base,
+            restart_dimension,
+            max_iterations,
+            maximum_restart_count)) {
+      engine_v2_terminal_failure(
+          control_state_base,
+          solve_record_base,
+          kErrorInvalidControlOrGeometry,
+          kFailureOriginControl,
+          kTerminationRestartStateFailed);
+      return;
+    }
+    engine_v2_store_i32_le(
+        solve_record_base, kRecordOffsetActive, 0);
+    engine_v2_store_i32_le(
+        solve_record_base,
+        kRecordOffsetTerminalStatus,
+        kTerminalMaxIterations);
+    engine_v2_store_i32_le(
+        solve_record_base,
+        kRecordOffsetTerminationCode,
+        kTerminationMaxIterationsExhausted);
+    engine_v2_store_i32_le(
+        control_state_base, kControlOffsetPhase, kPhaseTerminal);
     return;
   }
 
@@ -1898,9 +2359,10 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
         control_state_base, kControlOffsetReorthogonalizationCount);
     const int restart_base =
         kHeaderBytes + (restart_index - 1) * kRestartBytes;
-    if (restart_index != 1 ||
+    if (restart_index != expected_restart ||
+        restart_index < 1 || restart_index > maximum_restart_count ||
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetScheduledRestarts) < 1 ||
+            solve_record_base, kRecordOffsetScheduledRestarts) < restart_index ||
         (decision.row_required != 0 &&
          (engine_v2_load_i32_le(
               solve_record_base,
@@ -2056,7 +2518,9 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
           control_state_base, kControlOffsetPhase, kPhaseTerminal);
     } else if (decision.same_cycle_continuation != 0) {
       engine_v2_store_i32_le(
-          control_state_base, kControlOffsetColumnIndex, 1);
+          control_state_base,
+          kControlOffsetColumnIndex,
+          expected_column + 1);
       engine_v2_store_i32_le(
           control_state_base, kControlOffsetPhase, kPhaseArnoldi);
     } else if (decision.between_restarts_continuation != 0) {
@@ -2174,8 +2638,14 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
   }
 
   if (control_mode == kControlModeRestartBegin) {
-    const double beta = engine_v2_load_f64_le(
-        solve_record_base, kRecordOffsetInitialResidualL2);
+    const double beta = expected_restart == 1
+        ? engine_v2_load_f64_le(
+              solve_record_base, kRecordOffsetInitialResidualL2)
+        : engine_v2_load_f64_le(
+              control_state_base, kControlOffsetCycleBeta);
+    const int current_iterations = engine_v2_load_i32_le(
+        solve_record_base, kRecordOffsetEffectiveIterations);
+    const int remaining_iterations = max_iterations - current_iterations;
     const int dense_count = restart_dimension * restart_dimension +
         5 * restart_dimension + 1;
     for (int index = 0; index < dense_count; ++index) {
@@ -2188,11 +2658,15 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
     engine_v2_store_i32_le(
         control_state_base, kControlOffsetRestartIndex, expected_restart);
     engine_v2_store_i32_le(
-        control_state_base, kControlOffsetCycleStartIteration, 0);
+        control_state_base,
+        kControlOffsetCycleStartIteration,
+        current_iterations);
     engine_v2_store_i32_le(
         control_state_base,
         kControlOffsetCycleWidth,
-        restart_dimension < max_iterations ? restart_dimension : max_iterations);
+        restart_dimension < remaining_iterations
+            ? restart_dimension
+            : remaining_iterations);
     engine_v2_store_i32_le(
         control_state_base, kControlOffsetColumnIndex, 0);
     engine_v2_store_i32_le(
@@ -2214,19 +2688,29 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
     engine_v2_store_i32_le(
         control_state_base, kControlOffsetContinuationRequired, 0);
     engine_v2_store_i32_le(
-        control_state_base, kControlOffsetNextExpectedRestart, 2);
+        control_state_base,
+        kControlOffsetNextExpectedRestart,
+        expected_restart + 1);
     engine_v2_store_f64_le(
         control_state_base, kControlOffsetCycleBeta, beta);
     engine_v2_store_i32_le(
-        solve_record_base, kRecordOffsetEffectiveRestarts, 1);
+        solve_record_base,
+        kRecordOffsetEffectiveRestarts,
+        expected_restart);
+    engine_v2_store_i32_le(
+        solve_record_base, kRecordOffsetEffectiveArnoldiDimension, 0);
     engine_v2_store_i32_le(
         control_state_base, kControlOffsetPhase, kPhaseArnoldi);
     return;
   }
 
   if (control_mode == kControlModePreconditionAccept) {
+    const int prior_count = engine_v2_load_i32_le(
+        solve_record_base, kRecordOffsetPreconditionerApplyCount);
     engine_v2_store_i32_le(
-        solve_record_base, kRecordOffsetPreconditionerApplyCount, 1);
+        solve_record_base,
+        kRecordOffsetPreconditionerApplyCount,
+        prior_count + 1);
     return;
   }
 
@@ -2309,14 +2793,43 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
     const int cosine_offset = restart_dimension * (restart_dimension + 1);
     const int sine_offset = cosine_offset + restart_dimension;
     const int least_squares_rhs_offset = sine_offset + restart_dimension;
-    const double upper = dense_base[hessenberg_offset];
+    for (int row = 0; row < expected_column; ++row) {
+      const double prior_upper = dense_base[hessenberg_offset + row];
+      const double prior_lower = dense_base[hessenberg_offset + row + 1];
+      const double prior_cosine = dense_base[cosine_offset + row];
+      const double prior_sine = dense_base[sine_offset + row];
+      const double rotated_upper =
+          prior_cosine * prior_upper + prior_sine * prior_lower;
+      const double rotated_lower =
+          -prior_sine * prior_upper + prior_cosine * prior_lower;
+      if (!engine_v2_isfinite(prior_upper) ||
+          !engine_v2_isfinite(prior_lower) ||
+          !engine_v2_isfinite(prior_cosine) ||
+          !engine_v2_isfinite(prior_sine) ||
+          !engine_v2_isfinite(rotated_upper) ||
+          !engine_v2_isfinite(rotated_lower)) {
+        engine_v2_terminal_failure(
+            control_state_base,
+            solve_record_base,
+            kErrorArithmeticOverflow,
+            kFailureOriginControl,
+            kTerminationGivensRotationFailed);
+        return;
+      }
+      dense_base[hessenberg_offset + row] =
+          engine_v2_exact_zero(rotated_upper);
+      dense_base[hessenberg_offset + row + 1] =
+          engine_v2_exact_zero(rotated_lower);
+    }
+    const double upper = dense_base[hessenberg_offset + expected_column];
     const double h_next = engine_v2_load_f64_le(
         control_state_base, kControlOffsetHNextL2);
     const double work_before = engine_v2_load_f64_le(
         control_state_base, kControlOffsetWorkBeforeL2);
     const double solver_tolerance = engine_v2_load_f64_le(
         solve_record_base, kRecordOffsetSolverToleranceL2);
-    const double g_old = dense_base[least_squares_rhs_offset];
+    const double g_old =
+        dense_base[least_squares_rhs_offset + expected_column];
     const int dgks_required = engine_v2_load_i32_le(
         control_state_base, kControlOffsetDgksReorthRequired);
     const int normalization_breakdown = engine_v2_load_i32_le(
@@ -2392,8 +2905,10 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
     }
     const int candidate_required = candidate_reason_bits != 0 ? 1 : 0;
 
-    dense_base[hessenberg_offset] = engine_v2_exact_zero(rotated_upper);
-    dense_base[hessenberg_offset + 1] = engine_v2_exact_zero(rotated_lower);
+    dense_base[hessenberg_offset + expected_column] =
+        engine_v2_exact_zero(rotated_upper);
+    dense_base[hessenberg_offset + expected_column + 1] =
+        engine_v2_exact_zero(rotated_lower);
     dense_base[cosine_offset + expected_column] =
         engine_v2_exact_zero(cosine);
     dense_base[sine_offset + expected_column] = engine_v2_exact_zero(sine);
@@ -2402,11 +2917,15 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
     dense_base[least_squares_rhs_offset + expected_column + 1] =
         engine_v2_exact_zero(g1);
     engine_v2_store_i32_le(
-        control_state_base, kControlOffsetArnoldiStepCount, 1);
+        control_state_base,
+        kControlOffsetArnoldiStepCount,
+        expected_column + 1);
+    const int prior_reorthogonalization_count = engine_v2_load_i32_le(
+        control_state_base, kControlOffsetReorthogonalizationCount);
     engine_v2_store_i32_le(
         control_state_base,
         kControlOffsetReorthogonalizationCount,
-        dgks_required);
+        prior_reorthogonalization_count + dgks_required);
     engine_v2_store_i32_le(
         control_state_base, kControlOffsetDgksReorthRequired, 0);
     engine_v2_store_i32_le(
@@ -2426,9 +2945,13 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
     engine_v2_store_f64_le(
         control_state_base, kControlOffsetHNextL2, 0.0);
     engine_v2_store_i32_le(
-        solve_record_base, kRecordOffsetEffectiveIterations, 1);
+        solve_record_base,
+        kRecordOffsetEffectiveIterations,
+        cycle_start_iteration + expected_column + 1);
     engine_v2_store_i32_le(
-        solve_record_base, kRecordOffsetEffectiveArnoldiDimension, 1);
+        solve_record_base,
+        kRecordOffsetEffectiveArnoldiDimension,
+        expected_column + 1);
     engine_v2_store_f64_le(
         solve_record_base,
         kRecordOffsetEstimatedResidualL2,
@@ -2692,6 +3215,8 @@ extern "C" __global__ void engine_v2_fgmres_vector_v2(
   const int stages = engine_v2_reduction_stage_count(free_dof_count);
   const int restart_dimension = engine_v2_load_i32_le(
       control_state_base, kControlOffsetRestartDimension);
+  const int maximum_restart_count = engine_v2_load_i32_le(
+      control_state_base, kControlOffsetMaximumRestartCount);
   const bool copy_mode = vector_mode == kVectorModeCopyInitialX;
   const bool residual_mode = vector_mode == kVectorModeFormInitialResidual;
   const bool candidate_residual_mode =
@@ -2727,6 +3252,46 @@ extern "C" __global__ void engine_v2_fgmres_vector_v2(
       control_state_base, kControlOffsetPhase);
   const int current_schedule_epoch = engine_v2_load_i32_le(
       control_state_base, kControlOffsetScheduleEpoch);
+  const bool recurrence_coordinate =
+      engine_v2_global_column_coordinate_valid(
+          expected_restart,
+          expected_column,
+          restart_dimension,
+          maximum_restart_count);
+  const int column_base = recurrence_coordinate
+      ? engine_v2_global_column_schedule_base(
+            stages,
+            restart_dimension,
+            expected_restart,
+            expected_column)
+      : -1;
+  const int column_reduction_base = recurrence_coordinate
+      ? engine_v2_global_column_reduction_base(
+            stages,
+            restart_dimension,
+            expected_restart,
+            expected_column)
+      : -1;
+  const int second_pass_schedule = recurrence_coordinate
+      ? engine_v2_global_second_pass_schedule(
+            column_base, stages, expected_column)
+      : -1;
+  const int h_next_schedule = recurrence_coordinate
+      ? engine_v2_global_h_next_schedule(
+            column_base, stages, expected_column)
+      : -1;
+  const int candidate_metrics_schedule = recurrence_coordinate
+      ? engine_v2_global_candidate_metrics_schedule(
+            column_base, stages, expected_column)
+      : -1;
+  const int checkpoint_schedule = recurrence_coordinate
+      ? engine_v2_global_checkpoint_schedule(
+            column_base, stages, expected_column)
+      : -1;
+  const int column_reduction_end = recurrence_coordinate
+      ? column_reduction_base +
+            engine_v2_global_column_reduction_groups(expected_column) * stages
+      : -1;
   const bool completion_phase_valid =
       (dgks_required == 1 && phase == kPhaseDgksSecondPass) ||
       (dgks_required == 0 && phase == kPhaseArnoldi);
@@ -2735,22 +3300,27 @@ extern "C" __global__ void engine_v2_fgmres_vector_v2(
       : (residual_mode
              ? 5 + 2 * stages
              : (normalize_v0_mode
-                    ? 8 + 4 * stages
+                    ? engine_v2_global_restart_schedule_base(
+                          stages, restart_dimension, expected_restart) + 1
                     : (jacobi_mode
-                           ? 9 + 4 * stages
+                           ? column_base
                            : (first_mgs_mode
-                                  ? 14 + 6 * stages
+                                  ? column_base + 5 + 2 * stages +
+                                        logical_index * (stages + 2)
                                   : (second_mgs_mode
-                                         ? 17 + 8 * stages
+                                         ? second_pass_schedule +
+                                               logical_index * (stages + 2) +
+                                               stages + 1
                                          : (normalize_v_next_mode
-                                                ? 18 + 9 * stages
+                                                ? h_next_schedule + stages
                                                 : (build_trial_mode
-                                                       ? 21 + 9 * stages
+                                                       ? h_next_schedule +
+                                                             stages + 3
                                                        : (candidate_residual_mode
-                                                              ? 25 + 10 * stages
+                                                              ? candidate_metrics_schedule - 1
                                                               : ((commit_checkpoint_mode ||
                                                                   preflight_commit_source_mode)
-                                                                     ? 27 + 14 * stages
+                                                                     ? checkpoint_schedule + 1
                                                                      : -1)))))))));
   const int operator_count = engine_v2_load_i32_le(
       solve_record_base, kRecordOffsetOperatorApplyCount);
@@ -2770,7 +3340,14 @@ extern "C" __global__ void engine_v2_fgmres_vector_v2(
       logical_index == ((candidate_residual_mode || commit_checkpoint_mode ||
                          preflight_commit_source_mode)
               ? restart_dimension
-              : (normalize_v_next_mode ? 1 : 0));
+              : (build_trial_mode
+                     ? expected_column
+                     : (normalize_v_next_mode
+                     ? expected_column + 1
+                     : ((jacobi_mode || mgs_mode) ?
+                            (jacobi_mode ? expected_column : logical_index)
+                                                  : 0)))) &&
+      (!mgs_mode || (logical_index >= 0 && logical_index <= expected_column));
   const int valid_mask = engine_v2_load_i32_le(
       control_state_base, kControlOffsetReductionValidMask);
   const int predecessor_state = engine_v2_load_i32_le(
@@ -2783,7 +3360,7 @@ extern "C" __global__ void engine_v2_fgmres_vector_v2(
   const bool predecessor_legacy_shape = predecessor_mask == 0 &&
       predecessor_reduction_epoch == 0;
   const bool predecessor_sealed_shape = predecessor_mask == valid_mask &&
-      predecessor_reduction_epoch == 14 * stages;
+      predecessor_reduction_epoch == column_reduction_end;
   const bool predecessor_preflight_state_valid =
       ((predecessor_state == kPredecessorValidationEmpty ||
         predecessor_state == kPredecessorValidationCommitPreflighted) &&
@@ -2800,6 +3377,45 @@ extern "C" __global__ void engine_v2_fgmres_vector_v2(
       control_state_base, kControlOffsetCandidateReasonBits);
   const int triangular_breakdown = engine_v2_load_i32_le(
       control_state_base, kControlOffsetTriangularBreakdown);
+  const int cycle_start_iteration = engine_v2_load_i32_le(
+      control_state_base, kControlOffsetCycleStartIteration);
+  const int column_iteration = cycle_start_iteration + expected_column;
+  const int false_convergence_count = engine_v2_load_i32_le(
+      solve_record_base, kRecordOffsetFalseConvergenceCount);
+  const int operator_before_arnoldi = recurrence_coordinate
+      ? 1 + column_iteration + expected_restart - 1 +
+            false_convergence_count
+      : -1;
+  const int operator_after_arnoldi = operator_before_arnoldi + 1;
+  const bool candidate_numeric =
+      candidate_required == 1 && triangular_breakdown == 0;
+  const int operator_after_candidate =
+      operator_after_arnoldi + (candidate_numeric ? 1 : 0);
+  const int effective_iterations = engine_v2_load_i32_le(
+      solve_record_base, kRecordOffsetEffectiveIterations);
+  const bool recurrence_count_valid = recurrence_coordinate &&
+      ((normalize_v0_mode && expected_column == 0 &&
+        effective_iterations == cycle_start_iteration &&
+        preconditioner_count == cycle_start_iteration &&
+        operator_count == operator_before_arnoldi) ||
+       (jacobi_mode && effective_iterations == column_iteration &&
+        preconditioner_count == column_iteration &&
+        operator_count == operator_before_arnoldi) ||
+       ((first_mgs_mode || second_mgs_mode || normalize_v_next_mode) &&
+        effective_iterations == column_iteration &&
+        preconditioner_count == column_iteration + 1 &&
+        operator_count == operator_after_arnoldi) ||
+       (build_trial_mode && effective_iterations == column_iteration + 1 &&
+        preconditioner_count == column_iteration + 1 &&
+        operator_count == operator_after_arnoldi) ||
+       (candidate_residual_mode &&
+        effective_iterations == column_iteration + 1 &&
+        preconditioner_count == column_iteration + 1 &&
+        operator_count == operator_after_candidate) ||
+       ((commit_checkpoint_mode || preflight_commit_source_mode) &&
+        effective_iterations == column_iteration + 1 &&
+        preconditioner_count == column_iteration + 1 &&
+        operator_count == operator_after_candidate));
   const bool candidate_phase_valid =
       (candidate_required == 1 && phase == kPhaseCandidate) ||
       (candidate_required == 0 && phase == kPhaseArnoldi);
@@ -2831,10 +3447,7 @@ extern "C" __global__ void engine_v2_fgmres_vector_v2(
       (residual_mode && operator_count != 1) ||
       ((!copy_mode && !residual_mode && !candidate_residual_mode &&
         !commit_checkpoint_mode && !preflight_commit_source_mode) &&
-       (expected_restart != 1 || expected_column != 0 ||
-        ((normalize_v0_mode || jacobi_mode)
-             ? operator_count != 1 || preconditioner_count != 0
-             : operator_count != 2 || preconditioner_count != 1))) ||
+       !recurrence_count_valid) ||
       (normalize_v0_mode &&
        (!engine_v2_isfinite(engine_v2_load_f64_le(
             control_state_base, kControlOffsetCycleBeta)) ||
@@ -2859,30 +3472,35 @@ extern "C" __global__ void engine_v2_fgmres_vector_v2(
                  : 0) ||
         engine_v2_load_i32_le(
             control_state_base, kControlOffsetReductionEpoch) !=
-            (candidate_residual_mode ? 10 * stages : 9 * stages) ||
+            column_reduction_base +
+                (candidate_residual_mode
+                     ? 2 * expected_column + 6
+                     : 2 * expected_column + 5) * stages ||
         (candidate_required != 0 && candidate_required != 1) ||
         candidate_reason_bits < 0 || candidate_reason_bits >= 8 ||
         candidate_required != (candidate_reason_bits != 0 ? 1 : 0) ||
         (triangular_breakdown != 0 && triangular_breakdown != 1) ||
         (candidate_required == 0 && triangular_breakdown != 0) ||
         engine_v2_load_i32_le(
-            control_state_base, kControlOffsetArnoldiStepCount) != 1 ||
+            control_state_base, kControlOffsetArnoldiStepCount) !=
+            expected_column + 1 ||
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetEffectiveIterations) != 1 ||
+            solve_record_base, kRecordOffsetEffectiveIterations) !=
+            column_iteration + 1 ||
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetEffectiveArnoldiDimension) != 1 ||
+            solve_record_base, kRecordOffsetEffectiveArnoldiDimension) !=
+            expected_column + 1 ||
         (candidate_residual_mode &&
-         operator_count !=
-             (candidate_required == 1 && triangular_breakdown == 0 ? 3 : 2)))) ||
+         operator_count != operator_after_candidate))) ||
       ((commit_checkpoint_mode || preflight_commit_source_mode) &&
        (!(preflight_commit_source_mode ? predecessor_preflight_state_valid
                                        : predecessor_commit_state_valid) ||
         (preflight_commit_source_mode &&
          current_schedule_epoch != expected_schedule_epoch) ||
-        expected_restart != 1 ||
-        expected_column != 0 ||
+        !recurrence_coordinate ||
         engine_v2_load_i32_le(
-            control_state_base, kControlOffsetReductionEpoch) != 14 * stages ||
+            control_state_base, kControlOffsetReductionEpoch) !=
+            column_reduction_end ||
         engine_v2_load_i32_le(
             solve_record_base, kRecordOffsetDeviceErrorBits) != 0 ||
         (valid_mask != 0 && valid_mask != 1792 && valid_mask != 7936) ||
@@ -2914,9 +3532,9 @@ extern "C" __global__ void engine_v2_fgmres_vector_v2(
             control_state_base, kControlOffsetPendingRestartFlags) < 0 ||
         engine_v2_load_i32_le(
             control_state_base, kControlOffsetPendingRestartFlags) > 255 ||
-        operator_count !=
-            (candidate_required == 1 && triangular_breakdown == 0 ? 3 : 2) ||
-        preconditioner_count != 1))) {
+        operator_count != operator_after_candidate ||
+        preconditioner_count != column_iteration + 1 ||
+        !recurrence_count_valid))) {
     if (blockIdx.x == 0u && threadIdx.x == 0u) {
       if (preflight_commit_source_mode) {
         engine_v2_terminal_failure_if_error_clear(
@@ -3187,11 +3805,15 @@ extern "C" __global__ void engine_v2_fgmres_vector_v2(
     return;
   }
   if (jacobi_mode) {
+    const unsigned long long basis_offset =
+        static_cast<unsigned long long>(logical_index) *
+            static_cast<unsigned long long>(free_dof_count) +
+        index;
     const double inverse = inverse_diagonal_base[index];
-    const double basis = basis_v_base[index];
+    const double basis = basis_v_base[basis_offset];
     const double preconditioned = inverse * basis;
     if (!engine_v2_isfinite(inverse) || inverse <= 0.0) {
-      basis_z_base[index] = 0.0;
+      basis_z_base[basis_offset] = 0.0;
       engine_v2_terminal_failure(
           control_state_base,
           solve_record_base,
@@ -3201,7 +3823,7 @@ extern "C" __global__ void engine_v2_fgmres_vector_v2(
       return;
     }
     if (!engine_v2_isfinite(basis)) {
-      basis_z_base[index] = 0.0;
+      basis_z_base[basis_offset] = 0.0;
       engine_v2_terminal_failure(
           control_state_base,
           solve_record_base,
@@ -3211,7 +3833,7 @@ extern "C" __global__ void engine_v2_fgmres_vector_v2(
       return;
     }
     if (!engine_v2_isfinite(preconditioned)) {
-      basis_z_base[index] = 0.0;
+      basis_z_base[basis_offset] = 0.0;
       engine_v2_terminal_failure(
           control_state_base,
           solve_record_base,
@@ -3220,7 +3842,7 @@ extern "C" __global__ void engine_v2_fgmres_vector_v2(
           kTerminationOrthogonalizationFailed);
       return;
     }
-    basis_z_base[index] = engine_v2_exact_zero(preconditioned);
+    basis_z_base[basis_offset] = engine_v2_exact_zero(preconditioned);
     return;
   }
   if (mgs_mode) {
@@ -3370,6 +3992,8 @@ extern "C" __global__ void engine_v2_fgmres_csr_spmv_indexed_v2(
   const int stages = engine_v2_reduction_stage_count(free_dof_count);
   const int restart_dimension = engine_v2_load_i32_le(
       control_state_base, kControlOffsetRestartDimension);
+  const int maximum_restart_count = engine_v2_load_i32_le(
+      control_state_base, kControlOffsetMaximumRestartCount);
   const bool initial_mode = spmv_mode == kSpmvModeInitial;
   if (!engine_v2_predecessor_validation_empty(control_state_base)) {
     if (blockIdx.x == 0u && threadIdx.x == 0u) {
@@ -3384,9 +4008,34 @@ extern "C" __global__ void engine_v2_fgmres_csr_spmv_indexed_v2(
   }
   const bool arnoldi_mode = spmv_mode == kSpmvModeArnoldi;
   const bool candidate_mode = spmv_mode == kSpmvModeCandidate;
+  const bool recurrence_coordinate =
+      engine_v2_global_column_coordinate_valid(
+          expected_restart,
+          expected_column,
+          restart_dimension,
+          maximum_restart_count);
+  const int column_base = recurrence_coordinate
+      ? engine_v2_global_column_schedule_base(
+            stages,
+            restart_dimension,
+            expected_restart,
+            expected_column)
+      : -1;
+  const int column_reduction_base = recurrence_coordinate
+      ? engine_v2_global_column_reduction_base(
+            stages,
+            restart_dimension,
+            expected_restart,
+            expected_column)
+      : -1;
+  const int candidate_metrics_schedule = recurrence_coordinate
+      ? engine_v2_global_candidate_metrics_schedule(
+            column_base, stages, expected_column)
+      : -1;
   const int required_schedule = initial_mode
       ? 3 + 2 * stages
-      : (arnoldi_mode ? 11 + 4 * stages : 23 + 10 * stages);
+      : (arnoldi_mode ? column_base + 2
+                      : candidate_metrics_schedule - 3);
   const int candidate_required = engine_v2_load_i32_le(
       control_state_base, kControlOffsetCandidateRequired);
   const int candidate_reason_bits = engine_v2_load_i32_le(
@@ -3400,13 +4049,28 @@ extern "C" __global__ void engine_v2_fgmres_csr_spmv_indexed_v2(
            control_state_base, kControlOffsetPhase) == kPhaseArnoldi);
   const bool candidate_numeric =
       candidate_required == 1 && triangular_breakdown == 0;
+  const int cycle_start_iteration = engine_v2_load_i32_le(
+      control_state_base, kControlOffsetCycleStartIteration);
+  const int column_iteration = cycle_start_iteration + expected_column;
+  const int false_convergence_count = engine_v2_load_i32_le(
+      solve_record_base, kRecordOffsetFalseConvergenceCount);
+  const int operator_before_arnoldi = recurrence_coordinate
+      ? 1 + column_iteration + expected_restart - 1 +
+            false_convergence_count
+      : -1;
+  const int operator_after_arnoldi = operator_before_arnoldi + 1;
   const bool phase_valid = candidate_mode
       ? candidate_phase_valid
       : engine_v2_load_i32_le(control_state_base, kControlOffsetPhase) ==
           (initial_mode ? kPhaseInitialState : kPhaseArnoldi);
-  const int required_operator_count = initial_mode ? 0 : (arnoldi_mode ? 1 : 2);
+  const int required_operator_count = initial_mode
+      ? 0
+      : (arnoldi_mode ? operator_before_arnoldi
+                      : operator_after_arnoldi);
   if ((!initial_mode && !arnoldi_mode && !candidate_mode) ||
-      logical_index != (candidate_mode ? restart_dimension : 0) ||
+      logical_index != (candidate_mode
+                            ? restart_dimension
+                            : (arnoldi_mode ? expected_column : 0)) ||
       expected_schedule_epoch != required_schedule ||
       !engine_v2_common_state_valid(
           control_state_base,
@@ -3419,9 +4083,10 @@ extern "C" __global__ void engine_v2_fgmres_csr_spmv_indexed_v2(
           solve_record_base, kRecordOffsetOperatorApplyCount) !=
           required_operator_count ||
       (!initial_mode &&
-       (expected_restart != 1 || expected_column != 0 ||
+       (!recurrence_coordinate ||
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetPreconditionerApplyCount) != 1)) ||
+            solve_record_base, kRecordOffsetPreconditionerApplyCount) !=
+            column_iteration + 1)) ||
       (candidate_mode &&
        ((candidate_required != 0 && candidate_required != 1) ||
         candidate_reason_bits < 0 || candidate_reason_bits >= 8 ||
@@ -3429,13 +4094,18 @@ extern "C" __global__ void engine_v2_fgmres_csr_spmv_indexed_v2(
         (triangular_breakdown != 0 && triangular_breakdown != 1) ||
         (candidate_required == 0 && triangular_breakdown != 0) ||
         engine_v2_load_i32_le(
-            control_state_base, kControlOffsetArnoldiStepCount) != 1 ||
+            control_state_base, kControlOffsetArnoldiStepCount) !=
+            expected_column + 1 ||
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetEffectiveIterations) != 1 ||
+            solve_record_base, kRecordOffsetEffectiveIterations) !=
+            column_iteration + 1 ||
         engine_v2_load_i32_le(
-            solve_record_base, kRecordOffsetEffectiveArnoldiDimension) != 1 ||
+            solve_record_base, kRecordOffsetEffectiveArnoldiDimension) !=
+            expected_column + 1 ||
         engine_v2_load_i32_le(
-            control_state_base, kControlOffsetReductionEpoch) != 10 * stages ||
+            control_state_base, kControlOffsetReductionEpoch) !=
+            column_reduction_base +
+                (2 * expected_column + 6) * stages ||
         engine_v2_load_i32_le(
             control_state_base, kControlOffsetReductionValidMask) !=
             (candidate_numeric ? 1 << kReductionValidBitUpdateL2 : 0)))) {
@@ -3592,10 +4262,64 @@ extern "C" __global__ void engine_v2_fgmres_reduce_v2(
       control_state_base, kControlOffsetFreeDofCount);
   const int reduction_basis_count = free_dof_count > 0 ? free_dof_count : 1;
   const int stages = engine_v2_reduction_stage_count(reduction_basis_count);
+  const int restart_dimension = engine_v2_load_i32_le(
+      control_state_base, kControlOffsetRestartDimension);
+  const int maximum_restart_count = engine_v2_load_i32_le(
+      control_state_base, kControlOffsetMaximumRestartCount);
+  const bool initial_coordinate =
+      expected_restart == -1 && expected_column == -1;
+  const bool recurrence_coordinate =
+      engine_v2_global_column_coordinate_valid(
+          expected_restart,
+          expected_column,
+          restart_dimension,
+          maximum_restart_count);
+  const int column_base = recurrence_coordinate
+      ? engine_v2_global_column_schedule_base(
+            stages,
+            restart_dimension,
+            expected_restart,
+            expected_column)
+      : -1;
+  const int column_reduction_base = recurrence_coordinate
+      ? engine_v2_global_column_reduction_base(
+            stages,
+            restart_dimension,
+            expected_restart,
+            expected_column)
+      : -1;
+  const int local_reduction_epoch = recurrence_coordinate
+      ? expected_reduction_epoch - column_reduction_base
+      : expected_reduction_epoch;
+  const int local_group_limit = recurrence_coordinate
+      ? engine_v2_global_column_reduction_groups(expected_column)
+      : 4;
   const bool epoch_in_range = expected_reduction_epoch >= 0 &&
-      expected_reduction_epoch < 14 * stages;
-  const int group = epoch_in_range ? expected_reduction_epoch / stages : -1;
-  const int stage = epoch_in_range ? expected_reduction_epoch % stages : -1;
+      ((initial_coordinate && local_reduction_epoch < 4 * stages) ||
+       (recurrence_coordinate && local_reduction_epoch >= 0 &&
+        local_reduction_epoch < local_group_limit * stages));
+  const int local_group =
+      epoch_in_range ? local_reduction_epoch / stages : -1;
+  const int stage = epoch_in_range ? local_reduction_epoch % stages : -1;
+  int group = -1;
+  int group_row = 0;
+  if (initial_coordinate) {
+    group = local_group;
+  } else if (recurrence_coordinate) {
+    if (local_group == 0) {
+      group = 4;
+    } else if (local_group <= expected_column + 1) {
+      group = 5;
+      group_row = local_group - 1;
+    } else if (local_group == expected_column + 2) {
+      group = 6;
+    } else if (local_group <= 2 * expected_column + 3) {
+      group = 7;
+      group_row = local_group - (expected_column + 3);
+    } else {
+      group = 8 + local_group - (2 * expected_column + 4);
+    }
+  }
   int required_mode = -1;
   int final_target = -1;
   int required_phase = -1;
@@ -3674,23 +4398,34 @@ extern "C" __global__ void engine_v2_fgmres_reduce_v2(
                                : kReductionModeCombineLassq;
     final_target = kReductionTargetCommittedXL2;
   }
-  const int required_schedule = !epoch_in_range
-      ? -1
-      : (group < 2
-             ? 2 + expected_reduction_epoch
-             : (group < 4
-                    ? 6 + expected_reduction_epoch
-                    : (group < 6
-                           ? 13 + expected_reduction_epoch
-                           : (group == 6
-                                  ? 15 + expected_reduction_epoch
-                                  : (group == 7
-                                         ? 16 + expected_reduction_epoch
-                                         : (group == 8
-                                                ? 18 + expected_reduction_epoch
-                                                : (group == 9
-                                                       ? 22 + expected_reduction_epoch
-                                                       : 26 + expected_reduction_epoch)))))));
+  int required_schedule = -1;
+  if (epoch_in_range && group < 2) {
+    required_schedule = 2 + expected_reduction_epoch;
+  } else if (epoch_in_range && group < 4) {
+    required_schedule = 6 + expected_reduction_epoch;
+  } else if (epoch_in_range && group == 4) {
+    required_schedule = column_base + 4 + stage;
+  } else if (epoch_in_range && group == 5) {
+    required_schedule = column_base + 4 + stages +
+        group_row * (stages + 2) + stage;
+  } else if (epoch_in_range && group == 6) {
+    required_schedule = engine_v2_global_after_first_schedule(
+        column_base, stages, expected_column) + stage;
+  } else if (epoch_in_range && group == 7) {
+    required_schedule = engine_v2_global_second_pass_schedule(
+        column_base, stages, expected_column) +
+        group_row * (stages + 2) + stage;
+  } else if (epoch_in_range && group == 8) {
+    required_schedule = engine_v2_global_h_next_schedule(
+        column_base, stages, expected_column) + stage;
+  } else if (epoch_in_range && group == 9) {
+    required_schedule = engine_v2_global_update_schedule(
+        column_base, stages, expected_column) + stage;
+  } else if (epoch_in_range && group >= 10 && group <= 13) {
+    required_schedule = engine_v2_global_candidate_metrics_schedule(
+        column_base, stages, expected_column) +
+        (group - 10) * stages + stage;
+  }
   const int required_count = epoch_in_range
       ? engine_v2_reduction_stage_input_count(reduction_basis_count, stage)
       : -1;
@@ -3833,13 +4568,26 @@ extern "C" __global__ void engine_v2_fgmres_reduce_v2(
                                                : 0)
                                     : 0)
                              : required_pre_mask)));
-    const int required_logical_index = group == 10 || group == 11
-        ? engine_v2_load_i32_le(
-              control_state_base, kControlOffsetRestartDimension)
+    const int required_logical_index = recurrence_coordinate
+        ? ((group == 10 || group == 11)
+               ? restart_dimension
+               : ((group == 5 || group == 7) ? group_row : expected_column))
         : 0;
+    const int cycle_start_iteration = engine_v2_load_i32_le(
+        control_state_base, kControlOffsetCycleStartIteration);
+    const int column_iteration = cycle_start_iteration + expected_column;
+    const int false_convergence_count = engine_v2_load_i32_le(
+        solve_record_base, kRecordOffsetFalseConvergenceCount);
+    const int operator_before_arnoldi = recurrence_coordinate
+        ? 1 + column_iteration + expected_restart - 1 +
+              false_convergence_count
+        : -1;
+    const int operator_after_arnoldi = operator_before_arnoldi + 1;
     const int required_operator_count = group < 4
         ? 1
-        : (group >= 10 ? (candidate_numeric ? 3 : 2) : 2);
+        : (group >= 10
+               ? operator_after_arnoldi + (candidate_numeric ? 1 : 0)
+               : operator_after_arnoldi);
     const bool stage_valid = common_valid &&
         reduction_mode == required_mode &&
         reduction_target == required_target &&
@@ -3854,11 +4602,14 @@ extern "C" __global__ void engine_v2_fgmres_reduce_v2(
         phase_valid && candidate_state_valid && scale_predicate_state_valid &&
         (group < 9 ||
          (engine_v2_load_i32_le(
-              control_state_base, kControlOffsetArnoldiStepCount) == 1 &&
+              control_state_base, kControlOffsetArnoldiStepCount) ==
+              expected_column + 1 &&
           engine_v2_load_i32_le(
-              solve_record_base, kRecordOffsetEffectiveIterations) == 1 &&
+              solve_record_base, kRecordOffsetEffectiveIterations) ==
+              column_iteration + 1 &&
           engine_v2_load_i32_le(
-              solve_record_base, kRecordOffsetEffectiveArnoldiDimension) == 1)) &&
+              solve_record_base, kRecordOffsetEffectiveArnoldiDimension) ==
+              expected_column + 1)) &&
         (group < 4 || group >= 7 || dgks_required == 0) &&
         (group < 4 || group >= 9 || engine_v2_load_i32_le(
                           control_state_base,
@@ -3869,8 +4620,9 @@ extern "C" __global__ void engine_v2_fgmres_reduce_v2(
              required_operator_count) &&
         (group < 4 || engine_v2_load_i32_le(
                           solve_record_base,
-                          kRecordOffsetPreconditionerApplyCount) == 1) &&
-        (group < 4 || (expected_restart == 1 && expected_column == 0)) &&
+                          kRecordOffsetPreconditionerApplyCount) ==
+                              column_iteration + 1) &&
+        (group < 4 || recurrence_coordinate) &&
         output_base_distinct &&
         (stage == 0 || reduction_input_base != reduction_output_base);
     if (!abi_valid) {

@@ -18,11 +18,16 @@ from structural_analysis.engine_v2 import (
     validate_hip_fgmres_sealed_checkpoint_continuation_capability_v1,
     validate_hip_fgmres_sealed_checkpoint_transaction_receipt_v1,
 )
+from structural_analysis.engine_v2.assembly_backend.fgmres_global_schedule_plan_v1 import (
+    compile_hip_fgmres_global_sealed_continuation_v1,
+)
 from structural_analysis.engine_v2.assembly_backend.fgmres_rtc_v2 import (
     first_column_checkpoint_transaction_launches_v2,
 )
 from structural_analysis.engine_v2.assembly_backend.fgmres_sealed_checkpoint_transaction_v1 import (
+    _PHYSICAL_ROLES,
     _binding_values,
+    _mint_global_recurrence_child_lease_v1,
     _receipt_payload,
 )
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
@@ -66,6 +71,28 @@ def _close(values: tuple[Any, ...], sealed: Any | None = None) -> None:
     if sealed is not None and not sealed.context.closed:
         sealed.context.close()
     _close_canonical(values)
+
+
+def _register_global_recurrence_recovery(context: Any, token: object) -> Any:
+    """Mirror the production capture/register sequence before consume."""
+
+    authority = context._global_recurrence_child_authority(
+        token,
+        continuation_consumed=False,
+    )
+    partition = compile_hip_fgmres_global_sealed_continuation_v1(
+        authority.free_dof_count,
+        authority.restart_dimension,
+        authority.max_iterations,
+    )
+    context._register_global_recurrence_recovery_cell(
+        token,
+        kernel=authority.kernel,
+        checkpoint_owner_token=authority.checkpoint_owner_token,
+        stream_pointer=authority.stream_pointer,
+        launch_limit=partition.continuation.launch_count,
+    )
+    return authority
 
 
 def test_sealed_checkpoint_transaction_is_exact_nonowning_four_row_program(
@@ -206,6 +233,532 @@ def test_unused_child_close_allows_reopen_but_consumed_capability_is_terminal(
         if not first.context.closed:
             first.context.close()
         _close_canonical(values)
+
+
+def test_global_recurrence_child_unused_release_reopens_but_consumed_is_terminal(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    values, _, opened, _ = _open_sealed(monkeypatch)
+    context = opened.context
+    pending = context.enqueue_sealed_checkpoint_transaction()
+    continuation = context.synchronize_sealed_checkpoint_transaction(pending)
+    first_token = _mint_global_recurrence_child_lease_v1()
+    second_token = _mint_global_recurrence_child_lease_v1()
+    active_token: object | None = None
+    try:
+        with pytest.raises(HipFgmresSealedCheckpointTransactionV1Error) as forged:
+            context._reserve_global_recurrence_child(
+                HipFgmresSealedCheckpointContinuationCapabilityV1,
+                continuation,
+            )
+        assert forged.value.code == (
+            "hip_fgmres_sealed_checkpoint_transaction_global_child_token_invalid"
+        )
+        assert (
+            context._reserve_global_recurrence_child(first_token, continuation)
+            is first_token
+        )
+        active_token = first_token
+        authority = context._global_recurrence_child_authority(
+            first_token,
+            continuation_consumed=False,
+        )
+        binding = context._binding
+        assert binding is not None
+        assert authority.kernel is binding.kernel
+        assert authority.checkpoint_owner_token is binding.checkpoint_owner_token
+        assert authority.loaded_runtime is binding.loaded_runtime
+        assert authority.stream_pointer == binding.stream_pointer
+        assert (
+            tuple(role for role, _pointer in authority.physical_pointer_values)
+            == _PHYSICAL_ROLES
+        )
+        assert len(authority.physical_pointer_values) == 16
+        assert not hasattr(authority, "__dict__")
+        with pytest.raises(AttributeError):
+            authority.stream_pointer = authority.stream_pointer + 1  # type: ignore[misc]
+
+        canonical = values[-1].context
+        original_scratch = canonical._pointers["reduction_ping"]
+        canonical._pointers["reduction_ping"] = original_scratch + 8
+        try:
+            with pytest.raises(HipFgmresSealedCheckpointTransactionV1Error) as drifted:
+                context._global_recurrence_child_authority(
+                    first_token,
+                    continuation_consumed=False,
+                )
+            assert drifted.value.code == (
+                "hip_fgmres_sealed_checkpoint_transaction_global_child_authority_invalid"
+            )
+        finally:
+            canonical._pointers["reduction_ping"] = original_scratch
+        context._require_global_recurrence_child(
+            first_token,
+            continuation_consumed=False,
+        )
+        with pytest.raises(HipFgmresSealedCheckpointTransactionV1Error) as blocked:
+            context.close()
+        assert blocked.value.code == (
+            "hip_fgmres_sealed_checkpoint_transaction_global_child_active"
+        )
+        assert not context.closed
+
+        context._release_global_recurrence_child(first_token)
+        active_token = None
+        assert (
+            validate_hip_fgmres_sealed_checkpoint_continuation_capability_v1(
+                continuation,
+                expected_context=context,
+            )
+            is continuation
+        )
+
+        assert (
+            context._reserve_global_recurrence_child(second_token, continuation)
+            is second_token
+        )
+        active_token = second_token
+        _register_global_recurrence_recovery(context, second_token)
+        context._consume_global_recurrence_continuation_capability(
+            second_token,
+            continuation,
+        )
+        consumed_authority = context._global_recurrence_child_authority(
+            second_token,
+            continuation_consumed=True,
+        )
+        assert consumed_authority.kernel is authority.kernel
+        assert (
+            consumed_authority.physical_pointer_values
+            == authority.physical_pointer_values
+        )
+        assert context._global_recurrence_continuation_capability_consumed(second_token)
+        context._require_global_recurrence_child(
+            second_token,
+            continuation_consumed=True,
+        )
+        with pytest.raises(HipFgmresSealedCheckpointTransactionV1Error) as consumed:
+            validate_hip_fgmres_sealed_checkpoint_continuation_capability_v1(
+                continuation,
+                expected_context=context,
+            )
+        assert consumed.value.code == (
+            "hip_fgmres_sealed_checkpoint_continuation_capability_invalid"
+        )
+
+        context._release_global_recurrence_child(second_token)
+        active_token = None
+        with pytest.raises(HipFgmresSealedCheckpointTransactionV1Error) as reopened:
+            context._reserve_global_recurrence_child(
+                _mint_global_recurrence_child_lease_v1(),
+                continuation,
+            )
+        assert reopened.value.code == (
+            "hip_fgmres_sealed_checkpoint_continuation_capability_invalid"
+        )
+    finally:
+        if active_token is not None:
+            context._release_global_recurrence_child(active_token)
+        _close(values, opened)
+
+
+def test_global_recurrence_child_two_thread_reserve_race_has_one_winner(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    values, _, opened, _ = _open_sealed(monkeypatch)
+    context = opened.context
+    pending = context.enqueue_sealed_checkpoint_transaction()
+    continuation = context.synchronize_sealed_checkpoint_transaction(pending)
+    tokens = (
+        _mint_global_recurrence_child_lease_v1(),
+        _mint_global_recurrence_child_lease_v1(),
+    )
+    winner: object | None = None
+    try:
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            futures = [
+                pool.submit(
+                    context._reserve_global_recurrence_child,
+                    token,
+                    continuation,
+                )
+                for token in tokens
+            ]
+        successes: list[object] = []
+        failures: list[BaseException] = []
+        for future in futures:
+            try:
+                successes.append(future.result())
+            except BaseException as exc:
+                failures.append(exc)
+        assert len(successes) == len(failures) == 1
+        winner = successes[0]
+        assert winner in tokens
+        assert getattr(failures[0], "code", "") in {
+            "hip_fgmres_sealed_checkpoint_transaction_global_child_operation_reentrant",
+            "hip_fgmres_sealed_checkpoint_transaction_global_child_unavailable",
+        }
+        context._require_global_recurrence_child(
+            winner,
+            continuation_consumed=False,
+        )
+    finally:
+        if winner is not None:
+            context._release_global_recurrence_child(winner)
+        _close(values, opened)
+
+
+def test_global_recurrence_consume_without_recovery_registration_fails_closed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    values, _, opened, _ = _open_sealed(monkeypatch)
+    context = opened.context
+    kernel = values[-3]
+    loaded = kernel._runtime._runtime
+    pending = context.enqueue_sealed_checkpoint_transaction()
+    continuation = context.synchronize_sealed_checkpoint_transaction(pending)
+    binding = context._binding
+    assert binding is not None
+    token = _mint_global_recurrence_child_lease_v1()
+    active = False
+    try:
+        context._reserve_global_recurrence_child(token, continuation)
+        active = True
+        launch_count = len(loaded.launch_records)
+        sync_count = len(loaded.sync_streams)
+        query_count = len(loaded.query_streams)
+        pending_snapshot = kernel._checkpoint_pending_snapshot(
+            binding.checkpoint_owner_token
+        )
+
+        with pytest.raises(HipFgmresSealedCheckpointTransactionV1Error) as missing:
+            context._consume_global_recurrence_continuation_capability(
+                token,
+                continuation,
+            )
+        assert missing.value.code == (
+            "hip_fgmres_sealed_checkpoint_transaction_global_recovery_state_invalid"
+        )
+        assert not context._global_recurrence_continuation_capability_consumed(token)
+        assert context._global_recurrence_recovery_snapshot() is None
+        assert len(loaded.launch_records) == launch_count
+        assert len(loaded.sync_streams) == sync_count
+        assert len(loaded.query_streams) == query_count
+        assert (
+            kernel._checkpoint_pending_snapshot(binding.checkpoint_owner_token)
+            == pending_snapshot
+            == ()
+        )
+
+        context._release_global_recurrence_child(token)
+        active = False
+        assert (
+            validate_hip_fgmres_sealed_checkpoint_continuation_capability_v1(
+                continuation,
+                expected_context=context,
+            )
+            is continuation
+        )
+    finally:
+        if active:
+            context._release_global_recurrence_child(token)
+        _close(values, opened)
+
+
+def test_global_recurrence_consume_return_baseexception_reconciles_parent_bit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    values, _, opened, _ = _open_sealed(monkeypatch)
+    context = opened.context
+    pending = context.enqueue_sealed_checkpoint_transaction()
+    continuation = context.synchronize_sealed_checkpoint_transaction(pending)
+    token = _mint_global_recurrence_child_lease_v1()
+    context_type = type(context)
+    original_consume = context_type._consume_global_recurrence_continuation_capability
+
+    class InjectedInterruption(BaseException):
+        pass
+
+    def consume_then_interrupt(owner: Any, child: object, capability: Any) -> None:
+        original_consume(owner, child, capability)
+        raise InjectedInterruption("injected interruption after shared consume")
+
+    monkeypatch.setattr(
+        context_type,
+        "_consume_global_recurrence_continuation_capability",
+        consume_then_interrupt,
+    )
+    active = False
+    try:
+        context._reserve_global_recurrence_child(token, continuation)
+        active = True
+        _register_global_recurrence_recovery(context, token)
+        with pytest.raises(InjectedInterruption):
+            context._consume_global_recurrence_continuation_capability(
+                token,
+                continuation,
+            )
+        assert context._global_recurrence_continuation_capability_consumed(token)
+        context._require_global_recurrence_child(
+            token,
+            continuation_consumed=True,
+        )
+        with pytest.raises(HipFgmresSealedCheckpointTransactionV1Error):
+            validate_hip_fgmres_sealed_checkpoint_continuation_capability_v1(
+                continuation,
+                expected_context=context,
+            )
+        context._release_global_recurrence_child(token)
+        active = False
+        with pytest.raises(HipFgmresSealedCheckpointTransactionV1Error):
+            context._reserve_global_recurrence_child(
+                _mint_global_recurrence_child_lease_v1(),
+                continuation,
+            )
+    finally:
+        if active:
+            context._release_global_recurrence_child(token)
+        _close(values, opened)
+
+
+def test_global_recurrence_release_requires_exact_empty_pending_map(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    values, _, opened, _ = _open_sealed(monkeypatch)
+    kernel = values[-3]
+    context = opened.context
+    binding = context._binding
+    assert binding is not None
+    pending = context.enqueue_sealed_checkpoint_transaction()
+    continuation = context.synchronize_sealed_checkpoint_transaction(pending)
+    token = _mint_global_recurrence_child_lease_v1()
+    context._reserve_global_recurrence_child(token, continuation)
+    kernel_type = type(kernel)
+    original_snapshot = kernel_type._checkpoint_pending_snapshot
+    try:
+
+        def nonempty_zero_count_map(owner: Any, checkpoint_token: object) -> Any:
+            if checkpoint_token is binding.checkpoint_owner_token:
+                return ((binding.stream_pointer, 0),)
+            return original_snapshot(owner, checkpoint_token)
+
+        with monkeypatch.context() as patch:
+            patch.setattr(
+                kernel_type,
+                "_checkpoint_pending_snapshot",
+                nonempty_zero_count_map,
+            )
+            with pytest.raises(
+                HipFgmresSealedCheckpointTransactionV1Error
+            ) as malformed_authority:
+                context._global_recurrence_child_authority(
+                    token,
+                    continuation_consumed=False,
+                )
+            assert malformed_authority.value.code == (
+                "hip_fgmres_sealed_checkpoint_transaction_binding_changed"
+            )
+            with pytest.raises(HipFgmresSealedCheckpointTransactionV1Error) as rejected:
+                context._release_global_recurrence_child(token)
+            assert rejected.value.code == (
+                "hip_fgmres_sealed_checkpoint_transaction_global_child_pending"
+            )
+
+        def exact_two_operation_map(owner: Any, checkpoint_token: object) -> Any:
+            if checkpoint_token is binding.checkpoint_owner_token:
+                return ((binding.stream_pointer, 2),)
+            return original_snapshot(owner, checkpoint_token)
+
+        with monkeypatch.context() as patch:
+            patch.setattr(
+                kernel_type,
+                "_checkpoint_pending_snapshot",
+                exact_two_operation_map,
+            )
+            authority = context._global_recurrence_child_authority(
+                token,
+                continuation_consumed=False,
+                expected_pending_operation_bounds=(2, 2),
+            )
+            assert authority.stream_pointer == binding.stream_pointer
+        context._require_global_recurrence_child(
+            token,
+            continuation_consumed=False,
+        )
+    finally:
+        context._release_global_recurrence_child(token)
+        _close(values, opened)
+
+
+def test_global_recurrence_transition_callback_cannot_reenter_parent_close(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    values, _, opened, _ = _open_sealed(monkeypatch)
+    context = opened.context
+    pending = context.enqueue_sealed_checkpoint_transaction()
+    continuation = context.synchronize_sealed_checkpoint_transaction(pending)
+    token = _mint_global_recurrence_child_lease_v1()
+    context_type = type(context)
+    original_require_binding = context_type._require_current_binding
+    callback_failures: list[BaseException] = []
+    callback_count = 0
+
+    def require_binding_with_callback(owner: Any, **keywords: Any) -> None:
+        nonlocal callback_count
+        callback_count += 1
+        if callback_count == 1:
+            try:
+                owner.close()
+            except BaseException as exc:
+                callback_failures.append(exc)
+        original_require_binding(owner, **keywords)
+
+    monkeypatch.setattr(
+        context_type,
+        "_require_current_binding",
+        require_binding_with_callback,
+    )
+    active = False
+    try:
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            reserved = pool.submit(
+                context._reserve_global_recurrence_child,
+                token,
+                continuation,
+            ).result(timeout=5)
+        active = True
+        assert reserved is token
+        assert len(callback_failures) == 1
+        assert getattr(callback_failures[0], "code", "") == (
+            "hip_fgmres_sealed_checkpoint_transaction_global_child_operation_reentrant"
+        )
+        assert not context.closed
+    finally:
+        if active:
+            context._release_global_recurrence_child(token)
+        _close(values, opened)
+
+
+def test_global_recurrence_begin_return_interruptions_clear_exact_marker(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    values, _, opened, _ = _open_sealed(monkeypatch)
+    context = opened.context
+    pending = context.enqueue_sealed_checkpoint_transaction()
+    continuation = context.synchronize_sealed_checkpoint_transaction(pending)
+    token = _mint_global_recurrence_child_lease_v1()
+    context_type = type(context)
+    original_begin = context_type._begin_global_recurrence_child_operation
+
+    class InjectedInterruption(BaseException):
+        pass
+
+    def begin_then_interrupt(
+        owner: Any,
+        operation: str,
+        marker: object,
+    ) -> None:
+        original_begin(owner, operation, marker)
+        raise InjectedInterruption(operation)
+
+    active = False
+    try:
+        monkeypatch.setattr(
+            context_type,
+            "_begin_global_recurrence_child_operation",
+            begin_then_interrupt,
+        )
+        with pytest.raises(InjectedInterruption, match="reserve"):
+            context._reserve_global_recurrence_child(token, continuation)
+        assert context._global_recurrence_child_operation is None
+        assert context._global_recurrence_child_token is None
+
+        monkeypatch.setattr(
+            context_type,
+            "_begin_global_recurrence_child_operation",
+            original_begin,
+        )
+        assert context._reserve_global_recurrence_child(token, continuation) is token
+        active = True
+        _register_global_recurrence_recovery(context, token)
+
+        monkeypatch.setattr(
+            context_type,
+            "_begin_global_recurrence_child_operation",
+            begin_then_interrupt,
+        )
+        with pytest.raises(InjectedInterruption, match="consume"):
+            context._consume_global_recurrence_continuation_capability(
+                token,
+                continuation,
+            )
+        assert context._global_recurrence_child_operation is None
+        assert not context._global_recurrence_continuation_capability_consumed(token)
+
+        monkeypatch.setattr(
+            context_type,
+            "_begin_global_recurrence_child_operation",
+            original_begin,
+        )
+        context._consume_global_recurrence_continuation_capability(
+            token,
+            continuation,
+        )
+
+        monkeypatch.setattr(
+            context_type,
+            "_begin_global_recurrence_child_operation",
+            begin_then_interrupt,
+        )
+        with pytest.raises(InjectedInterruption, match="authority"):
+            context._global_recurrence_child_authority(
+                token,
+                continuation_consumed=True,
+            )
+        assert context._global_recurrence_child_operation is None
+
+        monkeypatch.setattr(
+            context_type,
+            "_begin_global_recurrence_child_operation",
+            original_begin,
+        )
+        authority = context._global_recurrence_child_authority(
+            token,
+            continuation_consumed=True,
+        )
+        assert authority.stream_pointer > 0
+
+        monkeypatch.setattr(
+            context_type,
+            "_begin_global_recurrence_child_operation",
+            begin_then_interrupt,
+        )
+        with pytest.raises(InjectedInterruption, match="release"):
+            context._release_global_recurrence_child(token)
+        assert context._global_recurrence_child_operation is None
+        context._require_global_recurrence_child(
+            token,
+            continuation_consumed=True,
+        )
+
+        monkeypatch.setattr(
+            context_type,
+            "_begin_global_recurrence_child_operation",
+            original_begin,
+        )
+        context._release_global_recurrence_child(token)
+        active = False
+        assert context._global_recurrence_child_token is None
+        assert context._global_recurrence_child_terminal
+    finally:
+        monkeypatch.setattr(
+            context_type,
+            "_begin_global_recurrence_child_operation",
+            original_begin,
+        )
+        if active:
+            context._release_global_recurrence_child(token)
+        _close(values, opened)
 
 
 def test_two_thread_open_and_enqueue_races_are_single_use(

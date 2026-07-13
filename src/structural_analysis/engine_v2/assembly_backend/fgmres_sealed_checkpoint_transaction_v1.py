@@ -90,6 +90,11 @@ _DELEGATED_OPERATOR_ROLES = (
     "reduced_csr_values",
 )
 _DELEGATED_WORKSPACE_ROLES = ("reduction_ping", "reduction_pong")
+_PHYSICAL_ROLES = (
+    *_DIRECT_ROLES,
+    *_DELEGATED_OPERATOR_ROLES,
+    *_DELEGATED_WORKSPACE_ROLES,
+)
 _ZERO_HASH = "sha256:" + "0" * 64
 _HASH_RE = re.compile(r"sha256:[0-9a-f]{64}\Z")
 _HEX_ADDRESS_RE = re.compile(r"(?i)\b0x[0-9a-f]+\b")
@@ -363,6 +368,145 @@ class _SealedTransactionLaunchBinding:
     kernel_binding_snapshot: tuple[Any, ...]
 
 
+@dataclass(frozen=True, slots=True, repr=False, eq=False)
+class _GlobalRecurrenceChildAuthorityV1:
+    """Internal immutable physical-16 witness for one reserved child."""
+
+    kernel: HipRtcFgmresV2Kernel
+    checkpoint_owner_token: object
+    loaded_runtime: Any
+    stream_pointer: int
+    device_ordinal: int
+    architecture: str
+    free_dof_count: int
+    reduced_csr_nnz: int
+    restart_dimension: int
+    max_iterations: int
+    maximum_restart_count: int
+    stagnation_checkpoint_limit: int
+    absolute_tolerance: float
+    relative_tolerance: float
+    authoritative_tolerance: float
+    stagnation_relative_tolerance: float
+    divergence_factor: float
+    physical_pointer_values: tuple[tuple[str, int], ...]
+    kernel_binding_snapshot: tuple[Any, ...]
+
+
+class _GlobalRecurrenceChildLeaseV1:
+    """Weak-parent lease held strongly only by the downstream owner."""
+
+    __slots__ = ("__weakref__",)
+
+
+@dataclass(frozen=True, slots=True)
+class _GlobalRecurrenceRecoverySnapshotV1:
+    """Non-authoritative private view of parent-owned cleanup progress."""
+
+    abandoned: bool
+    child_live: bool
+    continuation_consumed: bool
+    launch_limit: int
+    launch_attempt_count: int
+    launch_accept_lower_bound: int
+    launch_accept_upper_bound: int
+    poisoned: bool
+    fence_attempt_count: int
+    fence_observed: bool
+    ack_started: bool
+    acknowledged_launch_count: int | None
+    released: bool
+    terminal: bool
+
+
+class _GlobalRecurrenceRecoveryCellV1:
+    """Parent-owned authority for draining an abandoned global child.
+
+    The cell deliberately holds neither the downstream context nor its lease.
+    The only strong token retained here is the already parent-owned checkpoint
+    owner token needed by the exact frozen RTC cleanup authority.
+    """
+
+    __slots__ = (
+        "__weakref__",
+        "lease_reference",
+        "kernel",
+        "checkpoint_owner_token",
+        "stream_pointer",
+        "launch_limit",
+        "launch_attempt_count",
+        "launch_accept_lower_bound",
+        "launch_accept_upper_bound",
+        "poisoned",
+        "fence_attempt_count",
+        "fence_observed",
+        "ack_started",
+        "acknowledged_launch_count",
+        "released",
+        "terminal",
+        "abandoned",
+        "continuation_consumed",
+    )
+
+    def __init__(
+        self,
+        lease: _GlobalRecurrenceChildLeaseV1,
+        *,
+        kernel: HipRtcFgmresV2Kernel,
+        checkpoint_owner_token: object,
+        stream_pointer: int,
+        launch_limit: int,
+    ) -> None:
+        self.kernel = kernel
+        self.checkpoint_owner_token = checkpoint_owner_token
+        self.stream_pointer = stream_pointer
+        self.launch_limit = launch_limit
+        self.launch_attempt_count = 0
+        self.launch_accept_lower_bound = 0
+        self.launch_accept_upper_bound = 0
+        self.poisoned = False
+        self.fence_attempt_count = 0
+        self.fence_observed = False
+        self.ack_started = False
+        self.acknowledged_launch_count: int | None = None
+        self.released = False
+        self.terminal = False
+        self.abandoned = False
+        self.continuation_consumed = False
+        cell_reference = weakref.ref(self)
+
+        def mark_abandoned(_lease_reference: object) -> None:
+            cell = cell_reference()
+            if cell is not None and type(cell.released) is bool and not cell.released:
+                # A weakref callback may run on an arbitrary Python thread.  It
+                # records liveness only; HIP/runtime calls belong to close().
+                cell.abandoned = True
+
+        self.lease_reference = weakref.ref(lease, mark_abandoned)
+
+    def snapshot(self) -> _GlobalRecurrenceRecoverySnapshotV1:
+        return _GlobalRecurrenceRecoverySnapshotV1(
+            abandoned=self.abandoned,
+            child_live=self.lease_reference() is not None,
+            continuation_consumed=self.continuation_consumed,
+            launch_limit=self.launch_limit,
+            launch_attempt_count=self.launch_attempt_count,
+            launch_accept_lower_bound=self.launch_accept_lower_bound,
+            launch_accept_upper_bound=self.launch_accept_upper_bound,
+            poisoned=self.poisoned,
+            fence_attempt_count=self.fence_attempt_count,
+            fence_observed=self.fence_observed,
+            ack_started=self.ack_started,
+            acknowledged_launch_count=self.acknowledged_launch_count,
+            released=self.released,
+            terminal=self.terminal,
+        )
+
+
+def _mint_global_recurrence_child_lease_v1() -> _GlobalRecurrenceChildLeaseV1:
+    return _GlobalRecurrenceChildLeaseV1()
+
+
 _CONTEXT_MINT = object()
 
 
@@ -423,6 +567,15 @@ class HipFgmresSealedCheckpointTransactionExecutionContextV1:
         self._pending_nonce = object()
         self._continuation_nonce = object()
         self._pending_consume_started = False
+        self._global_recurrence_child_token: (
+            weakref.ReferenceType[_GlobalRecurrenceChildLeaseV1] | None
+        ) = None
+        self._global_recurrence_child_operation: tuple[str, object] | None = None
+        self._global_recurrence_child_terminal = False
+        self._global_recurrence_recovery_cell: (
+            _GlobalRecurrenceRecoveryCellV1 | None
+        ) = None
+        self._continuation_consumed = False
         self._child_released = False
         self._closed = False
         self._active_operation: str | None = None
@@ -587,6 +740,27 @@ class HipFgmresSealedCheckpointTransactionExecutionContextV1:
             if self._closed:
                 return
             try:
+                self._recover_abandoned_global_recurrence_child()
+            except Exception as exc:
+                raise HipFgmresSealedCheckpointTransactionV1Error(
+                    "hip_fgmres_sealed_checkpoint_transaction_cleanup_failed",
+                    "/cleanup/global_recurrence_recovery",
+                    _detail(exc),
+                    cleanup_owner=self,
+                ) from exc
+            if self._global_recurrence_child_operation is not None:
+                _fail(
+                    "hip_fgmres_sealed_checkpoint_transaction_global_child_operation_reentrant",
+                    "/lifetime/global_recurrence_child/operation",
+                    cleanup_owner=self,
+                )
+            if self._global_recurrence_child_token is not None:
+                _fail(
+                    "hip_fgmres_sealed_checkpoint_transaction_global_child_active",
+                    "/lifetime/global_recurrence_child",
+                    cleanup_owner=self,
+                )
+            try:
                 if self._state in {
                     "transaction_pending",
                     "poisoned_pending_fence",
@@ -621,6 +795,1137 @@ class HipFgmresSealedCheckpointTransactionExecutionContextV1:
             self._state = "context_closed"
             with _TRANSACTION_BINDING_LOCK:
                 _TRANSACTION_BINDINGS.pop(self, None)
+
+    def _reserve_global_recurrence_child(
+        self,
+        token: object,
+        capability: HipFgmresSealedCheckpointContinuationCapabilityV1,
+    ) -> object:
+        """Reserve the sole later-recurrence child without consuming continuity."""
+
+        if type(token) is not _GlobalRecurrenceChildLeaseV1:
+            _fail(
+                "hip_fgmres_sealed_checkpoint_transaction_global_child_token_invalid",
+                "/lifetime/global_recurrence_child",
+            )
+        operation_marker = object()
+        try:
+            self._begin_global_recurrence_child_operation(
+                "reserve",
+                operation_marker,
+            )
+            self._reap_abandoned_global_recurrence_child()
+            with self._lock:
+                self._require_current_continuation_locked(
+                    capability,
+                    continuation_consumed=False,
+                )
+                if (
+                    self._global_recurrence_child_terminal
+                    or self._global_recurrence_child_token is not None
+                ):
+                    _fail(
+                        "hip_fgmres_sealed_checkpoint_transaction_global_child_unavailable",
+                        "/lifetime/global_recurrence_child",
+                        cleanup_owner=self,
+                    )
+            self._require_current_binding(
+                expected_pending_operation_bounds=(0, 0),
+                expected_binding=self._require_frozen_binding(),
+            )
+            self._require_exact_empty_pending_map()
+            with self._lock:
+                self._require_current_continuation_locked(
+                    capability,
+                    continuation_consumed=False,
+                )
+                if (
+                    self._global_recurrence_child_terminal
+                    or self._global_recurrence_child_token is not None
+                ):
+                    _fail(
+                        "hip_fgmres_sealed_checkpoint_transaction_global_child_unavailable",
+                        "/lifetime/global_recurrence_child",
+                        cleanup_owner=self,
+                    )
+                self._global_recurrence_child_token = weakref.ref(token)
+                return token
+        finally:
+            self._finish_global_recurrence_child_operation(operation_marker)
+
+    def _register_global_recurrence_recovery_cell(
+        self,
+        token: object,
+        *,
+        kernel: HipRtcFgmresV2Kernel,
+        checkpoint_owner_token: object,
+        stream_pointer: int,
+        launch_limit: int,
+    ) -> None:
+        """Freeze cleanup authority before continuation consumption begins."""
+
+        if (
+            type(token) is not _GlobalRecurrenceChildLeaseV1
+            or type(kernel) is not HipRtcFgmresV2Kernel
+            or type(stream_pointer) is not int
+            or stream_pointer <= 0
+            or type(launch_limit) is not int
+            or launch_limit <= 0
+        ):
+            _fail(
+                "hip_fgmres_sealed_checkpoint_transaction_global_recovery_registration_invalid",
+                "/lifetime/global_recurrence_child/recovery",
+                cleanup_owner=self,
+            )
+        operation_marker = object()
+        try:
+            self._begin_global_recurrence_child_operation(
+                "register_recovery",
+                operation_marker,
+            )
+            binding = self._require_frozen_binding()
+            self._require_current_binding(
+                expected_pending_operation_bounds=(0, 0),
+                expected_binding=binding,
+            )
+            with self._lock:
+                self._require_global_recurrence_child_locked(
+                    token,
+                    continuation_consumed=False,
+                )
+                if (
+                    self._global_recurrence_recovery_cell is not None
+                    or kernel is not binding.kernel
+                    or checkpoint_owner_token is not binding.checkpoint_owner_token
+                    or stream_pointer != binding.stream_pointer
+                ):
+                    _fail(
+                        "hip_fgmres_sealed_checkpoint_transaction_global_recovery_registration_invalid",
+                        "/lifetime/global_recurrence_child/recovery",
+                        cleanup_owner=self,
+                    )
+                self._global_recurrence_recovery_cell = _GlobalRecurrenceRecoveryCellV1(
+                    token,
+                    kernel=kernel,
+                    checkpoint_owner_token=checkpoint_owner_token,
+                    stream_pointer=stream_pointer,
+                    launch_limit=launch_limit,
+                )
+        finally:
+            self._finish_global_recurrence_child_operation(operation_marker)
+
+    def _global_recurrence_recovery_snapshot(
+        self,
+    ) -> _GlobalRecurrenceRecoverySnapshotV1 | None:
+        """Return private lifecycle progress without exposing cleanup handles."""
+
+        with self._lock:
+            cell = self._global_recurrence_recovery_cell
+            return None if cell is None else cell.snapshot()
+
+    def _require_global_recurrence_child(
+        self,
+        token: object,
+        *,
+        continuation_consumed: bool | None = None,
+    ) -> None:
+        """Require the exact active child and, optionally, its consume state."""
+
+        with self._lock:
+            if self._global_recurrence_child_operation is not None:
+                _fail(
+                    "hip_fgmres_sealed_checkpoint_transaction_global_child_operation_reentrant",
+                    "/lifetime/global_recurrence_child/operation",
+                    cleanup_owner=self,
+                )
+            self._require_global_recurrence_child_locked(
+                token,
+                continuation_consumed=continuation_consumed,
+            )
+
+    def _global_recurrence_child_token_is_active(self, token: object) -> bool:
+        """Observe only whether one exact private child token remains active.
+
+        The query deliberately does not require the parent to remain open.  A
+        child uses it only to reconcile an exception raised after reserve or
+        release changed parent state but before that result reached the child.
+        """
+
+        if type(token) is not _GlobalRecurrenceChildLeaseV1:
+            _fail(
+                "hip_fgmres_sealed_checkpoint_transaction_global_child_token_invalid",
+                "/lifetime/global_recurrence_child",
+                cleanup_owner=self,
+            )
+        with self._lock:
+            if self._global_recurrence_child_operation is not None:
+                _fail(
+                    "hip_fgmres_sealed_checkpoint_transaction_global_child_operation_reentrant",
+                    "/lifetime/global_recurrence_child/operation",
+                    cleanup_owner=self,
+                )
+            active = self._active_global_recurrence_child_locked()
+            if active is None:
+                cell = self._global_recurrence_recovery_cell
+                if (
+                    type(cell) is _GlobalRecurrenceRecoveryCellV1
+                    and cell.released
+                    and not cell.terminal
+                    and not self._continuation_consumed
+                ):
+                    self._global_recurrence_recovery_cell = None
+            return token is active
+
+    def _consume_global_recurrence_continuation_capability(
+        self,
+        token: object,
+        capability: HipFgmresSealedCheckpointContinuationCapabilityV1,
+    ) -> None:
+        """Atomically consume continuation at the later-recurrence enqueue edge."""
+
+        operation_marker = object()
+        try:
+            self._begin_global_recurrence_child_operation(
+                "consume",
+                operation_marker,
+            )
+            with self._lock:
+                self._require_global_recurrence_child_locked(
+                    token,
+                    continuation_consumed=False,
+                )
+                self._require_current_continuation_locked(
+                    capability,
+                    continuation_consumed=False,
+                )
+            self._require_current_binding(
+                expected_pending_operation_bounds=(0, 0),
+                expected_binding=self._require_frozen_binding(),
+            )
+            self._require_exact_empty_pending_map()
+            with self._lock:
+                self._require_global_recurrence_child_locked(
+                    token,
+                    continuation_consumed=False,
+                )
+                self._require_current_continuation_locked(
+                    capability,
+                    continuation_consumed=False,
+                )
+                cell = self._global_recurrence_recovery_cell
+                if (
+                    type(cell) is not _GlobalRecurrenceRecoveryCellV1
+                    or cell.lease_reference() is not token
+                ):
+                    self._fail_global_recurrence_recovery_progress_locked()
+                self._reconcile_global_recurrence_consumed_locked(cell)
+                if cell.continuation_consumed:
+                    self._fail_global_recurrence_recovery_progress_locked()
+                self._validate_global_recurrence_recovery_cell_locked(cell)
+                # This is deliberately the final fallible state change.  A caller
+                # interrupted after return can reconcile this shared bit exactly.
+                self._continuation_consumed = True
+                cell.continuation_consumed = True
+        finally:
+            self._finish_global_recurrence_child_operation(operation_marker)
+
+    def _global_recurrence_continuation_capability_consumed(
+        self,
+        token: object,
+    ) -> bool:
+        """Return the exact parent-owned consume bit for interruption repair."""
+
+        with self._lock:
+            if self._global_recurrence_child_operation is not None:
+                _fail(
+                    "hip_fgmres_sealed_checkpoint_transaction_global_child_operation_reentrant",
+                    "/lifetime/global_recurrence_child/operation",
+                    cleanup_owner=self,
+                )
+            self._require_global_recurrence_child_locked(token)
+            cell = self._global_recurrence_recovery_cell
+            if cell is not None:
+                if cell.lease_reference() is not token:
+                    self._fail_global_recurrence_recovery_progress_locked()
+                self._reconcile_global_recurrence_consumed_locked(cell)
+            return self._continuation_consumed
+
+    def _record_global_recurrence_launch_started(self, token: object) -> None:
+        """Durably reserve one conservative accepted-work upper bound."""
+
+        with self._lock:
+            cell = self._require_global_recurrence_recovery_cell_locked(token)
+            if (
+                not cell.continuation_consumed
+                or cell.fence_attempt_count != 0
+                or cell.ack_started
+                or cell.released
+                or cell.launch_attempt_count >= cell.launch_limit
+                or cell.launch_accept_upper_bound >= cell.launch_limit
+            ):
+                self._fail_global_recurrence_recovery_progress_locked()
+            cell.launch_attempt_count += 1
+            # Pessimistically include the row before the fallible dispatch.  A
+            # rejected/not-attempted return narrows this bound afterwards.
+            cell.launch_accept_upper_bound += 1
+
+    def _record_global_recurrence_launch_succeeded(self, token: object) -> None:
+        with self._lock:
+            cell = self._require_global_recurrence_recovery_cell_locked(token)
+            if (
+                cell.launch_accept_lower_bound >= cell.launch_accept_upper_bound
+                or cell.launch_accept_lower_bound >= cell.launch_limit
+                or cell.fence_attempt_count != 0
+                or cell.ack_started
+                or cell.released
+            ):
+                self._fail_global_recurrence_recovery_progress_locked()
+            cell.launch_accept_lower_bound += 1
+
+    def _record_global_recurrence_launch_failed(
+        self,
+        token: object,
+        *,
+        definitely_not_accepted: bool,
+    ) -> None:
+        if type(definitely_not_accepted) is not bool:
+            self._fail_global_recurrence_recovery_progress_locked()
+        with self._lock:
+            cell = self._require_global_recurrence_recovery_cell_locked(token)
+            if (
+                cell.launch_attempt_count == 0
+                or cell.launch_accept_upper_bound <= cell.launch_accept_lower_bound
+                or cell.fence_attempt_count != 0
+                or cell.ack_started
+                or cell.released
+            ):
+                self._fail_global_recurrence_recovery_progress_locked()
+            if definitely_not_accepted:
+                cell.launch_accept_upper_bound -= 1
+
+    def _record_global_recurrence_poisoned(self, token: object) -> None:
+        with self._lock:
+            # Poisoning is a fail-safe ledger transition and performs no HIP
+            # work.  It must remain possible after a frozen authority mismatch
+            # so the live child can close without publishing completion once
+            # the exact private field is restored.
+            cell = self._require_global_recurrence_poison_cell_locked(token)
+            if cell.released:
+                self._fail_global_recurrence_recovery_progress_locked()
+            cell.poisoned = True
+
+    def _record_global_recurrence_fence_attempt(self, token: object) -> None:
+        with self._lock:
+            cell = self._require_global_recurrence_recovery_cell_locked(token)
+            if cell.ack_started or cell.released:
+                self._fail_global_recurrence_recovery_progress_locked()
+            cell.fence_attempt_count += 1
+
+    def _global_recurrence_fence_required(self, token: object) -> bool:
+        """Reconcile a lost successful-sync return before a live retry."""
+
+        with self._lock:
+            cell = self._require_global_recurrence_recovery_cell_locked(token)
+            if cell.ack_started or cell.released:
+                self._fail_global_recurrence_recovery_progress_locked()
+            if cell.fence_observed:
+                return False
+            if cell.fence_attempt_count == 0:
+                return True
+            kernel = cell.kernel
+            checkpoint_owner_token = cell.checkpoint_owner_token
+            stream_pointer = cell.stream_pointer
+        complete = kernel._query_checkpoint_stream_completion(
+            checkpoint_owner_token,
+            stream_pointer,
+        )
+        if type(complete) is not bool:
+            self._fail_global_recurrence_recovery_progress_locked()
+        if not complete:
+            return True
+        with self._lock:
+            current = self._require_global_recurrence_recovery_cell_locked(token)
+            if (
+                current is not cell
+                or current.kernel is not kernel
+                or current.checkpoint_owner_token is not checkpoint_owner_token
+                or current.stream_pointer != stream_pointer
+                or current.ack_started
+                or current.released
+            ):
+                self._fail_global_recurrence_recovery_progress_locked()
+            current.fence_observed = True
+        return False
+
+    def _record_global_recurrence_fence_observed(self, token: object) -> None:
+        with self._lock:
+            cell = self._require_global_recurrence_recovery_cell_locked(token)
+            if cell.fence_attempt_count <= 0 or cell.ack_started or cell.released:
+                self._fail_global_recurrence_recovery_progress_locked()
+            cell.fence_observed = True
+
+    def _record_global_recurrence_ack_started(self, token: object) -> None:
+        with self._lock:
+            cell = self._require_global_recurrence_recovery_cell_locked(token)
+            if not cell.fence_observed or cell.released:
+                self._fail_global_recurrence_recovery_progress_locked()
+            cell.ack_started = True
+
+    def _record_global_recurrence_acknowledged(
+        self,
+        token: object,
+        consumed_launch_count: int,
+    ) -> None:
+        if type(consumed_launch_count) is not int:
+            self._fail_global_recurrence_recovery_progress_locked()
+        with self._lock:
+            cell = self._require_global_recurrence_recovery_cell_locked(token)
+            if (
+                not cell.ack_started
+                or cell.released
+                or not cell.launch_accept_lower_bound
+                <= consumed_launch_count
+                <= cell.launch_accept_upper_bound
+            ):
+                self._fail_global_recurrence_recovery_progress_locked()
+            previous = cell.acknowledged_launch_count
+            if previous is not None and previous != consumed_launch_count:
+                self._fail_global_recurrence_recovery_progress_locked()
+            cell.acknowledged_launch_count = consumed_launch_count
+
+    def _global_recurrence_recovery_progress(
+        self,
+        token: object,
+        *,
+        allow_release_in_progress: bool = False,
+    ) -> _GlobalRecurrenceRecoverySnapshotV1:
+        """Return exact parent-ledger progress to its still-live child only."""
+
+        if type(allow_release_in_progress) is not bool:
+            self._fail_global_recurrence_recovery_progress_locked()
+        with self._lock:
+            cell = self._require_global_recurrence_recovery_cell_locked(
+                token,
+                allow_release_in_progress=allow_release_in_progress,
+            )
+            if cell.released:
+                if not allow_release_in_progress:
+                    self._fail_global_recurrence_recovery_progress_locked()
+                pending = cell.kernel._checkpoint_pending_snapshot(
+                    cell.checkpoint_owner_token
+                )
+                if pending != ():
+                    self._fail_global_recurrence_recovery_progress_locked()
+            return cell.snapshot()
+
+    def _global_recurrence_child_authority(
+        self,
+        token: object,
+        *,
+        continuation_consumed: bool,
+        expected_pending_operation_bounds: tuple[int, int] = (0, 0),
+    ) -> _GlobalRecurrenceChildAuthorityV1:
+        """Capture the exact live physical-16 lineage without exposing a dict."""
+
+        if type(continuation_consumed) is not bool:
+            _fail(
+                "hip_fgmres_sealed_checkpoint_transaction_continuation_state_invalid",
+                "/continuation_capability/consumed",
+                cleanup_owner=self,
+            )
+        if (
+            type(expected_pending_operation_bounds) is not tuple
+            or len(expected_pending_operation_bounds) != 2
+            or any(
+                type(value) is not int for value in expected_pending_operation_bounds
+            )
+            or not 0
+            <= expected_pending_operation_bounds[0]
+            <= expected_pending_operation_bounds[1]
+        ):
+            _fail(
+                "hip_fgmres_sealed_checkpoint_transaction_global_child_pending_expectation_invalid",
+                "/kernel/pending_operation_bounds",
+                cleanup_owner=self,
+            )
+        operation_marker = object()
+        try:
+            self._begin_global_recurrence_child_operation(
+                "authority",
+                operation_marker,
+            )
+            with self._lock:
+                self._require_global_recurrence_child_locked(
+                    token,
+                    continuation_consumed=continuation_consumed,
+                )
+            binding = self._require_frozen_binding()
+            self._require_current_binding(
+                expected_pending_operation_bounds=expected_pending_operation_bounds,
+                expected_binding=binding,
+            )
+            canonical = self._require_canonical()
+            with canonical._lock:
+                canonical._require_sealed_checkpoint_transaction_child(
+                    self._token,
+                    capability_consumed=True,
+                )
+                live = canonical._require_live()
+                recurrence = live._recurrence_plan
+                source_plan = live._source_plan
+                projection = canonical._projection
+                canonical_bindings = canonical._bindings
+                sealed_bindings = self._bindings
+                direct = tuple(live._group_capabilities)
+                try:
+                    delegated = tuple(projection.ordered_resources)
+                    physical_pointer_values = tuple(
+                        (role, int(canonical._pointers[role]))
+                        for role in _PHYSICAL_ROLES
+                    )
+                    direct_pointer_values = tuple(
+                        int(row.pointer_snapshot) for row in direct
+                    )
+                    delegated_pointer_values = tuple(
+                        int(row.pointer_snapshot) for row in delegated
+                    )
+                except Exception as exc:
+                    raise HipFgmresSealedCheckpointTransactionV1Error(
+                        "hip_fgmres_sealed_checkpoint_transaction_global_child_authority_invalid",
+                        "/authority/physical16",
+                        _detail(exc),
+                        cleanup_owner=self,
+                    ) from exc
+                policy = None if source_plan is None else source_plan.policy
+                identity = binding.kernel.identity
+                if (
+                    recurrence is None
+                    or source_plan is None
+                    or policy is None
+                    or projection is None
+                    or canonical_bindings is None
+                    or sealed_bindings is None
+                    or binding.kernel is not live._kernel
+                    or binding.checkpoint_owner_token is not live._checkpoint_token
+                    or binding.loaded_runtime is not live._loaded_runtime
+                    or binding.stream_pointer != live._stream_pointer_snapshot
+                    or projection.runtime is not live._runtime
+                    or projection.loaded_runtime is not live._loaded_runtime
+                    or projection.stream is not live._stream
+                    or type(live._device_ordinal) is not int
+                    or live._device_ordinal < 0
+                    or projection.device_ordinal != live._device_ordinal
+                    or type(live._architecture) is not str
+                    or not live._architecture
+                    or identity.architecture != live._architecture
+                    or identity.identity_hash != sealed_bindings.kernel_identity_hash
+                    or identity.source_sha256 != sealed_bindings.kernel_source_sha256
+                    or tuple(row.role for row in direct) != _DIRECT_ROLES
+                    or tuple(row.role for row in delegated)
+                    != (*_DELEGATED_OPERATOR_ROLES, *_DELEGATED_WORKSPACE_ROLES)
+                    or tuple(role for role, _pointer in physical_pointer_values)
+                    != _PHYSICAL_ROLES
+                    or tuple(pointer for _role, pointer in physical_pointer_values[:11])
+                    != direct_pointer_values
+                    or tuple(pointer for _role, pointer in physical_pointer_values[11:])
+                    != delegated_pointer_values
+                    or binding.pointer_values != direct_pointer_values
+                    or len({pointer for _role, pointer in physical_pointer_values})
+                    != 16
+                    or any(pointer <= 0 for _role, pointer in physical_pointer_values)
+                    or binding.free_dof_count != recurrence.free_dof_count
+                    or binding.restart_dimension != recurrence.restart_dimension
+                    or binding.max_iterations != recurrence.max_iterations
+                    or binding.maximum_restart_count != recurrence.maximum_restart_count
+                    or binding.stagnation_checkpoint_limit
+                    != policy.stagnation_checkpoint_limit
+                    or binding.absolute_tolerance != policy.absolute_tolerance
+                    or binding.relative_tolerance != policy.relative_tolerance
+                    or binding.authoritative_tolerance
+                    != source_plan.source_residual_tolerance
+                    or binding.stagnation_relative_tolerance
+                    != policy.stagnation_relative_tolerance
+                    or binding.divergence_factor != policy.divergence_factor
+                    or binding.kernel_binding_snapshot != live._kernel_binding_snapshot
+                    or canonical_bindings.direct_generation_binding_hash
+                    != sealed_bindings.direct_generation_binding_hash
+                    or canonical_bindings.physical_projection_hash
+                    != sealed_bindings.physical_projection_hash
+                ):
+                    _fail(
+                        "hip_fgmres_sealed_checkpoint_transaction_global_child_authority_invalid",
+                        "/authority/physical16",
+                        cleanup_owner=self,
+                    )
+                authority = _GlobalRecurrenceChildAuthorityV1(
+                    kernel=binding.kernel,
+                    checkpoint_owner_token=binding.checkpoint_owner_token,
+                    loaded_runtime=binding.loaded_runtime,
+                    stream_pointer=binding.stream_pointer,
+                    device_ordinal=live._device_ordinal,
+                    architecture=live._architecture,
+                    free_dof_count=recurrence.free_dof_count,
+                    reduced_csr_nnz=recurrence.reduced_csr_nnz,
+                    restart_dimension=recurrence.restart_dimension,
+                    max_iterations=recurrence.max_iterations,
+                    maximum_restart_count=recurrence.maximum_restart_count,
+                    stagnation_checkpoint_limit=binding.stagnation_checkpoint_limit,
+                    absolute_tolerance=binding.absolute_tolerance,
+                    relative_tolerance=binding.relative_tolerance,
+                    authoritative_tolerance=binding.authoritative_tolerance,
+                    stagnation_relative_tolerance=(
+                        binding.stagnation_relative_tolerance
+                    ),
+                    divergence_factor=binding.divergence_factor,
+                    physical_pointer_values=physical_pointer_values,
+                    kernel_binding_snapshot=binding.kernel_binding_snapshot,
+                )
+            with self._lock:
+                self._require_global_recurrence_child_locked(
+                    token,
+                    continuation_consumed=continuation_consumed,
+                )
+            return authority
+        finally:
+            self._finish_global_recurrence_child_operation(operation_marker)
+
+    def _release_global_recurrence_child(self, token: object) -> None:
+        """Release only after the shared stream reservation map is exactly empty."""
+
+        operation_marker = object()
+        try:
+            self._begin_global_recurrence_child_operation(
+                "release",
+                operation_marker,
+            )
+            with self._lock:
+                self._require_global_recurrence_child_locked(token)
+            self._require_exact_empty_pending_map()
+            self._require_current_binding(
+                expected_pending_operation_bounds=(0, 0),
+                expected_binding=self._require_frozen_binding(),
+            )
+            with self._lock:
+                self._require_global_recurrence_child_locked(token)
+                cell = self._global_recurrence_recovery_cell
+                if cell is not None:
+                    if cell.lease_reference() is not token:
+                        _fail(
+                            "hip_fgmres_sealed_checkpoint_transaction_global_recovery_state_invalid",
+                            "/lifetime/global_recurrence_child/recovery",
+                            cleanup_owner=self,
+                        )
+                    self._reconcile_global_recurrence_consumed_locked(cell)
+                    self._validate_global_recurrence_recovery_cell_locked(
+                        cell,
+                        allow_release_in_progress=(cell.released is True),
+                    )
+                    if not cell.released:
+                        cell.released = True
+                if self._continuation_consumed:
+                    if cell is not None and not cell.terminal:
+                        cell.terminal = True
+                    if not self._global_recurrence_child_terminal:
+                        self._global_recurrence_child_terminal = True
+                    self._global_recurrence_child_token = None
+                else:
+                    self._global_recurrence_child_token = None
+                    self._global_recurrence_recovery_cell = None
+        finally:
+            self._finish_global_recurrence_child_operation(operation_marker)
+
+    def _begin_global_recurrence_child_operation(
+        self,
+        operation: str,
+        marker: object,
+    ) -> None:
+        """Mark a transition while keeping parent locks out of lower callbacks."""
+
+        with self._lock:
+            if (
+                self._active_operation is not None
+                or self._global_recurrence_child_operation is not None
+            ):
+                _fail(
+                    "hip_fgmres_sealed_checkpoint_transaction_global_child_operation_reentrant",
+                    "/lifetime/global_recurrence_child/operation",
+                    cleanup_owner=self,
+                )
+            self._global_recurrence_child_operation = (operation, marker)
+
+    def _finish_global_recurrence_child_operation(self, marker: object) -> None:
+        with self._lock:
+            active = self._global_recurrence_child_operation
+            if active is not None and active[1] is marker:
+                self._global_recurrence_child_operation = None
+
+    def _require_global_recurrence_child_locked(
+        self,
+        token: object,
+        *,
+        continuation_consumed: bool | None = None,
+    ) -> None:
+        if token is not self._active_global_recurrence_child_locked():
+            _fail(
+                "hip_fgmres_sealed_checkpoint_transaction_global_child_token_invalid",
+                "/lifetime/global_recurrence_child",
+            )
+        if self._closed or self._state != "transaction_fenced":
+            _fail(
+                "hip_fgmres_sealed_checkpoint_transaction_global_child_unavailable",
+                "/lifetime/global_recurrence_child",
+                cleanup_owner=self,
+            )
+        if (
+            continuation_consumed is not None
+            and self._continuation_consumed is not continuation_consumed
+        ):
+            _fail(
+                "hip_fgmres_sealed_checkpoint_transaction_continuation_state_invalid",
+                "/continuation_capability/consumed",
+                cleanup_owner=self,
+            )
+
+    def _require_global_recurrence_recovery_cell_locked(
+        self,
+        token: object,
+        *,
+        allow_release_in_progress: bool = False,
+    ) -> _GlobalRecurrenceRecoveryCellV1:
+        if type(allow_release_in_progress) is not bool:
+            self._fail_global_recurrence_recovery_progress_locked()
+        self._require_global_recurrence_child_locked(
+            token,
+            continuation_consumed=True,
+        )
+        cell = self._global_recurrence_recovery_cell
+        if (
+            type(cell) is not _GlobalRecurrenceRecoveryCellV1
+            or cell.lease_reference() is not token
+        ):
+            self._fail_global_recurrence_recovery_progress_locked()
+        self._reconcile_global_recurrence_consumed_locked(cell)
+        if not cell.continuation_consumed:
+            self._fail_global_recurrence_recovery_progress_locked()
+        self._validate_global_recurrence_recovery_cell_locked(
+            cell,
+            allow_release_in_progress=allow_release_in_progress,
+        )
+        return cell
+
+    def _require_global_recurrence_poison_cell_locked(
+        self,
+        token: object,
+    ) -> _GlobalRecurrenceRecoveryCellV1:
+        """Require exact live ledger state while deliberately doing no HIP work."""
+
+        self._require_global_recurrence_child_locked(
+            token,
+            continuation_consumed=True,
+        )
+        cell = self._global_recurrence_recovery_cell
+        if (
+            type(cell) is not _GlobalRecurrenceRecoveryCellV1
+            or cell.lease_reference() is not token
+        ):
+            self._fail_global_recurrence_recovery_progress_locked()
+        self._reconcile_global_recurrence_consumed_locked(cell)
+        if not cell.continuation_consumed:
+            self._fail_global_recurrence_recovery_progress_locked()
+        self._validate_global_recurrence_recovery_ledger_locked(cell)
+        return cell
+
+    def _reconcile_global_recurrence_consumed_locked(
+        self,
+        cell: _GlobalRecurrenceRecoveryCellV1,
+    ) -> None:
+        """Complete the monotonic parent-bit -> recovery-cell transition."""
+
+        if (
+            type(self._continuation_consumed) is not bool
+            or type(cell.continuation_consumed) is not bool
+        ):
+            self._fail_global_recurrence_recovery_progress_locked()
+        if self._continuation_consumed:
+            if not cell.continuation_consumed:
+                cell.continuation_consumed = True
+            return
+        if cell.continuation_consumed:
+            self._fail_global_recurrence_recovery_progress_locked()
+
+    def _fail_global_recurrence_recovery_progress_locked(self) -> NoReturn:
+        _fail(
+            "hip_fgmres_sealed_checkpoint_transaction_global_recovery_state_invalid",
+            "/lifetime/global_recurrence_child/recovery",
+            cleanup_owner=self,
+        )
+
+    def _active_global_recurrence_child_locked(
+        self,
+    ) -> _GlobalRecurrenceChildLeaseV1 | None:
+        reference = self._global_recurrence_child_token
+        return None if reference is None else reference()
+
+    def _reap_abandoned_global_recurrence_child(self) -> None:
+        """Lazily release only a dead, unconsumed, stream-idle weak lease."""
+
+        with self._lock:
+            reference = self._global_recurrence_child_token
+            cell = self._global_recurrence_recovery_cell
+            abandoned = (
+                reference is not None
+                and reference() is None
+                and not self._continuation_consumed
+            )
+        if not abandoned:
+            return
+        self._require_exact_empty_pending_map()
+        with self._lock:
+            reference = self._global_recurrence_child_token
+            if (
+                reference is not None
+                and reference() is None
+                and not self._continuation_consumed
+            ):
+                cell = self._global_recurrence_recovery_cell
+                if cell is not None:
+                    if cell.lease_reference() is not None or cell.continuation_consumed:
+                        self._fail_global_recurrence_recovery_progress_locked()
+                    cell.abandoned = True
+                    cell.released = True
+                self._global_recurrence_recovery_cell = None
+                self._global_recurrence_child_token = None
+
+    def _recover_abandoned_global_recurrence_child(self) -> None:
+        """Drain only a dead registered child through frozen cleanup authority."""
+
+        self._reap_abandoned_global_recurrence_child()
+        with self._lock:
+            reference = self._global_recurrence_child_token
+            cell = self._global_recurrence_recovery_cell
+            if reference is None:
+                if cell is None:
+                    return
+                if (
+                    cell.released
+                    and cell.terminal
+                    and self._global_recurrence_child_terminal
+                    and self._continuation_consumed
+                ):
+                    return
+                self._fail_global_recurrence_recovery_progress_locked()
+            if reference() is not None:
+                return
+            if type(cell) is not _GlobalRecurrenceRecoveryCellV1:
+                self._fail_global_recurrence_recovery_progress_locked()
+            cell.abandoned = True
+            self._reconcile_global_recurrence_consumed_locked(cell)
+            if (
+                cell.lease_reference() is not None
+                or not self._continuation_consumed
+                or not cell.continuation_consumed
+            ):
+                self._fail_global_recurrence_recovery_progress_locked()
+            if cell.released:
+                self._validate_global_recurrence_recovery_cell_locked(
+                    cell,
+                    allow_release_in_progress=True,
+                )
+                if self._global_recurrence_recovery_pending_snapshot(cell):
+                    self._fail_global_recurrence_recovery_progress_locked()
+                self._terminally_release_abandoned_global_recurrence(cell)
+                return
+            if cell.terminal:
+                self._fail_global_recurrence_recovery_progress_locked()
+            self._validate_global_recurrence_recovery_cell_locked(cell)
+
+        pending = self._global_recurrence_recovery_pending_snapshot(cell)
+        lower = cell.launch_accept_lower_bound
+        upper = cell.launch_accept_upper_bound
+        if not pending:
+            if cell.ack_started:
+                acknowledged = cell.acknowledged_launch_count
+                if acknowledged is None:
+                    if lower == upper:
+                        acknowledged = upper
+                        with self._lock:
+                            if cell is not self._global_recurrence_recovery_cell:
+                                self._fail_global_recurrence_recovery_progress_locked()
+                            cell.acknowledged_launch_count = acknowledged
+                    else:
+                        # The exact count can be lost after a successful pop.
+                        # Cleanup remains safe because the empty map is the
+                        # lifecycle authority; retain ambiguity and publish no
+                        # numerical/completion capability.
+                        with self._lock:
+                            if cell is not self._global_recurrence_recovery_cell:
+                                self._fail_global_recurrence_recovery_progress_locked()
+                            cell.poisoned = True
+                if acknowledged is not None and not lower <= acknowledged <= upper:
+                    self._fail_global_recurrence_recovery_progress_locked()
+            elif not (
+                lower == 0
+                and (upper == 0 or (cell.poisoned and cell.fence_attempt_count == 0))
+            ):
+                # Accepted work cannot disappear before an acknowledgement was
+                # durably started.  Preserve ownership on malformed state.
+                self._fail_global_recurrence_recovery_progress_locked()
+            self._terminally_release_abandoned_global_recurrence(cell)
+            return
+
+        pending_stream, pending_count = pending[0]
+        if (
+            pending_stream != cell.stream_pointer
+            or not lower <= pending_count <= upper
+            or pending_count <= 0
+            or pending_count > cell.launch_limit
+        ):
+            self._fail_global_recurrence_recovery_progress_locked()
+
+        complete = cell.kernel._query_checkpoint_stream_completion(
+            cell.checkpoint_owner_token,
+            cell.stream_pointer,
+        )
+        if type(complete) is not bool:
+            self._fail_global_recurrence_recovery_progress_locked()
+        if not complete:
+            with self._lock:
+                if (
+                    cell is not self._global_recurrence_recovery_cell
+                    or cell.fence_observed
+                ):
+                    self._fail_global_recurrence_recovery_progress_locked()
+                # Set before the call.  A later NOT_READY result proves that a
+                # preceding failed/STORE-interrupted call did not complete the
+                # stream, while COMPLETE prevents a duplicate successful fence.
+                cell.fence_attempt_count += 1
+            cell.kernel._synchronize_checkpoint_stream(
+                cell.checkpoint_owner_token,
+                cell.stream_pointer,
+            )
+            complete = cell.kernel._query_checkpoint_stream_completion(
+                cell.checkpoint_owner_token,
+                cell.stream_pointer,
+            )
+            if complete is not True:
+                self._fail_global_recurrence_recovery_progress_locked()
+
+        with self._lock:
+            if cell is not self._global_recurrence_recovery_cell:
+                self._fail_global_recurrence_recovery_progress_locked()
+            cell.fence_observed = True
+            was_started = cell.ack_started
+            cell.ack_started = True
+        consumed = cell.kernel._consume_checkpoint_pending_after_fence(
+            cell.checkpoint_owner_token,
+            cell.stream_pointer,
+        )
+        if type(consumed) is not int:
+            self._fail_global_recurrence_recovery_progress_locked()
+        remaining = self._global_recurrence_recovery_pending_snapshot(cell)
+        if remaining:
+            self._fail_global_recurrence_recovery_progress_locked()
+        if consumed == 0 and was_started:
+            if lower == upper:
+                consumed = upper
+            else:
+                with self._lock:
+                    if cell is not self._global_recurrence_recovery_cell:
+                        self._fail_global_recurrence_recovery_progress_locked()
+                    cell.poisoned = True
+                self._terminally_release_abandoned_global_recurrence(cell)
+                return
+        if not lower <= consumed <= upper or (lower == upper and consumed != lower):
+            self._fail_global_recurrence_recovery_progress_locked()
+        with self._lock:
+            if cell is not self._global_recurrence_recovery_cell:
+                self._fail_global_recurrence_recovery_progress_locked()
+            previous = cell.acknowledged_launch_count
+            if previous is not None and previous != consumed:
+                self._fail_global_recurrence_recovery_progress_locked()
+            cell.acknowledged_launch_count = consumed
+        self._terminally_release_abandoned_global_recurrence(cell)
+
+    def _validate_global_recurrence_recovery_cell_locked(
+        self,
+        cell: _GlobalRecurrenceRecoveryCellV1,
+        *,
+        allow_release_in_progress: bool = False,
+    ) -> None:
+        self._validate_global_recurrence_recovery_ledger_locked(
+            cell,
+            allow_release_in_progress=allow_release_in_progress,
+        )
+        binding = self._require_frozen_binding()
+        if (
+            cell.kernel is not binding.kernel
+            or cell.checkpoint_owner_token is not binding.checkpoint_owner_token
+            or type(cell.stream_pointer) is not int
+            or cell.stream_pointer != binding.stream_pointer
+        ):
+            self._fail_global_recurrence_recovery_progress_locked()
+
+    def _validate_global_recurrence_recovery_ledger_locked(
+        self,
+        cell: _GlobalRecurrenceRecoveryCellV1,
+        *,
+        allow_release_in_progress: bool = False,
+    ) -> None:
+        """Validate no-HIP recovery progress independently of frozen handles."""
+
+        if (
+            type(cell) is not _GlobalRecurrenceRecoveryCellV1
+            or type(allow_release_in_progress) is not bool
+        ):
+            self._fail_global_recurrence_recovery_progress_locked()
+        acknowledged = cell.acknowledged_launch_count
+        exact_ints = (
+            cell.launch_limit,
+            cell.launch_attempt_count,
+            cell.launch_accept_lower_bound,
+            cell.launch_accept_upper_bound,
+            cell.fence_attempt_count,
+        )
+        exact_bools = (
+            cell.poisoned,
+            cell.fence_observed,
+            cell.ack_started,
+            cell.released,
+            cell.terminal,
+            cell.abandoned,
+            cell.continuation_consumed,
+        )
+        if (
+            any(type(value) is not int for value in exact_ints)
+            or any(type(value) is not bool for value in exact_bools)
+            or cell.launch_limit <= 0
+            or not 0
+            <= cell.launch_accept_lower_bound
+            <= cell.launch_accept_upper_bound
+            <= cell.launch_attempt_count
+            <= cell.launch_limit
+            or cell.fence_attempt_count < 0
+            or (cell.ack_started and not cell.fence_observed)
+            or (acknowledged is not None and type(acknowledged) is not int)
+            or (
+                acknowledged is not None
+                and (
+                    not cell.ack_started
+                    or not cell.launch_accept_lower_bound
+                    <= acknowledged
+                    <= cell.launch_accept_upper_bound
+                )
+            )
+            or (cell.terminal and not cell.released)
+            or ((cell.released or cell.terminal) and not allow_release_in_progress)
+        ):
+            self._fail_global_recurrence_recovery_progress_locked()
+
+    def _global_recurrence_recovery_pending_snapshot(
+        self,
+        cell: _GlobalRecurrenceRecoveryCellV1,
+    ) -> tuple[tuple[int, int], ...]:
+        pending = cell.kernel._checkpoint_pending_snapshot(cell.checkpoint_owner_token)
+        valid = type(pending) is tuple and len(pending) <= 1
+        if pending:
+            row = pending[0]
+            valid = (
+                valid
+                and type(row) is tuple
+                and len(row) == 2
+                and type(row[0]) is int
+                and type(row[1]) is int
+            )
+        if not valid:
+            self._fail_global_recurrence_recovery_progress_locked()
+        return pending
+
+    def _terminally_release_abandoned_global_recurrence(
+        self,
+        cell: _GlobalRecurrenceRecoveryCellV1,
+    ) -> None:
+        if self._global_recurrence_recovery_pending_snapshot(cell):
+            self._fail_global_recurrence_recovery_progress_locked()
+        with self._lock:
+            reference = self._global_recurrence_child_token
+            if (
+                cell is not self._global_recurrence_recovery_cell
+                or (reference is not None and reference() is not None)
+                or cell.lease_reference() is not None
+                or not self._continuation_consumed
+            ):
+                self._fail_global_recurrence_recovery_progress_locked()
+            self._reconcile_global_recurrence_consumed_locked(cell)
+            if not cell.released:
+                cell.released = True
+            if not cell.terminal:
+                cell.terminal = True
+            if not self._global_recurrence_child_terminal:
+                self._global_recurrence_child_terminal = True
+            if reference is not None:
+                self._global_recurrence_child_token = None
+
+    def _require_current_continuation_locked(
+        self,
+        capability: HipFgmresSealedCheckpointContinuationCapabilityV1,
+        *,
+        continuation_consumed: bool,
+    ) -> None:
+        if (
+            type(capability) is not HipFgmresSealedCheckpointContinuationCapabilityV1
+            or capability._issuer is not self
+            or capability._nonce is not self._continuation_nonce
+            or capability._snapshot != _continuation_snapshot(capability)
+            or capability is not self._continuation
+            or capability.context_id != self._context_id
+            or capability.checkpoint_schedule_hash
+            != HIP_FGMRES_CHECKPOINT_TRANSACTION_SCHEDULE_HASH_V2
+            or self._state != "transaction_fenced"
+            or self._closed
+            or self._continuation_consumed is not continuation_consumed
+        ):
+            _fail(
+                "hip_fgmres_sealed_checkpoint_continuation_capability_invalid",
+                "/capability",
+                cleanup_owner=self,
+            )
+
+    def _require_exact_empty_pending_map(self) -> None:
+        self._require_pending_map_bounds((0, 0))
+
+    def _require_pending_map_bounds(
+        self,
+        expected_pending_operation_bounds: tuple[int, int],
+    ) -> None:
+        binding = self._require_frozen_binding()
+        try:
+            pending = binding.kernel._checkpoint_pending_snapshot(
+                binding.checkpoint_owner_token
+            )
+        except Exception as exc:
+            raise HipFgmresSealedCheckpointTransactionV1Error(
+                "hip_fgmres_sealed_checkpoint_transaction_global_child_authority_invalid",
+                "/kernel/pending_operation_bounds",
+                _detail(exc),
+                cleanup_owner=self,
+            ) from exc
+        lower, upper = expected_pending_operation_bounds
+        valid = not pending and lower == 0
+        if len(pending) == 1:
+            stream_pointer, operation_count = pending[0]
+            valid = (
+                type(stream_pointer) is int
+                and stream_pointer == binding.stream_pointer
+                and type(operation_count) is int
+                and operation_count > 0
+                and lower <= operation_count <= upper
+            )
+        if not valid:
+            _fail(
+                "hip_fgmres_sealed_checkpoint_transaction_global_child_pending",
+                "/kernel/pending_operation_bounds",
+                cleanup_owner=self,
+            )
 
     def _attempt(self, operation: Any) -> None:
         row = self._telemetry
@@ -1454,7 +2759,13 @@ def _pending_snapshot_matches(
     if len(snapshot) != 1:
         return False
     pending_stream, operation_count = snapshot[0]
-    return pending_stream == stream_pointer and lower <= operation_count <= upper
+    return (
+        type(pending_stream) is int
+        and pending_stream == stream_pointer
+        and type(operation_count) is int
+        and operation_count > 0
+        and lower <= operation_count <= upper
+    )
 
 
 def validate_hip_fgmres_sealed_checkpoint_transaction_receipt_v1(
@@ -1813,6 +3124,7 @@ def validate_hip_fgmres_sealed_checkpoint_continuation_capability_v1(
             != HIP_FGMRES_CHECKPOINT_TRANSACTION_SCHEDULE_HASH_V2
             or expected_context._state != "transaction_fenced"
             or expected_context.closed
+            or expected_context._continuation_consumed
         ):
             _fail(
                 "hip_fgmres_sealed_checkpoint_continuation_capability_invalid",

@@ -28,6 +28,9 @@ from structural_analysis.engine_v2.assembly_backend import (  # noqa: E402
 )
 import structural_analysis.engine_v2 as engine_v2  # noqa: E402
 import structural_analysis.engine_v2.assembly_backend as assembly_backend  # noqa: E402
+from structural_analysis.engine_v2.assembly_backend.fgmres_global_schedule_plan_v1 import (  # noqa: E402
+    compile_hip_fgmres_global_schedule_plan_v1,
+)
 from structural_analysis.engine_v2.assembly_backend.fgmres_recurrence_plan_v2 import (  # noqa: E402
     HIP_FGMRES_CONTROL_STATE_BYTES_V2,
     HIP_FGMRES_RECURRENCE_ABI_VERSION_V2,
@@ -122,6 +125,7 @@ static int function_calls = 0;
 static int launch_calls = 0;
 static int memset_calls = 0;
 static int sync_calls = 0;
+static int query_calls = 0;
 static int unload_calls = 0;
 static int get_device_calls = 0;
 static test_hook_t test_hook = 0;
@@ -223,6 +227,12 @@ int hipStreamSynchronize(void *stream) {
     sync_calls += 1;
     return 0;
 }
+int hipStreamQuery(void *stream) {
+    (void)stream;
+    if (test_hook) test_hook(6);
+    query_calls += 1;
+    return 0;
+}
 int hipModuleUnload(void *module) {
     (void)module;
     if (test_hook) test_hook(4);
@@ -235,6 +245,7 @@ int testFunctionCalls(void) { return function_calls; }
 int testLaunchCalls(void) { return launch_calls; }
 int testMemsetCalls(void) { return memset_calls; }
 int testSyncCalls(void) { return sync_calls; }
+int testQueryCalls(void) { return query_calls; }
 int testUnloadCalls(void) { return unload_calls; }
 int testGetDeviceCalls(void) { return get_device_calls; }
 """
@@ -298,6 +309,8 @@ class FakeLoadedRuntime:
         current_device: int = 0,
         get_device_status: int = 0,
         get_device_exception: bool = False,
+        query_status: int | None = None,
+        query_exception: bool = False,
     ) -> None:
         self.library_identity = HipRuntimeLibraryIdentity(
             discovery_source="injected",
@@ -314,10 +327,16 @@ class FakeLoadedRuntime:
         self.current_device = current_device
         self.get_device_status = get_device_status
         self.get_device_exception = get_device_exception
+        self.query_status = query_status
+        self.query_exception = query_exception
         self.get_device_calls = 0
         self.load_calls = 0
         self.function_symbols: list[str] = []
         self.launch_records: list[dict[str, Any]] = []
+        self.memset_streams: list[int] = []
+        self.sync_streams: list[int] = []
+        self.query_streams: list[int] = []
+        self._stream_completion: dict[int, bool] = {}
         self.unload_calls = 0
         self._symbol_handles = {
             symbol: 769 + index for index, symbol in enumerate(SYMBOLS)
@@ -340,6 +359,9 @@ class FakeLoadedRuntime:
             "hipModuleLaunchKernel": self._launch,
             "hipModuleUnload": self._unload,
             "hipGetDevice": self._get_device,
+            "hipMemsetAsync": self._memset_async,
+            "hipStreamSynchronize": self._synchronize,
+            "hipStreamQuery": self._query,
         }[symbol]
 
     def _get_device(self, output: Any) -> int:
@@ -404,9 +426,46 @@ class FakeLoadedRuntime:
                 "extra": extra,
             }
         )
+        stream_value = _pointer_value(stream)
         if self.launch_exception:
+            assert stream_value is not None
+            self._stream_completion[stream_value] = False
             raise RuntimeError("ambiguous fake launch exception")
+        if self.launch_status == 0:
+            assert stream_value is not None
+            self._stream_completion[stream_value] = False
         return self.launch_status
+
+    def _memset_async(
+        self,
+        destination: Any,
+        value: Any,
+        byte_length: Any,
+        stream: Any,
+    ) -> int:
+        del destination, value, byte_length
+        stream_value = _pointer_value(stream)
+        assert stream_value is not None
+        self.memset_streams.append(stream_value)
+        self._stream_completion[stream_value] = False
+        return 0
+
+    def _synchronize(self, stream: Any) -> int:
+        stream_value = _pointer_value(stream)
+        assert stream_value is not None
+        self.sync_streams.append(stream_value)
+        self._stream_completion[stream_value] = True
+        return 0
+
+    def _query(self, stream: Any) -> int:
+        stream_value = _pointer_value(stream)
+        assert stream_value is not None
+        self.query_streams.append(stream_value)
+        if self.query_exception:
+            raise RuntimeError("injected hipStreamQuery exception")
+        if self.query_status is not None:
+            return self.query_status
+        return 0 if self._stream_completion.get(stream_value, True) else 600
 
     def _unload(self, module: Any) -> int:
         assert _pointer_value(module) == 513
@@ -624,6 +683,8 @@ def _launch_control(
     expected_column: int = -1,
     row_index: int = -1,
     pass_index: int = -1,
+    checkpoint_owner_token: object | None = None,
+    expected_prior_pending_count: int | None = None,
 ) -> None:
     kernel.launch_control(
         stream,
@@ -646,6 +707,8 @@ def _launch_control(
         201,
         202,
         203,
+        _checkpoint_owner_token=checkpoint_owner_token,
+        _checkpoint_expected_prior_pending_count=expected_prior_pending_count,
     )
 
 
@@ -661,6 +724,8 @@ def _launch_vector(
     logical_index: int = 0,
     gate: int | None = None,
     pointers: tuple[int, ...] = tuple(range(211, 222)),
+    checkpoint_owner_token: object | None = None,
+    expected_prior_pending_count: int | None = None,
 ) -> None:
     gates = hip_fgmres_control_state_abi_payload_v2()["vector_gate_codes"]
     kernel.launch_vector(
@@ -673,6 +738,8 @@ def _launch_vector(
         n,
         logical_index,
         *pointers,
+        _checkpoint_owner_token=checkpoint_owner_token,
+        _checkpoint_expected_prior_pending_count=expected_prior_pending_count,
     )
 
 
@@ -687,6 +754,8 @@ def _launch_spmv(
     expected_column: int = -1,
     logical_index: int = 0,
     pointers: tuple[int, ...] = tuple(range(231, 240)),
+    checkpoint_owner_token: object | None = None,
+    expected_prior_pending_count: int | None = None,
 ) -> None:
     modes = hip_fgmres_control_state_abi_payload_v2()["spmv_mode_codes"]
     kernel.launch_csr_spmv_indexed(
@@ -699,6 +768,8 @@ def _launch_spmv(
         n * 2,
         logical_index,
         *pointers,
+        _checkpoint_owner_token=checkpoint_owner_token,
+        _checkpoint_expected_prior_pending_count=expected_prior_pending_count,
     )
 
 
@@ -716,6 +787,8 @@ def _launch_reduction(
     logical_index: int = 0,
     input_pointer: int = 246,
     output_pointer: int = 247,
+    checkpoint_owner_token: object | None = None,
+    expected_prior_pending_count: int | None = None,
 ) -> None:
     kernel.launch_reduction(
         stream,
@@ -736,6 +809,8 @@ def _launch_reduction(
         output_pointer,
         248,
         249,
+        _checkpoint_owner_token=checkpoint_owner_token,
+        _checkpoint_expected_prior_pending_count=expected_prior_pending_count,
     )
 
 
@@ -1739,6 +1814,476 @@ def test_identity_binds_canonical_v2_control_record_and_four_symbol_interface(
     kernel.close()
 
 
+def test_fixed_binding_snapshot_detects_every_identity_value_drift_without_rehash(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    kernel, _, _ = _compile_fake(monkeypatch)
+    identity = kernel.identity
+    witness = fgmres_rtc_v2._KERNEL_BINDINGS[kernel]
+    assert witness.identity_value_snapshot == (
+        fgmres_rtc_v2._kernel_identity_value_snapshot(identity)
+    )
+    assert kernel._identity_value_snapshot is witness.identity_value_snapshot
+
+    def drift(value: Any) -> Any:
+        if type(value) is int:
+            # Equal numeric values with different exact types must not alias.
+            return float(value)
+        if type(value) is str:
+            return value + ":drift"
+        if type(value) is tuple:
+            return (*value, "drift")
+        if type(value) is bytes:
+            return value + b"\x00"
+        if value is None:
+            return "/drift"
+        raise AssertionError(f"uncovered identity value type: {type(value)!r}")
+
+    nested_names = {"hiprtc_library", "runtime_library"}
+    top_level_fields = tuple(identity.__dataclass_fields__)
+    assert set(top_level_fields) == {
+        "schema_version",
+        "abi_version",
+        "recurrence_abi_version",
+        "control_abi_version",
+        "kernel_name",
+        "kernel_symbols",
+        "control_block_size",
+        "vector_block_size",
+        "reduction_values_per_block",
+        "control_state_abi_hash",
+        "solve_record_abi_hash",
+        "kernel_interface_hash",
+        "source_resource",
+        "source_sha256",
+        "compile_options",
+        "architecture",
+        "hiprtc_version_major",
+        "hiprtc_version_minor",
+        "hiprtc_library",
+        "runtime_library",
+        "code_object_byte_length",
+        "code_object_sha256",
+        "identity_hash",
+        "_code_object_witness",
+    }
+    for field_name in top_level_fields:
+        if field_name in nested_names:
+            continue
+        original = getattr(identity, field_name)
+        object.__setattr__(identity, field_name, drift(original))
+        try:
+            with pytest.raises(HipRtcFgmresV2Error) as changed:
+                kernel._validated_binding()
+            assert changed.value.code == "hip_rtc_fgmres_v2_binding_changed"
+        finally:
+            object.__setattr__(identity, field_name, original)
+        assert kernel._validated_binding() is witness
+
+    for library_name in sorted(nested_names):
+        library = getattr(identity, library_name)
+        for field_name in library.__dataclass_fields__:
+            original = getattr(library, field_name)
+            object.__setattr__(library, field_name, drift(original))
+            try:
+                with pytest.raises(HipRtcFgmresV2Error) as changed:
+                    kernel._validated_binding()
+                assert changed.value.code == "hip_rtc_fgmres_v2_binding_changed"
+            finally:
+                object.__setattr__(library, field_name, original)
+            assert kernel._validated_binding() is witness
+
+    def forbidden_rehash(_identity: Any) -> Any:
+        raise AssertionError("the repeated binding path must not rebuild identity JSON")
+
+    monkeypatch.setattr(type(identity), "to_dict", forbidden_rehash)
+    assert kernel._validated_binding() is witness
+    kernel.close()
+
+
+def test_checkpoint_expected_prior_count_is_atomic_exact_and_covers_all_launches(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    kernel, _, runtime = _compile_fake(monkeypatch)
+    original_bind = runtime.bind
+
+    def bind_checkpoint_symbol(symbol: str, argtypes: Any, restype: Any) -> Any:
+        if symbol in {"hipStreamSynchronize", "hipMemsetAsync"}:
+            return lambda *_arguments: 0
+        return original_bind(symbol, argtypes, restype)
+
+    monkeypatch.setattr(runtime, "bind", bind_checkpoint_symbol)
+    token = object()
+    acquired, _ = kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+        0,
+        _checkpoint_owner_token=token,
+    )
+    assert acquired is token
+    stream = 181
+    control_modes = hip_fgmres_control_state_abi_payload_v2()["control_mode_codes"]
+    vector_modes = hip_fgmres_control_state_abi_payload_v2()["vector_mode_codes"]
+    reduction_modes = hip_fgmres_control_state_abi_payload_v2()["reduction_mode_codes"]
+    targets = hip_fgmres_control_state_abi_payload_v2()["reduction_target_codes"]
+
+    with pytest.raises(HipRtcFgmresV2Error) as empty_mismatch:
+        _launch_control(
+            kernel,
+            stream,
+            control_modes["INIT"],
+            0,
+            checkpoint_owner_token=token,
+            expected_prior_pending_count=1,
+        )
+    assert empty_mismatch.value.code == "hip_rtc_fgmres_v2_launch_contract_invalid"
+    assert empty_mismatch.value.launch_disposition == "not_attempted"
+    assert kernel._checkpoint_pending_snapshot(token) == ()
+    assert runtime.launch_records == []
+
+    _launch_control(
+        kernel,
+        stream,
+        control_modes["INIT"],
+        0,
+        checkpoint_owner_token=token,
+        expected_prior_pending_count=0,
+    )
+    _launch_vector(
+        kernel,
+        stream,
+        vector_modes["COPY_INITIAL_X"],
+        1,
+        checkpoint_owner_token=token,
+        expected_prior_pending_count=1,
+    )
+    _launch_spmv(
+        kernel,
+        stream,
+        7,
+        checkpoint_owner_token=token,
+        expected_prior_pending_count=2,
+    )
+    _launch_reduction(
+        kernel,
+        stream,
+        mode=reduction_modes["LASSQ_LOAD"],
+        target=targets["NONE"],
+        schedule_epoch=2,
+        reduction_epoch=0,
+        value_count=513,
+        checkpoint_owner_token=token,
+        expected_prior_pending_count=3,
+    )
+    assert len(runtime.launch_records) == 4
+    assert kernel._checkpoint_pending_snapshot(token) == ((stream, 4),)
+
+    for invalid_count in (3, 0, False, -1, 1.5):
+        with pytest.raises(HipRtcFgmresV2Error) as mismatch:
+            _launch_control(
+                kernel,
+                stream,
+                control_modes["INIT"],
+                0,
+                checkpoint_owner_token=token,
+                expected_prior_pending_count=invalid_count,  # type: ignore[arg-type]
+            )
+        assert mismatch.value.code == "hip_rtc_fgmres_v2_launch_contract_invalid"
+        assert mismatch.value.launch_disposition == "not_attempted"
+        assert len(runtime.launch_records) == 4
+        assert kernel._checkpoint_pending_snapshot(token) == ((stream, 4),)
+
+    with pytest.raises(HipRtcFgmresV2Error) as wrong_stream:
+        _launch_control(
+            kernel,
+            stream + 1,
+            control_modes["INIT"],
+            0,
+            checkpoint_owner_token=token,
+            expected_prior_pending_count=4,
+        )
+    assert wrong_stream.value.code == "hip_rtc_fgmres_v2_launch_contract_invalid"
+    assert len(runtime.launch_records) == 4
+    assert kernel._checkpoint_pending_snapshot(token) == ((stream, 4),)
+
+    kernel._synchronize_checkpoint_stream(token, stream)
+    assert kernel._consume_checkpoint_pending_after_fence(token, stream) == 4
+    assert kernel._checkpoint_pending_snapshot(token) == ()
+    kernel.close(_checkpoint_owner_token=token)
+
+
+def test_checkpoint_stream_query_distinguishes_pending_and_completed_exactly(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    kernel, _, runtime = _compile_fake(monkeypatch)
+    token = object()
+    acquired, snapshot = (
+        kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+            0,
+            _checkpoint_owner_token=token,
+        )
+    )
+    assert acquired is token
+    witness = fgmres_rtc_v2._KERNEL_BINDINGS[kernel]
+    assert witness.stream_query_callable is not None
+    assert id(witness.stream_query_callable) in snapshot
+
+    stream = 182
+    control_modes = hip_fgmres_control_state_abi_payload_v2()["control_mode_codes"]
+    _launch_control(
+        kernel,
+        stream,
+        control_modes["INIT"],
+        0,
+        checkpoint_owner_token=token,
+        expected_prior_pending_count=0,
+    )
+    assert kernel._query_checkpoint_stream_completion(token, stream) is False
+    assert runtime.query_streams == [stream]
+    assert kernel._checkpoint_pending_snapshot(token) == ((stream, 1),)
+
+    kernel._synchronize_checkpoint_stream(token, stream)
+    assert kernel._query_checkpoint_stream_completion(token, stream) is True
+    assert runtime.sync_streams == [stream]
+    assert runtime.query_streams == [stream, stream]
+    assert kernel._consume_checkpoint_pending_after_fence(token, stream) == 1
+    kernel.close(_checkpoint_owner_token=token)
+
+
+def test_checkpoint_stream_query_rejects_wrong_authority_device_stream_and_binding(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    kernel, _, runtime = _compile_fake(monkeypatch)
+    token = object()
+    kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+        0,
+        _checkpoint_owner_token=token,
+    )
+    stream = 183
+    control_modes = hip_fgmres_control_state_abi_payload_v2()["control_mode_codes"]
+    _launch_control(
+        kernel,
+        stream,
+        control_modes["INIT"],
+        0,
+        checkpoint_owner_token=token,
+        expected_prior_pending_count=0,
+    )
+
+    with pytest.raises(HipRtcFgmresV2Error) as wrong_token:
+        kernel._query_checkpoint_stream_completion(object(), stream)
+    assert wrong_token.value.code == "hip_rtc_fgmres_v2_checkpoint_lease_token_invalid"
+
+    with pytest.raises(HipRtcFgmresV2Error) as wrong_stream:
+        kernel._query_checkpoint_stream_completion(token, stream + 1)
+    assert (
+        wrong_stream.value.code == "hip_rtc_fgmres_v2_checkpoint_query_stream_invalid"
+    )
+
+    runtime.current_device = 1
+    with pytest.raises(HipRtcFgmresV2Error) as wrong_device:
+        kernel._query_checkpoint_stream_completion(token, stream)
+    assert wrong_device.value.code == "hip_rtc_fgmres_v2_device_mismatch"
+    runtime.current_device = 0
+
+    original_witness = fgmres_rtc_v2._KERNEL_BINDINGS[kernel]
+    fgmres_rtc_v2._KERNEL_BINDINGS[kernel] = replace(
+        original_witness,
+        stream_query_callable=lambda _stream: 0,
+    )
+    try:
+        with pytest.raises(HipRtcFgmresV2Error) as binding_drift:
+            kernel._query_checkpoint_stream_completion(token, stream)
+        assert binding_drift.value.code == "hip_rtc_fgmres_v2_binding_changed"
+    finally:
+        fgmres_rtc_v2._KERNEL_BINDINGS[kernel] = original_witness
+
+    for forged_witness in (
+        replace(
+            original_witness,
+            module_pointer=float(original_witness.module_pointer),
+        ),
+        replace(
+            original_witness,
+            function_pointers=(
+                (
+                    original_witness.function_pointers[0][0],
+                    float(original_witness.function_pointers[0][1]),
+                ),
+                *original_witness.function_pointers[1:],
+            ),
+        ),
+        replace(
+            original_witness,
+            module_device_ordinal=float(original_witness.module_device_ordinal),
+        ),
+    ):
+        fgmres_rtc_v2._KERNEL_BINDINGS[kernel] = forged_witness
+        try:
+            with pytest.raises(HipRtcFgmresV2Error) as type_drift:
+                kernel._query_checkpoint_stream_completion(token, stream)
+            assert type_drift.value.code == "hip_rtc_fgmres_v2_binding_changed"
+        finally:
+            fgmres_rtc_v2._KERNEL_BINDINGS[kernel] = original_witness
+
+    assert runtime.query_streams == []
+    assert kernel._checkpoint_pending_snapshot(token) == ((stream, 1),)
+    kernel._synchronize_checkpoint_stream(token, stream)
+    assert kernel._consume_checkpoint_pending_after_fence(token, stream) == 1
+    kernel.close(_checkpoint_owner_token=token)
+
+
+@pytest.mark.parametrize(
+    ("query_status", "query_exception"),
+    ((7, False), (None, True), (True, False)),
+)
+def test_checkpoint_stream_query_unknown_status_and_exception_fail_closed(
+    monkeypatch: pytest.MonkeyPatch,
+    query_status: Any,
+    query_exception: bool,
+) -> None:
+    runtime = FakeLoadedRuntime(
+        query_status=query_status,
+        query_exception=query_exception,
+    )
+    kernel, _, _ = _compile_fake(monkeypatch, runtime)
+    token = object()
+    kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+        0,
+        _checkpoint_owner_token=token,
+    )
+    stream = 184
+    control_modes = hip_fgmres_control_state_abi_payload_v2()["control_mode_codes"]
+    _launch_control(
+        kernel,
+        stream,
+        control_modes["INIT"],
+        0,
+        checkpoint_owner_token=token,
+        expected_prior_pending_count=0,
+    )
+    with pytest.raises(HipRtcFgmresV2Error) as caught:
+        kernel._query_checkpoint_stream_completion(token, stream)
+    assert caught.value.code == "hip_rtc_fgmres_v2_checkpoint_query_failed"
+    assert kernel._checkpoint_pending_snapshot(token) == ((stream, 1),)
+
+    runtime.query_status = None
+    runtime.query_exception = False
+    kernel._synchronize_checkpoint_stream(token, stream)
+    assert kernel._query_checkpoint_stream_completion(token, stream) is True
+    assert kernel._consume_checkpoint_pending_after_fence(token, stream) == 1
+    kernel.close(_checkpoint_owner_token=token)
+
+
+def test_checkpoint_stream_query_recovers_known_success_after_sync_status_store_interrupt(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    kernel, _, runtime = _compile_fake(monkeypatch)
+    token = object()
+    kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+        0,
+        _checkpoint_owner_token=token,
+    )
+    stream = 185
+    control_modes = hip_fgmres_control_state_abi_payload_v2()["control_mode_codes"]
+    _launch_control(
+        kernel,
+        stream,
+        control_modes["INIT"],
+        0,
+        checkpoint_owner_token=token,
+        expected_prior_pending_count=0,
+    )
+
+    with (
+        _SingleFireAfterStoreInterrupt(
+            type(kernel)._synchronize_checkpoint_stream,
+            "status = int(",
+        ) as interruption,
+        pytest.raises(KeyboardInterrupt),
+    ):
+        kernel._synchronize_checkpoint_stream(token, stream)
+    assert interruption.fired
+    assert runtime.sync_streams == [stream]
+    assert kernel._checkpoint_pending_snapshot(token) == ((stream, 1),)
+    assert kernel._query_checkpoint_stream_completion(token, stream) is True
+    assert kernel._consume_checkpoint_pending_after_fence(token, stream) == 1
+    kernel.close(_checkpoint_owner_token=token)
+
+
+def test_checkpoint_lease_requires_exact_stream_query_binding(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runtime = FakeLoadedRuntime()
+    kernel, _, _ = _compile_fake(monkeypatch, runtime)
+    original_bind = runtime.bind
+
+    def missing_query(symbol: str, argtypes: Any, restype: Any) -> Any:
+        if symbol == "hipStreamQuery":
+            raise RuntimeError("injected missing hipStreamQuery")
+        return original_bind(symbol, argtypes, restype)
+
+    monkeypatch.setattr(runtime, "bind", missing_query)
+    token = object()
+    with pytest.raises(HipRtcFgmresV2Error) as caught:
+        kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+            0,
+            _checkpoint_owner_token=token,
+        )
+    assert caught.value.code == "hip_rtc_fgmres_v2_checkpoint_query_unavailable"
+    assert kernel._checkpoint_owner_token is None
+    assert kernel.pending_stream_count == 0
+    kernel.close()
+
+
+def test_checkpoint_lease_registry_cas_rejection_rolls_back_provisional_owner(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    kernel, _, runtime = _compile_fake(monkeypatch)
+    original_witness = fgmres_rtc_v2._KERNEL_BINDINGS[kernel]
+    replacement_witness = replace(original_witness)
+    original_bind = runtime.bind
+    injected = False
+
+    def drift_before_registry_cas(
+        symbol: str,
+        argtypes: Any,
+        restype: Any,
+    ) -> Any:
+        nonlocal injected
+        result = original_bind(symbol, argtypes, restype)
+        if symbol == "hipMemsetAsync" and not injected:
+            injected = True
+            fgmres_rtc_v2._KERNEL_BINDINGS[kernel] = replacement_witness
+        return result
+
+    monkeypatch.setattr(runtime, "bind", drift_before_registry_cas)
+    rejected_token = object()
+    with pytest.raises(HipRtcFgmresV2Error) as rejected:
+        kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+            0,
+            _checkpoint_owner_token=rejected_token,
+        )
+    assert injected
+    assert rejected.value.code == "hip_rtc_fgmres_v2_binding_changed"
+    assert kernel._checkpoint_owner_token is None
+    assert kernel._checkpoint_owner_binding_snapshot is None
+    assert not kernel._checkpoint_owner_poisoned
+    assert kernel.pending_stream_count == 0
+
+    fgmres_rtc_v2._KERNEL_BINDINGS[kernel] = original_witness
+    monkeypatch.setattr(runtime, "bind", original_bind)
+    recovery_token = object()
+    acquired, snapshot = (
+        kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+            0,
+            _checkpoint_owner_token=recovery_token,
+        )
+    )
+    assert acquired is recovery_token
+    assert snapshot == kernel._checkpoint_binding_snapshot(recovery_token)
+    kernel._release_checkpoint_transaction_owner_without_work(recovery_token)
+    kernel.close()
+
+
 def test_compiler_requires_exact_hip_get_device_binding(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1813,12 +2358,14 @@ def test_native_callable_prototypes_are_sealed_from_public_ctypes_mutation(
     public_launch = public_cdll.hipModuleLaunchKernel
     public_memset = public_cdll.hipMemsetAsync
     public_sync = public_cdll.hipStreamSynchronize
+    public_query = public_cdll.hipStreamQuery
     public_unload = public_cdll.hipModuleUnload
     public_functions = (
         public_get_device,
         public_launch,
         public_memset,
         public_sync,
+        public_query,
         public_unload,
     )
     decoy_functions = (
@@ -1855,6 +2402,7 @@ def test_native_callable_prototypes_are_sealed_from_public_ctypes_mutation(
             ctypes.c_int,
         ),
         loaded.bind("hipStreamSynchronize", [ctypes.c_void_p], ctypes.c_int),
+        loaded.bind("hipStreamQuery", [ctypes.c_void_p], ctypes.c_int),
         loaded.bind("hipModuleUnload", [ctypes.c_void_p], ctypes.c_int),
     )
     for function in (*public_functions, *decoy_functions):
@@ -1863,6 +2411,7 @@ def test_native_callable_prototypes_are_sealed_from_public_ctypes_mutation(
     public_cdll.hipModuleLaunchKernel = lambda *_arguments: 7
     public_cdll.hipMemsetAsync = lambda *_arguments: 7
     public_cdll.hipStreamSynchronize = lambda *_arguments: 7
+    public_cdll.hipStreamQuery = lambda *_arguments: 7
     public_cdll.hipModuleUnload = lambda *_arguments: 7
 
     hook_stages: list[int] = []
@@ -1921,6 +2470,7 @@ def test_native_callable_prototypes_are_sealed_from_public_ctypes_mutation(
             _checkpoint_owner_token=token,
         )
         kernel._synchronize_checkpoint_stream(token, 77)
+        assert kernel._query_checkpoint_stream_completion(token, 77) is True
         assert kernel._consume_checkpoint_pending_after_fence(token, 77) == 2
         kernel.close(_checkpoint_owner_token=token)
     finally:
@@ -1929,7 +2479,7 @@ def test_native_callable_prototypes_are_sealed_from_public_ctypes_mutation(
     assert not mutator.is_alive()
     assert kernel.closed
     assert mutation_count > 0
-    assert {1, 2, 3, 4, 5}.issubset(hook_stages)
+    assert {1, 2, 3, 4, 5, 6}.issubset(hook_stages)
 
     def counter(symbol: str) -> int:
         function = getattr(public_cdll, symbol)
@@ -1942,6 +2492,7 @@ def test_native_callable_prototypes_are_sealed_from_public_ctypes_mutation(
     assert counter("testLaunchCalls") == 1
     assert counter("testMemsetCalls") == 1
     assert counter("testSyncCalls") == 1
+    assert counter("testQueryCalls") == 1
     assert counter("testUnloadCalls") == 1
     assert counter("testGetDeviceCalls") >= 4
 
@@ -4313,6 +4864,157 @@ def test_checkpoint_transaction_raw_reverse_validation_is_exact_and_bounded(
     kernel.close()
 
 
+def test_raw_launch_reverse_validation_accepts_exact_later_slot_and_final_guard(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    kernel, _, runtime = _compile_fake(monkeypatch)
+    n = 513
+    restart_dimension = 3
+    max_iterations = 7
+    plan = compile_hip_fgmres_global_schedule_plan_v1(
+        n,
+        restart_dimension,
+        max_iterations,
+    )
+    stream = 142
+    padded_restart = plan.restarts[-1]
+    later_column = padded_restart.columns[-1]
+    selected_launches = (
+        padded_restart.preamble_launches
+        + later_column.launches
+        + (plan.final_guard_launch,)
+    )
+
+    for row in selected_launches:
+        assert row is not None
+        if row.submission_kind == "control":
+            kernel.launch_control(
+                stream,
+                row.mode,
+                row.expected_schedule_epoch,
+                row.expected_restart,
+                row.expected_column,
+                row.row_index,
+                row.pass_index,
+                n,
+                restart_dimension,
+                max_iterations,
+                plan.maximum_restart_count,
+                2,
+                0.0,
+                1.0e-8,
+                1.0e-9,
+                1.0e-8,
+                1.0e8,
+                201,
+                202,
+                203,
+            )
+        elif row.submission_kind == "vector":
+            _launch_vector(
+                kernel,
+                stream,
+                row.mode,
+                row.expected_schedule_epoch,
+                n=n,
+                expected_restart=row.expected_restart,
+                expected_column=row.expected_column,
+                logical_index=row.logical_index,
+                gate=row.vector_gate,
+            )
+        elif row.submission_kind == "spmv":
+            _launch_spmv(
+                kernel,
+                stream,
+                row.expected_schedule_epoch,
+                n=n,
+                mode=row.mode,
+                expected_restart=row.expected_restart,
+                expected_column=row.expected_column,
+                logical_index=row.logical_index,
+            )
+        else:
+            assert row.submission_kind == "reduction"
+            _launch_reduction(
+                kernel,
+                stream,
+                mode=row.mode,
+                target=row.reduction_target,
+                schedule_epoch=row.expected_schedule_epoch,
+                reduction_epoch=row.expected_reduction_epoch,
+                value_count=row.value_count,
+                expected_restart=row.expected_restart,
+                expected_column=row.expected_column,
+                logical_index=row.logical_index,
+            )
+
+    assert len(runtime.launch_records) == len(selected_launches)
+    final_guard = plan.final_guard_launch
+    assert final_guard is not None
+    assert runtime.launch_records[-1]["arguments"][:6] == (
+        final_guard.mode,
+        final_guard.expected_schedule_epoch,
+        plan.maximum_restart_count,
+        restart_dimension - 1,
+        -1,
+        -1,
+    )
+    kernel.acknowledge_stream_completion(stream)
+    accepted_count = len(runtime.launch_records)
+
+    with pytest.raises(HipRtcFgmresV2Error) as error:
+        kernel.launch_control(
+            stream,
+            final_guard.mode,
+            final_guard.expected_schedule_epoch,
+            final_guard.expected_restart,
+            restart_dimension - 2,
+            -1,
+            -1,
+            n,
+            restart_dimension,
+            max_iterations,
+            plan.maximum_restart_count,
+            2,
+            0.0,
+            1.0e-8,
+            1.0e-9,
+            1.0e-8,
+            1.0e8,
+            201,
+            202,
+            203,
+        )
+    assert error.value.code == "hip_rtc_fgmres_v2_launch_contract_invalid"
+
+    mgs = next(
+        row
+        for row in later_column.launches
+        if row.submission_kind == "vector"
+        and row.mode
+        == hip_fgmres_control_state_abi_payload_v2()["vector_mode_codes"][
+            "MGS_SUBTRACT_INDEXED"
+        ]
+        and row.vector_gate
+        == hip_fgmres_control_state_abi_payload_v2()["vector_gate_codes"]["ACTIVE"]
+    )
+    with pytest.raises(HipRtcFgmresV2Error) as error:
+        _launch_vector(
+            kernel,
+            stream,
+            mgs.mode,
+            mgs.expected_schedule_epoch,
+            n=n,
+            expected_restart=mgs.expected_restart,
+            expected_column=mgs.expected_column,
+            logical_index=mgs.expected_column + 1,
+            gate=mgs.vector_gate,
+        )
+    assert error.value.code == "hip_rtc_fgmres_v2_launch_contract_invalid"
+    assert len(runtime.launch_records) == accepted_count
+    kernel.close()
+
+
 def test_checkpoint_commit_source_does_not_recompute_or_read_reduction_targets() -> (
     None
 ):
@@ -4345,15 +5047,11 @@ def test_checkpoint_preflight_is_read_only_nonadvancing_and_commit_is_pure_copy(
     None
 ):
     source = fgmres_rtc_v2._fixed_source().decode("utf-8")
-    terminal_publish_start = source.index(
-        "void engine_v2_publish_terminal_failure("
-    )
+    terminal_publish_start = source.index("void engine_v2_publish_terminal_failure(")
     terminal_publish_end = source.index(
         "void engine_v2_terminal_failure(", terminal_publish_start
     )
-    terminal_publish_source = source[
-        terminal_publish_start:terminal_publish_end
-    ]
+    terminal_publish_source = source[terminal_publish_start:terminal_publish_end]
     assert "kControlOffsetCommitRequired), 0" in terminal_publish_source
     assert "kControlOffsetContinuationRequired), 0" in terminal_publish_source
     first_error_start = source.index("bool engine_v2_terminal_failure_if_error_clear(")

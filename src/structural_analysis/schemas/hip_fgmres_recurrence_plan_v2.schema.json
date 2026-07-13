@@ -2659,6 +2659,276 @@
         }
       }
     },
+    "globalFixedRecurrenceSchedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "capability_profile",
+        "dimension_domain",
+        "fixed_host_program",
+        "epoch_formulas",
+        "column_numeric_order",
+        "counter_contract",
+        "terminal_padding_contract",
+        "final_guard_contract",
+        "complexity_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-hip-fgmres-global-schedule-plan.v1"
+        },
+        "capability_profile": {
+          "const": "phase0_hip_fgmres_fixed_global_recurrence_schedule_plan"
+        },
+        "dimension_domain": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "free_dof_count",
+            "restart_dimension_M",
+            "max_iterations_I",
+            "maximum_restart_count_R"
+          ],
+          "properties": {
+            "free_dof_count": { "const": "1..INT32_MAX" },
+            "restart_dimension_M": { "const": "1..16" },
+            "max_iterations_I": { "const": "0..4096" },
+            "maximum_restart_count_R": {
+              "const": "0_if_I=0_else_ceil(I/M)"
+            }
+          }
+        },
+        "fixed_host_program": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rows",
+            "live_convergence_host_branching",
+            "all_R_times_M_column_slots_submitted",
+            "final_guard_submitted_iff_I_positive",
+            "predecessor_validate_before_every_checkpoint",
+            "checkpoint_rows"
+          ],
+          "properties": {
+            "rows": {
+              "const": "initial_prefix + R*(restart_preamble + M*column) + guard_if_I>0"
+            },
+            "live_convergence_host_branching": { "const": false },
+            "all_R_times_M_column_slots_submitted": { "const": true },
+            "final_guard_submitted_iff_I_positive": { "const": true },
+            "predecessor_validate_before_every_checkpoint": { "const": true },
+            "checkpoint_rows": {
+              "const": [
+                "PREDECESSOR_VALIDATE",
+                "CHECKPOINT_DECIDE",
+                "PREFLIGHT_COMMIT_SOURCE",
+                "COMMIT_CHECKPOINT",
+                "CHECKPOINT_FINALIZE"
+              ]
+            }
+          }
+        },
+        "epoch_formulas": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "S",
+            "initial_schedule_end_B",
+            "initial_reduction_end",
+            "column_schedule_stride_L_j",
+            "column_reduction_stride",
+            "restart_schedule_stride_D",
+            "restart_reduction_stride_H",
+            "restart_schedule_base_B_r",
+            "restart_reduction_base_Q_r",
+            "column_schedule_base_C_rj",
+            "column_reduction_base_q_rj",
+            "active_fallthrough_final_schedule_epoch",
+            "active_fallthrough_final_reduction_epoch",
+            "first_column_checkpoint_end"
+          ],
+          "properties": {
+            "S": {
+              "const": "recursive_stage_count(F,ceil(value_count/512))"
+            },
+            "initial_schedule_end_B": { "const": "7+4*S" },
+            "initial_reduction_end": { "const": "4*S" },
+            "column_schedule_stride_L_j": {
+              "const": "20+4*j+(10+2*j)*S"
+            },
+            "column_reduction_stride": { "const": "(10+2*j)*S" },
+            "restart_schedule_stride_D": {
+              "const": "2+2*M^2+18*M+(M^2+9*M)*S"
+            },
+            "restart_reduction_stride_H": { "const": "(M^2+9*M)*S" },
+            "restart_schedule_base_B_r": { "const": "B+(r-1)*D" },
+            "restart_reduction_base_Q_r": { "const": "4*S+(r-1)*H" },
+            "column_schedule_base_C_rj": {
+              "const": "B_r+2+2*j^2+18*j+(j^2+9*j)*S"
+            },
+            "column_reduction_base_q_rj": {
+              "const": "Q_r+(j^2+9*j)*S"
+            },
+            "active_fallthrough_final_schedule_epoch": { "const": "B+R*D" },
+            "active_fallthrough_final_reduction_epoch": {
+              "const": "4*S+R*H"
+            },
+            "first_column_checkpoint_end": {
+              "const": "E=29+14*S,Q=14*S"
+            }
+          }
+        },
+        "column_numeric_order": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "first_mgs_rows",
+            "second_mgs_rows",
+            "dgks_second_pass_gate",
+            "prior_givens_rows",
+            "new_givens_row",
+            "jacobi_and_arnoldi_basis_index",
+            "next_basis_index",
+            "candidate_scratch_basis_index",
+            "column_scoped_noncandidate_logical_index",
+            "dense_state_reset_at_every_restart",
+            "next_restart_beta_source"
+          ],
+          "properties": {
+            "first_mgs_rows": { "const": "0..j_inclusive" },
+            "second_mgs_rows": {
+              "const": "0..j_inclusive_always_submitted"
+            },
+            "dgks_second_pass_gate": {
+              "const": "device_dgks_reorth_required"
+            },
+            "prior_givens_rows": { "const": "0..j-1_in_order" },
+            "new_givens_row": { "const": "j" },
+            "jacobi_and_arnoldi_basis_index": { "const": "j" },
+            "next_basis_index": { "const": "j+1" },
+            "candidate_scratch_basis_index": { "const": "M" },
+            "column_scoped_noncandidate_logical_index": { "const": "j" },
+            "dense_state_reset_at_every_restart": { "const": true },
+            "next_restart_beta_source": {
+              "const": "committed_true_residual_l2"
+            }
+          }
+        },
+        "counter_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "effective_iterations_after_givens",
+            "effective_arnoldi_dimension_after_givens",
+            "preconditioner_apply_count_after_accept",
+            "operator_apply_count_before_arnoldi",
+            "operator_apply_count_after_arnoldi",
+            "candidate_operator_addend"
+          ],
+          "properties": {
+            "effective_iterations_after_givens": {
+              "const": "cycle_start+j+1"
+            },
+            "effective_arnoldi_dimension_after_givens": { "const": "j+1" },
+            "preconditioner_apply_count_after_accept": {
+              "const": "cycle_start+j+1"
+            },
+            "operator_apply_count_before_arnoldi": {
+              "const": "1+cycle_start+j+(r-1)+false_convergence_count"
+            },
+            "operator_apply_count_after_arnoldi": {
+              "const": "before_arnoldi+1"
+            },
+            "candidate_operator_addend": {
+              "const": "1_iff_candidate_required_and_not_triangular_breakdown"
+            }
+          }
+        },
+        "terminal_padding_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "inactive_launches_preserve_all_device_bytes",
+            "inactive_launches_preserve_schedule_epoch",
+            "inactive_launches_preserve_reduction_epoch",
+            "inactive_launches_read_no_numeric_or_CSR_or_dense_inputs",
+            "host_submission_coordinates_continue_to_fixed_endpoint",
+            "host_program_endpoint_is_not_a_terminal_device_epoch_claim"
+          ],
+          "properties": {
+            "inactive_launches_preserve_all_device_bytes": { "const": true },
+            "inactive_launches_preserve_schedule_epoch": { "const": true },
+            "inactive_launches_preserve_reduction_epoch": { "const": true },
+            "inactive_launches_read_no_numeric_or_CSR_or_dense_inputs": {
+              "const": true
+            },
+            "host_submission_coordinates_continue_to_fixed_endpoint": {
+              "const": true
+            },
+            "host_program_endpoint_is_not_a_terminal_device_epoch_claim": {
+              "const": true
+            }
+          }
+        },
+        "final_guard_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "coordinates",
+            "inactive_behavior",
+            "active_required_endpoint",
+            "active_required_history",
+            "active_required_prestate",
+            "active_valid_behavior",
+            "active_malformed_behavior",
+            "absent_when_I_zero"
+          ],
+          "properties": {
+            "mode": { "const": "FINAL_GUARD" },
+            "coordinates": {
+              "const": "r=R,column=M-1,row=-1,pass=-1"
+            },
+            "inactive_behavior": { "const": "byte_preserving_no_op" },
+            "active_required_endpoint": { "const": "E=B+R*D,Q=4*S+R*H" },
+            "active_required_history": {
+              "const": "effective_iterations=I,effective_restarts=R,exact_final_restart_row"
+            },
+            "active_required_prestate": {
+              "const": "phase=arnoldi,status=not_terminal,code=none,all_action_and_pending_fields_clear"
+            },
+            "active_valid_behavior": {
+              "const": "claim_one_schedule_epoch_and_publish_max_iterations"
+            },
+            "active_malformed_behavior": { "const": "fail_closed_code_47" },
+            "absent_when_I_zero": { "const": true }
+          }
+        },
+        "complexity_boundary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "restart_dimension_is_compile_time_bounded",
+            "per_column_vector_and_sparse_operator_work",
+            "per_iteration_host_device_copy",
+            "per_iteration_host_synchronization",
+            "full_solver_owner_or_parity_implied_by_schedule_alone"
+          ],
+          "properties": {
+            "restart_dimension_is_compile_time_bounded": { "const": true },
+            "per_column_vector_and_sparse_operator_work": {
+              "const": "O(F+nnz)"
+            },
+            "per_iteration_host_device_copy": { "const": 0 },
+            "per_iteration_host_synchronization": { "const": 0 },
+            "full_solver_owner_or_parity_implied_by_schedule_alone": {
+              "const": false
+            }
+          }
+        }
+      }
+    },
     "kernelAbi": {
       "type": "object",
       "additionalProperties": false,
@@ -2670,6 +2940,7 @@
         "pointer_contract",
         "host_shifted_pointer_arguments_allowed",
         "logical_index_is_separate_i32_argument",
+        "global_fixed_recurrence_schedule",
         "launch_sequence_guard",
         "control_launch_geometry",
         "vector_launch_geometry",
@@ -2719,6 +2990,9 @@
         "pointer_contract": { "const": "allocation_base_pointers_only" },
         "host_shifted_pointer_arguments_allowed": { "const": false },
         "logical_index_is_separate_i32_argument": { "const": true },
+        "global_fixed_recurrence_schedule": {
+          "$ref": "#/$defs/globalFixedRecurrenceSchedule"
+        },
         "launch_sequence_guard": {
           "type": "object",
           "additionalProperties": false,

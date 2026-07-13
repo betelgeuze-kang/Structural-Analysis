@@ -19,6 +19,9 @@ from jsonschema import Draft202012Validator
 
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 
+from .fgmres_global_schedule_plan_v1 import (
+    hip_fgmres_global_schedule_contract_payload_v1,
+)
 from .fgmres_plan import (
     HIP_FGMRES_RECURRENCE_ABI_VERSION as HIP_FGMRES_RECURRENCE_ABI_VERSION_V1,
     HipFgmresBufferPlanV1,
@@ -2698,6 +2701,9 @@ def hip_fgmres_recurrence_kernel_abi_payload_v2() -> dict[str, Any]:
         "pointer_contract": "allocation_base_pointers_only",
         "host_shifted_pointer_arguments_allowed": False,
         "logical_index_is_separate_i32_argument": True,
+        "global_fixed_recurrence_schedule": (
+            hip_fgmres_global_schedule_contract_payload_v1()
+        ),
         "launch_sequence_guard": {
             "all_symbols_require_expected_schedule_epoch": True,
             "all_symbols_require_expected_restart_and_column": True,

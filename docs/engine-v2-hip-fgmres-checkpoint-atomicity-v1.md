@@ -85,7 +85,7 @@ Full context 전수 회귀는 Ruff format/check, Python bytecode compile, canoni
 - combined recurrence ABI: `sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f`
 - fixed HIP source: `sha256:ce4353f61fc3e8cd1311ad52ce50f21a677c7bfa865a2656aa5447b6ec104a83`
 
-v0.2.22 current source는 terminal failure 이후 future action gates를 clear하는 semantic patch로 `sha256:a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113`이다. Checkpoint schedule과 combined ABI는 위 v0.2.21 값에서 바뀌지 않았다. v0.2.20 canonical producer의 validator/combined/source와 기존 three-row checkpoint schedule도 historical identity다. Canonical producer receipt나 v0.2.16 caller-attested context의 과거 검증 결과를 이 v0.2.21 raw atomicity 증거로 소급 승격하지 않는다.
+v0.2.22 downstream source `sha256:a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113`는 terminal failure 이후 future action gates를 clear한 historical semantic patch다. Checkpoint schedule과 당시 combined ABI는 위 v0.2.21 값에서 바뀌지 않았다. Current v0.2.24 global ABI/source는 별도 global recurrence 문서가 소유하며 이 historical atomicity 증거를 소급 재분류하지 않는다.
 
 v0.2.22 [live sealed owner](engine-v2-hip-fgmres-sealed-checkpoint-transaction-v1.md)는 canonical capability consumption과 fixed-program continuity를 구현했고 actual `gfx1030` valid/late-invalid scoped cases `2 passed`를 확인했다. Invalid case의 state `{2,3}`, pending status/code 6/47, mask/snapshot provenance와 destination full-byte 불변은 verification-only oracle이며 product receipt가 numerical outcome을 관찰했다는 뜻은 아니다.
 
@@ -108,4 +108,4 @@ v0.2.22 [live sealed owner](engine-v2-hip-fgmres-sealed-checkpoint-transaction-v
 - later columns/restarts, full recurrence, solver/solution receipt
 - iteration host-copy zero, full CPU/HIP parity, O(N), speedup, signed promotion, commercial readiness
 
-다음 순서는 later column/restart global control과 final guard로 확장하는 것이다.
+Later column/restart global control과 final guard는 v0.2.23에서 별도 구현됐다. 이 historical atomicity receipt는 소급 승격되지 않으며 다음 통합 gate는 completion-only export와 명시적 outcome observation이다.

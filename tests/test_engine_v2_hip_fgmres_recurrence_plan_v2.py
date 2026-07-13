@@ -21,6 +21,9 @@ from structural_analysis.engine_v2.assembly_backend.fgmres_plan import (  # noqa
     compile_hip_fgmres_plan_v1,
     hip_fgmres_solve_record_abi_payload_v1,
 )
+from structural_analysis.engine_v2.assembly_backend.fgmres_global_schedule_plan_v1 import (  # noqa: E402
+    hip_fgmres_global_schedule_contract_payload_v1,
+)
 from structural_analysis.engine_v2.assembly_backend.fgmres_recurrence_plan_v2 import (  # noqa: E402
     HIP_FGMRES_CONTROL_STATE_BYTES_V2,
     HIP_FGMRES_RECURRENCE_PLAN_V2_CAPABILITY_PROFILE,
@@ -63,6 +66,13 @@ FIXTURE = REPO_ROOT / "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.jso
 SCHEMA = (
     REPO_ROOT
     / "src/structural_analysis/schemas/hip_fgmres_recurrence_plan_v2.schema.json"
+)
+
+_GLOBAL_FIXED_RECURRENCE_KERNEL_ABI_HASH_V2 = (
+    "sha256:4078f8f07b3bf605baae04ded1795f8a49038c636910b1c40916b42d3fe8c017"
+)
+_HISTORICAL_FIRST_COLUMN_CHECKPOINT_KERNEL_ABI_HASH_V2 = (
+    "sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f"
 )
 
 
@@ -533,6 +543,59 @@ def test_four_symbol_interface_binds_base_indices_schedule_and_error_contract() 
     assert kernel["device_error_bits"]["invalid_reduction_pair"] == 6
     assert kernel["device_error_masks"]["jacobi_inverse"] == 32
     assert kernel["device_error_masks"]["invalid_reduction_pair"] == 64
+
+
+def test_global_fixed_recurrence_schedule_is_closed_and_kernel_hash_bound() -> None:
+    schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
+    validator = Draft202012Validator(schema)
+    _, artifact = _artifact()
+    payload = artifact.to_dict()
+    contract = hip_fgmres_global_schedule_contract_payload_v1()
+    kernel = hip_fgmres_recurrence_kernel_abi_payload_v2()
+
+    assert canonical_hash(contract) == (
+        "sha256:425ea7f4cd30e67a255b1da7490011bd4ecda8537444011e7b7fa005bb477ad4"
+    )
+    assert kernel["global_fixed_recurrence_schedule"] == contract
+    assert canonical_hash(kernel) == _GLOBAL_FIXED_RECURRENCE_KERNEL_ABI_HASH_V2
+    assert (
+        artifact.kernel_module_abi_hash == _GLOBAL_FIXED_RECURRENCE_KERNEL_ABI_HASH_V2
+    )
+    assert (
+        _GLOBAL_FIXED_RECURRENCE_KERNEL_ABI_HASH_V2
+        != _HISTORICAL_FIRST_COLUMN_CHECKPOINT_KERNEL_ABI_HASH_V2
+    )
+
+    semantic_drift = deepcopy(kernel)
+    semantic_drift["global_fixed_recurrence_schedule"]["terminal_padding_contract"][
+        "inactive_launches_preserve_all_device_bytes"
+    ] = False
+    assert canonical_hash(semantic_drift) != canonical_hash(kernel)
+
+    additional_property = deepcopy(payload)
+    additional_interface = additional_property["kernel_module_contract"]["interface"]
+    additional_interface["global_fixed_recurrence_schedule"]["epoch_formulas"][
+        "unbound_formula"
+    ] = "E=unconstrained"
+    additional_property["kernel_module_contract"]["kernel_module_abi_hash"] = (
+        canonical_hash(additional_interface)
+    )
+    errors = list(validator.iter_errors(additional_property))
+    assert any(
+        error.validator == "additionalProperties"
+        and tuple(error.absolute_path)[-1] == "epoch_formulas"
+        for error in errors
+    )
+
+    missing_required_prestate = deepcopy(payload)
+    del missing_required_prestate["kernel_module_contract"]["interface"][
+        "global_fixed_recurrence_schedule"
+    ]["final_guard_contract"]["active_required_prestate"]
+    assert any(
+        error.validator == "required"
+        and tuple(error.absolute_path)[-1] == "final_guard_contract"
+        for error in validator.iter_errors(missing_required_prestate)
+    )
 
 
 def test_first_column_partial_schedule_is_exact_hashed_and_stops_after_dgks() -> None:
@@ -1169,9 +1232,7 @@ def test_candidate_residual_schedule_is_separate_exact_hashed_and_abi_bound() ->
     assert kernel["first_column_candidate_residual_schedule_hash"] == canonical_hash(
         residual
     )
-    assert canonical_hash(kernel) == (
-        "sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f"
-    )
+    assert canonical_hash(kernel) == _GLOBAL_FIXED_RECURRENCE_KERNEL_ABI_HASH_V2
     assert canonical_hash(kernel) != (
         "sha256:273791455b794afe35e726ef1e102f4953fbc9f60e4bd5fcbc9c8e11ec8c55f6"
     )
@@ -1450,9 +1511,7 @@ def test_candidate_scale_metrics_schedule_is_exact_hashed_and_abi_bound() -> Non
     assert kernel["first_column_candidate_scale_metrics_schedule_hash"] == (
         canonical_hash(scale)
     )
-    assert canonical_hash(kernel) == (
-        "sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f"
-    )
+    assert canonical_hash(kernel) == _GLOBAL_FIXED_RECURRENCE_KERNEL_ABI_HASH_V2
 
     first = hip_fgmres_first_column_candidate_scale_metrics_schedule_payload_v2()
     first["scope"]["trial_x_l2_included"] = False
@@ -1748,9 +1807,7 @@ def test_checkpoint_transaction_schedule_is_exact_hashed_and_abi_bound() -> None
     assert kernel["first_column_checkpoint_transaction_schedule_hash"] == (
         canonical_hash(transaction)
     )
-    assert canonical_hash(kernel) == (
-        "sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f"
-    )
+    assert canonical_hash(kernel) == _GLOBAL_FIXED_RECURRENCE_KERNEL_ABI_HASH_V2
 
     first = hip_fgmres_first_column_checkpoint_transaction_schedule_payload_v2()
     first["scope"]["final_guard_included"] = True
