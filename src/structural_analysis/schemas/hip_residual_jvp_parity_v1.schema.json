@@ -1,0 +1,288 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_residual_jvp_parity_v1.schema.json",
+  "title": "Engine v2 HIP residual/JVP narrow-case CPU parity receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "parity_id",
+    "status",
+    "execution_evidence_kind",
+    "evaluation_count",
+    "fallback_policy",
+    "fallback_used",
+    "input_bindings",
+    "cpu_oracle",
+    "metrics",
+    "tolerances",
+    "checks",
+    "case_scope",
+    "claims",
+    "parity_receipt_hash",
+    "extensions"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-hip-residual-jvp-parity.v1"},
+    "capability_profile": {"const": "phase0_hip_cpu_oracle_narrow_case_parity"},
+    "parity_id": {"$ref": "#/$defs/stableId"},
+    "status": {"enum": ["pass", "fail"]},
+    "execution_evidence_kind": {"enum": ["native_hip", "test_double"]},
+    "evaluation_count": {"const": 1},
+    "fallback_policy": {"const": "forbidden"},
+    "fallback_used": {"const": false},
+    "input_bindings": {"$ref": "#/$defs/inputBindings"},
+    "cpu_oracle": {"$ref": "#/$defs/cpuOracle"},
+    "metrics": {"$ref": "#/$defs/metrics"},
+    "tolerances": {"$ref": "#/$defs/tolerances"},
+    "checks": {"$ref": "#/$defs/checks"},
+    "case_scope": {"$ref": "#/$defs/caseScope"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "parity_receipt_hash": {"$ref": "#/$defs/sha256"},
+    "extensions": {"$ref": "#/$defs/extensions"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "pass"}}},
+      "then": {
+        "properties": {
+          "checks": {
+            "properties": {
+              "residual_pass": {"const": true},
+              "jvp_pass": {"const": true},
+              "overall_pass": {"const": true}
+            }
+          },
+          "claims": {
+            "properties": {
+              "narrow_case_result_cpu_parity_proven": {"const": true}
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "checks": {
+            "properties": {"overall_pass": {"const": false}}
+          },
+          "claims": {
+            "properties": {
+              "narrow_case_result_cpu_parity_proven": {"const": false},
+              "native_hip_narrow_case_parity_proven": {"const": false}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"const": "pass"},
+          "execution_evidence_kind": {"const": "native_hip"}
+        }
+      },
+      "then": {
+        "properties": {
+          "claims": {
+            "properties": {
+              "native_hip_narrow_case_parity_proven": {"const": true}
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "claims": {
+            "properties": {
+              "native_hip_narrow_case_parity_proven": {"const": false}
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "stableId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]*$"
+    },
+    "finiteNonnegative": {"type": "number", "minimum": 0},
+    "extensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "maxProperties": 0
+    },
+    "inputBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "residual_jvp_result_hash",
+        "context_receipt_hash",
+        "execution_plan_hash",
+        "operator_hash",
+        "committed_state_hash",
+        "kernel_artifact_hash",
+        "direction_hash",
+        "evaluated_residual_hash",
+        "evaluated_jvp_hash"
+      ],
+      "properties": {
+        "residual_jvp_result_hash": {"$ref": "#/$defs/sha256"},
+        "context_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "execution_plan_hash": {"$ref": "#/$defs/sha256"},
+        "operator_hash": {"$ref": "#/$defs/sha256"},
+        "committed_state_hash": {"$ref": "#/$defs/sha256"},
+        "kernel_artifact_hash": {"$ref": "#/$defs/sha256"},
+        "direction_hash": {"$ref": "#/$defs/sha256"},
+        "evaluated_residual_hash": {"$ref": "#/$defs/sha256"},
+        "evaluated_jvp_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "cpuOracle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "backend",
+        "oracle_version",
+        "evaluation_count",
+        "residual_definition",
+        "jvp_definition",
+        "residual_hash",
+        "jvp_hash"
+      ],
+      "properties": {
+        "backend": {"const": "cpu_reference"},
+        "oracle_version": {"const": "engine-v2-cpu-canonical-csr-residual-jvp.v1"},
+        "evaluation_count": {"const": 1},
+        "residual_definition": {"const": "K_times_u_minus_F"},
+        "jvp_definition": {"const": "K_times_v"},
+        "residual_hash": {"$ref": "#/$defs/sha256"},
+        "jvp_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "residual_max_abs_error",
+        "residual_max_relative_error",
+        "jvp_max_abs_error",
+        "jvp_max_relative_error",
+        "cpu_residual_linf",
+        "cpu_jvp_linf"
+      ],
+      "properties": {
+        "residual_max_abs_error": {"$ref": "#/$defs/finiteNonnegative"},
+        "residual_max_relative_error": {"$ref": "#/$defs/finiteNonnegative"},
+        "jvp_max_abs_error": {"$ref": "#/$defs/finiteNonnegative"},
+        "jvp_max_relative_error": {"$ref": "#/$defs/finiteNonnegative"},
+        "cpu_residual_linf": {"$ref": "#/$defs/finiteNonnegative"},
+        "cpu_jvp_linf": {"$ref": "#/$defs/finiteNonnegative"}
+      }
+    },
+    "tolerances": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "residual_abs_tolerance",
+        "residual_relative_tolerance",
+        "jvp_abs_tolerance",
+        "jvp_relative_tolerance",
+        "relative_error_denominator_floor"
+      ],
+      "properties": {
+        "residual_abs_tolerance": {"$ref": "#/$defs/finiteNonnegative"},
+        "residual_relative_tolerance": {"$ref": "#/$defs/finiteNonnegative"},
+        "jvp_abs_tolerance": {"$ref": "#/$defs/finiteNonnegative"},
+        "jvp_relative_tolerance": {"$ref": "#/$defs/finiteNonnegative"},
+        "relative_error_denominator_floor": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "single_result_evaluation_bound",
+        "cpu_oracle_replayed",
+        "residual_abs_within_tolerance",
+        "residual_relative_within_tolerance",
+        "residual_pass",
+        "jvp_abs_within_tolerance",
+        "jvp_relative_within_tolerance",
+        "jvp_pass",
+        "overall_pass"
+      ],
+      "properties": {
+        "single_result_evaluation_bound": {"const": true},
+        "cpu_oracle_replayed": {"const": true},
+        "residual_abs_within_tolerance": {"type": "boolean"},
+        "residual_relative_within_tolerance": {"type": "boolean"},
+        "residual_pass": {"type": "boolean"},
+        "jvp_abs_within_tolerance": {"type": "boolean"},
+        "jvp_relative_within_tolerance": {"type": "boolean"},
+        "jvp_pass": {"type": "boolean"},
+        "overall_pass": {"type": "boolean"}
+      }
+    },
+    "caseScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "case_id",
+        "model_ir_content_hash",
+        "dof_count",
+        "nnz_count",
+        "analysis_type",
+        "constitutive_scope",
+        "coverage_statement"
+      ],
+      "properties": {
+        "scope": {"const": "narrow_linear_static_case"},
+        "case_id": {"$ref": "#/$defs/stableId"},
+        "model_ir_content_hash": {"$ref": "#/$defs/sha256"},
+        "dof_count": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+        "nnz_count": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+        "analysis_type": {"const": "linear_static"},
+        "constitutive_scope": {"const": "preassembled_linear_operator_only"},
+        "coverage_statement": {
+          "const": "one_model_one_state_one_direction_one_fused_evaluation"
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "narrow_case_result_cpu_parity_proven",
+        "native_hip_narrow_case_parity_proven",
+        "cpu_hip_global_parity_proven",
+        "constitutive_parity_proven",
+        "solver_parity_proven",
+        "newton_parity_proven",
+        "krylov_parity_proven",
+        "commercial_readiness"
+      ],
+      "properties": {
+        "narrow_case_result_cpu_parity_proven": {"type": "boolean"},
+        "native_hip_narrow_case_parity_proven": {"type": "boolean"},
+        "cpu_hip_global_parity_proven": {"const": false},
+        "constitutive_parity_proven": {"const": false},
+        "solver_parity_proven": {"const": false},
+        "newton_parity_proven": {"const": false},
+        "krylov_parity_proven": {"const": false},
+        "commercial_readiness": {"const": false}
+      }
+    }
+  }
+}

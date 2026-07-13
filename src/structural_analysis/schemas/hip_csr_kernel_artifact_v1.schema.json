@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_csr_kernel_artifact_v1.schema.json",
+  "title": "Engine v2 HIP canonical-CSR kernel artifact receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_version",
+    "status",
+    "status_code",
+    "backend",
+    "entrypoint",
+    "last_error_entrypoint",
+    "abi_version",
+    "block_size",
+    "descriptor_layout",
+    "source_path",
+    "library_path",
+    "source_hash",
+    "library_hash",
+    "artifact_hash",
+    "abi_hash",
+    "build_target_hash",
+    "compiler",
+    "device_libraries",
+    "targets",
+    "flags",
+    "fallback_policy",
+    "fallback_used",
+    "operator_execution_proven",
+    "numerical_parity_proven",
+    "speedup_proven",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-csr-kernel-artifact.v1"
+    },
+    "artifact_version": {
+      "const": "engine-v2-canonical-csr-residual-jvp.v1"
+    },
+    "status": {"const": "artifact_ready"},
+    "status_code": {"const": "hip_csr_kernel_artifact_ready"},
+    "backend": {"const": "hip_native"},
+    "entrypoint": {"const": "engine_v2_hip_csr_launch"},
+    "last_error_entrypoint": {"const": "engine_v2_hip_csr_last_error"},
+    "abi_version": {"const": 1},
+    "block_size": {"const": 256},
+    "descriptor_layout": {"$ref": "#/$defs/descriptorLayout"},
+    "source_path": {"$ref": "#/$defs/path"},
+    "library_path": {"$ref": "#/$defs/path"},
+    "source_hash": {"$ref": "#/$defs/sha256"},
+    "library_hash": {"$ref": "#/$defs/sha256"},
+    "artifact_hash": {"$ref": "#/$defs/sha256"},
+    "abi_hash": {"$ref": "#/$defs/sha256"},
+    "build_target_hash": {"$ref": "#/$defs/sha256"},
+    "compiler": {"$ref": "#/$defs/compiler"},
+    "device_libraries": {"$ref": "#/$defs/deviceLibraries"},
+    "targets": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^gfx[0-9a-f]{3,8}(:[a-z0-9_+\\-]+)?$",
+        "maxLength": 64
+      }
+    },
+    "flags": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1, "maxLength": 4096},
+      "allOf": [
+        {"contains": {"const": "-O3"}, "minContains": 1, "maxContains": 1},
+        {"contains": {"const": "-std=c++17"}, "minContains": 1, "maxContains": 1},
+        {"contains": {"const": "-fPIC"}, "minContains": 1, "maxContains": 1},
+        {"contains": {"const": "-shared"}, "minContains": 1, "maxContains": 1},
+        {"contains": {"const": "-fno-fast-math"}, "minContains": 1, "maxContains": 1},
+        {"contains": {"const": "-ffp-contract=off"}, "minContains": 1, "maxContains": 1}
+      ]
+    },
+    "fallback_policy": {"const": "forbidden"},
+    "fallback_used": {"const": false},
+    "operator_execution_proven": {"const": false},
+    "numerical_parity_proven": {"const": false},
+    "speedup_proven": {"const": false},
+    "receipt_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "descriptorLayout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "buffer_view_size",
+        "canonical_csr_size",
+        "residual_jvp_request_size",
+        "dtype_i32_le",
+        "dtype_f64_le"
+      ],
+      "properties": {
+        "buffer_view_size": {"type": "integer", "minimum": 48, "maximum": 512},
+        "canonical_csr_size": {"type": "integer", "minimum": 160, "maximum": 4096},
+        "residual_jvp_request_size": {"type": "integer", "minimum": 384, "maximum": 8192},
+        "dtype_i32_le": {"const": 1},
+        "dtype_f64_le": {"const": 2}
+      }
+    },
+    "compiler": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "root",
+        "identity",
+        "identity_hash",
+        "hip_version",
+        "ambient_override_policy",
+        "rejected_environment_override_names",
+        "ambient_overrides_absent"
+      ],
+      "properties": {
+        "path": {"$ref": "#/$defs/path"},
+        "root": {"$ref": "#/$defs/path"},
+        "identity": {"type": "string", "minLength": 1, "maxLength": 4096},
+        "identity_hash": {"$ref": "#/$defs/sha256"},
+        "hip_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+$", "maxLength": 32},
+        "ambient_override_policy": {"const": "reject_if_present"},
+        "rejected_environment_override_names": {
+          "type": "array",
+          "minItems": 26,
+          "maxItems": 26,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "maxLength": 128
+          }
+        },
+        "ambient_overrides_absent": {"const": true}
+      }
+    },
+    "deviceLibraries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "content_hash",
+        "bitcode_file_count",
+        "matching_compiler_root_asserted",
+        "matching_hip_version_asserted"
+      ],
+      "properties": {
+        "path": {"$ref": "#/$defs/path"},
+        "content_hash": {"$ref": "#/$defs/sha256"},
+        "bitcode_file_count": {"type": "integer", "minimum": 2, "maximum": 1000000},
+        "matching_compiler_root_asserted": {"const": true},
+        "matching_hip_version_asserted": {"const": true}
+      }
+    }
+  }
+}

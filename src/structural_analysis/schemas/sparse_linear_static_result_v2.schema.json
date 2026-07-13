@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/sparse_linear_static_result_v2.schema.json",
+  "title": "Engine v2 sparse linear-static result v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "backend",
+    "execution_plan_hash",
+    "operator_version",
+    "operator_hash",
+    "numeric_snapshot_hash",
+    "result_hash",
+    "metrics",
+    "constraint_partition",
+    "arrays",
+    "claim_boundary",
+    "extensions"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-sparse-linear-static-result.v2"},
+    "status": {"enum": ["ready", "failed"]},
+    "backend": {"const": "cpu_scipy_sparse_direct_csr_fp64"},
+    "execution_plan_hash": {"$ref": "#/$defs/sha256"},
+    "operator_version": {"const": "engine-v2-cpu-direct-csr-linear-static.v2"},
+    "operator_hash": {"$ref": "#/$defs/sha256"},
+    "numeric_snapshot_hash": {"$ref": "#/$defs/sha256"},
+    "result_hash": {"$ref": "#/$defs/sha256"},
+    "metrics": {"$ref": "#/$defs/metrics"},
+    "constraint_partition": {"$ref": "#/$defs/partition"},
+    "arrays": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {"$ref": "#/$defs/arrayDescriptor"}
+    },
+    "claim_boundary": {"$ref": "#/$defs/claimBoundary"},
+    "extensions": {"$ref": "#/$defs/extensions"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "index": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+    "extensions": {
+      "type": "object",
+      "propertyNames": {"pattern": "^[a-z][a-z0-9_.-]*:[A-Za-z0-9_.-]+$"},
+      "additionalProperties": true
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_strain_energy_j",
+        "free_residual_linf",
+        "scaled_free_residual"
+      ],
+      "properties": {
+        "total_strain_energy_j": {"type": "number", "minimum": 0},
+        "free_residual_linf": {"type": "number", "minimum": 0},
+        "scaled_free_residual": {"type": "number", "minimum": 0}
+      }
+    },
+    "partition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["constrained_dofs", "free_dofs"],
+      "properties": {
+        "constrained_dofs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "free_dofs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/index"}
+        }
+      }
+    },
+    "arrayDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "layout",
+        "byte_length",
+        "data_hash",
+        "content_hash"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "displacements_si",
+            "reactions_si",
+            "residual_si",
+            "element_end_forces_local_si",
+            "element_strain_energy_j"
+          ]
+        },
+        "dtype": {"const": "<f8"},
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {"type": "integer", "minimum": 1, "maximum": 2147483647}
+        },
+        "layout": {"const": "C"},
+        "byte_length": {"type": "integer", "minimum": 1},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "claimBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "global_dense_matrix_materialized",
+        "residual_jvp_complexity",
+        "linear_solver",
+        "direct_solve_complexity_claim",
+        "end_to_end_O_N_claim",
+        "fallback_used",
+        "validation_mode",
+        "cross_platform_serialized_replay"
+      ],
+      "properties": {
+        "global_dense_matrix_materialized": {"const": false},
+        "residual_jvp_complexity": {"const": "O(nnz)"},
+        "linear_solver": {"const": "scipy_sparse_direct"},
+        "direct_solve_complexity_claim": {"const": "not_O_N"},
+        "end_to_end_O_N_claim": {"const": false},
+        "fallback_used": {"const": false},
+        "validation_mode": {"const": "exact_same_runtime_direct_solve_replay"},
+        "cross_platform_serialized_replay": {"const": "not_implemented"}
+      }
+    }
+  }
+}

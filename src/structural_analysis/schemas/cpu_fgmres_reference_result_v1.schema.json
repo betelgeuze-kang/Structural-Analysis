@@ -1,0 +1,796 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/cpu_fgmres_reference_result_v1.schema.json",
+  "title": "Engine v2 CPU fixed-restart FGMRES reference result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "status",
+    "termination_code",
+    "bindings",
+    "policy",
+    "counts",
+    "metrics",
+    "history",
+    "arrays",
+    "claims",
+    "result_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-cpu-fgmres-reference-result.v1"
+    },
+    "capability_profile": {
+      "const": "phase0_cpu_fixed_restart_right_preconditioned_fgmres_reference"
+    },
+    "status": {
+      "enum": [
+        "converged",
+        "max_iterations",
+        "stagnated",
+        "diverged",
+        "arnoldi_breakdown",
+        "numerical_failure"
+      ]
+    },
+    "termination_code": {
+      "type": "string"
+    },
+    "bindings": {
+      "$ref": "#/$defs/bindings"
+    },
+    "policy": {
+      "$ref": "#/$defs/policy"
+    },
+    "counts": {
+      "$ref": "#/$defs/counts"
+    },
+    "metrics": {
+      "$ref": "#/$defs/metrics"
+    },
+    "history": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "$ref": "#/$defs/restartRecord"
+      }
+    },
+    "arrays": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/reducedSolutionDescriptor"
+        },
+        {
+          "$ref": "#/$defs/trueResidualDescriptor"
+        }
+      ],
+      "items": false
+    },
+    "claims": {
+      "$ref": "#/$defs/claims"
+    },
+    "result_hash": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "allOf": [
+    {
+      "oneOf": [
+        {
+          "properties": {
+            "status": {
+              "const": "converged"
+            },
+            "termination_code": {
+              "enum": [
+                "converged_initial_true_residual",
+                "converged_happy_breakdown",
+                "converged_true_residual",
+                "converged_restart_true_residual"
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "status": {
+              "const": "max_iterations"
+            },
+            "termination_code": {
+              "const": "max_iterations_exhausted"
+            }
+          }
+        },
+        {
+          "properties": {
+            "status": {
+              "const": "stagnated"
+            },
+            "termination_code": {
+              "const": "true_residual_stagnated"
+            }
+          }
+        },
+        {
+          "properties": {
+            "status": {
+              "const": "diverged"
+            },
+            "termination_code": {
+              "const": "true_residual_diverged"
+            }
+          }
+        },
+        {
+          "properties": {
+            "status": {
+              "const": "arnoldi_breakdown"
+            },
+            "termination_code": {
+              "enum": [
+                "arnoldi_triangular_factor_breakdown",
+                "arnoldi_invariant_subspace_breakdown"
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "status": {
+              "const": "numerical_failure"
+            },
+            "termination_code": {
+              "enum": [
+                "initial_operator_application_failed",
+                "initial_residual_nonfinite",
+                "restart_residual_norm_invalid",
+                "preconditioner_application_nonfinite",
+                "arnoldi_operator_application_failed",
+                "arnoldi_work_norm_nonfinite",
+                "arnoldi_orthogonalization_failed",
+                "arnoldi_reorthogonalization_failed",
+                "arnoldi_norm_nonfinite",
+                "givens_rotation_arithmetic_failed",
+                "givens_residual_nonfinite",
+                "triangular_solve_arithmetic_failed",
+                "candidate_true_residual_failed",
+                "restart_true_residual_failed",
+                "restart_state_nonfinite"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "converged"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "metrics": {
+            "properties": {
+              "solver_tolerance_passed": {
+                "const": true
+              },
+              "authoritative_plan_tolerance_passed": {
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "metrics": {
+            "not": {
+              "properties": {
+                "solver_tolerance_passed": {
+                  "const": true
+                },
+                "authoritative_plan_tolerance_passed": {
+                  "const": true
+                }
+              },
+              "required": [
+                "solver_tolerance_passed",
+                "authoritative_plan_tolerance_passed"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "termination_code": {
+            "const": "converged_initial_true_residual"
+          }
+        },
+        "required": [
+          "termination_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "counts": {
+            "properties": {
+              "iteration_count": {
+                "const": 0
+              },
+              "restart_count": {
+                "const": 0
+              },
+              "operator_apply_count": {
+                "const": 1
+              },
+              "preconditioner_apply_count": {
+                "const": 0
+              }
+            }
+          },
+          "history": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "counts": {
+            "properties": {
+              "restart_count": {
+                "const": 0
+              }
+            },
+            "required": [
+              "restart_count"
+            ]
+          }
+        },
+        "required": [
+          "counts"
+        ]
+      },
+      "then": {
+        "properties": {
+          "counts": {
+            "properties": {
+              "iteration_count": {
+                "const": 0
+              },
+              "preconditioner_apply_count": {
+                "const": 0
+              }
+            }
+          },
+          "history": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "history": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "history"
+        ]
+      },
+      "then": {
+        "properties": {
+          "counts": {
+            "properties": {
+              "iteration_count": {
+                "minimum": 1
+              },
+              "restart_count": {
+                "minimum": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "stagnated",
+              "diverged"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "counts": {
+            "properties": {
+              "iteration_count": {
+                "minimum": 1
+              },
+              "restart_count": {
+                "minimum": 1
+              }
+            }
+          },
+          "history": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "termination_code": {
+            "enum": [
+              "converged_happy_breakdown",
+              "converged_true_residual",
+              "converged_restart_true_residual"
+            ]
+          }
+        },
+        "required": [
+          "termination_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "counts": {
+            "properties": {
+              "iteration_count": {
+                "minimum": 1
+              },
+              "restart_count": {
+                "minimum": 1
+              }
+            }
+          },
+          "history": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nonnegativeFiniteNumber": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1.7976931348623157e+308
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_plan_hash",
+        "operator_hash",
+        "numeric_snapshot_hash",
+        "partition_hash",
+        "initial_reduced_state_hash",
+        "rhs_hash",
+        "policy_hash"
+      ],
+      "properties": {
+        "execution_plan_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "operator_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "numeric_snapshot_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "partition_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "initial_reduced_state_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "rhs_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "policy_hash": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "method",
+        "restart_dimension",
+        "max_iterations",
+        "absolute_tolerance",
+        "relative_tolerance",
+        "stagnation_checkpoint_limit",
+        "stagnation_relative_tolerance",
+        "divergence_factor",
+        "orthogonalization",
+        "preconditioner",
+        "solver_norm",
+        "authoritative_norm",
+        "fallback_forbidden",
+        "policy_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-fgmres-policy.v1"
+        },
+        "method": {
+          "const": "fixed_restart_right_preconditioned_fgmres"
+        },
+        "restart_dimension": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "max_iterations": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "absolute_tolerance": {
+          "$ref": "#/$defs/nonnegativeFiniteNumber"
+        },
+        "relative_tolerance": {
+          "$ref": "#/$defs/nonnegativeFiniteNumber"
+        },
+        "stagnation_checkpoint_limit": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 16
+        },
+        "stagnation_relative_tolerance": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "divergence_factor": {
+          "type": "number",
+          "exclusiveMinimum": 1,
+          "maximum": 1.7976931348623157e+308
+        },
+        "orthogonalization": {
+          "const": "dgks_conditional_two_pass_mgs"
+        },
+        "preconditioner": {
+          "const": "positive_unshifted_jacobi_right"
+        },
+        "solver_norm": {
+          "const": "l2"
+        },
+        "authoritative_norm": {
+          "const": "scaled_true_residual_linf"
+        },
+        "fallback_forbidden": {
+          "const": true
+        },
+        "policy_hash": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "absolute_tolerance": {
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "absolute_tolerance"
+          ]
+        },
+        {
+          "properties": {
+            "relative_tolerance": {
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "relative_tolerance"
+          ]
+        }
+      ]
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "iteration_count",
+        "restart_count",
+        "operator_apply_count",
+        "preconditioner_apply_count"
+      ],
+      "properties": {
+        "iteration_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "restart_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "operator_apply_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "preconditioner_apply_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "initial_residual_l2",
+        "solver_tolerance_l2",
+        "final_residual_l2",
+        "final_residual_linf",
+        "scaled_true_residual",
+        "solver_tolerance_passed",
+        "authoritative_plan_tolerance_passed"
+      ],
+      "properties": {
+        "initial_residual_l2": {
+          "$ref": "#/$defs/nonnegativeFiniteNumber"
+        },
+        "solver_tolerance_l2": {
+          "$ref": "#/$defs/nonnegativeFiniteNumber"
+        },
+        "final_residual_l2": {
+          "$ref": "#/$defs/nonnegativeFiniteNumber"
+        },
+        "final_residual_linf": {
+          "$ref": "#/$defs/nonnegativeFiniteNumber"
+        },
+        "scaled_true_residual": {
+          "$ref": "#/$defs/nonnegativeFiniteNumber"
+        },
+        "solver_tolerance_passed": {
+          "type": "boolean"
+        },
+        "authoritative_plan_tolerance_passed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "restartRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "restart_index",
+        "start_iteration",
+        "end_iteration",
+        "arnoldi_step_count",
+        "preconditioner_apply_count",
+        "reorthogonalization_count",
+        "estimated_residual_l2",
+        "true_residual_l2",
+        "true_residual_linf",
+        "scaled_true_residual",
+        "solution_update_l2",
+        "termination_hint"
+      ],
+      "properties": {
+        "restart_index": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "start_iteration": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4095
+        },
+        "end_iteration": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "arnoldi_step_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "preconditioner_apply_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "reorthogonalization_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16
+        },
+        "estimated_residual_l2": {
+          "$ref": "#/$defs/nonnegativeFiniteNumber"
+        },
+        "true_residual_l2": {
+          "$ref": "#/$defs/nonnegativeFiniteNumber"
+        },
+        "true_residual_linf": {
+          "$ref": "#/$defs/nonnegativeFiniteNumber"
+        },
+        "scaled_true_residual": {
+          "$ref": "#/$defs/nonnegativeFiniteNumber"
+        },
+        "solution_update_l2": {
+          "$ref": "#/$defs/nonnegativeFiniteNumber"
+        },
+        "termination_hint": {
+          "enum": [
+            "converged_happy_breakdown",
+            "converged_true_residual",
+            "arnoldi_invariant_subspace_breakdown",
+            "arnoldi_triangular_factor_breakdown",
+            "restart_completed"
+          ]
+        }
+      }
+    },
+    "arrayDescriptorBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "byte_length",
+        "data_hash"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "reduced_solution",
+            "true_residual"
+          ]
+        },
+        "dtype": {
+          "const": "<f8"
+        },
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "prefixItems": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          ],
+          "items": false
+        },
+        "byte_length": {
+          "type": "integer",
+          "minimum": 8,
+          "maximum": 17179869176,
+          "multipleOf": 8
+        },
+        "data_hash": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "reducedSolutionDescriptor": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/arrayDescriptorBase"
+        },
+        {
+          "properties": {
+            "name": {
+              "const": "reduced_solution"
+            }
+          }
+        }
+      ]
+    },
+    "trueResidualDescriptor": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/arrayDescriptorBase"
+        },
+        {
+          "properties": {
+            "name": {
+              "const": "true_residual"
+            }
+          }
+        }
+      ]
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cpu_reference",
+        "fixed_restart",
+        "right_preconditioned",
+        "positive_unshifted_jacobi",
+        "true_residual_replay",
+        "scipy_iterative_solver_used",
+        "fallback_used",
+        "hip_execution",
+        "iteration_host_copy_zero_proven",
+        "end_to_end_o_n_proven",
+        "speedup_proven",
+        "commercial_ready"
+      ],
+      "properties": {
+        "cpu_reference": {
+          "const": true
+        },
+        "fixed_restart": {
+          "const": true
+        },
+        "right_preconditioned": {
+          "const": true
+        },
+        "positive_unshifted_jacobi": {
+          "const": true
+        },
+        "true_residual_replay": {
+          "const": true
+        },
+        "scipy_iterative_solver_used": {
+          "const": false
+        },
+        "fallback_used": {
+          "const": false
+        },
+        "hip_execution": {
+          "const": false
+        },
+        "iteration_host_copy_zero_proven": {
+          "const": false
+        },
+        "end_to_end_o_n_proven": {
+          "const": false
+        },
+        "speedup_proven": {
+          "const": false
+        },
+        "commercial_ready": {
+          "const": false
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_capability_receipt_v1.schema.json",
+  "title": "Engine v2 native HIP capability receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "probe_version",
+    "status",
+    "status_code",
+    "message",
+    "backend",
+    "library",
+    "device",
+    "versions",
+    "capabilities",
+    "fallback_policy",
+    "fallback_used",
+    "context_created",
+    "model_residency_proven",
+    "operator_execution_proven",
+    "solver_execution_proven",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-capability-receipt.v1"
+    },
+    "probe_version": {
+      "const": "engine-v2-native-hip-capability-probe.v1"
+    },
+    "status": {"enum": ["ready", "unavailable"]},
+    "status_code": {
+      "enum": [
+        "hip_runtime_device_ready",
+        "hip_runtime_library_not_found",
+        "hip_runtime_library_hash_failed",
+        "hip_runtime_library_load_failed",
+        "hip_runtime_symbol_missing",
+        "hip_init_failed",
+        "hip_device_count_failed",
+        "hip_no_devices",
+        "hip_device_ordinal_unavailable",
+        "hip_device_name_failed",
+        "hip_device_name_invalid",
+        "hip_runtime_version_failed",
+        "hip_driver_version_failed"
+      ]
+    },
+    "message": {"type": "string", "minLength": 1, "maxLength": 512},
+    "backend": {"const": "hip_native"},
+    "library": {"$ref": "#/$defs/library"},
+    "device": {"$ref": "#/$defs/device"},
+    "versions": {"$ref": "#/$defs/versions"},
+    "capabilities": {"$ref": "#/$defs/capabilities"},
+    "fallback_policy": {"const": "forbidden"},
+    "fallback_used": {"const": false},
+    "context_created": {"const": false},
+    "model_residency_proven": {"const": false},
+    "operator_execution_proven": {"const": false},
+    "solver_execution_proven": {"const": false},
+    "receipt_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "ready"}}},
+      "then": {
+        "properties": {
+          "status_code": {"const": "hip_runtime_device_ready"},
+          "library": {
+            "properties": {"loaded_name": {"type": "string", "minLength": 1}}
+          },
+          "device": {
+            "properties": {
+              "device_count": {"type": "integer", "minimum": 1},
+              "name": {"type": "string", "minLength": 1}
+            }
+          },
+          "versions": {
+            "properties": {
+              "runtime": {"type": "integer", "minimum": 0},
+              "driver": {"type": "integer", "minimum": 0}
+            }
+          },
+          "capabilities": {
+            "properties": {
+              "runtime_loaded": {"const": true},
+              "runtime_initialized": {"const": true},
+              "device_enumeration_succeeded": {"const": true},
+              "selected_device_available": {"const": true}
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "status_code": {
+            "enum": [
+              "hip_runtime_library_not_found",
+              "hip_runtime_library_hash_failed",
+              "hip_runtime_library_load_failed",
+              "hip_runtime_symbol_missing",
+              "hip_init_failed",
+              "hip_device_count_failed",
+              "hip_no_devices",
+              "hip_device_ordinal_unavailable",
+              "hip_device_name_failed",
+              "hip_device_name_invalid",
+              "hip_runtime_version_failed",
+              "hip_driver_version_failed"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nullableString": {
+      "oneOf": [
+        {"type": "null"},
+        {"type": "string", "minLength": 1, "maxLength": 4096}
+      ]
+    },
+    "nullableVersion": {
+      "oneOf": [
+        {"type": "null"},
+        {"type": "integer", "minimum": 0, "maximum": 2147483647}
+      ]
+    },
+    "library": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "discovery_source",
+        "requested_name",
+        "loaded_name",
+        "resolved_path",
+        "sha256"
+      ],
+      "properties": {
+        "discovery_source": {
+          "enum": ["explicit", "opt_rocm", "system_loader", "injected", "none"]
+        },
+        "requested_name": {"$ref": "#/$defs/nullableString"},
+        "loaded_name": {"$ref": "#/$defs/nullableString"},
+        "resolved_path": {"$ref": "#/$defs/nullableString"},
+        "sha256": {
+          "oneOf": [{"type": "null"}, {"$ref": "#/$defs/sha256"}]
+        }
+      }
+    },
+    "device": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selected_ordinal", "device_count", "name"],
+      "properties": {
+        "selected_ordinal": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "device_count": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "integer", "minimum": 0, "maximum": 2147483647}
+          ]
+        },
+        "name": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string", "minLength": 1, "maxLength": 255}
+          ]
+        }
+      }
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runtime", "driver"],
+      "properties": {
+        "runtime": {"$ref": "#/$defs/nullableVersion"},
+        "driver": {"$ref": "#/$defs/nullableVersion"}
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runtime_loaded",
+        "runtime_initialized",
+        "device_enumeration_succeeded",
+        "selected_device_available"
+      ],
+      "properties": {
+        "runtime_loaded": {"type": "boolean"},
+        "runtime_initialized": {"type": "boolean"},
+        "device_enumeration_succeeded": {"type": "boolean"},
+        "selected_device_available": {"type": "boolean"}
+      }
+    }
+  }
+}

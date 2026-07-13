@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_resident_csr_context_v1.schema.json",
+  "title": "HIP resident CSR consumer context receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "capability_profile", "status", "context_id", "actual_backend", "evidence_scope", "promotion_eligible", "reason", "bindings", "kernel", "dimensions", "borrowed_buffers", "owned_buffers", "telemetry", "claims", "context_receipt_hash"],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-hip-resident-csr-context.v1"},
+    "capability_profile": {"const": "phase0_hiprtc_assembly_resident_csr_residual_jvp_consumer"},
+    "status": {"enum": ["context_ready", "poisoned", "cleanup_failed", "context_closed", "unavailable"]},
+    "context_id": {"$ref": "#/$defs/hash"},
+    "actual_backend": {"type": ["string", "null"], "enum": ["hip", "test_double", null]},
+    "evidence_scope": {"enum": ["native_hiprtc_composite", "injected_test_double"]},
+    "promotion_eligible": {"const": false},
+    "reason": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/reason"}]},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "kernel": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/kernel"}]},
+    "dimensions": {"$ref": "#/$defs/dimensions"},
+    "borrowed_buffers": {
+      "type": "array", "minItems": 4, "maxItems": 4,
+      "prefixItems": [
+        {"$ref": "#/$defs/borrowed_csr_row"},
+        {"$ref": "#/$defs/borrowed_csr_columns"},
+        {"$ref": "#/$defs/borrowed_csr_values"},
+        {"$ref": "#/$defs/borrowed_load"}
+      ],
+      "items": false
+    },
+    "owned_buffers": {"type": "array", "items": {"$ref": "#/$defs/owned_buffer"}, "maxItems": 4},
+    "telemetry": {"$ref": "#/$defs/telemetry"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "context_receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "nonnegative": {"type": "integer", "minimum": 0},
+    "reason": {
+      "type": "object", "additionalProperties": false,
+      "required": ["code", "detail"],
+      "properties": {"code": {"type": "string", "minLength": 1, "maxLength": 128}, "detail": {"type": "string", "minLength": 1, "maxLength": 512}}
+    },
+    "bindings": {
+      "type": "object", "additionalProperties": false,
+      "required": ["parent_context_id", "parent_opening_receipt_hash", "parent_assembly_evaluation_receipt_hash", "parent_operator_id", "parent_operator_metadata_hash", "parent_assembly_kernel_identity_hash", "parent_runtime_library_sha256", "parent_architecture", "parent_evidence_scope", "source_execution_plan_hash", "source_operator_hash", "source_numeric_snapshot_hash", "source_partition_hash", "load_pattern_id", "load_vector_hash", "state_hash", "state_epoch", "state_displacement_hash", "device_ordinal", "lease_epoch", "ordering_domain", "residual_sign_convention", "host_csr_role", "load_source", "state_load_factor_applied", "residual_kernel_origin"],
+      "properties": {
+        "parent_context_id": {"type": "string", "pattern": "^HipAssemblyContext:[0-9a-f]{24}$"}, "parent_opening_receipt_hash": {"$ref": "#/$defs/hash"}, "parent_assembly_evaluation_receipt_hash": {"$ref": "#/$defs/hash"}, "parent_operator_id": {"type": "string", "pattern": "^HipAssemblyOperator:[0-9a-f]{24}$"}, "parent_operator_metadata_hash": {"$ref": "#/$defs/hash"}, "parent_assembly_kernel_identity_hash": {"$ref": "#/$defs/hash"}, "parent_runtime_library_sha256": {"$ref": "#/$defs/hash"}, "parent_architecture": {"type": "string", "pattern": "^gfx[0-9][0-9a-f]{2,15}$"}, "parent_evidence_scope": {"enum": ["native_hiprtc", "injected_test_double"]}, "source_execution_plan_hash": {"$ref": "#/$defs/hash"}, "source_operator_hash": {"$ref": "#/$defs/hash"}, "source_numeric_snapshot_hash": {"$ref": "#/$defs/hash"}, "source_partition_hash": {"$ref": "#/$defs/hash"}, "load_pattern_id": {"type": "string", "minLength": 1, "maxLength": 128}, "load_vector_hash": {"$ref": "#/$defs/hash"}, "state_hash": {"$ref": "#/$defs/hash"}, "state_epoch": {"$ref": "#/$defs/nonnegative"}, "state_displacement_hash": {"$ref": "#/$defs/hash"}, "device_ordinal": {"$ref": "#/$defs/nonnegative"}, "lease_epoch": {"type": "integer", "minimum": 1}, "ordering_domain": {"const": "parent_context_serial_queue"}, "residual_sign_convention": {"const": "internal_minus_external"}, "host_csr_role": {"const": "device_borrowed_never_reuploaded"}, "load_source": {"const": "foundation_load_vector_si_full"}, "state_load_factor_applied": {"const": false}, "residual_kernel_origin": {"enum": ["internally_compiled", "caller_supplied"]}
+      }
+    },
+    "kernel": {
+      "type": "object", "additionalProperties": false,
+      "required": ["abi_version", "kernel_symbol", "block_size", "architecture", "source_resource", "source_sha256", "code_object_sha256", "identity_hash", "identity_snapshot_hash", "runtime_library_discovery_source", "runtime_library_sha256", "hiprtc_library_discovery_source", "hiprtc_library_sha256"],
+      "properties": {
+        "abi_version": {"type": "integer", "minimum": 1}, "kernel_symbol": {"type": "string", "minLength": 1}, "block_size": {"type": "integer", "minimum": 1}, "architecture": {"type": "string", "pattern": "^gfx[0-9][0-9a-f]{2,15}$"}, "source_resource": {"type": "string", "minLength": 1}, "source_sha256": {"$ref": "#/$defs/hash"}, "code_object_sha256": {"$ref": "#/$defs/hash"}, "identity_hash": {"$ref": "#/$defs/hash"}, "identity_snapshot_hash": {"$ref": "#/$defs/hash"}, "runtime_library_discovery_source": {"type": "string", "minLength": 1}, "runtime_library_sha256": {"$ref": "#/$defs/hash"}, "hiprtc_library_discovery_source": {"type": "string", "minLength": 1}, "hiprtc_library_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "dimensions": {
+      "type": "object", "additionalProperties": false,
+      "required": ["global_dof_count", "free_dof_count", "constrained_dof_count", "csr_nnz", "borrowed_buffer_count", "owned_buffer_count"],
+      "properties": {"global_dof_count": {"type": "integer", "minimum": 1}, "free_dof_count": {"$ref": "#/$defs/nonnegative"}, "constrained_dof_count": {"$ref": "#/$defs/nonnegative"}, "csr_nnz": {"type": "integer", "minimum": 1}, "borrowed_buffer_count": {"const": 4}, "owned_buffer_count": {"const": 4}}
+    },
+    "borrowed_base": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "ownership", "consumer_allocation_count", "consumer_h2d_bytes", "consumer_d2h_bytes"],
+      "properties": {"name": {"type": "string"}, "ownership": {"const": "parent_borrowed_process_local"}, "consumer_allocation_count": {"const": 0}, "consumer_h2d_bytes": {"const": 0}, "consumer_d2h_bytes": {"const": 0}}
+    },
+    "borrowed_csr_row": {"allOf": [{"$ref": "#/$defs/borrowed_base"}, {"properties": {"name": {"const": "csr_row_ptr"}}}]},
+    "borrowed_csr_columns": {"allOf": [{"$ref": "#/$defs/borrowed_base"}, {"properties": {"name": {"const": "csr_column_indices"}}}]},
+    "borrowed_csr_values": {"allOf": [{"$ref": "#/$defs/borrowed_base"}, {"properties": {"name": {"const": "csr_values"}}}]},
+    "borrowed_load": {"allOf": [{"$ref": "#/$defs/borrowed_base"}, {"properties": {"name": {"const": "load_vector_si"}}}]},
+    "owned_buffer": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "dtype", "shape", "byte_length", "data_hash", "memory_space", "access", "initial_transfer"],
+      "properties": {"name": {"enum": ["state_displacement", "direction_workspace", "residual_workspace", "jvp_workspace"]}, "dtype": {"const": "<f8"}, "shape": {"type": "array", "minItems": 1, "items": {"type": "integer", "minimum": 1}}, "byte_length": {"type": "integer", "minimum": 8}, "data_hash": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/hash"}]}, "memory_space": {"const": "hip_device"}, "access": {"enum": ["read_only", "read_write", "write_only"]}, "initial_transfer": {"enum": ["async_h2d_once_then_same_stream_fence", "none"]}}
+    },
+    "telemetry": {
+      "type": "object", "additionalProperties": false,
+      "required": ["owned_allocation_attempt_count", "owned_allocation_success_count", "owned_deallocation_attempt_count", "owned_deallocation_success_count", "owned_current_device_bytes", "owned_peak_device_bytes", "borrowed_device_bytes", "h2d_operation_attempt_count", "h2d_operation_success_count", "h2d_bytes_attempted", "h2d_bytes_succeeded", "d2h_operation_attempt_count", "d2h_operation_success_count", "d2h_bytes_attempted", "d2h_bytes_succeeded", "kernel_launch_attempt_count", "kernel_launch_success_count", "sync_attempt_count", "sync_success_count", "module_close_attempt_count", "module_close_success_count", "module_owner_acquired_count", "lease_release_attempt_count", "lease_release_success_count", "fallback_count", "new_stream_create_count", "consumer_csr_symbolic_h2d_bytes", "consumer_csr_numeric_h2d_bytes", "consumer_load_h2d_bytes"],
+      "properties": {"owned_allocation_attempt_count": {"$ref": "#/$defs/nonnegative"}, "owned_allocation_success_count": {"$ref": "#/$defs/nonnegative"}, "owned_deallocation_attempt_count": {"$ref": "#/$defs/nonnegative"}, "owned_deallocation_success_count": {"$ref": "#/$defs/nonnegative"}, "owned_current_device_bytes": {"$ref": "#/$defs/nonnegative"}, "owned_peak_device_bytes": {"$ref": "#/$defs/nonnegative"}, "borrowed_device_bytes": {"$ref": "#/$defs/nonnegative"}, "h2d_operation_attempt_count": {"$ref": "#/$defs/nonnegative"}, "h2d_operation_success_count": {"$ref": "#/$defs/nonnegative"}, "h2d_bytes_attempted": {"$ref": "#/$defs/nonnegative"}, "h2d_bytes_succeeded": {"$ref": "#/$defs/nonnegative"}, "d2h_operation_attempt_count": {"$ref": "#/$defs/nonnegative"}, "d2h_operation_success_count": {"$ref": "#/$defs/nonnegative"}, "d2h_bytes_attempted": {"$ref": "#/$defs/nonnegative"}, "d2h_bytes_succeeded": {"$ref": "#/$defs/nonnegative"}, "kernel_launch_attempt_count": {"$ref": "#/$defs/nonnegative"}, "kernel_launch_success_count": {"$ref": "#/$defs/nonnegative"}, "sync_attempt_count": {"$ref": "#/$defs/nonnegative"}, "sync_success_count": {"$ref": "#/$defs/nonnegative"}, "module_close_attempt_count": {"$ref": "#/$defs/nonnegative"}, "module_close_success_count": {"$ref": "#/$defs/nonnegative"}, "module_owner_acquired_count": {"type": "integer", "minimum": 0, "maximum": 1}, "lease_release_attempt_count": {"$ref": "#/$defs/nonnegative"}, "lease_release_success_count": {"$ref": "#/$defs/nonnegative"}, "fallback_count": {"const": 0}, "new_stream_create_count": {"const": 0}, "consumer_csr_symbolic_h2d_bytes": {"const": 0}, "consumer_csr_numeric_h2d_bytes": {"const": 0}, "consumer_load_h2d_bytes": {"const": 0}}
+    },
+    "claims": {
+      "type": "object", "additionalProperties": false,
+      "required": ["exclusive_parent_lease_active", "same_runtime_device_stream", "borrowed_assembly_csr", "borrowed_foundation_load", "resident_residual_jvp_ready", "host_csr_reupload_avoided", "native_composite_context", "solver_ready", "device_resident_krylov_ready", "end_to_end_on_complexity", "performance_or_speedup", "commercial_readiness"],
+      "properties": {"exclusive_parent_lease_active": {"type": "boolean"}, "same_runtime_device_stream": {"type": "boolean"}, "borrowed_assembly_csr": {"type": "boolean"}, "borrowed_foundation_load": {"type": "boolean"}, "resident_residual_jvp_ready": {"type": "boolean"}, "host_csr_reupload_avoided": {"type": "boolean"}, "native_composite_context": {"type": "boolean"}, "solver_ready": {"const": false}, "device_resident_krylov_ready": {"const": false}, "end_to_end_on_complexity": {"const": false}, "performance_or_speedup": {"const": false}, "commercial_readiness": {"const": false}}
+    }
+  }
+}

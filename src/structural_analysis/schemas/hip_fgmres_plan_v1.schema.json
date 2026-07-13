@@ -1,0 +1,905 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_plan_v1.schema.json",
+  "title": "Engine v2 HIP fixed-restart FGMRES plan v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "plan_id",
+    "source_contract",
+    "free_space_contract",
+    "policy",
+    "dimensions",
+    "algorithm_contract",
+    "runtime_lineage_requirements",
+    "memory_plan",
+    "claim_boundary",
+    "plan_hash",
+    "extensions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-plan.v1"
+    },
+    "capability_profile": {
+      "const": "phase0_hip_fixed_restart_fgmres_allocation_and_policy_plan"
+    },
+    "plan_id": {
+      "type": "string",
+      "pattern": "^HipFgmresPlan:[0-9a-f]{24}$"
+    },
+    "source_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_plan_schema_version",
+        "execution_plan_capability_profile",
+        "execution_plan_id",
+        "execution_plan_hash",
+        "operator_version",
+        "operator_hash",
+        "numeric_snapshot_hash",
+        "symbolic_reuse_hash",
+        "partition_hash",
+        "model_ir_content_hash",
+        "solver_artifact_hash",
+        "load_pattern_id",
+        "authoritative_residual_tolerance",
+        "source_solver_policy",
+        "source_solver_policy_overridden"
+      ],
+      "properties": {
+        "execution_plan_schema_version": {
+          "const": "structural-analysis-execution-plan.v2"
+        },
+        "execution_plan_capability_profile": {
+          "const": "phase0_sparse_cpu_direct_linear_static"
+        },
+        "execution_plan_id": {
+          "type": "string",
+          "pattern": "^SparsePlan:[0-9a-f]{24}$"
+        },
+        "execution_plan_hash": { "$ref": "#/$defs/hash" },
+        "operator_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "operator_hash": { "$ref": "#/$defs/hash" },
+        "numeric_snapshot_hash": { "$ref": "#/$defs/hash" },
+        "symbolic_reuse_hash": { "$ref": "#/$defs/hash" },
+        "partition_hash": { "$ref": "#/$defs/hash" },
+        "model_ir_content_hash": { "$ref": "#/$defs/hash" },
+        "solver_artifact_hash": { "$ref": "#/$defs/hash" },
+        "load_pattern_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
+        },
+        "authoritative_residual_tolerance": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1.7976931348623157e+308
+        },
+        "source_solver_policy": { "const": "scipy_sparse_direct" },
+        "source_solver_policy_overridden": { "const": false }
+      }
+    },
+    "free_space_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "capability_profile",
+        "plan_id",
+        "plan_hash",
+        "free_space_view_hash",
+        "jacobi_diagonal_data_hash",
+        "jacobi_inverse_data_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-hip-free-space-operator-plan.v1"
+        },
+        "capability_profile": {
+          "const": "phase0_hip_free_space_symbolic_non_solver_overlay"
+        },
+        "plan_id": {
+          "type": "string",
+          "pattern": "^HipFreeSpacePlan:[0-9a-f]{24}$"
+        },
+        "plan_hash": { "$ref": "#/$defs/hash" },
+        "free_space_view_hash": { "$ref": "#/$defs/hash" },
+        "jacobi_diagonal_data_hash": { "$ref": "#/$defs/hash" },
+        "jacobi_inverse_data_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "policy": { "$ref": "#/$defs/policy" },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "global_dof_count",
+        "free_dof_count",
+        "reduced_csr_nnz",
+        "restart_dimension",
+        "max_iterations",
+        "maximum_restart_count",
+        "reduction_segment_size",
+        "reduction_partial_count",
+        "packed_dense_scalar_count"
+      ],
+      "properties": {
+        "global_dof_count": { "$ref": "#/$defs/positiveInt32" },
+        "free_dof_count": { "$ref": "#/$defs/positiveInt32" },
+        "reduced_csr_nnz": { "$ref": "#/$defs/positiveInt32" },
+        "restart_dimension": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "max_iterations": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "maximum_restart_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "reduction_segment_size": { "const": 512 },
+        "reduction_partial_count": { "$ref": "#/$defs/positiveInt32" },
+        "packed_dense_scalar_count": { "$ref": "#/$defs/positiveInt64" }
+      }
+    },
+    "algorithm_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recurrence_abi_version",
+        "method",
+        "scalar_type",
+        "residual_equation",
+        "orthogonalization",
+        "dgks_reorthogonalization_eta",
+        "arnoldi_breakdown_epsilon_multiplier",
+        "arnoldi_breakdown_test",
+        "givens_breakdown_test",
+        "least_squares_update",
+        "hessenberg_layout",
+        "triangular_backsolve",
+        "preconditioner",
+        "initial_residual_replay",
+        "internal_convergence_test",
+        "true_residual_checkpoint",
+        "candidate_true_residual_trigger",
+        "estimated_residual_authoritative",
+        "convergence_requires_both_true_residual_gates",
+        "authoritative_load_scale",
+        "comparisons_are_inclusive",
+        "authoritative_final_test",
+        "triangular_pivot_floor",
+        "stagnation_checkpoint_rule",
+        "divergence_checkpoint_rule",
+        "restart_dimension_fixed_for_plan",
+        "global_iteration_cap_crosses_restart_boundaries",
+        "dense_lstsq_or_pinv_fallback_allowed",
+        "diagonal_shift_or_clamp_allowed",
+        "silent_solver_fallback_allowed"
+      ],
+      "properties": {
+        "recurrence_abi_version": { "const": 1 },
+        "method": { "const": "fixed_restart_right_preconditioned_fgmres" },
+        "scalar_type": { "const": "fp64" },
+        "residual_equation": { "const": "r=b-Ax" },
+        "orthogonalization": { "const": "dgks_conditional_two_pass_mgs" },
+        "dgks_reorthogonalization_eta": { "const": 0.717 },
+        "arnoldi_breakdown_epsilon_multiplier": { "const": 64.0 },
+        "arnoldi_breakdown_test": {
+          "const": "h_next_le_64_eps_times_l2_of_A_z_j"
+        },
+        "givens_breakdown_test": {
+          "const": "hypot_upper_lower_le_64_eps_times_max_abs_upper_lower"
+        },
+        "least_squares_update": { "const": "incremental_givens_qr" },
+        "hessenberg_layout": { "const": "column_major_(M+1)_by_M" },
+        "triangular_backsolve": {
+          "const": "scale_relative_upper_triangular_no_lstsq_or_pinv"
+        },
+        "preconditioner": { "const": "positive_unshifted_jacobi_right" },
+        "initial_residual_replay": {
+          "const": "always_explicit_b_minus_A_x0"
+        },
+        "internal_convergence_test": {
+          "const": "l2_le_max_atol_rtol_times_rhs_l2_no_unit_floor"
+        },
+        "true_residual_checkpoint": { "const": "each_restart_and_final" },
+        "candidate_true_residual_trigger": {
+          "const": "estimated_l2_pass_or_suspected_arnoldi_breakdown"
+        },
+        "estimated_residual_authoritative": { "const": false },
+        "convergence_requires_both_true_residual_gates": { "const": true },
+        "authoritative_load_scale": { "const": "max_1_rhs_linf" },
+        "comparisons_are_inclusive": { "const": true },
+        "authoritative_final_test": {
+          "const": "scaled_true_residual_linf_le_execution_plan_tolerance"
+        },
+        "triangular_pivot_floor": {
+          "const": "64_eps_times_max_abs_upper_factor_no_unit_floor"
+        },
+        "stagnation_checkpoint_rule": {
+          "const": "consecutive_plateau_and_sqrt_eps_scaled_tiny_update"
+        },
+        "divergence_checkpoint_rule": {
+          "const": "true_l2_gt_factor_times_max_initial_l2_float64_tiny"
+        },
+        "restart_dimension_fixed_for_plan": { "const": true },
+        "global_iteration_cap_crosses_restart_boundaries": { "const": true },
+        "dense_lstsq_or_pinv_fallback_allowed": { "const": false },
+        "diagonal_shift_or_clamp_allowed": { "const": false },
+        "silent_solver_fallback_allowed": { "const": false }
+      }
+    },
+    "runtime_lineage_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compile_time_apply_receipt_bound",
+        "compile_time_primitive_receipt_bound",
+        "context_open_must_bind_exact_latest_free_space_apply",
+        "context_open_must_acquire_exclusive_primitive_child",
+        "context_open_must_bind_exact_live_primitive_context",
+        "reduced_buffers_must_resolve_through_primitive_source_apply",
+        "same_runtime_device_and_stream_required"
+      ],
+      "properties": {
+        "compile_time_apply_receipt_bound": { "const": false },
+        "compile_time_primitive_receipt_bound": { "const": false },
+        "context_open_must_bind_exact_latest_free_space_apply": {
+          "const": true
+        },
+        "context_open_must_acquire_exclusive_primitive_child": {
+          "const": true
+        },
+        "context_open_must_bind_exact_live_primitive_context": {
+          "const": true
+        },
+        "reduced_buffers_must_resolve_through_primitive_source_apply": {
+          "const": true
+        },
+        "same_runtime_device_and_stream_required": { "const": true }
+      }
+    },
+    "memory_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "buffer_order",
+        "borrowed_buffer_count",
+        "owned_buffer_count",
+        "borrowed_device_byte_span",
+        "owned_device_byte_length",
+        "additional_peak_device_bytes_planned",
+        "basis_storage_formula",
+        "reduction_storage_formula",
+        "packed_dense_storage_formula",
+        "solve_record_storage_formula",
+        "solve_record_header_bytes",
+        "solve_record_restart_bytes",
+        "solve_record_restart_layout",
+        "solve_record_header_layout",
+        "scalar_byte_order",
+        "packed_dense_offsets",
+        "solve_record_header_fields",
+        "solve_record_restart_fields",
+        "terminal_status_codes",
+        "termination_codes",
+        "restart_hint_codes",
+        "restart_flag_bits",
+        "buffers",
+        "memory_layout_hash"
+      ],
+      "properties": {
+        "buffer_order": {
+          "const": [
+            "reduced_csr_row_ptr",
+            "reduced_csr_column_indices",
+            "reduced_csr_values",
+            "reduced_state",
+            "reduced_load",
+            "reduced_direction",
+            "jacobi_inverse",
+            "solution_x",
+            "true_residual",
+            "work_w",
+            "basis_v",
+            "preconditioned_basis_z",
+            "reduction_ping",
+            "reduction_pong",
+            "packed_dense_state",
+            "solve_record"
+          ]
+        },
+        "borrowed_buffer_count": { "const": 7 },
+        "owned_buffer_count": { "const": 9 },
+        "borrowed_device_byte_span": { "$ref": "#/$defs/positiveInt64" },
+        "owned_device_byte_length": { "$ref": "#/$defs/positiveInt64" },
+        "additional_peak_device_bytes_planned": {
+          "$ref": "#/$defs/positiveInt64"
+        },
+        "basis_storage_formula": { "const": "8*((M+1)*F+M*F)" },
+        "reduction_storage_formula": { "const": "8*(2*P+2*P)" },
+        "packed_dense_storage_formula": { "const": "8*(M*M+5*M+1)" },
+        "solve_record_storage_formula": { "const": "192+72*R" },
+        "solve_record_header_bytes": { "const": 192 },
+        "solve_record_restart_bytes": { "const": 72 },
+        "solve_record_restart_layout": {
+          "const": "7*i32+4_byte_pad+5*f64"
+        },
+        "solve_record_header_layout": { "const": "16*i32+16*f64" },
+        "scalar_byte_order": { "const": "little_endian" },
+        "packed_dense_offsets": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "hessenberg",
+            "givens_cos",
+            "givens_sin",
+            "least_squares_rhs",
+            "triangular_solution"
+          ],
+          "properties": {
+            "hessenberg": { "const": "offset=0,length=M*(M+1)" },
+            "givens_cos": { "const": "offset=M*(M+1),length=M" },
+            "givens_sin": { "const": "offset=M*(M+1)+M,length=M" },
+            "least_squares_rhs": {
+              "const": "offset=M*(M+1)+2*M,length=M+1"
+            },
+            "triangular_solution": {
+              "const": "offset=M*(M+1)+3*M+1,length=M"
+            }
+          }
+        },
+        "solve_record_header_fields": {
+          "const": [
+            {"name":"recurrence_abi_version","dtype":"i32","offset_bytes":0},
+            {"name":"active","dtype":"i32","offset_bytes":4},
+            {"name":"terminal_status","dtype":"i32","offset_bytes":8},
+            {"name":"termination_code","dtype":"i32","offset_bytes":12},
+            {"name":"device_error_bits","dtype":"i32","offset_bytes":16},
+            {"name":"scheduled_iterations","dtype":"i32","offset_bytes":20},
+            {"name":"effective_iterations","dtype":"i32","offset_bytes":24},
+            {"name":"scheduled_restarts","dtype":"i32","offset_bytes":28},
+            {"name":"effective_restarts","dtype":"i32","offset_bytes":32},
+            {"name":"effective_arnoldi_dimension","dtype":"i32","offset_bytes":36},
+            {"name":"happy_breakdown_count","dtype":"i32","offset_bytes":40},
+            {"name":"stagnation_checkpoint_count","dtype":"i32","offset_bytes":44},
+            {"name":"false_convergence_count","dtype":"i32","offset_bytes":48},
+            {"name":"operator_apply_count","dtype":"i32","offset_bytes":52},
+            {"name":"preconditioner_apply_count","dtype":"i32","offset_bytes":56},
+            {"name":"restart_dimension","dtype":"i32","offset_bytes":60},
+            {"name":"rhs_l2","dtype":"f64","offset_bytes":64},
+            {"name":"rhs_linf","dtype":"f64","offset_bytes":72},
+            {"name":"solver_tolerance_l2","dtype":"f64","offset_bytes":80},
+            {"name":"authoritative_tolerance_scaled_linf","dtype":"f64","offset_bytes":88},
+            {"name":"initial_residual_l2","dtype":"f64","offset_bytes":96},
+            {"name":"final_residual_l2","dtype":"f64","offset_bytes":104},
+            {"name":"final_residual_linf","dtype":"f64","offset_bytes":112},
+            {"name":"final_scaled_residual","dtype":"f64","offset_bytes":120},
+            {"name":"previous_checkpoint_residual_l2","dtype":"f64","offset_bytes":128},
+            {"name":"solution_update_l2","dtype":"f64","offset_bytes":136},
+            {"name":"solution_scale_l2","dtype":"f64","offset_bytes":144},
+            {"name":"estimated_residual_l2","dtype":"f64","offset_bytes":152},
+            {"name":"arnoldi_work_l2","dtype":"f64","offset_bytes":160},
+            {"name":"arnoldi_breakdown_threshold","dtype":"f64","offset_bytes":168},
+            {"name":"triangular_scale","dtype":"f64","offset_bytes":176},
+            {"name":"reserved_f64_0","dtype":"f64","offset_bytes":184}
+          ]
+        },
+        "solve_record_restart_fields": {
+          "const": [
+            {"name":"restart_index","dtype":"i32","offset_bytes":0},
+            {"name":"start_iteration","dtype":"i32","offset_bytes":4},
+            {"name":"end_iteration","dtype":"i32","offset_bytes":8},
+            {"name":"arnoldi_step_count","dtype":"i32","offset_bytes":12},
+            {"name":"reorthogonalization_count","dtype":"i32","offset_bytes":16},
+            {"name":"termination_hint","dtype":"i32","offset_bytes":20},
+            {"name":"flags","dtype":"i32","offset_bytes":24},
+            {"name":"reserved_i32_0","dtype":"i32","offset_bytes":28},
+            {"name":"estimated_residual_l2","dtype":"f64","offset_bytes":32},
+            {"name":"true_residual_l2","dtype":"f64","offset_bytes":40},
+            {"name":"true_residual_linf","dtype":"f64","offset_bytes":48},
+            {"name":"scaled_true_residual","dtype":"f64","offset_bytes":56},
+            {"name":"solution_update_l2","dtype":"f64","offset_bytes":64}
+          ]
+        },
+        "terminal_status_codes": {
+          "const": {"not_terminal":0,"converged":1,"max_iterations":2,"stagnated":3,"diverged":4,"arnoldi_breakdown":5,"numerical_failure":6}
+        },
+        "termination_codes": {
+          "const": {"none":0,"converged_initial_true_residual":1,"converged_happy_breakdown":2,"converged_true_residual":3,"converged_restart_true_residual":4,"max_iterations_exhausted":10,"true_residual_stagnated":20,"true_residual_diverged":21,"arnoldi_triangular_factor_breakdown":30,"arnoldi_invariant_subspace_breakdown":31,"invalid_input_or_control":40,"nonfinite_arithmetic":41,"operator_application_failed":42,"orthogonalization_failed":43,"givens_rotation_failed":44,"triangular_solve_failed":45,"true_residual_replay_failed":46,"restart_state_failed":47}
+        },
+        "restart_hint_codes": {
+          "const": {"none":0,"restart_completed":1,"converged_happy_breakdown":2,"converged_true_residual":3,"arnoldi_invariant_subspace_breakdown":4,"arnoldi_triangular_factor_breakdown":5}
+        },
+        "restart_flag_bits": {
+          "const": {"true_residual_replayed":0,"solver_l2_passed":1,"authoritative_linf_passed":2,"happy_breakdown":3,"invariant_breakdown":4,"stagnation_plateau":5,"tiny_update":6,"divergence":7}
+        },
+        "buffers": {
+          "type": "array",
+          "minItems": 16,
+          "maxItems": 16,
+          "prefixItems": [
+            {
+              "allOf": [
+                { "$ref": "#/$defs/buffer" },
+                {
+                  "properties": {
+                    "name": { "const": "reduced_csr_row_ptr" },
+                    "ownership": { "const": "borrowed" },
+                    "dtype": { "const": "<i4" },
+                    "access": { "const": "read_only" },
+                    "source": { "const": "free_space_symbolic" },
+                    "initialization": { "const": "parent_owned_no_transfer" },
+                    "extent_formula": { "const": "F+1" }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                { "$ref": "#/$defs/buffer" },
+                {
+                  "properties": {
+                    "name": { "const": "reduced_csr_column_indices" },
+                    "ownership": { "const": "borrowed" },
+                    "dtype": { "const": "<i4" },
+                    "access": { "const": "read_only" },
+                    "source": { "const": "free_space_symbolic" },
+                    "initialization": { "const": "parent_owned_no_transfer" },
+                    "extent_formula": { "const": "Z" }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                { "$ref": "#/$defs/buffer" },
+                {
+                  "properties": {
+                    "name": { "const": "reduced_csr_values" },
+                    "ownership": { "const": "borrowed" },
+                    "dtype": { "const": "<f8" },
+                    "access": { "const": "read_only" },
+                    "source": { "const": "free_space_numeric" },
+                    "initialization": { "const": "parent_owned_no_transfer" },
+                    "extent_formula": { "const": "Z" }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                { "$ref": "#/$defs/buffer" },
+                {
+                  "properties": {
+                    "name": { "const": "reduced_state" },
+                    "ownership": { "const": "borrowed" },
+                    "dtype": { "const": "<f8" },
+                    "access": { "const": "read_only" },
+                    "source": { "const": "free_space_reduced_state" },
+                    "initialization": { "const": "parent_owned_no_transfer" },
+                    "extent_formula": { "const": "F" }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                { "$ref": "#/$defs/buffer" },
+                {
+                  "properties": {
+                    "name": { "const": "reduced_load" },
+                    "ownership": { "const": "borrowed" },
+                    "dtype": { "const": "<f8" },
+                    "access": { "const": "read_only" },
+                    "source": { "const": "free_space_reduced_load" },
+                    "initialization": { "const": "parent_owned_no_transfer" },
+                    "extent_formula": { "const": "F" }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                { "$ref": "#/$defs/buffer" },
+                {
+                  "properties": {
+                    "name": { "const": "reduced_direction" },
+                    "ownership": { "const": "borrowed" },
+                    "dtype": { "const": "<f8" },
+                    "access": { "const": "read_only" },
+                    "source": { "const": "latest_free_space_apply" },
+                    "initialization": { "const": "parent_owned_no_transfer" },
+                    "extent_formula": { "const": "F" }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                { "$ref": "#/$defs/buffer" },
+                {
+                  "properties": {
+                    "name": { "const": "jacobi_inverse" },
+                    "ownership": { "const": "borrowed" },
+                    "dtype": { "const": "<f8" },
+                    "access": { "const": "read_only_after_prepare" },
+                    "source": { "const": "krylov_primitives" },
+                    "initialization": { "const": "parent_owned_no_transfer" },
+                    "extent_formula": { "const": "F" }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                { "$ref": "#/$defs/buffer" },
+                {
+                  "properties": {
+                    "name": { "const": "solution_x" },
+                    "ownership": { "const": "owned" },
+                    "dtype": { "const": "<f8" },
+                    "access": { "const": "read_write" },
+                    "source": { "const": "fgmres_context" },
+                    "initialization": { "const": "same_stream_copy_from_reduced_state" },
+                    "extent_formula": { "const": "F" }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                { "$ref": "#/$defs/buffer" },
+                {
+                  "properties": {
+                    "name": { "const": "true_residual" },
+                    "ownership": { "const": "owned" },
+                    "dtype": { "const": "<f8" },
+                    "access": { "const": "read_write" },
+                    "source": { "const": "fgmres_context" },
+                    "initialization": { "const": "same_stream_copy_from_reduced_direction" },
+                    "extent_formula": { "const": "F" }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                { "$ref": "#/$defs/buffer" },
+                {
+                  "properties": {
+                    "name": { "const": "work_w" },
+                    "ownership": { "const": "owned" },
+                    "dtype": { "const": "<f8" },
+                    "access": { "const": "read_write" },
+                    "source": { "const": "fgmres_context" },
+                    "initialization": { "const": "device_only" },
+                    "extent_formula": { "const": "F" }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                { "$ref": "#/$defs/buffer" },
+                {
+                  "properties": {
+                    "name": { "const": "basis_v" },
+                    "ownership": { "const": "owned" },
+                    "dtype": { "const": "<f8" },
+                    "access": { "const": "read_write" },
+                    "source": { "const": "fgmres_context" },
+                    "initialization": { "const": "device_only" },
+                    "extent_formula": { "const": "(M+1)*F" }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                { "$ref": "#/$defs/buffer" },
+                {
+                  "properties": {
+                    "name": { "const": "preconditioned_basis_z" },
+                    "ownership": { "const": "owned" },
+                    "dtype": { "const": "<f8" },
+                    "access": { "const": "read_write" },
+                    "source": { "const": "fgmres_context" },
+                    "initialization": { "const": "device_only" },
+                    "extent_formula": { "const": "M*F" }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                { "$ref": "#/$defs/buffer" },
+                {
+                  "properties": {
+                    "name": { "const": "reduction_ping" },
+                    "ownership": { "const": "owned" },
+                    "dtype": { "const": "<f8" },
+                    "access": { "const": "read_write" },
+                    "source": { "const": "fgmres_context" },
+                    "initialization": { "const": "device_only" },
+                    "extent_formula": { "const": "2*P" }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                { "$ref": "#/$defs/buffer" },
+                {
+                  "properties": {
+                    "name": { "const": "reduction_pong" },
+                    "ownership": { "const": "owned" },
+                    "dtype": { "const": "<f8" },
+                    "access": { "const": "read_write" },
+                    "source": { "const": "fgmres_context" },
+                    "initialization": { "const": "device_only" },
+                    "extent_formula": { "const": "2*P" }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                { "$ref": "#/$defs/buffer" },
+                {
+                  "properties": {
+                    "name": { "const": "packed_dense_state" },
+                    "ownership": { "const": "owned" },
+                    "dtype": { "const": "<f8" },
+                    "access": { "const": "read_write" },
+                    "source": { "const": "fgmres_context" },
+                    "initialization": { "const": "device_only" },
+                    "extent_formula": { "const": "M*M+5*M+1" }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                { "$ref": "#/$defs/buffer" },
+                {
+                  "properties": {
+                    "name": { "const": "solve_record" },
+                    "ownership": { "const": "owned" },
+                    "dtype": { "const": "|u1" },
+                    "access": { "const": "read_write" },
+                    "source": { "const": "fgmres_context" },
+                    "initialization": { "const": "async_h2d_zero_once_before_enqueue" },
+                    "extent_formula": { "const": "192+72*R" }
+                  }
+                }
+              ]
+            }
+          ],
+          "items": false
+        },
+        "memory_layout_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "claim_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compile_time_plan_only",
+        "hip_specific_layout",
+        "device_buffer_layout_planned",
+        "positive_jacobi_source_preflight_passed",
+        "execution_performed",
+        "device_allocation_performed",
+        "runtime_receipt_lineage_bound",
+        "fgmres_runtime_ready",
+        "iteration_host_copy_zero_proven",
+        "spd_proven",
+        "pcg_ready",
+        "fallback_used",
+        "end_to_end_O_N_proven",
+        "speedup_proven",
+        "promotion_eligible",
+        "commercial_ready",
+        "schema_only_validation_authoritative",
+        "python_semantic_replay_required"
+      ],
+      "properties": {
+        "compile_time_plan_only": { "const": true },
+        "hip_specific_layout": { "const": true },
+        "device_buffer_layout_planned": { "const": true },
+        "positive_jacobi_source_preflight_passed": { "const": true },
+        "execution_performed": { "const": false },
+        "device_allocation_performed": { "const": false },
+        "runtime_receipt_lineage_bound": { "const": false },
+        "fgmres_runtime_ready": { "const": false },
+        "iteration_host_copy_zero_proven": { "const": false },
+        "spd_proven": { "const": false },
+        "pcg_ready": { "const": false },
+        "fallback_used": { "const": false },
+        "end_to_end_O_N_proven": { "const": false },
+        "speedup_proven": { "const": false },
+        "promotion_eligible": { "const": false },
+        "commercial_ready": { "const": false },
+        "schema_only_validation_authoritative": { "const": false },
+        "python_semantic_replay_required": { "const": true }
+      }
+    },
+    "plan_hash": { "$ref": "#/$defs/hash" },
+    "extensions": {
+      "type": "object",
+      "maxProperties": 0,
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "positiveInt32": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "positiveInt64": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9223372036854775807
+    },
+    "nonnegativeFiniteNumber": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1.7976931348623157e+308
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "method",
+        "restart_dimension",
+        "max_iterations",
+        "absolute_tolerance",
+        "relative_tolerance",
+        "stagnation_checkpoint_limit",
+        "stagnation_relative_tolerance",
+        "divergence_factor",
+        "orthogonalization",
+        "preconditioner",
+        "solver_norm",
+        "authoritative_norm",
+        "fallback_forbidden",
+        "policy_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-fgmres-policy.v1"
+        },
+        "method": { "const": "fixed_restart_right_preconditioned_fgmres" },
+        "restart_dimension": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "max_iterations": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "absolute_tolerance": { "$ref": "#/$defs/nonnegativeFiniteNumber" },
+        "relative_tolerance": { "$ref": "#/$defs/nonnegativeFiniteNumber" },
+        "stagnation_checkpoint_limit": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 16
+        },
+        "stagnation_relative_tolerance": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "divergence_factor": {
+          "type": "number",
+          "exclusiveMinimum": 1,
+          "maximum": 1.7976931348623157e+308
+        },
+        "orthogonalization": { "const": "dgks_conditional_two_pass_mgs" },
+        "preconditioner": { "const": "positive_unshifted_jacobi_right" },
+        "solver_norm": { "const": "l2" },
+        "authoritative_norm": { "const": "scaled_true_residual_linf" },
+        "fallback_forbidden": { "const": true },
+        "policy_hash": { "$ref": "#/$defs/hash" }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "absolute_tolerance": { "exclusiveMinimum": 0 }
+          },
+          "required": ["absolute_tolerance"]
+        },
+        {
+          "properties": {
+            "relative_tolerance": { "exclusiveMinimum": 0 }
+          },
+          "required": ["relative_tolerance"]
+        }
+      ]
+    },
+    "buffer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "ownership",
+        "dtype",
+        "shape",
+        "element_count",
+        "byte_length",
+        "access",
+        "source",
+        "initialization",
+        "extent_formula",
+        "memory_space"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,63}$"
+        },
+        "ownership": { "enum": ["borrowed", "owned"] },
+        "dtype": { "enum": ["<f8", "<i4", "|u1"] },
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "items": { "$ref": "#/$defs/positiveInt64" }
+        },
+        "element_count": { "$ref": "#/$defs/positiveInt64" },
+        "byte_length": { "$ref": "#/$defs/positiveInt64" },
+        "access": {
+          "enum": ["read_only", "read_only_after_prepare", "read_write"]
+        },
+        "source": {
+          "enum": [
+            "free_space_symbolic",
+            "free_space_numeric",
+            "free_space_reduced_state",
+            "free_space_reduced_load",
+            "latest_free_space_apply",
+            "krylov_primitives",
+            "fgmres_context"
+          ]
+        },
+        "initialization": {
+          "enum": [
+            "parent_owned_no_transfer",
+            "same_stream_copy_from_reduced_state",
+            "same_stream_copy_from_reduced_direction",
+            "device_only",
+            "async_h2d_zero_once_before_enqueue"
+          ]
+        },
+        "extent_formula": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "memory_space": { "const": "hip_device" }
+      }
+    }
+  }
+}

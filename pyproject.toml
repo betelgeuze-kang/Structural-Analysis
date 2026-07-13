@@ -33,7 +33,12 @@ where = ["src"]
 include = ["structural_analysis*"]
 
 [tool.setuptools.package-data]
-structural_analysis = ["schemas/*.json"]
+structural_analysis = [
+  "schemas/*.json",
+  "engine_v2/assembly_backend/kernels/*.hip.cpp",
+  "engine_v2/backends/hip/kernels/*.hip.cpp",
+  "engine_v2/rtc_backend/kernels/*.hip.cpp",
+]
 
 [tool.ruff]
 extend-exclude = [

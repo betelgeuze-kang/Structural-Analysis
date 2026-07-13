@@ -1,0 +1,29 @@
+{
+  "schema_version": "structural-analysis-cpu-reference-golden.v1",
+  "operator_version": "engine-v2-cpu-reference-linear-static.v1",
+  "absolute_tolerance": 1e-10,
+  "relative_tolerance": 1e-10,
+  "cases": {
+    "LC_AXIAL": {
+      "tip": {"UX": 0.00005},
+      "base_reaction": {"FX": -100000.0},
+      "total_strain_energy_j": 2.5
+    },
+    "LC_WEAK": {
+      "tip": {"UY": -0.0026666666666666666, "RZ": -0.002},
+      "base_reaction": {"FY": 10000.0, "MZ": 20000.0},
+      "total_strain_energy_j": 13.333333333333334
+    },
+    "LC_STRONG": {
+      "tip": {"UZ": -0.0016666666666666668, "RY": 0.00125},
+      "base_reaction": {"FZ": 10000.0, "MY": -20000.0},
+      "total_strain_energy_j": 8.333333333333334
+    },
+    "LC_TORSION": {
+      "tip": {"RX": 0.013},
+      "base_reaction": {"MX": -5000.0},
+      "total_strain_energy_j": 32.5
+    }
+  },
+  "claim_boundary": "analytic_single_element_cpu_reference_golden_not_hip_parity"
+}

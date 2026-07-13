@@ -1,0 +1,515 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/rtc_kernel_scaling_report_v1.schema.json",
+  "title": "Engine v2 HIPRTC kernel-only scaling report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "status", "decision", "reason",
+    "requested_backend", "actual_backend", "evidence_scope", "claim_scope",
+    "evidence_authenticity", "signature", "promotion_eligible", "nonpromoting",
+    "fallback_policy", "fallback_count", "device_ordinal", "architecture",
+    "agent_enumerator", "detected_architectures", "environment", "harness_identity", "configuration",
+    "device", "kernel_identity", "samples", "fit", "acceptance", "claims",
+    "report_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-rtc-kernel-scaling-report.v1"},
+    "status": {"enum": ["accepted", "rejected", "inconclusive", "unavailable", "error"]},
+    "decision": {"enum": ["accepted", "rejected", "inconclusive", "not_evaluated"]},
+    "reason": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/reason"}]},
+    "requested_backend": {"const": "hip"},
+    "actual_backend": {"oneOf": [{"const": "hip"}, {"type": "null"}]},
+    "evidence_scope": {"const": "native_hiprtc_kernel_event_timing"},
+    "claim_scope": {"const": "hiprtc_fused_csr_residual_jvp_kernel_only"},
+    "evidence_authenticity": {"const": "unsigned_local_measurement"},
+    "signature": {"type": "null"},
+    "promotion_eligible": {"const": false},
+    "nonpromoting": {"const": true},
+    "fallback_policy": {"const": "forbidden"},
+    "fallback_count": {"const": 0},
+    "device_ordinal": {"type": "integer", "minimum": 0},
+    "architecture": {
+      "oneOf": [
+        {"type": "string", "pattern": "^gfx[0-9][0-9a-f]{2,15}$"},
+        {"type": "null"}
+      ]
+    },
+    "agent_enumerator": {
+      "oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]
+    },
+    "detected_architectures": {
+      "type": "array", "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^gfx[0-9][0-9a-f]{2,15}$"}
+    },
+    "environment": {"$ref": "#/$defs/environment"},
+    "harness_identity": {"$ref": "#/$defs/harness_identity"},
+    "configuration": {"$ref": "#/$defs/configuration"},
+    "device": {"oneOf": [{"$ref": "#/$defs/device"}, {"type": "null"}]},
+    "kernel_identity": {
+      "oneOf": [{"$ref": "#/$defs/kernel_identity"}, {"type": "null"}]
+    },
+    "samples": {"type": "array", "items": {"$ref": "#/$defs/sample"}},
+    "fit": {"oneOf": [{"$ref": "#/$defs/fit"}, {"type": "null"}]},
+    "acceptance": {"$ref": "#/$defs/acceptance"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "report_hash": {"$ref": "#/$defs/hash"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "accepted"}}},
+      "then": {"properties": {
+        "decision": {"const": "accepted"}, "actual_backend": {"const": "hip"},
+        "reason": {"type": "null"}, "fit": {"$ref": "#/$defs/fit"},
+        "device": {"$ref": "#/$defs/device"},
+        "kernel_identity": {"$ref": "#/$defs/kernel_identity"},
+        "samples": {"minItems": 5},
+        "acceptance": {"properties": {
+          "evaluated": {"const": true}, "accepted": {"const": true},
+          "outcome": {"const": "accepted"},
+          "robust_slope_passed": {"const": true},
+          "ols_slope_passed": {"const": true},
+          "r2_passed": {"const": true},
+          "bootstrap_ci_passed": {"const": true},
+          "hardware_profile_matched": {"const": true},
+          "off_cache_occupancy_precondition_passed": {"const": true},
+          "batch_duration_passed": {"const": true},
+          "batch_length_stability_passed": {"const": true},
+          "coefficient_of_variation_passed": {"const": true},
+          "end_repeat_drift_passed": {"const": true},
+          "correctness_passed": {"const": true},
+          "timed_region_clean": {"const": true}
+        }},
+        "claims": {"properties": {
+          "kernel_scope_timing_measured": {"const": true},
+          "kernel_scope_initial_linear_scaling_accepted": {"const": true}
+        }}
+      }}
+    },
+    {
+      "if": {"properties": {"status": {"const": "rejected"}}},
+      "then": {"properties": {
+        "decision": {"const": "rejected"},
+        "actual_backend": {"const": "hip"}, "reason": {"$ref": "#/$defs/reason"},
+        "fit": {"$ref": "#/$defs/fit"},
+        "acceptance": {"properties": {
+          "evaluated": {"const": true}, "accepted": {"const": false},
+          "outcome": {"const": "rejected"}
+        }},
+        "claims": {"properties": {
+          "kernel_scope_initial_linear_scaling_accepted": {"const": false}
+        }}
+      }}
+    },
+    {
+      "if": {"properties": {"status": {"const": "inconclusive"}}},
+      "then": {"properties": {
+        "decision": {"const": "inconclusive"},
+        "actual_backend": {"const": "hip"}, "reason": {"$ref": "#/$defs/reason"},
+        "fit": {"$ref": "#/$defs/fit"},
+        "acceptance": {"properties": {
+          "evaluated": {"const": true}, "accepted": {"const": false},
+          "outcome": {"const": "inconclusive"}
+        }},
+        "claims": {"properties": {
+          "kernel_scope_initial_linear_scaling_accepted": {"const": false}
+        }}
+      }}
+    },
+    {
+      "if": {"properties": {"status": {"enum": ["unavailable", "error"]}}},
+      "then": {"properties": {
+        "decision": {"const": "not_evaluated"}, "actual_backend": {"type": "null"},
+        "reason": {"$ref": "#/$defs/reason"}, "samples": {"maxItems": 0},
+        "fit": {"type": "null"},
+        "acceptance": {"properties": {
+          "evaluated": {"const": false}, "accepted": {"const": false},
+          "outcome": {"const": "not_evaluated"}
+        }},
+        "claims": {"properties": {
+          "kernel_scope_timing_measured": {"const": false},
+          "kernel_scope_initial_linear_scaling_accepted": {"const": false}
+        }}
+      }}
+    }
+  ],
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "reason": {
+      "type": "object", "additionalProperties": false,
+      "required": ["code", "detail"],
+      "properties": {
+        "code": {"type": "string", "minLength": 1, "maxLength": 128},
+        "detail": {"type": "string", "minLength": 1, "maxLength": 1024}
+      }
+    },
+    "environment": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "clean_worker_reexec", "serialization_overrides_removed_before_runtime_init",
+        "serialization_overrides_present_in_worker", "hip_launch_blocking",
+        "amd_serialize_kernel", "amd_serialize_copy", "timing_api",
+        "host_wall_clock_used_for_acceptance"
+      ],
+      "properties": {
+        "clean_worker_reexec": {"const": true},
+        "serialization_overrides_removed_before_runtime_init": {
+          "type": "array", "uniqueItems": true,
+          "items": {"enum": [
+            "HIP_LAUNCH_BLOCKING", "AMD_SERIALIZE_KERNEL", "AMD_SERIALIZE_COPY",
+            "CUDA_LAUNCH_BLOCKING"
+          ]}
+        },
+        "serialization_overrides_present_in_worker": {"type": "array", "maxItems": 0},
+        "hip_launch_blocking": {"type": "null"},
+        "amd_serialize_kernel": {"type": "null"},
+        "amd_serialize_copy": {"type": "null"},
+        "timing_api": {"const": "hip_event_elapsed_time"},
+        "host_wall_clock_used_for_acceptance": {"const": false}
+      }
+    },
+    "harness_identity": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "benchmark_script_resource", "benchmark_script_sha256",
+        "report_schema_resource", "report_schema_sha256",
+        "python_implementation", "python_version", "numpy_version"
+      ],
+      "properties": {
+        "benchmark_script_resource": {
+          "const": "scripts/benchmark_engine_v2_rtc_kernel_scaling.py"
+        },
+        "benchmark_script_sha256": {"$ref": "#/$defs/hash"},
+        "report_schema_resource": {
+          "const": "src/structural_analysis/schemas/rtc_kernel_scaling_report_v1.schema.json"
+        },
+        "report_schema_sha256": {"$ref": "#/$defs/hash"},
+        "python_implementation": {"type": "string", "minLength": 1},
+        "python_version": {
+          "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "numpy_version": {"type": "string", "minLength": 1}
+      }
+    },
+    "off_cache_precondition": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "hardware_profile_source", "expected_architecture",
+        "expected_device_name_token", "reference_cache_bytes",
+        "minimum_unique_read_multiple", "reference_compute_units",
+        "minimum_blocks_per_compute_unit", "kernel_block_size"
+      ],
+      "properties": {
+        "hardware_profile_source": {"const": "predeclared_rx6900xt_gfx1030"},
+        "expected_architecture": {"const": "gfx1030"},
+        "expected_device_name_token": {"const": "6900 XT"},
+        "reference_cache_bytes": {"const": 134217728},
+        "minimum_unique_read_multiple": {"const": 2},
+        "reference_compute_units": {"const": 80},
+        "minimum_blocks_per_compute_unit": {"const": 8},
+        "kernel_block_size": {"const": 256}
+      }
+    },
+    "configuration": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "sizes", "measurement_order", "measurement_order_policy", "warmup_launches",
+        "pilot_launches", "target_batch_ms", "max_batch_launches",
+        "stability_repeats", "repeats", "fit_min_n", "fit_max_n",
+        "slope_lower_inclusive", "slope_upper_inclusive", "minimum_ols_r2",
+        "maximum_coefficient_of_variation",
+        "maximum_batch_length_stability_relative_delta",
+        "maximum_end_repeat_relative_drift", "bootstrap_replicates",
+        "bootstrap_seed", "minimum_free_device_bytes",
+        "maximum_payload_fraction_of_free_memory", "fit_regime",
+        "fit_regime_rationale", "off_cache_precondition", "end_repeat_definition",
+        "automatic_size_downscaling"
+      ],
+      "properties": {
+        "sizes": {
+          "type": "array", "minItems": 5, "uniqueItems": true,
+          "items": {"type": "integer", "minimum": 1, "maximum": 715827883}
+        },
+        "measurement_order": {
+          "type": "array", "minItems": 5, "uniqueItems": true,
+          "items": {"type": "integer", "minimum": 1, "maximum": 715827883}
+        },
+        "measurement_order_policy": {"const": "alternating_low_high_predeclared"},
+        "warmup_launches": {"type": "integer", "minimum": 20},
+        "pilot_launches": {"type": "integer", "minimum": 1},
+        "target_batch_ms": {"type": "number", "minimum": 20},
+        "max_batch_launches": {"type": "integer", "minimum": 2},
+        "stability_repeats": {"type": "integer", "minimum": 3},
+        "repeats": {"type": "integer", "minimum": 3},
+        "fit_min_n": {"type": "integer", "minimum": 1},
+        "fit_max_n": {"type": "integer", "minimum": 1},
+        "slope_lower_inclusive": {"type": "number", "exclusiveMinimum": 0},
+        "slope_upper_inclusive": {"type": "number", "exclusiveMinimum": 0},
+        "minimum_ols_r2": {"type": "number", "minimum": 0, "maximum": 1},
+        "maximum_coefficient_of_variation": {"type": "number", "exclusiveMinimum": 0},
+        "maximum_batch_length_stability_relative_delta": {
+          "type": "number", "exclusiveMinimum": 0
+        },
+        "maximum_end_repeat_relative_drift": {"type": "number", "exclusiveMinimum": 0},
+        "bootstrap_replicates": {"type": "integer", "minimum": 200},
+        "bootstrap_seed": {"type": "integer"},
+        "minimum_free_device_bytes": {"type": "integer", "minimum": 0},
+        "maximum_payload_fraction_of_free_memory": {
+          "type": "number", "exclusiveMinimum": 0, "maximum": 0.75
+        },
+        "fit_regime": {"enum": [
+          "predeclared_dram_resident_large_problem", "explicit_user_configured"
+        ]},
+        "fit_regime_rationale": {"type": "string", "minLength": 1},
+        "off_cache_precondition": {"$ref": "#/$defs/off_cache_precondition"},
+        "end_repeat_definition": {
+          "const": "same_allocation_same_size_after_main_trials_before_correctness_download"
+        },
+        "automatic_size_downscaling": {"const": false}
+      }
+    },
+    "device": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "name", "free_memory_bytes_before", "total_memory_bytes",
+        "runtime_version_raw", "driver_version_raw", "capability_receipt_hash",
+        "hardware_profile_matched"
+      ],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "free_memory_bytes_before": {"type": "integer", "minimum": 0},
+        "total_memory_bytes": {"type": "integer", "minimum": 1},
+        "runtime_version_raw": {"type": "integer", "minimum": 0},
+        "driver_version_raw": {"type": "integer", "minimum": 0},
+        "capability_receipt_hash": {"$ref": "#/$defs/hash"},
+        "hardware_profile_matched": {"type": "boolean"}
+      }
+    },
+    "kernel_identity": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "kernel_symbol", "architecture", "source_sha256", "code_object_sha256",
+        "identity_hash", "hiprtc_version_major", "hiprtc_version_minor",
+        "runtime_library_sha256", "hiprtc_library_sha256"
+      ],
+      "properties": {
+        "kernel_symbol": {"const": "engine_v2_csr_residual_jvp_v1"},
+        "architecture": {"type": "string", "pattern": "^gfx[0-9][0-9a-f]{2,15}$"},
+        "source_sha256": {"$ref": "#/$defs/hash"},
+        "code_object_sha256": {"$ref": "#/$defs/hash"},
+        "identity_hash": {"$ref": "#/$defs/hash"},
+        "hiprtc_version_major": {"type": "integer", "minimum": 0},
+        "hiprtc_version_minor": {"type": "integer", "minimum": 0},
+        "runtime_library_sha256": {"$ref": "#/$defs/hash"},
+        "hiprtc_library_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "trial": {
+      "type": "object", "additionalProperties": false,
+      "required": ["trial_index", "batch_elapsed_ms", "per_launch_ms"],
+      "properties": {
+        "trial_index": {"type": "integer", "minimum": 0},
+        "batch_elapsed_ms": {"type": "number", "exclusiveMinimum": 0},
+        "per_launch_ms": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "calibration": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "calibration_index", "launch_count", "median_batch_elapsed_ms",
+        "raw_batch_elapsed_ms"
+      ],
+      "properties": {
+        "calibration_index": {"type": "integer", "minimum": 0},
+        "launch_count": {"type": "integer", "minimum": 1},
+        "median_batch_elapsed_ms": {"type": "number", "exclusiveMinimum": 0},
+        "raw_batch_elapsed_ms": {
+          "type": "array", "minItems": 3,
+          "items": {"type": "number", "exclusiveMinimum": 0}
+        }
+      }
+    },
+    "correctness": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "performed_outside_timed_region", "finite", "residual_max_abs_error",
+        "residual_relative_l2_error", "jvp_max_abs_error", "jvp_relative_l2_error",
+        "absolute_tolerance", "relative_l2_tolerance", "passed"
+      ],
+      "properties": {
+        "performed_outside_timed_region": {"const": true},
+        "finite": {"type": "boolean"},
+        "residual_max_abs_error": {"type": "number", "minimum": 0},
+        "residual_relative_l2_error": {"type": "number", "minimum": 0},
+        "jvp_max_abs_error": {"type": "number", "minimum": 0},
+        "jvp_relative_l2_error": {"type": "number", "minimum": 0},
+        "absolute_tolerance": {"const": 1e-10},
+        "relative_l2_tolerance": {"const": 1e-10},
+        "passed": {"type": "boolean"}
+      }
+    },
+    "sample": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "row_count", "csr_nnz", "fp64_equivalent_operations_per_launch",
+        "source_logical_bytes_per_launch", "unique_read_bytes", "resident_touched_bytes",
+        "physical_dram_bytes", "grid_block_count", "allocated_device_payload_bytes",
+        "allocation_count", "initial_h2d_operation_count", "initial_h2d_bytes",
+        "outside_timed_region_d2h_operation_count", "outside_timed_region_d2h_bytes",
+        "warmup_launch_count", "pilot_launch_count", "pilot_batch_elapsed_ms",
+        "calibration_trials", "timed_batch_launch_count", "double_batch_launch_count",
+        "batch_length_stability_k_per_launch_ms",
+        "batch_length_stability_2k_per_launch_ms",
+        "batch_length_stability_relative_delta",
+        "batch_length_stability_k_raw_batch_elapsed_ms",
+        "batch_length_stability_2k_raw_batch_elapsed_ms", "timed_trial_count",
+        "fit_trial_kernel_launch_count", "event_timed_kernel_launch_count_total",
+        "timed_region_h2d_operation_count",
+        "timed_region_d2h_operation_count", "timed_region_allocation_count",
+        "fallback_count", "raw_trials", "median_batch_elapsed_ms",
+        "median_per_launch_ms", "minimum_per_launch_ms", "maximum_per_launch_ms",
+        "mean_per_launch_ms", "standard_deviation_per_launch_ms",
+        "median_absolute_deviation_per_launch_ms", "coefficient_of_variation",
+        "end_repeat_batch_elapsed_ms", "end_repeat_per_launch_ms",
+        "end_repeat_relative_drift", "event_timing_scope", "correctness"
+      ],
+      "properties": {
+        "row_count": {"type": "integer", "minimum": 1, "maximum": 715827883},
+        "csr_nnz": {"type": "integer", "minimum": 1},
+        "fp64_equivalent_operations_per_launch": {"type": "integer", "minimum": 1},
+        "source_logical_bytes_per_launch": {"type": "integer", "minimum": 1},
+        "unique_read_bytes": {"type": "integer", "minimum": 1},
+        "resident_touched_bytes": {"type": "integer", "minimum": 1},
+        "physical_dram_bytes": {"const": "not_instrumented"},
+        "grid_block_count": {"type": "integer", "minimum": 1},
+        "allocated_device_payload_bytes": {"type": "integer", "minimum": 1},
+        "allocation_count": {"const": 8},
+        "initial_h2d_operation_count": {"const": 6},
+        "initial_h2d_bytes": {"type": "integer", "minimum": 1},
+        "outside_timed_region_d2h_operation_count": {"const": 2},
+        "outside_timed_region_d2h_bytes": {"type": "integer", "minimum": 1},
+        "warmup_launch_count": {"type": "integer", "minimum": 20},
+        "pilot_launch_count": {"type": "integer", "minimum": 1},
+        "pilot_batch_elapsed_ms": {"type": "number", "exclusiveMinimum": 0},
+        "calibration_trials": {
+          "type": "array", "minItems": 1, "items": {"$ref": "#/$defs/calibration"}
+        },
+        "timed_batch_launch_count": {"type": "integer", "minimum": 1},
+        "double_batch_launch_count": {"type": "integer", "minimum": 2},
+        "batch_length_stability_k_per_launch_ms": {"type": "number", "exclusiveMinimum": 0},
+        "batch_length_stability_2k_per_launch_ms": {"type": "number", "exclusiveMinimum": 0},
+        "batch_length_stability_relative_delta": {"type": "number", "minimum": 0},
+        "batch_length_stability_k_raw_batch_elapsed_ms": {
+          "type": "array", "minItems": 3,
+          "items": {"type": "number", "exclusiveMinimum": 0}
+        },
+        "batch_length_stability_2k_raw_batch_elapsed_ms": {
+          "type": "array", "minItems": 3,
+          "items": {"type": "number", "exclusiveMinimum": 0}
+        },
+        "timed_trial_count": {"type": "integer", "minimum": 3},
+        "fit_trial_kernel_launch_count": {"type": "integer", "minimum": 3},
+        "event_timed_kernel_launch_count_total": {"type": "integer", "minimum": 3},
+        "timed_region_h2d_operation_count": {"const": 0},
+        "timed_region_d2h_operation_count": {"const": 0},
+        "timed_region_allocation_count": {"const": 0},
+        "fallback_count": {"const": 0},
+        "raw_trials": {"type": "array", "minItems": 3, "items": {"$ref": "#/$defs/trial"}},
+        "median_batch_elapsed_ms": {"type": "number", "exclusiveMinimum": 0},
+        "median_per_launch_ms": {"type": "number", "exclusiveMinimum": 0},
+        "minimum_per_launch_ms": {"type": "number", "exclusiveMinimum": 0},
+        "maximum_per_launch_ms": {"type": "number", "exclusiveMinimum": 0},
+        "mean_per_launch_ms": {"type": "number", "exclusiveMinimum": 0},
+        "standard_deviation_per_launch_ms": {"type": "number", "minimum": 0},
+        "median_absolute_deviation_per_launch_ms": {"type": "number", "minimum": 0},
+        "coefficient_of_variation": {"type": "number", "minimum": 0},
+        "end_repeat_batch_elapsed_ms": {"type": "number", "exclusiveMinimum": 0},
+        "end_repeat_per_launch_ms": {"type": "number", "exclusiveMinimum": 0},
+        "end_repeat_relative_drift": {"type": "number", "minimum": 0},
+        "event_timing_scope": {"const": "steady_state_stream_dispatch_plus_kernel"},
+        "correctness": {"$ref": "#/$defs/correctness"}
+      }
+    },
+    "fit": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "method", "point_count", "row_count_min", "row_count_max",
+        "robust_slope", "robust_intercept_log_ms", "robust_r2", "ols_slope",
+        "ols_intercept_log_ms", "ols_r2", "pairwise_slope_count",
+        "bootstrap_method", "bootstrap_replicates", "bootstrap_seed",
+        "bootstrap_slope_ci95_lower", "bootstrap_slope_ci95_upper"
+      ],
+      "properties": {
+        "method": {"const": "theil_sen_log_log_with_ols_diagnostic"},
+        "point_count": {"type": "integer", "minimum": 5},
+        "row_count_min": {"type": "integer", "minimum": 1},
+        "row_count_max": {"type": "integer", "minimum": 1},
+        "robust_slope": {"type": "number"},
+        "robust_intercept_log_ms": {"type": "number"},
+        "robust_r2": {"type": "number"},
+        "ols_slope": {"type": "number"},
+        "ols_intercept_log_ms": {"type": "number"},
+        "ols_r2": {"type": "number"},
+        "pairwise_slope_count": {"type": "integer", "minimum": 10},
+        "bootstrap_method": {"const": "stratified_trial_resample_theil_sen"},
+        "bootstrap_replicates": {"type": "integer", "minimum": 200},
+        "bootstrap_seed": {"type": "integer"},
+        "bootstrap_slope_ci95_lower": {"type": "number"},
+        "bootstrap_slope_ci95_upper": {"type": "number"}
+      }
+    },
+    "acceptance": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "evaluated", "accepted", "scope", "slope_lower_inclusive",
+        "slope_upper_inclusive", "minimum_ols_r2", "robust_slope_passed",
+        "ols_slope_passed", "r2_passed", "bootstrap_ci_passed",
+        "hardware_profile_matched", "off_cache_occupancy_precondition_passed",
+        "batch_duration_passed", "batch_length_stability_passed",
+        "coefficient_of_variation_passed", "end_repeat_drift_passed",
+        "correctness_passed", "timed_region_clean", "outcome"
+      ],
+      "properties": {
+        "evaluated": {"type": "boolean"},
+        "accepted": {"type": "boolean"},
+        "scope": {"const": "hiprtc_fused_csr_residual_jvp_kernel_only"},
+        "slope_lower_inclusive": {"type": "number", "exclusiveMinimum": 0},
+        "slope_upper_inclusive": {"type": "number", "exclusiveMinimum": 0},
+        "minimum_ols_r2": {"type": "number", "minimum": 0, "maximum": 1},
+        "robust_slope_passed": {"type": "boolean"},
+        "ols_slope_passed": {"type": "boolean"},
+        "r2_passed": {"type": "boolean"},
+        "bootstrap_ci_passed": {"type": "boolean"},
+        "hardware_profile_matched": {"type": "boolean"},
+        "off_cache_occupancy_precondition_passed": {"type": "boolean"},
+        "batch_duration_passed": {"type": "boolean"},
+        "batch_length_stability_passed": {"type": "boolean"},
+        "coefficient_of_variation_passed": {"type": "boolean"},
+        "end_repeat_drift_passed": {"type": "boolean"},
+        "correctness_passed": {"type": "boolean"},
+        "timed_region_clean": {"type": "boolean"},
+        "outcome": {"enum": ["accepted", "rejected", "inconclusive", "not_evaluated"]}
+      }
+    },
+    "claims": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "kernel_scope_timing_measured", "kernel_scope_initial_linear_scaling_accepted",
+        "physical_dram_bytes_measured", "numerical_parity_measured_in_timed_region",
+        "end_to_end_o_n", "solver_o_n", "solver_speedup",
+        "structural_solver_executed", "commercial_readiness"
+      ],
+      "properties": {
+        "kernel_scope_timing_measured": {"type": "boolean"},
+        "kernel_scope_initial_linear_scaling_accepted": {"type": "boolean"},
+        "physical_dram_bytes_measured": {"const": false},
+        "numerical_parity_measured_in_timed_region": {"const": false},
+        "end_to_end_o_n": {"const": false},
+        "solver_o_n": {"const": false},
+        "solver_speedup": {"const": false},
+        "structural_solver_executed": {"const": false},
+        "commercial_readiness": {"const": false}
+      }
+    }
+  }
+}

@@ -1,0 +1,393 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/execution_plan_v2.schema.json",
+  "title": "Engine v2 sparse-only ExecutionPlan v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "plan_id",
+    "input_binding",
+    "analysis",
+    "entity_order",
+    "dof_layout",
+    "constraint_partition",
+    "symbolic_plan",
+    "numeric_snapshot",
+    "solver_policy",
+    "claim_boundary",
+    "plan_hash",
+    "extensions"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-execution-plan.v2"},
+    "capability_profile": {"const": "phase0_sparse_cpu_direct_linear_static"},
+    "plan_id": {"$ref": "#/$defs/stableId"},
+    "input_binding": {"$ref": "#/$defs/inputBinding"},
+    "analysis": {"$ref": "#/$defs/analysis"},
+    "entity_order": {"$ref": "#/$defs/entityOrder"},
+    "dof_layout": {"$ref": "#/$defs/dofLayout"},
+    "constraint_partition": {"$ref": "#/$defs/constraintPartition"},
+    "symbolic_plan": {"$ref": "#/$defs/symbolicPlan"},
+    "numeric_snapshot": {"$ref": "#/$defs/numericSnapshot"},
+    "solver_policy": {"$ref": "#/$defs/solverPolicy"},
+    "claim_boundary": {"$ref": "#/$defs/claimBoundary"},
+    "plan_hash": {"$ref": "#/$defs/sha256"},
+    "extensions": {"$ref": "#/$defs/extensions"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "stableId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]*$"
+    },
+    "index": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+    "reducedIndex": {"type": "integer", "minimum": -1, "maximum": 2147483647},
+    "extensions": {
+      "type": "object",
+      "propertyNames": {"pattern": "^[a-z][a-z0-9_.-]*:[A-Za-z0-9_.-]+$"},
+      "additionalProperties": true
+    },
+    "inputBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_ir_content_hash",
+        "solver_buffer_schema_version",
+        "solver_numeric_buffer_hash",
+        "solver_entity_mapping_hash",
+        "solver_artifact_hash",
+        "load_pattern_id"
+      ],
+      "properties": {
+        "model_ir_content_hash": {"$ref": "#/$defs/sha256"},
+        "solver_buffer_schema_version": {"const": "structural-analysis-solver-model-buffers.v1"},
+        "solver_numeric_buffer_hash": {"$ref": "#/$defs/sha256"},
+        "solver_entity_mapping_hash": {"$ref": "#/$defs/sha256"},
+        "solver_artifact_hash": {"$ref": "#/$defs/sha256"},
+        "load_pattern_id": {"$ref": "#/$defs/stableId"}
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "residual_sign",
+        "operator_version",
+        "source_element_operator_version",
+        "operator_hash",
+        "recovery_operator_hash",
+        "numeric_snapshot_hash"
+      ],
+      "properties": {
+        "type": {"const": "linear_static"},
+        "residual_sign": {"const": "internal_minus_external"},
+        "operator_version": {"const": "engine-v2-cpu-direct-csr-linear-static.v2"},
+        "source_element_operator_version": {"const": "engine-v2-cpu-reference-linear-static.v1"},
+        "operator_hash": {"$ref": "#/$defs/sha256"},
+        "recovery_operator_hash": {"$ref": "#/$defs/sha256"},
+        "numeric_snapshot_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "entityOrder": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_ids", "element_ids", "ordering_hash"],
+      "properties": {
+        "node_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/stableId"}
+        },
+        "element_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/stableId"}
+        },
+        "ordering_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "indexRow6": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {"$ref": "#/$defs/index"}
+    },
+    "indexRow12": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": {"$ref": "#/$defs/index"}
+    },
+    "dofLayout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "components",
+        "node_count",
+        "element_count",
+        "dofs_per_node",
+        "dof_count",
+        "index_base",
+        "index_dtype",
+        "node_dof_indices",
+        "element_global_dofs",
+        "global_to_free"
+      ],
+      "properties": {
+        "components": {"const": ["UX", "UY", "UZ", "RX", "RY", "RZ"]},
+        "node_count": {"type": "integer", "minimum": 1},
+        "element_count": {"type": "integer", "minimum": 1},
+        "dofs_per_node": {"const": 6},
+        "dof_count": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+        "index_base": {"const": 0},
+        "index_dtype": {"const": "<i4"},
+        "node_dof_indices": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/indexRow6"}
+        },
+        "element_global_dofs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/indexRow12"}
+        },
+        "global_to_free": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/reducedIndex"}
+        }
+      }
+    },
+    "constraintPartition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "constrained_dofs",
+        "free_dofs",
+        "prescribed_displacement_mode",
+        "partition_hash"
+      ],
+      "properties": {
+        "constrained_dofs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "free_dofs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "prescribed_displacement_mode": {"const": "zero_only"},
+        "partition_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "scatterMatrix": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": {"$ref": "#/$defs/indexRow12"}
+    },
+    "shape2": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {"type": "integer", "minimum": 1, "maximum": 2147483647}
+    },
+    "symbolicPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "shape",
+        "row_ptr",
+        "column_indices",
+        "diagonal_positions",
+        "element_scatter_indices",
+        "reduced_shape",
+        "reduced_row_ptr",
+        "reduced_column_indices",
+        "reduced_global_value_indices",
+        "nnz",
+        "reduced_nnz",
+        "sorted_columns",
+        "symmetric_pattern",
+        "structural_zero_slots_retained",
+        "assembly_order",
+        "symbolic_reuse_hash"
+      ],
+      "properties": {
+        "format": {"const": "csr"},
+        "shape": {"$ref": "#/$defs/shape2"},
+        "row_ptr": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "column_indices": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "diagonal_positions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "element_scatter_indices": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/scatterMatrix"}
+        },
+        "reduced_shape": {"$ref": "#/$defs/shape2"},
+        "reduced_row_ptr": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "reduced_column_indices": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "reduced_global_value_indices": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "nnz": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+        "reduced_nnz": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+        "sorted_columns": {"const": true},
+        "symmetric_pattern": {"const": true},
+        "structural_zero_slots_retained": {"const": true},
+        "assembly_order": {"const": "element_index_then_local_row_then_local_column_v1"},
+        "symbolic_reuse_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "arrayDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "layout",
+        "byte_length",
+        "data_hash",
+        "content_hash"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "node_dof_indices",
+            "global_to_free",
+            "element_global_dofs",
+            "constrained_dofs",
+            "free_dofs",
+            "csr_row_ptr",
+            "csr_column_indices",
+            "csr_diagonal_positions",
+            "csr_element_scatter_indices",
+            "reduced_csr_row_ptr",
+            "reduced_csr_column_indices",
+            "reduced_csr_global_value_indices",
+            "global_stiffness_csr_values",
+            "reduced_stiffness_csr_values",
+            "global_load",
+            "recovery_transform_global_to_local",
+            "recovery_stiffness_local"
+          ]
+        },
+        "dtype": {"enum": ["<i4", "<f8"]},
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {"type": "integer", "minimum": 0, "maximum": 2147483647}
+        },
+        "layout": {"const": "C"},
+        "byte_length": {"type": "integer", "minimum": 1},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "numericSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scalar_type",
+        "signed_zero_normalized",
+        "structural_zero_count",
+        "described_array_byte_length",
+        "arrays",
+        "numeric_snapshot_hash"
+      ],
+      "properties": {
+        "scalar_type": {"const": "<f8"},
+        "signed_zero_normalized": {"const": true},
+        "structural_zero_count": {"type": "integer", "minimum": 0},
+        "described_array_byte_length": {"type": "integer", "minimum": 1},
+        "arrays": {
+          "type": "array",
+          "minItems": 17,
+          "maxItems": 17,
+          "items": {"$ref": "#/$defs/arrayDescriptor"}
+        },
+        "numeric_snapshot_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "solverPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "linear_solver",
+        "solver_permutation",
+        "residual_tolerance",
+        "fallback_policy"
+      ],
+      "properties": {
+        "linear_solver": {"const": "scipy_sparse_direct"},
+        "solver_permutation": {"const": "NATURAL"},
+        "residual_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "fallback_policy": {"const": "forbidden"}
+      }
+    },
+    "claimBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "global_dense_matrix_materialized",
+        "symbolic_and_numeric_compile_complexity",
+        "direct_scatter_complexity",
+        "bounded_row_degree_compile_note",
+        "residual_jvp_complexity",
+        "direct_solve_complexity_claim",
+        "end_to_end_O_N_claim",
+        "supported_scope"
+      ],
+      "properties": {
+        "global_dense_matrix_materialized": {"const": false},
+        "symbolic_and_numeric_compile_complexity": {
+          "const": "O(E*12^3+sum_r(z_r*log(z_r))+nnz)"
+        },
+        "direct_scatter_complexity": {"const": "O(E*12^2+nnz)"},
+        "bounded_row_degree_compile_note": {
+          "const": "O(E+nnz)_only_when_element_rank_and_row_degree_are_bounded"
+        },
+        "residual_jvp_complexity": {"const": "O(nnz)"},
+        "direct_solve_complexity_claim": {"const": "not_O_N"},
+        "end_to_end_O_N_claim": {"const": false},
+        "supported_scope": {"const": "zero_offset_zero_release_zero_prescribed_linear_3d_frame_truss"}
+      }
+    }
+  }
+}

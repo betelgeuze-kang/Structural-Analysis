@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_live_checkpoint_context_v1.schema.json",
+  "title": "HIP FGMRES live checkpoint context receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "capability_profile", "status", "context_id",
+    "evidence_scope", "actual_backend", "promotion_eligible", "reason",
+    "bindings", "kernel", "dimensions", "owned_buffers",
+    "allocation_lineage", "telemetry", "claims", "extensions",
+    "context_receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-hip-fgmres-live-checkpoint-context.v1"},
+    "capability_profile": {"const": "phase0_live_fgmres_checkpoint_resource_owner"},
+    "status": {"enum": ["context_ready", "context_closed", "cleanup_failed", "cleanup_quarantined", "unavailable"]},
+    "context_id": {"$ref": "#/$defs/hash"},
+    "evidence_scope": {"const": "allocator_bound_live_checkpoint_resources_non_promoting"},
+    "actual_backend": {"enum": ["hip", "test_double", null]},
+    "promotion_eligible": {"const": false},
+    "reason": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["code", "detail"],
+          "properties": {
+            "code": {"type": "string", "minLength": 1},
+            "detail": {"type": "string", "minLength": 1, "maxLength": 512}
+          }
+        }
+      ]
+    },
+    "bindings": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "primitive_context_id", "primitive_opening_receipt_hash",
+        "primitive_evidence_scope", "primitive_actual_backend",
+        "source_apply_id", "source_apply_receipt_hash", "source_apply_sequence",
+        "source_direction_generation", "source_execution_plan_hash",
+        "source_free_space_plan_hash", "source_state_hash", "source_state_epoch",
+        "source_fgmres_plan_hash", "recurrence_plan_id", "recurrence_plan_hash",
+        "recurrence_memory_layout_hash", "recurrence_kernel_abi_hash",
+        "primitive_parent_lease_epoch", "solver_child_lease_epoch",
+        "allocation_generation_binding_hash"
+      ],
+      "properties": {
+        "primitive_context_id": {"$ref": "#/$defs/hash"},
+        "primitive_opening_receipt_hash": {"$ref": "#/$defs/hash"},
+        "primitive_evidence_scope": {"enum": ["native_hiprtc_krylov_primitives_composite", "injected_test_double"]},
+        "primitive_actual_backend": {"enum": ["hip", "test_double"]},
+        "source_apply_id": {"type": "string", "minLength": 1},
+        "source_apply_receipt_hash": {"$ref": "#/$defs/hash"},
+        "source_apply_sequence": {"type": "integer", "minimum": 1},
+        "source_direction_generation": {"type": "integer", "minimum": 1},
+        "source_execution_plan_hash": {"$ref": "#/$defs/hash"},
+        "source_free_space_plan_hash": {"$ref": "#/$defs/hash"},
+        "source_state_hash": {"$ref": "#/$defs/hash"},
+        "source_state_epoch": {"type": "integer", "minimum": 0},
+        "source_fgmres_plan_hash": {"$ref": "#/$defs/hash"},
+        "recurrence_plan_id": {"type": "string", "minLength": 1},
+        "recurrence_plan_hash": {"$ref": "#/$defs/hash"},
+        "recurrence_memory_layout_hash": {"$ref": "#/$defs/hash"},
+        "recurrence_kernel_abi_hash": {"$ref": "#/$defs/hash"},
+        "primitive_parent_lease_epoch": {"type": "integer", "minimum": 1},
+        "solver_child_lease_epoch": {"type": "integer", "minimum": 0},
+        "allocation_generation_binding_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "kernel": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["architecture", "identity_hash", "source_sha256", "code_object_sha256", "kernel_interface_hash", "runtime_library_sha256", "runtime_library_discovery_source", "hiprtc_library_sha256", "hiprtc_library_discovery_source", "kernel_origin"],
+          "properties": {
+            "architecture": {"type": "string", "pattern": "^gfx[0-9a-f]+$"},
+            "identity_hash": {"$ref": "#/$defs/hash"},
+            "source_sha256": {"$ref": "#/$defs/hash"},
+            "code_object_sha256": {"$ref": "#/$defs/hash"},
+            "kernel_interface_hash": {"$ref": "#/$defs/hash"},
+            "runtime_library_sha256": {"$ref": "#/$defs/hash"},
+            "runtime_library_discovery_source": {"enum": ["explicit", "opt_rocm", "system_loader", "injected"]},
+            "hiprtc_library_sha256": {"$ref": "#/$defs/hash"},
+            "hiprtc_library_discovery_source": {"enum": ["explicit", "opt_rocm", "system_loader", "injected"]},
+            "kernel_origin": {"enum": ["internally_compiled", "caller_supplied"]}
+          }
+        }
+      ]
+    },
+    "dimensions": {
+      "type": "object", "additionalProperties": false,
+      "required": ["free_dof_count", "restart_dimension", "max_iterations", "maximum_restart_count", "parent_capability_count", "solver_owned_capability_count", "atomic_group_capability_count"],
+      "properties": {
+        "free_dof_count": {"type": "integer", "minimum": 1},
+        "restart_dimension": {"type": "integer", "minimum": 1, "maximum": 16},
+        "max_iterations": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "maximum_restart_count": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "parent_capability_count": {"const": 3},
+        "solver_owned_capability_count": {"const": 8},
+        "atomic_group_capability_count": {"const": 11}
+      }
+    },
+    "owned_buffers": {
+      "type": "array", "maxItems": 8,
+      "prefixItems": [
+        {"$ref": "#/$defs/solution_x"}, {"$ref": "#/$defs/true_residual"},
+        {"$ref": "#/$defs/work_w"}, {"$ref": "#/$defs/basis_v"},
+        {"$ref": "#/$defs/preconditioned_basis_z"}, {"$ref": "#/$defs/packed_dense_state"},
+        {"$ref": "#/$defs/fgmres_control_state_v2"}, {"$ref": "#/$defs/solve_record"}
+      ],
+      "items": false
+    },
+    "allocation_lineage": {
+      "type": "object", "additionalProperties": false,
+      "required": ["capability_profile", "evidence_scope", "owner_role", "runtime_device_bound", "same_stream_bound", "parent_borrowed_capability_count", "managed_buffer_count", "managed_device_bytes", "atomic_group_capability_count", "all_owned_buffers_managed", "pointer_values_serialized", "promotion_eligible"],
+      "properties": {
+        "capability_profile": {"const": "foundation_non_promoting"},
+        "evidence_scope": {"const": "foundation_non_promoting"},
+        "owner_role": {"const": "fgmres_checkpoint_owned_buffers"},
+        "runtime_device_bound": {"type": "boolean"},
+        "same_stream_bound": {"type": "boolean"},
+        "parent_borrowed_capability_count": {"type": "integer", "minimum": 0, "maximum": 3},
+        "managed_buffer_count": {"type": "integer", "minimum": 0, "maximum": 8},
+        "managed_device_bytes": {"type": "integer", "minimum": 0},
+        "atomic_group_capability_count": {"type": "integer", "enum": [0, 11]},
+        "all_owned_buffers_managed": {"type": "boolean"},
+        "pointer_values_serialized": {"const": false},
+        "promotion_eligible": {"const": false}
+      }
+    },
+    "telemetry": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "allocation_attempt_count", "allocation_success_count", "deallocation_attempt_count", "deallocation_success_count", "current_device_bytes", "peak_device_bytes",
+        "lineage_owner_open_success_count", "lineage_owner_close_success_count", "lineage_capability_mint_success_count", "lineage_capability_mint_bytes",
+        "lineage_free_acknowledgement_count", "lineage_free_quarantine_count", "lineage_orphan_acknowledgement_count", "lineage_orphan_quarantine_count",
+        "quarantined_device_bytes", "unknown_malloc_outcome_count", "unknown_requested_bytes", "module_owner_acquire_success_count", "module_close_attempt_count", "module_close_success_count",
+        "checkpoint_token_acquire_success_count", "checkpoint_token_release_success_count", "group_borrow_acquire_success_count", "group_borrow_release_attempt_count", "group_borrow_release_success_count",
+        "semantic_lease_acquire_success_count", "semantic_lease_release_attempt_count", "semantic_lease_release_success_count",
+        "h2d_operation_count", "d2h_operation_count", "kernel_launch_count", "sync_count", "fallback_count"
+      ],
+      "properties": {
+        "allocation_attempt_count": {"$ref": "#/$defs/nonnegative"}, "allocation_success_count": {"$ref": "#/$defs/nonnegative"},
+        "deallocation_attempt_count": {"$ref": "#/$defs/nonnegative"}, "deallocation_success_count": {"$ref": "#/$defs/nonnegative"},
+        "current_device_bytes": {"$ref": "#/$defs/nonnegative"}, "peak_device_bytes": {"$ref": "#/$defs/nonnegative"},
+        "lineage_owner_open_success_count": {"$ref": "#/$defs/nonnegative"}, "lineage_owner_close_success_count": {"$ref": "#/$defs/nonnegative"},
+        "lineage_capability_mint_success_count": {"$ref": "#/$defs/nonnegative"}, "lineage_capability_mint_bytes": {"$ref": "#/$defs/nonnegative"},
+        "lineage_free_acknowledgement_count": {"$ref": "#/$defs/nonnegative"}, "lineage_free_quarantine_count": {"$ref": "#/$defs/nonnegative"},
+        "lineage_orphan_acknowledgement_count": {"$ref": "#/$defs/nonnegative"}, "lineage_orphan_quarantine_count": {"$ref": "#/$defs/nonnegative"},
+        "quarantined_device_bytes": {"$ref": "#/$defs/nonnegative"}, "unknown_malloc_outcome_count": {"$ref": "#/$defs/nonnegative"}, "unknown_requested_bytes": {"$ref": "#/$defs/nonnegative"},
+        "module_owner_acquire_success_count": {"$ref": "#/$defs/nonnegative"}, "module_close_attempt_count": {"$ref": "#/$defs/nonnegative"}, "module_close_success_count": {"$ref": "#/$defs/nonnegative"},
+        "checkpoint_token_acquire_success_count": {"$ref": "#/$defs/nonnegative"}, "checkpoint_token_release_success_count": {"$ref": "#/$defs/nonnegative"},
+        "group_borrow_acquire_success_count": {"$ref": "#/$defs/nonnegative"}, "group_borrow_release_attempt_count": {"$ref": "#/$defs/nonnegative"}, "group_borrow_release_success_count": {"$ref": "#/$defs/nonnegative"},
+        "semantic_lease_acquire_success_count": {"$ref": "#/$defs/nonnegative"}, "semantic_lease_release_attempt_count": {"$ref": "#/$defs/nonnegative"}, "semantic_lease_release_success_count": {"$ref": "#/$defs/nonnegative"},
+        "h2d_operation_count": {"const": 0}, "d2h_operation_count": {"const": 0}, "kernel_launch_count": {"const": 0}, "sync_count": {"const": 0}, "fallback_count": {"const": 0}
+      }
+    },
+    "claims": {
+      "type": "object", "additionalProperties": false,
+      "required": ["live_krylov_parent_integrated", "allocator_provenance_bound", "resource_owner_ready", "owned_content_initialized", "authoritative_predecessor_proven", "device_mask_domain_validator_bound", "actual_mask_host_observed", "checkpoint_transaction_ready", "live_solver_ready", "solution_ready", "iteration_host_copy_zero_proven", "asymptotic_o_n_proven", "speedup_proven", "commercial_ready", "promotion_eligible"],
+      "properties": {
+        "live_krylov_parent_integrated": {"type": "boolean"}, "allocator_provenance_bound": {"type": "boolean"}, "resource_owner_ready": {"type": "boolean"},
+        "owned_content_initialized": {"const": false}, "authoritative_predecessor_proven": {"const": false}, "device_mask_domain_validator_bound": {"const": false}, "actual_mask_host_observed": {"const": false},
+        "checkpoint_transaction_ready": {"const": false}, "live_solver_ready": {"const": false}, "solution_ready": {"const": false}, "iteration_host_copy_zero_proven": {"const": false},
+        "asymptotic_o_n_proven": {"const": false}, "speedup_proven": {"const": false}, "commercial_ready": {"const": false}, "promotion_eligible": {"const": false}
+      }
+    },
+    "extensions": {"type": "object", "maxProperties": 0},
+    "context_receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "nonnegative": {"type": "integer", "minimum": 0},
+    "buffer": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "dtype", "shape", "element_count", "byte_length", "memory_space", "ownership", "access", "initialization", "extent_formula"],
+      "properties": {
+        "name": {"type": "string"}, "dtype": {"enum": ["<f8", "|u1"]}, "shape": {"type": "array", "minItems": 1, "items": {"type": "integer", "minimum": 1}},
+        "element_count": {"type": "integer", "minimum": 1}, "byte_length": {"type": "integer", "minimum": 1}, "memory_space": {"const": "hip_device"}, "ownership": {"const": "owned"},
+        "access": {"type": "string", "minLength": 1}, "initialization": {"type": "string", "minLength": 1}, "extent_formula": {"type": "string", "minLength": 1}
+      }
+    },
+    "solution_x": {"allOf": [{"$ref": "#/$defs/buffer"}, {"properties": {"name": {"const": "solution_x"}, "dtype": {"const": "<f8"}}}]},
+    "true_residual": {"allOf": [{"$ref": "#/$defs/buffer"}, {"properties": {"name": {"const": "true_residual"}, "dtype": {"const": "<f8"}}}]},
+    "work_w": {"allOf": [{"$ref": "#/$defs/buffer"}, {"properties": {"name": {"const": "work_w"}, "dtype": {"const": "<f8"}}}]},
+    "basis_v": {"allOf": [{"$ref": "#/$defs/buffer"}, {"properties": {"name": {"const": "basis_v"}, "dtype": {"const": "<f8"}}}]},
+    "preconditioned_basis_z": {"allOf": [{"$ref": "#/$defs/buffer"}, {"properties": {"name": {"const": "preconditioned_basis_z"}, "dtype": {"const": "<f8"}}}]},
+    "packed_dense_state": {"allOf": [{"$ref": "#/$defs/buffer"}, {"properties": {"name": {"const": "packed_dense_state"}, "dtype": {"const": "<f8"}}}]},
+    "fgmres_control_state_v2": {"allOf": [{"$ref": "#/$defs/buffer"}, {"properties": {"name": {"const": "fgmres_control_state_v2"}, "dtype": {"const": "|u1"}, "shape": {"const": [256]}, "element_count": {"const": 256}, "byte_length": {"const": 256}}}]},
+    "solve_record": {"allOf": [{"$ref": "#/$defs/buffer"}, {"properties": {"name": {"const": "solve_record"}, "dtype": {"const": "|u1"}}}]}
+  },
+  "allOf": [
+    {"if": {"properties": {"status": {"const": "context_ready"}}}, "then": {"properties": {"reason": {"type": "null"}, "owned_buffers": {"minItems": 8}, "kernel": {"type": "object"}}}},
+    {"if": {"properties": {"status": {"enum": ["cleanup_failed", "cleanup_quarantined", "unavailable"]}}}, "then": {"properties": {"reason": {"type": "object"}}}}
+  ]
+}

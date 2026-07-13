@@ -1,0 +1,374 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/mgt_model_ir_v2_audit.schema.json",
+  "title": "MIDAS MGT to ModelIR v2 import audit",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source",
+    "adapter",
+    "status",
+    "model_ir",
+    "cards",
+    "source_mappings",
+    "reference_audit",
+    "roundtrip_audit",
+    "capabilities",
+    "diagnostics",
+    "classification_counts",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-mgt-model-ir-v2-audit.v1"},
+    "source": {"$ref": "#/$defs/source"},
+    "adapter": {"$ref": "#/$defs/adapter"},
+    "status": {"enum": ["ready", "blocked"]},
+    "model_ir": {"$ref": "#/$defs/modelIRStatus"},
+    "cards": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/card"}
+    },
+    "source_mappings": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/sourceMapping"}
+    },
+    "reference_audit": {"$ref": "#/$defs/referenceAudit"},
+    "roundtrip_audit": {"$ref": "#/$defs/roundtripAudit"},
+    "capabilities": {"$ref": "#/$defs/capabilities"},
+    "diagnostics": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/diagnostic"}
+    },
+    "classification_counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "SUPPORTED_EXACT",
+        "SUPPORTED_NORMALIZED",
+        "PRESERVED_NONANALYTIC",
+        "BLOCKED_UNSUPPORTED",
+        "BLOCKED_INVALID_SYNTAX",
+        "BLOCKED_DUPLICATE_ID",
+        "BLOCKED_DANGLING_REFERENCE",
+        "BLOCKED_CONTEXT_MISSING"
+      ],
+      "properties": {
+        "SUPPORTED_EXACT": {"type": "integer", "minimum": 0},
+        "SUPPORTED_NORMALIZED": {"type": "integer", "minimum": 0},
+        "PRESERVED_NONANALYTIC": {"type": "integer", "minimum": 0},
+        "BLOCKED_UNSUPPORTED": {"type": "integer", "minimum": 0},
+        "BLOCKED_INVALID_SYNTAX": {"type": "integer", "minimum": 0},
+        "BLOCKED_DUPLICATE_ID": {"type": "integer", "minimum": 0},
+        "BLOCKED_DANGLING_REFERENCE": {"type": "integer", "minimum": 0},
+        "BLOCKED_CONTEXT_MISSING": {"type": "integer", "minimum": 0}
+      }
+    },
+    "claim_boundary": {
+      "const": "phase0_supported_subset_import_audit_not_full_midas_interoperability"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"status": {"const": "ready"}},
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "model_ir": {
+            "properties": {
+              "content_hash": {"$ref": "#/$defs/sha256"},
+              "contract_valid": {"const": true},
+              "analysis_ready": {"const": true}
+            }
+          },
+          "roundtrip_audit": {
+            "properties": {
+              "supported_source_semantic_hash": {"$ref": "#/$defs/sha256"},
+              "reverse_projection_semantic_hash": {"$ref": "#/$defs/sha256"},
+              "semantic_equivalent": {"const": true},
+              "silent_loss_count": {"const": 0},
+              "target_pointer_error_count": {"const": 0}
+            }
+          },
+          "capabilities": {
+            "properties": {
+              "linear_static_ready": {"const": true},
+              "solver_buffers_packable": {"const": true},
+              "supported_subset_roundtrip_ready": {"const": true}
+            }
+          },
+          "diagnostics": {
+            "items": {
+              "properties": {
+                "severity": {"enum": ["info", "warning"]}
+              }
+            }
+          },
+          "cards": {
+            "items": {
+              "properties": {
+                "disposition": {
+                  "enum": [
+                    "SUPPORTED_EXACT",
+                    "SUPPORTED_NORMALIZED",
+                    "PRESERVED_NONANALYTIC"
+                  ]
+                }
+              }
+            }
+          },
+          "source_mappings": {
+            "items": {
+              "properties": {
+                "disposition": {
+                  "enum": [
+                    "SUPPORTED_EXACT",
+                    "SUPPORTED_NORMALIZED",
+                    "PRESERVED_NONANALYTIC"
+                  ]
+                }
+              }
+            }
+          },
+          "classification_counts": {
+            "properties": {
+              "BLOCKED_UNSUPPORTED": {"const": 0},
+              "BLOCKED_INVALID_SYNTAX": {"const": 0},
+              "BLOCKED_DUPLICATE_ID": {"const": 0},
+              "BLOCKED_DANGLING_REFERENCE": {"const": 0},
+              "BLOCKED_CONTEXT_MISSING": {"const": 0}
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nullableSha256": {
+      "oneOf": [
+        {"$ref": "#/$defs/sha256"},
+        {"type": "null"}
+      ]
+    },
+    "disposition": {
+      "enum": [
+        "SUPPORTED_EXACT",
+        "SUPPORTED_NORMALIZED",
+        "PRESERVED_NONANALYTIC",
+        "BLOCKED_UNSUPPORTED",
+        "BLOCKED_INVALID_SYNTAX",
+        "BLOCKED_DUPLICATE_ID",
+        "BLOCKED_DANGLING_REFERENCE",
+        "BLOCKED_CONTEXT_MISSING"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "sha256",
+        "byte_count",
+        "physical_line_count",
+        "encoding",
+        "has_utf8_bom",
+        "newline_style"
+      ],
+      "properties": {
+        "ref": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "byte_count": {"type": "integer", "minimum": 0},
+        "physical_line_count": {"type": "integer", "minimum": 0},
+        "encoding": {"enum": ["utf-8", "utf-8-sig"]},
+        "has_utf8_bom": {"type": "boolean"},
+        "newline_style": {"enum": ["LF", "CRLF", "CR", "MIXED", "NONE"]}
+      }
+    },
+    "adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adapter_id", "adapter_version", "subset_contract"],
+      "properties": {
+        "adapter_id": {"const": "structural_analysis.io.midas.v2"},
+        "adapter_version": {"const": "1"},
+        "subset_contract": {"const": "midas_mgt_phase0_linear_frame.v1"}
+      }
+    },
+    "modelIRStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "content_hash", "contract_valid", "analysis_ready"],
+      "properties": {
+        "schema_version": {"const": "structural-analysis-model-ir.v2"},
+        "content_hash": {"$ref": "#/$defs/nullableSha256"},
+        "contract_valid": {"type": "boolean"},
+        "analysis_ready": {"type": "boolean"}
+      }
+    },
+    "card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "occurrence_index",
+        "header_line",
+        "row_count",
+        "disposition",
+        "active_load_case",
+        "reason_codes"
+      ],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "occurrence_index": {"type": "integer", "minimum": 0},
+        "header_line": {"type": "integer", "minimum": 1},
+        "row_count": {"type": "integer", "minimum": 0},
+        "disposition": {"$ref": "#/$defs/disposition"},
+        "active_load_case": {"type": ["string", "null"]},
+        "reason_codes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "sourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "section",
+        "block_occurrence",
+        "header_line",
+        "line_start",
+        "line_end",
+        "logical_row_index",
+        "raw_sha256"
+      ],
+      "properties": {
+        "section": {"type": "string", "minLength": 1},
+        "block_occurrence": {"type": "integer", "minimum": 0},
+        "header_line": {"type": "integer", "minimum": 1},
+        "line_start": {"type": "integer", "minimum": 1},
+        "line_end": {"type": "integer", "minimum": 1},
+        "logical_row_index": {"type": ["integer", "null"], "minimum": 0},
+        "raw_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "targetRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entity_kind", "entity_id", "json_pointer"],
+      "properties": {
+        "entity_kind": {
+          "enum": [
+            "model",
+            "node",
+            "material",
+            "section",
+            "element",
+            "constraint",
+            "load_pattern",
+            "nodal_load"
+          ]
+        },
+        "entity_id": {"type": "string", "minLength": 1},
+        "json_pointer": {"type": "string", "pattern": "^/"}
+      }
+    },
+    "sourceMapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_record_id",
+        "source_ref",
+        "disposition",
+        "target_refs",
+        "transformations",
+        "reason_codes"
+      ],
+      "properties": {
+        "source_record_id": {"type": "string", "minLength": 1},
+        "source_ref": {"$ref": "#/$defs/sourceRef"},
+        "disposition": {"$ref": "#/$defs/disposition"},
+        "target_refs": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/targetRef"}
+        },
+        "transformations": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "reason_codes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "referenceAudit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["duplicate_ids", "dangling_references"],
+      "properties": {
+        "duplicate_ids": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "dangling_references": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "roundtripAudit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "supported_source_semantic_hash",
+        "reverse_projection_semantic_hash",
+        "semantic_equivalent",
+        "silent_loss_count",
+        "target_pointer_error_count"
+      ],
+      "properties": {
+        "supported_source_semantic_hash": {"$ref": "#/$defs/nullableSha256"},
+        "reverse_projection_semantic_hash": {"$ref": "#/$defs/nullableSha256"},
+        "semantic_equivalent": {"type": "boolean"},
+        "silent_loss_count": {"type": "integer", "minimum": 0},
+        "target_pointer_error_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "linear_static_ready",
+        "solver_buffers_packable",
+        "supported_subset_roundtrip_ready"
+      ],
+      "properties": {
+        "linear_static_ready": {"type": "boolean"},
+        "solver_buffers_packable": {"type": "boolean"},
+        "supported_subset_roundtrip_ready": {"type": "boolean"}
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["severity", "code", "message", "line_start", "line_end"],
+      "properties": {
+        "severity": {"enum": ["info", "warning", "error"]},
+        "code": {"type": "string", "minLength": 1},
+        "message": {"type": "string", "minLength": 1},
+        "line_start": {"type": ["integer", "null"], "minimum": 1},
+        "line_end": {"type": ["integer", "null"], "minimum": 1}
+      }
+    }
+  }
+}

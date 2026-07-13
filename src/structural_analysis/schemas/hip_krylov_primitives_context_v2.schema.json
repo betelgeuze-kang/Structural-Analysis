@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_krylov_primitives_context_v2.schema.json",
+  "title": "HIP Krylov Primitives Context Receipt v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "capability_profile", "status", "context_id", "evidence_scope", "actual_backend", "promotion_eligible", "reason", "bindings", "kernel", "dimensions", "owned_buffers", "allocation_lineage", "telemetry", "claims", "context_receipt_hash"],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-hip-krylov-primitives-context.v2"},
+    "capability_profile": {"const": "phase0_hip_krylov_vector_reduction_positive_jacobi_primitives"},
+    "status": {"enum": ["context_ready", "context_closed", "poisoned", "cleanup_failed", "cleanup_quarantined", "unavailable"]},
+    "context_id": {"$ref": "#/$defs/hash"},
+    "evidence_scope": {"enum": ["native_hiprtc_krylov_primitives_composite", "injected_test_double"]},
+    "actual_backend": {"enum": ["hip", "test_double", null]},
+    "promotion_eligible": {"const": false},
+    "reason": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/reason"}]},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "kernel": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/kernel"}]},
+    "dimensions": {"$ref": "#/$defs/dimensions"},
+    "owned_buffers": {"type": "array", "items": {"$ref": "#/$defs/buffer"}, "maxItems": 9},
+    "allocation_lineage": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/allocation_lineage"}]},
+    "telemetry": {"$ref": "#/$defs/telemetry"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "context_receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "context_ready"}}, "required": ["status"]},
+      "then": {"properties": {"reason": {"type": "null"}, "actual_backend": {"enum": ["hip", "test_double"]}, "kernel": {"$ref": "#/$defs/kernel"}, "owned_buffers": {"minItems": 9, "maxItems": 9}, "allocation_lineage": {"$ref": "#/$defs/allocation_lineage"}, "claims": {"$ref": "#/$defs/ready_claims"}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "context_closed"}}, "required": ["status"]},
+      "then": {"properties": {"reason": {"type": "null"}, "actual_backend": {"enum": ["hip", "test_double"]}}}
+    },
+    {
+      "if": {"properties": {"status": {"enum": ["poisoned", "cleanup_failed", "cleanup_quarantined"]}}, "required": ["status"]},
+      "then": {"properties": {"reason": {"$ref": "#/$defs/reason"}, "actual_backend": {"enum": ["hip", "test_double"]}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "cleanup_quarantined"}}, "required": ["status"]},
+      "then": {"properties": {"allocation_lineage": {"$ref": "#/$defs/allocation_lineage"}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "unavailable"}}, "required": ["status"]},
+      "then": {"properties": {"reason": {"$ref": "#/$defs/reason"}, "actual_backend": {"type": "null"}, "owned_buffers": {"maxItems": 0}}}
+    }
+  ],
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "reason": {"type": "object", "additionalProperties": false, "required": ["code", "detail"], "properties": {"code": {"type": "string", "minLength": 1, "maxLength": 128}, "detail": {"type": "string", "minLength": 1, "maxLength": 512}}},
+    "bindings": {
+      "type": "object", "additionalProperties": false,
+      "required": ["parent_context_id", "parent_opening_receipt_hash", "source_apply_id", "source_apply_receipt_hash", "source_apply_sequence", "source_direction_generation", "source_execution_plan_hash", "source_operator_hash", "source_numeric_snapshot_hash", "source_partition_hash", "state_hash", "state_epoch", "lease_epoch", "kernel_origin"],
+      "properties": {
+        "parent_context_id": {"$ref": "#/$defs/hash"}, "parent_opening_receipt_hash": {"$ref": "#/$defs/hash"},
+        "source_apply_id": {"$ref": "#/$defs/hash"}, "source_apply_receipt_hash": {"$ref": "#/$defs/hash"},
+        "source_apply_sequence": {"type": "integer", "minimum": 1}, "source_direction_generation": {"type": "integer", "minimum": 1},
+        "source_execution_plan_hash": {"$ref": "#/$defs/hash"}, "source_operator_hash": {"$ref": "#/$defs/hash"},
+        "source_numeric_snapshot_hash": {"$ref": "#/$defs/hash"}, "source_partition_hash": {"$ref": "#/$defs/hash"},
+        "state_hash": {"$ref": "#/$defs/hash"}, "state_epoch": {"type": "integer", "minimum": 0},
+        "lease_epoch": {"type": "integer", "minimum": 1}, "kernel_origin": {"enum": ["internally_compiled", "caller_supplied"]}
+      }
+    },
+    "kernel": {
+      "type": "object", "additionalProperties": false,
+      "required": ["abi_version", "architecture", "kernel_name", "prepare_positive_jacobi_symbol", "fill_symbol", "affine_symbol", "apply_jacobi_symbol", "dot_stage_symbol", "sum_stage_symbol", "lassq_stage_symbol", "lassq_combine_stage_symbol", "lassq_finalize_symbol", "vector_block_size", "reduction_segment_size", "source_resource", "source_sha256", "code_object_sha256", "identity_hash", "runtime_library_discovery_source", "runtime_library_sha256", "hiprtc_library_discovery_source", "hiprtc_library_sha256"],
+      "properties": {
+        "abi_version": {"type": "integer"}, "architecture": {"type": "string"}, "kernel_name": {"type": "string"},
+        "prepare_positive_jacobi_symbol": {"type": "string"}, "fill_symbol": {"type": "string"}, "affine_symbol": {"type": "string"}, "apply_jacobi_symbol": {"type": "string"}, "dot_stage_symbol": {"type": "string"}, "sum_stage_symbol": {"type": "string"}, "lassq_stage_symbol": {"type": "string"}, "lassq_combine_stage_symbol": {"type": "string"}, "lassq_finalize_symbol": {"type": "string"},
+        "vector_block_size": {"type": "integer"}, "reduction_segment_size": {"type": "integer"}, "source_resource": {"type": "string"},
+        "source_sha256": {"$ref": "#/$defs/hash"}, "code_object_sha256": {"$ref": "#/$defs/hash"}, "identity_hash": {"$ref": "#/$defs/hash"},
+        "runtime_library_discovery_source": {"type": "string"}, "runtime_library_sha256": {"$ref": "#/$defs/hash"},
+        "hiprtc_library_discovery_source": {"type": "string"}, "hiprtc_library_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "dimensions": {"type": "object", "additionalProperties": false, "required": ["free_dof_count", "reduced_csr_nnz", "reduction_segment_size", "reduction_partial_count", "borrowed_buffer_count", "owned_buffer_count"], "properties": {"free_dof_count": {"type": "integer", "minimum": 1}, "reduced_csr_nnz": {"type": "integer", "minimum": 1}, "reduction_segment_size": {"const": 512}, "reduction_partial_count": {"type": "integer", "minimum": 1}, "borrowed_buffer_count": {"const": 5}, "owned_buffer_count": {"const": 9}}},
+    "buffer": {"type": "object", "additionalProperties": false, "required": ["name", "dtype", "shape", "byte_length", "data_hash", "memory_space", "access", "initial_transfer"], "properties": {"name": {"type": "string"}, "dtype": {"enum": ["<f8", "<i4"]}, "shape": {"type": "array", "items": {"type": "integer", "minimum": 1}, "minItems": 1, "maxItems": 1}, "byte_length": {"type": "integer", "minimum": 1}, "data_hash": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/hash"}]}, "memory_space": {"const": "hip_device"}, "access": {"type": "string"}, "initial_transfer": {"type": "string"}}},
+    "allocation_lineage": {"type": "object", "additionalProperties": false, "required": ["capability_profile", "evidence_scope", "owner_role", "runtime_device_bound", "parent_borrowed_capability_count", "managed_buffer_count", "managed_device_bytes", "all_owned_buffers_managed", "pointer_values_serialized", "promotion_eligible"], "properties": {"capability_profile": {"const": "foundation_non_promoting"}, "evidence_scope": {"const": "foundation_non_promoting"}, "owner_role": {"const": "krylov_primitives_owned_buffers"}, "runtime_device_bound": {"const": true}, "parent_borrowed_capability_count": {"const": 5}, "managed_buffer_count": {"type": "integer", "minimum": 0, "maximum": 9}, "managed_device_bytes": {"type": "integer", "minimum": 0}, "all_owned_buffers_managed": {"type": "boolean"}, "pointer_values_serialized": {"const": false}, "promotion_eligible": {"const": false}}},
+    "telemetry": {
+      "type": "object", "additionalProperties": false,
+      "required": ["allocation_attempt_count", "allocation_success_count", "deallocation_attempt_count", "deallocation_success_count", "current_device_bytes", "peak_device_bytes", "h2d_operation_attempt_count", "h2d_operation_success_count", "h2d_bytes_attempted", "h2d_bytes_succeeded", "d2h_operation_attempt_count", "d2h_operation_success_count", "d2h_bytes_attempted", "d2h_bytes_succeeded", "kernel_launch_attempt_count", "kernel_launch_success_count", "sync_attempt_count", "sync_success_count", "module_owner_acquired_count", "module_close_attempt_count", "module_close_success_count", "lease_release_attempt_count", "lease_release_success_count", "lineage_owner_open_success_count", "lineage_capability_mint_success_count", "lineage_capability_mint_bytes", "lineage_free_acknowledgement_count", "lineage_free_quarantine_count", "lineage_orphan_acknowledgement_count", "lineage_orphan_quarantine_count", "lineage_owner_close_success_count", "quarantined_device_bytes", "unknown_malloc_outcome_count", "unknown_requested_bytes", "error_flag_h2d_bytes", "error_flag_d2h_bytes", "vector_h2d_bytes", "reduction_h2d_bytes", "new_stream_create_count", "fallback_count"],
+      "properties": {
+        "allocation_attempt_count": {"type": "integer", "minimum": 0}, "allocation_success_count": {"type": "integer", "minimum": 0}, "deallocation_attempt_count": {"type": "integer", "minimum": 0}, "deallocation_success_count": {"type": "integer", "minimum": 0}, "current_device_bytes": {"type": "integer", "minimum": 0}, "peak_device_bytes": {"type": "integer", "minimum": 0},
+        "h2d_operation_attempt_count": {"type": "integer", "minimum": 0}, "h2d_operation_success_count": {"type": "integer", "minimum": 0}, "h2d_bytes_attempted": {"type": "integer", "minimum": 0}, "h2d_bytes_succeeded": {"type": "integer", "minimum": 0}, "d2h_operation_attempt_count": {"type": "integer", "minimum": 0}, "d2h_operation_success_count": {"type": "integer", "minimum": 0}, "d2h_bytes_attempted": {"type": "integer", "minimum": 0}, "d2h_bytes_succeeded": {"type": "integer", "minimum": 0},
+        "kernel_launch_attempt_count": {"type": "integer", "minimum": 0}, "kernel_launch_success_count": {"type": "integer", "minimum": 0}, "sync_attempt_count": {"type": "integer", "minimum": 0}, "sync_success_count": {"type": "integer", "minimum": 0}, "module_owner_acquired_count": {"type": "integer", "minimum": 0}, "module_close_attempt_count": {"type": "integer", "minimum": 0}, "module_close_success_count": {"type": "integer", "minimum": 0}, "lease_release_attempt_count": {"type": "integer", "minimum": 0}, "lease_release_success_count": {"type": "integer", "minimum": 0},
+        "lineage_owner_open_success_count": {"type": "integer", "minimum": 0}, "lineage_capability_mint_success_count": {"type": "integer", "minimum": 0}, "lineage_capability_mint_bytes": {"type": "integer", "minimum": 0}, "lineage_free_acknowledgement_count": {"type": "integer", "minimum": 0}, "lineage_free_quarantine_count": {"type": "integer", "minimum": 0}, "lineage_orphan_acknowledgement_count": {"type": "integer", "minimum": 0}, "lineage_orphan_quarantine_count": {"type": "integer", "minimum": 0}, "lineage_owner_close_success_count": {"type": "integer", "minimum": 0}, "quarantined_device_bytes": {"type": "integer", "minimum": 0}, "unknown_malloc_outcome_count": {"type": "integer", "minimum": 0}, "unknown_requested_bytes": {"type": "integer", "minimum": 0},
+        "error_flag_h2d_bytes": {"type": "integer", "minimum": 0}, "error_flag_d2h_bytes": {"type": "integer", "minimum": 0}, "vector_h2d_bytes": {"const": 0}, "reduction_h2d_bytes": {"const": 0}, "new_stream_create_count": {"const": 0}, "fallback_count": {"const": 0}
+      }
+    },
+    "claims": {"type": "object", "additionalProperties": false, "required": ["exclusive_parent_lease_active", "same_runtime_and_stream", "positive_jacobi_inverse_ready", "affine_primitive_ready", "dot_primitive_ready", "stable_l2_primitive_ready", "native_hiprtc_evidence", "host_copy_zero_proven", "diagonal_shift_or_clamp_used", "spd_proven", "pcg_ready", "krylov_solver_ready", "preconditioner_integrated", "solver_iteration_ready", "asymptotic_o_n_proven", "speedup_proven", "commercial_ready", "fallback_used"], "properties": {"exclusive_parent_lease_active": {"type": "boolean"}, "same_runtime_and_stream": {"type": "boolean"}, "positive_jacobi_inverse_ready": {"type": "boolean"}, "affine_primitive_ready": {"type": "boolean"}, "dot_primitive_ready": {"type": "boolean"}, "stable_l2_primitive_ready": {"type": "boolean"}, "native_hiprtc_evidence": {"type": "boolean"}, "host_copy_zero_proven": {"const": false}, "diagonal_shift_or_clamp_used": {"const": false}, "spd_proven": {"const": false}, "pcg_ready": {"const": false}, "krylov_solver_ready": {"const": false}, "preconditioner_integrated": {"const": false}, "solver_iteration_ready": {"const": false}, "asymptotic_o_n_proven": {"const": false}, "speedup_proven": {"const": false}, "commercial_ready": {"const": false}, "fallback_used": {"const": false}}},
+    "ready_claims": {"allOf": [{"$ref": "#/$defs/claims"}, {"properties": {"exclusive_parent_lease_active": {"const": true}, "same_runtime_and_stream": {"const": true}, "positive_jacobi_inverse_ready": {"const": true}, "affine_primitive_ready": {"const": true}, "dot_primitive_ready": {"const": true}, "stable_l2_primitive_ready": {"const": true}}}]}
+  }
+}

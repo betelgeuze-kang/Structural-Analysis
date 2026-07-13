@@ -1,0 +1,331 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_free_space_operator_plan_v1.schema.json",
+  "title": "HIP Free-Space Operator Plan v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "plan_id",
+    "source_contract",
+    "dimensions",
+    "overlay_policy",
+    "symbolic_payload",
+    "verification_oracle",
+    "claim_boundary",
+    "plan_hash",
+    "extensions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-free-space-operator-plan.v1"
+    },
+    "capability_profile": {
+      "const": "phase0_hip_free_space_symbolic_non_solver_overlay"
+    },
+    "plan_id": {
+      "type": "string",
+      "pattern": "^HipFreeSpacePlan:[0-9a-f]{24}$"
+    },
+    "source_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_plan_schema_version",
+        "execution_plan_capability_profile",
+        "execution_plan_id",
+        "execution_plan_hash",
+        "operator_version",
+        "operator_hash",
+        "numeric_snapshot_hash",
+        "symbolic_reuse_hash",
+        "partition_hash",
+        "model_ir_content_hash",
+        "solver_artifact_hash",
+        "load_pattern_id",
+        "solver_policy",
+        "source_plan_role"
+      ],
+      "properties": {
+        "execution_plan_schema_version": {
+          "const": "structural-analysis-execution-plan.v2"
+        },
+        "execution_plan_capability_profile": {
+          "const": "phase0_sparse_cpu_direct_linear_static"
+        },
+        "execution_plan_id": {
+          "type": "string",
+          "pattern": "^SparsePlan:[0-9a-f]{24}$"
+        },
+        "execution_plan_hash": { "$ref": "#/$defs/hash" },
+        "operator_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "operator_hash": { "$ref": "#/$defs/hash" },
+        "numeric_snapshot_hash": { "$ref": "#/$defs/hash" },
+        "symbolic_reuse_hash": { "$ref": "#/$defs/hash" },
+        "partition_hash": { "$ref": "#/$defs/hash" },
+        "model_ir_content_hash": { "$ref": "#/$defs/hash" },
+        "solver_artifact_hash": { "$ref": "#/$defs/hash" },
+        "load_pattern_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
+        },
+        "solver_policy": { "const": "scipy_sparse_direct" },
+        "source_plan_role": {
+          "const": "operator_partition_verification_witness_not_solver_execution"
+        }
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "global_dof_count",
+        "constrained_dof_count",
+        "free_dof_count",
+        "full_csr_nnz",
+        "reduced_csr_nnz"
+      ],
+      "properties": {
+        "global_dof_count": { "$ref": "#/$defs/positiveInt32" },
+        "constrained_dof_count": { "$ref": "#/$defs/positiveInt32" },
+        "free_dof_count": { "$ref": "#/$defs/positiveInt32" },
+        "full_csr_nnz": { "$ref": "#/$defs/positiveInt32" },
+        "reduced_csr_nnz": { "$ref": "#/$defs/positiveInt32" }
+      }
+    },
+    "overlay_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "solver_role",
+        "source_solver_policy_overridden",
+        "numeric_materialization",
+        "prescribed_displacement_mode",
+        "index_base",
+        "index_dtype"
+      ],
+      "properties": {
+        "kind": { "const": "device_free_space_symbolic_view" },
+        "solver_role": { "const": "none" },
+        "source_solver_policy_overridden": { "const": false },
+        "numeric_materialization": {
+          "const": "same_stream_device_gather_from_assembly_owned_full_csr"
+        },
+        "prescribed_displacement_mode": { "const": "zero_only" },
+        "index_base": { "const": 0 },
+        "index_dtype": { "const": "<i4" }
+      }
+    },
+    "symbolic_payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "array_order",
+        "described_array_byte_length",
+        "arrays",
+        "device_h2d_role",
+        "reduced_numeric_values_present",
+        "reduced_numeric_values_h2d_forbidden",
+        "free_space_view_hash"
+      ],
+      "properties": {
+        "format": { "const": "csr" },
+        "array_order": {
+          "const": [
+            "free_dofs",
+            "global_to_free",
+            "reduced_csr_row_ptr",
+            "reduced_csr_column_indices",
+            "reduced_csr_global_value_indices"
+          ]
+        },
+        "described_array_byte_length": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "arrays": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            { "$ref": "#/$defs/freeDofsDescriptor" },
+            { "$ref": "#/$defs/globalToFreeDescriptor" },
+            { "$ref": "#/$defs/reducedRowPtrDescriptor" },
+            { "$ref": "#/$defs/reducedColumnsDescriptor" },
+            { "$ref": "#/$defs/reducedGlobalValueDescriptor" }
+          ],
+          "items": false
+        },
+        "device_h2d_role": { "const": "symbolic_only" },
+        "reduced_numeric_values_present": { "const": false },
+        "reduced_numeric_values_h2d_forbidden": { "const": true },
+        "free_space_view_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "verification_oracle": { "$ref": "#/$defs/oracle" },
+    "claim_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_performed",
+        "device_allocation_performed",
+        "device_numeric_materialization_performed",
+        "solver_policy_overridden",
+        "solver_ready",
+        "device_resident_krylov_ready",
+        "host_reduced_numeric_h2d_allowed",
+        "end_to_end_O_N_claim",
+        "performance_or_speedup_claim",
+        "commercial_readiness"
+      ],
+      "properties": {
+        "execution_performed": { "const": false },
+        "device_allocation_performed": { "const": false },
+        "device_numeric_materialization_performed": { "const": false },
+        "solver_policy_overridden": { "const": false },
+        "solver_ready": { "const": false },
+        "device_resident_krylov_ready": { "const": false },
+        "host_reduced_numeric_h2d_allowed": { "const": false },
+        "end_to_end_O_N_claim": { "const": false },
+        "performance_or_speedup_claim": { "const": false },
+        "commercial_readiness": { "const": false }
+      }
+    },
+    "plan_hash": { "$ref": "#/$defs/hash" },
+    "extensions": {
+      "type": "object",
+      "maxProperties": 0,
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "positiveInt32": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "descriptorBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "layout",
+        "byte_length",
+        "data_hash",
+        "content_hash"
+      ],
+      "properties": {
+        "name": { "type": "string" },
+        "dtype": { "const": "<i4" },
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": { "$ref": "#/$defs/positiveInt32" }
+        },
+        "layout": { "const": "C" },
+        "byte_length": { "$ref": "#/$defs/positiveInt32" },
+        "data_hash": { "$ref": "#/$defs/hash" },
+        "content_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "freeDofsDescriptor": {
+      "allOf": [
+        { "$ref": "#/$defs/descriptorBase" },
+        {
+          "type": "object",
+          "properties": { "name": { "const": "free_dofs" } }
+        }
+      ]
+    },
+    "globalToFreeDescriptor": {
+      "allOf": [
+        { "$ref": "#/$defs/descriptorBase" },
+        {
+          "type": "object",
+          "properties": { "name": { "const": "global_to_free" } }
+        }
+      ]
+    },
+    "reducedRowPtrDescriptor": {
+      "allOf": [
+        { "$ref": "#/$defs/descriptorBase" },
+        {
+          "type": "object",
+          "properties": { "name": { "const": "reduced_csr_row_ptr" } }
+        }
+      ]
+    },
+    "reducedColumnsDescriptor": {
+      "allOf": [
+        { "$ref": "#/$defs/descriptorBase" },
+        {
+          "type": "object",
+          "properties": {
+            "name": { "const": "reduced_csr_column_indices" }
+          }
+        }
+      ]
+    },
+    "reducedGlobalValueDescriptor": {
+      "allOf": [
+        { "$ref": "#/$defs/descriptorBase" },
+        {
+          "type": "object",
+          "properties": {
+            "name": { "const": "reduced_csr_global_value_indices" }
+          }
+        }
+      ]
+    },
+    "oracle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_array_name",
+        "dtype",
+        "shape",
+        "layout",
+        "byte_length",
+        "data_hash",
+        "content_hash",
+        "role",
+        "device_upload_forbidden"
+      ],
+      "properties": {
+        "source_array_name": {
+          "const": "reduced_stiffness_csr_values"
+        },
+        "dtype": { "const": "<f8" },
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": { "$ref": "#/$defs/positiveInt32" }
+        },
+        "layout": { "const": "C" },
+        "byte_length": { "$ref": "#/$defs/positiveInt32" },
+        "data_hash": { "$ref": "#/$defs/hash" },
+        "content_hash": { "$ref": "#/$defs/hash" },
+        "role": {
+          "const": "verification_oracle_only_never_device_input"
+        },
+        "device_upload_forbidden": { "const": true }
+      }
+    }
+  }
+}

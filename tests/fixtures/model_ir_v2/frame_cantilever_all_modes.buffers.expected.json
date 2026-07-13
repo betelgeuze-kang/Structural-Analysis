@@ -1,0 +1,45 @@
+{
+  "schema_version": "structural-analysis-solver-model-buffers-snapshot.v1",
+  "model_ir_content_hash": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+  "entity_mapping_hash": "sha256:43a6fd46ad9c500d2955fae25ae8622c5cbeed268a9fa56f449a017eb7534736",
+  "cases": {
+    "LC_AXIAL": {
+      "numeric_buffer_hash": "sha256:47d963a3682635181a20a8f7a738368172ef4a8985c83f1ef8372dec167c2daa",
+      "artifact_hash": "sha256:2a0ad868cbecbaea49564149ec5be9476d865d252cabdfd286967579b0bd7871",
+      "load_vector_content_hash": "sha256:709dbc0b82c481b5e751fcd423035e883eb4a56acdfebf491bbea76a14529382"
+    },
+    "LC_WEAK": {
+      "numeric_buffer_hash": "sha256:9fe7b000908666a66a0698d03359cd9896cf1a05e4bc423ccc2fea16ca130a18",
+      "artifact_hash": "sha256:5b38890d5c603e5d878df415b211c68e1251fcd8565cad1205614857565e8a87",
+      "load_vector_content_hash": "sha256:7c0249540a0e1a94f8778ad7465732a3c86353f9b742257868bb76a82b2a3c70"
+    },
+    "LC_STRONG": {
+      "numeric_buffer_hash": "sha256:36ac590f270c2188fbdc9d44331c46f7e5fb40c062569d922d18a1125801b7d2",
+      "artifact_hash": "sha256:e06f6291a0478a93bd69b27dcd00ead4e90d72833795fdf772a89302f4328891",
+      "load_vector_content_hash": "sha256:868297cb464f2990826eeb0071f11aa5f2f08598637d21f302d0f9acf12c6ecb"
+    },
+    "LC_TORSION": {
+      "numeric_buffer_hash": "sha256:3beeb818908372fd657b565adcc40b7b571c68461c281e42f6a3a23708e73421",
+      "artifact_hash": "sha256:c888dbc8134eef5d73f5cf059060a0d56c79cd386d697af13dd91140eb67667f",
+      "load_vector_content_hash": "sha256:631c0719a422648c5450d3d77d2776c684b689bb765e9a1b99d2c83790600d77"
+    }
+  },
+  "buffer_contract": {
+    "element_connectivity": {"dtype": "<i4", "shape": [1, 2], "content_hash": "sha256:063066b4ae40196b42e0e2e4f6c7c6e9667a4e317bd818106f86c3fc28449cd8"},
+    "element_formulation_code": {"dtype": "|u1", "shape": [1], "content_hash": "sha256:9891c5b334293d98e895e913e9a6a937c9671ef9fb7224310f4c8b6c5ef0c31c"},
+    "element_local_axis_rotation_rad": {"dtype": "<f8", "shape": [1], "content_hash": "sha256:3ad9d6107ae7ebfe6be493563d665c16e06271980a5f3e63ab7c4dc22a3aedf5"},
+    "element_material_index": {"dtype": "<i4", "shape": [1], "content_hash": "sha256:49a784a68fd3c3fe400bb75fe9cc106b277cfd180fbea48f8af3c8132b2680af"},
+    "element_offsets_m": {"dtype": "<f8", "shape": [1, 2, 3], "content_hash": "sha256:ece54a4bc70e55827f7b76f12abeaf8b0bcde3a7f9857dffeb39a1b61443bd7c"},
+    "element_release_mask": {"dtype": "|u1", "shape": [1, 2, 6], "content_hash": "sha256:4251a1cbc49dc55b7457e4769fab9bac2d2c2ffa71200117eb21999391d6b221"},
+    "element_section_index": {"dtype": "<i4", "shape": [1], "content_hash": "sha256:5d0ac1a50203a438d0571cb86863592488f63aa65044c6427c22358f240765ed"},
+    "element_type": {"dtype": "|u1", "shape": [1], "content_hash": "sha256:13d90acde63489bb124f87b048ee3acf88e2a2a0854ddda72822ec0a243d3506"},
+    "load_vector_si": {"dtype": "<f8", "shape": [2, 6], "content_hash": "sha256:709dbc0b82c481b5e751fcd423035e883eb4a56acdfebf491bbea76a14529382"},
+    "material_law_code": {"dtype": "|u1", "shape": [1], "content_hash": "sha256:f1727fb5aaf5068d689a46d7bacdccdd167ef57f7af41d7f92acfbe4cf53ac42"},
+    "material_properties_si": {"dtype": "<f8", "shape": [1, 3], "content_hash": "sha256:e338d05fbb7fa141eecbe20264117f757362daa61eb3cf3c3b4c931c22b1660d"},
+    "node_coordinates_m": {"dtype": "<f8", "shape": [2, 3], "content_hash": "sha256:74fcfdde0826e87643bf86913806f2f715c750fade97ab799b448143b0ff5bbb"},
+    "prescribed_values_si": {"dtype": "<f8", "shape": [2, 6], "content_hash": "sha256:f023172a3e8f913c62c69d6a267b86be4b8ed01e3471690486431fec647bbacd"},
+    "section_family_code": {"dtype": "|u1", "shape": [1], "content_hash": "sha256:c18d956c649c0daf334a038b4fa4ac6ecf5050c00c472ff6a9c32094db548339"},
+    "section_properties_si": {"dtype": "<f8", "shape": [1, 6], "content_hash": "sha256:7d1f60700377aeceff49466029cadf339ce3e2fe6cb7e8d81bd13175718333db"},
+    "support_mask": {"dtype": "|u1", "shape": [2, 6], "content_hash": "sha256:27c722e46c35a61c041880bdea5b12dd2513d1f87600586e5cf5d4c6e7fda61d"}
+  }
+}

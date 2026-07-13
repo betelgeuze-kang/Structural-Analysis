@@ -1,0 +1,278 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/fixed_rank_qr_memory_v1.schema.json",
+  "title": "Engine v2 solver-approved fixed-rank QR memory v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "algorithm_version",
+    "plan_binding",
+    "free_dof_count",
+    "rank_cap",
+    "active_teacher_count",
+    "accepted_teacher_count_total",
+    "evicted_teacher_count_total",
+    "chain_anchor_hash",
+    "rolling_teacher_chain_hash",
+    "provenance",
+    "arrays",
+    "projection",
+    "update_receipt",
+    "implementation_constraints",
+    "claim_boundary",
+    "memory_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-fixed-rank-qr-memory.v1"
+    },
+    "algorithm_version": {"const": "solver_approved_fifo_qr_memory.v1"},
+    "plan_binding": {"$ref": "#/$defs/planBinding"},
+    "free_dof_count": {"type": "integer", "minimum": 1},
+    "rank_cap": {"type": "integer", "minimum": 1, "maximum": 16},
+    "active_teacher_count": {"type": "integer", "minimum": 0, "maximum": 16},
+    "accepted_teacher_count_total": {"type": "integer", "minimum": 0},
+    "evicted_teacher_count_total": {"type": "integer", "minimum": 0},
+    "chain_anchor_hash": {"$ref": "#/$defs/sha256"},
+    "rolling_teacher_chain_hash": {"$ref": "#/$defs/sha256"},
+    "provenance": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {"$ref": "#/$defs/provenance"}
+    },
+    "arrays": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["raw_modes", "basis_q"],
+      "properties": {
+        "raw_modes": {
+          "allOf": [
+            {"$ref": "#/$defs/arrayDescriptor"},
+            {"properties": {"name": {"const": "raw_modes"}}}
+          ]
+        },
+        "basis_q": {
+          "allOf": [
+            {"$ref": "#/$defs/arrayDescriptor"},
+            {"properties": {"name": {"const": "basis_q"}}}
+          ]
+        }
+      }
+    },
+    "projection": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/projection"}
+      ]
+    },
+    "update_receipt": {"$ref": "#/$defs/updateReceipt"},
+    "implementation_constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "teacher_source",
+        "physical_mode",
+        "eviction_policy",
+        "basis_rebuild",
+        "reverse_mode_autograd",
+        "gradient_updates",
+        "legacy_training_imports"
+      ],
+      "properties": {
+        "teacher_source": {"const": "validated_ready_linear_static_run_only"},
+        "physical_mode": {
+          "const": "(committed_displacement-initial_displacement)[free_dofs]"
+        },
+        "eviction_policy": {"const": "deterministic_fifo"},
+        "basis_rebuild": {"const": "build_fixed_rank_projection"},
+        "reverse_mode_autograd": {"const": false},
+        "gradient_updates": {"const": false},
+        "legacy_training_imports": {"const": false}
+      }
+    },
+    "claim_boundary": {
+      "const": "solver_approved_qr_correction_memory_not_training"
+    },
+    "memory_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"active_teacher_count": {"const": 0}}},
+      "then": {
+        "properties": {
+          "provenance": {"maxItems": 0},
+          "projection": {"type": "null"}
+        }
+      },
+      "else": {
+        "properties": {
+          "provenance": {"minItems": 1},
+          "projection": {"$ref": "#/$defs/projection"}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "stableId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]*$"
+    },
+    "planBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["plan_hash", "operator_hash", "pattern_hash", "partition_hash"],
+      "properties": {
+        "plan_hash": {"$ref": "#/$defs/sha256"},
+        "operator_hash": {"$ref": "#/$defs/sha256"},
+        "pattern_hash": {"$ref": "#/$defs/sha256"},
+        "partition_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "arrayDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "layout",
+        "byte_length",
+        "data_hash",
+        "content_hash"
+      ],
+      "properties": {
+        "name": {"enum": ["raw_modes", "basis_q"]},
+        "dtype": {"const": "<f8"},
+        "shape": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "prefixItems": [
+            {"type": "integer", "minimum": 1},
+            {"type": "integer", "minimum": 0, "maximum": 16}
+          ],
+          "items": false
+        },
+        "layout": {"const": "C"},
+        "byte_length": {"type": "integer", "minimum": 0},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "projection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "algorithm_version",
+        "projection_hash",
+        "candidate_count",
+        "retained_rank",
+        "drop_tolerance"
+      ],
+      "properties": {
+        "schema_version": {"const": "structural-analysis-fixed-rank-projection.v1"},
+        "algorithm_version": {"const": "two_pass_mgs_jacobi_scaled.v1"},
+        "projection_hash": {"$ref": "#/$defs/sha256"},
+        "candidate_count": {"type": "integer", "minimum": 1, "maximum": 16},
+        "retained_rank": {"type": "integer", "minimum": 1, "maximum": 16},
+        "drop_tolerance": {"const": 1e-12}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence",
+        "teacher_id",
+        "receipt_chain_hash",
+        "result_ir_hash",
+        "backend_native_result_hash",
+        "initial_state_hash",
+        "committed_state_hash",
+        "solver_artifact_hash",
+        "matrix_backend",
+        "teacher_mode_data_hash",
+        "teacher_mode_content_hash",
+        "previous_teacher_chain_hash",
+        "teacher_chain_hash"
+      ],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1},
+        "teacher_id": {"$ref": "#/$defs/stableId"},
+        "receipt_chain_hash": {"$ref": "#/$defs/sha256"},
+        "result_ir_hash": {"$ref": "#/$defs/sha256"},
+        "backend_native_result_hash": {"$ref": "#/$defs/sha256"},
+        "initial_state_hash": {"$ref": "#/$defs/sha256"},
+        "committed_state_hash": {"$ref": "#/$defs/sha256"},
+        "solver_artifact_hash": {"$ref": "#/$defs/sha256"},
+        "matrix_backend": {"enum": ["dense", "scipy_sparse"]},
+        "teacher_mode_data_hash": {"$ref": "#/$defs/sha256"},
+        "teacher_mode_content_hash": {"$ref": "#/$defs/sha256"},
+        "previous_teacher_chain_hash": {"$ref": "#/$defs/sha256"},
+        "teacher_chain_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "updateReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation",
+        "previous_active_teacher_count",
+        "current_active_teacher_count",
+        "appended_teacher_count",
+        "evicted_teacher_count_this_update",
+        "fifo_retained_teacher_count",
+        "accepted_teacher_count_total",
+        "evicted_teacher_count_total",
+        "teacher_free_dof_subtraction_count",
+        "projection_rebuild_count",
+        "projection_candidate_count",
+        "projection_retained_rank",
+        "projection_basis_scaling_multiply_count",
+        "projection_orthogonalization_dot_count",
+        "projection_orthogonalization_axpy_count",
+        "projection_normalization_divide_count",
+        "raw_mode_elements",
+        "basis_elements",
+        "max_dense_square_dimension",
+        "reverse_mode_autograd_call_count",
+        "gradient_update_count",
+        "storage_complexity",
+        "rebuild_complexity"
+      ],
+      "properties": {
+        "operation": {"enum": ["initialize", "append", "append_fifo_evict"]},
+        "previous_active_teacher_count": {"type": "integer", "minimum": 0, "maximum": 16},
+        "current_active_teacher_count": {"type": "integer", "minimum": 0, "maximum": 16},
+        "appended_teacher_count": {"type": "integer", "minimum": 0, "maximum": 1},
+        "evicted_teacher_count_this_update": {"type": "integer", "minimum": 0, "maximum": 1},
+        "fifo_retained_teacher_count": {"type": "integer", "minimum": 0, "maximum": 16},
+        "accepted_teacher_count_total": {"type": "integer", "minimum": 0},
+        "evicted_teacher_count_total": {"type": "integer", "minimum": 0},
+        "teacher_free_dof_subtraction_count": {"type": "integer", "minimum": 0},
+        "projection_rebuild_count": {"type": "integer", "minimum": 0, "maximum": 1},
+        "projection_candidate_count": {"type": "integer", "minimum": 0, "maximum": 16},
+        "projection_retained_rank": {"type": "integer", "minimum": 0, "maximum": 16},
+        "projection_basis_scaling_multiply_count": {"type": "integer", "minimum": 0},
+        "projection_orthogonalization_dot_count": {"type": "integer", "minimum": 0},
+        "projection_orthogonalization_axpy_count": {"type": "integer", "minimum": 0},
+        "projection_normalization_divide_count": {"type": "integer", "minimum": 0},
+        "raw_mode_elements": {"type": "integer", "minimum": 0},
+        "basis_elements": {"type": "integer", "minimum": 0},
+        "max_dense_square_dimension": {"type": "integer", "minimum": 0, "maximum": 16},
+        "reverse_mode_autograd_call_count": {"const": 0},
+        "gradient_update_count": {"const": 0},
+        "storage_complexity": {"const": "O(Nk)"},
+        "rebuild_complexity": {"const": "O(Nk^2)"}
+      }
+    }
+  }
+}

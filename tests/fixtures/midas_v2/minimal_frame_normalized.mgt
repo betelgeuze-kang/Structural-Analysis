@@ -1,0 +1,45 @@
+; Engine v2 Phase 0 normalized MIDAS/MGT walking-skeleton fixture.
+; The subset intentionally uses only explicit elastic material data,
+; a DBUSER solid-rectangle section, one BEAM, fixed support, and nodal loads.
+
+*VERSION
+9.3.0
+
+*UNIT    ; FORCE, LENGTH, HEAT, TEMPER
+KN, M, KJ, C
+
+*STRUCTYPE    ; iSTYP, iMASS, iSMAS, bMASSOFFSET, bSELFWEIGHT, GRAV, ...
+0, 1, 1, NO, YES, 10, 0, YES, YES, NO
+
+*NODE
+1, 0.0, 0.0, 0.0
+2, 2.0, 0.0, 0.0
+
+*MATERIAL
+; iMAT, TYPE, MNAME, SPHEAT, HEATCO, PLAST, TUNIT, bMASS, DAMPRATIO,
+; DATA=2, ELAST, POISN, THERMAL, DEN(force/length^3), MASS
+1, STEEL, S355, 0, 0, , C, NO, 0.02, 2, 2.0e8, 0.3, 1.2e-5, 78.5, 0
+
+*SECTION
+; DBUSER solid rectangle: SHAPE=SB, DATA=2, H=0.2, B=0.1
+1, DBUSER, RECT200X100, CC, 0, 0, 0, 0, 0, 0, YES, NO, SB, 2, 0.2, 0.1, 0, 0, 0, 0, 0, 0, 0, 0
+
+*ELEMENT
+1, BEAM, 1, 1, 1, 2, 0, 0
+
+*STLDCASE
+AXIAL, USER,
+LATERAL, USER,
+
+*CONSTRAINT
+1, 111111,
+
+*USE-STLD, AXIAL
+*CONLOAD
+2, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+
+*USE-STLD, LATERAL
+*CONLOAD
+2, 0.0, -10.0, 0.0, 0.0, 0.0, 0.0,
+
+*ENDDATA

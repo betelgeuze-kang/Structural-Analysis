@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_free_space_context_v1.schema.json",
+  "title": "HIP free-space operator context receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "capability_profile", "status", "context_id", "evidence_scope", "actual_backend", "promotion_eligible", "reason", "bindings", "kernel", "dimensions", "owned_buffers", "telemetry", "claims", "context_receipt_hash"],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-hip-free-space-context.v1"},
+    "capability_profile": {"const": "phase0_hip_free_space_device_direction_operator_apply"},
+    "status": {"enum": ["context_ready", "context_closed", "poisoned", "cleanup_failed", "unavailable"]},
+    "context_id": {"$ref": "#/$defs/hash"},
+    "evidence_scope": {"enum": ["native_hiprtc_free_space_composite", "injected_test_double"]},
+    "actual_backend": {"enum": ["hip", "test_double", null]},
+    "promotion_eligible": {"const": false},
+    "reason": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/reason"}]},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "kernel": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/kernel"}]},
+    "dimensions": {"$ref": "#/$defs/dimensions"},
+    "owned_buffers": {"type": "array", "maxItems": 12, "items": {"$ref": "#/$defs/view"}},
+    "telemetry": {"$ref": "#/$defs/telemetry"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "context_receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "reason": {"type": "object", "additionalProperties": false, "required": ["code", "detail"], "properties": {"code": {"type": "string", "minLength": 1, "maxLength": 128}, "detail": {"type": "string", "minLength": 1, "maxLength": 512}}},
+    "bindings": {
+      "type": "object", "additionalProperties": false,
+      "required": ["resident_context_id", "resident_opening_receipt_hash", "parent_assembly_context_id", "parent_operator_id", "free_space_plan_id", "free_space_plan_hash", "free_space_view_hash", "source_execution_plan_hash", "source_operator_hash", "source_numeric_snapshot_hash", "source_symbolic_reuse_hash", "source_partition_hash", "state_hash", "state_epoch", "load_pattern_id", "device_ordinal", "downstream_lease_epoch", "kernel_origin"],
+      "properties": {
+        "resident_context_id": {"$ref": "#/$defs/hash"}, "resident_opening_receipt_hash": {"$ref": "#/$defs/hash"}, "parent_assembly_context_id": {"type": "string", "pattern": "^HipAssemblyContext:[0-9a-f]{24}$"}, "parent_operator_id": {"type": "string", "pattern": "^HipAssemblyOperator:[0-9a-f]{24}$"},
+        "free_space_plan_id": {"type": "string", "minLength": 1}, "free_space_plan_hash": {"$ref": "#/$defs/hash"}, "free_space_view_hash": {"$ref": "#/$defs/hash"}, "source_execution_plan_hash": {"$ref": "#/$defs/hash"}, "source_operator_hash": {"$ref": "#/$defs/hash"}, "source_numeric_snapshot_hash": {"$ref": "#/$defs/hash"}, "source_symbolic_reuse_hash": {"$ref": "#/$defs/hash"}, "source_partition_hash": {"$ref": "#/$defs/hash"}, "state_hash": {"$ref": "#/$defs/hash"},
+        "state_epoch": {"type": "integer", "minimum": 0}, "load_pattern_id": {"type": "string", "minLength": 1}, "device_ordinal": {"type": "integer", "minimum": 0}, "downstream_lease_epoch": {"type": "integer", "minimum": 1}, "kernel_origin": {"enum": ["internally_compiled", "caller_supplied"]}
+      }
+    },
+    "kernel": {
+      "type": "object", "additionalProperties": false,
+      "required": ["abi_version", "architecture", "materialize_symbol", "residual_direction_symbol", "gather_jvp_symbol", "block_size", "source_resource", "source_sha256", "code_object_sha256", "identity_hash", "runtime_library_discovery_source", "runtime_library_sha256", "hiprtc_library_discovery_source", "hiprtc_library_sha256"],
+      "properties": {
+        "abi_version": {"const": 1}, "architecture": {"type": "string", "pattern": "^gfx[0-9][0-9a-f]{2,15}$"}, "materialize_symbol": {"const": "engine_v2_free_space_materialize_v1"}, "residual_direction_symbol": {"const": "engine_v2_free_space_residual_direction_v1"}, "gather_jvp_symbol": {"const": "engine_v2_free_space_gather_jvp_v1"}, "block_size": {"const": 256}, "source_resource": {"type": "string", "pattern": "\\.hip\\.cpp$"},
+        "source_sha256": {"$ref": "#/$defs/hash"}, "code_object_sha256": {"$ref": "#/$defs/hash"}, "identity_hash": {"$ref": "#/$defs/hash"}, "runtime_library_discovery_source": {"type": "string", "minLength": 1}, "runtime_library_sha256": {"$ref": "#/$defs/hash"}, "hiprtc_library_discovery_source": {"type": "string", "minLength": 1}, "hiprtc_library_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "dimensions": {"type": "object", "additionalProperties": false, "required": ["global_dof_count", "free_dof_count", "constrained_dof_count", "full_csr_nnz", "reduced_csr_nnz", "symbolic_buffer_count", "work_buffer_count", "borrowed_buffer_count"], "properties": {"global_dof_count": {"type": "integer", "minimum": 1}, "free_dof_count": {"type": "integer", "minimum": 1}, "constrained_dof_count": {"type": "integer", "minimum": 0}, "full_csr_nnz": {"type": "integer", "minimum": 1}, "reduced_csr_nnz": {"type": "integer", "minimum": 1}, "symbolic_buffer_count": {"const": 5}, "work_buffer_count": {"const": 7}, "borrowed_buffer_count": {"const": 6}}},
+    "view": {"type": "object", "additionalProperties": false, "required": ["name", "dtype", "shape", "byte_length", "data_hash", "memory_space", "access", "initial_transfer"], "properties": {"name": {"type": "string", "minLength": 1}, "dtype": {"enum": ["<i4", "<f8"]}, "shape": {"type": "array", "minItems": 1, "items": {"type": "integer", "minimum": 1}}, "byte_length": {"type": "integer", "minimum": 4}, "data_hash": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/hash"}]}, "memory_space": {"const": "hip_device"}, "access": {"type": "string", "minLength": 1}, "initial_transfer": {"type": "string", "minLength": 1}}},
+    "telemetry": {"type": "object", "propertyNames": {"enum": ["allocation_attempt_count", "allocation_success_count", "deallocation_attempt_count", "deallocation_success_count", "current_device_bytes", "peak_device_bytes", "h2d_operation_attempt_count", "h2d_operation_success_count", "h2d_bytes_attempted", "h2d_bytes_succeeded", "d2h_operation_attempt_count", "d2h_operation_success_count", "d2h_bytes_attempted", "d2h_bytes_succeeded", "kernel_launch_attempt_count", "kernel_launch_success_count", "sync_attempt_count", "sync_success_count", "module_owner_acquired_count", "module_close_attempt_count", "module_close_success_count", "lease_release_attempt_count", "lease_release_success_count", "symbolic_h2d_bytes", "error_flag_h2d_bytes", "error_flag_d2h_bytes", "reduced_numeric_h2d_bytes", "state_h2d_bytes", "load_h2d_bytes", "direction_h2d_bytes", "new_stream_create_count", "fallback_count"]}, "required": ["allocation_attempt_count", "allocation_success_count", "deallocation_attempt_count", "deallocation_success_count", "current_device_bytes", "peak_device_bytes", "h2d_operation_attempt_count", "h2d_operation_success_count", "h2d_bytes_attempted", "h2d_bytes_succeeded", "d2h_operation_attempt_count", "d2h_operation_success_count", "d2h_bytes_attempted", "d2h_bytes_succeeded", "kernel_launch_attempt_count", "kernel_launch_success_count", "sync_attempt_count", "sync_success_count", "module_owner_acquired_count", "module_close_attempt_count", "module_close_success_count", "lease_release_attempt_count", "lease_release_success_count", "symbolic_h2d_bytes", "error_flag_h2d_bytes", "error_flag_d2h_bytes", "reduced_numeric_h2d_bytes", "state_h2d_bytes", "load_h2d_bytes", "direction_h2d_bytes", "new_stream_create_count", "fallback_count"], "additionalProperties": {"type": "integer", "minimum": 0}},
+    "claims": {"type": "object", "propertyNames": {"enum": ["exclusive_resident_lease_active", "same_runtime_device_stream", "reduced_csr_device_materialized", "device_direction_producer_ready", "resident_jvp_consumer_ready", "host_reduced_numeric_h2d_avoided", "native_composite_context", "krylov_iteration_ready", "preconditioner_ready", "solver_ready", "iteration_host_copy_zero", "end_to_end_on_complexity", "performance_or_speedup", "commercial_readiness"]}, "required": ["exclusive_resident_lease_active", "same_runtime_device_stream", "reduced_csr_device_materialized", "device_direction_producer_ready", "resident_jvp_consumer_ready", "host_reduced_numeric_h2d_avoided", "native_composite_context", "krylov_iteration_ready", "preconditioner_ready", "solver_ready", "iteration_host_copy_zero", "end_to_end_on_complexity", "performance_or_speedup", "commercial_readiness"], "additionalProperties": {"type": "boolean"}}
+  }
+}

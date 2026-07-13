@@ -1,0 +1,341 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/ai_correction_proposal_v1.schema.json",
+  "title": "Engine v2 Phase 0 AICorrectionProposal v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "proposal_id",
+    "status",
+    "input_bindings",
+    "base_state",
+    "hook",
+    "target",
+    "subspace",
+    "trust",
+    "uncertainty",
+    "required_replay",
+    "arrays",
+    "implementation_constraints",
+    "proposal_hash",
+    "claim_boundary",
+    "extensions"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-ai-correction-proposal.v1"},
+    "capability_profile": {"const": "phase0_fixed_rank_initial_guess_proposal"},
+    "proposal_id": {"$ref": "#/$defs/stableId"},
+    "status": {"const": "unevaluated"},
+    "input_bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_ir_content_hash",
+        "solver_numeric_buffer_hash",
+        "solver_entity_mapping_hash",
+        "solver_artifact_hash",
+        "execution_plan_hash",
+        "operator_hash",
+        "pattern_hash",
+        "partition_hash",
+        "load_pattern_id",
+        "base_state_hash",
+        "projection_hash"
+      ],
+      "properties": {
+        "model_ir_content_hash": {"$ref": "#/$defs/sha256"},
+        "solver_numeric_buffer_hash": {"$ref": "#/$defs/sha256"},
+        "solver_entity_mapping_hash": {"$ref": "#/$defs/sha256"},
+        "solver_artifact_hash": {"$ref": "#/$defs/sha256"},
+        "execution_plan_hash": {"$ref": "#/$defs/sha256"},
+        "operator_hash": {"$ref": "#/$defs/sha256"},
+        "pattern_hash": {"$ref": "#/$defs/sha256"},
+        "partition_hash": {"$ref": "#/$defs/sha256"},
+        "load_pattern_id": {"$ref": "#/$defs/stableId"},
+        "base_state_hash": {"$ref": "#/$defs/sha256"},
+        "projection_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "base_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state_id", "role", "epoch", "state_hash"],
+      "properties": {
+        "state_id": {"$ref": "#/$defs/stableId"},
+        "role": {"const": "committed"},
+        "epoch": {"type": "integer", "minimum": 0},
+        "state_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "hook": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "overlay_only",
+        "final_result",
+        "direct_state_commit",
+        "promotion_authorized"
+      ],
+      "properties": {
+        "name": {"const": "initial_guess"},
+        "overlay_only": {"const": true},
+        "final_result": {"const": false},
+        "direct_state_commit": {"const": false},
+        "promotion_authorized": {"const": false}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "vector_space",
+        "coordinate_map",
+        "free_dof_count",
+        "scaled_units",
+        "physical_units"
+      ],
+      "properties": {
+        "vector_space": {"const": "scaled_reduced_free_dof"},
+        "coordinate_map": {"const": "u_free=D*x,D=diag(K_ff)^-1/2"},
+        "free_dof_count": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+        "scaled_units": {"const": "sqrt_joule_energy_coordinate"},
+        "physical_units": {"const": "m_or_rad_by_global_dof"}
+      }
+    },
+    "subspace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "projection_hash",
+        "retained_rank",
+        "rank_cap",
+        "orthogonality_error_frobenius",
+        "gram_condition",
+        "gram_condition_limit",
+        "within_condition_bound",
+        "dense_projector"
+      ],
+      "properties": {
+        "projection_hash": {"$ref": "#/$defs/sha256"},
+        "retained_rank": {"type": "integer", "minimum": 1, "maximum": 16},
+        "rank_cap": {"type": "integer", "minimum": 1, "maximum": 16},
+        "orthogonality_error_frobenius": {"type": "number", "minimum": 0},
+        "gram_condition": {"type": "number", "minimum": 1},
+        "gram_condition_limit": {"const": 1.00000001},
+        "within_condition_bound": {"const": true},
+        "dense_projector": {"const": false}
+      }
+    },
+    "trust": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "norm",
+        "units",
+        "radius",
+        "absolute_tolerance",
+        "coefficient_l2_norm",
+        "correction_scaled_l2_norm",
+        "within_bound"
+      ],
+      "properties": {
+        "norm": {"const": "scaled_reduced_free_dof_l2"},
+        "units": {"const": "sqrt_joule_energy_coordinate"},
+        "radius": {"type": "number", "exclusiveMinimum": 0},
+        "absolute_tolerance": {"type": "number", "minimum": 0},
+        "coefficient_l2_norm": {"type": "number", "minimum": 0},
+        "correction_scaled_l2_norm": {"type": "number", "minimum": 0},
+        "within_bound": {"const": true}
+      }
+    },
+    "uncertainty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ood_status", "statistical_calibration", "acceptance_eligible"],
+      "properties": {
+        "ood_status": {"const": "not_evaluated"},
+        "statistical_calibration": {"const": false},
+        "acceptance_eligible": {"const": false}
+      }
+    },
+    "required_replay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "full_residual",
+        "energy",
+        "boundary_conditions",
+        "constitutive_admissibility",
+        "required_before_promotion"
+      ],
+      "properties": {
+        "full_residual": {"const": true},
+        "energy": {"const": true},
+        "boundary_conditions": {"const": true},
+        "constitutive_admissibility": {"const": true},
+        "required_before_promotion": {"const": true}
+      }
+    },
+    "arrays": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coefficients_y", "correction_scaled", "correction_free"],
+      "properties": {
+        "coefficients_y": {"$ref": "#/$defs/coefficientsArtifact"},
+        "correction_scaled": {"$ref": "#/$defs/scaledCorrectionArtifact"},
+        "correction_free": {"$ref": "#/$defs/freeCorrectionArtifact"}
+      }
+    },
+    "implementation_constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "correction_formula",
+        "physical_coordinate_formula",
+        "explicit_dense_projector",
+        "reverse_mode_autograd",
+        "legacy_ai_runtime"
+      ],
+      "properties": {
+        "correction_formula": {"const": "correction_scaled=Q*y"},
+        "physical_coordinate_formula": {"const": "correction_free=D*correction_scaled"},
+        "explicit_dense_projector": {"const": false},
+        "reverse_mode_autograd": {"const": false},
+        "legacy_ai_runtime": {"const": false}
+      }
+    },
+    "proposal_hash": {"$ref": "#/$defs/sha256"},
+    "claim_boundary": {"const": "phase0_unevaluated_initial_guess_proposal_only"},
+    "extensions": {
+      "type": "object",
+      "maxProperties": 0
+    }
+  },
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "coefficientsArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "layout",
+        "axis_labels",
+        "units",
+        "byte_length",
+        "data_hash",
+        "content_hash",
+        "values"
+      ],
+      "properties": {
+        "name": {"const": "coefficients_y"},
+        "dtype": {"const": "<f8"},
+        "shape": {
+          "type": "array",
+          "prefixItems": [{"type": "integer", "minimum": 1, "maximum": 16}],
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "layout": {"const": "C"},
+        "axis_labels": {"const": ["basis_rank"]},
+        "units": {"const": "sqrt_joule_energy_coordinate"},
+        "byte_length": {"type": "integer", "minimum": 8, "maximum": 128},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"},
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {"type": "number"}
+        }
+      }
+    },
+    "scaledCorrectionArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "layout",
+        "axis_labels",
+        "units",
+        "byte_length",
+        "data_hash",
+        "content_hash",
+        "values"
+      ],
+      "properties": {
+        "name": {"const": "correction_scaled"},
+        "dtype": {"const": "<f8"},
+        "shape": {
+          "type": "array",
+          "prefixItems": [{"type": "integer", "minimum": 1, "maximum": 2147483647}],
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "layout": {"const": "C"},
+        "axis_labels": {"const": ["free_dof"]},
+        "units": {"const": "sqrt_joule_energy_coordinate"},
+        "byte_length": {"type": "integer", "minimum": 8},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"},
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "number"}
+        }
+      }
+    },
+    "freeCorrectionArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "layout",
+        "axis_labels",
+        "units",
+        "byte_length",
+        "data_hash",
+        "content_hash",
+        "values"
+      ],
+      "properties": {
+        "name": {"const": "correction_free"},
+        "dtype": {"const": "<f8"},
+        "shape": {
+          "type": "array",
+          "prefixItems": [{"type": "integer", "minimum": 1, "maximum": 2147483647}],
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "layout": {"const": "C"},
+        "axis_labels": {"const": ["free_dof"]},
+        "units": {"const": "m_or_rad_by_global_dof"},
+        "byte_length": {"type": "integer", "minimum": 8},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"},
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "number"}
+        }
+      }
+    }
+  }
+}

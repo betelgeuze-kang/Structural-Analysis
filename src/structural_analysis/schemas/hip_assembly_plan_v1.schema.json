@@ -1,0 +1,342 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_assembly_plan_v1.schema.json",
+  "title": "Engine v2 CPU-compiled HIP element-assembly symbolic plan v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "assembly_plan_id",
+    "input_binding",
+    "source_contract",
+    "dimensions",
+    "axis_policy",
+    "reverse_assembly_plan",
+    "symbolic_payload",
+    "claim_boundary",
+    "assembly_plan_hash",
+    "extensions"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-hip-assembly-plan.v1"},
+    "capability_profile": {"const": "phase0_hip_element_assembly_symbolic_plan"},
+    "assembly_plan_id": {
+      "type": "string",
+      "pattern": "^HipAssemblyPlan:[0-9a-f]{24}$"
+    },
+    "input_binding": {"$ref": "#/$defs/inputBinding"},
+    "source_contract": {"$ref": "#/$defs/sourceContract"},
+    "dimensions": {"$ref": "#/$defs/dimensions"},
+    "axis_policy": {"$ref": "#/$defs/axisPolicy"},
+    "reverse_assembly_plan": {"$ref": "#/$defs/reverseAssemblyPlan"},
+    "symbolic_payload": {"$ref": "#/$defs/symbolicPayload"},
+    "claim_boundary": {"$ref": "#/$defs/claimBoundary"},
+    "assembly_plan_hash": {"$ref": "#/$defs/sha256"},
+    "extensions": {
+      "type": "object",
+      "maxProperties": 0
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "stableId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]*$"
+    },
+    "positiveInt32": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "index": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "inputBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_ir_content_hash",
+        "solver_buffer_schema_version",
+        "solver_numeric_buffer_hash",
+        "solver_entity_mapping_hash",
+        "solver_artifact_hash",
+        "load_pattern_id"
+      ],
+      "properties": {
+        "model_ir_content_hash": {"$ref": "#/$defs/sha256"},
+        "solver_buffer_schema_version": {"const": "structural-analysis-solver-model-buffers.v1"},
+        "solver_numeric_buffer_hash": {"$ref": "#/$defs/sha256"},
+        "solver_entity_mapping_hash": {"$ref": "#/$defs/sha256"},
+        "solver_artifact_hash": {"$ref": "#/$defs/sha256"},
+        "load_pattern_id": {"$ref": "#/$defs/stableId"}
+      }
+    },
+    "sourceContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_plan_schema_version",
+        "execution_plan_capability_profile",
+        "execution_plan_id",
+        "execution_plan_hash",
+        "operator_version",
+        "element_operator_version",
+        "symbolic_reuse_hash",
+        "partition_hash",
+        "ordering_hash",
+        "scatter_content_hash",
+        "geometry_hash",
+        "support_partition_hash"
+      ],
+      "properties": {
+        "execution_plan_schema_version": {"const": "structural-analysis-execution-plan.v2"},
+        "execution_plan_capability_profile": {"const": "phase0_sparse_cpu_direct_linear_static"},
+        "execution_plan_id": {"$ref": "#/$defs/stableId"},
+        "execution_plan_hash": {"$ref": "#/$defs/sha256"},
+        "operator_version": {"const": "engine-v2-cpu-direct-csr-linear-static.v2"},
+        "element_operator_version": {"const": "engine-v2-cpu-reference-linear-static.v1"},
+        "symbolic_reuse_hash": {"$ref": "#/$defs/sha256"},
+        "partition_hash": {"$ref": "#/$defs/sha256"},
+        "ordering_hash": {"$ref": "#/$defs/sha256"},
+        "scatter_content_hash": {"$ref": "#/$defs/sha256"},
+        "geometry_hash": {"$ref": "#/$defs/sha256"},
+        "support_partition_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "node_count",
+        "element_count",
+        "dof_count",
+        "csr_nnz",
+        "dofs_per_element",
+        "contributions_per_element",
+        "contribution_count",
+        "reverse_segment_count"
+      ],
+      "properties": {
+        "node_count": {"$ref": "#/$defs/positiveInt32"},
+        "element_count": {"$ref": "#/$defs/positiveInt32"},
+        "dof_count": {"$ref": "#/$defs/positiveInt32"},
+        "csr_nnz": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483646
+        },
+        "dofs_per_element": {"const": 12},
+        "contributions_per_element": {"const": 144},
+        "contribution_count": {"$ref": "#/$defs/positiveInt32"},
+        "reverse_segment_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483646
+        }
+      }
+    },
+    "axisPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy",
+        "default_reference_axis",
+        "switch_reference_axis",
+        "switch_comparison",
+        "switch_threshold",
+        "codes",
+        "reference_axis_code",
+        "axis_policy_hash"
+      ],
+      "properties": {
+        "policy": {"const": "cpu_reference_global_z_unless_abs_local_x_z_gt_0_9_v1"},
+        "default_reference_axis": {"const": "global_z"},
+        "switch_reference_axis": {"const": "global_y"},
+        "switch_comparison": {"const": "abs_local_x_z_strictly_greater_than"},
+        "switch_threshold": {"const": 0.9},
+        "codes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["global_y", "global_z"],
+          "properties": {
+            "global_y": {"const": 1},
+            "global_z": {"const": 2}
+          }
+        },
+        "reference_axis_code": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"enum": [1, 2]}
+        },
+        "axis_policy_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "reverseAssemblyPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_format",
+        "source_assembly_order",
+        "contribution_index_order",
+        "reverse_segment_order",
+        "structural_zero_segments_retained",
+        "reverse_segment_offsets",
+        "reverse_contribution_indices",
+        "reverse_map_hash"
+      ],
+      "properties": {
+        "source_format": {"const": "csr"},
+        "source_assembly_order": {"const": "element_index_then_local_row_then_local_column_v1"},
+        "contribution_index_order": {"const": "element_index_then_local_row_then_local_column_v1"},
+        "reverse_segment_order": {"const": "csr_slot_then_stable_source_contribution_index_v1"},
+        "structural_zero_segments_retained": {"const": true},
+        "reverse_segment_offsets": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "reverse_contribution_indices": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "reverse_map_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "arrayDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "layout",
+        "byte_length",
+        "data_hash",
+        "content_hash"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "reference_axis_code",
+            "reverse_segment_offsets",
+            "reverse_contribution_indices"
+          ]
+        },
+        "dtype": {"enum": ["|u1", "<i4"]},
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {"$ref": "#/$defs/positiveInt32"}
+        },
+        "layout": {"const": "C"},
+        "byte_length": {"$ref": "#/$defs/positiveInt32"},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "symbolicPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "index_base",
+        "index_dtype",
+        "axis_code_dtype",
+        "csr_numeric_values_present",
+        "described_array_byte_length",
+        "arrays",
+        "symbolic_payload_hash"
+      ],
+      "properties": {
+        "index_base": {"const": 0},
+        "index_dtype": {"const": "<i4"},
+        "axis_code_dtype": {"const": "|u1"},
+        "csr_numeric_values_present": {"const": false},
+        "described_array_byte_length": {"$ref": "#/$defs/positiveInt32"},
+        "arrays": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "prefixItems": [
+            {
+              "allOf": [
+                {"$ref": "#/$defs/arrayDescriptor"},
+                {
+                  "properties": {
+                    "name": {"const": "reference_axis_code"},
+                    "dtype": {"const": "|u1"}
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {"$ref": "#/$defs/arrayDescriptor"},
+                {
+                  "properties": {
+                    "name": {"const": "reverse_segment_offsets"},
+                    "dtype": {"const": "<i4"}
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {"$ref": "#/$defs/arrayDescriptor"},
+                {
+                  "properties": {
+                    "name": {"const": "reverse_contribution_indices"},
+                    "dtype": {"const": "<i4"}
+                  }
+                }
+              ]
+            }
+          ],
+          "items": false
+        },
+        "symbolic_payload_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "claimBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compiler_location",
+        "reverse_compile_complexity",
+        "manifest_serialization_complexity",
+        "contribution_formula",
+        "global_dense_matrix_materialized",
+        "csr_numeric_values_copied_or_described",
+        "hip_execution_performed",
+        "device_allocation_performed",
+        "numerical_assembly_performed",
+        "solver_ready",
+        "end_to_end_O_N_claim",
+        "commercial_solver_parity_claim"
+      ],
+      "properties": {
+        "compiler_location": {"const": "cpu"},
+        "reverse_compile_complexity": {"const": "O(C+Z)_fixed_12x12_scatter"},
+        "manifest_serialization_complexity": {"const": "O(C+Z)_with_high_transient_python_object_memory"},
+        "contribution_formula": {"const": "C=144E"},
+        "global_dense_matrix_materialized": {"const": false},
+        "csr_numeric_values_copied_or_described": {"const": false},
+        "hip_execution_performed": {"const": false},
+        "device_allocation_performed": {"const": false},
+        "numerical_assembly_performed": {"const": false},
+        "solver_ready": {"const": false},
+        "end_to_end_O_N_claim": {"const": false},
+        "commercial_solver_parity_claim": {"const": false}
+      }
+    }
+  }
+}

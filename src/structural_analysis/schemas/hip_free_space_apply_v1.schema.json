@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_free_space_apply_v1.schema.json",
+  "title": "HIP free-space device direction and resident apply receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "capability_profile", "status", "apply_id", "context_id", "opening_context_receipt_hash", "sequence", "direction_generation", "resident_enqueue", "resident_enqueue_receipt_hash", "resident_enqueue_sequence", "evidence_scope", "promotion_eligible", "reason", "telemetry_delta", "claims", "receipt_hash"],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-hip-free-space-apply.v1"},
+    "capability_profile": {"const": "phase0_hip_free_space_device_direction_operator_apply"},
+    "status": {"enum": ["enqueued", "unavailable"]},
+    "apply_id": {"$ref": "#/$defs/hash"}, "context_id": {"$ref": "#/$defs/hash"}, "opening_context_receipt_hash": {"$ref": "#/$defs/hash"},
+    "sequence": {"type": "integer", "minimum": 1},
+    "direction_generation": {"oneOf": [{"type": "null"}, {"type": "integer", "minimum": 1}]},
+    "resident_enqueue": {"oneOf": [{"type": "null"}, {"type": "object"}]},
+    "resident_enqueue_receipt_hash": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/hash"}]},
+    "resident_enqueue_sequence": {"oneOf": [{"type": "null"}, {"type": "integer", "minimum": 1}]},
+    "evidence_scope": {"enum": ["native_hiprtc_free_space_composite", "injected_test_double"]},
+    "promotion_eligible": {"const": false},
+    "reason": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/reason"}]},
+    "telemetry_delta": {"$ref": "#/$defs/delta"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "reason": {"type": "object", "additionalProperties": false, "required": ["code", "detail"], "properties": {"code": {"type": "string", "minLength": 1, "maxLength": 128}, "detail": {"type": "string", "minLength": 1, "maxLength": 512}}},
+    "delta": {"type": "object", "additionalProperties": false, "required": ["producer_launch_attempt_count", "producer_launch_success_count", "resident_launch_attempt_count", "resident_launch_success_count", "gather_launch_attempt_count", "gather_launch_success_count", "h2d_operation_count", "d2h_operation_count", "allocation_count", "sync_count", "fallback_count"], "properties": {"producer_launch_attempt_count": {"type": "integer", "minimum": 0, "maximum": 1}, "producer_launch_success_count": {"type": "integer", "minimum": 0, "maximum": 1}, "resident_launch_attempt_count": {"type": "integer", "minimum": 0, "maximum": 1}, "resident_launch_success_count": {"type": "integer", "minimum": 0, "maximum": 1}, "gather_launch_attempt_count": {"type": "integer", "minimum": 0, "maximum": 1}, "gather_launch_success_count": {"type": "integer", "minimum": 0, "maximum": 1}, "h2d_operation_count": {"const": 0}, "d2h_operation_count": {"const": 0}, "allocation_count": {"const": 0}, "sync_count": {"const": 0}, "fallback_count": {"const": 0}}},
+    "claims": {"type": "object", "additionalProperties": false, "required": ["direction_device_produced", "direction_generation_single_consumed", "resident_residual_jvp_enqueued", "reduced_jvp_gather_enqueued", "completion_fence_observed", "solver_iteration", "fallback_used"], "properties": {"direction_device_produced": {"type": "boolean"}, "direction_generation_single_consumed": {"type": "boolean"}, "resident_residual_jvp_enqueued": {"type": "boolean"}, "reduced_jvp_gather_enqueued": {"type": "boolean"}, "completion_fence_observed": {"const": false}, "solver_iteration": {"const": false}, "fallback_used": {"const": false}}}
+  }
+}

@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_canonical_predecessor_v1.schema.json",
+  "title": "HIP FGMRES canonical predecessor receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "capability_profile", "status", "context_id",
+    "evidence_scope", "actual_backend", "promotion_eligible", "reason",
+    "bindings", "dimensions", "projection", "admitted_mask_domain",
+    "telemetry", "claims", "extensions", "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-canonical-predecessor.v1"
+    },
+    "capability_profile": {
+      "const": "phase0_live_first_column_device_sealed_predecessor"
+    },
+    "status": {
+      "enum": [
+        "context_ready", "predecessor_pending",
+        "fence_observed_ack_pending", "predecessor_fenced",
+        "poisoned_no_work", "poisoned_pending_fence",
+        "poisoned_fence_observed_ack_pending", "poisoned_fenced",
+        "context_closed", "cleanup_failed"
+      ]
+    },
+    "context_id": { "$ref": "#/$defs/hash" },
+    "evidence_scope": {
+      "const": "device_sealed_predecessor_outcome_unobserved_non_promoting"
+    },
+    "actual_backend": { "enum": ["hip", "test_double"] },
+    "promotion_eligible": { "const": false },
+    "reason": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "detail"],
+          "properties": {
+            "code": { "type": "string", "minLength": 1, "maxLength": 128 },
+            "detail": { "type": "string", "minLength": 1, "maxLength": 512 }
+          }
+        }
+      ]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "live_context_id", "live_opening_receipt_hash", "primitive_context_id",
+        "primitive_opening_receipt_hash", "primitive_evidence_scope",
+        "primitive_actual_backend", "source_apply_receipt_hash",
+        "source_state_hash", "recurrence_plan_hash",
+        "recurrence_kernel_abi_hash", "kernel_identity_hash",
+        "kernel_source_sha256", "kernel_origin",
+        "runtime_library_discovery_source", "hiprtc_library_discovery_source",
+        "canonical_schedule_hash",
+        "validator_schedule_hash", "direct_generation_binding_hash",
+        "physical_projection_hash", "primitive_parent_lease_epoch",
+        "solver_child_lease_epoch"
+      ],
+      "properties": {
+        "live_context_id": { "$ref": "#/$defs/hash" },
+        "live_opening_receipt_hash": { "$ref": "#/$defs/hash" },
+        "primitive_context_id": { "$ref": "#/$defs/hash" },
+        "primitive_opening_receipt_hash": { "$ref": "#/$defs/hash" },
+        "primitive_evidence_scope": { "type": "string", "minLength": 1 },
+        "primitive_actual_backend": { "enum": ["hip", "test_double"] },
+        "source_apply_receipt_hash": { "$ref": "#/$defs/hash" },
+        "source_state_hash": { "$ref": "#/$defs/hash" },
+        "recurrence_plan_hash": { "$ref": "#/$defs/hash" },
+        "recurrence_kernel_abi_hash": { "$ref": "#/$defs/hash" },
+        "kernel_identity_hash": { "$ref": "#/$defs/hash" },
+        "kernel_source_sha256": { "$ref": "#/$defs/hash" },
+        "kernel_origin": { "enum": ["internally_compiled", "caller_supplied"] },
+        "runtime_library_discovery_source": { "type": "string", "minLength": 1 },
+        "hiprtc_library_discovery_source": { "type": "string", "minLength": 1 },
+        "canonical_schedule_hash": { "$ref": "#/$defs/hash" },
+        "validator_schedule_hash": { "$ref": "#/$defs/hash" },
+        "direct_generation_binding_hash": { "$ref": "#/$defs/hash" },
+        "physical_projection_hash": { "$ref": "#/$defs/hash" },
+        "primitive_parent_lease_epoch": { "type": "integer", "minimum": 1 },
+        "solver_child_lease_epoch": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "free_dof_count", "reduced_csr_nnz", "restart_dimension",
+        "reduction_stage_count", "persistent_capability_count",
+        "delegated_operator_capability_count",
+        "delegated_workspace_capability_count", "physical_capability_count"
+      ],
+      "properties": {
+        "free_dof_count": { "type": "integer", "minimum": 1 },
+        "reduced_csr_nnz": { "type": "integer", "minimum": 1 },
+        "restart_dimension": { "type": "integer", "minimum": 1, "maximum": 16 },
+        "reduction_stage_count": { "type": "integer", "minimum": 1 },
+        "persistent_capability_count": { "const": 11 },
+        "delegated_operator_capability_count": { "const": 3 },
+        "delegated_workspace_capability_count": { "const": 2 },
+        "physical_capability_count": { "const": 16 }
+      }
+    },
+    "projection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "persistent_roles", "delegated_operator_roles",
+        "delegated_workspace_roles", "runtime_device_bound",
+        "same_stream_bound", "pointer_values_serialized",
+        "additional_allocation_count", "additional_device_bytes"
+      ],
+      "properties": {
+        "persistent_roles": {
+          "const": [
+            "reduced_state", "reduced_load", "jacobi_inverse", "solution_x",
+            "true_residual", "work_w", "basis_v", "preconditioned_basis_z",
+            "packed_dense_state", "fgmres_control_state_v2", "solve_record"
+          ]
+        },
+        "delegated_operator_roles": {
+          "const": [
+            "reduced_csr_row_ptr", "reduced_csr_column_indices",
+            "reduced_csr_values"
+          ]
+        },
+        "delegated_workspace_roles": {
+          "const": ["reduction_ping", "reduction_pong"]
+        },
+        "runtime_device_bound": { "type": "boolean" },
+        "same_stream_bound": { "type": "boolean" },
+        "pointer_values_serialized": { "const": false },
+        "additional_allocation_count": { "const": 0 },
+        "additional_device_bytes": { "const": 0 }
+      }
+    },
+    "admitted_mask_domain": { "const": [0, 1792, 7936] },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "memset_attempt_count", "memset_accept_lower_bound",
+        "memset_accept_upper_bound", "kernel_launch_attempt_count",
+        "kernel_launch_accept_lower_bound", "kernel_launch_accept_upper_bound",
+        "async_operation_attempt_count", "async_operation_accept_lower_bound",
+        "async_operation_accept_upper_bound", "fence_attempt_count",
+        "fence_success_count", "pending_consume_attempt_count",
+        "consumed_operation_count", "h2d_operation_count",
+        "d2h_operation_count", "intermediate_sync_count", "fallback_count"
+      ],
+      "properties": {
+        "memset_attempt_count": { "$ref": "#/$defs/nonnegativeInteger" },
+        "memset_accept_lower_bound": { "$ref": "#/$defs/nonnegativeInteger" },
+        "memset_accept_upper_bound": { "$ref": "#/$defs/nonnegativeInteger" },
+        "kernel_launch_attempt_count": { "$ref": "#/$defs/nonnegativeInteger" },
+        "kernel_launch_accept_lower_bound": { "$ref": "#/$defs/nonnegativeInteger" },
+        "kernel_launch_accept_upper_bound": { "$ref": "#/$defs/nonnegativeInteger" },
+        "async_operation_attempt_count": { "$ref": "#/$defs/nonnegativeInteger" },
+        "async_operation_accept_lower_bound": { "$ref": "#/$defs/nonnegativeInteger" },
+        "async_operation_accept_upper_bound": { "$ref": "#/$defs/nonnegativeInteger" },
+        "fence_attempt_count": { "$ref": "#/$defs/nonnegativeInteger" },
+        "fence_success_count": { "$ref": "#/$defs/nonnegativeInteger" },
+        "pending_consume_attempt_count": { "$ref": "#/$defs/nonnegativeInteger" },
+        "consumed_operation_count": { "$ref": "#/$defs/nonnegativeInteger" },
+        "h2d_operation_count": { "const": 0 },
+        "d2h_operation_count": { "const": 0 },
+        "intermediate_sync_count": { "const": 0 },
+        "fallback_count": { "const": 0 }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_apply_completion_bound", "positive_jacobi_completion_bound",
+        "persistent_parent3_owned8_bound", "delegated_operator_workspace_bound",
+        "same_runtime_device_stream_bound", "owned_content_initialized",
+        "canonical_producer_prefix_fenced", "device_mask_domain_gate_bound",
+        "device_validation_outcome_host_observed", "actual_mask_host_observed",
+        "authoritative_predecessor_proven", "checkpoint_transaction_ready",
+        "invalid_source_destination_atomicity_proven", "live_solver_ready",
+        "solution_ready", "iteration_host_copy_zero_proven",
+        "asymptotic_o_n_proven", "speedup_proven", "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "source_apply_completion_bound": { "type": "boolean" },
+        "positive_jacobi_completion_bound": { "type": "boolean" },
+        "persistent_parent3_owned8_bound": { "type": "boolean" },
+        "delegated_operator_workspace_bound": { "type": "boolean" },
+        "same_runtime_device_stream_bound": { "type": "boolean" },
+        "owned_content_initialized": { "type": "boolean" },
+        "canonical_producer_prefix_fenced": { "type": "boolean" },
+        "device_mask_domain_gate_bound": { "type": "boolean" },
+        "device_validation_outcome_host_observed": { "const": false },
+        "actual_mask_host_observed": { "const": false },
+        "authoritative_predecessor_proven": { "const": false },
+        "checkpoint_transaction_ready": { "const": false },
+        "invalid_source_destination_atomicity_proven": { "const": false },
+        "live_solver_ready": { "const": false },
+        "solution_ready": { "const": false },
+        "iteration_host_copy_zero_proven": { "const": false },
+        "asymptotic_o_n_proven": { "const": false },
+        "speedup_proven": { "const": false },
+        "commercial_ready": { "const": false },
+        "promotion_eligible": { "const": false }
+      }
+    },
+    "extensions": { "type": "object", "maxProperties": 0 },
+    "receipt_hash": { "$ref": "#/$defs/hash" }
+  },
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "nonnegativeInteger": { "type": "integer", "minimum": 0 }
+  }
+}

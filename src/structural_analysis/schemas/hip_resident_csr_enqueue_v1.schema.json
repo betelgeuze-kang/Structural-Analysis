@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_resident_csr_enqueue_v1.schema.json",
+  "title": "HIP resident CSR enqueue receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "capability_profile", "status", "enqueue_id", "context_id", "opening_context_receipt_hash", "operator_id", "state_hash", "state_epoch", "kernel_identity_hash", "sequence", "evidence_scope", "promotion_eligible", "reason", "telemetry_delta", "completion_fence_observed", "residual_jvp_enqueued", "solver_iteration", "receipt_hash"],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-hip-resident-csr-enqueue.v1"},
+    "capability_profile": {"const": "phase0_hiprtc_assembly_resident_csr_residual_jvp_consumer"},
+    "status": {"enum": ["enqueued", "unavailable"]},
+    "enqueue_id": {"$ref": "#/$defs/hash"},
+    "context_id": {"$ref": "#/$defs/hash"},
+    "opening_context_receipt_hash": {"$ref": "#/$defs/hash"},
+    "operator_id": {"type": "string", "pattern": "^HipAssemblyOperator:[0-9a-f]{24}$"},
+    "state_hash": {"$ref": "#/$defs/hash"},
+    "state_epoch": {"type": "integer", "minimum": 0},
+    "kernel_identity_hash": {"$ref": "#/$defs/hash"},
+    "sequence": {"type": "integer", "minimum": 1},
+    "evidence_scope": {"enum": ["native_hiprtc_composite", "injected_test_double"]},
+    "promotion_eligible": {"const": false},
+    "reason": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/reason"}]},
+    "telemetry_delta": {"$ref": "#/$defs/delta"},
+    "completion_fence_observed": {"const": false},
+    "residual_jvp_enqueued": {"type": "boolean"},
+    "solver_iteration": {"const": false},
+    "receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "reason": {"type": "object", "additionalProperties": false, "required": ["code", "detail"], "properties": {"code": {"type": "string", "minLength": 1, "maxLength": 128}, "detail": {"type": "string", "minLength": 1, "maxLength": 512}}},
+    "delta": {
+      "type": "object", "additionalProperties": false,
+      "required": ["h2d_operation_count", "h2d_bytes", "d2h_operation_count", "d2h_bytes", "allocation_count", "sync_count", "kernel_launch_attempt_count", "kernel_launch_success_count", "fallback_count"],
+      "properties": {"h2d_operation_count": {"const": 0}, "h2d_bytes": {"const": 0}, "d2h_operation_count": {"const": 0}, "d2h_bytes": {"const": 0}, "allocation_count": {"const": 0}, "sync_count": {"const": 0}, "kernel_launch_attempt_count": {"type": "integer", "minimum": 0, "maximum": 1}, "kernel_launch_success_count": {"type": "integer", "minimum": 0, "maximum": 1}, "fallback_count": {"const": 0}}
+    }
+  }
+}

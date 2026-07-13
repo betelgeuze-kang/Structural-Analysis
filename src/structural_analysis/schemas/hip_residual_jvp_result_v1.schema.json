@@ -1,0 +1,366 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_residual_jvp_result_v1.schema.json",
+  "title": "Engine v2 HIP canonical-CSR residual/JVP result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "status",
+    "result_id",
+    "context_id",
+    "execution_evidence_kind",
+    "actual_backend",
+    "fallback_policy",
+    "fallback_used",
+    "input_bindings",
+    "evaluation",
+    "outputs",
+    "transfer_delta",
+    "complexity",
+    "claims",
+    "result_hash",
+    "extensions"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-hip-residual-jvp-result.v1"},
+    "capability_profile": {"const": "phase0_hip_canonical_csr_residual_jvp"},
+    "status": {"const": "evaluated"},
+    "result_id": {"$ref": "#/$defs/stableId"},
+    "context_id": {"$ref": "#/$defs/stableId"},
+    "execution_evidence_kind": {"enum": ["native_hip", "test_double"]},
+    "actual_backend": {"enum": ["hip_native", "test_double"]},
+    "fallback_policy": {"const": "forbidden"},
+    "fallback_used": {"const": false},
+    "input_bindings": {"$ref": "#/$defs/inputBindings"},
+    "evaluation": {"$ref": "#/$defs/evaluation"},
+    "outputs": {"$ref": "#/$defs/outputs"},
+    "transfer_delta": {"$ref": "#/$defs/transferDelta"},
+    "complexity": {"$ref": "#/$defs/complexity"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "result_hash": {"$ref": "#/$defs/sha256"},
+    "extensions": {"$ref": "#/$defs/extensions"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"execution_evidence_kind": {"const": "native_hip"}}},
+      "then": {
+        "properties": {
+          "actual_backend": {"const": "hip_native"},
+          "claims": {
+            "properties": {
+              "native_hip_kernel_execution_proven": {"const": true}
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "actual_backend": {"const": "test_double"},
+          "claims": {
+            "properties": {
+              "native_hip_kernel_execution_proven": {"const": false}
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "stableId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]*$"
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "maxProperties": 0
+    },
+    "inputBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "context_receipt_hash",
+        "foundation_context_receipt_hash",
+        "solver_artifact_hash",
+        "execution_plan",
+        "committed_state",
+        "kernel_artifact",
+        "direction"
+      ],
+      "properties": {
+        "context_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "foundation_context_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "solver_artifact_hash": {"$ref": "#/$defs/sha256"},
+        "execution_plan": {"$ref": "#/$defs/executionPlan"},
+        "committed_state": {"$ref": "#/$defs/committedState"},
+        "kernel_artifact": {"$ref": "#/$defs/kernelArtifact"},
+        "direction": {"$ref": "#/$defs/vectorBinding"}
+      }
+    },
+    "executionPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "model_ir_content_hash",
+        "plan_hash",
+        "operator_hash",
+        "pattern_hash",
+        "partition_hash",
+        "dof_count",
+        "free_dof_count",
+        "nnz"
+      ],
+      "properties": {
+        "schema_version": {"const": "structural-analysis-execution-plan.v1"},
+        "model_ir_content_hash": {"$ref": "#/$defs/sha256"},
+        "plan_hash": {"$ref": "#/$defs/sha256"},
+        "operator_hash": {"$ref": "#/$defs/sha256"},
+        "pattern_hash": {"$ref": "#/$defs/sha256"},
+        "partition_hash": {"$ref": "#/$defs/sha256"},
+        "dof_count": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+        "free_dof_count": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+        "nnz": {"type": "integer", "minimum": 1, "maximum": 2147483647}
+      }
+    },
+    "committedState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "role",
+        "state_hash",
+        "displacement_hash",
+        "epoch",
+        "execution_plan_hash",
+        "operator_hash",
+        "dof_count"
+      ],
+      "properties": {
+        "schema_version": {"const": "structural-analysis-state-ir.v1"},
+        "role": {"const": "committed"},
+        "state_hash": {"$ref": "#/$defs/sha256"},
+        "displacement_hash": {"$ref": "#/$defs/sha256"},
+        "epoch": {"type": "integer", "minimum": 0},
+        "execution_plan_hash": {"$ref": "#/$defs/sha256"},
+        "operator_hash": {"$ref": "#/$defs/sha256"},
+        "dof_count": {"type": "integer", "minimum": 1, "maximum": 2147483647}
+      }
+    },
+    "kernelArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "artifact_receipt_hash",
+        "artifact_hash",
+        "source_hash",
+        "library_hash",
+        "abi_hash",
+        "build_target_hash",
+        "entrypoint",
+        "abi_version",
+        "block_size",
+        "targets",
+        "flags",
+        "artifact_kind"
+      ],
+      "properties": {
+        "schema_version": {"const": "structural-analysis-hip-csr-kernel-artifact.v1"},
+        "artifact_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "artifact_hash": {"$ref": "#/$defs/sha256"},
+        "source_hash": {"$ref": "#/$defs/sha256"},
+        "library_hash": {"$ref": "#/$defs/sha256"},
+        "abi_hash": {"$ref": "#/$defs/sha256"},
+        "build_target_hash": {"$ref": "#/$defs/sha256"},
+        "entrypoint": {"const": "engine_v2_hip_csr_launch"},
+        "abi_version": {"const": 1},
+        "block_size": {"const": 256},
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 128}
+        },
+        "flags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 256}
+        },
+        "artifact_kind": {"enum": ["native_hip", "test_double"]}
+      }
+    },
+    "vectorBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dtype", "shape", "byte_length", "data_hash"],
+      "properties": {
+        "dtype": {"const": "<f8"},
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {"type": "integer", "minimum": 1, "maximum": 2147483647}
+        },
+        "byte_length": {"type": "integer", "minimum": 8},
+        "data_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "residual_definition",
+        "jvp_definition",
+        "residual_sign",
+        "jvp_semantics",
+        "load_factor_semantics",
+        "operator_storage",
+        "fused_residual_jvp",
+        "kernel_entrypoint",
+        "kernel_launch_count",
+        "dof_count",
+        "direction_dof_count",
+        "nnz_count"
+      ],
+      "properties": {
+        "residual_definition": {"const": "K_times_u_minus_F"},
+        "jvp_definition": {"const": "K_times_v"},
+        "residual_sign": {"const": "internal_minus_external"},
+        "jvp_semantics": {"const": "linear_preassembled_K_times_v"},
+        "load_factor_semantics": {
+          "const": "plan_global_load_unscaled_phase0"
+        },
+        "operator_storage": {"const": "canonical_full_dof_csr"},
+        "fused_residual_jvp": {"const": true},
+        "kernel_entrypoint": {"const": "engine_v2_hip_csr_launch"},
+        "kernel_launch_count": {"const": 1},
+        "dof_count": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+        "direction_dof_count": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+        "nnz_count": {"type": "integer", "minimum": 1, "maximum": 2147483647}
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "layout",
+        "residual",
+        "jvp"
+      ],
+      "properties": {
+        "layout": {"const": "C"},
+        "residual": {"$ref": "#/$defs/vectorBinding"},
+        "jvp": {"$ref": "#/$defs/vectorBinding"}
+      }
+    },
+    "transferDelta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "h2d_operation_attempt_count",
+        "h2d_operation_success_count",
+        "h2d_operation_count",
+        "h2d_bytes_attempted",
+        "h2d_bytes_succeeded",
+        "h2d_bytes",
+        "d2h_operation_attempt_count",
+        "d2h_operation_success_count",
+        "d2h_operation_count",
+        "d2h_bytes_attempted",
+        "d2h_bytes_succeeded",
+        "d2h_bytes",
+        "explicit_sync_attempt_count",
+        "explicit_sync_success_count",
+        "explicit_sync_count",
+        "kernel_launch_attempt_count",
+        "kernel_launch_success_count",
+        "kernel_launch_count",
+        "blocking_copy_count",
+        "fallback_count"
+      ],
+      "properties": {
+        "h2d_operation_attempt_count": {"const": 1},
+        "h2d_operation_success_count": {"const": 1},
+        "h2d_operation_count": {"const": 1},
+        "h2d_bytes_attempted": {"type": "integer", "minimum": 8},
+        "h2d_bytes_succeeded": {"type": "integer", "minimum": 8},
+        "h2d_bytes": {"type": "integer", "minimum": 8},
+        "d2h_operation_attempt_count": {"const": 2},
+        "d2h_operation_success_count": {"const": 2},
+        "d2h_operation_count": {"const": 2},
+        "d2h_bytes_attempted": {"type": "integer", "minimum": 16},
+        "d2h_bytes_succeeded": {"type": "integer", "minimum": 16},
+        "d2h_bytes": {"type": "integer", "minimum": 16},
+        "explicit_sync_attempt_count": {"const": 1},
+        "explicit_sync_success_count": {"const": 1},
+        "explicit_sync_count": {"const": 1},
+        "kernel_launch_attempt_count": {"const": 1},
+        "kernel_launch_success_count": {"const": 1},
+        "kernel_launch_count": {"const": 1},
+        "blocking_copy_count": {"const": 0},
+        "fallback_count": {"const": 0}
+      }
+    },
+    "complexity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "time_complexity",
+        "auxiliary_device_space_complexity",
+        "csr_nonzero_visit_count",
+        "row_visit_count",
+        "multiply_count",
+        "load_subtraction_count",
+        "dense_operator_materialized",
+        "proof_scope"
+      ],
+      "properties": {
+        "time_complexity": {"const": "O(nnz)"},
+        "auxiliary_device_space_complexity": {"const": "O(n_dof)"},
+        "csr_nonzero_visit_count": {"type": "integer", "minimum": 1},
+        "row_visit_count": {"type": "integer", "minimum": 1},
+        "multiply_count": {"type": "integer", "minimum": 1},
+        "load_subtraction_count": {"type": "integer", "minimum": 1},
+        "dense_operator_materialized": {"const": false},
+        "proof_scope": {"const": "exact_single_fused_csr_residual_jvp_evaluation"}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonical_csr_operator_executed",
+        "fused_single_kernel_launch_proven",
+        "residual_jvp_evaluation_proven",
+        "native_hip_kernel_execution_proven",
+        "device_constitutive_assembly_proven",
+        "solver_ready",
+        "newton_ready",
+        "krylov_ready",
+        "cpu_hip_global_parity_proven",
+        "commercial_readiness"
+      ],
+      "properties": {
+        "canonical_csr_operator_executed": {"const": true},
+        "fused_single_kernel_launch_proven": {"const": true},
+        "residual_jvp_evaluation_proven": {"const": true},
+        "native_hip_kernel_execution_proven": {"type": "boolean"},
+        "device_constitutive_assembly_proven": {"const": false},
+        "solver_ready": {"const": false},
+        "newton_ready": {"const": false},
+        "krylov_ready": {"const": false},
+        "cpu_hip_global_parity_proven": {"const": false},
+        "commercial_readiness": {"const": false}
+      }
+    }
+  }
+}

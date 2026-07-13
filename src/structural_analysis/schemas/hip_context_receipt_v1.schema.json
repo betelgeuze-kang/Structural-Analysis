@@ -1,0 +1,291 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_context_receipt_v1.schema.json",
+  "title": "Engine v2 HIP DeviceExecutionContext v1 receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "status",
+    "context_id",
+    "requested_backend",
+    "actual_backend",
+    "fallback_policy",
+    "fallback_used",
+    "reason",
+    "capability_receipt_hash",
+    "solver_model_buffers",
+    "device",
+    "buffer_views",
+    "telemetry",
+    "claims",
+    "context_receipt_hash",
+    "extensions"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-hip-context-receipt.v1"},
+    "capability_profile": {"const": "phase0_hip_model_buffer_context_foundation"},
+    "status": {"enum": ["context_ready", "context_closed", "unavailable"]},
+    "context_id": {"$ref": "#/$defs/stableId"},
+    "requested_backend": {"const": "hip"},
+    "actual_backend": {"type": ["string", "null"], "enum": ["hip", null]},
+    "fallback_policy": {"const": "forbidden"},
+    "fallback_used": {"const": false},
+    "reason": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/reason"}
+      ]
+    },
+    "capability_receipt_hash": {"$ref": "#/$defs/sha256"},
+    "solver_model_buffers": {"$ref": "#/$defs/bufferBinding"},
+    "device": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/device"}
+      ]
+    },
+    "buffer_views": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {"$ref": "#/$defs/bufferView"}
+    },
+    "telemetry": {"$ref": "#/$defs/telemetry"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "context_receipt_hash": {"$ref": "#/$defs/sha256"},
+    "extensions": {"$ref": "#/$defs/extensions"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "context_ready"}}},
+      "then": {
+        "properties": {
+          "actual_backend": {"const": "hip"},
+          "reason": {"type": "null"},
+          "device": {"$ref": "#/$defs/device"},
+          "buffer_views": {"minItems": 16, "maxItems": 16},
+          "claims": {
+            "properties": {"model_buffers_device_resident": {"const": true}}
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "context_closed"}}},
+      "then": {
+        "properties": {
+          "actual_backend": {"const": "hip"},
+          "reason": {"type": "null"},
+          "device": {"$ref": "#/$defs/device"},
+          "buffer_views": {"minItems": 16, "maxItems": 16},
+          "claims": {
+            "properties": {"model_buffers_device_resident": {"const": false}}
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "unavailable"}}},
+      "then": {
+        "properties": {
+          "actual_backend": {"type": "null"},
+          "reason": {"$ref": "#/$defs/reason"},
+          "buffer_views": {"maxItems": 0},
+          "claims": {
+            "properties": {"model_buffers_device_resident": {"const": false}}
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]*$"
+    },
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "extensions": {
+      "type": "object",
+      "propertyNames": {"pattern": "^[a-z][a-z0-9_.-]*:[A-Za-z0-9_.-]+$"},
+      "additionalProperties": true
+    },
+    "reason": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "detail"],
+      "properties": {
+        "code": {
+          "enum": [
+            "hip_native_library_missing",
+            "hip_native_abi_mismatch",
+            "hip_runtime_init_failed",
+            "hip_no_device",
+            "hip_device_ordinal_invalid",
+            "hip_device_access_failed",
+            "hip_allocation_failed",
+            "hip_copy_failed",
+            "hip_memory_budget_exceeded"
+          ]
+        },
+        "detail": {"type": "string", "minLength": 1, "maxLength": 512}
+      }
+    },
+    "bufferBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "model_ir_content_hash",
+        "load_pattern_id",
+        "numeric_buffer_hash",
+        "entity_mapping_hash",
+        "artifact_hash"
+      ],
+      "properties": {
+        "schema_version": {"const": "structural-analysis-solver-model-buffers.v1"},
+        "model_ir_content_hash": {"$ref": "#/$defs/sha256"},
+        "load_pattern_id": {"$ref": "#/$defs/stableId"},
+        "numeric_buffer_hash": {"$ref": "#/$defs/sha256"},
+        "entity_mapping_hash": {"$ref": "#/$defs/sha256"},
+        "artifact_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "device": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ordinal",
+        "name",
+        "architecture",
+        "runtime_version_raw",
+        "driver_version_raw",
+        "total_memory_bytes",
+        "free_memory_bytes_before_upload",
+        "free_memory_bytes_after_upload"
+      ],
+      "properties": {
+        "ordinal": {"type": "integer", "minimum": 0},
+        "name": {"type": "string", "minLength": 1},
+        "architecture": {"type": ["string", "null"]},
+        "runtime_version_raw": {"type": "integer", "minimum": 1},
+        "driver_version_raw": {"type": "integer", "minimum": 1},
+        "total_memory_bytes": {"type": "integer", "minimum": 1},
+        "free_memory_bytes_before_upload": {"type": "integer", "minimum": 0},
+        "free_memory_bytes_after_upload": {"type": "integer", "minimum": 0}
+      }
+    },
+    "bufferView": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "layout",
+        "byte_length",
+        "data_hash",
+        "content_hash",
+        "memory_space",
+        "device_ordinal",
+        "access",
+        "initial_transfer"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "element_connectivity",
+            "element_formulation_code",
+            "element_local_axis_rotation_rad",
+            "element_material_index",
+            "element_offsets_m",
+            "element_release_mask",
+            "element_section_index",
+            "element_type",
+            "load_vector_si",
+            "material_law_code",
+            "material_properties_si",
+            "node_coordinates_m",
+            "prescribed_values_si",
+            "section_family_code",
+            "section_properties_si",
+            "support_mask"
+          ]
+        },
+        "dtype": {"enum": ["<f8", "<i4", "|u1"]},
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {"type": "integer", "minimum": 1}
+        },
+        "layout": {"const": "C"},
+        "byte_length": {"type": "integer", "minimum": 1},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"},
+        "memory_space": {"const": "hip_device"},
+        "device_ordinal": {"type": "integer", "minimum": 0},
+        "access": {"const": "read_only"},
+        "initial_transfer": {"const": "async_h2d_then_explicit_sync"}
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "h2d_bytes",
+        "d2h_bytes",
+        "h2d_operation_count",
+        "d2h_operation_count",
+        "blocking_copy_count",
+        "explicit_sync_count",
+        "allocation_count",
+        "deallocation_count",
+        "current_device_payload_bytes",
+        "peak_device_payload_bytes",
+        "kernel_launch_count",
+        "fallback_count"
+      ],
+      "properties": {
+        "h2d_bytes": {"type": "integer", "minimum": 0},
+        "d2h_bytes": {"type": "integer", "minimum": 0},
+        "h2d_operation_count": {"type": "integer", "minimum": 0},
+        "d2h_operation_count": {"type": "integer", "minimum": 0},
+        "blocking_copy_count": {"type": "integer", "minimum": 0},
+        "explicit_sync_count": {"type": "integer", "minimum": 0},
+        "allocation_count": {"type": "integer", "minimum": 0},
+        "deallocation_count": {"type": "integer", "minimum": 0},
+        "current_device_payload_bytes": {"type": "integer", "minimum": 0},
+        "peak_device_payload_bytes": {"type": "integer", "minimum": 0},
+        "kernel_launch_count": {"const": 0},
+        "fallback_count": {"const": 0}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_buffers_device_resident",
+        "operator_bound",
+        "state_bound",
+        "residual_jvp_ready",
+        "solver_ready",
+        "device_resident_newton_krylov",
+        "cpu_hip_parity_proven",
+        "commercial_readiness"
+      ],
+      "properties": {
+        "model_buffers_device_resident": {"type": "boolean"},
+        "operator_bound": {"const": false},
+        "state_bound": {"const": false},
+        "residual_jvp_ready": {"const": false},
+        "solver_ready": {"const": false},
+        "device_resident_newton_krylov": {"const": false},
+        "cpu_hip_parity_proven": {"const": false},
+        "commercial_readiness": {"const": false}
+      }
+    }
+  }
+}

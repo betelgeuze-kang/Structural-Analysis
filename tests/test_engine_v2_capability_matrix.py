@@ -1,0 +1,619 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+MATRIX_PATH = REPO_ROOT / "validation/capabilities/engine_v2_capability_matrix.json"
+
+
+def test_engine_v2_capability_matrix_keeps_implementation_and_promotion_separate() -> (
+    None
+):
+    payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    rows = payload["rows"]
+    implementation_states = set(payload["allowed_implementation_states"])
+    promotion_states = set(payload["allowed_promotion_states"])
+
+    assert (
+        payload["schema_version"]
+        == "structural-analysis-engine-v2-capability-matrix.v1"
+    )
+    assert (
+        payload["claim_boundary"]
+        == "future_state_tracker_not_release_readiness_evidence"
+    )
+    assert len({row["capability_id"] for row in rows}) == len(rows)
+    assert all(row["implementation_state"] in implementation_states for row in rows)
+    assert all(row["promotion_state"] in promotion_states for row in rows)
+    assert all(row["claim_level"] != "full_commercial" for row in rows)
+
+    for row in rows:
+        required = {
+            "capability_id",
+            "category",
+            "phase_target",
+            "implementation_state",
+            "promotion_state",
+            "supported_scope",
+            "explicit_exclusions",
+            "required_contracts",
+            "verification_cases",
+            "evidence_paths",
+            "claim_level",
+        }
+        assert required.issubset(row)
+        if row["promotion_state"] != "unavailable":
+            assert row["evidence_paths"], row["capability_id"]
+        for relative_path in row["evidence_paths"]:
+            assert (REPO_ROOT / relative_path).exists(), relative_path
+
+
+def test_engine_v2_adr_index_contains_every_required_contract() -> None:
+    payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    adr_index = (REPO_ROOT / "docs/adr/README.md").read_text(encoding="utf-8")
+    required_contracts = {
+        contract for row in payload["rows"] for contract in row["required_contracts"]
+    }
+
+    assert required_contracts == {f"ADR-{index:03d}" for index in range(1, 8)}
+    for contract in sorted(required_contracts):
+        assert contract in adr_index
+
+
+def test_engine_v2_ai_rows_keep_shadow_memory_and_learning_claims_separate() -> None:
+    payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    rows = {row["capability_id"]: row for row in payload["rows"]}
+
+    proposal = rows["ai_correction_proposal_physics_gate_shadow_v1"]
+    assert proposal["implementation_state"] == "implemented"
+    assert proposal["promotion_state"] == "shadow"
+    assert "proposal_consumed_by_solver" in proposal["explicit_exclusions"]
+    assert "solver_speedup" in proposal["explicit_exclusions"]
+
+    memory = rows["solver_approved_fixed_rank_qr_memory_v1"]
+    assert memory["implementation_state"] == "implemented"
+    assert memory["promotion_state"] == "contract_only"
+    assert "online_parameter_learning" in memory["explicit_exclusions"]
+
+    learning = rows["no_backprop_local_learning"]
+    assert learning["implementation_state"] == "in_progress"
+    assert learning["promotion_state"] == "unavailable"
+    assert "online_learning_claim" in learning["explicit_exclusions"]
+
+
+def test_engine_v2_hip_rows_separate_artifact_replay_and_native_parity() -> None:
+    payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    rows = {row["capability_id"]: row for row in payload["rows"]}
+
+    artifact = rows["hip_canonical_csr_aot_kernel_artifact_v1"]
+    assert artifact["implementation_state"] == "implemented"
+    assert artifact["promotion_state"] == "contract_only"
+    assert "native_kernel_execution_receipt" in artifact["explicit_exclusions"]
+    assert "performance_or_speedup_claim" in artifact["explicit_exclusions"]
+
+    replay = rows["hip_canonical_csr_residual_jvp_replay_v1"]
+    assert replay["implementation_state"] == "implemented"
+    assert replay["promotion_state"] == "contract_only"
+    assert "test_double_native_evidence_separation" in replay["supported_scope"]
+    assert "global_cpu_hip_parity" in replay["explicit_exclusions"]
+
+    native = rows["hip_native_csr_residual_jvp_parity"]
+    assert native["implementation_state"] == "in_progress"
+    assert native["promotion_state"] == "unavailable"
+    assert "test_double_as_native_evidence" in native["explicit_exclusions"]
+
+    assembly = rows["hip_device_linear_frame_truss_assembly_v1"]
+    assert assembly["implementation_state"] == "implemented"
+    assert assembly["promotion_state"] == "contract_only"
+    assert "host_csr_numeric_h2d_forbidden" in assembly["supported_scope"]
+    assert "unsigned_v1_forced_non_promoting" in assembly["supported_scope"]
+    assert (
+        "fresh_native_gpu_frame_truss_numerical_launch_parity"
+        in assembly["explicit_exclusions"]
+    )
+    assert "device_krylov_or_preconditioner" in assembly["explicit_exclusions"]
+    assert "end_to_end_on_complexity" in assembly["explicit_exclusions"]
+    assert "commercial_readiness" in assembly["explicit_exclusions"]
+    assert (
+        assembly["claim_level"]
+        == "device_assembly_contract_and_hiprtc_compile_only_fresh_native_launch_unavailable"
+    )
+
+    resident = rows["hip_assembly_resident_csr_residual_jvp_consumer_v1"]
+    assert resident["implementation_state"] == "implemented"
+    assert resident["promotion_state"] == "contract_only"
+    assert (
+        "borrowed_device_csr_row_column_values_without_reallocation"
+        in resident["supported_scope"]
+    )
+    assert "borrowed_foundation_load_without_reupload" in resident["supported_scope"]
+    assert (
+        "zero_transfer_allocation_sync_enqueue_after_direction_producer"
+        in resident["supported_scope"]
+    )
+    assert "public_device_direction_producer_token" in resident["explicit_exclusions"]
+    assert "device_krylov_or_preconditioner" in resident["explicit_exclusions"]
+    assert "iteration_host_copy_zero" in resident["explicit_exclusions"]
+    assert "end_to_end_on_complexity" in resident["explicit_exclusions"]
+    assert "commercial_readiness" in resident["explicit_exclusions"]
+    assert (
+        resident["claim_level"]
+        == "same_stream_resident_csr_consumer_contract_test_double_parity_native_hardware_unavailable"
+    )
+
+
+def test_engine_v2_rtc_backend_records_native_parity_without_promotion() -> None:
+    payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    rows = {row["capability_id"]: row for row in payload["rows"]}
+
+    rtc = rows["hip_rtc_canonical_csr_residual_jvp_v1"]
+    assert rtc["implementation_state"] == "implemented"
+    assert rtc["promotion_state"] == "contract_only"
+    assert (
+        "native_gfx1030_full_free_constrained_fp64_parity" in (rtc["supported_scope"])
+    )
+    assert "unsigned_v1_forced_non_promoting" in rtc["supported_scope"]
+    assert "signed_promotion_evidence" in rtc["explicit_exclusions"]
+    assert "measured_complexity_slope" in rtc["explicit_exclusions"]
+
+    scaling = rows["hip_rtc_fixed_degree3_kernel_scaling_v1"]
+    assert scaling["implementation_state"] == "implemented"
+    assert scaling["promotion_state"] == "non_promoting"
+    assert (
+        "measured_fixed_degree3_kernel_only_near_linear_scaling"
+        in (scaling["supported_scope"])
+    )
+    assert "end_to_end_on_complexity" in scaling["explicit_exclusions"]
+    assert "linear_or_nonlinear_solver" in scaling["explicit_exclusions"]
+    assert "signed_promotion_evidence" in scaling["explicit_exclusions"]
+
+
+def test_engine_v2_sparse_v2_stays_a_bounded_cpu_foundation() -> None:
+    payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    rows = {row["capability_id"]: row for row in payload["rows"]}
+
+    sparse = rows["sparse_execution_plan_v2_cpu_direct_csr"]
+    assert sparse["implementation_state"] == "implemented"
+    assert sparse["promotion_state"] == "contract_only"
+    assert "global_dense_stiffness_materialization_zero" in sparse["supported_scope"]
+    assert "support_mask_partition_rederivation" in sparse["supported_scope"]
+    assert "state_ir_or_result_ir_receipt_chain" in sparse["explicit_exclusions"]
+    assert "device_resident_krylov_or_preconditioner" in sparse["explicit_exclusions"]
+    assert "sparse_direct_or_end_to_end_on_complexity" in sparse["explicit_exclusions"]
+
+
+def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None:
+    payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    rows = {row["capability_id"]: row for row in payload["rows"]}
+
+    fgmres = rows["cpu_fixed_restart_fgmres_reference_v1"]
+    assert fgmres["implementation_state"] == "implemented"
+    assert fgmres["promotion_state"] == "cpu_reference"
+    assert "actual_initial_residual_b_minus_a_x0" in fgmres["supported_scope"]
+    assert (
+        "mandatory_deterministic_full_recurrence_validation"
+        in (fgmres["supported_scope"])
+    )
+    assert "hip_or_hiprtc_execution" in fgmres["explicit_exclusions"]
+    assert "iteration_host_copy_zero" in fgmres["explicit_exclusions"]
+    assert "end_to_end_on_complexity" in fgmres["explicit_exclusions"]
+    assert "commercial_readiness" in fgmres["explicit_exclusions"]
+
+    hip_plan = rows["hip_fixed_restart_fgmres_allocation_policy_plan_v1"]
+    assert hip_plan["implementation_state"] == "implemented"
+    assert hip_plan["promotion_state"] == "contract_only"
+    assert (
+        "seven_borrowed_and_nine_owned_physical_device_buffer_extents"
+        in (hip_plan["supported_scope"])
+    )
+    assert "hiprtc_fgmres_recurrence_execution" in hip_plan["explicit_exclusions"]
+    assert "iteration_host_copy_zero" in hip_plan["explicit_exclusions"]
+    assert "commercial_readiness" in hip_plan["explicit_exclusions"]
+
+    rtc_substrate = rows["hip_fgmres_seven_symbol_rtc_substrate_v1"]
+    assert rtc_substrate["implementation_state"] == "implemented"
+    assert rtc_substrate["promotion_state"] == "contract_only"
+    assert (
+        "package_owned_fixed_seven_symbol_hiprtc_source"
+        in (rtc_substrate["supported_scope"])
+    )
+    assert (
+        "native_gfx1030_hiprtc_compile_and_seven_symbol_inspection"
+        in (rtc_substrate["supported_scope"])
+    )
+    assert "arnoldi_mgs_or_dgks_recurrence" in (rtc_substrate["explicit_exclusions"])
+    assert (
+        "authoritative_solver_completion_or_solution_receipt"
+        in (rtc_substrate["explicit_exclusions"])
+    )
+    assert (
+        "native_gpu_numerical_execution_or_cpu_hip_recurrence_parity"
+        in (rtc_substrate["explicit_exclusions"])
+    )
+    assert "iteration_host_copy_zero" in rtc_substrate["explicit_exclusions"]
+    assert "commercial_readiness" in rtc_substrate["explicit_exclusions"]
+
+    recurrence_plan_v2 = rows["hip_fgmres_recurrence_allocation_control_plan_v2"]
+    assert recurrence_plan_v2["implementation_state"] == "implemented"
+    assert recurrence_plan_v2["promotion_state"] == "contract_only"
+    assert (
+        "seven_borrowed_and_ten_owned_device_buffer_extents"
+        in (recurrence_plan_v2["supported_scope"])
+    )
+    assert (
+        "hashed_initial_mode_schedule_and_reduction_target_stage_compatibility"
+        in (recurrence_plan_v2["supported_scope"])
+    )
+    assert (
+        "hashed_first_column_partial_schedule_through_device_dgks_decide"
+        in (recurrence_plan_v2["supported_scope"])
+    )
+    assert (
+        "hashed_first_column_completion_schedule_through_normalize_v_next_and_arnoldi_givens"
+        in recurrence_plan_v2["supported_scope"]
+    )
+    assert (
+        "hashed_first_column_candidate_preparation_schedule_through_vector_accept"
+        in recurrence_plan_v2["supported_scope"]
+    )
+    assert (
+        "candidate_preparation_schedule_hash_sha256_8df0561cf0988539ed8718dc7348a1e2a85c86f474056ca156c8b8c6d5bb1aec"
+        in recurrence_plan_v2["supported_scope"]
+    )
+    assert (
+        "candidate_residual_schedule_hash_sha256_c2c74ad20a4b881ad209a632d021cbf368d8ae042bca5f161e82cb0bae9c4ad3"
+        in recurrence_plan_v2["supported_scope"]
+    )
+    assert (
+        "candidate_scale_metrics_schedule_hash_sha256_1bc8a32247ad2255cc5953f525f67b1991a62ffb9f6ca6bf299a898c11468ba8"
+        in recurrence_plan_v2["supported_scope"]
+    )
+    assert (
+        "checkpoint_transaction_schedule_hash_sha256_2423da989b6cd419b7c4bef46d6c76f2120825a0c840cb516803bb2643ca11e5"
+        in recurrence_plan_v2["supported_scope"]
+    )
+    assert {
+        "checkpoint_nonadvancing_source_preflight_mode9_and_state3_ticket_contract",
+        "checkpoint_legacy_zero_to_three_to_zero_and_sealed_two_to_three_to_zero_lifecycle",
+        "checkpoint_source_preflight_destination_access_zero_and_no_new_f_workspace",
+        "checkpoint_invalid_source_failure_status_code47_error_bit4_origin2_destination_preservation_contract",
+        "checkpoint_fixed_four_row_parallel_o_f_preflight_without_product_h2d_d2h_sync_or_fallback",
+    }.issubset(recurrence_plan_v2["supported_scope"])
+    assert (
+        "checkpoint_finalizer_only_restart_row_and_result_metric_header_publish_contract"
+        in recurrence_plan_v2["supported_scope"]
+    )
+    assert (
+        "checkpoint_pre_finalizer_numerical_failure_terminal_status_code_error_header_only"
+        in recurrence_plan_v2["supported_scope"]
+    )
+    assert (
+        "conditional_second_dgks_claim_only_false_path_and_h_next_target_contract"
+        in (recurrence_plan_v2["supported_scope"])
+    )
+    assert (
+        "device_allocation_or_kernel_execution"
+        in (recurrence_plan_v2["explicit_exclusions"])
+    )
+
+    initial_rtc_v2 = rows["hip_fgmres_initial_recurrence_rtc_v2"]
+    assert initial_rtc_v2["implementation_state"] == "implemented"
+    assert initial_rtc_v2["promotion_state"] == "contract_only"
+    assert (
+        "native_gfx1030_f513_initial_numerical_gpu_tree_parity"
+        in (initial_rtc_v2["supported_scope"])
+    )
+    assert (
+        "native_duplicate_reduction_epoch_fail_closed_without_hang"
+        in (initial_rtc_v2["supported_scope"])
+    )
+    assert (
+        "single_pending_stream_recurrence_enforcement"
+        in (initial_rtc_v2["supported_scope"])
+    )
+    assert (
+        "device_dot_accept_y0_h00_accumulation_and_strict_dgks_decision"
+        in (initial_rtc_v2["supported_scope"])
+    )
+    assert (
+        "device_conditional_second_dgks_dot_and_mgs_with_false_path_epoch_claim_only"
+        in initial_rtc_v2["supported_scope"]
+    )
+    assert (
+        "device_h_next_lassq_tau_two_to_minus_46_v1_normalization_and_canonical_positive_zero_breakdown"
+        in initial_rtc_v2["supported_scope"]
+    )
+    assert (
+        "device_signed_incremental_givens_candidate_reason_state_and_successful_counters"
+        in (initial_rtc_v2["supported_scope"])
+    )
+    assert (
+        "device_column0_scale_relative_backsolve_gated_trial_update_l2_and_vector_accept"
+        in initial_rtc_v2["supported_scope"]
+    )
+    assert (
+        "candidate_false_and_triangular_breakdown_followup_claim_only_without_candidate_numeric_publish"
+        in initial_rtc_v2["supported_scope"]
+    )
+    assert (
+        "combined_kernel_abi_hash_sha256_31fbff2fa25c221a99f28e170818990a8ed71211169d239e05d28628941941c9"
+        in initial_rtc_v2["supported_scope"]
+    )
+    assert (
+        "fixed_source_hash_sha256_34049a08119b19382c26fbe310f957d7af9c41db037dfcbab521828732025e9b"
+        in initial_rtc_v2["supported_scope"]
+    )
+    assert (
+        "checkpoint_transaction_schedule_hash_sha256_d9b9115287e3b5839096e3f4417c04899ffc7592864483d918be55deaf4b4442"
+        in initial_rtc_v2["supported_scope"]
+    )
+    assert (
+        "raw_checkpoint_launch_owner_only_not_authoritative_transaction_owner"
+        in initial_rtc_v2["supported_scope"]
+    )
+    assert (
+        "checkpoint_v0_2_15_validation_plan58_rtc57_oracle95_focused222_hardware12_fgmres289_broad1019"
+        in initial_rtc_v2["supported_scope"]
+    )
+    assert (
+        "checkpoint_numerical_failure_status_code_error_header_without_result_metric_or_row_publish"
+        in initial_rtc_v2["supported_scope"]
+    )
+    assert (
+        "device_only_active_cycle_end_dual_gate_invariant_strict_divergence_priority_predicate"
+        in initial_rtc_v2["supported_scope"]
+    )
+    assert (
+        "native_gfx1030_f513_dgks_true_false_and_exact_happy_breakdown_through_givens_gpu_tree_parity"
+        in initial_rtc_v2["verification_cases"]
+    )
+    assert (
+        "authoritative_checkpoint_transaction"
+        in (initial_rtc_v2["explicit_exclusions"])
+    )
+    assert (
+        "authoritative_rtc_transaction_owner" in initial_rtc_v2["explicit_exclusions"]
+    )
+    assert (
+        "invalid_source_multiblock_commit_all_or_nothing_proof"
+        in initial_rtc_v2["explicit_exclusions"]
+    )
+    assert (
+        "shifted_or_range_overlap_raw_pointer_validation"
+        in initial_rtc_v2["explicit_exclusions"]
+    )
+    assert (
+        "same_buffer_three_launch_atomic_enqueue_and_state_tracking"
+        in initial_rtc_v2["explicit_exclusions"]
+    )
+    assert (
+        "native_duplicate_checkpoint_decide_commit_finalize_policy"
+        in initial_rtc_v2["explicit_exclusions"]
+    )
+    assert "later_columns_or_restarts" in initial_rtc_v2["explicit_exclusions"]
+    assert "iteration_host_copy_zero" in initial_rtc_v2["explicit_exclusions"]
+    assert "commercial_readiness" in initial_rtc_v2["explicit_exclusions"]
+
+    checkpoint_context = rows["hip_fgmres_checkpoint_transaction_context_v2"]
+    assert checkpoint_context["implementation_state"] == "implemented"
+    assert checkpoint_context["promotion_state"] == "contract_only"
+    assert (
+        "caller_attested_valid_predecessor_non_promoting_scope"
+        in checkpoint_context["supported_scope"]
+    )
+    assert (
+        "exact_eleven_role_f64_u8_allocation_extents"
+        in checkpoint_context["supported_scope"]
+    )
+    assert (
+        "conservative_process_native_runtime_domain_per_device_ordinal"
+        in checkpoint_context["supported_scope"]
+    )
+    assert (
+        "loader_minted_runtime_and_read_only_library_identity"
+        in checkpoint_context["supported_scope"]
+    )
+    assert (
+        "private_dlsym_fresh_fixed_cfunctype_prototypes_isolated_from_public_ctypes_mutation"
+        in checkpoint_context["supported_scope"]
+    )
+    assert (
+        "actual_hip_get_device_module_lease_launch_fence_consume_authority_and_close_checks"
+        in checkpoint_context["supported_scope"]
+    )
+    assert (
+        "one_queue_lock_decide_commit_finalize_same_stream_submission"
+        in checkpoint_context["supported_scope"]
+    )
+    for fixed_evidence in (
+        "v0_2_16_historical_checkpoint_context_source_hash_sha256_52d95b7a57a9c851c52fa8012047e2399e84e8da65cb686346f1ab2694cc2f23",
+        "v0_2_16_historical_raw_rtc_python_source_hash_sha256_d6e312fba83d60c87dedc10aa5b8c0525cb1715b4beb5980df9b0f9dc40e7f59",
+        "v0_2_16_historical_hip_native_binding_source_hash_sha256_35dad9d9a303d71ffef975e99247dc1ca08f1bfa7a871bf67746a75f3225a59e",
+        "v0_2_16_historical_hip_context_binding_source_hash_sha256_de916fe1a41a7aedec49fe1170fe8153fa75babc4d644ac0c27a974dd03f554e",
+        "v0_2_16_historical_checkpoint_context246_raw_rtc60_combined_hip_context258_fgmres538_broad1268_hardware12_validation",
+    ):
+        assert fixed_evidence in checkpoint_context["supported_scope"]
+    assert (
+        "authoritative_predecessor_producer_receipt"
+        in checkpoint_context["explicit_exclusions"]
+    )
+    assert (
+        "live_parent_resource_context_not_bound_into_this_caller_attested_transaction"
+        in checkpoint_context["explicit_exclusions"]
+    )
+    assert (
+        "live_allocator_resource_context_not_bound_into_this_caller_attested_transaction"
+        in checkpoint_context["explicit_exclusions"]
+    )
+    assert (
+        "invalid_source_multiblock_commit_all_or_nothing_proof"
+        in checkpoint_context["explicit_exclusions"]
+    )
+    assert "later_columns_or_restarts" in checkpoint_context["explicit_exclusions"]
+    assert (
+        "adversarial_runtime_library_path_to_loaded_mapping_toctou_or_amd_signature_attestation"
+        in checkpoint_context["explicit_exclusions"]
+    )
+    assert "iteration_host_copy_zero" in checkpoint_context["explicit_exclusions"]
+    assert "commercial_readiness" in checkpoint_context["explicit_exclusions"]
+
+    live_resources = rows["hip_fgmres_live_checkpoint_resource_context_v1"]
+    assert live_resources["implementation_state"] == "implemented"
+    assert live_resources["promotion_state"] == "contract_only"
+    assert (
+        "exact_krylov_parent_three_capability_binding"
+        in live_resources["supported_scope"]
+    )
+    assert (
+        "fresh_exclusive_solver_owned_eight_allocation_owner"
+        in live_resources["supported_scope"]
+    )
+    assert "exact_eleven_capability_atomic_borrow" in live_resources["supported_scope"]
+    assert "semantic_last_reverse_cleanup" in live_resources["supported_scope"]
+    assert (
+        "owned_device_content_initialization" in live_resources["explicit_exclusions"]
+    )
+    assert "authoritative_predecessor" in live_resources["explicit_exclusions"]
+    assert "device_mask_domain_validation" in live_resources["explicit_exclusions"]
+    assert "live_solver_or_solution" in live_resources["explicit_exclusions"]
+    assert "iteration_host_copy_zero" in live_resources["explicit_exclusions"]
+    assert "commercial_readiness" in live_resources["explicit_exclusions"]
+
+    row_ids = [row["capability_id"] for row in payload["rows"]]
+    live_resource_index = row_ids.index(
+        "hip_fgmres_live_checkpoint_resource_context_v1"
+    )
+    assert (
+        row_ids[live_resource_index + 1]
+        == "hip_fgmres_canonical_predecessor_producer_v1"
+    )
+
+    canonical_predecessor = rows["hip_fgmres_canonical_predecessor_producer_v1"]
+    assert canonical_predecessor["implementation_state"] == "implemented"
+    assert canonical_predecessor["promotion_state"] == "contract_only"
+    assert canonical_predecessor["claim_level"].endswith("contract_only_non_promoting")
+    assert {
+        "canonical_first_column_exact_27_plus_14s_kernel_schedule_fenced",
+        "exact_owned_eight_zero_initialized_before_canonical_schedule_then_fenced",
+        "source_apply_completion_bound",
+        "positive_jacobi_completion_bound",
+        "device_validator_mask_domain_zero_1792_7936_gate_bound",
+        "same_runtime_device_stream_bound",
+        "persistent_parent_three_owned_eight_exact_eleven_bound",
+        "delegated_reduced_csr_three_and_reduction_scratch_two_bound",
+        "exact_sixteen_physical_capability_projection_without_additional_allocation",
+    }.issubset(canonical_predecessor["supported_scope"])
+    assert {
+        "authoritative_predecessor_proven",
+        "actual_mask_host_observed",
+        "device_validation_outcome_host_observed",
+        "checkpoint_transaction_ready",
+        "invalid_source_destination_atomicity_proven",
+        "live_solver_ready",
+        "solution_ready",
+        "iteration_host_copy_zero_proven",
+        "asymptotic_o_n_proven",
+        "speedup_proven",
+        "commercial_ready",
+        "promotion_eligible",
+    }.issubset(canonical_predecessor["explicit_exclusions"])
+
+    atomicity = rows["hip_fgmres_checkpoint_invalid_source_atomicity_v1"]
+    assert atomicity["implementation_state"] == "implemented"
+    assert atomicity["promotion_state"] == "contract_only"
+    assert atomicity["claim_level"].startswith(
+        "raw_fixed_four_row_invalid_source_destination_atomicity_scoped"
+    )
+    assert {
+        "raw_exact_registered_nonoverlap_allocation_scope",
+        "same_stream_exclusive_source_ownership_fixed_four_row_owner_sequence",
+        "checkpoint_decide_preflight_commit_finalize_control_vector_vector_control_rows",
+        "checkpoint_schedule_hash_sha256_2423da989b6cd419b7c4bef46d6c76f2120825a0c840cb516803bb2643ca11e5",
+        "combined_kernel_abi_hash_sha256_bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f",
+        "fixed_source_hash_sha256_ce4353f61fc3e8cd1311ad52ce50f21a677c7bfa865a2656aa5447b6ec104a83",
+        "source_preflight_destination_access_zero",
+        "late_invalid_source_preserves_entire_solution_and_residual_raw_bytes",
+        "gate_false_source_and_destination_no_read_no_write",
+        "no_new_order_f_workspace_allocation_h2d_d2h_intermediate_sync_or_fallback",
+        "context_new_and_adjacent_focused_seventy_seven_cases",
+        "full_checkpoint_context_two_hundred_sixty_one_cases_in_523_33_seconds",
+        "first_error_cas_diagnostic_latch",
+        "complete_row_canonical_tuple_kernel_token_stream_policy_and_eleven_pointer_frozen_binding",
+        "control_and_solve_record_u8_allocation_eight_byte_alignment",
+    }.issubset(atomicity["supported_scope"])
+    assert {
+        "canonical_conditional_capability_consumed_by_live_transaction",
+        "authoritative_predecessor",
+        "authoritative_checkpoint_transaction",
+        "arbitrary_raw_duplicate_commit_device_only_rejection",
+        "host_four_launch_enqueue_indivisible_atomicity",
+        "external_kernel_dma_or_other_stream_writer",
+        "dedicated_native_sealed_plus_invalid_source_combination_case",
+        "iteration_host_copy_zero",
+        "end_to_end_on_complexity",
+        "performance_or_speedup_claim",
+        "commercial_readiness",
+    }.issubset(atomicity["explicit_exclusions"])
+    assert (
+        "full_context_ruff_pycompile_canonical_hash_and_actual_hip_source_hash_assertion"
+        in atomicity["verification_cases"]
+    )
+    assert (
+        "checkpoint_context_full_261_and_focused_77" in atomicity["verification_cases"]
+    )
+
+    atomicity_index = row_ids.index("hip_fgmres_checkpoint_invalid_source_atomicity_v1")
+    assert (
+        row_ids[atomicity_index - 1] == "hip_fgmres_checkpoint_transaction_context_v2"
+    )
+    assert row_ids[atomicity_index + 1] == "hip_fgmres_full_device_recurrence_abi_v2"
+
+    recurrence_v2 = rows["hip_fgmres_full_device_recurrence_abi_v2"]
+    assert recurrence_v2["implementation_state"] == "planned"
+    assert recurrence_v2["promotion_state"] == "unavailable"
+    assert (
+        "accepted_256_byte_transient_device_control_state_design"
+        in (recurrence_v2["supported_scope"])
+    )
+    assert (
+        "implemented_first_restart_column0_through_valid_predecessor_checkpoint_raw_numerical_slice_kept_partial"
+        in (recurrence_v2["supported_scope"])
+    )
+    assert (
+        "implemented_caller_attested_non_promoting_checkpoint_transaction_context_kept_partial"
+        in recurrence_v2["supported_scope"]
+    )
+    assert (
+        "implemented_live_krylov_parent_allocator_resource_context_kept_partial"
+        in recurrence_v2["supported_scope"]
+    )
+    assert (
+        "implemented_canonical_device_predecessor_prefix_and_mask_domain_gate_kept_partial"
+        in recurrence_v2["supported_scope"]
+    )
+    assert (
+        "implemented_raw_fixed_four_row_invalid_source_atomicity_in_exact_registered_nonoverlap_same_stream_exclusive_owner_scope_kept_partial"
+        in recurrence_v2["supported_scope"]
+    )
+    assert (
+        "authoritative_checkpoint_transaction" in recurrence_v2["explicit_exclusions"]
+    )
+    assert (
+        "device_validation_outcome_and_actual_mask_host_observation"
+        in recurrence_v2["explicit_exclusions"]
+    )
+    assert (
+        "sealed_predecessor_checkpoint_transaction_integration"
+        in recurrence_v2["explicit_exclusions"]
+    )
+    assert (
+        "global_atomicity_beyond_fixed_four_row_registered_nonoverlap_same_stream_exclusive_owner_scope"
+        in recurrence_v2["explicit_exclusions"]
+    )
+    assert (
+        "later_columns_and_restarts_kernel_implementation"
+        in (recurrence_v2["explicit_exclusions"])
+    )
+    assert "iteration_host_copy_zero" in recurrence_v2["explicit_exclusions"]
+    assert "commercial_readiness" in recurrence_v2["explicit_exclusions"]

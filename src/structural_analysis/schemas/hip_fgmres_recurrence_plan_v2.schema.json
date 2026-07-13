@@ -1,0 +1,3042 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_recurrence_plan_v2.schema.json",
+  "title": "Engine v2 HIP FGMRES full recurrence ABI plan v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "plan_id",
+    "source_fgmres_plan_contract",
+    "dimensions",
+    "algorithm_contract",
+    "kernel_module_contract",
+    "memory_plan",
+    "runtime_lineage_requirements",
+    "claim_boundary",
+    "plan_hash",
+    "extensions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-recurrence-plan.v2"
+    },
+    "capability_profile": {
+      "const": "phase0_hip_fixed_restart_fgmres_full_recurrence_abi_plan"
+    },
+    "plan_id": {
+      "type": "string",
+      "pattern": "^HipFgmresRecurrencePlan:[0-9a-f]{24}$"
+    },
+    "source_fgmres_plan_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "capability_profile",
+        "plan_id",
+        "plan_hash",
+        "memory_layout_hash",
+        "execution_plan_hash",
+        "free_space_plan_hash",
+        "policy_hash",
+        "exact_v1_semantic_replay_required",
+        "v1_compatibility_artifact_retained"
+      ],
+      "properties": {
+        "schema_version": { "const": "structural-analysis-hip-fgmres-plan.v1" },
+        "capability_profile": {
+          "const": "phase0_hip_fixed_restart_fgmres_allocation_and_policy_plan"
+        },
+        "plan_id": {
+          "type": "string",
+          "pattern": "^HipFgmresPlan:[0-9a-f]{24}$"
+        },
+        "plan_hash": { "$ref": "#/$defs/hash" },
+        "memory_layout_hash": { "$ref": "#/$defs/hash" },
+        "execution_plan_hash": { "$ref": "#/$defs/hash" },
+        "free_space_plan_hash": { "$ref": "#/$defs/hash" },
+        "policy_hash": { "$ref": "#/$defs/hash" },
+        "exact_v1_semantic_replay_required": { "const": true },
+        "v1_compatibility_artifact_retained": { "const": true }
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "global_dof_count",
+        "free_dof_count",
+        "reduced_csr_nnz",
+        "restart_dimension",
+        "max_iterations",
+        "maximum_restart_count",
+        "reduction_segment_size",
+        "reduction_partial_count",
+        "packed_dense_scalar_count"
+      ],
+      "properties": {
+        "global_dof_count": { "$ref": "#/$defs/positiveInt" },
+        "free_dof_count": { "$ref": "#/$defs/positiveInt" },
+        "reduced_csr_nnz": { "$ref": "#/$defs/positiveInt" },
+        "restart_dimension": { "type": "integer", "minimum": 1, "maximum": 16 },
+        "max_iterations": { "type": "integer", "minimum": 0, "maximum": 4096 },
+        "maximum_restart_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "reduction_segment_size": { "const": 512 },
+        "reduction_partial_count": { "$ref": "#/$defs/positiveInt" },
+        "packed_dense_scalar_count": { "$ref": "#/$defs/positiveInt" }
+      }
+    },
+    "algorithm_contract": {
+      "const": {
+        "recurrence_abi_version": 2,
+        "method": "fixed_restart_right_preconditioned_fgmres",
+        "scalar_type": "fp64",
+        "right_preconditioner": "positive_unshifted_jacobi",
+        "orthogonalization": "dgks_conditional_two_pass_mgs",
+        "dgks_eta": 0.717,
+        "breakdown_epsilon_multiplier": 64.0,
+        "true_residual_equation": "r=b-Ax",
+        "fixed_host_schedule": true,
+        "submitted_column_count": "R*M",
+        "planned_raw_iteration_h2d_count": 0,
+        "planned_raw_iteration_d2h_count": 0,
+        "planned_raw_iteration_sync_count": 0,
+        "planned_raw_iteration_allocation_count": 0,
+        "single_v2_code_object_required": true,
+        "v1_and_v2_module_mixing_allowed": false,
+        "solve_record_producer_recurrence_abi_version": 2,
+        "base_pointer_plus_logical_index_only": true,
+        "host_shifted_pointer_arguments_allowed": false,
+        "dense_lstsq_or_pinv_fallback_allowed": false,
+        "silent_solver_fallback_allowed": false
+      }
+    },
+    "kernel_module_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "symbol_count",
+        "symbols",
+        "single_code_object",
+        "active_mask_source",
+        "device_error_state",
+        "control_state_abi_hash",
+        "solve_record_abi_hash",
+        "interface",
+        "kernel_module_abi_hash"
+      ],
+      "properties": {
+        "symbol_count": { "const": 4 },
+        "symbols": {
+          "const": [
+            "engine_v2_fgmres_control_v2",
+            "engine_v2_fgmres_vector_v2",
+            "engine_v2_fgmres_csr_spmv_indexed_v2",
+            "engine_v2_fgmres_reduce_v2"
+          ]
+        },
+        "single_code_object": { "const": true },
+        "active_mask_source": { "const": "solve_record_header.active" },
+        "device_error_state": {
+          "const": "solve_record_header.device_error_bits"
+        },
+        "control_state_abi_hash": { "$ref": "#/$defs/hash" },
+        "solve_record_abi_hash": { "$ref": "#/$defs/hash" },
+        "interface": { "$ref": "#/$defs/kernelAbi" },
+        "kernel_module_abi_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "memory_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "buffer_order",
+        "borrowed_buffer_count",
+        "owned_buffer_count",
+        "borrowed_device_byte_span",
+        "source_v1_owned_device_byte_length",
+        "owned_device_byte_length",
+        "additional_peak_device_bytes_planned",
+        "incremental_owned_device_bytes_over_v1",
+        "control_state_storage_formula",
+        "control_state_abi",
+        "control_state_abi_hash",
+        "solve_record_abi",
+        "solve_record_abi_hash",
+        "base_index_layout",
+        "buffers",
+        "memory_layout_hash"
+      ],
+      "properties": {
+        "buffer_order": {
+          "const": [
+            "reduced_csr_row_ptr",
+            "reduced_csr_column_indices",
+            "reduced_csr_values",
+            "reduced_state",
+            "reduced_load",
+            "reduced_direction",
+            "jacobi_inverse",
+            "solution_x",
+            "true_residual",
+            "work_w",
+            "basis_v",
+            "preconditioned_basis_z",
+            "reduction_ping",
+            "reduction_pong",
+            "packed_dense_state",
+            "solve_record",
+            "fgmres_control_state_v2"
+          ]
+        },
+        "borrowed_buffer_count": { "const": 7 },
+        "owned_buffer_count": { "const": 10 },
+        "borrowed_device_byte_span": { "$ref": "#/$defs/positiveInt" },
+        "source_v1_owned_device_byte_length": { "$ref": "#/$defs/positiveInt" },
+        "owned_device_byte_length": { "$ref": "#/$defs/positiveInt" },
+        "additional_peak_device_bytes_planned": { "$ref": "#/$defs/positiveInt" },
+        "incremental_owned_device_bytes_over_v1": { "const": 256 },
+        "control_state_storage_formula": { "const": "256" },
+        "control_state_abi": { "$ref": "#/$defs/controlAbi" },
+        "control_state_abi_hash": { "$ref": "#/$defs/hash" },
+        "solve_record_abi": { "$ref": "#/$defs/solveRecordAbi" },
+        "solve_record_abi_hash": { "$ref": "#/$defs/hash" },
+        "base_index_layout": { "$ref": "#/$defs/baseIndexLayout" },
+        "buffers": {
+          "type": "array",
+          "minItems": 17,
+          "maxItems": 17,
+          "prefixItems": [
+            {"allOf":[{"$ref":"#/$defs/buffer"},{"properties":{"name":{"const":"reduced_csr_row_ptr"},"ownership":{"const":"borrowed"},"dtype":{"const":"<i4"},"access":{"const":"read_only"},"source":{"const":"free_space_symbolic"},"initialization":{"const":"parent_owned_no_transfer"},"extent_formula":{"const":"F+1"}}}]},
+            {"allOf":[{"$ref":"#/$defs/buffer"},{"properties":{"name":{"const":"reduced_csr_column_indices"},"ownership":{"const":"borrowed"},"dtype":{"const":"<i4"},"access":{"const":"read_only"},"source":{"const":"free_space_symbolic"},"initialization":{"const":"parent_owned_no_transfer"},"extent_formula":{"const":"Z"}}}]},
+            {"allOf":[{"$ref":"#/$defs/buffer"},{"properties":{"name":{"const":"reduced_csr_values"},"ownership":{"const":"borrowed"},"dtype":{"const":"<f8"},"access":{"const":"read_only"},"source":{"const":"free_space_numeric"},"initialization":{"const":"parent_owned_no_transfer"},"extent_formula":{"const":"Z"}}}]},
+            {"allOf":[{"$ref":"#/$defs/buffer"},{"properties":{"name":{"const":"reduced_state"},"ownership":{"const":"borrowed"},"dtype":{"const":"<f8"},"access":{"const":"read_only"},"source":{"const":"free_space_reduced_state"},"initialization":{"const":"parent_owned_no_transfer"},"extent_formula":{"const":"F"}}}]},
+            {"allOf":[{"$ref":"#/$defs/buffer"},{"properties":{"name":{"const":"reduced_load"},"ownership":{"const":"borrowed"},"dtype":{"const":"<f8"},"access":{"const":"read_only"},"source":{"const":"free_space_reduced_load"},"initialization":{"const":"parent_owned_no_transfer"},"extent_formula":{"const":"F"}}}]},
+            {"allOf":[{"$ref":"#/$defs/buffer"},{"properties":{"name":{"const":"reduced_direction"},"ownership":{"const":"borrowed"},"dtype":{"const":"<f8"},"access":{"const":"read_only"},"source":{"const":"latest_free_space_apply"},"initialization":{"const":"parent_owned_no_transfer"},"extent_formula":{"const":"F"}}}]},
+            {"allOf":[{"$ref":"#/$defs/buffer"},{"properties":{"name":{"const":"jacobi_inverse"},"ownership":{"const":"borrowed"},"dtype":{"const":"<f8"},"access":{"const":"read_only_after_prepare"},"source":{"const":"krylov_primitives"},"initialization":{"const":"parent_owned_no_transfer"},"extent_formula":{"const":"F"}}}]},
+            {"allOf":[{"$ref":"#/$defs/buffer"},{"properties":{"name":{"const":"solution_x"},"ownership":{"const":"owned"},"dtype":{"const":"<f8"},"access":{"const":"read_write"},"source":{"const":"fgmres_context"},"initialization":{"const":"same_stream_copy_from_reduced_state"},"extent_formula":{"const":"F"}}}]},
+            {"allOf":[{"$ref":"#/$defs/buffer"},{"properties":{"name":{"const":"true_residual"},"ownership":{"const":"owned"},"dtype":{"const":"<f8"},"access":{"const":"read_write"},"source":{"const":"fgmres_context"},"initialization":{"const":"same_stream_copy_from_reduced_direction"},"extent_formula":{"const":"F"}}}]},
+            {"allOf":[{"$ref":"#/$defs/buffer"},{"properties":{"name":{"const":"work_w"},"ownership":{"const":"owned"},"dtype":{"const":"<f8"},"access":{"const":"read_write"},"source":{"const":"fgmres_context"},"initialization":{"const":"device_only"},"extent_formula":{"const":"F"}}}]},
+            {"allOf":[{"$ref":"#/$defs/buffer"},{"properties":{"name":{"const":"basis_v"},"ownership":{"const":"owned"},"dtype":{"const":"<f8"},"access":{"const":"read_write"},"source":{"const":"fgmres_context"},"initialization":{"const":"device_only"},"extent_formula":{"const":"(M+1)*F"}}}]},
+            {"allOf":[{"$ref":"#/$defs/buffer"},{"properties":{"name":{"const":"preconditioned_basis_z"},"ownership":{"const":"owned"},"dtype":{"const":"<f8"},"access":{"const":"read_write"},"source":{"const":"fgmres_context"},"initialization":{"const":"device_only"},"extent_formula":{"const":"M*F"}}}]},
+            {"allOf":[{"$ref":"#/$defs/buffer"},{"properties":{"name":{"const":"reduction_ping"},"ownership":{"const":"owned"},"dtype":{"const":"<f8"},"access":{"const":"read_write"},"source":{"const":"fgmres_context"},"initialization":{"const":"device_only"},"extent_formula":{"const":"2*P"}}}]},
+            {"allOf":[{"$ref":"#/$defs/buffer"},{"properties":{"name":{"const":"reduction_pong"},"ownership":{"const":"owned"},"dtype":{"const":"<f8"},"access":{"const":"read_write"},"source":{"const":"fgmres_context"},"initialization":{"const":"device_only"},"extent_formula":{"const":"2*P"}}}]},
+            {"allOf":[{"$ref":"#/$defs/buffer"},{"properties":{"name":{"const":"packed_dense_state"},"ownership":{"const":"owned"},"dtype":{"const":"<f8"},"access":{"const":"read_write"},"source":{"const":"fgmres_context"},"initialization":{"const":"device_only"},"extent_formula":{"const":"M*M+5*M+1"}}}]},
+            {"allOf":[{"$ref":"#/$defs/buffer"},{"properties":{"name":{"const":"solve_record"},"ownership":{"const":"owned"},"dtype":{"const":"|u1"},"access":{"const":"read_write"},"source":{"const":"fgmres_context"},"initialization":{"const":"async_h2d_zero_once_before_enqueue"},"extent_formula":{"const":"192+72*R"}}}]},
+            {"allOf":[{"$ref":"#/$defs/buffer"},{"properties":{"name":{"const":"fgmres_control_state_v2"},"ownership":{"const":"owned"},"dtype":{"const":"|u1"},"shape":{"const":[256]},"element_count":{"const":256},"byte_length":{"const":256},"access":{"const":"read_write"},"source":{"const":"fgmres_recurrence_context_v2"},"initialization":{"const":"async_h2d_zero_once_before_control_init"},"extent_formula":{"const":"256"}}}]}
+          ],
+          "items": false
+        },
+        "memory_layout_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "runtime_lineage_requirements": {
+      "const": {
+        "context_open_must_bind_exact_v2_plan": true,
+        "context_open_must_bind_exact_latest_free_space_apply": true,
+        "context_open_must_acquire_exclusive_primitive_child": true,
+        "same_runtime_device_and_stream_required": true,
+        "all_buffer_arguments_are_allocation_bases": true,
+        "logical_indices_are_separate_scalar_arguments": true
+      }
+    },
+    "claim_boundary": {
+      "const": {
+        "compile_time_plan_only": true,
+        "control_abi_planned": true,
+        "full_recurrence_interface_planned": true,
+        "first_column_partial_schedule_contract_complete": true,
+        "first_column_completion_schedule_contract_complete": true,
+        "first_column_candidate_preparation_schedule_contract_complete": true,
+        "first_column_candidate_residual_schedule_contract_complete": true,
+        "first_column_candidate_scale_metrics_schedule_contract_complete": true,
+        "first_column_predecessor_validation_schedule_contract_complete": true,
+        "first_column_checkpoint_transaction_schedule_contract_complete": true,
+        "first_column_commit_source_preflight_contract_complete": true,
+        "invalid_source_destination_failure_atomicity_contract_complete": true,
+        "invalid_source_destination_failure_atomicity_runtime_proven": false,
+        "authoritative_checkpoint_transaction_proven": false,
+        "first_arnoldi_column_recurrence_schedule_contract_complete": true,
+        "first_pass_mgs_schedule_contract_complete": true,
+        "device_dgks_decision_schedule_contract_complete": true,
+        "second_pass_mgs_schedule_contract_complete": true,
+        "h_next_schedule_contract_complete": true,
+        "v_next_schedule_contract_complete": true,
+        "givens_schedule_contract_complete": true,
+        "candidate_schedule_contract_complete": false,
+        "candidate_envelope_schedule_contract_complete": false,
+        "checkpoint_commit_schedule_contract_complete": false,
+        "full_recurrence_schedule_contract_complete": false,
+        "operator_apply_count_failure_parity_proven": false,
+        "device_recurrence_implemented": false,
+        "kernel_compiled": false,
+        "device_allocation_performed": false,
+        "execution_performed": false,
+        "live_solver_ready": false,
+        "solution_ready": false,
+        "iteration_host_copy_zero_proven": false,
+        "native_recurrence_parity": false,
+        "end_to_end_O_N_proven": false,
+        "speedup_proven": false,
+        "result_ir_integrated": false,
+        "spd_proven": false,
+        "pcg_ready": false,
+        "promotion_eligible": false,
+        "commercial_ready": false,
+        "schema_only_validation_authoritative": false,
+        "python_semantic_replay_required": true
+      }
+    },
+    "plan_hash": { "$ref": "#/$defs/hash" },
+    "extensions": { "const": {} }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "positiveInt": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9223372036854775807
+    },
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "dtype", "offset_bytes"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "dtype": { "enum": ["i32", "f64"] },
+        "offset_bytes": { "type": "integer", "minimum": 0, "maximum": 248 }
+      }
+    },
+    "integerCodeMap": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "controlAbi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "control_abi_version",
+        "byte_order",
+        "byte_length",
+        "required_alignment_bytes",
+        "layout",
+        "fields",
+        "transient_zero_fields",
+        "post_init_values",
+        "phase_codes",
+        "control_mode_codes",
+        "vector_mode_codes",
+        "vector_gate_codes",
+        "spmv_mode_codes",
+        "reduction_mode_codes",
+        "reduction_target_codes",
+        "reduction_valid_bits",
+        "reduction_target_fields",
+        "reduction_target_none_contract",
+        "transient_norm_slot_alias_contract",
+        "candidate_reason_bits",
+        "failure_origin_codes",
+        "predecessor_validation_state_codes",
+        "predecessor_validation_contract",
+        "whole_buffer_zeroed_before_init",
+        "init_zero_prestate_exception",
+        "transient_validation_fields_zero_outside_checkpoint_transaction",
+        "host_scalar_publish_allowed_during_recurrence"
+      ],
+      "properties": {
+        "control_abi_version": { "const": 2 },
+        "byte_order": { "const": "little_endian" },
+        "byte_length": { "const": 256 },
+        "required_alignment_bytes": { "const": 8 },
+        "layout": { "const": "32*i32+16*f64" },
+        "fields": {
+          "const": [
+            {"name":"control_abi_version","dtype":"i32","offset_bytes":0},
+            {"name":"phase","dtype":"i32","offset_bytes":4},
+            {"name":"free_dof_count","dtype":"i32","offset_bytes":8},
+            {"name":"restart_dimension","dtype":"i32","offset_bytes":12},
+            {"name":"max_iterations","dtype":"i32","offset_bytes":16},
+            {"name":"maximum_restart_count","dtype":"i32","offset_bytes":20},
+            {"name":"restart_index","dtype":"i32","offset_bytes":24},
+            {"name":"cycle_start_iteration","dtype":"i32","offset_bytes":28},
+            {"name":"cycle_width","dtype":"i32","offset_bytes":32},
+            {"name":"column_index","dtype":"i32","offset_bytes":36},
+            {"name":"arnoldi_step_count","dtype":"i32","offset_bytes":40},
+            {"name":"reorthogonalization_count","dtype":"i32","offset_bytes":44},
+            {"name":"dgks_reorth_required","dtype":"i32","offset_bytes":48},
+            {"name":"invariant_breakdown","dtype":"i32","offset_bytes":52},
+            {"name":"candidate_required","dtype":"i32","offset_bytes":56},
+            {"name":"candidate_reason_bits","dtype":"i32","offset_bytes":60},
+            {"name":"triangular_breakdown","dtype":"i32","offset_bytes":64},
+            {"name":"commit_required","dtype":"i32","offset_bytes":68},
+            {"name":"continuation_required","dtype":"i32","offset_bytes":72},
+            {"name":"pending_terminal_status","dtype":"i32","offset_bytes":76},
+            {"name":"pending_termination_code","dtype":"i32","offset_bytes":80},
+            {"name":"pending_restart_hint","dtype":"i32","offset_bytes":84},
+            {"name":"pending_restart_flags","dtype":"i32","offset_bytes":88},
+            {"name":"stagnation_checkpoint_limit","dtype":"i32","offset_bytes":92},
+            {"name":"reduction_epoch","dtype":"i32","offset_bytes":96},
+            {"name":"reduction_valid_mask","dtype":"i32","offset_bytes":100},
+            {"name":"failure_origin","dtype":"i32","offset_bytes":104},
+            {"name":"next_expected_restart","dtype":"i32","offset_bytes":108},
+            {"name":"schedule_epoch","dtype":"i32","offset_bytes":112},
+            {"name":"predecessor_validation_state","dtype":"i32","offset_bytes":116},
+            {"name":"predecessor_mask_snapshot","dtype":"i32","offset_bytes":120},
+            {"name":"predecessor_reduction_epoch_snapshot","dtype":"i32","offset_bytes":124},
+            {"name":"absolute_tolerance","dtype":"f64","offset_bytes":128},
+            {"name":"relative_tolerance","dtype":"f64","offset_bytes":136},
+            {"name":"authoritative_tolerance","dtype":"f64","offset_bytes":144},
+            {"name":"stagnation_relative_tolerance","dtype":"f64","offset_bytes":152},
+            {"name":"divergence_factor","dtype":"f64","offset_bytes":160},
+            {"name":"cycle_beta","dtype":"f64","offset_bytes":168},
+            {"name":"dot_coefficient","dtype":"f64","offset_bytes":176},
+            {"name":"work_before_l2","dtype":"f64","offset_bytes":184},
+            {"name":"after_first_l2","dtype":"f64","offset_bytes":192},
+            {"name":"h_next_l2","dtype":"f64","offset_bytes":200},
+            {"name":"candidate_l2","dtype":"f64","offset_bytes":208},
+            {"name":"candidate_linf","dtype":"f64","offset_bytes":216},
+            {"name":"solution_update_l2","dtype":"f64","offset_bytes":224},
+            {"name":"committed_x_l2","dtype":"f64","offset_bytes":232},
+            {"name":"trial_x_l2","dtype":"f64","offset_bytes":240},
+            {"name":"x_scale_l2","dtype":"f64","offset_bytes":248}
+          ]
+        },
+        "transient_zero_fields": {
+          "const": [
+            "predecessor_validation_state",
+            "predecessor_mask_snapshot",
+            "predecessor_reduction_epoch_snapshot"
+          ]
+        },
+        "post_init_values": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "control_abi_version",
+            "phase",
+            "restart_index",
+            "column_index",
+            "reduction_epoch",
+            "reduction_valid_mask",
+            "failure_origin",
+            "schedule_epoch",
+            "predecessor_validation_state",
+            "predecessor_mask_snapshot",
+            "predecessor_reduction_epoch_snapshot"
+          ],
+          "properties": {
+            "control_abi_version": { "const": 2 },
+            "phase": { "const": 1 },
+            "restart_index": { "const": 0 },
+            "column_index": { "const": -1 },
+            "reduction_epoch": { "const": 0 },
+            "reduction_valid_mask": { "const": 0 },
+            "failure_origin": { "const": 0 },
+            "schedule_epoch": { "const": 1 },
+            "predecessor_validation_state": { "const": 0 },
+            "predecessor_mask_snapshot": { "const": 0 },
+            "predecessor_reduction_epoch_snapshot": { "const": 0 }
+          }
+        },
+        "phase_codes": {
+          "const": {"uninitialized":0,"rhs_metrics":1,"initial_state":2,"restart_ready":3,"arnoldi":4,"dgks_second_pass":5,"candidate":6,"checkpoint_commit":7,"between_restarts":8,"terminal":9,"failed":10}
+        },
+        "control_mode_codes": {
+          "const": {"INIT":0,"BIND_RHS":1,"INITIAL_GATE":2,"RESTART_BEGIN":3,"PRECONDITION_ACCEPT":4,"OPERATOR_ACCEPT":5,"DOT_ACCEPT":6,"DGKS_DECIDE":7,"ARNOLDI_GIVENS":8,"BACKSUBSTITUTE":9,"VECTOR_ACCEPT":10,"CHECKPOINT_DECIDE":11,"CHECKPOINT_FINALIZE":12,"FINAL_GUARD":13,"PREDECESSOR_VALIDATE":14}
+        },
+        "vector_mode_codes": {
+          "const": {"COPY_INITIAL_X":0,"FORM_INITIAL_RESIDUAL":1,"APPLY_JACOBI_INDEXED":2,"MGS_SUBTRACT_INDEXED":3,"NORMALIZE_V0":4,"NORMALIZE_V_NEXT":5,"BUILD_TRIAL_X":6,"FORM_CANDIDATE_RESIDUAL":7,"COMMIT_CHECKPOINT":8,"PREFLIGHT_COMMIT_SOURCE":9}
+        },
+        "vector_gate_codes": {
+          "const": {"ACTIVE":0,"DGKS_SECOND_PASS":1,"CANDIDATE_REQUIRED":2,"CYCLE_END":3,"COMMIT_REQUIRED":4}
+        },
+        "spmv_mode_codes": {
+          "const": {"INITIAL":0,"ARNOLDI":1,"CANDIDATE":2}
+        },
+        "reduction_mode_codes": {
+          "const": {"DOT_W_VI":0,"LASSQ_LOAD":1,"LASSQ_TRUE_RESIDUAL":2,"LASSQ_WORK_W":3,"LASSQ_V_M":4,"LASSQ_WORK_W_MINUS_X":5,"LASSQ_SOLUTION_X":6,"LINF_LOAD":7,"LINF_TRUE_RESIDUAL":8,"LINF_V_M":9,"COMBINE_SUM":10,"COMBINE_LASSQ":11,"COMBINE_MAX":12}
+        },
+        "reduction_target_codes": {
+          "const": {"NONE":0,"DOT":1,"RHS_L2":2,"RHS_LINF":3,"INITIAL_L2":4,"INITIAL_LINF":5,"WORK_BEFORE":6,"AFTER_FIRST":7,"H_NEXT":8,"CANDIDATE_L2":9,"CANDIDATE_LINF":10,"UPDATE_L2":11,"COMMITTED_X_L2":12,"TRIAL_X_L2":13}
+        },
+        "reduction_valid_bits": {
+          "const": {"DOT":0,"RHS_L2":1,"RHS_LINF":2,"INITIAL_L2":3,"INITIAL_LINF":4,"WORK_BEFORE":5,"AFTER_FIRST":6,"H_NEXT":7,"CANDIDATE_L2":8,"CANDIDATE_LINF":9,"UPDATE_L2":10,"COMMITTED_X_L2":11,"TRIAL_X_L2":12}
+        },
+        "reduction_target_fields": {
+          "const": {
+            "DOT":{"field":"dot_coefficient","offset_bytes":176,"valid_bit":0,"consumed_by_control_mode":"DOT_ACCEPT"},
+            "RHS_L2":{"field":"candidate_l2","offset_bytes":208,"valid_bit":1,"consumed_by_control_mode":"BIND_RHS"},
+            "RHS_LINF":{"field":"candidate_linf","offset_bytes":216,"valid_bit":2,"consumed_by_control_mode":"BIND_RHS"},
+            "INITIAL_L2":{"field":"candidate_l2","offset_bytes":208,"valid_bit":3,"consumed_by_control_mode":"INITIAL_GATE"},
+            "INITIAL_LINF":{"field":"candidate_linf","offset_bytes":216,"valid_bit":4,"consumed_by_control_mode":"INITIAL_GATE"},
+            "WORK_BEFORE":{"field":"work_before_l2","offset_bytes":184,"valid_bit":5,"consumed_by_control_mode":"DGKS_DECIDE"},
+            "AFTER_FIRST":{"field":"after_first_l2","offset_bytes":192,"valid_bit":6,"consumed_by_control_mode":"DGKS_DECIDE"},
+            "H_NEXT":{"field":"h_next_l2","offset_bytes":200,"valid_bit":7,"consumed_by_control_mode":"ARNOLDI_GIVENS"},
+            "CANDIDATE_L2":{"field":"candidate_l2","offset_bytes":208,"valid_bit":8,"consumed_by_control_mode":"CHECKPOINT_DECIDE"},
+            "CANDIDATE_LINF":{"field":"candidate_linf","offset_bytes":216,"valid_bit":9,"consumed_by_control_mode":"CHECKPOINT_DECIDE"},
+            "UPDATE_L2":{"field":"solution_update_l2","offset_bytes":224,"valid_bit":10,"consumed_by_control_mode":"CHECKPOINT_DECIDE"},
+            "COMMITTED_X_L2":{"field":"committed_x_l2","offset_bytes":232,"valid_bit":11,"consumed_by_control_mode":"CHECKPOINT_FINALIZE"},
+            "TRIAL_X_L2":{"field":"trial_x_l2","offset_bytes":240,"valid_bit":12,"consumed_by_control_mode":"CHECKPOINT_DECIDE"}
+          }
+        },
+        "reduction_target_none_contract": {
+          "const": {
+            "code": 0,
+            "publishes_control_scalar": false,
+            "sets_reduction_valid_bit": false
+          }
+        },
+        "transient_norm_slot_alias_contract": {
+          "const": {
+            "rhs_targets": ["RHS_L2", "RHS_LINF"],
+            "rhs_consumer": "BIND_RHS",
+            "rhs_consumer_clears_valid_bits": true,
+            "initial_targets": ["INITIAL_L2", "INITIAL_LINF"],
+            "initial_consumer": "INITIAL_GATE",
+            "initial_metrics_may_overwrite_only_after_rhs_bits_cleared": true
+          }
+        },
+        "candidate_reason_bits": {
+          "const": {"estimated_l2_trigger":0,"invariant_or_rotation_breakdown":1,"planned_cycle_end":2}
+        },
+        "failure_origin_codes": {
+          "const": {"none":0,"control":1,"vector":2,"csr_spmv":3,"reduction":4}
+        },
+        "predecessor_validation_state_codes": {
+          "const": {"empty":0,"armed":1,"consumed":2,"commit_preflighted":3}
+        },
+        "predecessor_validation_contract": {
+          "const": {
+            "validator_control_mode": "PREDECESSOR_VALIDATE",
+            "validator_control_mode_code": 14,
+            "admitted_mask_domain": [0,1792,7936],
+            "validator_preserves_schedule_epoch": true,
+            "validator_preserves_reduction_epoch": true,
+            "validator_arms_exact_mask_snapshot": true,
+            "checkpoint_decide_consumes_armed_state": true,
+            "checkpoint_preflight_vector_mode": "PREFLIGHT_COMMIT_SOURCE",
+            "checkpoint_preflight_vector_mode_code": 9,
+            "checkpoint_preflight_transitions_consumed_or_legacy_empty_to_commit_preflighted": true,
+            "checkpoint_preflight_preserves_mask_and_reduction_epoch_snapshots": true,
+            "commit_preflighted_state_is_standalone_success_verdict": false,
+            "checkpoint_commit_requires_commit_preflighted_state": true,
+            "checkpoint_finalize_clears_commit_preflighted_state": true,
+            "legacy_caller_attested_empty_state_retained_through_checkpoint_decide": true,
+            "legacy_commit_preflighted_snapshots_are_exact_zero": true,
+            "actual_mask_host_observed": false
+          }
+        },
+        "whole_buffer_zeroed_before_init": { "const": true },
+        "init_zero_prestate_exception": {
+          "const": {
+            "allowed_control_mode": "INIT",
+            "required_prestate": "all_256_bytes_exact_zero",
+            "only_exception_to_control_abi_field_validation": true,
+            "nonzero_malformed_prestate_rejected": true
+          }
+        },
+        "transient_validation_fields_zero_outside_checkpoint_transaction": {
+          "const": true
+        },
+        "host_scalar_publish_allowed_during_recurrence": { "const": false }
+      }
+    },
+    "solveRecordAbi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recurrence_abi_version",
+        "byte_order",
+        "header_bytes",
+        "restart_bytes",
+        "header_layout",
+        "restart_layout",
+        "header_fields",
+        "restart_fields",
+        "terminal_status_codes",
+        "termination_codes",
+        "restart_hint_codes",
+        "restart_flag_bits",
+        "producer_contract",
+        "header_initial_values"
+      ],
+      "properties": {
+        "recurrence_abi_version": { "const": 2 },
+        "byte_order": { "const": "little_endian" },
+        "header_bytes": { "const": 192 },
+        "restart_bytes": { "const": 72 },
+        "header_layout": { "const": "16*i32+16*f64" },
+        "restart_layout": { "const": "7*i32+4_byte_pad+5*f64" },
+        "header_fields": {
+          "const": [
+            {"name":"recurrence_abi_version","dtype":"i32","offset_bytes":0},
+            {"name":"active","dtype":"i32","offset_bytes":4},
+            {"name":"terminal_status","dtype":"i32","offset_bytes":8},
+            {"name":"termination_code","dtype":"i32","offset_bytes":12},
+            {"name":"device_error_bits","dtype":"i32","offset_bytes":16},
+            {"name":"scheduled_iterations","dtype":"i32","offset_bytes":20},
+            {"name":"effective_iterations","dtype":"i32","offset_bytes":24},
+            {"name":"scheduled_restarts","dtype":"i32","offset_bytes":28},
+            {"name":"effective_restarts","dtype":"i32","offset_bytes":32},
+            {"name":"effective_arnoldi_dimension","dtype":"i32","offset_bytes":36},
+            {"name":"happy_breakdown_count","dtype":"i32","offset_bytes":40},
+            {"name":"stagnation_checkpoint_count","dtype":"i32","offset_bytes":44},
+            {"name":"false_convergence_count","dtype":"i32","offset_bytes":48},
+            {"name":"operator_apply_count","dtype":"i32","offset_bytes":52},
+            {"name":"preconditioner_apply_count","dtype":"i32","offset_bytes":56},
+            {"name":"restart_dimension","dtype":"i32","offset_bytes":60},
+            {"name":"rhs_l2","dtype":"f64","offset_bytes":64},
+            {"name":"rhs_linf","dtype":"f64","offset_bytes":72},
+            {"name":"solver_tolerance_l2","dtype":"f64","offset_bytes":80},
+            {"name":"authoritative_tolerance_scaled_linf","dtype":"f64","offset_bytes":88},
+            {"name":"initial_residual_l2","dtype":"f64","offset_bytes":96},
+            {"name":"final_residual_l2","dtype":"f64","offset_bytes":104},
+            {"name":"final_residual_linf","dtype":"f64","offset_bytes":112},
+            {"name":"final_scaled_residual","dtype":"f64","offset_bytes":120},
+            {"name":"previous_checkpoint_residual_l2","dtype":"f64","offset_bytes":128},
+            {"name":"solution_update_l2","dtype":"f64","offset_bytes":136},
+            {"name":"solution_scale_l2","dtype":"f64","offset_bytes":144},
+            {"name":"estimated_residual_l2","dtype":"f64","offset_bytes":152},
+            {"name":"arnoldi_work_l2","dtype":"f64","offset_bytes":160},
+            {"name":"arnoldi_breakdown_threshold","dtype":"f64","offset_bytes":168},
+            {"name":"triangular_scale","dtype":"f64","offset_bytes":176},
+            {"name":"reserved_f64_0","dtype":"f64","offset_bytes":184}
+          ]
+        },
+        "restart_fields": {
+          "const": [
+            {"name":"restart_index","dtype":"i32","offset_bytes":0},
+            {"name":"start_iteration","dtype":"i32","offset_bytes":4},
+            {"name":"end_iteration","dtype":"i32","offset_bytes":8},
+            {"name":"arnoldi_step_count","dtype":"i32","offset_bytes":12},
+            {"name":"reorthogonalization_count","dtype":"i32","offset_bytes":16},
+            {"name":"termination_hint","dtype":"i32","offset_bytes":20},
+            {"name":"flags","dtype":"i32","offset_bytes":24},
+            {"name":"reserved_i32_0","dtype":"i32","offset_bytes":28},
+            {"name":"estimated_residual_l2","dtype":"f64","offset_bytes":32},
+            {"name":"true_residual_l2","dtype":"f64","offset_bytes":40},
+            {"name":"true_residual_linf","dtype":"f64","offset_bytes":48},
+            {"name":"scaled_true_residual","dtype":"f64","offset_bytes":56},
+            {"name":"solution_update_l2","dtype":"f64","offset_bytes":64}
+          ]
+        },
+        "terminal_status_codes": {
+          "const": {"not_terminal":0,"converged":1,"max_iterations":2,"stagnated":3,"diverged":4,"arnoldi_breakdown":5,"numerical_failure":6}
+        },
+        "termination_codes": {
+          "const": {"none":0,"converged_initial_true_residual":1,"converged_happy_breakdown":2,"converged_true_residual":3,"converged_restart_true_residual":4,"max_iterations_exhausted":10,"true_residual_stagnated":20,"true_residual_diverged":21,"arnoldi_triangular_factor_breakdown":30,"arnoldi_invariant_subspace_breakdown":31,"invalid_input_or_control":40,"nonfinite_arithmetic":41,"operator_application_failed":42,"orthogonalization_failed":43,"givens_rotation_failed":44,"triangular_solve_failed":45,"true_residual_replay_failed":46,"restart_state_failed":47}
+        },
+        "restart_hint_codes": {
+          "const": {"none":0,"restart_completed":1,"converged_happy_breakdown":2,"converged_true_residual":3,"arnoldi_invariant_subspace_breakdown":4,"arnoldi_triangular_factor_breakdown":5}
+        },
+        "restart_flag_bits": {
+          "const": {"true_residual_replayed":0,"solver_l2_passed":1,"authoritative_linf_passed":2,"happy_breakdown":3,"invariant_breakdown":4,"stagnation_plateau":5,"tiny_update":6,"divergence":7}
+        },
+        "producer_contract": { "const": "single_v2_code_object_only" },
+        "header_initial_values": {
+          "const": { "recurrence_abi_version": 2 }
+        }
+      }
+    },
+    "firstColumnPartialSchedule": {
+      "const": {
+        "schedule_contract_version": "structural-analysis-hip-fgmres-first-column-partial-schedule.v2",
+        "scope": {
+          "restart_numbering": "one_based",
+          "restart_index": 1,
+          "column_index": 0,
+          "included_through": "DGKS_DECIDE",
+          "schedule_epoch_B_owner": "RESTART_BEGIN",
+          "initial_final_guard_at_B_allowed": false,
+          "first_pass_mgs_included": true,
+          "device_dgks_decision_included": true,
+          "second_pass_mgs_included": false,
+          "h_next_reduction_included": false,
+          "givens_included": false,
+          "candidate_included": false,
+          "checkpoint_commit_included": false,
+          "full_column_complete": false,
+          "full_recurrence_complete": false
+        },
+        "symbols": {
+          "F": "free_dof_count",
+          "M": "restart_dimension",
+          "I": "max_iterations",
+          "S": "recursive_stage_count(F,ceil(F/512))",
+          "B": "7+4*S"
+        },
+        "start_state": {
+          "schedule_epoch": "B",
+          "reduction_epoch": "4*S",
+          "phase": "restart_ready",
+          "restart_index": 0,
+          "next_expected_restart": 1,
+          "column_index": -1,
+          "effective_restarts": 0,
+          "effective_iterations": 0,
+          "arnoldi_step_count": 0,
+          "reorthogonalization_count": 0,
+          "operator_apply_count": 1,
+          "preconditioner_apply_count": 0,
+          "reduction_valid_mask": 0
+        },
+        "launches": [
+          {
+            "name": "CONTROL_RESTART_BEGIN",
+            "symbol": "engine_v2_fgmres_control_v2",
+            "mode": "RESTART_BEGIN",
+            "expected_schedule_epoch": "B",
+            "expected_restart": 1,
+            "expected_column": -1,
+            "row_index": -1,
+            "pass_index": -1,
+            "phase_before": "restart_ready",
+            "phase_after": "arnoldi",
+            "accepted_effect": "restart_index=1,column_index=0,next_expected_restart=2,effective_restarts=1,cycle_start_iteration=0,cycle_width=min(M,I),cycle_beta=initial_true_residual_l2,zero_dense_then_set_g[0]=cycle_beta"
+          },
+          {
+            "name": "VECTOR_NORMALIZE_V0",
+            "symbol": "engine_v2_fgmres_vector_v2",
+            "mode": "NORMALIZE_V0",
+            "gate": "ACTIVE",
+            "expected_schedule_epoch": "B+1",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": 0,
+            "phase_before": "arnoldi",
+            "phase_after": "arnoldi",
+            "accepted_effect": "V[0,k]=true_residual[k]/cycle_beta"
+          },
+          {
+            "name": "VECTOR_APPLY_JACOBI",
+            "symbol": "engine_v2_fgmres_vector_v2",
+            "mode": "APPLY_JACOBI_INDEXED",
+            "gate": "ACTIVE",
+            "expected_schedule_epoch": "B+2",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": 0,
+            "phase_before": "arnoldi",
+            "phase_after": "arnoldi",
+            "accepted_effect": "Z[0,k]=inverse_diagonal[k]*V[0,k]"
+          },
+          {
+            "name": "CONTROL_PRECONDITION_ACCEPT",
+            "symbol": "engine_v2_fgmres_control_v2",
+            "mode": "PRECONDITION_ACCEPT",
+            "expected_schedule_epoch": "B+3",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "row_index": -1,
+            "pass_index": -1,
+            "phase_before": "arnoldi",
+            "phase_after": "arnoldi",
+            "accepted_effect": "preconditioner_apply_count=0->1"
+          },
+          {
+            "name": "SPMV_ARNOLDI",
+            "symbol": "engine_v2_fgmres_csr_spmv_indexed_v2",
+            "mode": "ARNOLDI",
+            "expected_schedule_epoch": "B+4",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": 0,
+            "phase_before": "arnoldi",
+            "phase_after": "arnoldi",
+            "accepted_effect": "work_w=A*Z[0]"
+          },
+          {
+            "name": "CONTROL_OPERATOR_ACCEPT",
+            "symbol": "engine_v2_fgmres_control_v2",
+            "mode": "OPERATOR_ACCEPT",
+            "expected_schedule_epoch": "B+5",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "row_index": -1,
+            "pass_index": -1,
+            "phase_before": "arnoldi",
+            "phase_after": "arnoldi",
+            "accepted_effect": "operator_apply_count=1->2"
+          },
+          {
+            "name": "REDUCE_WORK_BEFORE",
+            "symbol": "engine_v2_fgmres_reduce_v2",
+            "first_mode": "LASSQ_WORK_W",
+            "combine_mode": "COMBINE_LASSQ",
+            "expected_schedule_epoch": "13+q",
+            "expected_reduction_epoch": "q=4*S..5*S-1",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": 0,
+            "intermediate_target": "NONE",
+            "final_target": "WORK_BEFORE",
+            "phase_before": "arnoldi",
+            "phase_after": "arnoldi",
+            "accepted_effect": "final_stage_sets_valid_bit_5_mask_32"
+          },
+          {
+            "name": "REDUCE_DOT_FIRST_PASS_ROW0",
+            "symbol": "engine_v2_fgmres_reduce_v2",
+            "first_mode": "DOT_W_VI",
+            "combine_mode": "COMBINE_SUM",
+            "expected_schedule_epoch": "13+q",
+            "expected_reduction_epoch": "q=5*S..6*S-1",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": 0,
+            "orthogonalization_row": 0,
+            "orthogonalization_pass": 0,
+            "intermediate_target": "NONE",
+            "final_target": "DOT",
+            "phase_before": "arnoldi",
+            "phase_after": "arnoldi",
+            "accepted_effect": "final_stage_sets_valid_bit_0_mask_33"
+          },
+          {
+            "name": "CONTROL_DOT_ACCEPT_ROW0_PASS0",
+            "symbol": "engine_v2_fgmres_control_v2",
+            "mode": "DOT_ACCEPT",
+            "expected_schedule_epoch": "13+6*S",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "row_index": 0,
+            "pass_index": 0,
+            "phase_before": "arnoldi",
+            "phase_after": "arnoldi",
+            "required_valid_mask": 33,
+            "result_valid_mask": 32,
+            "accepted_effect": "y[0]=dot_coefficient,H[0,0]+=y[0],clear_DOT_bit_and_dot_coefficient"
+          },
+          {
+            "name": "VECTOR_MGS_SUBTRACT_ROW0_PASS0",
+            "symbol": "engine_v2_fgmres_vector_v2",
+            "mode": "MGS_SUBTRACT_INDEXED",
+            "gate": "ACTIVE",
+            "expected_schedule_epoch": "14+6*S",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": 0,
+            "orthogonalization_row": 0,
+            "orthogonalization_pass": 0,
+            "phase_before": "arnoldi",
+            "phase_after": "arnoldi",
+            "accepted_effect": "work_w[k]-=y[0]*V[0,k]"
+          },
+          {
+            "name": "REDUCE_AFTER_FIRST",
+            "symbol": "engine_v2_fgmres_reduce_v2",
+            "first_mode": "LASSQ_WORK_W",
+            "combine_mode": "COMBINE_LASSQ",
+            "expected_schedule_epoch": "15+q",
+            "expected_reduction_epoch": "q=6*S..7*S-1",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": 0,
+            "intermediate_target": "NONE",
+            "final_target": "AFTER_FIRST",
+            "phase_before": "arnoldi",
+            "phase_after": "arnoldi",
+            "accepted_effect": "final_stage_sets_valid_bit_6_mask_96"
+          },
+          {
+            "name": "CONTROL_DGKS_DECIDE_PASS0",
+            "symbol": "engine_v2_fgmres_control_v2",
+            "mode": "DGKS_DECIDE",
+            "expected_schedule_epoch": "15+7*S",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "row_index": -1,
+            "pass_index": 0,
+            "phase_before": "arnoldi",
+            "phase_after": "dgks_second_pass_if_after_first_lt_0.717_times_work_before_else_arnoldi",
+            "required_valid_mask": 96,
+            "result_valid_mask": 0,
+            "accepted_effect": "set_dgks_reorth_required,consume_WORK_BEFORE_and_AFTER_FIRST_bits,preserve_work_before_l2"
+          }
+        ],
+        "reduction_validity_contract": {
+          "target_codes": {
+            "DOT": 1,
+            "WORK_BEFORE": 6,
+            "AFTER_FIRST": 7
+          },
+          "valid_bits": {
+            "DOT": 0,
+            "WORK_BEFORE": 5,
+            "AFTER_FIRST": 6
+          },
+          "mask_at_start": 0,
+          "mask_after_work_before": 32,
+          "mask_after_dot": 33,
+          "dot_accept_consumes": [
+            "DOT"
+          ],
+          "mask_after_dot_accept": 32,
+          "mask_after_after_first": 96,
+          "dgks_decide_consumes": [
+            "WORK_BEFORE",
+            "AFTER_FIRST"
+          ],
+          "mask_after_dgks_decide": 0,
+          "intermediate_stages_use_none_target": true,
+          "only_final_stages_publish_named_target": true
+        },
+        "dense_transient_contract": {
+          "offset_unit": "fp64_elements_from_dense_base",
+          "h_0_0_element_offset": 0,
+          "h_0_0_byte_offset": 0,
+          "g_0_element_offset": "M*(M+1)+2*M",
+          "g_0_byte_offset": "8*(M*(M+1)+2*M)",
+          "y_0_element_offset": "M*(M+1)+3*M+1",
+          "y_0_byte_offset": "8*(M*(M+1)+3*M+1)",
+          "restart_begin_h_initialization": "H[:,:]=0",
+          "restart_begin_g_initialization": "g[:]=0;g[0]=cycle_beta",
+          "dot_accept_update": "y[0]=dot_coefficient;H[0,0]+=y[0]",
+          "mgs_coefficient_source": "y[0]",
+          "y_storage_before_backsolve": "triangular_solution_alias",
+          "mgs_reads_h_0_0_directly": false
+        },
+        "counter_acceptance_contract": {
+          "multi_block_launches_increment_record_counters": false,
+          "restart_begin_accepts_effective_restarts": "0->1",
+          "precondition_accept_accepts_count": "0->1",
+          "operator_accept_accepts_count": "1->2",
+          "effective_iterations_incremented": false,
+          "arnoldi_step_count_incremented": false,
+          "reorthogonalization_count_incremented": false,
+          "late_multiblock_failure_before_accept_may_leave_count_unadvanced": true,
+          "failure_count_parity_proven": false
+        },
+        "end_state": {
+          "schedule_epoch": "16+7*S",
+          "reduction_epoch": "7*S",
+          "phase": "dgks_second_pass_if_after_first_lt_0.717_times_work_before_else_arnoldi",
+          "restart_index": 1,
+          "next_expected_restart": 2,
+          "column_index": 0,
+          "effective_restarts": 1,
+          "effective_iterations": 0,
+          "arnoldi_step_count": 0,
+          "reorthogonalization_count": 0,
+          "operator_apply_count": 2,
+          "preconditioner_apply_count": 1,
+          "reduction_valid_mask": 0,
+          "dgks_reorth_required": "1_if_after_first<0.717*work_before_else_0"
+        }
+      }
+    },
+    "firstColumnCompletionSchedule": {
+      "const": {
+        "schedule_contract_version": "structural-analysis-hip-fgmres-first-column-completion-schedule.v2",
+        "predecessor_contract": {
+          "schedule_contract_version": "structural-analysis-hip-fgmres-first-column-partial-schedule.v2",
+          "schedule_hash": "sha256:dc6d1306ae3c7c0f970afcbe433b888cfcea591d6a34c6f36657e30ecc9c3b88",
+          "required_end_schedule_epoch": "16+7*S",
+          "required_end_reduction_epoch": "7*S",
+          "required_end_reduction_valid_mask": 0
+        },
+        "scope": {
+          "restart_numbering": "one_based",
+          "restart_index": 1,
+          "column_index": 0,
+          "included_from": "DGKS_DECIDE_ACCEPTED_STATE",
+          "included_through": "ARNOLDI_GIVENS",
+          "dgks_second_pass_included": true,
+          "h_next_reduction_included": true,
+          "v_next_normalization_included": true,
+          "givens_included": true,
+          "normalization_precedes_givens": true,
+          "vector_accept_used_for_v_next": false,
+          "candidate_envelope_included": false,
+          "backsubstitute_included": false,
+          "checkpoint_commit_included": false,
+          "full_recurrence_complete": false
+        },
+        "symbols": {
+          "F": "free_dof_count",
+          "M": "restart_dimension",
+          "I": "max_iterations",
+          "S": "recursive_stage_count(F,ceil(F/512))",
+          "tau": "64*binary64_epsilon=2^-46"
+        },
+        "start_state": {
+          "schedule_epoch": "16+7*S",
+          "reduction_epoch": "7*S",
+          "phase": "dgks_second_pass_if_required_else_arnoldi",
+          "restart_index": 1,
+          "next_expected_restart": 2,
+          "column_index": 0,
+          "effective_restarts": 1,
+          "effective_iterations": 0,
+          "arnoldi_step_count": 0,
+          "reorthogonalization_count": 0,
+          "operator_apply_count": 2,
+          "preconditioner_apply_count": 1,
+          "reduction_valid_mask": 0,
+          "dgks_reorth_required": "0_or_1_from_strict_dgks_decision"
+        },
+        "launches": [
+          {
+            "name": "REDUCE_DOT_SECOND_PASS_ROW0",
+            "symbol": "engine_v2_fgmres_reduce_v2",
+            "first_mode": "DOT_W_VI",
+            "combine_mode": "COMBINE_SUM",
+            "gate_source": "dgks_reorth_required",
+            "expected_schedule_epoch": "16+q",
+            "expected_reduction_epoch": "q=7*S..8*S-1",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": 0,
+            "orthogonalization_row": 0,
+            "orthogonalization_pass": 1,
+            "intermediate_target": "NONE",
+            "final_target": "DOT",
+            "phase_before": "dgks_second_pass_if_required_else_arnoldi",
+            "phase_after": "unchanged",
+            "gate_true_effect": "final_stage_sets_DOT_valid_bit_0_mask_1",
+            "gate_false_effect": "claim_schedule_and_reduction_epochs_without_numeric_read_write_or_target_publish"
+          },
+          {
+            "name": "CONTROL_DOT_ACCEPT_ROW0_PASS1",
+            "symbol": "engine_v2_fgmres_control_v2",
+            "mode": "DOT_ACCEPT",
+            "gate_source": "dgks_reorth_required",
+            "expected_schedule_epoch": "16+8*S",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "row_index": 0,
+            "pass_index": 1,
+            "phase_before": "dgks_second_pass_if_required_else_arnoldi",
+            "phase_after": "unchanged",
+            "required_valid_mask": "1_if_gate_true_else_0",
+            "result_valid_mask": 0,
+            "gate_true_effect": "y[0]=dot_coefficient,H[0,0]=checked(H[0,0]+y[0]),clear_DOT_bit_and_dot_coefficient",
+            "gate_false_effect": "y[0]=positive_zero,H[0,0]_unchanged"
+          },
+          {
+            "name": "VECTOR_MGS_SUBTRACT_ROW0_PASS1",
+            "symbol": "engine_v2_fgmres_vector_v2",
+            "mode": "MGS_SUBTRACT_INDEXED",
+            "gate": "DGKS_SECOND_PASS",
+            "expected_schedule_epoch": "17+8*S",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": 0,
+            "orthogonalization_row": 0,
+            "orthogonalization_pass": 1,
+            "phase_before": "dgks_second_pass_if_required_else_arnoldi",
+            "phase_after": "unchanged",
+            "gate_true_effect": "work_w[k]=checked(work_w[k]-y[0]*V[0,k])",
+            "gate_false_effect": "claim_schedule_without_vector_read_or_write"
+          },
+          {
+            "name": "REDUCE_H_NEXT",
+            "symbol": "engine_v2_fgmres_reduce_v2",
+            "first_mode": "LASSQ_WORK_W",
+            "combine_mode": "COMBINE_LASSQ",
+            "expected_schedule_epoch": "18+q",
+            "expected_reduction_epoch": "q=8*S..9*S-1",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": 0,
+            "intermediate_target": "NONE",
+            "final_target": "H_NEXT",
+            "phase_before": "dgks_second_pass_if_required_else_arnoldi",
+            "phase_after": "unchanged",
+            "accepted_effect": "final_stage_sets_H_NEXT_valid_bit_7_mask_128"
+          },
+          {
+            "name": "VECTOR_NORMALIZE_V1",
+            "symbol": "engine_v2_fgmres_vector_v2",
+            "mode": "NORMALIZE_V_NEXT",
+            "gate": "ACTIVE",
+            "expected_schedule_epoch": "18+9*S",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": 1,
+            "phase_before": "dgks_second_pass_if_required_else_arnoldi",
+            "phase_after": "unchanged",
+            "required_valid_mask": 128,
+            "result_valid_mask": 128,
+            "accepted_effect": "if_h_next_le_tau_times_work_before_set_invariant_and_V[1,:]=positive_zero_else_V[1,k]=checked(work_w[k]/h_next)"
+          },
+          {
+            "name": "CONTROL_ARNOLDI_GIVENS_COLUMN0",
+            "symbol": "engine_v2_fgmres_control_v2",
+            "mode": "ARNOLDI_GIVENS",
+            "expected_schedule_epoch": "19+9*S",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "row_index": -1,
+            "pass_index": -1,
+            "phase_before": "dgks_second_pass_if_required_else_arnoldi",
+            "phase_after": "candidate_if_reason_bits_nonzero_else_arnoldi",
+            "required_valid_mask": 128,
+            "result_valid_mask": 0,
+            "accepted_effect": "accept_normalized_or_breakdown_zero_V1,apply_column0_givens,publish_metrics_and_counts,retain_column_0"
+          }
+        ],
+        "gated_second_pass_contract": {
+          "host_schedule_is_flag_independent": true,
+          "all_S_dot_stages_submitted_for_both_gate_values": true,
+          "gate_false_claims_schedule_epoch": true,
+          "gate_false_claims_reduction_epoch": true,
+          "gate_false_reads_numeric_vectors": false,
+          "gate_false_writes_reduction_scratch": false,
+          "gate_false_publishes_dot_target_or_valid_bit": false,
+          "gate_false_dot_accept_requires_mask": 0,
+          "gate_false_mgs_reads_or_writes_vector": false,
+          "gate_true_dot_accept_requires_mask": 1,
+          "reorthogonalization_count_increments_at_givens_accept_only": true
+        },
+        "reduction_validity_contract": {
+          "target_codes": {
+            "DOT": 1,
+            "H_NEXT": 8
+          },
+          "valid_bits": {
+            "DOT": 0,
+            "H_NEXT": 7
+          },
+          "mask_at_start": 0,
+          "mask_after_second_dot": "1_if_dgks_required_else_0",
+          "dot_accept_consumes": [
+            "DOT_if_dgks_required"
+          ],
+          "mask_after_second_dot_accept": 0,
+          "mask_after_h_next": 128,
+          "normalization_preserves": [
+            "H_NEXT"
+          ],
+          "givens_consumes": [
+            "H_NEXT"
+          ],
+          "mask_at_end": 0,
+          "intermediate_stages_use_none_target": true,
+          "only_active_final_stages_publish_named_target": true
+        },
+        "arithmetic_contract": {
+          "binary64_epsilon_hex": "0x1.0000000000000p-52",
+          "tau_hex": "0x1.0000000000000p-46",
+          "tau_decimal": 1.4210854715202004e-14,
+          "fp_contraction_allowed": false,
+          "second_dot": "fixed_256_thread_512_value_product_then_sum_tree",
+          "h_accumulation": "H[0,0]=checked(H[0,0]+second_dot)",
+          "second_mgs": "work_w[k]=checked(work_w[k]-second_dot*V[0,k])",
+          "h_next": "fixed_256_thread_512_value_scale_first_LASSQ(work_w)",
+          "invariant_breakdown_threshold": "tau*work_before_l2",
+          "invariant_breakdown_comparison": "h_next_l2<=threshold",
+          "threshold_has_unit_floor": false,
+          "normalize_before_givens": true,
+          "normalization_breakdown_effect": "V[1,:]=positive_zero_without_division",
+          "normalization_active_effect": "V[1,k]=checked(work_w[k]/h_next_l2)",
+          "rotation_prior_row_count": 0,
+          "rotation_upper": "u=H[0,0]",
+          "rotation_lower": "l=H[1,0]=h_next_l2",
+          "rotation_norm": "rho=hypot(u,l)",
+          "rotation_scale": "max(abs(u),abs(l))",
+          "rotation_breakdown_threshold": "tau*rotation_scale",
+          "rotation_breakdown_comparison": "not_finite(rho)_or_rho<=rotation_breakdown_threshold",
+          "rotation_breakdown_effect": "invariant_breakdown=1,c[0]=1,s[0]=0,H_entries_unchanged",
+          "rotation_active_effect": "c[0]=u/rho,s[0]=l/rho,H[0,0]=rho,H[1,0]=positive_zero",
+          "signed_rotation_convention": "[u';l']=[c*u+s*l;-s*u+c*l],g[1]=-s*g_old",
+          "g_update_order": "g_old=g[0];g[0]=checked(c[0]*g_old);g[1]=checked(-s[0]*g_old)",
+          "estimated_residual": "abs(g[1])",
+          "all_stored_zero_values_are_positive_zero": true
+        },
+        "dense_contract": {
+          "offset_unit": "fp64_elements_from_dense_base",
+          "h_0_0_element_offset": 0,
+          "h_1_0_element_offset": 1,
+          "c_0_element_offset": "M*(M+1)",
+          "s_0_element_offset": "M*(M+1)+M",
+          "g_0_element_offset": "M*(M+1)+2*M",
+          "g_1_element_offset": "M*(M+1)+2*M+1",
+          "y_0_element_offset": "M*(M+1)+3*M+1",
+          "y_0_role_before_givens": "second_pass_dot_transient_or_positive_zero",
+          "rotation_only_breakdown_retains_normalized_unused_V1": true
+        },
+        "candidate_contract": {
+          "reason_bits": {
+            "estimated_l2_trigger": 0,
+            "invariant_or_rotation_breakdown": 1,
+            "planned_cycle_end": 2
+          },
+          "estimated_l2_trigger": "estimated_residual_l2<=solver_tolerance_l2",
+          "breakdown_trigger": "invariant_breakdown!=0",
+          "planned_cycle_end_trigger": "column_index+1>=cycle_width",
+          "reason_bits_are_bitwise_or": true,
+          "candidate_required": "1_if_reason_bits_nonzero_else_0",
+          "phase_after_givens": "candidate_if_required_else_arnoldi",
+          "candidate_schedule_included_here": false
+        },
+        "counter_record_acceptance_contract": {
+          "normalization_changes_counters_or_public_record": false,
+          "givens_is_the_accept_after_multiblock_normalization": true,
+          "effective_iterations": "0->1",
+          "arnoldi_step_count": "0->1",
+          "effective_arnoldi_dimension": "0->1",
+          "reorthogonalization_count": "0->dgks_reorth_required",
+          "operator_apply_count": "preserve_2",
+          "preconditioner_apply_count": "preserve_1",
+          "happy_breakdown_count": "preserve_0_until_true_residual_checkpoint",
+          "record_estimated_residual_l2": {
+            "offset_bytes": 152,
+            "value": "abs(g[1])"
+          },
+          "record_arnoldi_work_l2": {
+            "offset_bytes": 160,
+            "value": "work_before_l2"
+          },
+          "record_arnoldi_breakdown_threshold": {
+            "offset_bytes": 168,
+            "value": "tau*work_before_l2"
+          },
+          "solution_and_true_residual_record_fields_change": false,
+          "late_normalization_failure_advances_counts_or_record_metrics": false
+        },
+        "column_phase_contract": {
+          "column_index_after_givens": 0,
+          "candidate_required_true_phase": "candidate",
+          "candidate_required_false_phase": "arnoldi",
+          "fixed_candidate_envelope_uses_expected_column": 0,
+          "no_candidate_envelope_still_submitted_as_gated_noops": true,
+          "advance_to_column_1_at_givens_or_normalization": false,
+          "advance_authority": "future_CHECKPOINT_FINALIZE_column_boundary"
+        },
+        "end_state": {
+          "schedule_epoch": "20+9*S",
+          "reduction_epoch": "9*S",
+          "phase": "candidate_if_reason_bits_nonzero_else_arnoldi",
+          "restart_index": 1,
+          "next_expected_restart": 2,
+          "column_index": 0,
+          "effective_restarts": 1,
+          "effective_iterations": 1,
+          "arnoldi_step_count": 1,
+          "effective_arnoldi_dimension": 1,
+          "reorthogonalization_count": "0_or_1_from_consumed_dgks_flag",
+          "operator_apply_count": 2,
+          "preconditioner_apply_count": 1,
+          "reduction_valid_mask": 0,
+          "dgks_reorth_required": 0,
+          "candidate_required": "1_if_candidate_reason_bits_nonzero_else_0",
+          "candidate_reason_bits": "bitwise_or_of_bits_0_1_2",
+          "solution_and_true_residual_committed": false
+        }
+      }
+    },
+    "firstColumnCandidatePreparationSchedule": {
+      "const": {
+        "schedule_contract_version": "structural-analysis-hip-fgmres-first-column-candidate-preparation-schedule.v2",
+        "predecessor_contract": {
+          "schedule_contract_version": "structural-analysis-hip-fgmres-first-column-completion-schedule.v2",
+          "schedule_hash": "sha256:941f1191e4acd806ae6616c36599949506e87219199908e3aa62ee116ac6dbb4",
+          "required_end_schedule_epoch": "20+9*S",
+          "required_end_reduction_epoch": "9*S",
+          "required_end_reduction_valid_mask": 0
+        },
+        "scope": {
+          "restart_numbering": "one_based",
+          "restart_index": 1,
+          "column_index": 0,
+          "included_from": "ARNOLDI_GIVENS_ACCEPTED_STATE",
+          "included_through": "VECTOR_ACCEPT",
+          "candidate_preparation_included": true,
+          "backsubstitute_included": true,
+          "trial_vector_build_included": true,
+          "solution_update_l2_included": true,
+          "vector_accept_included": true,
+          "candidate_false_claim_only": true,
+          "triangular_breakdown_claim_only_after_backsubstitute": true,
+          "candidate_true_residual_included": false,
+          "candidate_spmv_included": false,
+          "checkpoint_decide_included": false,
+          "checkpoint_commit_included": false,
+          "full_recurrence_complete": false
+        },
+        "symbols": {
+          "F": "free_dof_count",
+          "M": "restart_dimension",
+          "S": "recursive_stage_count(F,ceil(F/512))",
+          "tau": "64*binary64_epsilon=2^-46"
+        },
+        "start_state": {
+          "schedule_epoch": "20+9*S",
+          "reduction_epoch": "9*S",
+          "phase": "candidate_if_candidate_required_else_arnoldi",
+          "restart_index": 1,
+          "next_expected_restart": 2,
+          "column_index": 0,
+          "effective_restarts": 1,
+          "effective_iterations": 1,
+          "arnoldi_step_count": 1,
+          "effective_arnoldi_dimension": 1,
+          "operator_apply_count": 2,
+          "preconditioner_apply_count": 1,
+          "reduction_valid_mask": 0,
+          "candidate_required": "0_or_1_from_candidate_reason_bits",
+          "triangular_breakdown": 0,
+          "invariant_breakdown": "0_or_1_from_givens"
+        },
+        "launches": [
+          {
+            "name": "CONTROL_BACKSUBSTITUTE_COLUMN0",
+            "symbol": "engine_v2_fgmres_control_v2",
+            "mode": "BACKSUBSTITUTE",
+            "gate_source": "candidate_required",
+            "expected_schedule_epoch": "20+9*S",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "row_index": -1,
+            "pass_index": -1,
+            "phase_before": "candidate_if_required_else_arnoldi",
+            "phase_after": "unchanged",
+            "required_valid_mask": 0,
+            "result_valid_mask": 0,
+            "gate_true_success_effect": "triangular_scale=abs(H[0,0]),y[0]=checked(g[0]/H[0,0]),triangular_breakdown=0,invariant_breakdown=preserve",
+            "gate_true_pivot_breakdown_effect": "triangular_scale=abs(H[0,0]),y[0]=positive_zero,triangular_breakdown=1,invariant_breakdown=1",
+            "gate_false_effect": "claim_schedule_without_dense_read_or_write_and_preserve_triangular_breakdown_zero_and_invariant_breakdown"
+          },
+          {
+            "name": "VECTOR_BUILD_TRIAL_X_COLUMN0",
+            "symbol": "engine_v2_fgmres_vector_v2",
+            "mode": "BUILD_TRIAL_X",
+            "gate": "CANDIDATE_REQUIRED",
+            "numeric_gate": "candidate_required_and_not_triangular_breakdown",
+            "expected_schedule_epoch": "21+9*S",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": 0,
+            "phase_before": "candidate_if_required_else_arnoldi",
+            "phase_after": "unchanged",
+            "gate_true_effect": "work_w[k]=checked(solution_x[k]+y[0]*Z[0,k])",
+            "gate_false_effect": "claim_schedule_without_solution_basis_dense_or_work_vector_read_or_write"
+          },
+          {
+            "name": "REDUCE_SOLUTION_UPDATE_L2_COLUMN0",
+            "symbol": "engine_v2_fgmres_reduce_v2",
+            "first_mode": "LASSQ_WORK_W_MINUS_X",
+            "combine_mode": "COMBINE_LASSQ",
+            "numeric_gate": "candidate_required_and_not_triangular_breakdown",
+            "expected_schedule_epoch": "22+q",
+            "expected_reduction_epoch": "q=9*S..10*S-1",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": 0,
+            "intermediate_target": "NONE",
+            "final_target": "UPDATE_L2",
+            "phase_before": "candidate_if_required_else_arnoldi",
+            "phase_after": "unchanged",
+            "gate_true_effect": "final_stage_sets_UPDATE_L2_valid_bit_10_mask_1024",
+            "gate_false_effect": "claim_all_schedule_and_reduction_epochs_without_numeric_read_write_or_target_publish"
+          },
+          {
+            "name": "CONTROL_VECTOR_ACCEPT_TRIAL_COLUMN0",
+            "symbol": "engine_v2_fgmres_control_v2",
+            "mode": "VECTOR_ACCEPT",
+            "gate_source": "candidate_required_and_not_triangular_breakdown",
+            "expected_schedule_epoch": "22+10*S",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "row_index": -1,
+            "pass_index": -1,
+            "phase_before": "candidate_if_required_else_arnoldi",
+            "phase_after": "unchanged",
+            "required_valid_mask": "1024_if_candidate_required_and_not_triangular_breakdown_else_0",
+            "result_valid_mask": "same_as_required_valid_mask",
+            "gate_true_effect": "accept_finite_nonnegative_solution_update_l2_and_preserve_UPDATE_L2_for_future_CHECKPOINT_DECIDE",
+            "gate_false_effect": "claim_schedule_without_scalar_vector_or_record_mutation"
+          }
+        ],
+        "backsubstitution_contract": {
+          "active_count": 1,
+          "upper_factor_scale": "max_abs(H[0:1,0:1])=abs(H[0,0])",
+          "pivot": "H[0,0]",
+          "pivot_floor": "tau*upper_factor_scale",
+          "pivot_breakdown_comparison": "upper_factor_scale==0_or_abs(pivot)<=pivot_floor",
+          "pivot_floor_has_unit_floor": false,
+          "nonfinite_scale_or_pivot_is_arithmetic_failure": true,
+          "triangular_solution": "y[0]=checked(g[0]/H[0,0])",
+          "candidate_false_reads_or_writes_dense": false,
+          "pivot_breakdown_promotes_invariant_breakdown": true,
+          "success_preserves_preexisting_invariant_breakdown": true,
+          "candidate_false_preserves_preexisting_invariant_breakdown": true,
+          "triangular_scale_record_offset_bytes": 176
+        },
+        "trial_vector_contract": {
+          "formula": "work_w[k]=solution_x[k]+y[0]*Z[0,k]",
+          "evaluation_order": "multiply_then_add_without_fp_contraction",
+          "all_stored_zero_values_are_positive_zero": true,
+          "work_w_role_after_build": "candidate_trial_x",
+          "additional_O_F_workspace_allowed": false
+        },
+        "gated_preparation_contract": {
+          "host_schedule_is_candidate_flag_independent": true,
+          "all_four_launch_groups_submitted_for_both_candidate_values": true,
+          "all_S_update_stages_submitted_for_all_gate_values": true,
+          "candidate_false_claims_schedule_epochs": true,
+          "candidate_false_claims_reduction_epochs": true,
+          "candidate_false_reads_numeric_data": false,
+          "candidate_false_writes_numeric_data_or_reduction_scratch": false,
+          "candidate_false_publishes_target_or_valid_bit": false,
+          "triangular_breakdown_claims_remaining_schedule_epochs": true,
+          "triangular_breakdown_claims_update_reduction_epochs": true,
+          "triangular_breakdown_reads_or_writes_trial_numeric_data": false,
+          "triangular_breakdown_publishes_update_target_or_valid_bit": false
+        },
+        "reduction_validity_contract": {
+          "target_code": { "UPDATE_L2": 11 },
+          "valid_bit": { "UPDATE_L2": 10 },
+          "mask_at_start": 0,
+          "mask_after_update_tree": "1024_if_candidate_required_and_not_triangular_breakdown_else_0",
+          "vector_accept_requires": "UPDATE_L2_if_candidate_required_and_not_triangular_breakdown_else_none",
+          "vector_accept_preserves": ["UPDATE_L2_if_present"],
+          "mask_at_end": "1024_if_candidate_required_and_not_triangular_breakdown_else_0",
+          "future_consumer": "CHECKPOINT_DECIDE",
+          "intermediate_stages_use_none_target": true,
+          "only_active_final_stage_publishes_named_target": true
+        },
+        "dense_contract": {
+          "offset_unit": "fp64_elements_from_dense_base",
+          "h_0_0_element_offset": 0,
+          "g_0_element_offset": "M*(M+1)+2*M",
+          "y_0_element_offset": "M*(M+1)+3*M+1",
+          "z_0_element_formula": "basis_z_base[0*F+k]"
+        },
+        "counter_phase_contract": {
+          "effective_restarts": "preserve_1",
+          "effective_iterations": "preserve_1",
+          "arnoldi_step_count": "preserve_1",
+          "effective_arnoldi_dimension": "preserve_1",
+          "operator_apply_count": "preserve_2",
+          "preconditioner_apply_count": "preserve_1",
+          "phase": "preserve_candidate_if_required_else_arnoldi",
+          "column_index": "preserve_0",
+          "candidate_required": "preserve",
+          "candidate_reason_bits": "preserve",
+          "invariant_breakdown": "preserve_unless_active_pivot_breakdown_promotes_to_1",
+          "solution_and_true_residual_committed": false
+        },
+        "end_state": {
+          "schedule_epoch": "23+10*S",
+          "reduction_epoch": "10*S",
+          "phase": "candidate_if_candidate_required_else_arnoldi",
+          "restart_index": 1,
+          "next_expected_restart": 2,
+          "column_index": 0,
+          "effective_restarts": 1,
+          "effective_iterations": 1,
+          "arnoldi_step_count": 1,
+          "effective_arnoldi_dimension": 1,
+          "operator_apply_count": 2,
+          "preconditioner_apply_count": 1,
+          "candidate_required": "preserved_0_or_1",
+          "candidate_reason_bits": "preserved_bitwise_or_of_bits_0_1_2",
+          "triangular_breakdown": "1_only_if_active_scale_relative_pivot_breaks_else_0",
+          "invariant_breakdown": "1_if_preexisting_or_active_pivot_breakdown_else_0",
+          "reduction_valid_mask": "1024_if_candidate_required_and_not_triangular_breakdown_else_0",
+          "solution_and_true_residual_committed": false
+        }
+      }
+    },
+    "firstColumnCandidateResidualSchedule": {
+      "const": {
+        "schedule_contract_version": "structural-analysis-hip-fgmres-first-column-candidate-residual-schedule.v2",
+        "predecessor_contract": {
+          "schedule_contract_version": "structural-analysis-hip-fgmres-first-column-candidate-preparation-schedule.v2",
+          "schedule_hash": "sha256:8df0561cf0988539ed8718dc7348a1e2a85c86f474056ca156c8b8c6d5bb1aec",
+          "required_end_schedule_epoch": "23+10*S",
+          "required_end_reduction_epoch": "10*S",
+          "required_active_end_reduction_valid_mask": 1024,
+          "required_inactive_end_reduction_valid_mask": 0
+        },
+        "scope": {
+          "restart_numbering": "one_based",
+          "restart_index": 1,
+          "column_index": 0,
+          "included_from": "CANDIDATE_PREPARATION_ACCEPTED_STATE",
+          "included_through": "CANDIDATE_LINF_FINAL_STAGE",
+          "candidate_spmv_included": true,
+          "candidate_operator_accept_included": true,
+          "candidate_residual_formation_included": true,
+          "candidate_l2_included": true,
+          "candidate_linf_included": true,
+          "candidate_false_claim_only": true,
+          "triangular_breakdown_claim_only": true,
+          "trial_x_l2_included": false,
+          "committed_x_l2_included": false,
+          "checkpoint_decide_included": false,
+          "checkpoint_commit_included": false,
+          "full_recurrence_complete": false
+        },
+        "symbols": {
+          "F": "free_dof_count",
+          "M": "restart_dimension",
+          "S": "recursive_stage_count(F,ceil(F/512))",
+          "q": "absolute_reduction_epoch"
+        },
+        "active_predicate": {
+          "expression": "candidate_required_and_not_triangular_breakdown",
+          "candidate_required_value": 1,
+          "triangular_breakdown_value": 0,
+          "evaluated_on_device_for_every_submitted_launch": true,
+          "host_submission_depends_on_predicate": false
+        },
+        "start_state": {
+          "schedule_epoch": "23+10*S",
+          "reduction_epoch": "10*S",
+          "phase": "candidate_if_candidate_required_else_arnoldi",
+          "restart_index": 1,
+          "next_expected_restart": 2,
+          "column_index": 0,
+          "effective_restarts": 1,
+          "effective_iterations": 1,
+          "arnoldi_step_count": 1,
+          "effective_arnoldi_dimension": 1,
+          "operator_apply_count": 2,
+          "preconditioner_apply_count": 1,
+          "candidate_required": "preserved_0_or_1",
+          "candidate_reason_bits": "preserved_bitwise_or_of_bits_0_1_2",
+          "triangular_breakdown": "preserved_0_or_1",
+          "invariant_breakdown": "preserved_0_or_1",
+          "reduction_valid_mask": "1024_if_active_predicate_else_0",
+          "work_w_role": "candidate_trial_x_if_active_predicate",
+          "solution_and_true_residual_committed": false
+        },
+        "launches": [
+          {
+            "name": "SPMV_CANDIDATE_COLUMN0",
+            "symbol": "engine_v2_fgmres_csr_spmv_indexed_v2",
+            "mode": "CANDIDATE",
+            "numeric_gate": "candidate_required_and_not_triangular_breakdown",
+            "expected_schedule_epoch": "23+10*S",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": "M",
+            "phase_before": "candidate_if_required_else_arnoldi",
+            "phase_after": "unchanged",
+            "gate_true_effect": "V[M,k]=checked(A*work_w)[k]",
+            "gate_false_effect": "claim_schedule_without_csr_work_w_basis_v_solution_or_scratch_access"
+          },
+          {
+            "name": "CONTROL_OPERATOR_ACCEPT_CANDIDATE_COLUMN0",
+            "symbol": "engine_v2_fgmres_control_v2",
+            "mode": "OPERATOR_ACCEPT",
+            "gate_source": "candidate_required_and_not_triangular_breakdown",
+            "expected_schedule_epoch": "24+10*S",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "row_index": -1,
+            "pass_index": -1,
+            "phase_before": "candidate_if_required_else_arnoldi",
+            "phase_after": "unchanged",
+            "required_valid_mask": "1024_if_active_predicate_else_0",
+            "result_valid_mask": "same_as_required_valid_mask",
+            "gate_true_effect": "operator_apply_count=2->3",
+            "gate_false_effect": "claim_schedule_without_operator_count_scalar_or_record_mutation"
+          },
+          {
+            "name": "VECTOR_FORM_CANDIDATE_RESIDUAL_COLUMN0",
+            "symbol": "engine_v2_fgmres_vector_v2",
+            "mode": "FORM_CANDIDATE_RESIDUAL",
+            "gate": "CANDIDATE_REQUIRED",
+            "numeric_gate": "candidate_required_and_not_triangular_breakdown",
+            "expected_schedule_epoch": "25+10*S",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": "M",
+            "phase_before": "candidate_if_required_else_arnoldi",
+            "phase_after": "unchanged",
+            "gate_true_effect": "V[M,k]=checked(reduced_load[k]-V[M,k])",
+            "gate_false_effect": "claim_schedule_without_load_basis_v_work_w_solution_or_scratch_access"
+          },
+          {
+            "name": "REDUCE_CANDIDATE_L2_COLUMN0",
+            "symbol": "engine_v2_fgmres_reduce_v2",
+            "first_mode": "LASSQ_V_M",
+            "combine_mode": "COMBINE_LASSQ",
+            "numeric_gate": "candidate_required_and_not_triangular_breakdown",
+            "expected_schedule_epoch": "26+q",
+            "expected_reduction_epoch": "q=10*S..11*S-1",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": "M",
+            "intermediate_target": "NONE",
+            "final_target": "CANDIDATE_L2",
+            "final_target_code": 9,
+            "final_valid_bit": 8,
+            "phase_before": "candidate_if_required_else_arnoldi",
+            "phase_after": "unchanged",
+            "gate_true_effect": "final_stage_publishes_raw_candidate_l2_and_sets_bit_8_mask_1024_to_1280",
+            "gate_false_effect": "claim_all_schedule_and_reduction_epochs_without_basis_v_reduction_scratch_or_target_access"
+          },
+          {
+            "name": "REDUCE_CANDIDATE_LINF_COLUMN0",
+            "symbol": "engine_v2_fgmres_reduce_v2",
+            "first_mode": "LINF_V_M",
+            "combine_mode": "COMBINE_MAX",
+            "numeric_gate": "candidate_required_and_not_triangular_breakdown",
+            "expected_schedule_epoch": "26+q",
+            "expected_reduction_epoch": "q=11*S..12*S-1",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": "M",
+            "intermediate_target": "NONE",
+            "final_target": "CANDIDATE_LINF",
+            "final_target_code": 10,
+            "final_valid_bit": 9,
+            "phase_before": "candidate_if_required_else_arnoldi",
+            "phase_after": "unchanged",
+            "gate_true_effect": "final_stage_publishes_raw_candidate_linf_and_sets_bit_9_mask_1280_to_1792",
+            "gate_false_effect": "claim_all_schedule_and_reduction_epochs_without_basis_v_reduction_scratch_or_target_access"
+          }
+        ],
+        "candidate_residual_contract": {
+          "candidate_spmv_formula": "V[M]=A*work_w",
+          "candidate_residual_formula": "V[M]=reduced_load-V[M]",
+          "candidate_residual_formation_is_in_place": true,
+          "candidate_residual_storage_after_active_replay": "V[M]",
+          "candidate_trial_storage_after_active_replay": "work_w",
+          "solution_x_modified": false,
+          "true_residual_modified": false,
+          "additional_O_F_workspace_allowed": false
+        },
+        "always_submit_gated_contract": {
+          "host_schedule_is_gate_independent": true,
+          "all_five_launch_groups_submitted_for_all_gate_values": true,
+          "all_2S_reduction_stages_submitted_for_all_gate_values": true,
+          "inactive_claims_all_schedule_epochs": true,
+          "inactive_claims_all_reduction_epochs": true,
+          "inactive_reads_csr": false,
+          "inactive_reads_reduced_load": false,
+          "inactive_reads_work_w": false,
+          "inactive_reads_or_writes_basis_v_M": false,
+          "inactive_reads_or_writes_solution_x": false,
+          "inactive_reads_or_writes_reduction_scratch": false,
+          "inactive_reads_or_writes_reduction_targets": false,
+          "inactive_operator_apply_count": 2,
+          "inactive_reduction_valid_mask": 0
+        },
+        "reduction_validity_contract": {
+          "target_codes": {
+            "CANDIDATE_L2": 9,
+            "CANDIDATE_LINF": 10
+          },
+          "valid_bits": {
+            "CANDIDATE_L2": 8,
+            "CANDIDATE_LINF": 9
+          },
+          "active_mask_at_start": 1024,
+          "active_mask_after_candidate_l2": 1280,
+          "active_mask_after_candidate_linf": 1792,
+          "inactive_mask_at_all_epochs": 0,
+          "update_l2_bit_preserved": true,
+          "intermediate_stages_use_none_target": true,
+          "only_active_final_stages_publish_named_targets": true,
+          "future_consumer": "CHECKPOINT_DECIDE"
+        },
+        "numeric_policy_contract": {
+          "candidate_l2_algorithm": "scale_first_lassq_fp64",
+          "candidate_l2_input_finiteness_required": true,
+          "represented_fp64_final_l2_overflow_policy": "terminal_nonfinite_arithmetic_failure",
+          "represented_fp64_final_l2_overflow_exact_cpu_parity_claimed": false,
+          "cpu_edge_difference": "cpu_early_candidate_gate_false_may_continue_while_device_reduction_fails_closed",
+          "candidate_linf_published_value": "raw_max_abs_candidate_residual",
+          "scaled_candidate_linf_persisted": false,
+          "candidate_scaled_residual_decision_included": false
+        },
+        "counter_phase_contract": {
+          "effective_restarts": "preserve_1",
+          "effective_iterations": "preserve_1",
+          "arnoldi_step_count": "preserve_1",
+          "effective_arnoldi_dimension": "preserve_1",
+          "preconditioner_apply_count": "preserve_1",
+          "operator_apply_count": "3_if_active_predicate_else_preserve_2",
+          "phase": "preserve_candidate_if_required_else_arnoldi",
+          "column_index": "preserve_0",
+          "candidate_required": "preserve",
+          "candidate_reason_bits": "preserve",
+          "triangular_breakdown": "preserve",
+          "invariant_breakdown": "preserve",
+          "solution_and_true_residual_committed": false
+        },
+        "stop_boundary": {
+          "stops_before": [
+            "TRIAL_X_L2",
+            "COMMITTED_X_L2",
+            "CHECKPOINT_DECIDE"
+          ],
+          "checkpoint_decision_or_commit_performed": false,
+          "reduction_target_consumer_metadata_modified": false,
+          "solution_and_true_residual_committed": false
+        },
+        "end_state": {
+          "schedule_epoch": "26+12*S",
+          "reduction_epoch": "12*S",
+          "phase": "candidate_if_candidate_required_else_arnoldi",
+          "restart_index": 1,
+          "next_expected_restart": 2,
+          "column_index": 0,
+          "effective_restarts": 1,
+          "effective_iterations": 1,
+          "arnoldi_step_count": 1,
+          "effective_arnoldi_dimension": 1,
+          "operator_apply_count": "3_if_active_predicate_else_2",
+          "preconditioner_apply_count": 1,
+          "candidate_required": "preserved_0_or_1",
+          "candidate_reason_bits": "preserved_bitwise_or_of_bits_0_1_2",
+          "triangular_breakdown": "preserved_0_or_1",
+          "invariant_breakdown": "preserved_0_or_1",
+          "reduction_valid_mask": "1792_if_active_predicate_else_0",
+          "basis_v_M_role": "candidate_residual_if_active_else_unchanged",
+          "work_w_role": "candidate_trial_x_if_active_else_unchanged",
+          "candidate_l2_linf": "raw_published_if_active_else_unmodified",
+          "solution_and_true_residual_committed": false
+        }
+      }
+    },
+    "firstColumnCandidateScaleMetricsSchedule": {
+      "const": {
+        "schedule_contract_version": "structural-analysis-hip-fgmres-first-column-candidate-scale-metrics-schedule.v2",
+        "predecessor_contract": {
+          "schedule_contract_version": "structural-analysis-hip-fgmres-first-column-candidate-residual-schedule.v2",
+          "schedule_hash": "sha256:c2c74ad20a4b881ad209a632d021cbf368d8ae042bca5f161e82cb0bae9c4ad3",
+          "required_end_schedule_epoch": "26+12*S",
+          "required_end_reduction_epoch": "12*S",
+          "required_inactive_end_reduction_valid_mask": 0,
+          "required_active_end_reduction_valid_mask": 1792
+        },
+        "scope": {
+          "restart_numbering": "one_based",
+          "restart_index": 1,
+          "column_index": 0,
+          "included_from": "CANDIDATE_RESIDUAL_METRICS_ACCEPTED_STATE",
+          "included_through": "COMMITTED_X_L2_FINAL_STAGE",
+          "trial_x_l2_included": true,
+          "committed_x_l2_included": true,
+          "device_scale_metrics_predicate_included": true,
+          "fixed_claim_only_when_predicate_false": true,
+          "checkpoint_decide_included": false,
+          "checkpoint_finalize_included": false,
+          "checkpoint_commit_included": false,
+          "x_scale_l2_included": false,
+          "full_recurrence_complete": false
+        },
+        "symbols": {
+          "F": "free_dof_count",
+          "S": "recursive_stage_count(F,ceil(F/512))",
+          "q": "absolute_reduction_epoch",
+          "DBL_MIN_NORMAL": "0x1p-1022"
+        },
+        "scale_metrics_required_contract": {
+          "storage": "device_only_nonpersistent_predicate",
+          "host_submission_depends_on_predicate": false,
+          "expression": "active_candidate_and_planned_cycle_end_bit2_and_not_dual_gate_and_not_invariant_breakdown_and_not_diverged",
+          "evaluation_priority": [
+            "active_candidate",
+            "planned_cycle_end_bit2",
+            "dual_gate",
+            "invariant_breakdown",
+            "divergence"
+          ],
+          "active_candidate": "candidate_required_and_not_triangular_breakdown",
+          "planned_cycle_end": "candidate_reason_bits_bit_2_is_set",
+          "dual_gate": {
+            "solver_l2_passed": "candidate_l2<=solver_tolerance_l2",
+            "scaled_linf_formula": "candidate_linf/max(1.0,rhs_linf)",
+            "authoritative_linf_passed": "scaled_linf<=authoritative_tolerance",
+            "passed": "solver_l2_passed_and_authoritative_linf_passed",
+            "scaled_linf_persisted": false
+          },
+          "invariant_gate": "invariant_breakdown==0",
+          "divergence": {
+            "base": "max(initial_residual_l2,DBL_MIN_NORMAL)",
+            "DBL_MIN_NORMAL": "0x1p-1022",
+            "threshold": "divergence_factor*base",
+            "comparison": "candidate_l2>threshold",
+            "comparison_is_strict": true,
+            "threshold_product_positive_infinity_means_diverged": false,
+            "threshold_product_positive_infinity_is_arithmetic_error": false
+          },
+          "false_predicate_preserves_cpu_terminal_priority": true
+        },
+        "start_state": {
+          "schedule_epoch": "26+12*S",
+          "reduction_epoch": "12*S",
+          "phase": "candidate_if_candidate_required_else_arnoldi",
+          "restart_index": 1,
+          "next_expected_restart": 2,
+          "column_index": 0,
+          "effective_restarts": 1,
+          "effective_iterations": 1,
+          "arnoldi_step_count": 1,
+          "effective_arnoldi_dimension": 1,
+          "operator_apply_count": "3_if_active_candidate_else_2",
+          "preconditioner_apply_count": 1,
+          "candidate_required": "preserved_0_or_1",
+          "candidate_reason_bits": "preserved_bitwise_or_of_bits_0_1_2",
+          "triangular_breakdown": "preserved_0_or_1",
+          "invariant_breakdown": "preserved_0_or_1",
+          "reduction_valid_mask": "1792_if_active_candidate_else_0",
+          "basis_v_M_role": "candidate_residual_if_active_else_unchanged",
+          "work_w_role": "candidate_trial_x_if_active_else_unchanged",
+          "solution_and_true_residual_committed": false
+        },
+        "launches": [
+          {
+            "name": "REDUCE_TRIAL_X_L2_COLUMN0",
+            "symbol": "engine_v2_fgmres_reduce_v2",
+            "first_mode": "LASSQ_WORK_W",
+            "combine_mode": "COMBINE_LASSQ",
+            "numeric_gate": "scale_metrics_required",
+            "expected_schedule_epoch": "26+q",
+            "expected_reduction_epoch": "q=12*S..13*S-1",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": 0,
+            "intermediate_target": "NONE",
+            "final_target": "TRIAL_X_L2",
+            "final_target_code": 13,
+            "final_valid_bit": 12,
+            "phase_before": "candidate_if_required_else_arnoldi",
+            "phase_after": "unchanged",
+            "gate_true_effect": "final_stage_publishes_trial_x_l2_and_sets_bit_12_mask_1792_to_5888",
+            "gate_false_effect": "claim_all_schedule_and_reduction_epochs_without_work_w_reduction_scratch_or_target_access"
+          },
+          {
+            "name": "REDUCE_COMMITTED_X_L2_COLUMN0",
+            "symbol": "engine_v2_fgmres_reduce_v2",
+            "first_mode": "LASSQ_SOLUTION_X",
+            "combine_mode": "COMBINE_LASSQ",
+            "numeric_gate": "scale_metrics_required",
+            "expected_schedule_epoch": "26+q",
+            "expected_reduction_epoch": "q=13*S..14*S-1",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": 0,
+            "intermediate_target": "NONE",
+            "final_target": "COMMITTED_X_L2",
+            "final_target_code": 12,
+            "final_valid_bit": 11,
+            "phase_before": "candidate_if_required_else_arnoldi",
+            "phase_after": "unchanged",
+            "gate_true_effect": "final_stage_publishes_committed_x_l2_and_sets_bit_11_mask_5888_to_7936",
+            "gate_false_effect": "claim_all_schedule_and_reduction_epochs_without_solution_x_reduction_scratch_or_target_access"
+          }
+        ],
+        "always_submit_gated_contract": {
+          "host_schedule_is_predicate_independent": true,
+          "both_launch_groups_submitted_for_all_predicate_values": true,
+          "all_2S_reduction_stages_submitted_for_all_predicate_values": true,
+          "predicate_false_claims_all_schedule_epochs": true,
+          "predicate_false_claims_all_reduction_epochs": true,
+          "predicate_false_reads_work_w": false,
+          "predicate_false_reads_solution_x": false,
+          "predicate_false_reads_or_writes_reduction_scratch": false,
+          "predicate_false_reads_or_writes_reduction_targets": false,
+          "predicate_false_mutates_solution_or_true_residual": false
+        },
+        "reduction_validity_contract": {
+          "target_codes": {
+            "TRIAL_X_L2": 13,
+            "COMMITTED_X_L2": 12
+          },
+          "valid_bits": {
+            "TRIAL_X_L2": 12,
+            "COMMITTED_X_L2": 11
+          },
+          "inactive_candidate_mask_at_all_epochs": 0,
+          "active_predicate_false_mask_at_all_epochs": 1792,
+          "scale_metrics_mask_at_start": 1792,
+          "scale_metrics_mask_after_trial_x_l2": 5888,
+          "scale_metrics_mask_after_committed_x_l2": 7936,
+          "candidate_update_and_residual_bits_preserved": true,
+          "intermediate_stages_use_none_target": true,
+          "only_predicate_true_final_stages_publish_named_targets": true
+        },
+        "target_lifetime_contract": {
+          "existing_consumer_metadata_modified": false,
+          "trial_x_l2": {
+            "field": "trial_x_l2",
+            "offset_bytes": 240,
+            "valid_bit": 12,
+            "future_consumer": "CHECKPOINT_DECIDE"
+          },
+          "committed_x_l2": {
+            "field": "committed_x_l2",
+            "offset_bytes": 232,
+            "valid_bit": 11,
+            "future_checkpoint_decide_access": "read_only_without_consume",
+            "future_consumer": "CHECKPOINT_FINALIZE",
+            "bit_and_value_preserved_at_slice_end": true,
+            "future_checkpoint_finalize_must_clear": true
+          }
+        },
+        "numeric_policy_contract": {
+          "algorithm": "scale_first_lassq_fp64",
+          "input_finiteness_required_only_when_predicate_true": true,
+          "trial_x_l2_represented_overflow_policy": "terminal_nonfinite_arithmetic_failure_if_predicate_true",
+          "committed_x_l2_represented_overflow_policy": "terminal_nonfinite_arithmetic_failure_if_predicate_true",
+          "predicate_false_overflow_or_nonfinite_sources_inspected": false,
+          "divergence_threshold_positive_infinity_is_not_l2_overflow": true
+        },
+        "counter_phase_contract": {
+          "effective_restarts": "preserve_1",
+          "effective_iterations": "preserve_1",
+          "arnoldi_step_count": "preserve_1",
+          "effective_arnoldi_dimension": "preserve_1",
+          "operator_apply_count": "preserve_3_if_active_candidate_else_2",
+          "preconditioner_apply_count": "preserve_1",
+          "phase": "preserve_candidate_if_required_else_arnoldi",
+          "column_index": "preserve_0",
+          "candidate_required": "preserve",
+          "candidate_reason_bits": "preserve",
+          "triangular_breakdown": "preserve",
+          "invariant_breakdown": "preserve",
+          "solution_and_true_residual_committed": false
+        },
+        "stop_boundary": {
+          "stops_before": [
+            "CHECKPOINT_DECIDE"
+          ],
+          "checkpoint_decision_or_finalize_performed": false,
+          "checkpoint_commit_performed": false,
+          "x_scale_l2_computed_or_persisted": false,
+          "solution_and_true_residual_committed": false
+        },
+        "end_state": {
+          "schedule_epoch": "26+14*S",
+          "reduction_epoch": "14*S",
+          "phase": "candidate_if_candidate_required_else_arnoldi",
+          "restart_index": 1,
+          "next_expected_restart": 2,
+          "column_index": 0,
+          "effective_restarts": 1,
+          "effective_iterations": 1,
+          "arnoldi_step_count": 1,
+          "effective_arnoldi_dimension": 1,
+          "operator_apply_count": "3_if_active_candidate_else_2",
+          "preconditioner_apply_count": 1,
+          "candidate_required": "preserved_0_or_1",
+          "candidate_reason_bits": "preserved_bitwise_or_of_bits_0_1_2",
+          "triangular_breakdown": "preserved_0_or_1",
+          "invariant_breakdown": "preserved_0_or_1",
+          "scale_metrics_required": "device_only_nonpersistent",
+          "reduction_valid_mask": "7936_if_scale_metrics_required_else_1792_if_active_candidate_else_0",
+          "trial_x_l2": "published_if_scale_metrics_required_else_unmodified",
+          "committed_x_l2": "published_and_preserved_if_scale_metrics_required_else_unmodified",
+          "x_scale_l2": "not_computed_or_persisted",
+          "solution_and_true_residual_committed": false
+        }
+      }
+    },
+    "firstColumnPredecessorValidationSchedule": {
+      "const": {
+        "schedule_version": 1,
+        "scope": {
+          "restart_index": 1,
+          "column_index": 0,
+          "standalone_device_validator": true,
+          "checkpoint_transaction_included": false,
+          "later_columns_or_restarts_included": false
+        },
+        "predecessor_contract": {
+          "schedule_hash": "sha256:1bc8a32247ad2255cc5953f525f67b1991a62ffb9f6ca6bf299a898c11468ba8",
+          "required_schedule_epoch": "26+14*S",
+          "required_reduction_epoch": "14*S",
+          "admitted_reduction_valid_masks": [0,1792,7936]
+        },
+        "launch": {
+          "name": "PREDECESSOR_VALIDATE_COLUMN0",
+          "symbol": "engine_v2_fgmres_control_v2",
+          "submission_kind": "control",
+          "control_mode": "PREDECESSOR_VALIDATE",
+          "control_mode_code": 14,
+          "expected_schedule_epoch": "26+14*S",
+          "required_reduction_epoch": "14*S",
+          "expected_restart": 1,
+          "expected_column": 0,
+          "row_index": -1,
+          "pass_index": -1,
+          "device_gate": "active_checkpoint_predecessor"
+        },
+        "seal_contract": {
+          "state_field": "predecessor_validation_state",
+          "mask_snapshot_field": "predecessor_mask_snapshot",
+          "reduction_epoch_snapshot_field": "predecessor_reduction_epoch_snapshot",
+          "empty_state": 0,
+          "armed_state": 1,
+          "consumed_state": 2,
+          "success_advances_schedule_epoch": false,
+          "success_advances_reduction_epoch": false,
+          "duplicate_validation_allowed": false,
+          "allowed_mask_change_after_validation": false,
+          "consumer": "CHECKPOINT_DECIDE",
+          "final_clear_authority": "CHECKPOINT_FINALIZE"
+        },
+        "host_observation_contract": {
+          "actual_mask_host_observed": false,
+          "validation_outcome_host_observed": false,
+          "device_fence_alone_is_host_success_verdict": false
+        },
+        "end_state": {
+          "schedule_epoch": "26+14*S",
+          "reduction_epoch": "14*S",
+          "predecessor_validation_state": "armed_if_valid_else_terminal_failure",
+          "reduction_valid_mask": "device_only_preserved_exact_value"
+        }
+      }
+    },
+    "firstColumnCheckpointTransactionSchedule": {
+      "const": {
+        "schedule_contract_version": "structural-analysis-hip-fgmres-first-column-checkpoint-transaction-schedule.v2",
+        "predecessor_contract": {
+          "schedule_contract_version": "structural-analysis-hip-fgmres-first-column-candidate-scale-metrics-schedule.v2",
+          "schedule_hash": "sha256:1bc8a32247ad2255cc5953f525f67b1991a62ffb9f6ca6bf299a898c11468ba8",
+          "required_end_schedule_epoch": "26+14*S",
+          "required_end_reduction_epoch": "14*S",
+          "required_end_reduction_valid_masks": [
+            0,
+            1792,
+            7936
+          ],
+          "required_inactive_or_triangular_mask": 0,
+          "required_active_scale_false_mask": 1792,
+          "required_active_scale_true_mask": 7936
+        },
+        "scope": {
+          "restart_numbering": "one_based",
+          "restart_index": 1,
+          "column_index": 0,
+          "included_from": "CANDIDATE_SCALE_METRICS_ACCEPTED_STATE",
+          "included_through": "CHECKPOINT_FINALIZE_COLUMN0",
+          "checkpoint_decide_included": true,
+          "checkpoint_source_preflight_included": true,
+          "checkpoint_commit_included": true,
+          "checkpoint_finalize_included": true,
+          "invalid_source_destination_failure_atomicity_contract_included": true,
+          "x_scale_l2_included": true,
+          "restart_record_finalize_included": true,
+          "later_column_included": false,
+          "later_restart_included": false,
+          "final_guard_included": false,
+          "additional_reduction_stages": 0,
+          "additional_vector_preflight_launches": 1,
+          "full_recurrence_complete": false
+        },
+        "symbols": {
+          "F": "free_dof_count",
+          "M": "restart_dimension",
+          "S": "recursive_stage_count(F,ceil(F/512))",
+          "DBL_MIN_NORMAL": "0x1p-1022",
+          "SQRT_EPS": "0x1p-26"
+        },
+        "start_state": {
+          "schedule_epoch": "26+14*S",
+          "reduction_epoch": "14*S",
+          "phase": "candidate_if_candidate_required_else_arnoldi",
+          "restart_index": 1,
+          "next_expected_restart": 2,
+          "column_index": 0,
+          "effective_restarts": 1,
+          "effective_iterations": 1,
+          "arnoldi_step_count": 1,
+          "effective_arnoldi_dimension": 1,
+          "operator_apply_count": "3_if_active_candidate_else_2",
+          "preconditioner_apply_count": 1,
+          "active": 1,
+          "candidate_required": "preserved_0_or_1",
+          "candidate_reason_bits": "preserved_bitwise_or_of_bits_0_1_2",
+          "triangular_breakdown": "preserved_0_or_1",
+          "invariant_breakdown": "preserved_0_or_1",
+          "reduction_valid_mask": "0_or_1792_or_7936_from_exact_predecessor_predicate",
+          "solution_x_role": "committed_solution",
+          "true_residual_role": "committed_true_residual",
+          "work_w_role": "candidate_trial_solution_if_active_else_unchanged",
+          "basis_v_M_role": "candidate_true_residual_if_active_else_unchanged"
+        },
+        "launches": [
+          {
+            "name": "CHECKPOINT_DECIDE_COLUMN0",
+            "symbol": "engine_v2_fgmres_control_v2",
+            "control_mode": "CHECKPOINT_DECIDE",
+            "control_mode_code": 11,
+            "expected_schedule_epoch": "26+14*S",
+            "required_reduction_epoch": "14*S",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "row_index": -1,
+            "pass_index": -1,
+            "phase_before": "candidate_if_required_else_arnoldi",
+            "phase_after_success": "checkpoint_commit",
+            "device_gate_source": "always",
+            "admitted_reduction_valid_masks": [
+              0,
+              1792,
+              7936
+            ],
+            "reduction_valid_mask_effect": "preserve_exact",
+            "active_effect": "preserve_1_until_finalize_on_nonfailure",
+            "allowed_writes": [
+              "commit_required",
+              "continuation_required",
+              "pending_terminal_status",
+              "pending_termination_code",
+              "pending_restart_hint",
+              "pending_restart_flags",
+              "x_scale_l2_if_scale_path",
+              "phase"
+            ],
+            "solve_record_header_or_restart_row_writes": false
+          },
+          {
+            "name": "PREFLIGHT_COMMIT_SOURCE_COLUMN0",
+            "symbol": "engine_v2_fgmres_vector_v2",
+            "vector_mode": "PREFLIGHT_COMMIT_SOURCE",
+            "vector_mode_code": 9,
+            "vector_gate": "COMMIT_REQUIRED",
+            "vector_gate_code": 4,
+            "expected_schedule_epoch": "27+14*S",
+            "required_reduction_epoch": "14*S",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": "M",
+            "phase_before": "checkpoint_commit",
+            "phase_after": "unchanged",
+            "device_gate_source": "commit_required",
+            "admitted_reduction_valid_masks": [
+              0,
+              1792,
+              7936
+            ],
+            "reduction_valid_mask_effect": "preserve_exact",
+            "schedule_epoch_effect": "preserve_exact_nonadvancing",
+            "reduction_epoch_effect": "preserve_exact_nonadvancing",
+            "preflight_state_effect": "legacy_empty_0_or_sealed_consumed_2_to_commit_preflighted_3",
+            "snapshot_effect": "preserve_exact_without_mutation",
+            "gate_true_effect": "parallel_isfinite_scan_of_work_w_k_and_basis_v_M_k_without_destination_access",
+            "gate_false_effect": "publish_commit_preflighted_state_without_reading_or_writing_sources_or_destinations",
+            "solve_record_header_or_restart_row_writes": "failure_diagnostics_only",
+            "active_effect": "preserve_1_if_all_sources_finite_else_terminal_failure"
+          },
+          {
+            "name": "COMMIT_CHECKPOINT_COLUMN0",
+            "symbol": "engine_v2_fgmres_vector_v2",
+            "vector_mode": "COMMIT_CHECKPOINT",
+            "vector_mode_code": 8,
+            "vector_gate": "COMMIT_REQUIRED",
+            "vector_gate_code": 4,
+            "expected_schedule_epoch": "27+14*S",
+            "required_reduction_epoch": "14*S",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "logical_index": "M",
+            "phase_before": "checkpoint_commit",
+            "phase_after": "unchanged",
+            "device_gate_source": "commit_required",
+            "admitted_reduction_valid_masks": [
+              0,
+              1792,
+              7936
+            ],
+            "reduction_valid_mask_effect": "preserve_exact",
+            "required_preflight_state": "commit_preflighted_3",
+            "required_preflight_success_conjunction": "state_3_and_active_1_and_no_device_error_and_exact_legacy_or_sealed_snapshot_shape",
+            "gate_true_effect": "solution_x[k]=exact_zero(work_w[k]);true_residual[k]=exact_zero(V[M,k])",
+            "gate_false_effect": "claim_schedule_epoch_without_reading_or_writing_work_w_solution_x_V_M_or_true_residual",
+            "solve_record_header_or_restart_row_writes": false,
+            "active_effect": "preserve_1_until_finalize"
+          },
+          {
+            "name": "CHECKPOINT_FINALIZE_COLUMN0",
+            "symbol": "engine_v2_fgmres_control_v2",
+            "control_mode": "CHECKPOINT_FINALIZE",
+            "control_mode_code": 12,
+            "expected_schedule_epoch": "28+14*S",
+            "required_reduction_epoch": "14*S",
+            "expected_restart": 1,
+            "expected_column": 0,
+            "row_index": -1,
+            "pass_index": -1,
+            "phase_before": "checkpoint_commit",
+            "phase_after": "outcome_selected_terminal_between_restarts_or_arnoldi",
+            "device_gate_source": "always",
+            "admitted_reduction_valid_masks": [
+              0,
+              1792,
+              7936
+            ],
+            "reduction_valid_mask_effect": "clear_exact_to_0_on_success",
+            "required_preflight_state": "commit_preflighted_3",
+            "successful_preflight_state_effect": "clear_state_and_mask_and_reduction_epoch_snapshots_to_zero",
+            "sole_restart_row_writer": true,
+            "sole_solve_record_header_writer_in_transaction": true,
+            "sole_terminal_status_and_phase_publish_authority": true,
+            "sole_successful_path_target_and_validity_clear_authority": true
+          }
+        ],
+        "fixed_submission_contract": {
+          "four_launches_always_submitted": true,
+          "host_submission_depends_on_candidate_or_outcome": false,
+          "host_submission_depends_on_source_finiteness": false,
+          "preflight_launch_advances_schedule_epoch": false,
+          "preflight_launch_advances_reduction_epoch": false,
+          "commit_launch_claims_epoch_when_commit_required_false": true,
+          "successful_transaction_is_single_hashed_schedule_slice": true,
+          "checkpoint_decide_only_boundary_is_publishable": false,
+          "checkpoint_commit_only_boundary_is_publishable": false,
+          "successful_end_schedule_epoch": "29+14*S",
+          "successful_end_reduction_epoch": "14*S"
+        },
+        "commit_source_preflight_contract": {
+          "vector_mode": "PREFLIGHT_COMMIT_SOURCE",
+          "vector_mode_code": 9,
+          "kernel_symbol": "engine_v2_fgmres_vector_v2",
+          "fixed_four_symbol_interface_preserved": true,
+          "logical_index": "M",
+          "launch_geometry": "ceil(F/256)_blocks_of_256_threads",
+          "source_element_formulas": [
+            "work_w[k]",
+            "basis_v[M*F+k]"
+          ],
+          "source_lane_predicate": "isfinite(work_w[k])&&isfinite(basis_v[M*F+k])",
+          "gate_true_scans_every_lane": true,
+          "gate_false_reads_sources": false,
+          "gate_false_reads_or_writes_destinations": false,
+          "preflight_reads_or_writes_solution_x": false,
+          "preflight_reads_or_writes_true_residual": false,
+          "preflight_writes_work_w_or_basis_v_M": false,
+          "preflight_mutates_mask_snapshot": false,
+          "preflight_mutates_reduction_epoch_snapshot": false,
+          "legacy_state_transition": "empty_0_to_commit_preflighted_3",
+          "legacy_snapshot_shape": "mask_0_and_reduction_epoch_0",
+          "sealed_state_transition": "consumed_2_to_commit_preflighted_3",
+          "sealed_snapshot_shape": "exact_live_mask_and_reduction_epoch",
+          "commit_preflighted_state_is_success_verdict": false,
+          "success_interpretation_boundary": "later_same_stream_commit_observes_state_3_active_1_no_device_error_and_exact_snapshot_shape",
+          "duplicate_preflight_is_terminal_invalid_control": true,
+          "malformed_state_or_snapshot_is_terminal_invalid_control": true,
+          "additional_F_vector_workspace_count": 0,
+          "additional_device_allocation_count": 0,
+          "raw_iteration_h2d_count": 0,
+          "raw_iteration_d2h_count": 0,
+          "intermediate_host_sync_count": 0,
+          "host_finiteness_branch": false,
+          "operation_complexity_scope": "parallel_O_F_constant_work_per_lane",
+          "end_to_end_O_N_proven": false,
+          "authoritative_predecessor_proven": false,
+          "authoritative_checkpoint_transaction_proven": false
+        },
+        "decision_priority_contract": {
+          "evaluation_priority": [
+            "dual_gate_convergence",
+            "invariant_breakdown",
+            "planned_cycle_end_divergence",
+            "planned_cycle_end_stagnation",
+            "max_iterations"
+          ],
+          "dual_gate": {
+            "solver_l2_passed": "candidate_l2<=solver_tolerance_l2",
+            "scaled_linf": "candidate_linf/max(1.0,rhs_linf)",
+            "authoritative_linf_passed": "scaled_linf<=authoritative_tolerance",
+            "passed": "solver_l2_passed_and_authoritative_linf_passed",
+            "comparisons_are_inclusive": true
+          },
+          "divergence": {
+            "evaluated_only_if_planned_cycle_end_bit2": true,
+            "base": "max(initial_residual_l2,DBL_MIN_NORMAL)",
+            "threshold": "divergence_factor*base",
+            "comparison": "candidate_l2>threshold",
+            "comparison_is_strict": true,
+            "positive_infinity_threshold_is_error": false,
+            "positive_infinity_threshold_is_diverged": false
+          },
+          "stagnation": {
+            "evaluated_only_after_dual_invariant_and_divergence_fail": true,
+            "x_scale_l2": "trial_x_l2+committed_x_l2",
+            "unit_floor_applied": false,
+            "plateau": "candidate_l2>=(1-stagnation_relative_tolerance)*previous_checkpoint_residual_l2",
+            "tiny_update": "solution_update_l2<=0x1p-26*x_scale_l2",
+            "comparisons_are_inclusive": true,
+            "new_streak": "old_streak+1_if_plateau_and_tiny_update_else_0",
+            "terminal": "new_streak>=stagnation_checkpoint_limit"
+          },
+          "max_iterations": {
+            "evaluated_after_stagnation": true,
+            "terminal": "effective_iterations==max_iterations"
+          }
+        },
+        "outcome_contract": [
+          {
+            "name": "candidate_not_required_same_cycle",
+            "condition": "candidate_required==0",
+            "commit_required": 0,
+            "continuation_required": 1,
+            "restart_row_written": false,
+            "terminal_status": 0,
+            "termination_code": 0,
+            "restart_hint": 0,
+            "restart_flags": 0,
+            "final_phase": "arnoldi",
+            "final_column_index": 1
+          },
+          {
+            "name": "triangular_factor_breakdown",
+            "condition": "candidate_required==1_and_triangular_breakdown==1",
+            "commit_required": 0,
+            "continuation_required": 0,
+            "restart_row_written": true,
+            "restart_row_residual_source": "previous_committed_header_metrics",
+            "restart_row_solution_update_l2": 0.0,
+            "terminal_status": 5,
+            "termination_code": 30,
+            "restart_hint": 5,
+            "restart_flags": 0,
+            "final_phase": "terminal"
+          },
+          {
+            "name": "happy_breakdown_converged",
+            "condition": "active_candidate_and_dual_gate_and_invariant_breakdown",
+            "commit_required": 1,
+            "continuation_required": 0,
+            "restart_row_written": true,
+            "terminal_status": 1,
+            "termination_code": 2,
+            "restart_hint": 2,
+            "restart_flags": 15,
+            "happy_flag_set_and_invariant_flag_clear": true,
+            "final_phase": "terminal"
+          },
+          {
+            "name": "estimated_trigger_true_residual_converged",
+            "condition": "active_candidate_and_dual_gate_and_not_invariant_and_reason_bit0",
+            "commit_required": 1,
+            "continuation_required": 0,
+            "restart_row_written": true,
+            "terminal_status": 1,
+            "termination_code": 3,
+            "restart_hint": 3,
+            "restart_flags": 7,
+            "final_phase": "terminal"
+          },
+          {
+            "name": "planned_end_true_residual_converged",
+            "condition": "active_candidate_and_dual_gate_and_not_invariant_and_not_reason_bit0_and_reason_bit2",
+            "commit_required": 1,
+            "continuation_required": 0,
+            "restart_row_written": true,
+            "terminal_status": 1,
+            "termination_code": 4,
+            "restart_hint": 1,
+            "restart_flags": 7,
+            "final_phase": "terminal"
+          },
+          {
+            "name": "invariant_subspace_breakdown",
+            "condition": "active_candidate_and_not_dual_gate_and_invariant",
+            "commit_required": 1,
+            "continuation_required": 0,
+            "restart_row_written": true,
+            "terminal_status": 5,
+            "termination_code": 31,
+            "restart_hint": 4,
+            "restart_flags": "bit0_replayed_or_individual_gate_bits_or_bit4_invariant",
+            "happy_flag_clear_and_invariant_flag_set": true,
+            "final_phase": "terminal"
+          },
+          {
+            "name": "planned_end_diverged",
+            "condition": "active_candidate_and_planned_bit2_and_not_dual_and_not_invariant_and_candidate_l2_strictly_above_divergence_threshold",
+            "commit_required": 1,
+            "continuation_required": 0,
+            "restart_row_written": true,
+            "terminal_status": 4,
+            "termination_code": 21,
+            "restart_hint": 1,
+            "restart_flags": "bit0_replayed_or_individual_gate_bits_or_bit7_divergence",
+            "final_phase": "terminal"
+          },
+          {
+            "name": "planned_end_stagnated",
+            "condition": "scale_path_and_new_streak_at_least_limit",
+            "commit_required": 1,
+            "continuation_required": 0,
+            "restart_row_written": true,
+            "terminal_status": 3,
+            "termination_code": 20,
+            "restart_hint": 1,
+            "restart_flags": "bit0_replayed_or_individual_gate_bits_or_actual_bit5_plateau_or_actual_bit6_tiny",
+            "final_phase": "terminal"
+          },
+          {
+            "name": "planned_end_max_iterations",
+            "condition": "scale_path_and_not_stagnated_and_effective_iterations_equals_max_iterations",
+            "commit_required": 1,
+            "continuation_required": 0,
+            "restart_row_written": true,
+            "terminal_status": 2,
+            "termination_code": 10,
+            "restart_hint": 1,
+            "restart_flags": "bit0_replayed_or_individual_gate_bits_or_actual_plateau_and_tiny_bits",
+            "final_phase": "terminal"
+          },
+          {
+            "name": "planned_end_continue_next_restart",
+            "condition": "scale_path_and_not_stagnated_and_not_max_iterations",
+            "commit_required": 1,
+            "continuation_required": 1,
+            "restart_row_written": true,
+            "terminal_status": 0,
+            "termination_code": 0,
+            "restart_hint": 1,
+            "restart_flags": "bit0_replayed_or_individual_gate_bits_or_actual_plateau_and_tiny_bits",
+            "final_phase": "between_restarts",
+            "final_column_index": -1,
+            "next_expected_restart": 2
+          },
+          {
+            "name": "early_false_convergence_same_cycle",
+            "condition": "active_candidate_and_reason_bit0_and_not_dual_and_not_invariant_and_not_planned_bit2",
+            "commit_required": 0,
+            "continuation_required": 1,
+            "restart_row_written": false,
+            "false_convergence_count_effect": "+1",
+            "terminal_status": 0,
+            "termination_code": 0,
+            "restart_hint": 0,
+            "restart_flags": 0,
+            "final_phase": "arnoldi",
+            "final_column_index": 1
+          }
+        ],
+        "pending_state_contract": {
+          "checkpoint_decide_is_only_pending_state_writer": true,
+          "checkpoint_decide_writes_solve_record_header": false,
+          "checkpoint_decide_writes_restart_row": false,
+          "checkpoint_decide_writes_solution_or_true_residual": false,
+          "pending_fields": [
+            "commit_required",
+            "continuation_required",
+            "pending_terminal_status",
+            "pending_termination_code",
+            "pending_restart_hint",
+            "pending_restart_flags"
+          ],
+          "active_must_remain_1_until_finalize_on_nonfailure": true,
+          "pending_algorithmic_terminal_is_not_public_before_finalize": true
+        },
+        "reduction_validity_lifetime_contract": {
+          "start_masks": [
+            0,
+            1792,
+            7936
+          ],
+          "after_checkpoint_decide_masks": [
+            0,
+            1792,
+            7936
+          ],
+          "after_commit_source_preflight_masks": [
+            0,
+            1792,
+            7936
+          ],
+          "after_commit_checkpoint_masks": [
+            0,
+            1792,
+            7936
+          ],
+          "after_checkpoint_finalize_mask": 0,
+          "checkpoint_decide_preserves_exact_mask": true,
+          "commit_source_preflight_preserves_exact_mask": true,
+          "commit_checkpoint_preserves_exact_mask": true,
+          "checkpoint_finalize_is_only_successful_path_clear_authority": true,
+          "checkpoint_decide_target_scalar_access": "read_only_validation",
+          "checkpoint_decide_mutates_target_scalars": false,
+          "commit_source_preflight_target_scalar_access": "none",
+          "commit_checkpoint_target_scalar_access": "none",
+          "existing_target_consumer_metadata_semantics": "algorithmic_reader_not_reduction_validity_clear_authority",
+          "candidate_l2": {
+            "target_code": 9,
+            "valid_bit": 8,
+            "offset": 208
+          },
+          "candidate_linf": {
+            "target_code": 10,
+            "valid_bit": 9,
+            "offset": 216
+          },
+          "solution_update_l2": {
+            "target_code": 11,
+            "valid_bit": 10,
+            "offset": 224
+          },
+          "committed_x_l2": {
+            "target_code": 12,
+            "valid_bit": 11,
+            "offset": 232,
+            "checkpoint_decide_access": "read_only",
+            "commit_checkpoint_access": "none",
+            "checkpoint_finalize_action": "publish_scale_if_valid_then_clear"
+          },
+          "trial_x_l2": {
+            "target_code": 13,
+            "valid_bit": 12,
+            "offset": 240
+          },
+          "mask_zero_path_target_scalar_access": false
+        },
+        "commit_ownership_contract": {
+          "commit_point": "COMMIT_CHECKPOINT_vector_launch",
+          "preflight_precedes_commit_on_same_stream": true,
+          "preflight_is_nonadvancing_global_kernel_boundary": true,
+          "before_commit": {
+            "solution_x": "committed_solution",
+            "true_residual": "committed_true_residual",
+            "work_w": "candidate_trial_solution",
+            "basis_v_M": "candidate_true_residual"
+          },
+          "commit_required_true": {
+            "solution_x": "exact_copy_from_work_w",
+            "true_residual": "exact_copy_from_basis_v_M",
+            "work_w": "source_only_preserved",
+            "basis_v_M": "source_only_preserved"
+          },
+          "commit_required_false_reads_or_writes_work_w": false,
+          "commit_required_false_reads_or_writes_solution_x": false,
+          "commit_required_false_reads_or_writes_basis_v_M": false,
+          "commit_required_false_reads_or_writes_true_residual": false,
+          "solve_record_publish_after_commit_only": true
+        },
+        "invalid_source_destination_atomicity_contract": {
+          "scope": "registered_nonoverlapping_allocations_and_exclusive_same_stream_transaction_only",
+          "invalid_predicate": "any_nonfinite_lane_in_work_w_or_basis_v_M_when_commit_required",
+          "detection_launch": "PREFLIGHT_COMMIT_SOURCE_COLUMN0",
+          "detection_precedes_any_destination_access": true,
+          "source_buffers": [
+            "work_w",
+            "basis_v_M"
+          ],
+          "destination_buffers": [
+            "solution_x",
+            "true_residual"
+          ],
+          "preflight_destination_access": "none",
+          "invalid_successor_commit_destination_access": "none",
+          "solution_x_entire_byte_range_unchanged": true,
+          "true_residual_entire_byte_range_unchanged": true,
+          "source_byte_ranges_preserved": true,
+          "failure_diagnostics_may_mutate_control_or_solve_record": true,
+          "device_error": "nonfinite_input",
+          "device_error_mask": 4,
+          "failure_origin": "vector",
+          "failure_origin_code": 2,
+          "terminal_status": 6,
+          "termination_code": 47,
+          "failure_schedule_epoch": "27+14*S",
+          "failure_reduction_epoch": "14*S",
+          "algorithmic_restart_row_written": false,
+          "additional_F_vector_workspace_count": 0,
+          "raw_iteration_d2h_count": 0,
+          "host_finiteness_branch": false,
+          "parallel_valid_path_work": "O(F)",
+          "arbitrary_device_fault_atomicity_proven": false,
+          "concurrent_external_writer_atomicity_proven": false,
+          "raw_pointer_range_nonoverlap_authoritative": false,
+          "authoritative_solver_or_solution_receipt": false,
+          "end_to_end_O_N_proven": false
+        },
+        "pointer_alias_contract": {
+          "all_arguments_are_exact_allocation_base_pointers": true,
+          "host_shifted_pointer_allowed": false,
+          "commit_source_destination_alias_allowed": false,
+          "forbidden_exact_alias_pairs": [
+            [
+              "work_w_base",
+              "solution_x_base"
+            ],
+            [
+              "basis_v_base",
+              "true_residual_base"
+            ],
+            [
+              "work_w_base",
+              "true_residual_base"
+            ],
+            [
+              "basis_v_base",
+              "solution_x_base"
+            ],
+            [
+              "solution_x_base",
+              "true_residual_base"
+            ]
+          ],
+          "basis_v_M_address": "basis_v_base+M*F",
+          "logical_index_is_separate_argument": true,
+          "commit_required_false_still_requires_canonical_allocation_lineage": true
+        },
+        "finalize_record_contract": {
+          "sole_writer": "CHECKPOINT_FINALIZE",
+          "restart_row_written_for": [
+            "triangular_factor_breakdown",
+            "every_commit_required_true_outcome"
+          ],
+          "restart_row_not_written_for": [
+            "candidate_not_required_same_cycle",
+            "early_false_convergence_same_cycle"
+          ],
+          "active_candidate_row_metrics": "candidate_l2_candidate_linf_scaled_linf_solution_update_l2",
+          "triangular_row_metrics": "previous_committed_residual_metrics_and_zero_solution_update",
+          "header_final_metrics_change_only_if_commit_required": true,
+          "solution_scale_l2": "publish_x_scale_only_on_scale_path_else_preserve",
+          "happy_breakdown_count": "+1_only_for_happy_breakdown_converged",
+          "false_convergence_count": "+1_only_for_same_cycle_active_reason_bit0_dual_fail_no_commit_no_row",
+          "stagnation_checkpoint_count": "new_streak_only_on_scale_path_else_preserve",
+          "previous_checkpoint_residual_l2": "candidate_l2_on_scale_path_else_preserve",
+          "pending_fields_cleared_after_publish": true,
+          "candidate_state_fields_reset_after_publish": true
+        },
+        "counter_contract": {
+          "effective_restarts": "preserve_1",
+          "effective_iterations": "preserve_1",
+          "arnoldi_step_count": "preserve_1",
+          "effective_arnoldi_dimension": "preserve_1",
+          "operator_apply_count": "preserve_3_if_active_candidate_else_2",
+          "preconditioner_apply_count": "preserve_1",
+          "next_expected_restart": "preserve_2",
+          "same_cycle_continuation_column_index": "0_to_1",
+          "planned_nonterminal_column_index": "0_to_-1"
+        },
+        "numeric_failure_contract": {
+          "x_scale_formula": "trial_x_l2+committed_x_l2",
+          "unit_floor_applied": false,
+          "nonfinite_or_positive_infinity_sum_is_failure": true,
+          "device_error": "arithmetic_overflow",
+          "device_error_mask": 8,
+          "terminal_status": 6,
+          "termination_code": 47,
+          "failure_origin": "control",
+          "failure_timing": "checkpoint_decide_pre_commit",
+          "solution_x_and_true_residual_preserved": true,
+          "algorithmic_result_metrics_or_restart_row_written": false,
+          "terminal_failure_status_code_and_device_error_header_written": true,
+          "cpu_history_append_edge_exact_parity_claimed": false,
+          "failure_transition_is_not_success_end_state": true
+        },
+        "success_end_state": {
+          "schedule_epoch": "29+14*S",
+          "reduction_epoch": "14*S",
+          "reduction_valid_mask": 0,
+          "predecessor_validation_state": 0,
+          "predecessor_mask_snapshot": 0,
+          "predecessor_reduction_epoch_snapshot": 0,
+          "active": "0_if_terminal_else_1",
+          "phase": "terminal_or_between_restarts_or_arnoldi",
+          "column_index": "0_if_terminal_else_-1_if_between_restarts_else_1",
+          "restart_index": 1,
+          "next_expected_restart": 2,
+          "effective_restarts": 1,
+          "effective_iterations": 1,
+          "arnoldi_step_count": 1,
+          "effective_arnoldi_dimension": 1,
+          "operator_apply_count": "3_if_active_candidate_else_2",
+          "preconditioner_apply_count": 1,
+          "public_record_matches_committed_vector_ownership": true,
+          "later_column_or_restart_executed": false,
+          "final_guard_executed": false
+        }
+      }
+    },
+    "kernelAbi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recurrence_abi_version",
+        "language_linkage",
+        "symbols",
+        "signatures",
+        "pointer_contract",
+        "host_shifted_pointer_arguments_allowed",
+        "logical_index_is_separate_i32_argument",
+        "launch_sequence_guard",
+        "control_launch_geometry",
+        "vector_launch_geometry",
+        "spmv_launch_geometry",
+        "reduction_launch_geometry",
+        "first_column_partial_schedule",
+        "first_column_partial_schedule_hash",
+        "first_column_completion_schedule",
+        "first_column_completion_schedule_hash",
+        "first_column_candidate_preparation_schedule",
+        "first_column_candidate_preparation_schedule_hash",
+        "first_column_candidate_residual_schedule",
+        "first_column_candidate_residual_schedule_hash",
+        "first_column_candidate_scale_metrics_schedule",
+        "first_column_candidate_scale_metrics_schedule_hash",
+        "first_column_predecessor_validation_schedule",
+        "first_column_predecessor_validation_schedule_hash",
+        "first_column_checkpoint_transaction_schedule",
+        "first_column_checkpoint_transaction_schedule_hash",
+        "device_error_bits",
+        "device_error_masks",
+        "control_state_abi_hash",
+        "solve_record_abi_hash",
+        "active_mask_source",
+        "device_error_state",
+        "single_code_object_required"
+      ],
+      "properties": {
+        "recurrence_abi_version": { "const": 2 },
+        "language_linkage": { "const": "extern_C" },
+        "symbols": {
+          "const": [
+            "engine_v2_fgmres_control_v2",
+            "engine_v2_fgmres_vector_v2",
+            "engine_v2_fgmres_csr_spmv_indexed_v2",
+            "engine_v2_fgmres_reduce_v2"
+          ]
+        },
+        "signatures": {
+          "const": {
+            "engine_v2_fgmres_control_v2": "void(int control_mode,int expected_schedule_epoch,int expected_restart,int expected_column,int row_index,int pass_index,int free_dof_count,int restart_dimension,int max_iterations,int maximum_restart_count,int stagnation_checkpoint_limit,double absolute_tolerance,double relative_tolerance,double authoritative_tolerance,double stagnation_relative_tolerance,double divergence_factor,double* dense_base,unsigned char* control_state_base,unsigned char* solve_record_base)",
+            "engine_v2_fgmres_vector_v2": "void(int vector_mode,int vector_gate,int expected_schedule_epoch,int expected_restart,int expected_column,int free_dof_count,int logical_index,const double* reduced_state_base,const double* reduced_load_base,const double* inverse_diagonal_base,double* solution_x_base,double* true_residual_base,double* work_w_base,double* basis_v_base,double* basis_z_base,const double* dense_base,unsigned char* control_state_base,unsigned char* solve_record_base)",
+            "engine_v2_fgmres_csr_spmv_indexed_v2": "void(int spmv_mode,int expected_schedule_epoch,int expected_restart,int expected_column,int free_dof_count,int nonzero_count,int logical_index,const int* row_ptr_base,const int* column_indices_base,const double* values_base,const double* solution_x_base,double* work_w_base,double* basis_v_base,const double* basis_z_base,unsigned char* control_state_base,unsigned char* solve_record_base)",
+            "engine_v2_fgmres_reduce_v2": "void(int reduction_mode,int reduction_target,int expected_schedule_epoch,int expected_restart,int expected_column,int expected_reduction_epoch,int value_count,int logical_index,const double* reduced_load_base,const double* solution_x_base,const double* true_residual_base,const double* work_w_base,const double* basis_v_base,const double* reduction_input_base,double* reduction_output_base,unsigned char* control_state_base,unsigned char* solve_record_base)"
+          }
+        },
+        "pointer_contract": { "const": "allocation_base_pointers_only" },
+        "host_shifted_pointer_arguments_allowed": { "const": false },
+        "logical_index_is_separate_i32_argument": { "const": true },
+        "launch_sequence_guard": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "all_symbols_require_expected_schedule_epoch",
+            "all_symbols_require_expected_restart_and_column",
+            "control_requires_explicit_row_and_pass",
+            "reduce_requires_expected_reduction_epoch",
+            "pre_restart_or_noncolumn_sentinel",
+            "schedule_epoch_initial_value",
+            "schedule_epoch_after_init",
+            "initial_schedule_stage_count",
+            "initial_mode_schedule",
+            "admission_checks_before_schedule_epoch_increment",
+            "admission_mismatch_advances_schedule_epoch",
+            "schedule_epoch_increments_once_after_admitted_active_or_gated_stage",
+            "nonadvancing_mode_exceptions",
+            "schedule_epoch_rejects_duplicate_skip_or_reorder",
+            "coordinate_contract",
+            "mismatch_sets_invalid_control_or_geometry",
+            "mismatch_mutates_counters_or_published_scalars",
+            "reduction_epoch_increments_only_after_valid_stage",
+            "late_lane_data_error_may_follow_block0_epoch_increment",
+            "late_lane_data_error_sets_device_error_and_active_zero",
+            "schedule_epoch_increment_claims_global_data_validity",
+            "multi_block_epoch_owner",
+            "nonzero_blocks_read_or_mutate_schedule_epoch",
+            "nonzero_blocks_read_or_mutate_reduction_epoch"
+          ],
+          "properties": {
+            "all_symbols_require_expected_schedule_epoch": { "const": true },
+            "all_symbols_require_expected_restart_and_column": { "const": true },
+            "control_requires_explicit_row_and_pass": { "const": true },
+            "reduce_requires_expected_reduction_epoch": { "const": true },
+            "pre_restart_or_noncolumn_sentinel": { "const": -1 },
+            "schedule_epoch_initial_value": { "const": 0 },
+            "schedule_epoch_after_init": { "const": 1 },
+            "initial_schedule_stage_count": {
+              "const": "S=recursive_stage_count(F,ceil(value_count/512))"
+            },
+            "initial_mode_schedule": {
+              "const": {
+                "CONTROL_INIT": "schedule=0 -> 1,phase=rhs_metrics",
+                "VECTOR_COPY_INITIAL_X": "schedule=1",
+                "RHS_L2_REDUCTION": "schedule=2..1+S,reduction_epoch=0..S-1",
+                "RHS_LINF_REDUCTION": "schedule=2+S..1+2S,reduction_epoch=S..2S-1",
+                "CONTROL_BIND_RHS": "schedule=2+2S,phase=rhs_metrics->initial_state",
+                "SPMV_INITIAL": "schedule=3+2S",
+                "CONTROL_OPERATOR_ACCEPT": "schedule=4+2S",
+                "VECTOR_FORM_INITIAL_RESIDUAL": "schedule=5+2S",
+                "INITIAL_L2_REDUCTION": "schedule=6+2S..5+3S,reduction_epoch=2S..3S-1",
+                "INITIAL_LINF_REDUCTION": "schedule=6+3S..5+4S,reduction_epoch=3S..4S-1",
+                "CONTROL_INITIAL_GATE": "schedule=6+4S"
+              }
+            },
+            "admission_checks_before_schedule_epoch_increment": {
+              "const": [
+                "control_or_zero_init_abi",
+                "expected_schedule_epoch",
+                "expected_restart",
+                "expected_column",
+                "mode_specific_geometry_and_gate"
+              ]
+            },
+            "admission_mismatch_advances_schedule_epoch": { "const": false },
+            "schedule_epoch_increments_once_after_admitted_active_or_gated_stage": {
+              "const": true
+            },
+            "nonadvancing_mode_exceptions": {
+              "const": {
+                "control": ["PREDECESSOR_VALIDATE"],
+                "vector": ["PREFLIGHT_COMMIT_SOURCE"]
+              }
+            },
+            "schedule_epoch_rejects_duplicate_skip_or_reorder": { "const": true },
+            "coordinate_contract": {
+              "const": {
+                "initial_metrics_expected_restart": -1,
+                "initial_metrics_stored_restart_index": 0,
+                "restart_begin_expected_restart_source": "next_expected_restart",
+                "restart_begin_expected_column": -1,
+                "restart_begin_is_exception_to_active_restart_equality": true,
+                "restart_begin_accepted_transition": "restart_index=expected_restart,column_index=0,next_expected_restart=expected_restart+1",
+                "schedule_epoch_B_formula": "7+4*S",
+                "schedule_epoch_B_unique_mode": "RESTART_BEGIN",
+                "final_guard_allowed_at_schedule_epoch_B": false,
+                "outside_column_expected_column": -1,
+                "active_restart_must_equal_stored_restart_index": true,
+                "active_column_must_equal_stored_column_index": true
+              }
+            },
+            "mismatch_sets_invalid_control_or_geometry": { "const": true },
+            "mismatch_mutates_counters_or_published_scalars": { "const": false },
+            "reduction_epoch_increments_only_after_valid_stage": { "const": true },
+            "late_lane_data_error_may_follow_block0_epoch_increment": {
+              "const": true
+            },
+            "late_lane_data_error_sets_device_error_and_active_zero": {
+              "const": true
+            },
+            "schedule_epoch_increment_claims_global_data_validity": {
+              "const": false
+            },
+            "multi_block_epoch_owner": { "const": "block_0_only" },
+            "nonzero_blocks_read_or_mutate_schedule_epoch": { "const": false },
+            "nonzero_blocks_read_or_mutate_reduction_epoch": { "const": false }
+          }
+        },
+        "control_launch_geometry": {
+          "const": { "grid_blocks": 1, "block_threads": 1 }
+        },
+        "vector_launch_geometry": {
+          "const": { "grid_blocks": "ceil(F/256)", "block_threads": 256 }
+        },
+        "spmv_launch_geometry": {
+          "const": { "grid_blocks": "ceil(F/256)", "block_threads": 256 }
+        },
+        "reduction_launch_geometry": {
+          "const": {
+            "block_threads": 256,
+            "values_per_block": 512,
+            "first_stage_grid_blocks": "ceil(value_count/512)",
+            "combine_stage_grid_blocks": "ceil(partial_count/512)",
+            "fixed_tree": "256_threads_512_values",
+            "intermediate_output_condition": "output_count>=2",
+            "intermediate_target": "NONE",
+            "intermediate_publishes_scalar_or_valid_bit": false,
+            "final_output_count": 1,
+            "final_requires_named_non_none_target": true,
+            "duplicate_valid_target_is_terminal_invalid_control": true,
+            "combine_input_output_base_must_differ": true,
+            "named_mode_target_compatibility": {
+              "DOT_W_VI": ["DOT"],
+              "LASSQ_LOAD": ["RHS_L2"],
+              "LASSQ_TRUE_RESIDUAL": ["INITIAL_L2"],
+              "LASSQ_WORK_W": ["WORK_BEFORE","AFTER_FIRST","H_NEXT","TRIAL_X_L2"],
+              "LASSQ_V_M": ["CANDIDATE_L2"],
+              "LASSQ_WORK_W_MINUS_X": ["UPDATE_L2"],
+              "LASSQ_SOLUTION_X": ["COMMITTED_X_L2"],
+              "LINF_LOAD": ["RHS_LINF"],
+              "LINF_TRUE_RESIDUAL": ["INITIAL_LINF"],
+              "LINF_V_M": ["CANDIDATE_LINF"],
+              "COMBINE_SUM": ["DOT"],
+              "COMBINE_LASSQ": ["RHS_L2","INITIAL_L2","WORK_BEFORE","AFTER_FIRST","H_NEXT","CANDIDATE_L2","UPDATE_L2","COMMITTED_X_L2","TRIAL_X_L2"],
+              "COMBINE_MAX": ["RHS_LINF","INITIAL_LINF","CANDIDATE_LINF"]
+            }
+          }
+        },
+        "first_column_partial_schedule": {
+          "$ref": "#/$defs/firstColumnPartialSchedule"
+        },
+        "first_column_partial_schedule_hash": {
+          "const": "sha256:dc6d1306ae3c7c0f970afcbe433b888cfcea591d6a34c6f36657e30ecc9c3b88"
+        },
+        "first_column_completion_schedule": {
+          "$ref": "#/$defs/firstColumnCompletionSchedule"
+        },
+        "first_column_completion_schedule_hash": {
+          "const": "sha256:941f1191e4acd806ae6616c36599949506e87219199908e3aa62ee116ac6dbb4"
+        },
+        "first_column_candidate_preparation_schedule": {
+          "$ref": "#/$defs/firstColumnCandidatePreparationSchedule"
+        },
+        "first_column_candidate_preparation_schedule_hash": {
+          "const": "sha256:8df0561cf0988539ed8718dc7348a1e2a85c86f474056ca156c8b8c6d5bb1aec"
+        },
+        "first_column_candidate_residual_schedule": {
+          "$ref": "#/$defs/firstColumnCandidateResidualSchedule"
+        },
+        "first_column_candidate_residual_schedule_hash": {
+          "const": "sha256:c2c74ad20a4b881ad209a632d021cbf368d8ae042bca5f161e82cb0bae9c4ad3"
+        },
+        "first_column_candidate_scale_metrics_schedule": {
+          "$ref": "#/$defs/firstColumnCandidateScaleMetricsSchedule"
+        },
+        "first_column_candidate_scale_metrics_schedule_hash": {
+          "const": "sha256:1bc8a32247ad2255cc5953f525f67b1991a62ffb9f6ca6bf299a898c11468ba8"
+        },
+        "first_column_predecessor_validation_schedule": {
+          "$ref": "#/$defs/firstColumnPredecessorValidationSchedule"
+        },
+        "first_column_predecessor_validation_schedule_hash": {
+          "const": "sha256:b083896de86a808b1398d0fde4abe73726cb91f50399651274ef82dc09a5ef58"
+        },
+        "first_column_checkpoint_transaction_schedule": {
+          "$ref": "#/$defs/firstColumnCheckpointTransactionSchedule"
+        },
+        "first_column_checkpoint_transaction_schedule_hash": {
+          "const": "sha256:2423da989b6cd419b7c4bef46d6c76f2120825a0c840cb516803bb2643ca11e5"
+        },
+        "device_error_bits": {
+          "const": {"invalid_control_or_geometry":0,"csr_structure":1,"nonfinite_input":2,"arithmetic_overflow":3,"record_abi":4,"jacobi_inverse":5,"invalid_reduction_pair":6}
+        },
+        "device_error_masks": {
+          "const": {"invalid_control_or_geometry":1,"csr_structure":2,"nonfinite_input":4,"arithmetic_overflow":8,"record_abi":16,"jacobi_inverse":32,"invalid_reduction_pair":64}
+        },
+        "control_state_abi_hash": { "$ref": "#/$defs/hash" },
+        "solve_record_abi_hash": { "$ref": "#/$defs/hash" },
+        "active_mask_source": { "const": "solve_record_header.active" },
+        "device_error_state": {
+          "const": "solve_record_header.device_error_bits"
+        },
+        "single_code_object_required": { "const": true }
+      }
+    },
+    "baseIndexLayout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pointer_contract",
+        "host_shifted_pointer_arguments_allowed",
+        "basis_v",
+        "preconditioned_basis_z",
+        "hessenberg",
+        "packed_dense_offsets",
+        "packed_dense_scalar_count",
+        "work_w_aliases",
+        "basis_v_last_row_aliases",
+        "additional_O_F_workspace_allowed"
+      ],
+      "properties": {
+        "pointer_contract": {
+          "const": "allocation_base_plus_explicit_logical_index"
+        },
+        "host_shifted_pointer_arguments_allowed": { "const": false },
+        "basis_v": {
+          "const": {
+            "logical_shape": "(M+1,F)",
+            "element_formula": "basis_v_base[i*F+k]",
+            "index_ranges": "0<=i<=M,0<=k<F"
+          }
+        },
+        "preconditioned_basis_z": {
+          "const": {
+            "logical_shape": "(M,F)",
+            "element_formula": "basis_z_base[i*F+k]",
+            "index_ranges": "0<=i<M,0<=k<F"
+          }
+        },
+        "hessenberg": {
+          "const": {
+            "logical_shape": "(M+1,M)",
+            "element_formula": "dense_base[j*(M+1)+i]",
+            "index_ranges": "0<=i<=M,0<=j<M",
+            "layout": "column_major_(M+1)_by_M"
+          }
+        },
+        "packed_dense_offsets": {
+          "const": {
+            "hessenberg": "offset=0,length=M*(M+1)",
+            "givens_cos": "offset=M*(M+1),length=M",
+            "givens_sin": "offset=M*(M+1)+M,length=M",
+            "least_squares_rhs": "offset=M*(M+1)+2*M,length=M+1",
+            "triangular_solution": "offset=M*(M+1)+3*M+1,length=M"
+          }
+        },
+        "packed_dense_scalar_count": { "const": "M*M+5*M+1" },
+        "work_w_aliases": { "const": ["arnoldi_work", "candidate_trial_x"] },
+        "basis_v_last_row_aliases": {
+          "const": ["candidate_spmv", "candidate_residual_scratch"]
+        },
+        "additional_O_F_workspace_allowed": { "const": false }
+      }
+    },
+    "buffer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "ownership",
+        "dtype",
+        "shape",
+        "element_count",
+        "byte_length",
+        "access",
+        "source",
+        "initialization",
+        "extent_formula",
+        "memory_space"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "reduced_csr_row_ptr",
+            "reduced_csr_column_indices",
+            "reduced_csr_values",
+            "reduced_state",
+            "reduced_load",
+            "reduced_direction",
+            "jacobi_inverse",
+            "solution_x",
+            "true_residual",
+            "work_w",
+            "basis_v",
+            "preconditioned_basis_z",
+            "reduction_ping",
+            "reduction_pong",
+            "packed_dense_state",
+            "solve_record",
+            "fgmres_control_state_v2"
+          ]
+        },
+        "ownership": { "enum": ["borrowed", "owned"] },
+        "dtype": { "enum": ["<f8", "<i4", "|u1"] },
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "items": { "$ref": "#/$defs/positiveInt" }
+        },
+        "element_count": { "$ref": "#/$defs/positiveInt" },
+        "byte_length": { "$ref": "#/$defs/positiveInt" },
+        "access": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "initialization": { "type": "string", "minLength": 1 },
+        "extent_formula": { "type": "string", "minLength": 1 },
+        "memory_space": { "const": "hip_device" }
+      }
+    }
+  }
+}

@@ -1,5 +1,7 @@
 # 차세대 하이브리드 건축구조 분석 AI 아키텍처 명세서 (ADD)
 
+> 현재 Structural Solver Engine v2의 구현 기준, 수치적 진실 경계, HIP/no-backprop/O(N) 계약 및 단계별 종료 기준은 [Structural Solver Engine v2 통합 아키텍처 및 마스터 로드맵](structural-solver-engine-v2-master-roadmap.md)을 따른다. 본 문서는 기존 Hybrid Physics-AI 연구 방향과 역사적 설계 맥락을 보존한다.
+
 - 버전: 1.0
 - 목표: FEM 연산 병목을 줄이고, GNN + 잔차 보정 학습 + 물리 제약 기반 검증을 통해 상용 구조해석 툴 수준 이상의 속도/정확도/확장성 확보
 

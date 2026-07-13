@@ -1,0 +1,509 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/execution_plan_v1.schema.json",
+  "title": "Engine v2 ExecutionPlan v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "plan_id",
+    "capability_profile",
+    "model_ir_content_hash",
+    "solver_model_buffers",
+    "analysis",
+    "entity_order",
+    "vector_spaces",
+    "dof_layout",
+    "constraint_partition",
+    "sparse_pattern",
+    "operator_graph",
+    "compiled_operator",
+    "backend_policy",
+    "solver_policy",
+    "state_contract",
+    "plan_hash",
+    "extensions"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-execution-plan.v1"},
+    "plan_id": {"$ref": "#/$defs/stableId"},
+    "capability_profile": {"const": "phase0_cpu_reference_linear_static"},
+    "model_ir_content_hash": {"$ref": "#/$defs/sha256"},
+    "solver_model_buffers": {"$ref": "#/$defs/solverBuffers"},
+    "analysis": {"$ref": "#/$defs/analysis"},
+    "entity_order": {"$ref": "#/$defs/entityOrder"},
+    "vector_spaces": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "prefixItems": [
+        {
+          "allOf": [
+            {"$ref": "#/$defs/vectorSpace"},
+            {"properties": {"id": {"const": "nodal_state"}}}
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/vectorSpace"},
+            {"properties": {"id": {"const": "global_equation"}}}
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/vectorSpace"},
+            {"properties": {"id": {"const": "element_end_result"}}}
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/vectorSpace"},
+            {"properties": {"id": {"const": "scalar_result"}}}
+          ]
+        }
+      ],
+      "items": false
+    },
+    "dof_layout": {"$ref": "#/$defs/dofLayout"},
+    "constraint_partition": {"$ref": "#/$defs/constraintPartition"},
+    "sparse_pattern": {"$ref": "#/$defs/sparsePattern"},
+    "operator_graph": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "prefixItems": [
+        {"$ref": "#/$defs/assemblyOperator"},
+        {"$ref": "#/$defs/partitionOperator"},
+        {"$ref": "#/$defs/solveOperator"},
+        {"$ref": "#/$defs/residualOperator"},
+        {"$ref": "#/$defs/reactionOperator"},
+        {"$ref": "#/$defs/recoveryOperator"},
+        {"$ref": "#/$defs/energyOperator"}
+      ],
+      "items": false
+    },
+    "compiled_operator": {"$ref": "#/$defs/compiledOperator"},
+    "backend_policy": {"$ref": "#/$defs/backendPolicy"},
+    "solver_policy": {"$ref": "#/$defs/solverPolicy"},
+    "state_contract": {"$ref": "#/$defs/stateContract"},
+    "plan_hash": {"$ref": "#/$defs/sha256"},
+    "extensions": {"$ref": "#/$defs/extensions"}
+  },
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]*$"
+    },
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "index": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+    "reducedIndex": {"type": "integer", "minimum": -1, "maximum": 2147483647},
+    "extensions": {
+      "type": "object",
+      "propertyNames": {"pattern": "^[a-z][a-z0-9_.-]*:[A-Za-z0-9_.-]+$"},
+      "additionalProperties": true
+    },
+    "solverBuffers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "load_pattern_id",
+        "numeric_buffer_hash",
+        "entity_mapping_hash",
+        "artifact_hash"
+      ],
+      "properties": {
+        "schema_version": {"const": "structural-analysis-solver-model-buffers.v1"},
+        "load_pattern_id": {"$ref": "#/$defs/stableId"},
+        "numeric_buffer_hash": {"$ref": "#/$defs/sha256"},
+        "entity_mapping_hash": {"$ref": "#/$defs/sha256"},
+        "artifact_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "residual_sign",
+        "operator_version",
+        "operator_hash",
+        "recovery_operator_hash"
+      ],
+      "properties": {
+        "type": {"const": "linear_static"},
+        "residual_sign": {"const": "internal_minus_external"},
+        "operator_version": {"const": "engine-v2-cpu-reference-linear-static.v1"},
+        "operator_hash": {"$ref": "#/$defs/sha256"},
+        "recovery_operator_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "entityOrder": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_ids", "element_ids", "ordering_hash"],
+      "properties": {
+        "node_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/stableId"}},
+        "element_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/stableId"}},
+        "ordering_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "vectorSpace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "shape", "dtype", "axis_labels", "component_labels", "component_units"],
+      "properties": {
+        "id": {"enum": ["nodal_state", "global_equation", "element_end_result", "scalar_result"]},
+        "shape": {"type": "array", "minItems": 1, "maxItems": 3, "items": {"type": "integer", "minimum": 1}},
+        "dtype": {"const": "<f8"},
+        "axis_labels": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "component_labels": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "component_units": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "dofLayout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "components",
+        "node_count",
+        "dofs_per_node",
+        "dof_count",
+        "index_base",
+        "index_dtype",
+        "global_index_formula",
+        "node_dof_indices",
+        "global_to_free",
+        "element_global_dofs"
+      ],
+      "properties": {
+        "components": {"const": ["UX", "UY", "UZ", "RX", "RY", "RZ"]},
+        "node_count": {"type": "integer", "minimum": 1},
+        "dofs_per_node": {"const": 6},
+        "dof_count": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+        "index_base": {"const": 0},
+        "index_dtype": {"const": "<i4"},
+        "global_index_formula": {"const": "node_index*6+component_index"},
+        "node_dof_indices": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "minItems": 6,
+            "maxItems": 6,
+            "items": {"$ref": "#/$defs/index"}
+          }
+        },
+        "global_to_free": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/reducedIndex"}
+        },
+        "element_global_dofs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "minItems": 12,
+            "maxItems": 12,
+            "items": {"$ref": "#/$defs/index"}
+          }
+        }
+      }
+    },
+    "constraintPartition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["constrained_dofs", "free_dofs", "partition_hash"],
+      "properties": {
+        "constrained_dofs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "free_dofs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "partition_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "sparsePattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "shape",
+        "index_dtype",
+        "row_ptr",
+        "column_indices",
+        "diagonal_positions",
+        "element_scatter_indices",
+        "reduced_row_ptr",
+        "reduced_column_indices",
+        "reduced_global_value_indices",
+        "nnz",
+        "reduced_nnz",
+        "sorted_columns",
+        "symmetric_pattern",
+        "pattern_hash"
+      ],
+      "properties": {
+        "format": {"const": "csr"},
+        "shape": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"type": "integer", "minimum": 1, "maximum": 2147483647}
+        },
+        "index_dtype": {"const": "<i4"},
+        "row_ptr": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "column_indices": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "diagonal_positions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "element_scatter_indices": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "minItems": 12,
+            "maxItems": 12,
+            "items": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {"$ref": "#/$defs/index"}
+            }
+          }
+        },
+        "reduced_row_ptr": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "reduced_column_indices": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "reduced_global_value_indices": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/index"}
+        },
+        "nnz": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+        "reduced_nnz": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+        "sorted_columns": {"const": true},
+        "symmetric_pattern": {"const": true},
+        "pattern_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "operator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "depends_on",
+        "input_space",
+        "output_space",
+        "state_epoch_source",
+        "representation"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "kind": {"enum": ["assembly", "constraint_partition", "linear_solve", "residual", "reaction", "result_recovery", "energy"]},
+        "depends_on": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/stableId"}
+        },
+        "input_space": {"enum": ["solver_model_buffers", "global_dof", "reduced_dof", "element_state", "element_result"]},
+        "output_space": {"enum": ["global_dof", "reduced_dof", "element_result", "scalar_result"]},
+        "state_epoch_source": {"const": "state_ir"},
+        "representation": {"enum": ["assembled_dense", "assembled_csr", "index_partition", "direct_solve", "matrix_vector", "element_local", "scalar_reduction"]}
+      }
+    },
+    "assemblyOperator": {
+      "allOf": [
+        {"$ref": "#/$defs/operator"},
+        {"properties": {
+          "id": {"const": "assembly"},
+          "kind": {"const": "assembly"},
+          "depends_on": {"const": []},
+          "input_space": {"const": "solver_model_buffers"},
+          "output_space": {"const": "global_dof"},
+          "representation": {"const": "assembled_csr"}
+        }}
+      ]
+    },
+    "partitionOperator": {
+      "allOf": [
+        {"$ref": "#/$defs/operator"},
+        {"properties": {
+          "id": {"const": "partition"},
+          "kind": {"const": "constraint_partition"},
+          "depends_on": {"const": ["assembly"]},
+          "input_space": {"const": "global_dof"},
+          "output_space": {"const": "reduced_dof"},
+          "representation": {"const": "index_partition"}
+        }}
+      ]
+    },
+    "solveOperator": {
+      "allOf": [
+        {"$ref": "#/$defs/operator"},
+        {"properties": {
+          "id": {"const": "solve"},
+          "kind": {"const": "linear_solve"},
+          "depends_on": {"const": ["partition"]},
+          "input_space": {"const": "reduced_dof"},
+          "output_space": {"const": "global_dof"},
+          "representation": {"const": "direct_solve"}
+        }}
+      ]
+    },
+    "residualOperator": {
+      "allOf": [
+        {"$ref": "#/$defs/operator"},
+        {"properties": {
+          "id": {"const": "residual"},
+          "kind": {"const": "residual"},
+          "depends_on": {"const": ["assembly", "solve"]},
+          "input_space": {"const": "global_dof"},
+          "output_space": {"const": "global_dof"},
+          "representation": {"const": "matrix_vector"}
+        }}
+      ]
+    },
+    "reactionOperator": {
+      "allOf": [
+        {"$ref": "#/$defs/operator"},
+        {"properties": {
+          "id": {"const": "reaction"},
+          "kind": {"const": "reaction"},
+          "depends_on": {"const": ["residual"]},
+          "input_space": {"const": "global_dof"},
+          "output_space": {"const": "global_dof"},
+          "representation": {"const": "index_partition"}
+        }}
+      ]
+    },
+    "recoveryOperator": {
+      "allOf": [
+        {"$ref": "#/$defs/operator"},
+        {"properties": {
+          "id": {"const": "recovery"},
+          "kind": {"const": "result_recovery"},
+          "depends_on": {"const": ["solve"]},
+          "input_space": {"const": "global_dof"},
+          "output_space": {"const": "element_result"},
+          "representation": {"const": "element_local"}
+        }}
+      ]
+    },
+    "energyOperator": {
+      "allOf": [
+        {"$ref": "#/$defs/operator"},
+        {"properties": {
+          "id": {"const": "energy"},
+          "kind": {"const": "energy"},
+          "depends_on": {"const": ["solve", "recovery"]},
+          "input_space": {"const": "element_result"},
+          "output_space": {"const": "scalar_result"},
+          "representation": {"const": "scalar_reduction"}
+        }}
+      ]
+    },
+    "compiledArrayDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "dtype", "shape", "layout", "byte_length", "data_hash", "content_hash"],
+      "properties": {
+        "name": {"enum": ["global_stiffness", "global_load"]},
+        "dtype": {"const": "<f8"},
+        "shape": {"type": "array", "minItems": 1, "maxItems": 2, "items": {"type": "integer", "minimum": 1}},
+        "layout": {"const": "C"},
+        "byte_length": {"type": "integer", "minimum": 8},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "compiledOperator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stiffness", "load", "recovery_operator_hash"],
+      "properties": {
+        "stiffness": {"$ref": "#/$defs/compiledArrayDescriptor"},
+        "load": {"$ref": "#/$defs/compiledArrayDescriptor"},
+        "recovery_operator_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "backendPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "backend",
+        "execution_mode",
+        "scalar_type",
+        "fallback_policy",
+        "deterministic",
+        "device_residency_required",
+        "required_capabilities"
+      ],
+      "properties": {
+        "backend": {"const": "cpu_reference"},
+        "execution_mode": {"const": "verification"},
+        "scalar_type": {"const": "<f8"},
+        "fallback_policy": {"const": "forbidden"},
+        "deterministic": {"const": true},
+        "device_residency_required": {"const": false},
+        "required_capabilities": {
+          "const": ["fp64", "assembled_operator", "result_recovery", "immutable_state"]
+        }
+      }
+    },
+    "solverPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["linear_solver", "residual_tolerance", "max_iterations"],
+      "properties": {
+        "linear_solver": {"enum": ["dense_direct", "scipy_sparse_direct"]},
+        "residual_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "max_iterations": {"const": 1}
+      }
+    },
+    "stateContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "initial_epoch",
+        "material_state_mode",
+        "trial_commit_rollback_required"
+      ],
+      "properties": {
+        "schema_version": {"const": "structural-analysis-state-ir.v1"},
+        "initial_epoch": {"const": 0},
+        "material_state_mode": {"const": "stateless_linear_elastic"},
+        "trial_commit_rollback_required": {"const": true}
+      }
+    }
+  }
+}

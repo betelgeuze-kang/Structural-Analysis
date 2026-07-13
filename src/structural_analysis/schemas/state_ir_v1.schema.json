@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/state_ir_v1.schema.json",
+  "title": "Engine v2 StateIR v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "state_id",
+    "model_ir_content_hash",
+    "solver_numeric_buffer_hash",
+    "solver_entity_mapping_hash",
+    "solver_artifact_hash",
+    "execution_plan_hash",
+    "operator_hash",
+    "load_pattern_id",
+    "role",
+    "epoch",
+    "parent_state_hash",
+    "step",
+    "load_factor",
+    "time_s",
+    "dof_count",
+    "kinematics",
+    "constitutive_state",
+    "vector_hashes",
+    "state_hash",
+    "extensions"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-state-ir.v1"},
+    "state_id": {"$ref": "#/$defs/stableId"},
+    "model_ir_content_hash": {"$ref": "#/$defs/sha256"},
+    "solver_numeric_buffer_hash": {"$ref": "#/$defs/sha256"},
+    "solver_entity_mapping_hash": {"$ref": "#/$defs/sha256"},
+    "solver_artifact_hash": {"$ref": "#/$defs/sha256"},
+    "execution_plan_hash": {"$ref": "#/$defs/sha256"},
+    "operator_hash": {"$ref": "#/$defs/sha256"},
+    "load_pattern_id": {"$ref": "#/$defs/stableId"},
+    "role": {"enum": ["committed", "trial"]},
+    "epoch": {"type": "integer", "minimum": 0},
+    "parent_state_hash": {
+      "oneOf": [
+        {"$ref": "#/$defs/sha256"},
+        {"type": "null"}
+      ]
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["load_step", "iteration"],
+      "properties": {
+        "load_step": {"type": "integer", "minimum": 0},
+        "iteration": {"type": "integer", "minimum": 0}
+      }
+    },
+    "load_factor": {"type": "number"},
+    "time_s": {"type": "number", "minimum": 0},
+    "dof_count": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+    "kinematics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dof_components",
+        "displacement_component_units",
+        "velocity_component_units",
+        "acceleration_component_units",
+        "displacement_si",
+        "velocity_si",
+        "acceleration_si"
+      ],
+      "properties": {
+        "dof_components": {"const": ["UX", "UY", "UZ", "RX", "RY", "RZ"]},
+        "displacement_component_units": {"const": ["m", "m", "m", "rad", "rad", "rad"]},
+        "velocity_component_units": {"const": ["m/s", "m/s", "m/s", "rad/s", "rad/s", "rad/s"]},
+        "acceleration_component_units": {"const": ["m/s2", "m/s2", "m/s2", "rad/s2", "rad/s2", "rad/s2"]},
+        "displacement_si": {"$ref": "#/$defs/vector"},
+        "velocity_si": {"$ref": "#/$defs/vector"},
+        "acceleration_si": {"$ref": "#/$defs/vector"}
+      }
+    },
+    "constitutive_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "stateful", "value_count", "values"],
+      "properties": {
+        "mode": {"const": "stateless_linear_elastic"},
+        "stateful": {"const": false},
+        "value_count": {"const": 0},
+        "values": {"const": []}
+      }
+    },
+    "vector_hashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["displacement", "velocity", "acceleration", "constitutive"],
+      "properties": {
+        "displacement": {"$ref": "#/$defs/sha256"},
+        "velocity": {"$ref": "#/$defs/sha256"},
+        "acceleration": {"$ref": "#/$defs/sha256"},
+        "constitutive": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "state_hash": {"$ref": "#/$defs/sha256"},
+    "extensions": {"$ref": "#/$defs/extensions"}
+  },
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]*$"
+    },
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "vector": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "number"}
+    },
+    "extensions": {
+      "type": "object",
+      "propertyNames": {"pattern": "^[a-z][a-z0-9_.-]*:[A-Za-z0-9_.-]+$"},
+      "additionalProperties": true
+    }
+  }
+}

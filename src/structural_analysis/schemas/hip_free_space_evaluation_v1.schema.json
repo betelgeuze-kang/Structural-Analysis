@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_free_space_evaluation_v1.schema.json",
+  "title": "HIP free-space operator verification receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "capability_profile", "status", "execution_id", "context_id", "opening_context_receipt_hash", "apply", "evidence_scope", "actual_backend", "promotion_eligible", "reason", "arrays", "telemetry_delta", "parity", "receipt_hash"],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-hip-free-space-evaluation.v1"},
+    "capability_profile": {"const": "phase0_hip_free_space_device_direction_operator_apply"},
+    "status": {"enum": ["verified", "parity_failed", "unavailable"]},
+    "execution_id": {"$ref": "#/$defs/hash"}, "context_id": {"$ref": "#/$defs/hash"}, "opening_context_receipt_hash": {"$ref": "#/$defs/hash"},
+    "apply": {"oneOf": [{"type": "null"}, {"type": "object"}]},
+    "evidence_scope": {"enum": ["native_hiprtc_free_space_composite", "injected_test_double"]},
+    "actual_backend": {"enum": ["hip", "test_double"]}, "promotion_eligible": {"const": false},
+    "reason": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/reason"}]},
+    "arrays": {"type": "object", "additionalProperties": false, "properties": {"reduced_values": {"$ref": "#/$defs/array"}, "reduced_state": {"$ref": "#/$defs/array"}, "reduced_load": {"$ref": "#/$defs/array"}, "residual_direction": {"$ref": "#/$defs/array"}, "reduced_jvp": {"$ref": "#/$defs/array"}, "full_residual": {"$ref": "#/$defs/array"}, "full_direction": {"$ref": "#/$defs/array"}}},
+    "telemetry_delta": {"$ref": "#/$defs/delta"},
+    "parity": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/parity"}]},
+    "receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "reason": {"type": "object", "additionalProperties": false, "required": ["code", "detail"], "properties": {"code": {"type": "string", "minLength": 1, "maxLength": 128}, "detail": {"type": "string", "minLength": 1, "maxLength": 512}}},
+    "array": {"type": "object", "additionalProperties": false, "required": ["dtype", "shape", "byte_length", "data_hash"], "properties": {"dtype": {"const": "<f8"}, "shape": {"type": "array", "minItems": 1, "items": {"type": "integer", "minimum": 1}}, "byte_length": {"type": "integer", "minimum": 8}, "data_hash": {"$ref": "#/$defs/hash"}}},
+    "delta": {"type": "object", "additionalProperties": false, "required": ["d2h_operation_attempt_count", "d2h_operation_success_count", "d2h_bytes_attempted", "d2h_bytes_succeeded", "sync_attempt_count", "sync_success_count", "allocation_count", "h2d_operation_count", "fallback_count"], "properties": {"d2h_operation_attempt_count": {"type": "integer", "minimum": 0, "maximum": 8}, "d2h_operation_success_count": {"type": "integer", "minimum": 0, "maximum": 8}, "d2h_bytes_attempted": {"type": "integer", "minimum": 0}, "d2h_bytes_succeeded": {"type": "integer", "minimum": 0}, "sync_attempt_count": {"type": "integer", "minimum": 0, "maximum": 1}, "sync_success_count": {"type": "integer", "minimum": 0, "maximum": 1}, "allocation_count": {"const": 0}, "h2d_operation_count": {"const": 0}, "fallback_count": {"const": 0}}},
+    "metric": {"type": "object", "additionalProperties": false, "required": ["count", "max_abs_error", "relative_l2_error", "max_scaled_error", "absolute_tolerance", "relative_tolerance", "passed"], "properties": {"count": {"type": "integer", "minimum": 0}, "max_abs_error": {"type": "number", "minimum": 0}, "relative_l2_error": {"type": "number", "minimum": 0}, "max_scaled_error": {"type": "number", "minimum": 0}, "absolute_tolerance": {"const": 1e-8}, "relative_tolerance": {"const": 1e-8}, "passed": {"type": "boolean"}}},
+    "parity": {"type": "object", "additionalProperties": false, "required": ["oracle", "oracle_role", "metrics", "constrained_direction_exact_zero", "passed"], "properties": {"oracle": {"const": "execution_plan_v2_cpu_full_and_reduced_csr_fp64"}, "oracle_role": {"const": "verification_only_never_fallback"}, "metrics": {"type": "object", "additionalProperties": false, "required": ["reduced_values", "reduced_state", "reduced_load", "residual_direction", "residual_direction_vs_negative_full_residual_free", "reduced_jvp", "full_residual", "full_direction"], "properties": {"reduced_values": {"$ref": "#/$defs/metric"}, "reduced_state": {"$ref": "#/$defs/metric"}, "reduced_load": {"$ref": "#/$defs/metric"}, "residual_direction": {"$ref": "#/$defs/metric"}, "residual_direction_vs_negative_full_residual_free": {"$ref": "#/$defs/metric"}, "reduced_jvp": {"$ref": "#/$defs/metric"}, "full_residual": {"$ref": "#/$defs/metric"}, "full_direction": {"$ref": "#/$defs/metric"}}}, "constrained_direction_exact_zero": {"type": "boolean"}, "passed": {"type": "boolean"}}}
+  }
+}

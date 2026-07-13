@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_krylov_primitives_batch_v1.schema.json",
+  "title": "HIP Krylov Primitives Batch Receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "capability_profile", "status", "batch_id", "context_id", "opening_context_receipt_hash", "source_apply_receipt_hash", "sequence", "evidence_scope", "promotion_eligible", "reason", "telemetry_delta", "claims", "receipt_hash"],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-hip-krylov-primitives-batch.v1"},
+    "capability_profile": {"const": "phase0_hip_krylov_vector_reduction_positive_jacobi_primitives"},
+    "status": {"enum": ["enqueued", "unavailable"]},
+    "batch_id": {"$ref": "#/$defs/hash"}, "context_id": {"$ref": "#/$defs/hash"},
+    "opening_context_receipt_hash": {"$ref": "#/$defs/hash"}, "source_apply_receipt_hash": {"$ref": "#/$defs/hash"},
+    "sequence": {"type": "integer", "minimum": 1},
+    "evidence_scope": {"enum": ["native_hiprtc_krylov_primitives_composite", "injected_test_double"]},
+    "promotion_eligible": {"const": false},
+    "reason": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/reason"}]},
+    "telemetry_delta": {"$ref": "#/$defs/delta"}, "claims": {"$ref": "#/$defs/claims"},
+    "receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "enqueued"}}, "required": ["status"]},
+      "then": {
+        "properties": {
+          "reason": {"type": "null"},
+          "claims": {"$ref": "#/$defs/claims_all_complete"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "unavailable"}}, "required": ["status"]},
+      "then": {
+        "properties": {
+          "reason": {"$ref": "#/$defs/reason"},
+          "claims": {"not": {"$ref": "#/$defs/claims_all_complete"}}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "reason": {"type": "object", "additionalProperties": false, "required": ["code", "detail"], "properties": {"code": {"type": "string", "minLength": 1}, "detail": {"type": "string", "minLength": 1, "maxLength": 512}}},
+    "delta": {
+      "type": "object", "additionalProperties": false,
+      "required": ["fill_launch_attempt_count", "fill_launch_success_count", "affine_launch_attempt_count", "affine_launch_success_count", "jacobi_launch_attempt_count", "jacobi_launch_success_count", "dot_stage_launch_attempt_count", "dot_stage_launch_success_count", "sum_stage_launch_attempt_count", "sum_stage_launch_success_count", "lassq_stage_launch_attempt_count", "lassq_stage_launch_success_count", "lassq_combine_launch_attempt_count", "lassq_combine_launch_success_count", "lassq_finalize_launch_attempt_count", "lassq_finalize_launch_success_count", "h2d_operation_count", "d2h_operation_count", "allocation_count", "sync_count", "fallback_count"],
+      "properties": {
+        "fill_launch_attempt_count": {"type": "integer", "minimum": 0},
+        "fill_launch_success_count": {"type": "integer", "minimum": 0},
+        "affine_launch_attempt_count": {"type": "integer", "minimum": 0},
+        "affine_launch_success_count": {"type": "integer", "minimum": 0},
+        "jacobi_launch_attempt_count": {"type": "integer", "minimum": 0},
+        "jacobi_launch_success_count": {"type": "integer", "minimum": 0},
+        "dot_stage_launch_attempt_count": {"type": "integer", "minimum": 0},
+        "dot_stage_launch_success_count": {"type": "integer", "minimum": 0},
+        "sum_stage_launch_attempt_count": {"type": "integer", "minimum": 0},
+        "sum_stage_launch_success_count": {"type": "integer", "minimum": 0},
+        "lassq_stage_launch_attempt_count": {"type": "integer", "minimum": 0},
+        "lassq_stage_launch_success_count": {"type": "integer", "minimum": 0},
+        "lassq_combine_launch_attempt_count": {"type": "integer", "minimum": 0},
+        "lassq_combine_launch_success_count": {"type": "integer", "minimum": 0},
+        "lassq_finalize_launch_attempt_count": {"type": "integer", "minimum": 0},
+        "lassq_finalize_launch_success_count": {"type": "integer", "minimum": 0},
+        "h2d_operation_count": {"const": 0},
+        "d2h_operation_count": {"const": 0},
+        "allocation_count": {"const": 0},
+        "sync_count": {"const": 0},
+        "fallback_count": {"const": 0}
+      }
+    },
+    "claims": {
+      "type": "object", "additionalProperties": false,
+      "required": ["fill_enqueued", "affine_program_enqueued", "jacobi_apply_enqueued", "dot_reduction_enqueued", "stable_l2_reduction_enqueued", "completion_fence_observed", "solver_iteration", "pcg_iteration", "fallback_used"],
+      "properties": {
+        "fill_enqueued": {"type": "boolean"},
+        "affine_program_enqueued": {"type": "boolean"},
+        "jacobi_apply_enqueued": {"type": "boolean"},
+        "dot_reduction_enqueued": {"type": "boolean"},
+        "stable_l2_reduction_enqueued": {"type": "boolean"},
+        "completion_fence_observed": {"const": false},
+        "solver_iteration": {"const": false},
+        "pcg_iteration": {"const": false},
+        "fallback_used": {"const": false}
+      }
+    },
+    "claims_all_complete": {
+      "type": "object",
+      "required": [
+        "fill_enqueued",
+        "affine_program_enqueued",
+        "jacobi_apply_enqueued",
+        "dot_reduction_enqueued",
+        "stable_l2_reduction_enqueued"
+      ],
+      "properties": {
+        "fill_enqueued": {"const": true},
+        "affine_program_enqueued": {"const": true},
+        "jacobi_apply_enqueued": {"const": true},
+        "dot_reduction_enqueued": {"const": true},
+        "stable_l2_reduction_enqueued": {"const": true}
+      }
+    }
+  }
+}

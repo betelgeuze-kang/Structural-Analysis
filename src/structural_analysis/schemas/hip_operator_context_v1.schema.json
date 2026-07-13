@@ -1,0 +1,613 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_operator_context_v1.schema.json",
+  "title": "Engine v2 HIP CSR residual/JVP operator context v1 receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "status",
+    "context_id",
+    "requested_backend",
+    "actual_backend",
+    "execution_evidence_kind",
+    "fallback_policy",
+    "fallback_used",
+    "reason",
+    "capability_receipt_hash",
+    "foundation_context_receipt_hash",
+    "solver_model_buffers",
+    "execution_plan",
+    "committed_state",
+    "kernel_artifact",
+    "device",
+    "device_views",
+    "telemetry",
+    "claims",
+    "context_receipt_hash",
+    "extensions"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-hip-operator-context.v1"},
+    "capability_profile": {"const": "phase0_hip_csr_residual_jvp_operator_context"},
+    "status": {
+      "enum": [
+        "context_ready",
+        "context_closed",
+        "unavailable",
+        "poisoned",
+        "cleanup_failed"
+      ]
+    },
+    "context_id": {"$ref": "#/$defs/stableId"},
+    "requested_backend": {"const": "hip"},
+    "actual_backend": {
+      "type": ["string", "null"],
+      "enum": ["hip_native", "test_double", null]
+    },
+    "execution_evidence_kind": {"enum": ["native_hip", "test_double"]},
+    "fallback_policy": {"const": "forbidden"},
+    "fallback_used": {"const": false},
+    "reason": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/reason"}
+      ]
+    },
+    "capability_receipt_hash": {"$ref": "#/$defs/sha256"},
+    "foundation_context_receipt_hash": {"$ref": "#/$defs/sha256"},
+    "solver_model_buffers": {"$ref": "#/$defs/solverModelBuffers"},
+    "execution_plan": {"$ref": "#/$defs/executionPlan"},
+    "committed_state": {"$ref": "#/$defs/committedState"},
+    "kernel_artifact": {"$ref": "#/$defs/kernelArtifact"},
+    "device": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/device"}
+      ]
+    },
+    "device_views": {
+      "type": "array",
+      "maxItems": 8,
+      "prefixItems": [
+        {
+          "allOf": [
+            {"$ref": "#/$defs/deviceView"},
+            {
+              "properties": {
+                "name": {"const": "csr_row_ptr"},
+                "dtype": {"const": "<i4"},
+                "data_hash": {"$ref": "#/$defs/sha256"},
+                "access": {"const": "read_only"},
+                "initial_transfer": {"const": "async_h2d_then_explicit_sync"}
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/deviceView"},
+            {
+              "properties": {
+                "name": {"const": "csr_col_ind"},
+                "dtype": {"const": "<i4"},
+                "data_hash": {"$ref": "#/$defs/sha256"},
+                "access": {"const": "read_only"},
+                "initial_transfer": {"const": "async_h2d_then_explicit_sync"}
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/deviceView"},
+            {
+              "properties": {
+                "name": {"const": "csr_values"},
+                "dtype": {"const": "<f8"},
+                "data_hash": {"$ref": "#/$defs/sha256"},
+                "access": {"const": "read_only"},
+                "initial_transfer": {"const": "async_h2d_then_explicit_sync"}
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/deviceView"},
+            {
+              "properties": {
+                "name": {"const": "load_vector"},
+                "dtype": {"const": "<f8"},
+                "data_hash": {"$ref": "#/$defs/sha256"},
+                "access": {"const": "read_only"},
+                "initial_transfer": {"const": "async_h2d_then_explicit_sync"}
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/deviceView"},
+            {
+              "properties": {
+                "name": {"const": "committed_displacement"},
+                "dtype": {"const": "<f8"},
+                "data_hash": {"$ref": "#/$defs/sha256"},
+                "access": {"const": "read_only"},
+                "initial_transfer": {"const": "async_h2d_then_explicit_sync"}
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/deviceView"},
+            {
+              "properties": {
+                "name": {"const": "direction"},
+                "dtype": {"const": "<f8"},
+                "access": {"const": "read_write"},
+                "initial_transfer": {"const": "none"}
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/deviceView"},
+            {
+              "properties": {
+                "name": {"const": "residual_output"},
+                "dtype": {"const": "<f8"},
+                "access": {"const": "write_only"},
+                "initial_transfer": {"const": "none"}
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/deviceView"},
+            {
+              "properties": {
+                "name": {"const": "jvp_output"},
+                "dtype": {"const": "<f8"},
+                "access": {"const": "write_only"},
+                "initial_transfer": {"const": "none"}
+              }
+            }
+          ]
+        }
+      ],
+      "items": false
+    },
+    "telemetry": {"$ref": "#/$defs/telemetry"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "context_receipt_hash": {"$ref": "#/$defs/sha256"},
+    "extensions": {"$ref": "#/$defs/extensions"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"execution_evidence_kind": {"const": "native_hip"}}},
+      "then": {
+        "properties": {
+          "kernel_artifact": {
+            "properties": {"artifact_kind": {"const": "native_hip"}}
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "kernel_artifact": {
+            "properties": {"artifact_kind": {"const": "test_double"}}
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "context_ready"}}},
+      "then": {
+        "properties": {
+          "reason": {"type": "null"},
+          "device": {"$ref": "#/$defs/device"},
+          "device_views": {"minItems": 8, "maxItems": 8},
+          "claims": {
+            "properties": {
+              "model_buffers_foundation_bound": {"const": true},
+              "canonical_csr_operator_bound": {"const": true},
+              "committed_state_bound": {"const": true},
+              "residual_jvp_ready": {"const": true}
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {"properties": {"execution_evidence_kind": {"const": "native_hip"}}},
+            "then": {"properties": {"actual_backend": {"const": "hip_native"}}},
+            "else": {"properties": {"actual_backend": {"const": "test_double"}}}
+          }
+        ]
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "context_closed"}}},
+      "then": {
+        "properties": {
+          "reason": {"type": "null"},
+          "device": {"$ref": "#/$defs/device"},
+          "device_views": {"minItems": 8, "maxItems": 8},
+          "claims": {
+            "properties": {
+              "model_buffers_foundation_bound": {"const": true},
+              "canonical_csr_operator_bound": {"const": true},
+              "committed_state_bound": {"const": true},
+              "residual_jvp_ready": {"const": false}
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {"properties": {"execution_evidence_kind": {"const": "native_hip"}}},
+            "then": {"properties": {"actual_backend": {"const": "hip_native"}}},
+            "else": {"properties": {"actual_backend": {"const": "test_double"}}}
+          }
+        ]
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "unavailable"}}},
+      "then": {
+        "properties": {
+          "actual_backend": {"type": "null"},
+          "reason": {"$ref": "#/$defs/reason"},
+          "device": {"type": "null"},
+          "device_views": {"maxItems": 0},
+          "claims": {
+            "properties": {
+              "model_buffers_foundation_bound": {"const": false},
+              "canonical_csr_operator_bound": {"const": false},
+              "committed_state_bound": {"const": false},
+              "residual_jvp_ready": {"const": false}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"enum": ["poisoned", "cleanup_failed"]}
+        }
+      },
+      "then": {
+        "properties": {
+          "reason": {"$ref": "#/$defs/reason"},
+          "device": {"$ref": "#/$defs/device"},
+          "device_views": {"minItems": 8, "maxItems": 8},
+          "claims": {
+            "properties": {"residual_jvp_ready": {"const": false}}
+          }
+        },
+        "allOf": [
+          {
+            "if": {"properties": {"execution_evidence_kind": {"const": "native_hip"}}},
+            "then": {"properties": {"actual_backend": {"const": "hip_native"}}},
+            "else": {"properties": {"actual_backend": {"const": "test_double"}}}
+          }
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "stableId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]*$"
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "maxProperties": 0
+    },
+    "reason": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "detail"],
+      "properties": {
+        "code": {
+          "enum": [
+            "foundation_context_not_ready",
+            "model_plan_binding_mismatch",
+            "state_plan_binding_mismatch",
+            "unsupported_execution_plan",
+            "kernel_artifact_invalid",
+            "hip_allocation_failed",
+            "hip_copy_failed",
+            "hip_sync_failed",
+            "hip_kernel_launch_failed",
+            "operator_context_poisoned",
+            "operator_context_cleanup_failed"
+          ]
+        },
+        "detail": {"type": "string", "minLength": 1, "maxLength": 512}
+      }
+    },
+    "solverModelBuffers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "model_ir_content_hash",
+        "load_pattern_id",
+        "numeric_buffer_hash",
+        "entity_mapping_hash",
+        "artifact_hash"
+      ],
+      "properties": {
+        "schema_version": {"const": "structural-analysis-solver-model-buffers.v1"},
+        "model_ir_content_hash": {"$ref": "#/$defs/sha256"},
+        "load_pattern_id": {"$ref": "#/$defs/stableId"},
+        "numeric_buffer_hash": {"$ref": "#/$defs/sha256"},
+        "entity_mapping_hash": {"$ref": "#/$defs/sha256"},
+        "artifact_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "executionPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "model_ir_content_hash",
+        "plan_hash",
+        "operator_hash",
+        "pattern_hash",
+        "partition_hash",
+        "dof_count",
+        "free_dof_count",
+        "nnz"
+      ],
+      "properties": {
+        "schema_version": {"const": "structural-analysis-execution-plan.v1"},
+        "model_ir_content_hash": {"$ref": "#/$defs/sha256"},
+        "plan_hash": {"$ref": "#/$defs/sha256"},
+        "operator_hash": {"$ref": "#/$defs/sha256"},
+        "pattern_hash": {"$ref": "#/$defs/sha256"},
+        "partition_hash": {"$ref": "#/$defs/sha256"},
+        "dof_count": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+        "free_dof_count": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+        "nnz": {"type": "integer", "minimum": 1, "maximum": 2147483647}
+      }
+    },
+    "committedState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "role",
+        "state_hash",
+        "displacement_hash",
+        "epoch",
+        "execution_plan_hash",
+        "operator_hash",
+        "dof_count"
+      ],
+      "properties": {
+        "schema_version": {"const": "structural-analysis-state-ir.v1"},
+        "role": {"const": "committed"},
+        "state_hash": {"$ref": "#/$defs/sha256"},
+        "displacement_hash": {"$ref": "#/$defs/sha256"},
+        "epoch": {"type": "integer", "minimum": 0},
+        "execution_plan_hash": {"$ref": "#/$defs/sha256"},
+        "operator_hash": {"$ref": "#/$defs/sha256"},
+        "dof_count": {"type": "integer", "minimum": 1, "maximum": 2147483647}
+      }
+    },
+    "kernelArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "artifact_receipt_hash",
+        "artifact_hash",
+        "source_hash",
+        "library_hash",
+        "abi_hash",
+        "build_target_hash",
+        "entrypoint",
+        "abi_version",
+        "block_size",
+        "targets",
+        "flags",
+        "artifact_kind"
+      ],
+      "properties": {
+        "schema_version": {"const": "structural-analysis-hip-csr-kernel-artifact.v1"},
+        "artifact_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "artifact_hash": {"$ref": "#/$defs/sha256"},
+        "source_hash": {"$ref": "#/$defs/sha256"},
+        "library_hash": {"$ref": "#/$defs/sha256"},
+        "abi_hash": {"$ref": "#/$defs/sha256"},
+        "build_target_hash": {"$ref": "#/$defs/sha256"},
+        "entrypoint": {"const": "engine_v2_hip_csr_launch"},
+        "abi_version": {"const": 1},
+        "block_size": {"const": 256},
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 128}
+        },
+        "flags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 256}
+        },
+        "artifact_kind": {"enum": ["native_hip", "test_double"]}
+      }
+    },
+    "device": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ordinal",
+        "name",
+        "architecture",
+        "runtime_version_raw",
+        "driver_version_raw",
+        "total_memory_bytes",
+        "free_memory_bytes_before_upload",
+        "free_memory_bytes_after_upload"
+      ],
+      "properties": {
+        "ordinal": {"type": "integer", "minimum": 0},
+        "name": {"type": "string", "minLength": 1, "maxLength": 255},
+        "architecture": {"type": ["string", "null"]},
+        "runtime_version_raw": {"type": "integer", "minimum": 0},
+        "driver_version_raw": {"type": "integer", "minimum": 0},
+        "total_memory_bytes": {"type": "integer", "minimum": 1},
+        "free_memory_bytes_before_upload": {"type": "integer", "minimum": 0},
+        "free_memory_bytes_after_upload": {"type": "integer", "minimum": 0}
+      }
+    },
+    "deviceView": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "layout",
+        "byte_length",
+        "data_hash",
+        "memory_space",
+        "device_ordinal",
+        "access",
+        "initial_transfer"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "csr_row_ptr",
+            "csr_col_ind",
+            "csr_values",
+            "load_vector",
+            "committed_displacement",
+            "direction",
+            "residual_output",
+            "jvp_output"
+          ]
+        },
+        "dtype": {"enum": ["<f8", "<i4"]},
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {"type": "integer", "minimum": 1, "maximum": 2147483647}
+        },
+        "layout": {"const": "C"},
+        "byte_length": {"type": "integer", "minimum": 1},
+        "data_hash": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/sha256"}
+          ]
+        },
+        "memory_space": {"const": "hip_device"},
+        "device_ordinal": {"type": "integer", "minimum": 0},
+        "access": {"enum": ["read_only", "read_write", "write_only"]},
+        "initial_transfer": {"enum": ["async_h2d_then_explicit_sync", "none"]}
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allocation_attempt_count",
+        "allocation_success_count",
+        "h2d_operation_attempt_count",
+        "h2d_operation_success_count",
+        "h2d_bytes_attempted",
+        "h2d_bytes_succeeded",
+        "h2d_bytes",
+        "d2h_operation_attempt_count",
+        "d2h_operation_success_count",
+        "d2h_bytes_attempted",
+        "d2h_bytes_succeeded",
+        "d2h_bytes",
+        "explicit_sync_attempt_count",
+        "explicit_sync_success_count",
+        "kernel_launch_attempt_count",
+        "kernel_launch_success_count",
+        "deallocation_attempt_count",
+        "deallocation_success_count",
+        "blocking_copy_count",
+        "current_device_payload_bytes",
+        "peak_device_payload_bytes",
+        "fallback_count"
+      ],
+      "properties": {
+        "allocation_attempt_count": {"type": "integer", "minimum": 0},
+        "allocation_success_count": {"type": "integer", "minimum": 0},
+        "h2d_operation_attempt_count": {"type": "integer", "minimum": 0},
+        "h2d_operation_success_count": {"type": "integer", "minimum": 0},
+        "h2d_bytes_attempted": {"type": "integer", "minimum": 0},
+        "h2d_bytes_succeeded": {"type": "integer", "minimum": 0},
+        "h2d_bytes": {"type": "integer", "minimum": 0},
+        "d2h_operation_attempt_count": {"type": "integer", "minimum": 0},
+        "d2h_operation_success_count": {"type": "integer", "minimum": 0},
+        "d2h_bytes_attempted": {"type": "integer", "minimum": 0},
+        "d2h_bytes_succeeded": {"type": "integer", "minimum": 0},
+        "d2h_bytes": {"type": "integer", "minimum": 0},
+        "explicit_sync_attempt_count": {"type": "integer", "minimum": 0},
+        "explicit_sync_success_count": {"type": "integer", "minimum": 0},
+        "kernel_launch_attempt_count": {"type": "integer", "minimum": 0},
+        "kernel_launch_success_count": {"type": "integer", "minimum": 0},
+        "deallocation_attempt_count": {"type": "integer", "minimum": 0},
+        "deallocation_success_count": {"type": "integer", "minimum": 0},
+        "blocking_copy_count": {"const": 0},
+        "current_device_payload_bytes": {"type": "integer", "minimum": 0},
+        "peak_device_payload_bytes": {"type": "integer", "minimum": 0},
+        "fallback_count": {"const": 0}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_buffers_foundation_bound",
+        "canonical_csr_operator_bound",
+        "committed_state_bound",
+        "residual_jvp_ready",
+        "native_hip_kernel_execution_proven",
+        "device_constitutive_assembly_proven",
+        "solver_ready",
+        "newton_ready",
+        "krylov_ready",
+        "cpu_hip_global_parity_proven",
+        "exact_foundation_cleanup_proven",
+        "commercial_readiness"
+      ],
+      "properties": {
+        "model_buffers_foundation_bound": {"type": "boolean"},
+        "canonical_csr_operator_bound": {"type": "boolean"},
+        "committed_state_bound": {"type": "boolean"},
+        "residual_jvp_ready": {"type": "boolean"},
+        "native_hip_kernel_execution_proven": {"const": false},
+        "device_constitutive_assembly_proven": {"const": false},
+        "solver_ready": {"const": false},
+        "newton_ready": {"const": false},
+        "krylov_ready": {"const": false},
+        "cpu_hip_global_parity_proven": {"const": false},
+        "exact_foundation_cleanup_proven": {"const": false},
+        "commercial_readiness": {"const": false}
+      }
+    }
+  }
+}
