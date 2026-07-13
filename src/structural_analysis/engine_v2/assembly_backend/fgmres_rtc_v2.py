@@ -1824,7 +1824,8 @@ class HipRtcFgmresV2Kernel:
 
     @property
     def pending_stream_count(self) -> int:
-        return len(self._pending_streams)
+        with self._checkpoint_owner_lock:
+            return len(self._pending_streams)
 
     def _validated_binding(self) -> _HipRtcFgmresV2BindingWitness:
         with _KERNEL_BINDING_LOCK:
@@ -2642,6 +2643,22 @@ class HipRtcFgmresV2Kernel:
                 operation="checkpoint pending observation",
             )
             return len(self._pending_streams)
+
+    def _checkpoint_pending_snapshot(
+        self,
+        token: object,
+    ) -> tuple[tuple[int, int], ...]:
+        """Return the exact stream/reservation map under the owner lock."""
+
+        with self._checkpoint_owner_lock:
+            self._require_open()
+            self._require_checkpoint_owner_identity(token)
+            witness = self._validated_binding()
+            _require_expected_device_ordinal(
+                witness,
+                operation="checkpoint pending snapshot",
+            )
+            return tuple(sorted(self._pending_streams.items()))
 
     def _consume_checkpoint_pending_after_fence(
         self,

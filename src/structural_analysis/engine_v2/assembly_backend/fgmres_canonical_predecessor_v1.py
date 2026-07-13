@@ -344,6 +344,9 @@ class HipFgmresCanonicalPredecessorExecutionContextV1:
         self._pending_nonce = object()
         self._capability_nonce = object()
         self._consume_started = False
+        self._sealed_checkpoint_transaction_child_token: object | None = None
+        self._sealed_checkpoint_transaction_child_terminal = False
+        self._capability_consumed = False
         self._child_released = False
         self._closed = False
 
@@ -464,6 +467,12 @@ class HipFgmresCanonicalPredecessorExecutionContextV1:
         with self._lock:
             if self._closed:
                 return
+            if self._sealed_checkpoint_transaction_child_token is not None:
+                _fail(
+                    "hip_fgmres_canonical_predecessor_sealed_child_active",
+                    "/lifetime/sealed_checkpoint_transaction_child",
+                    cleanup_owner=self,
+                )
             try:
                 if self._state in {
                     "predecessor_pending",
@@ -781,6 +790,164 @@ class HipFgmresCanonicalPredecessorExecutionContextV1:
             or pending is not self._pending
         ):
             _fail("hip_fgmres_canonical_predecessor_pending_invalid", "/pending")
+
+    def _reserve_sealed_checkpoint_transaction_child(
+        self,
+        token: object,
+        capability: HipFgmresCanonicalPredecessorCapabilityV1,
+    ) -> object:
+        """Reserve the sole non-owning transaction child without consuming it."""
+
+        if type(token) is not object:
+            _fail(
+                "hip_fgmres_canonical_predecessor_sealed_child_token_invalid",
+                "/lifetime/sealed_checkpoint_transaction_child",
+            )
+        with self._lock:
+            if (
+                self._closed
+                or self._sealed_checkpoint_transaction_child_terminal
+                or self._sealed_checkpoint_transaction_child_token is not None
+                or self._capability_consumed
+            ):
+                _fail(
+                    "hip_fgmres_canonical_predecessor_sealed_child_unavailable",
+                    "/lifetime/sealed_checkpoint_transaction_child",
+                )
+            validate_hip_fgmres_canonical_predecessor_capability_v1(
+                capability,
+                expected_context=self,
+            )
+            self._validate_authority(require_idle_kernel=True)
+            self._sealed_checkpoint_transaction_child_token = token
+            return token
+
+    def _require_sealed_checkpoint_transaction_child(
+        self,
+        token: object,
+        *,
+        capability_consumed: bool | None = None,
+    ) -> None:
+        with self._lock:
+            if token is not self._sealed_checkpoint_transaction_child_token:
+                _fail(
+                    "hip_fgmres_canonical_predecessor_sealed_child_token_invalid",
+                    "/lifetime/sealed_checkpoint_transaction_child",
+                )
+            if self._closed:
+                _fail(
+                    "hip_fgmres_canonical_predecessor_sealed_child_unavailable",
+                    "/lifetime/sealed_checkpoint_transaction_child",
+                )
+            if (
+                capability_consumed is not None
+                and self._capability_consumed is not capability_consumed
+            ):
+                _fail(
+                    "hip_fgmres_canonical_predecessor_capability_state_invalid",
+                    "/capability/consumed",
+                )
+
+    def _consume_sealed_checkpoint_transaction_capability(
+        self,
+        token: object,
+        capability: HipFgmresCanonicalPredecessorCapabilityV1,
+    ) -> None:
+        """Atomically consume the reserved canonical capability exactly once."""
+
+        with self._lock:
+            self._require_sealed_checkpoint_transaction_child(
+                token,
+                capability_consumed=False,
+            )
+            validate_hip_fgmres_canonical_predecessor_capability_v1(
+                capability,
+                expected_context=self,
+            )
+            self._validate_authority(require_idle_kernel=True)
+            self._capability_consumed = True
+
+    def _sealed_checkpoint_transaction_capability_consumed(
+        self,
+        token: object,
+    ) -> bool:
+        """Report the exact shared consume bit for caller-side reconciliation."""
+
+        with self._lock:
+            self._require_sealed_checkpoint_transaction_child(token)
+            return self._capability_consumed
+
+    def _validate_sealed_checkpoint_transaction_authority(
+        self,
+        token: object,
+        *,
+        expected_pending_operation_bounds: tuple[int, int],
+    ) -> None:
+        """Validate lineage plus the exact live stream reservation interval."""
+
+        if (
+            type(expected_pending_operation_bounds) is not tuple
+            or len(expected_pending_operation_bounds) != 2
+            or any(
+                type(value) is not int
+                for value in expected_pending_operation_bounds
+            )
+            or not 0
+            <= expected_pending_operation_bounds[0]
+            <= expected_pending_operation_bounds[1]
+        ):
+            _fail(
+                "hip_fgmres_canonical_predecessor_pending_expectation_invalid",
+                "/kernel/pending_operation_bounds",
+            )
+        with self._lock:
+            self._require_sealed_checkpoint_transaction_child(
+                token,
+                capability_consumed=True,
+            )
+            self._validate_authority(require_idle_kernel=False)
+            live = self._require_live()
+            live._validate_authority_for_canonical_child(
+                self._token,
+                pending_operation_bounds=expected_pending_operation_bounds,
+            )
+            kernel = self._kernel()
+            checkpoint_token = self._live_checkpoint_token()
+            try:
+                runtime_owner = kernel._checkpoint_runtime_owner(checkpoint_token)
+                binding_snapshot = kernel._checkpoint_binding_snapshot(
+                    checkpoint_token
+                )
+            except Exception as exc:
+                raise HipFgmresCanonicalPredecessorV1Error(
+                    "hip_fgmres_canonical_predecessor_sealed_authority_invalid",
+                    "/kernel/authority",
+                    _detail(exc),
+                    cleanup_owner=self,
+                ) from exc
+            if (
+                runtime_owner is not live._loaded_runtime
+                or binding_snapshot != live._kernel_binding_snapshot
+            ):
+                _fail(
+                    "hip_fgmres_canonical_predecessor_sealed_authority_invalid",
+                    "/kernel/authority",
+                    cleanup_owner=self,
+                )
+
+    def _release_sealed_checkpoint_transaction_child(self, token: object) -> None:
+        """Release the child only after its exact stream reservation is empty."""
+
+        with self._lock:
+            self._require_sealed_checkpoint_transaction_child(token)
+            self._validate_authority(require_idle_kernel=False)
+            self._require_live()._validate_authority_for_canonical_child(
+                self._token,
+                pending_operation_bounds=(0, 0),
+            )
+            if self._capability_consumed:
+                self._sealed_checkpoint_transaction_child_terminal = True
+            self._sealed_checkpoint_transaction_child_token = None
 
     def _mint_pending(self) -> HipFgmresCanonicalPredecessorPendingV1:
         if self._pending is not None:
@@ -1326,29 +1493,35 @@ def validate_hip_fgmres_canonical_predecessor_capability_v1(
 ) -> HipFgmresCanonicalPredecessorCapabilityV1:
     """Validate one live, exact-context conditional device capability."""
 
-    if (
-        type(capability) is not HipFgmresCanonicalPredecessorCapabilityV1
-        or type(expected_context) is not HipFgmresCanonicalPredecessorExecutionContextV1
-        or capability._issuer is not expected_context
-        or capability._nonce is not expected_context._capability_nonce
-        or capability._snapshot != _capability_snapshot(capability)
-        or capability is not expected_context._capability
-        or capability.context_id != expected_context._context_id
-        or capability.mask_domain != _MASK_DOMAIN
-        or expected_context._state != "predecessor_fenced"
-        or expected_context.closed
-    ):
+    if type(expected_context) is not HipFgmresCanonicalPredecessorExecutionContextV1:
         _fail(
             "hip_fgmres_canonical_predecessor_capability_invalid",
             "/capability",
         )
-    receipt = expected_context.receipt()
-    if capability.receipt_hash != receipt.receipt_hash:
-        _fail(
-            "hip_fgmres_canonical_predecessor_capability_invalid",
-            "/capability/receipt_hash",
-        )
-    return capability
+    with expected_context._lock:
+        if (
+            type(capability) is not HipFgmresCanonicalPredecessorCapabilityV1
+            or capability._issuer is not expected_context
+            or capability._nonce is not expected_context._capability_nonce
+            or capability._snapshot != _capability_snapshot(capability)
+            or capability is not expected_context._capability
+            or capability.context_id != expected_context._context_id
+            or capability.mask_domain != _MASK_DOMAIN
+            or expected_context._state != "predecessor_fenced"
+            or expected_context._capability_consumed
+            or expected_context.closed
+        ):
+            _fail(
+                "hip_fgmres_canonical_predecessor_capability_invalid",
+                "/capability",
+            )
+        receipt = expected_context.receipt()
+        if capability.receipt_hash != receipt.receipt_hash:
+            _fail(
+                "hip_fgmres_canonical_predecessor_capability_invalid",
+                "/capability/receipt_hash",
+            )
+        return capability
 
 
 def _receipt_payload(

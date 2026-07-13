@@ -1,14 +1,15 @@
 # Engine v2 HIP FGMRES first-column checkpoint transaction context v2
 
-- 상태: Checkpoint owner v0.2.16 implemented; v0.2.21 fixed-four-row recurrence ABI compatibility confirmed, `contract_only`
+- 상태: Checkpoint owner v0.2.16 implemented; v0.2.22 fixed-four-row recurrence ABI compatibility confirmed, `contract_only`
 - 증거 범위: `caller_attested_valid_predecessor_non_promoting`
 - 수치 커널: [initial + first-column checkpoint recurrence v2](engine-v2-hip-fgmres-initial-recurrence-v2.md)
+- 후속 live owner: [canonical-capability-consuming sealed checkpoint transaction v1](engine-v2-hip-fgmres-sealed-checkpoint-transaction-v1.md)
 - 전체 설계: [HIP FGMRES full recurrence ABI v2](engine-v2-hip-fgmres-recurrence-abi-v2.md)
 - 상위 기준: [Structural Solver Engine v2 마스터 로드맵](structural-solver-engine-v2-master-roadmap.md)
 
-이 단계는 column-0 `CHECKPOINT_DECIDE -> PREFLIGHT_COMMIT_SOURCE -> COMMIT_CHECKPOINT -> CHECKPOINT_FINALIZE` 네 launch에 process-local 단독 실행권, 정확한 HIP allocation 범위 등록, single-use predecessor capability, 부분 enqueue poison, 실제 HIP stream fence와 재시도 가능한 cleanup을 추가한다. 네 launch의 host-side lifetime은 한 context가 소유한다. v0.2.16의 three-row 검증 수치는 historical snapshot으로 유지하며 v0.2.21 current owner는 fixed four-row schedule을 사용한다.
+이 단계는 column-0 `CHECKPOINT_DECIDE -> PREFLIGHT_COMMIT_SOURCE -> COMMIT_CHECKPOINT -> CHECKPOINT_FINALIZE` 네 launch에 process-local 단독 실행권, 정확한 HIP allocation 범위 등록, single-use predecessor capability, 부분 enqueue poison, 실제 HIP stream fence와 재시도 가능한 cleanup을 추가한다. 네 launch의 host-side lifetime은 한 context가 소유한다. v0.2.16의 three-row 검증 수치는 historical snapshot으로 유지하며 current owner는 fixed four-row schedule을 사용한다.
 
-이 context가 발행하는 predecessor는 상위 Krylov producer가 장치 메모리의 실제 값과 mask를 검증해 넘긴 영수증이 아니라 caller attestation이다. 따라서 이 context 자체의 `authoritative_predecessor_proven`, `live_krylov_parent_integrated`, `promotion_eligible`은 모두 false다. 후속 [live checkpoint resource context v1](engine-v2-hip-fgmres-live-checkpoint-context-v1.md)과 [canonical first-column predecessor producer v1](engine-v2-hip-fgmres-canonical-predecessor-v1.md)은 actual allocator lineage, owned8 initialization과 device validator seal을 별도로 구현했지만, 그 conditional capability를 이 transaction context가 소비하도록 아직 결합하지 않았다. 이 문서는 authoritative solver, solution receipt 또는 상용 준비를 주장하지 않는다.
+이 context가 발행하는 predecessor는 상위 Krylov producer가 장치 메모리의 실제 값과 mask를 검증해 넘긴 영수증이 아니라 caller attestation이다. 따라서 이 context 자체의 `authoritative_predecessor_proven`, `live_krylov_parent_integrated`, `promotion_eligible`은 모두 false다. 후속 [live checkpoint resource context v1](engine-v2-hip-fgmres-live-checkpoint-context-v1.md)과 [canonical first-column predecessor producer v1](engine-v2-hip-fgmres-canonical-predecessor-v1.md)은 actual allocator lineage, owned8 initialization과 device validator seal을 별도로 구현했고, v0.2.22의 별도 sealed transaction child가 그 conditional capability를 소비한다. 이 caller-attested API의 receipt가 소급 승격되는 것은 아니며, 이 문서는 authoritative solver, solution receipt 또는 상용 준비를 주장하지 않는다.
 
 ## 1. 소유 경계
 
@@ -100,7 +101,7 @@ Context는 `READY` 상태에서 predecessor를 정확히 한 번만 발행한다
 
 중요하게도 receipt는 device memory를 D2H해서 실제 mask나 content를 관찰하지 않는다. Caller가 세 허용 mask 중 실제 하나와 canonical valid-predecessor 내용을 만들었다고 증언할 뿐이다. v0.2.20 control ABI에서 이 legacy 경로는 offset 116/120/124의 validation state/mask snapshot/reduction-epoch snapshot도 모두 0이라고 attestation한다. 따라서 fixed domain 확인은 actual-mask proof가 아니다.
 
-별도 canonical producer 경로에서는 `PREDECESSOR_VALIDATE=14`가 같은 `E=26+14S`, `Q=14S`에서 actual mask를 장치 안에서 검사하고 `empty(0) -> armed(1)` seal을 만든다. `CHECKPOINT_DECIDE`는 sealed 경로에서 `armed(1) -> consumed(2)`, source preflight는 snapshot을 보존하며 `consumed(2) -> commit-preflighted(3)`, finalizer는 snapshot clear 뒤 state `3 -> empty(0)`를 수행한다. Legacy 경로는 exact-zero snapshot의 `0 -> 3 -> 0`이다. 현재 이 context API는 canonical producer capability를 입력받지 않으며 caller-attested legacy 경로만 소유하므로, device seal의 존재가 이 receipt를 승격하지 않는다.
+별도 canonical producer 경로에서는 `PREDECESSOR_VALIDATE=14`가 같은 `E=26+14S`, `Q=14S`에서 actual mask를 장치 안에서 검사하고 `empty(0) -> armed(1)` seal을 만든다. `CHECKPOINT_DECIDE`는 sealed 경로에서 `armed(1) -> consumed(2)`, 정상 source preflight는 snapshot을 보존하며 `consumed(2) -> commit-preflighted(3)`, 정상 finalizer는 snapshot clear 뒤 state `3 -> empty(0)`를 수행한다. Multi-block invalid preflight의 종료 state는 scheduling에 따라 `2` 또는 `3`이고 mask/reduction snapshot을 보존한다. Legacy 경로는 exact-zero snapshot의 정상 `0 -> 3 -> 0`이다. 이 caller-attested context API는 canonical producer capability를 입력받지 않으며 legacy 경로만 소유하므로, 별도 sealed owner 구현이 이 receipt를 승격하지 않는다.
 
 정상 enqueue는 context queue lock 아래에서 raw pending count가 0임을 확인하고 네 launch를 항상 같은 stream에 순서대로 호출한다. Plan의 row kind는 control/vector/vector/control, epoch은 `E0`, `E0+1`, `E0+1`, `E0+2`여야 하며 preflight와 commit은 같은 exact 11-pointer tuple을 사용한다. Receipt에는 attempted count와 accepted lower/upper bound를 기록한다.
 
@@ -154,14 +155,14 @@ v0.2.16 집중 검증은 다음을 통과했다.
 - combined recurrence ABI: `sha256:31fbff2fa25c221a99f28e170818990a8ed71211169d239e05d28628941941c9`
 - checkpoint schedule: `sha256:d9b9115287e3b5839096e3f4417c04899ffc7592864483d918be55deaf4b4442`
 
-현재 v0.2.21 recurrence identity는 다음과 같다. 위 historical ABI/source와 구분한다.
+현재 v0.2.22 recurrence identity는 다음과 같다. 위 historical ABI/source와 구분한다.
 
 - predecessor validator schedule: `sha256:b083896de86a808b1398d0fde4abe73726cb91f50399651274ef82dc09a5ef58`
 - combined recurrence ABI: `sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f`
-- fixed HIP source: `sha256:ce4353f61fc3e8cd1311ad52ce50f21a677c7bfa865a2656aa5447b6ec104a83`
+- fixed HIP source: `sha256:a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113`
 - checkpoint schedule: `sha256:2423da989b6cd419b7c4bef46d6c76f2120825a0c840cb516803bb2643ca11e5`
 
-v0.2.20 combined/source `sha256:d719aebffadafa0c076bb4ff395df35e7b4bd888bdb613b8be9ff7ef0f20335d`/`sha256:cdb8917b8553ceceed047b0c9b3e091afe9d80bccfece8242a778b5d56e00b18`와 three-row checkpoint schedule `sha256:d9b9115287e3b5839096e3f4417c04899ffc7592864483d918be55deaf4b4442`는 historical identity다.
+v0.2.22 source patch는 terminal failure 이후 future `commit_required`/`continuation_required` gate를 clear하는 device semantic change뿐이며 combined ABI와 checkpoint schedule은 불변이다. Gate clear만으로 과거 COMMIT 미실행이나 rollback을 증명하지 않는다. v0.2.21 fixed HIP source `sha256:ce4353f61fc3e8cd1311ad52ce50f21a677c7bfa865a2656aa5447b6ec104a83`와 v0.2.20 combined/source `sha256:d719aebffadafa0c076bb4ff395df35e7b4bd888bdb613b8be9ff7ef0f20335d`/`sha256:cdb8917b8553ceceed047b0c9b3e091afe9d80bccfece8242a778b5d56e00b18`, three-row checkpoint schedule `sha256:d9b9115287e3b5839096e3f4417c04899ffc7592864483d918be55deaf4b4442`는 historical identity다.
 
 v0.2.21 context 신규·인접 focused `77 passed`는 complete row fields, canonical tuple identity, kernel/token/stream/policy/exact 11-pointer tuple의 frozen binding과 dispatch 전 drift 거부를 검증했다. 전체 context 전수 회귀도 `261 passed in 523.33s (0:08:43)`를 통과했다. `control_state`와 `solve_record`를 포함한 모든 11 allocation은 role type·extent뿐 아니라 이 context가 요구하는 exact alignment도 통과해야 한다. 독립 감사에서 발견한 same-kind row mutation, preflight/commit pointer TOCTOU, predecessor state-code source-ABI binding 누락과 u8 role alignment 누락을 수정했고 최종 source에서 남은 High/Medium 결함은 없었다. Ruff format/check, py_compile, canonical hashes와 actual HIP source hash assertion도 통과했다.
 
@@ -178,13 +179,13 @@ v0.2.21 context 신규·인접 focused `77 passed`는 complete row fields, canon
 - 실제 scale-metrics producer가 발행한 authoritative predecessor와 actual mask/content proof
 - free-space/Krylov parent의 live lease와 queue/buffer lifetime 통합(후속 resource/canonical producer에서 완료, 이 transaction과의 결합은 미완료)
 - allocator가 발행한 pointer provenance와 실제 free ownership(후속 resource/canonical producer에서 완료, 이 transaction의 predecessor provenance는 미완료)
-- canonical producer의 device-sealed conditional capability 소비와 `1→2→3→0` transaction ownership
+- 이 caller-attested API 자체의 canonical conditional capability 소비; 별도 v0.2.22 sealed child에서 single-use consume와 정상 `1→2→3→0` fixed-program continuity를 구현했지만 본 receipt에는 소급되지 않음
 - arbitrary raw duplicate COMMIT, 외부 writer/DMA/device fault까지 포함한 전역 destination atomicity
 - host 측 네 launch enqueue 자체의 불가분 원자성
-- sealed lifecycle과 common invalid-source branch는 각각 native 검증됐지만 sealed+invalid-source 조합 전용 native case
+- 본 caller-attested receipt가 actual sealed invalid outcome을 host 관찰했다는 claim; 별도 v0.2.22 actual `gfx1030` valid/late-invalid scoped cases `2 passed`도 conditional receipt 경계를 유지함
 - later columns, later restarts와 final guard
 - full CPU/HIP recurrence parity와 iteration host-copy zero
 - multi-GPU/explicit HIP context, HIP graph/capture와 속도 증거
 - SPD/PCG, AMG/DD, Newton, ResultIR, O(N), signed promotion, commercial readiness
 
-다음 구현은 완료된 canonical producer의 conditional device capability를 still-open canonical context 아래의 live transaction lifetime에 결속한 뒤 later-column/restart schedule로 확장하는 것이다. D2H가 없는 receipt는 exact mask scalar나 validator verdict를 host가 안다고 주장하지 않고 `actual_mask_host_observed=false`, `device_validation_outcome_host_observed=false`를 유지해야 한다.
+다음 구현은 later-column/restart global control과 final guard로 확장하는 것이다. D2H가 없는 receipt는 exact mask scalar나 validator verdict를 host가 안다고 주장하지 않고 `actual_mask_host_observed=false`, `device_validation_outcome_host_observed=false`를 유지해야 한다.

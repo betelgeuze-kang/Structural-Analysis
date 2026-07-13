@@ -3,7 +3,8 @@
 - 상태: v0.2.21 implemented, `contract_only`
 - 증거 범위: exact registered nonoverlap allocation, same stream, exclusive source ownership, fixed four-row raw checkpoint transaction
 - 수치 커널: [initial + first-column checkpoint recurrence v2](engine-v2-hip-fgmres-initial-recurrence-v2.md)
-- Host owner: [first-column checkpoint transaction context v2](engine-v2-hip-fgmres-checkpoint-context-v2.md)
+- Caller-attested owner: [first-column checkpoint transaction context v2](engine-v2-hip-fgmres-checkpoint-context-v2.md)
+- Live sealed owner: [canonical-capability-consuming sealed checkpoint transaction v1](engine-v2-hip-fgmres-sealed-checkpoint-transaction-v1.md)
 - 전체 설계: [HIP FGMRES full recurrence ABI v2](engine-v2-hip-fgmres-recurrence-abi-v2.md)
 
 v0.2.21은 multi-block `COMMIT_CHECKPOINT`가 각 lane의 source를 검사하면서 바로 destination을 쓰던 경계를 닫는다. 늦은 lane에서 NaN/Inf를 발견했을 때 앞선 block이 이미 `solution_x` 또는 `true_residual`을 변경할 수 있었으므로, source 검사와 destination copy를 서로 다른 kernel row로 분리했다. 이 문서의 atomicity claim은 아래에 적은 등록·stream·ownership 전제가 모두 성립하는 raw fixed-four-row transaction에만 적용한다.
@@ -26,14 +27,18 @@ v0.2.21은 multi-block `COMMIT_CHECKPOINT`가 각 lane의 source를 검사하면
 새 vector mode는 `PREFLIGHT_COMMIT_SOURCE=9`, 새 `predecessor_validation_state`는 `commit_preflighted=3`이다. State 3은 성공 verdict가 아니라 fixed transaction의 preflight ticket이다.
 
 - caller-attested legacy: `empty(0) -> commit_preflighted(3) -> empty(0)`
-- device-sealed path: `armed(1) -> consumed(2) -> commit_preflighted(3) -> empty(0)`
+- 정상 device-sealed path: `armed(1) -> consumed(2) -> commit_preflighted(3) -> empty(0)`
 - sealed `2 -> 3` 전이는 mask와 reduction-epoch snapshot을 그대로 보존한다.
 - preflight는 snapshot을 변경하지 않는다.
 - finalizer는 snapshot·mask·나머지 transient를 먼저 clear하고 state `3 -> 0`을 마지막에 수행한다.
 
 Preflight의 block 0은 허용된 `0` 또는 `2`에서 `3`으로 atomic ticket을 발행한다. 같은 launch의 다른 block은 `0`, `2`, `3`의 일시적 관찰을 허용하되 read-only source scan만 수행한다. 이미 state 3인 별도 duplicate preflight의 block 0은 terminal fail-closed한다.
 
-`commit_required=false`에서는 preflight와 commit 모두 source와 destination을 읽거나 쓰지 않지만 state 3 ticket은 발행해 fixed lifecycle을 유지한다. `commit_required=true`에서 비유한 source를 찾으면 error bit 4, failure origin vector 2, termination code 47(`RestartStateFailed`), `active=0`으로 종료하며 두 destination 전체를 보존한다. 이어 제출된 commit은 `active=0` admission에서 copy를 수행하지 않는다.
+정상 lifecycle만 sealed `2 -> 3 -> 0`으로 단정한다. Multi-block preflight의 block>0 invalid lane이 block 0 CAS보다 먼저 `active=0`을 publish하면 block 0은 ticket을 발행하지 않을 수 있으므로 invalid failure의 validation state는 scheduling에 따라 `consumed(2)` 또는 `commit_preflighted(3)`이다. 두 경우 모두 mask/reduction snapshot을 유지하고 이어지는 COMMIT은 `active=0`에서 no-op하므로 destination atomicity에는 영향이 없다.
+
+`commit_required=false`에서는 preflight와 commit 모두 source와 destination을 읽거나 쓰지 않지만 정상 state 3 ticket을 발행해 fixed lifecycle을 유지한다. `commit_required=true`에서 비유한 source를 찾으면 error bit 4, failure origin vector 2, pending terminal status/code 6/47(`RestartStateFailed`), `commit_required=0`, `continuation_required=0`, `active=0`으로 종료하며 두 destination 전체를 보존한다. Restart hint/flags와 `x_scale_l2`는 이 failure에서 inert/unspecified이고 predecessor mask/snapshot은 provenance로 보존된다. 이어 제출된 commit은 `active=0` admission에서 copy를 수행하지 않는다.
+
+두 action gate의 0은 terminal failure 이후 future commit/continuation을 차단하는 의미다. 이것만으로 과거 COMMIT 미실행이나 rollback을 증명하지 않으며, late-invalid no-commit과 destination byte 보존은 preflight-before-destination 순서와 full-byte sentinel 검증이 별도로 증명한다.
 
 Multi-block failure diagnostics는 first-error atomic CAS latch가 한 번만 발행한다. 따라서 늦은 block의 generic invalid-control 경로가 먼저 고정된 nonfinite-input error 4/code 47을 error 1/code 40으로 덮어쓰지 못한다.
 
@@ -73,14 +78,16 @@ v0.2.21 focused 검증은 다음을 포함한다.
 
 Full context 전수 회귀는 Ruff format/check, Python bytecode compile, canonical schedule/combined identity와 actual HIP source hash assertion도 함께 통과했다.
 
-현재 identity는 다음과 같다.
+이 문서의 v0.2.21 historical identity는 다음과 같다.
 
 - predecessor validator schedule: `sha256:b083896de86a808b1398d0fde4abe73726cb91f50399651274ef82dc09a5ef58`
 - checkpoint transaction schedule: `sha256:2423da989b6cd419b7c4bef46d6c76f2120825a0c840cb516803bb2643ca11e5`
 - combined recurrence ABI: `sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f`
 - fixed HIP source: `sha256:ce4353f61fc3e8cd1311ad52ce50f21a677c7bfa865a2656aa5447b6ec104a83`
 
-v0.2.20 canonical producer의 validator/combined/source와 기존 three-row checkpoint schedule은 historical identity다. Canonical producer receipt나 v0.2.16 caller-attested context의 과거 검증 결과를 이 v0.2.21 raw atomicity 증거로 소급 승격하지 않는다.
+v0.2.22 current source는 terminal failure 이후 future action gates를 clear하는 semantic patch로 `sha256:a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113`이다. Checkpoint schedule과 combined ABI는 위 v0.2.21 값에서 바뀌지 않았다. v0.2.20 canonical producer의 validator/combined/source와 기존 three-row checkpoint schedule도 historical identity다. Canonical producer receipt나 v0.2.16 caller-attested context의 과거 검증 결과를 이 v0.2.21 raw atomicity 증거로 소급 승격하지 않는다.
+
+v0.2.22 [live sealed owner](engine-v2-hip-fgmres-sealed-checkpoint-transaction-v1.md)는 canonical capability consumption과 fixed-program continuity를 구현했고 actual `gfx1030` valid/late-invalid scoped cases `2 passed`를 확인했다. Invalid case의 state `{2,3}`, pending status/code 6/47, mask/snapshot provenance와 destination full-byte 불변은 verification-only oracle이며 product receipt가 numerical outcome을 관찰했다는 뜻은 아니다.
 
 ## 5. Claim boundary
 
@@ -94,11 +101,11 @@ v0.2.20 canonical producer의 validator/combined/source와 기존 three-row chec
 - transaction 중 외부 kernel, DMA 또는 다른 stream이 source/destination을 쓰는 경우
 - 겹친 allocation, shifted raw pointer 또는 미등록 pointer의 atomicity
 - device fault나 process failure에 대한 durable transaction
-- canonical conditional capability의 live transaction 소비
-- sealed lifecycle과 invalid-source 공통 분기는 각각 native 검증됐지만 sealed+invalid-source 조합 전용 native case
+- canonical conditional capability의 live transaction 소비 자체는 v0.2.22에서 구현됐지만, 이 v0.2.21 historical atomicity receipt가 그 integration을 소급 증명하지는 않음
+- product receipt가 actual sealed invalid device outcome이나 commit 여부를 host에서 관찰했다는 claim
 - authoritative predecessor 또는 authoritative checkpoint transaction
 - actual mask/verdict의 host 관찰
 - later columns/restarts, full recurrence, solver/solution receipt
 - iteration host-copy zero, full CPU/HIP parity, O(N), speedup, signed promotion, commercial readiness
 
-다음 순서는 canonical producer가 발행한 still-open conditional capability 아래에서 sealed predecessor를 소비하는 live transaction owner를 만들고, 그 뒤 later column/restart와 final guard로 확장하는 것이다.
+다음 순서는 later column/restart global control과 final guard로 확장하는 것이다.

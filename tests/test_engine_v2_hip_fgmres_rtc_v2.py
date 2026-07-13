@@ -4345,6 +4345,17 @@ def test_checkpoint_preflight_is_read_only_nonadvancing_and_commit_is_pure_copy(
     None
 ):
     source = fgmres_rtc_v2._fixed_source().decode("utf-8")
+    terminal_publish_start = source.index(
+        "void engine_v2_publish_terminal_failure("
+    )
+    terminal_publish_end = source.index(
+        "void engine_v2_terminal_failure(", terminal_publish_start
+    )
+    terminal_publish_source = source[
+        terminal_publish_start:terminal_publish_end
+    ]
+    assert "kControlOffsetCommitRequired), 0" in terminal_publish_source
+    assert "kControlOffsetContinuationRequired), 0" in terminal_publish_source
     first_error_start = source.index("bool engine_v2_terminal_failure_if_error_clear(")
     first_error_end = source.index(
         "EngineV2LassqPair engine_v2_lassq_zero()", first_error_start

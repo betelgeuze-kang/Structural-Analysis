@@ -53,7 +53,7 @@ HIP_FGMRES_COMBINED_RECURRENCE_ABI_HASH_V2 = (
     "sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f"
 )
 HIP_FGMRES_RTC_SOURCE_SHA256_V2 = (
-    "sha256:ce4353f61fc3e8cd1311ad52ce50f21a677c7bfa865a2656aa5447b6ec104a83"
+    "sha256:a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113"
 )
 
 FgmresCheckpointContextStateV2 = Literal[

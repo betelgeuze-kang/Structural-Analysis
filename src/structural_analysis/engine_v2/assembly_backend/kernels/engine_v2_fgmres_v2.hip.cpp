@@ -486,6 +486,10 @@ __device__ __forceinline__ void engine_v2_publish_terminal_failure(
     unsigned char* record,
     int failure_origin,
     int termination_code) {
+  atomicExch(
+      reinterpret_cast<int*>(control + kControlOffsetCommitRequired), 0);
+  atomicExch(
+      reinterpret_cast<int*>(control + kControlOffsetContinuationRequired), 0);
   atomicExch(reinterpret_cast<int*>(record + kRecordOffsetActive), 0);
   atomicExch(
       reinterpret_cast<int*>(record + kRecordOffsetTerminalStatus),

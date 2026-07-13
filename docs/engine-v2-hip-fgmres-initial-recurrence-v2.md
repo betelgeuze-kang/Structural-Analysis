@@ -1,7 +1,8 @@
 # Engine v2 HIP FGMRES initial + first-column checkpoint transaction recurrence v2
 
-- 상태: v0.2.21, Phase 0 valid-predecessor raw checkpoint slice와 scoped invalid-source atomicity implemented, `contract_only`
-- Transaction owner: [first-column checkpoint transaction context v2](engine-v2-hip-fgmres-checkpoint-context-v2.md)
+- 상태: v0.2.22, Phase 0 valid-predecessor raw checkpoint slice, scoped invalid-source atomicity와 canonical-capability-consuming sealed transaction implemented, `contract_only`
+- Caller-attested owner: [first-column checkpoint transaction context v2](engine-v2-hip-fgmres-checkpoint-context-v2.md)
+- Live sealed owner: [canonical-capability-consuming sealed checkpoint transaction v1](engine-v2-hip-fgmres-sealed-checkpoint-transaction-v1.md)
 - Canonical producer: [device-sealed canonical first-column predecessor v1](engine-v2-hip-fgmres-canonical-predecessor-v1.md)
 - 전체 설계: [HIP FGMRES full recurrence ABI v2](engine-v2-hip-fgmres-recurrence-abi-v2.md)
 - CPU 수치 oracle: [CPU fixed-restart FGMRES reference v1](engine-v2-cpu-fgmres-reference-v1.md)
@@ -9,7 +10,9 @@
 
 이 단계는 v2 전체 FGMRES 중 initial gate, restart 1/column 0 Arnoldi/DGKS/Givens, candidate preparation, SpMV, in-place residual, raw candidate L2/L∞와 trial/committed scale metrics를 거쳐 `CHECKPOINT_DECIDE -> PREFLIGHT_COMMIT_SOURCE -> gated COMMIT_CHECKPOINT -> CHECKPOINT_FINALIZE`까지 실행한다. v0.2.21 source preflight는 destination을 전혀 쓰지 않은 채 commit source의 유한성을 모든 block에서 먼저 검사해 late invalid lane에서도 두 destination 전체 bytes를 보존한다. 이 atomicity는 exact registered nonoverlap allocation, same stream, exclusive source ownership과 fixed four-row owner sequence에만 적용한다.
 
-v0.2.20 canonical producer는 live exact11과 delegated CSR3/scratch2를 결속하고 owned8 zero initialization 뒤 `INIT`부터 device seal까지 exact `27+14S` kernel row를 제출한다. 그러나 product receipt는 actual mask와 validator verdict를 D2H하지 않으며, 발행 capability는 아직 checkpoint transaction이 소비하지 않는 conditional device capability다. Companion transaction context의 predecessor도 계속 caller attestation이므로 raw atomicity 구현이 authoritative predecessor, transaction 또는 solution receipt를 만들지는 않는다.
+v0.2.20 canonical producer는 live exact11과 delegated CSR3/scratch2를 결속하고 owned8 zero initialization 뒤 `INIT`부터 device seal까지 exact `27+14S` kernel row를 제출한다. v0.2.22 sealed transaction child는 still-open canonical context 아래에서 이 conditional capability를 single-use consume하고 같은 live token/stream/direct11/physical16으로 fixed four-row transaction을 제출해 별도 final fence로 닫는다. Canonical prefix를 포함한 체인은 fence 총 2회이고 transaction child의 추가 allocation/borrow/module/H2D/D2H/intermediate sync/fallback은 0이다.
+
+Product receipt는 여전히 actual mask, validator verdict, commit gate, commit과 device numerical outcome을 D2H하지 않는다. 따라서 이 연결은 fixed program continuity와 outcome-unobserved conditional continuation만 증명하며 authoritative predecessor, numerical transaction, solver 또는 solution receipt를 만들지 않는다. v0.2.16 caller-attested context는 historical raw owner로 유지된다.
 
 ## 1. 구현 구성
 
@@ -123,11 +126,11 @@ Validator schedule hash는 `sha256:b083896de86a808b1398d0fde4abe73726cb91f503996
 | 순서 | 예상 schedule / reduction epoch | 수치·publish 계약 |
 | --- | --- | --- |
 | `CHECKPOINT_DECIDE` | `E=26+14S`, `Q=14S` | Sealed 경로는 armed snapshot과 live mask/epoch을 대조하고 `armed(1) -> consumed(2)`로 전이한다. Legacy raw 경로는 state/snapshot 모두 0이어야 한다. 그 뒤 `x_scale_l2=trial_x_l2+committed_x_l2`, unit floor 없음으로 dual gate → invariant → strict divergence → stagnation → max iterations 우선순위를 계산하고 pending outcome을 기록한다. |
-| `PREFLIGHT_COMMIT_SOURCE(mode=9)` | `E=27+14S`, `Q=14S`; non-advancing | Legacy `0 -> 3`, sealed `2 -> 3` ticket을 발행한다. `commit_required=true`이면 `work_w`와 `V[M]`만 읽어 전체 source finite를 검사하며 destination과 snapshot은 쓰지 않는다. False이면 source/destination을 읽지 않는다. Invalid source는 error bit 4, origin 2, code 47, `active=0`으로 fail-closed한다. |
+| `PREFLIGHT_COMMIT_SOURCE(mode=9)` | `E=27+14S`, `Q=14S`; non-advancing | 정상 admission은 legacy `0 -> 3`, sealed `2 -> 3` ticket을 발행한다. `commit_required=true`이면 `work_w`와 `V[M]`만 읽어 전체 source finite를 검사하며 destination과 snapshot은 쓰지 않는다. False이면 source/destination을 읽지 않는다. Invalid source는 error bit 4, origin 2, code 47, `active=0`으로 fail-closed한다. |
 | gated `COMMIT_CHECKPOINT` | `E=27+14S`, `Q=14S` | 모든 lane이 state 3, active 1, error bits 0과 exact legacy/sealed snapshot shape를 확인한 뒤 pure copy만 수행한다. Late finite 검사나 rollback branch는 없다. False이면 source와 destination을 읽거나 쓰지 않는다. |
 | `CHECKPOINT_FINALIZE` | `E=28+14S`, `Q=14S`; 성공 종료 `E=29+14S`, `Q=14S` | Sealed 경로는 state 3과 preserved snapshot을 다시 대조한다. Pending decision을 재계산·대조한 뒤 restart row와 result-metric header를 쓰는 유일한 publisher이며, 성공 시 mask와 snapshot을 먼저 지우고 validation state를 마지막에 0으로 clear해 terminal/continuation phase를 확정한다. |
 
-Mask 0/1792/7936은 decide, preflight와 commit 동안 그대로 유지되고 finalizer만 0으로 지운다. 정상 transaction에서 solve record의 `active`도 finalizer 전까지 1이다. 단 terminal numerical failure는 finalizer 전에도 `active=0`과 terminal status/code/error header를 기록하며 result metrics/restart row는 publish하지 않는다. Restart row는 나머지 field를 먼저 쓴 뒤 `restart_index` sentinel을 마지막에 쓴다. Finalizer는 snapshot과 transient를 먼저 지우고 state `3 -> 0`을 마지막에 수행한다.
+Mask 0/1792/7936은 decide, preflight와 commit 동안 그대로 유지되고 finalizer만 0으로 지운다. 정상 transaction에서 solve record의 `active`도 finalizer 전까지 1이며 정상 sealed lifecycle만 `2 -> 3 -> 0`으로 단정한다. Multi-block preflight의 block>0 invalid lane이 block 0의 state CAS보다 먼저 `active=0`을 publish할 수 있으므로 invalid failure 종료 state는 scheduling에 따라 `consumed(2)` 또는 `commit-preflighted(3)`일 수 있다. 두 경우 모두 mask/reduction snapshot은 보존되고 COMMIT은 `active=0` admission에서 destination을 쓰지 않으므로 destination atomicity에는 영향이 없다. Terminal numerical failure는 `commit_required=0`, `continuation_required=0`, `active=0`과 terminal status/code/error header를 기록하며 result metrics/restart row는 publish하지 않는다. Restart row는 나머지 field를 먼저 쓴 뒤 `restart_index` sentinel을 마지막에 쓴다. 정상 finalizer는 snapshot과 transient를 먼저 지우고 state `3 -> 0`을 마지막에 수행한다.
 
 계약 해시는 다음이다.
 
@@ -137,11 +140,11 @@ Mask 0/1792/7936은 decide, preflight와 commit 동안 그대로 유지되고 fi
 - predecessor validator schedule: `sha256:b083896de86a808b1398d0fde4abe73726cb91f50399651274ef82dc09a5ef58`
 - checkpoint transaction schedule: `sha256:2423da989b6cd419b7c4bef46d6c76f2120825a0c840cb516803bb2643ca11e5`
 - current combined v2 kernel ABI: `sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f`
-- current fixed HIP source: `sha256:ce4353f61fc3e8cd1311ad52ce50f21a677c7bfa865a2656aa5447b6ec104a83`
+- current fixed HIP source: `sha256:a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113`
 
-v0.2.20 canonical producer 당시 combined ABI `sha256:d719aebffadafa0c076bb4ff395df35e7b4bd888bdb613b8be9ff7ef0f20335d`, fixed HIP source `sha256:cdb8917b8553ceceed047b0c9b3e091afe9d80bccfece8242a778b5d56e00b18`와 three-row checkpoint schedule `sha256:d9b9115287e3b5839096e3f4417c04899ffc7592864483d918be55deaf4b4442`는 historical identity다. v0.2.15 raw checkpoint 검증 당시 combined ABI `sha256:31fbff2fa25c221a99f28e170818990a8ed71211169d239e05d28628941941c9`와 fixed HIP source `sha256:34049a08119b19382c26fbe310f957d7af9c41db037dfcbab521828732025e9b`도 historical snapshot이다. 현재 identity로 재사용하지 않는다.
+v0.2.22 source patch는 common terminal failure가 future action gate인 device `commit_required`와 `continuation_required`를 clear하도록 보강한 semantic change다. Gate clear만으로 과거 COMMIT 미실행이나 rollback을 증명하지 않으며 late-invalid no-commit은 source-only preflight와 destination full-byte sentinel로 별도 확인한다. Checkpoint schedule과 combined ABI는 v0.2.21에서 바뀌지 않았다. v0.2.21 invalid-source atomicity 당시 fixed HIP source `sha256:ce4353f61fc3e8cd1311ad52ce50f21a677c7bfa865a2656aa5447b6ec104a83`는 historical identity다. v0.2.20 canonical producer 당시 combined ABI `sha256:d719aebffadafa0c076bb4ff395df35e7b4bd888bdb613b8be9ff7ef0f20335d`, fixed HIP source `sha256:cdb8917b8553ceceed047b0c9b3e091afe9d80bccfece8242a778b5d56e00b18`와 three-row checkpoint schedule `sha256:d9b9115287e3b5839096e3f4417c04899ffc7592864483d918be55deaf4b4442`도 historical identity다. v0.2.15 raw checkpoint 검증 당시 combined ABI `sha256:31fbff2fa25c221a99f28e170818990a8ed71211169d239e05d28628941941c9`와 fixed HIP source `sha256:34049a08119b19382c26fbe310f957d7af9c41db037dfcbab521828732025e9b`도 historical snapshot이다. 현재 identity로 재사용하지 않는다.
 
-모든 pending operation은 최초에 결속된 하나의 stream에만 제출할 수 있다. 다른 stream은 completion fence가 관찰되고 pending reservation이 소비되기 전에 host에서 거부된다. v0.2.21 checkpoint owner는 exact four-row sequence와 같은 stream을 결속하고, preflight/commit에는 동일한 exact 11-pointer snapshot을 전달한다. Binding witness는 exact loaded runtime의 `hipStreamSynchronize`와 sealed `hipMemsetAsync` callable을 함께 고정하고 kernel/memset acceptance interval을 같은 pending accounting에 포함한다. Canonical producer는 8개 owned memset과 exact `27+14S` kernel row를 한 fence로 소비하지만 event/sequence receipt를 발행하지 않는다. Reduction의 pre-barrier admission은 block-shared flag로 통일해 lane 일부만 return한 뒤 `__syncthreads()`에 진입하는 경우를 금지한다.
+모든 pending operation은 최초에 결속된 하나의 stream에만 제출할 수 있다. 다른 stream은 completion fence가 관찰되고 pending reservation이 소비되기 전에 host에서 거부된다. v0.2.21 checkpoint owner는 exact four-row sequence와 같은 stream을 결속하고, preflight/commit에는 동일한 exact 11-pointer snapshot을 전달한다. v0.2.22 sealed child는 still-open canonical capability를 single-use consume하고 exact live kernel/checkpoint token/stream/direct11/physical16과 four-row tuple을 고정한 뒤 각 row 전에 exact pending map을 재검증한다. Binding witness는 exact loaded runtime의 `hipStreamSynchronize`와 sealed `hipMemsetAsync` callable을 함께 고정하고 kernel/memset acceptance interval을 같은 pending accounting에 포함한다. Canonical producer는 8개 owned memset과 exact `27+14S` kernel row를 한 fence로 소비하고, sealed transaction은 네 row를 별도 final fence 하나로 소비한다. 따라서 연속 chain의 successful fence는 총 2회다. Reduction의 pre-barrier admission은 block-shared flag로 통일해 lane 일부만 return한 뒤 `__syncthreads()`에 진입하는 경우를 금지한다.
 
 `schedule_epoch`는 launch admission 순서의 증거이지 전역 수치 성공의 증거가 아니다. Multi-block의 늦은 lane에서 비유한/CSR 오류가 발견되면 `device_error_bits`, `active=0`, terminal failure로 격리한다.
 
@@ -161,6 +164,8 @@ v0.2.20 validator/producer historical focused 기록은 recurrence plan `61 pass
 
 v0.2.21 atomicity focused 기록은 recurrence plan/schema `63 passed`, RTC owner/source `100 passed`, checkpoint context 신규·인접 `77 passed`, actual `gfx1030` recurrence `13 passed`와 native repeated race stress `5/5`다. 별도 full checkpoint context 전수 회귀는 `261 passed in 523.33s (0:08:43)`를 통과했다. Source preflight의 destination access count가 0이고, 늦은 lane에 비유한 source를 주입해도 `solution_x`와 `true_residual` 전체 raw byte sentinel이 변하지 않음을 확인했다. Valid legacy/sealed lifecycle `0 -> 3 -> 0`/`2 -> 3 -> 0`, gate-false source/destination no-read, error bit 4/origin 2/code 47 fail-closed도 검증했다. 독립 감사에서 diagnostic first-error CAS, state-code ABI binding, complete row/pointer frozen binding과 u8 role alignment를 보강한 뒤 남은 High/Medium 결함은 없었다. Ruff format/check, py_compile, canonical hashes와 actual HIP source hash assertion도 통과했다. 이 결과는 scoped raw fixed-four-row atomicity 증거이며 canonical capability 소비나 authoritative transaction 증거가 아니다. Sealed lifecycle과 common invalid-source branch는 각각 native 검증됐지만 sealed+invalid-source 조합 전용 native case는 아직 없다.
 
+v0.2.22 sealed transaction focused 검증은 적대적 unit `23 passed`, 인접 live+canonical legacy `56 passed`다. Actual `gfx1030` valid canonical-to-sealed와 late-nonfinite multi-block sealed case `2 passed`에서 capability single-use consume, direct11/physical16 continuity, fixed four-row pending consume, transaction fence 1/canonical 포함 total fence 2와 추가 allocation/borrow/module/copy/fallback 0을 확인했다. Invalid case는 state `{2,3}`, pending status/code 6/47, snapshot provenance 보존, future action gate clear와 destination full-byte 불변을 verification-only D2H로 대조했다. 이 oracle 관찰은 product receipt의 actual outcome host-observed claim을 바꾸지 않는다.
+
 실제 RX 6900 XT `gfx1030` gate에서는 `F=513` diagonal CSR과 nonzero `x0`를 사용해 두 block/two-stage 초기 schedule을 실행했다. Completion에서만 `x`, `Ax`, residual, control, record를 D2H하고 stream fence 1회를 관찰했다. GPU-tree oracle과 vector/네 norm/gate가 일치했고 `schedule_epoch=15`, `reduction_epoch=8`, operator count 1, `device_error_bits=0`, fallback 0을 확인했다. 이는 initial slice의 조건부 native test이며 signed promotion receipt나 전체 recurrence parity가 아니다.
 
 동일한 `F=513` nonfinal LASSQ stage를 같은 schedule/reduction epoch로 중복 제출한 native 회귀에서도 stream이 hang 없이 완료되고, invalid-control error bit·`active=0`·failed phase·보존된 epoch으로 종료됨을 확인했다.
@@ -171,8 +176,8 @@ v0.2.21 atomicity focused 기록은 recurrence plan/schema `63 passed`, RTC owne
 
 - exact registered nonoverlap allocation, 같은 stream, exclusive source ownership과 fixed four-row owner sequence에서는 active commit source의 late NaN/Inf에도 destination all-or-nothing을 보존한다. Arbitrary raw duplicate COMMIT, 외부 writer/DMA/device fault는 이 증거 범위 밖이다.
 - raw API 자체는 exact pointer equality만 거부하지만 v0.2.16 context가 exact extent·alignment·uintptr와 shifted/range overlap을 검증한다. 별도 live resource/canonical producer 경로는 actual allocator lineage exact11과 delegated CSR3/scratch2 physical projection을 결속한다.
-- 현재 context가 decide/preflight/commit/finalize를 same-buffer host transaction으로 묶고 중간 rejection/ambiguity poison, exact-runtime fence와 acknowledgement retry를 소유한다. 이는 caller-attested predecessor에 한정된다.
-- v0.2.20 canonical producer는 owned8 initialization과 validator arm까지 fence하지만, 그 conditional capability를 위 caller-attested checkpoint context가 소비하지 않으므로 authoritative checkpoint transaction은 여전히 성립하지 않는다.
+- v0.2.16 context가 decide/preflight/commit/finalize를 same-buffer host transaction으로 묶고 중간 rejection/ambiguity poison, exact-runtime fence와 acknowledgement retry를 소유한다. 이 historical owner는 caller-attested predecessor에 한정된다.
+- v0.2.22 non-owning sealed child는 v0.2.20 canonical producer의 conditional capability를 single-use consume하고 같은 live token/stream/direct11/physical16으로 네 row와 final fence를 닫는다. 이 fixed-program integration은 true지만 actual mask/verdict/commit/device outcome을 host에서 관찰하지 않으므로 authoritative numerical transaction은 성립하지 않는다.
 - context 경로는 predecessor single-use로 duplicate transaction을 거부한다. Context 밖 raw API의 native duplicate checkpoint 정책은 별도 hardware 회귀로 고정되지 않았다.
 
 ## 5. Claim boundary
@@ -184,9 +189,10 @@ v0.2.21 atomicity focused 기록은 recurrence plan/schema `63 passed`, RTC owne
 - Python raw launch owner와 plan·schema hash binding이 fixed four-row checkpoint transaction schedule까지 있다.
 - Caller-attested companion context에 exact typed range registry, exclusive raw lease, same-stream four-launch transaction, ambiguity poison과 exact-runtime fence/cleanup이 있다.
 - Live canonical child는 exact16 physical projection, sealed owned8 zero initialization, exact `27+14S` prefix와 non-advancing device validator를 one-fence conditional capability로 묶는다.
+- Still-open sealed transaction child는 그 conditional capability를 single-use consume하고 exact live token/stream/direct11/physical16에 fixed four-row program을 transaction-owned final fence로 묶어 outcome-unobserved conditional continuation을 발행한다.
 
 다음은 true다: valid predecessor에 대한 raw `x_scale_l2`, `CHECKPOINT_DECIDE`, source-only `PREFLIGHT_COMMIT_SOURCE`, gated pure-copy `COMMIT_CHECKPOINT`, `CHECKPOINT_FINALIZE` 수치 slice와 actual HIPRTC 실행. Exact registered nonoverlap allocation, same stream, exclusive source ownership과 fixed four-row owner sequence에 한해 invalid-source destination failure atomicity도 true다.
 
-다음은 아직 false다: authoritative predecessor와 checkpoint transaction, canonical sealed-capability consumption, host-observed actual device mask/validator verdict, arbitrary writer/duplicate/device-fault 범위의 전역 atomicity, live solver context, later columns/restarts, full recurrence/full parity, owned event sequence receipt, authoritative solver/solution receipt, 전체 iteration host-copy-zero, SPD/PCG, AMG/DD, Newton, ResultIR, end-to-end O(N), speedup, signed promotion, commercial readiness.
+다음은 아직 false다: authoritative predecessor와 numerical checkpoint transaction, host-observed actual device mask/validator verdict/commit/device outcome, arbitrary writer/duplicate/device-fault 범위의 전역 atomicity, live solver context, later columns/restarts와 final guard, full recurrence/full parity, authoritative solver/solution receipt, 전체 iteration host-copy-zero, SPD/PCG, AMG/DD, Newton, ResultIR, end-to-end O(N), speedup, signed promotion, commercial readiness.
 
-다음 구현 우선순위는 conditional sealed capability를 still-open canonical context 아래의 live checkpoint transaction이 소비하게 한 뒤 later columns/restarts로 확장하는 것이다. D2H가 없는 receipt는 계속 `actual_mask_host_observed=false`, `device_validation_outcome_host_observed=false`를 유지한다.
+다음 구현 우선순위는 later column/restart global control과 final guard다. D2H가 없는 receipt는 계속 `actual_mask_host_observed=false`, `device_validation_outcome_host_observed=false`를 유지한다.

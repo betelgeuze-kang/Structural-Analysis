@@ -531,9 +531,10 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         "checkpoint_decide_preflight_commit_finalize_control_vector_vector_control_rows",
         "checkpoint_schedule_hash_sha256_2423da989b6cd419b7c4bef46d6c76f2120825a0c840cb516803bb2643ca11e5",
         "combined_kernel_abi_hash_sha256_bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f",
-        "fixed_source_hash_sha256_ce4353f61fc3e8cd1311ad52ce50f21a677c7bfa865a2656aa5447b6ec104a83",
+        "fixed_source_hash_sha256_a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113",
         "source_preflight_destination_access_zero",
         "late_invalid_source_preserves_entire_solution_and_residual_raw_bytes",
+        "terminal_failure_clears_commit_and_continuation_required",
         "gate_false_source_and_destination_no_read_no_write",
         "no_new_order_f_workspace_allocation_h2d_d2h_intermediate_sync_or_fallback",
         "context_new_and_adjacent_focused_seventy_seven_cases",
@@ -567,7 +568,51 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
     assert (
         row_ids[atomicity_index - 1] == "hip_fgmres_checkpoint_transaction_context_v2"
     )
-    assert row_ids[atomicity_index + 1] == "hip_fgmres_full_device_recurrence_abi_v2"
+    assert row_ids[atomicity_index + 1] == (
+        "hip_fgmres_sealed_checkpoint_transaction_context_v1"
+    )
+
+    sealed = rows["hip_fgmres_sealed_checkpoint_transaction_context_v1"]
+    assert sealed["implementation_state"] == "implemented"
+    assert sealed["promotion_state"] == "contract_only"
+    assert sealed["claim_level"] == (
+        "canonical_capability_consuming_live_sealed_transaction_contract_only_"
+        "device_outcome_unobserved_non_promoting"
+    )
+    assert {
+        "still_open_canonical_predecessor_conditional_capability_reserved_and_consumed_exactly_once",
+        "nonowning_nested_child_over_exact_live_kernel_checkpoint_token_and_stream",
+        "exact_control_vector_vector_control_four_row_program",
+        "transaction_final_exact_runtime_fence_one_and_atomic_pending_consume_four",
+        "canonical_prefix_plus_transaction_total_final_fence_count_two",
+        "frozen_kernel_token_stream_cleanup_after_mutable_projection_drift",
+        "post_fence_authority_revalidation_before_conditional_continuation_issue",
+        "additional_allocation_borrow_checkpoint_owner_module_h2d_d2h_intermediate_sync_and_fallback_zero",
+        "device_outcome_unobserved_conditional_continuation_capability_only",
+        "focused_adversarial_transaction_twenty_three_cases",
+        "legacy_live_and_canonical_boundary_fifty_six_cases",
+        "broad_engine_v2_midas_v2_model_ir_v2_one_thousand_seven_hundred_seventy_eight_passed",
+        "wheel_826616_bytes_sha256_9c0eaaa4e27f2cbb9b2ac827a91b1f3785c8ca01c3e494077d01aae763420ffb_isolated_public_api_schema_kernel_resource_import",
+        "native_gfx1030_valid_canonical_to_sealed_chain",
+        "native_gfx1030_late_nonfinite_sealed_source_preserves_full_destination_and_source_bytes",
+        "native_terminal_and_pending_status_six_code_forty_seven_with_future_action_gates_cleared",
+    }.issubset(sealed["supported_scope"])
+    assert {
+        "actual_mask_host_observed",
+        "device_validation_outcome_host_observed",
+        "authoritative_predecessor_proven",
+        "authoritative_numerical_transaction_proven",
+        "live_solver_ready",
+        "solution_ready",
+        "later_columns_or_restarts",
+        "iteration_host_copy_zero_proven",
+        "end_to_end_on_complexity",
+        "performance_or_speedup_claim",
+        "standalone_receipt_provenance_authenticity_without_expected_context_or_signature",
+        "commercial_readiness",
+        "promotion_eligible",
+    }.issubset(sealed["explicit_exclusions"])
+    assert row_ids[atomicity_index + 2] == "hip_fgmres_full_device_recurrence_abi_v2"
 
     recurrence_v2 = rows["hip_fgmres_full_device_recurrence_abi_v2"]
     assert recurrence_v2["implementation_state"] == "planned"
@@ -604,8 +649,12 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         in recurrence_v2["explicit_exclusions"]
     )
     assert (
+        "implemented_canonical_capability_consuming_live_sealed_checkpoint_transaction_kept_partial"
+        in recurrence_v2["supported_scope"]
+    )
+    assert (
         "sealed_predecessor_checkpoint_transaction_integration"
-        in recurrence_v2["explicit_exclusions"]
+        not in recurrence_v2["explicit_exclusions"]
     )
     assert (
         "global_atomicity_beyond_fixed_four_row_registered_nonoverlap_same_stream_exclusive_owner_scope"

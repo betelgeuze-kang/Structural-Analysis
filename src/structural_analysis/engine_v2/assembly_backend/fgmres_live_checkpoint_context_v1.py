@@ -1888,6 +1888,58 @@ def _validate_context_authority(
 def _context_validate_authority(
     self: HipFgmresLiveCheckpointExecutionContextV1,
 ) -> None:
+    _context_validate_authority_common(
+        self,
+        canonical_child_token=None,
+        pending_operation_bounds=(0, 0),
+    )
+
+
+def _context_validate_authority_for_canonical_child(
+    self: HipFgmresLiveCheckpointExecutionContextV1,
+    canonical_child_token: object,
+    *,
+    pending_operation_bounds: tuple[int, int],
+) -> None:
+    _context_validate_authority_common(
+        self,
+        canonical_child_token=canonical_child_token,
+        pending_operation_bounds=pending_operation_bounds,
+    )
+
+
+def _context_validate_authority_common(
+    self: HipFgmresLiveCheckpointExecutionContextV1,
+    *,
+    canonical_child_token: object | None,
+    pending_operation_bounds: tuple[int, int],
+) -> None:
+    if (
+        type(pending_operation_bounds) is not tuple
+        or len(pending_operation_bounds) != 2
+        or any(type(value) is not int for value in pending_operation_bounds)
+        or not 0 <= pending_operation_bounds[0] <= pending_operation_bounds[1]
+    ):
+        _fail(
+            "hip_fgmres_live_checkpoint_pending_bounds_invalid",
+            "/kernel/pending_operation_bounds",
+        )
+    with self._queue_lock:
+        if canonical_child_token is not None:
+            self._require_canonical_predecessor_child(canonical_child_token)
+        _context_validate_authority_locked(
+            self,
+            pending_operation_bounds=pending_operation_bounds,
+            use_leased_pending_snapshot=canonical_child_token is not None,
+        )
+
+
+def _context_validate_authority_locked(
+    self: HipFgmresLiveCheckpointExecutionContextV1,
+    *,
+    pending_operation_bounds: tuple[int, int],
+    use_leased_pending_snapshot: bool,
+) -> None:
     if (
         self._parent is None
         or self._source_apply is None
@@ -1929,18 +1981,40 @@ def _context_validate_authority(
     validate_hip_allocation_owner_v1(self._allocation_owner)
     for capability in self._group_capabilities:
         validate_hip_allocation_capability_v1(capability)
+    if not use_leased_pending_snapshot:
+        # Preserve the original public owner validation contract.  The
+        # canonical child path below needs the stronger leased-stream snapshot,
+        # but callers of the live owner still observe this exact legacy probe.
+        pending_valid = self._kernel.pending_stream_count == 0
+    else:
+        pending_snapshot = self._kernel._checkpoint_pending_snapshot(
+            self._checkpoint_token
+        )
+        lower, upper = pending_operation_bounds
+        pending_valid = False
+        if not pending_snapshot:
+            pending_valid = lower == 0
+        elif len(pending_snapshot) == 1:
+            stream_pointer, operation_count = pending_snapshot[0]
+            pending_valid = (
+                stream_pointer == self._stream_pointer_snapshot
+                and lower <= operation_count <= upper
+            )
     if (
         self._kernel._checkpoint_runtime_owner(self._checkpoint_token)
         is not self._loaded_runtime
         or self._kernel._checkpoint_binding_snapshot(self._checkpoint_token)
         != self._kernel_binding_snapshot
-        or self._kernel.pending_stream_count != 0
+        or not pending_valid
     ):
         _fail("hip_fgmres_live_checkpoint_kernel_authority_invalid", "/kernel")
 
 
 HipFgmresLiveCheckpointExecutionContextV1._validate_authority = (  # type: ignore[attr-defined]
     _context_validate_authority
+)
+HipFgmresLiveCheckpointExecutionContextV1._validate_authority_for_canonical_child = (  # type: ignore[attr-defined]
+    _context_validate_authority_for_canonical_child
 )
 
 
