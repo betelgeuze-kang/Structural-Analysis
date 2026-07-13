@@ -66,12 +66,12 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-12T23:11:19.078923+00:00",
+  "generated_at": "2026-07-12T23:56:26.431616+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:500b7803686ab0e8a38937948dc8831ce19bf9ef6461e601121ef434e39ba81a",
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:9ddb5502fc9eb5911082834fb184629f72eb488fd8b53425594c32a52ef06a2f",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:bfaee02e237b7ff38e29b79d6206d52c831cfcdf41ac86ca812cba6b08307273",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:e04e26339acf515bd215e9f62cfba0db697984e8cb66a82400101817a6123781",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:88320c5da2a85e5d38fbb98efc4cfb3fd32300a7330ebe6ac69923667874ea94",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:ef1b852638eb4e0f007a05377ecbf7b3c3cbd51ee15ab4ce4de07919df3a6f19",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:18bc58bb2a7bb2ae2d64a9e7b2476f32697392860e8eab9d28e5ad6949dababe",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:b02caecac3f2e59899f6c73cbb6aa5c352669749094a51736ce916e544d2d689",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:7ad36778461baa79f656ed870b84fdf37b95fdbf264f3a94bc717228ab82b8e9"
@@ -2291,7 +2291,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -2372,7 +2372,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -2453,7 +2453,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -2534,7 +2534,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -2615,7 +2615,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -2696,7 +2696,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -2777,7 +2777,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -2858,7 +2858,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -2939,7 +2939,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -3020,7 +3020,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -3101,7 +3101,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -3182,7 +3182,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -3263,7 +3263,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -3344,7 +3344,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -3425,7 +3425,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -3506,7 +3506,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -3587,7 +3587,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -3668,7 +3668,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -3749,7 +3749,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -3830,7 +3830,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 20,
-        "current_source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "max_age_days": 30.0,
         "pass_count": 2
       },
@@ -5600,7 +5600,7 @@
           "tests/test_verify_quality_gate.py",
           "tests/test_verify_quality_gate_contract.py"
         ],
-        "current_head_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_head_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 0,
@@ -5719,7 +5719,7 @@
           "tests/test_verify_quality_gate.py",
           "tests/test_verify_quality_gate_contract.py"
         ],
-        "current_head_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+        "current_head_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
         "feature_ahead_count": 0,
         "feature_fast_forward_possible": true,
         "feature_synced_to_head": true,
@@ -6297,7 +6297,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "17432480a573281d7affe6a09f91b6e0890d0b4e",
+  "source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 11,

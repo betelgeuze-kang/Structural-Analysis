@@ -77,6 +77,12 @@ def test_source_state_accepts_generated_evidence_only_commit(
         "phase1_core_api_contract_summary.json"
     ]
     assert receipt["disallowed_paths"] == []
+    assert receipt["policy"]["integration_requirement"] == (
+        "regular_merge_commit_preserves_source_ancestry"
+    )
+    assert receipt["policy"]["base_alignment_requirement"] == (
+        "source_commit_contains_current_main_at_integration"
+    )
 
 
 def test_source_state_rejects_code_change_after_source(tmp_path: Path) -> None:
@@ -131,3 +137,5 @@ def test_resync_workflow_invokes_exact_head_verifier() -> None:
     assert "scripts/verify_phase1_evidence_source_state.py" in workflow
     assert "--source-commit" in workflow
     assert "--fail-blocked" in workflow
+    assert 'git fetch origin main' in workflow
+    assert 'merge-base --is-ancestor origin/main "$EVIDENCE_SOURCE_COMMIT_SHA"' in workflow
